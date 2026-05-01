@@ -92,3 +92,56 @@ Active development — Power is functional, action library converted, steering d
 - Atlas overview: `~/Downloads/Atlas - Overview.txt`
 
 ---
+
+### 2026-05-01 (Evening) / 2026-05-02 (Early Morning) — Action Verification, Component Library, Repo Standardization
+
+#### Completed
+- Verified ALL action files against live Appian site (Tier 1, 2, 3)
+  - Tier 1: common-page.ts, navigation files — 6 functions fixed
+  - Tier 2: create-evaluation.ts (21 field locators verified), evaluation-summary.ts — 9 functions fixed
+  - Tier 3: vendor-site.ts, add-vendor.ts, continue-setup.ts — 5 functions fixed
+  - Total: 20 functions fixed, 45+ verified working
+- Eliminated 31 CSS class-based locators (from ~60 down to 29 irreducible)
+  - Modal close → `getByRole('button', { name: 'Close modal' })`
+  - Modal unfocus → `page.keyboard.press('Tab')`
+  - Kebab menu → `getByRole('button', { name: 'Actions' })`
+  - Menu items → `getByRole('menuitem')`
+  - Cards → `getByRole('link')` within section
+  - All modal containers → `getByRole('dialog')`
+- Built complete `playwright-appian` component library (30 components, full Owl parity)
+  - 33 files, 1,575 lines, all compile cleanly
+  - Published to GitLab: `git@gitlab.appian-stratus.com:ramaswamy.u/playwright-appian.git`
+  - GSS test repo installs via git URL
+  - Library integration test: 11/11 passing against live site
+- Standardized test repo structure (mirrors Owl conventions)
+  - `actions/` → `pages/`, `suite/` → `tests/regression/` etc.
+  - `tests/config/default.env` for environment config
+- Revamped ALL 22 page files to use the library
+  - 142 uses of `createAppianPage`, 20% code reduction (2,200 → 1,749 lines)
+  - Deleted login.ts and wait-for-appian.ts (replaced by library)
+- Updated ALL 6 steering documents
+  - Three-layer architecture: Library → Pages → Tests
+  - All imports reference `'playwright-appian'`
+  - 8 strict rules including library-first mandate
+
+#### Decisions Made
+- npm package for library (shared across all Appian app test repos)
+- Git URL install (no registry setup needed)
+- `pages/` not `actions/` (matches Owl convention)
+- Three-layer architecture (Library → Pages → Tests)
+- 29 CSS locators are irreducible (Owl uses same CSS — no accessible alternative)
+
+#### Remaining Items
+- [ ] Test GAMS-7882 script with revamped pages
+- [ ] Investigate `isTabVisible` edge case for multi-word tab names
+- [ ] Run full regression of all page actions against live site
+- [ ] Build remaining QE Power actions (regression-analysis, failure-diagnosis)
+- [ ] Set up CI pipeline for playwright-tests repo
+- [ ] Publish playwright-appian to GitLab npm registry (when ready for team)
+
+#### Key Repos
+| Repo | Location | Purpose |
+|---|---|---|
+| QE Power | `~/repo-gitlab/ramaswamy.u/power-appian-atlas-qe/` | Kiro Power steering documents |
+| Component Library | `git@gitlab.appian-stratus.com:ramaswamy.u/playwright-appian.git` | Shared Appian Playwright library |
+| GSS Tests | `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/gss-playwright-tests` | GSS Source Selection test suite |
