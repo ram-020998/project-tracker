@@ -1,0 +1,94 @@
+# Atlas QE Power — Project Tracker
+
+## Overview
+Building a Kiro Power for QE Engineers that generates executable Playwright test scripts for Appian applications. Uses Atlas MCP for application knowledge (SAIL code, interfaces, dependencies) and Playwright MCP for live site verification. Part of the Atlas ecosystem (Developer, Product Owner, UX Designer powers already exist).
+
+## Status
+Active development — Power is functional, action library converted, steering documents comprehensive. Currently debugging action reliability against live site.
+
+## Session Log
+
+### 2026-05-01 — Initial Research, Architecture, Power Creation, Action Library, and Testing
+
+#### Completed
+- Read complete Owl documentation (https://docs.appian-stratus.io/owl/)
+- Analyzed Owl's component locator patterns from `owl-appian-element` source code (owl-pages repo)
+- Analyzed Appian's `sail-client` source code to understand how components render HTML/ARIA attributes
+- Validated Playwright accessibility-based locators against live Appian site (https://eng-test-fed-aq-dev2.appianpreview.com)
+- Created the QE Power repo at `~/repo-gitlab/ramaswamy.u/power-appian-atlas-qe/`
+- Created comprehensive steering documents:
+  - `POWER.md` (126 lines) — Minimal router with environment checks at session start
+  - `appian-component-map.md` (~580 lines) — Complete SAIL→Accessibility→Playwright mapping for all Appian components
+  - `action-test-script-generation.md` (~700 lines) — 6-phase strict workflow with 8 rules
+  - `tool-reference.md` (68 lines) — Atlas MCP tools for QE
+  - `.kiro/steering.md` (~110 lines) — Architecture decisions and patterns
+- Set up Playwright test repo at `/Users/ramaswamy.u/Documents/gss-tests/playwright-tests/`
+  - `playwright.config.ts`, `package.json`, `.env`, `.gitignore`, `README.md`
+  - Installed `@playwright/test`, `dotenv`, `typescript`, `@types/node`
+- Converted ALL Owl page objects to Playwright action files (23 files, ~2,100 lines):
+  - `auth/login.ts`
+  - `common/common-page.ts`, `wait-for-appian.ts`, `solutions-hub.ts`
+  - `evaluation/create-evaluation.ts`, `evaluation-summary.ts`, `update-evaluation.ts`, `delete-evaluation.ts`, `eval-history.ts`, `lpta-task-form.ts`
+  - `vendor/add-vendor.ts`, `vendor-site.ts`, `vendor-analysis.ts`, `vendors-tab.ts`
+  - `factor/continue-setup.ts`, `factors-tab.ts`
+  - `consensus/consensus-reports.ts`
+  - `document/documents-tab.ts`
+  - `task/add-custom-task.ts`, `tasks-tab.ts`
+  - `award/create-awards.ts`, `select-awardees.ts`
+  - `navigation/evaluation-site.ts`, `my-workspace-site.ts`
+- Created `action-registry.json` (551 lines) — Structured registry with categories, composites, preconditions/postconditions, and chain validation rules
+- Ran initial test suite (10 tests for Create Evaluation) — all 10 passed
+- Ran smoke tests on action library — 6/7 passed
+- All action files compile cleanly (zero TypeScript errors)
+
+#### Decisions Made
+- **Playwright over Owl** (reason: Appian renders rich accessibility attributes — `getByRole`/`getByLabel` work natively without custom adapters. Validated on live site. Playwright is AI-friendly with massive training data.)
+- **Option B: AI writes scripts, execution is deterministic** (reason: scripts run in CI without AI tokens. AI cost is one-time generation, not per-execution.)
+- **Actions library pattern over Playwright fixtures** (reason: explicit, easier for AI to generate, easier for QE to review)
+- **`waitForAppian()` over `networkidle`** (reason: Appian's progress bar `appianNProgress---nprogress_custom_parent` is the reliable signal. `networkidle` is unreliable with SAIL.)
+- **`selectDropdownOption()` helper** (reason: Appian dropdowns are custom `<div role="combobox">`, NOT native `<select>`. `.selectOption()` throws errors.)
+- **Never use `getByText()` for interactive elements** (reason: Appian renders duplicate spans for buttons and nav links. Always use `getByRole('button'|'link', { name })`)
+- **6-phase workflow with user checkpoints** (reason: prevents hallucinated tests, ensures QE reviews before promotion)
+- **Action registry JSON** (reason: agent needs precondition/postcondition chain to avoid missing intermediate steps like closing confirmation dialogs)
+- **Research folder isolation** (reason: draft tests never touch the main suite until explicitly promoted)
+
+#### Learnings
+- Appian components render proper ARIA roles: `textbox`, `button`, `combobox`, `table`, `checkbox`, `region`, `heading`, `link`, `radio`, `progressbar`, `dialog`
+- Appian's `<label htmlFor={_cId}>` connects labels to inputs — Playwright's `getByRole('textbox', { name: 'label' })` works
+- `data-owl-test-label` and `data-owl-icon-name` attributes are in the DOM (from sail-client source)
+- Radio buttons: `<label>` intercepts clicks on `<input>` — must use `{ force: true }` with `.check()`
+- Radio options with shared text ("Required"/"Not Required") — must use `getByLabel('Required', { exact: true })`
+- After form submission, Appian shows confirmation — must call `close()` then navigate to the record
+- Owl's `create_with_only_mandatory_values` fills form but does NOT submit — `create_btn_click` is separate
+- The `waitForAppian` utility watches for `appianNProgress---nprogress_custom_parent` class to disappear
+
+#### Issues Encountered
+- `getByText('Create new evaluation')` matched 2 elements (visible span + hidden accessibility span) → Fix: use `getByRole('button', { name: /Create new evaluation/ })`
+- `.selectOption('D - Requirements')` threw "Element is not a `<select>` element" → Fix: created `selectDropdownOption()` helper that clicks combobox then clicks option
+- `getByText('Evaluations')` matched nav link AND page content → Fix: use `getByRole('link', { name: 'Evaluations' })`
+- After `clickCreateButton`, test tried `addVendorClick` but page was on confirmation, not summary → Root cause: missing `close()` + navigation steps between create and add vendor
+- Agent generated placeholder comments without implementation code → Fix: added Rule 8 forbidding placeholders
+- Actions converted from Owl used `waitForLoadState('networkidle')` which is unreliable → Fix: bulk-replaced with `waitForAppian(page)` across all 19 action files
+- Action library needs live verification — some locators from Owl conversion use CSS class selectors marked with `// TODO: needs live verification`
+
+#### Remaining Items
+- [ ] Verify all action files against live site (many have `// TODO: needs live verification` comments)
+- [ ] Fix the full evaluation creation flow (create → close confirmation → navigate → open record)
+- [ ] Convert `evaluation_summary.py` contract_writing subfolder
+- [ ] Test the complete 6-phase workflow with a real Jira ticket end-to-end
+- [ ] Add Jira MCP integration for automatic ticket pulling
+- [ ] Build `action-regression-analysis` steering (Phase 2 of the power)
+- [ ] Build `action-failure-diagnosis` steering (Phase 3 of the power)
+- [ ] Set up CI pipeline for the playwright-tests repo
+- [ ] Add more composites to `action-registry.json` as workflows are validated
+- [ ] Create the `suite/` folder structure with promoted tests
+
+#### Key File Paths
+- Power repo: `~/repo-gitlab/ramaswamy.u/power-appian-atlas-qe/`
+- Test repo: `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/gss-playwright-tests`
+- Owl tests (reference): `/Users/ramaswamy.u/Documents/gss-tests/owl-tests/`
+- Owl pages source: `~/repo/owl-pages/owl-appian-element/`
+- Sail client source: `~/repo/ae/appian-libraries/sail-client/src/components/`
+- Atlas overview: `~/Downloads/Atlas - Overview.txt`
+
+---
