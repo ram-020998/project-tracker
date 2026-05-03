@@ -107,6 +107,39 @@ Plugin uses public Appian SDK. Zero Appian-schema-specific code in the plugin �
 | Data type UUID/name garbled (URL-encoded XSD filename) | URL-decode filename, strip `.xsd`, extract name from `xsd:complexType` attribute |
 | `UnmarshalVendorObjectFunction` can't return Object | Abandoned approach, removed function |
 
+### May 2, 2026 — Impact Analysis (Dependents & Precedents) Viewer
+
+#### Completed
+
+**Impact Analysis SAIL interface built (`sail-interfaces/MA_impactAnalysis.sail`):**
+- Two-tab UI: Dependents (what depends on this object) and Precedents (what this object depends on)
+- Uses internal Appian functions: `a!appdesigner_impactAnalysis_objectDependents` and `a!appdesigner_impactAnalysis_objectPrecedents`
+- Object type mapping from Merge Assist type names to Appian IA type references (Interface, ContentFreeformRule, Constant, ProcessModel, RecordType, Group, Datatype, WebApiEndpointDesignObject, SiteDesignObject, ConnectedSystem, Decision, OutboundIntegration)
+- UUID-based lookup via `uuidAndTypeList` parameter (no object ID needed for dependents)
+- Object ID resolution via `fn!objectselect_appian_internal` + `a!aos_getObjects` for precedents
+- Resolves object metadata (name, type, description) via `a!aos_getObjects`
+- Grid display with icon, name, type, location/breadcrumbs, and sub-dependency count
+- Empty state messages for both tabs
+
+**Key internal functions discovered:**
+
+| Function | Purpose |
+|----------|---------|
+| `a!appdesigner_impactAnalysis_objectDependents` | Fetches objects that depend on a given object. Accepts `uuidAndTypeList` (UUID+type) or `objectId` |
+| `a!appdesigner_impactAnalysis_objectPrecedents` | Fetches objects that a given object depends on. Requires `objectId` |
+| `fn!objectReadAction_appian_internal` | Low-level function that both wrappers call with action name `"dependents"` or `"precedents"` |
+| `fn!objectselect_appian_internal` | Creates an object selection from `id` or `uuid` (dict with type+uuid) |
+| `a!aos_getObjects` | Resolves object metadata (name, resource type, description, imageUrl, etc.) from a selection |
+| `fn!formatIaGridData_appian_internal` | Formats raw IA data into hierarchical grid rows (used by Appian's own IA UI) |
+
+**Return structure from IA functions:**
+```
+Dictionary?list where each entry = {
+  id, uuid, hasChildren, expanded, numChildren,
+  children: [{id, uuid, hasChildren, numChildren, location: Text?list, inApp, inPkg}]
+}
+```
+
 #### Remaining Items
 
 - [ ] **Right side (vendor) diff conversion** — Find standard way to convert vendor XML → diff-ready format without hardcoding per-type field mapping
