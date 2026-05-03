@@ -145,3 +145,51 @@ Active development — Power is functional, action library converted, steering d
 | QE Power | `~/repo-gitlab/ramaswamy.u/power-appian-atlas-qe/` | Kiro Power steering documents |
 | Component Library | `git@gitlab.appian-stratus.com:ramaswamy.u/playwright-appian.git` | Shared Appian Playwright library |
 | GSS Tests | `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/gss-playwright-tests` | GSS Source Selection test suite |
+
+### 2026-05-03 — Test Impact Analysis, Regression Analysis, Failure Diagnosis, Coverage Analysis, Steering Hardening
+
+#### Completed
+- Designed Test Impact Analysis system
+  - Per-test `*.spec.map.json` files (modular, no merge conflicts)
+  - Three object categories: direct (🔴), setup (🟡), data (🟢)
+  - Auto-generated reverse index `tests/index.map.json`
+  - Integrated into Phase 6 (Promotion) — maps generated automatically from Phase 3 findings
+  - Created `tests/TEST-IMPACT-ANALYSIS.md` documentation
+- Built Regression Analysis action (`action-regression-analysis.md`)
+  - Queries Atlas for changed objects → expands transitive dependencies → matches against test maps
+  - Reports HIGH/MEDIUM/LOW priority tests to run
+- Built Failure Diagnosis action (`action-failure-diagnosis.md`)
+  - Classifies failures (element not found, assertion, setup, environment)
+  - Cross-references Atlas object history to find recent changes
+  - Can use Playwright MCP for live diagnosis
+- Built Coverage Analysis action (`action-coverage-analysis.md`)
+  - Maps test coverage against Atlas bundles/features
+  - Reports: directly tested, indirectly tested, not tested
+  - Prioritizes gaps by object type (Interface > Process Model > Expression Rule > CDT)
+- Updated POWER.md — all 4 actions now ✅ Active
+- Updated Phase 6 — now includes map generation + index rebuild
+- Updated test naming convention — promoted tests named by Jira ticket (GAMS-7089.spec.ts)
+- Hardened progress reporting — Rule 0 (highest priority), NON-NEGOTIABLE, must be FIRST in response
+- Wrote comprehensive README for GSS test repo (395 lines)
+
+#### Decisions Made
+- Per-test map files over monolithic JSON (reason: modular, no merge conflicts, scales to hundreds of tests)
+- Three impact categories: direct/setup/data (reason: different severity levels for regression prioritization)
+- Test files named by Jira ticket (reason: instant traceability, simple naming)
+- Progress tracker as Rule 0 (reason: agent was skipping it — made it highest priority and non-negotiable)
+
+#### QE Power — Final State (4 Actions)
+| Action | Steering File | Status |
+|---|---|---|
+| Test Script Generation | action-test-script-generation.md | ✅ Active |
+| Regression Analysis | action-regression-analysis.md | ✅ Active |
+| Failure Diagnosis | action-failure-diagnosis.md | ✅ Active |
+| Coverage Analysis | action-coverage-analysis.md | ✅ Active |
+
+#### Remaining Items
+- [ ] Test full workflow end-to-end with a real ticket
+- [ ] Fix and run GAMS-7882 with revamped pages
+- [ ] Validate revamped pages against live site
+- [ ] Add Jira MCP integration
+- [ ] Set up CI pipeline
+- [ ] Publish playwright-appian to npm registry
