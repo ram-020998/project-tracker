@@ -439,3 +439,72 @@ setup_stratus() {
 | 8 | Trigger manual pipeline run and verify | ⬜ After #6 |
 | 9 | Merge MR-C to `solutions-atlas-mcp-server` | ⬜ After #8 |
 | 10 | Archive old repos | ⬜ After #8 |
+
+### May 5, 2026 — MCP server build fix, power mcp.json creation, refresh verified
+
+#### Completed
+- Created `mcp.json` files for all three atlas powers in `solutions-os`:
+  - `ai-framework/Engineering/.kiro/powers/atlas-developer/mcp.json`
+  - `ai-framework/Product/.kiro/powers/atlas-product-owner/mcp.json`
+  - `ai-framework/Product/.kiro/powers/atlas-ux-designer/mcp.json`
+- All configured with project ID `13490`, `ATLAS_DATA_PREFIX`, and `autoApprove: ["*"]`
+- Fixed MCP server Docker image build — trigger token was not being baked in
+- Updated `solutions-atlas-mcp-server/.gitlab-ci.yml`: added `buildargs` input, removed unused `DOCKER_BUILD_ARGS` variable
+- Verified token is present in the built image (`glptt-...`)
+- Restarted MCP server in Kiro — `refresh_knowledge_base` tool now works end-to-end ✅
+
+#### Decisions Made
+- Use `buildargs` component input (not `DOCKER_BUILD_ARGS` variable) to pass build args to kaniko — standard stratus-service pattern used by 10+ repos
+
+#### Issues Encountered
+- **Power mcp.json files missing** → Were deferred during migration ("update when structure finalized") but never added back. Created from MCP server repo's updated config.
+- **`refresh_knowledge_base` tool failing — token empty in image**
+  - Root cause: `DOCKER_BUILD_ARGS` variable in `.gitlab-ci.yml` was never consumed by the stratus-service kaniko template
+  - The template uses `$[[ inputs.buildargs ]]` appended to the kaniko executor command
+  - Fix: Added `buildargs: "--build-arg ATLAS_PIPELINE_TRIGGER_TOKEN=$STRATUS_MANAGED_ATLAS_PIPELINE_TRIGGER"` to the component inputs
+  - Reference: `templates/stratus-service/template.yml` and `templates/image-build/template.yml` in `appian/prod/stratus-pipeline-tools`
+  - Other repos using same pattern: maverick-deployment-tools (2363), virustotal (2396), elixir (794), aws-s3-proxy (1023)
+- **Token in image but tool still failing** → Stale container. Restarting MCP server in Kiro resolved it.
+
+#### Learnings
+- Stratus `stratus-service` component accepts `buildargs` input for custom Docker build args
+- `ADDITIONAL_ARGS` in the template is reserved for image signing, not user build args
+- `DOCKER_BUILD_ARGS` is NOT a recognized variable by the template — it's a no-op
+- When Docker image has `ENV` baked in, `--env VARNAME` without a value from host overrides with empty if host doesn't have it
+- After pulling a new image, must restart/reconnect the MCP server in Kiro to use it
+
+#### Remaining Items
+- [ ] Push mcp.json changes to `solutions-os` (3 power files)
+- [ ] Continue end-to-end testing of all atlas power features
+
+---
+
+### May 6, 2026 — MCP configs, docgenie power push, gitignore issue
+
+#### Completed
+- Created `ai-framework/mcp-configs/atlas-mcp.json` — shared Atlas MCP config for standalone use without powers
+- Created `ai-framework/mcp-configs/README.md` — explains what it is, 3 usage options (project-level, user-level, custom agent), prerequisites, tool list
+- Removed `.gitkeep` placeholder (folder now has real content)
+- Created `atlas-dev-documentation` power (12 files) — moved from Product to Engineering
+- Pushed all changes to `dev-documentation-power` branch on `appian/dev/solutions-os`
+- Fixed MCP server `.gitlab-ci.yml` — `buildargs` input for trigger token (confirmed working, token baked in image)
+
+#### Issues Encountered
+- **mcp.json files not in commit** — `.gitignore` line 16 has blanket `mcp.json` rule ignoring all mcp.json files repo-wide
+  - Fix: `git add -f` to force-add the power mcp.json files
+  - Alternative: add `!**/powers/**/mcp.json` exception to `.gitignore`
+- **Git rebase squash error** — user changed wrong line (first instead of second), got "cannot squash without a previous commit"
+  - Fix: `git rebase --abort` → `git reset --soft HEAD~2` → `git commit`
+- **Push rejected after squash** — needed `git push --force-with-lease`
+
+#### Decisions Made
+- `mcp-configs/` folder used for shared MCP configs (as per README intent) — Atlas MCP is the first entry
+- Data folder LFS discussion deferred — Stratus docs don't mention LFS, need to confirm with Stratus team before implementing
+
+#### Remaining Items
+- [ ] Fix `.gitignore` to allow `mcp.json` in powers (either force-add or add exception rule)
+- [ ] Investigate LFS or alternative for `solutions-kb/data/` (565MB) — pending Stratus team confirmation
+- [ ] Test `atlas-dev-documentation` power end-to-end
+- [ ] Push mcp.json for atlas-developer, atlas-product-owner, atlas-ux-designer powers
+
+---
