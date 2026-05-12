@@ -1,0 +1,1684 @@
+[
+  {
+    "from_table": "AS_GSS_A_R_CNSNSS_RSPNS_FLD",
+    "from_columns": [
+      "CONSENSUS_RESPONSE_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_CNSNSUS_RESPONSE",
+    "to_columns": [
+      "CONSENSUS_RESPONSE_AUDIT_ID"
+    ],
+    "name": "asgssrcnsnssrs_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_CNSNSUS_REPT_FLD",
+    "from_columns": [
+      "CONSENSUS_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_CONSENSUS_REPORT",
+    "to_columns": [
+      "CONSENSUS_AUDIT_ID"
+    ],
+    "name": "asgssrcnsnss_simplfildchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_CNSNSUS_RESPONSE",
+    "from_columns": [
+      "CONSENSUS_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_CONSENSUS_REPORT",
+    "to_columns": [
+      "CONSENSUS_AUDIT_ID"
+    ],
+    "name": "asgssrcnsnss_cnsnssrspnschn"
+  },
+  {
+    "from_table": "AS_GSS_A_R_CNSNSUS_RESPONSE",
+    "from_columns": [
+      "CONSENSUS_RESPONSE_ID"
+    ],
+    "to_table": "AS_GSS_CONSENSUS_RESPONSE",
+    "to_columns": [
+      "CONSENSUS_RESPONSE_ID"
+    ],
+    "name": "asgss_consensus_response"
+  },
+  {
+    "from_table": "AS_GSS_A_R_CONSENSUS_REPORT",
+    "from_columns": [
+      "CONSENSUS_ID"
+    ],
+    "to_table": "AS_GSS_CONSENSUS_REPORT",
+    "to_columns": [
+      "CONSENSUS_ID"
+    ],
+    "name": "asgss_consensus"
+  },
+  {
+    "from_table": "AS_GSS_A_R_CRITERIA",
+    "from_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATION",
+    "to_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "name": "asgssarevltin_criterichnges"
+  },
+  {
+    "from_table": "AS_GSS_A_R_CRITERIA_FIELD",
+    "from_columns": [
+      "CRITERIA_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_CRITERIA",
+    "to_columns": [
+      "CRITERIA_AUDIT_ID"
+    ],
+    "name": "asgssrcritri_simplfildchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_CRTR_ASSGNS_FLD",
+    "from_columns": [
+      "ASSIGNMENT_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_CRTR_ASSIGNMENTS",
+    "to_columns": [
+      "ASSIGNMENT_AUDIT_ID"
+    ],
+    "name": "asgssrcrtrssgn_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_CRTR_ASSIGNMENTS",
+    "from_columns": [
+      "CRITERIA_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_CRITERIA",
+    "to_columns": [
+      "CRITERIA_AUDIT_ID"
+    ],
+    "name": "asgssarcriteria_chnges"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVALUATION_FIELD",
+    "from_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATION",
+    "to_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "name": "asgssrevltin_simplfildchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVALUATION_PHASE",
+    "from_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATION",
+    "to_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "name": "asgssarevalphse_evaladtid"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVALUATOR_TEAM",
+    "from_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATION",
+    "to_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "name": "asgssrevltin_vltortemchnges"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVAL_VDR_BIZ_TYP",
+    "from_columns": [
+      "VENDOR_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVLUATION_VENDOR",
+    "to_columns": [
+      "VENDOR_AUDIT_ID"
+    ],
+    "name": "asgssrvltnvnd_bsnsstypchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLTION_DOCUMENT",
+    "from_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATION",
+    "to_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "name": "asgssarevltin_dcmentchanges"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLTN_DCMNT_FELD",
+    "from_columns": [
+      "EVALUATION_DOCUMENT_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVLTION_DOCUMENT",
+    "to_columns": [
+      "EVALUATION_DOCUMENT_AUDIT_ID"
+    ],
+    "name": "asgssrvltndcmn_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLTN_PHSE_FIELD",
+    "from_columns": [
+      "EVALUATION_PHASE_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATION_PHASE",
+    "to_columns": [
+      "EVALUATION_PHASE_AUDIT_ID"
+    ],
+    "name": "asgssrvltnphs_smplfildchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLTN_RSPNSS_FLD",
+    "from_columns": [
+      "RESPONSE_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVLTON_RESPONSES",
+    "to_columns": [
+      "RESPONSE_AUDIT_ID"
+    ],
+    "name": "asgssrvltnrspn_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLTN_VNDR_FIELD",
+    "from_columns": [
+      "VENDOR_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVLUATION_VENDOR",
+    "to_columns": [
+      "VENDOR_AUDIT_ID"
+    ],
+    "name": "asgssrevltnvndr_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLTON_RESPONSES",
+    "from_columns": [
+      "RESPONSE_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION_RESPONSES",
+    "to_columns": [
+      "RESPONSE_ID"
+    ],
+    "name": "asgssarevaluationresponses_responseid"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLTON_RESPONSES",
+    "from_columns": [
+      "RESPONSE_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION_RESPONSES",
+    "to_columns": [
+      "RESPONSE_ID"
+    ],
+    "name": "asgssrvltnresponses_responseid"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLTR_TEAM_FIELD",
+    "from_columns": [
+      "TEAM_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATOR_TEAM",
+    "to_columns": [
+      "TEAM_AUDIT_ID"
+    ],
+    "name": "asgssrvltortm_simplfildchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLUATION_VENDOR",
+    "from_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATION",
+    "to_columns": [
+      "EVALUATION_AUDIT_ID"
+    ],
+    "name": "asgssarevalvendr_evaladtid"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EVLUATION_VENDOR",
+    "from_columns": [
+      "VENDOR_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION_VENDOR",
+    "to_columns": [
+      "VENDOR_ID"
+    ],
+    "name": "asgssarevalvendr_vendrid"
+  },
+  {
+    "from_table": "AS_GSS_A_R_EV_VDR_BZ_TP_FLD",
+    "from_columns": [
+      "BUSINESS_TYPE_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVAL_VDR_BIZ_TYP",
+    "to_columns": [
+      "BUSINESS_TYPE_AUDIT_ID"
+    ],
+    "name": "asgssrvltnvndr_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_TEAM_MEMBERSHIP",
+    "from_columns": [
+      "TEAM_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATOR_TEAM",
+    "to_columns": [
+      "TEAM_AUDIT_ID"
+    ],
+    "name": "asgssrevltin_vltortemmembrshpchnges"
+  },
+  {
+    "from_table": "AS_GSS_A_R_TEAM_MEMBERSHIP",
+    "from_columns": [
+      "TEAM_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_EVALUATOR_TEAM",
+    "to_columns": [
+      "TEAM_AUDIT_ID"
+    ],
+    "name": "asgssrvltn_vltrtmmmbrshpchnges"
+  },
+  {
+    "from_table": "AS_GSS_A_R_TM_MMBRSHP_FIELD",
+    "from_columns": [
+      "TEAM_MEMBERSHIP_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_TEAM_MEMBERSHIP",
+    "to_columns": [
+      "TEAM_MEMBERSHIP_AUDIT_ID"
+    ],
+    "name": "asgssrvltortmmbrshp_simplfildchngs"
+  },
+  {
+    "from_table": "AS_GSS_A_R_TM_MMBRSHP_FIELD",
+    "from_columns": [
+      "TEAM_MEMBERSHIP_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_A_R_TEAM_MEMBERSHIP",
+    "to_columns": [
+      "TEAM_MEMBERSHIP_AUDIT_ID"
+    ],
+    "name": "asgssrvltrtmmbrshp_smplfldchgs"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_REPORT",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgssconsensus_evaluationid"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_REPORT",
+    "from_columns": [
+      "FACTOR_ID"
+    ],
+    "to_table": "AS_GSS_CRITERIA",
+    "to_columns": [
+      "CRITERIA_ID"
+    ],
+    "name": "asgssconsensus_factorid"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_REPORT",
+    "from_columns": [
+      "VENDOR_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION_VENDOR",
+    "to_columns": [
+      "VENDOR_ID"
+    ],
+    "name": "asgssconsensus_vendorid"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_REPORT",
+    "from_columns": [
+      "STATUS_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgssconsensus_statusid"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_REPORT",
+    "from_columns": [
+      "RATING_ID"
+    ],
+    "to_table": "AS_GSS_RATING",
+    "to_columns": [
+      "RATING_ID"
+    ],
+    "name": "asgssconsensus_ratingid"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_REPORT",
+    "from_columns": [
+      "ARCHIVAL_REASON"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgssconsensus_archreason"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_RESPONSE",
+    "from_columns": [
+      "CONSENSUS_ID"
+    ],
+    "to_table": "AS_GSS_CONSENSUS_REPORT",
+    "to_columns": [
+      "CONSENSUS_ID"
+    ],
+    "name": "asgssconsensusrspnse_consensusid"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_RESPONSE",
+    "from_columns": [
+      "RESPONSE_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgssconsensusrspnse_responsetypeid"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_RESPONSE",
+    "from_columns": [
+      "RESPONSE_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsscnsnssrspns_rsponsetypeid"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_RESPONSE",
+    "from_columns": [
+      "CONSENSUS_ID"
+    ],
+    "to_table": "AS_GSS_CONSENSUS_REPORT",
+    "to_columns": [
+      "CONSENSUS_ID"
+    ],
+    "name": "asgsscnsnsusrspnse_consensusid"
+  },
+  {
+    "from_table": "AS_GSS_CONSENSUS_SIGNATURE",
+    "from_columns": [
+      "CONSENSUS_ID"
+    ],
+    "to_table": "AS_GSS_CONSENSUS_REPORT",
+    "to_columns": [
+      "CONSENSUS_ID"
+    ]
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "CRITERIA_CHAIR"
+    ],
+    "to_table": "AS_GSS_USER",
+    "to_columns": [
+      "USERNAME"
+    ],
+    "name": "asgsscriteria_criteriachair"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "CRITERIA_STATUS_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsscriteria_criteriastats"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "RANKING_METHOD_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsscriteria_rankingmethod"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgssevaluation_criteria"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "RATING_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_R_RATING",
+    "to_columns": [
+      "RATING_ID"
+    ],
+    "name": "asgsscriteria_ratingtype"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgsscriteria_evaluation"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "REF_RATING_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_R_RATING",
+    "to_columns": [
+      "REF_RATING_ID"
+    ],
+    "name": "asgsscriteria_ref_rating"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "RATING_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_RATING",
+    "to_columns": [
+      "RATING_ID"
+    ],
+    "name": "asgsscriteria_rating"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "EVALUATOR_TEAM_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATOR_TEAM",
+    "to_columns": [
+      "TEAM_ID"
+    ],
+    "name": "asgsscriteria_evltr_team"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA",
+    "from_columns": [
+      "COMPLETED_BY"
+    ],
+    "to_table": "AS_GSS_USER",
+    "to_columns": [
+      "USERNAME"
+    ],
+    "name": "completedby_usercriteria"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA_ASSIGNMENTS",
+    "from_columns": [
+      "CRITERIA_ID"
+    ],
+    "to_table": "AS_GSS_CRITERIA",
+    "to_columns": [
+      "CRITERIA_ID"
+    ],
+    "name": "asgss_criteria_assignments"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA_ASSIGNMENTS",
+    "from_columns": [
+      "ASSIGNED_TEAM_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATOR_TEAM",
+    "to_columns": [
+      "TEAM_ID"
+    ],
+    "name": "asgss_evltr_team"
+  },
+  {
+    "from_table": "AS_GSS_CRITERIA_ASSIGNMENTS",
+    "from_columns": [
+      "ASSIGNEE"
+    ],
+    "to_table": "AS_GSS_USER",
+    "to_columns": [
+      "USERNAME"
+    ],
+    "name": "asgss_assignee_user"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION",
+    "from_columns": [
+      "EVALUATION_CHIEF"
+    ],
+    "to_table": "AS_GSS_USER",
+    "to_columns": [
+      "USERNAME"
+    ],
+    "name": "asgssevalatin_evalatinchair"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION",
+    "from_columns": [
+      "EVALUATION_METHOD_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgssevalatin_evalatinmethd"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION",
+    "from_columns": [
+      "EVALUATION_STATUS_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgssevalatin_evalatinstats"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION",
+    "from_columns": [
+      "CONTRACTING_OFFICER"
+    ],
+    "to_table": "AS_GSS_USER",
+    "to_columns": [
+      "USERNAME"
+    ],
+    "name": "contractingOfficer_user"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION",
+    "from_columns": [
+      "CONTRACTING_SPECIALIST"
+    ],
+    "to_table": "AS_GSS_USER",
+    "to_columns": [
+      "USERNAME"
+    ],
+    "name": "contractingSpecialist_User"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION",
+    "from_columns": [
+      "COMPLETED_BY"
+    ],
+    "to_table": "AS_GSS_USER",
+    "to_columns": [
+      "USERNAME"
+    ],
+    "name": "completedby_userevaluation"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_COMMENTS",
+    "from_columns": [
+      "TASK"
+    ],
+    "to_table": "AS_GSS_TMG_TASK",
+    "to_columns": [
+      "TASK_ID"
+    ],
+    "name": "asgssevaluationcomments_task"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_COMMENTS",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgssevaluationcomments_evaluation"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_DOCUMENT",
+    "from_columns": [
+      "CRITERIA_ID"
+    ],
+    "to_table": "AS_GSS_CRITERIA",
+    "to_columns": [
+      "CRITERIA_ID"
+    ],
+    "name": "asgsscriteria_documents"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_DOCUMENT",
+    "from_columns": [
+      "DOC_TYPE"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgssevalatindcment_doctype"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_DOCUMENT",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgssevaluation_documents"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_DOCUMENT",
+    "from_columns": [
+      "VENDOR_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION_VENDOR",
+    "to_columns": [
+      "VENDOR_ID"
+    ],
+    "name": "asgssevaluation_vendor"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_DOCUMENT",
+    "from_columns": [
+      "DOCUMENT_TEMPLATE"
+    ],
+    "to_table": "AS_GSS_R_DOCUMENT_TEMPLATE",
+    "to_columns": [
+      "DOCUMENT_TEMPLATE_ID"
+    ],
+    "name": "asgssevltindcment_dctemplte"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_DOCUMENT",
+    "from_columns": [
+      "TASK_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK",
+    "to_columns": [
+      "TASK_ID"
+    ],
+    "name": "asgssevaluation_task"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_DOCUMENT",
+    "from_columns": [
+      "CONSENSUS_ID"
+    ],
+    "to_table": "AS_GSS_CONSENSUS_REPORT",
+    "to_columns": [
+      "CONSENSUS_ID"
+    ],
+    "name": "asgssconsensus_consensusid"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_PHASE",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgssevalatin_evalationphase"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_PHASE",
+    "from_columns": [
+      "DURATION_UNIT"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgssevalatin_evaltnduration"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_PHASE",
+    "from_columns": [
+      "REF_PHASE_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TASK_CATEGORY",
+    "to_columns": [
+      "TASK_CATEGORY_ID"
+    ],
+    "name": "fk_refPhaseId"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_RESPONSES",
+    "from_columns": [
+      "FACTOR_ID"
+    ],
+    "to_table": "AS_GSS_CRITERIA",
+    "to_columns": [
+      "CRITERIA_ID"
+    ],
+    "name": "asgssevalresponses_factorid"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_RESPONSES",
+    "from_columns": [
+      "TASK_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK",
+    "to_columns": [
+      "TASK_ID"
+    ],
+    "name": "asgssevalresponses_taskid"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_RESPONSES",
+    "from_columns": [
+      "VENDOR_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION_VENDOR",
+    "to_columns": [
+      "VENDOR_ID"
+    ],
+    "name": "asgssevalresponses_vendorid"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_RESPONSES",
+    "from_columns": [
+      "RESPONSE_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgssevltinrspnss_rspnstype"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_RESPONSES",
+    "from_columns": [
+      "CONSENSUS_ID"
+    ],
+    "to_table": "AS_GSS_CONSENSUS_REPORT",
+    "to_columns": [
+      "CONSENSUS_ID"
+    ],
+    "name": "asgssevalresponses_consensusid"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_VENDOR",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgssevalvendr_evalid"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_VENDOR",
+    "from_columns": [
+      "VENDOR_COUNTRY"
+    ],
+    "to_table": "AS_GAM_R_COUNTRY",
+    "to_columns": [
+      "COUNTRY_ID"
+    ],
+    "name": "asgssevalvendr_vendrcntry"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_VENDOR",
+    "from_columns": [
+      "VENDOR_REF_ID"
+    ],
+    "to_table": "AS_GSS_R_VENDOR",
+    "to_columns": [
+      "VENDOR_REF_ID"
+    ],
+    "name": "asgssevalvendr_vendrrefid"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATION_VENDOR",
+    "from_columns": [
+      "VENDOR_STATE"
+    ],
+    "to_table": "AS_GAM_R_STATE",
+    "to_columns": [
+      "STATE_ID"
+    ],
+    "name": "asgssevalvendr_vendrstte"
+  },
+  {
+    "from_table": "AS_GSS_EVALUATOR_TEAM",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgssevalatin_evalationteam"
+  },
+  {
+    "from_table": "AS_GSS_EVLTN_VNDR_BSNSS_TYP",
+    "from_columns": [
+      "TYPE_CODE"
+    ],
+    "to_table": "AS_GAM_R_BUSINESS_TYPE",
+    "to_columns": [
+      "CODE"
+    ],
+    "name": "asgssevalvendrbsnstype_typecode"
+  },
+  {
+    "from_table": "AS_GSS_EVLTN_VNDR_BSNSS_TYP",
+    "from_columns": [
+      "VENDOR_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION_VENDOR",
+    "to_columns": [
+      "VENDOR_ID"
+    ],
+    "name": "asgssrvendrbsnstype_vendrid"
+  },
+  {
+    "from_table": "AS_GSS_EVLTN_VNDR_BSNSS_TYP",
+    "from_columns": [
+      "TYPE_CODE"
+    ],
+    "to_table": "AS_GAM_R_BUSINESS_TYPE",
+    "to_columns": [
+      "CODE"
+    ],
+    "name": "asgssvalvendrbsnstype_typecode"
+  },
+  {
+    "from_table": "AS_GSS_FCTR_DCUMENT_MAPPING",
+    "from_columns": [
+      "FACTOR_ID"
+    ],
+    "to_table": "AS_GSS_CRITERIA",
+    "to_columns": [
+      "CRITERIA_ID"
+    ],
+    "name": "asgssfctrdcmentmpping_factr"
+  },
+  {
+    "from_table": "AS_GSS_FCTR_DCUMENT_MAPPING",
+    "from_columns": [
+      "DOCUMENT_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION_DOCUMENT",
+    "to_columns": [
+      "EVAL_DOCUMENT_ID"
+    ],
+    "name": "asgssfctrdcmntmpping_dcment"
+  },
+  {
+    "from_table": "AS_GSS_RATING",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgssrating_evaluationid"
+  },
+  {
+    "from_table": "AS_GSS_RATING",
+    "from_columns": [
+      "REF_RATING_ID"
+    ],
+    "to_table": "AS_GSS_R_RATING",
+    "to_columns": [
+      "REF_RATING_ID"
+    ],
+    "name": "asgssrating_refratingid"
+  },
+  {
+    "from_table": "AS_GSS_R_VENDOR",
+    "from_columns": [
+      "VENDOR_COUNTRY"
+    ],
+    "to_table": "AS_GAM_R_COUNTRY",
+    "to_columns": [
+      "COUNTRY_ID"
+    ],
+    "name": "asgssrvendr_vendrcntry"
+  },
+  {
+    "from_table": "AS_GSS_R_VENDOR",
+    "from_columns": [
+      "VENDOR_STATE"
+    ],
+    "to_table": "AS_GAM_R_STATE",
+    "to_columns": [
+      "STATE_ID"
+    ],
+    "name": "asgssrvendr_vendrstte"
+  },
+  {
+    "from_table": "AS_GSS_R_VNDR_BUSINESS_TYPE",
+    "from_columns": [
+      "TYPE_CODE"
+    ],
+    "to_table": "AS_GAM_R_BUSINESS_TYPE",
+    "to_columns": [
+      "CODE"
+    ],
+    "name": "asgssrvendrbsnstype_typecode"
+  },
+  {
+    "from_table": "AS_GSS_R_VNDR_BUSINESS_TYPE",
+    "from_columns": [
+      "VENDOR_REF_ID"
+    ],
+    "to_table": "AS_GSS_R_VENDOR",
+    "to_columns": [
+      "VENDOR_REF_ID"
+    ],
+    "name": "asgssrvendrbsnstype_vendrrefid"
+  },
+  {
+    "from_table": "AS_GSS_TEAM_MEMBERSHIP",
+    "from_columns": [
+      "TEAM_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATOR_TEAM",
+    "to_columns": [
+      "TEAM_ID"
+    ],
+    "name": "asgssevltrtem_temmembership"
+  },
+  {
+    "from_table": "AS_GSS_TEAM_MEMBERSHIP",
+    "from_columns": [
+      "MEMBER"
+    ],
+    "to_table": "AS_GSS_USER",
+    "to_columns": [
+      "USERNAME"
+    ],
+    "name": "asgssevltrteam_member"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TMPLATE_TASK",
+    "from_columns": [
+      "TEMPLATE_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TEMPLATE",
+    "to_columns": [
+      "TEMPLATE_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtmplt_templtetskchnges"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TMPLATE_TASK",
+    "from_columns": [
+      "TEMPLATE_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TEMPLATE",
+    "to_columns": [
+      "TEMPLATE_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtpl_tmplttskchngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TMPLTE_FIELD",
+    "from_columns": [
+      "TEMPLATE_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TEMPLATE",
+    "to_columns": [
+      "TEMPLATE_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtmplt_simplfieldchnges"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TMPLTE_FIELD",
+    "from_columns": [
+      "TEMPLATE_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TEMPLATE",
+    "to_columns": [
+      "TEMPLATE_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtmplt_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TPL_TK_PRC_F",
+    "from_columns": [
+      "TEMPLATE_TASK_PREC_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TPL_TSK_PRC",
+    "to_columns": [
+      "TEMPLATE_TASK_PREC_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtmplttskp_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TPL_TK_PRC_F",
+    "from_columns": [
+      "TEMPLATE_TASK_PREC_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TPL_TSK_PRC",
+    "to_columns": [
+      "TEMPLATE_TASK_PREC_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtpltkp_smplfldchgs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TPL_TSK_FLD",
+    "from_columns": [
+      "TEMPLATE_TASK_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TMPLATE_TASK",
+    "to_columns": [
+      "TEMPLATE_TASK_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtmplttsk_smplfildchngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TPL_TSK_FLD",
+    "from_columns": [
+      "TEMPLATE_TASK_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TMPLATE_TASK",
+    "to_columns": [
+      "TEMPLATE_TASK_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtpltk_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TPL_TSK_PRC",
+    "from_columns": [
+      "TEMPLATE_TASK_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TMPLATE_TASK",
+    "to_columns": [
+      "TEMPLATE_TASK_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtmplttsk_tmplttskprcdn"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TPL_TSK_PRC",
+    "from_columns": [
+      "TEMPLATE_TASK_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TMPLATE_TASK",
+    "to_columns": [
+      "TEMPLATE_TASK_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtpltsk_tpltskprcdn"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TSK_CAT_FLD",
+    "from_columns": [
+      "TASK_CATEGORY_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TSK_CATEGORY",
+    "to_columns": [
+      "TASK_CATEGORY_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtskctgry_smplfildchngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TSK_CAT_FLD",
+    "from_columns": [
+      "TASK_CATEGORY_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TSK_CATEGORY",
+    "to_columns": [
+      "TASK_CATEGORY_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtkctgry_splfldchgs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TSK_RF_FIELD",
+    "from_columns": [
+      "TASK_REF_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TASK_REF",
+    "to_columns": [
+      "TASK_REF_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtskrf_simplfieldchnges"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_R_TSK_RF_FIELD",
+    "from_columns": [
+      "TASK_REF_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_R_TASK_REF",
+    "to_columns": [
+      "TASK_REF_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_rtskrf_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_TK_PRC_STP_FLD",
+    "from_columns": [
+      "TASK_PROC_SETUP_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_TSK_PRCSS_STUP",
+    "to_columns": [
+      "TASK_PROC_SETUP_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_tskprcssst_smplfldchngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_TK_PRC_STP_FLD",
+    "from_columns": [
+      "TASK_PROC_SETUP_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_TSK_PRCSS_STUP",
+    "to_columns": [
+      "TASK_PROC_SETUP_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_tkprocst_splfldchgs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_TSK_PRCSS_STUP",
+    "from_columns": [
+      "TEMPLATE_PROC_SETUP_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_TMPLT_PROC_STP",
+    "to_columns": [
+      "TEMPLATE_PROC_SETUP_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_tmpltprcssstp_tskschngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_A_TSK_PRCSS_STUP",
+    "from_columns": [
+      "TEMPLATE_PROC_SETUP_AUDIT_ID"
+    ],
+    "to_table": "AS_GSS_TMG_A_TMPLT_PROC_STP",
+    "to_columns": [
+      "TEMPLATE_PROC_SETUP_AUDIT_ID"
+    ],
+    "name": "AS_GSS_TMG_tplprocstp_tkschngs"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TASK_REF",
+    "from_columns": [
+      "TASK_REF_DOC_UPLOAD_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TSK_RF_DC_UPLD",
+    "to_columns": [
+      "TASK_REF_DOC_UPLOAD_ID"
+    ],
+    "name": "AS_GSS_TMG_rtaskref_dcploadcontext"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TASK_REF",
+    "from_columns": [
+      "TASK_CATEGORY_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TASK_CATEGORY",
+    "to_columns": [
+      "TASK_CATEGORY_ID"
+    ],
+    "name": "AS_GSS_TMG_rtaskref_taskcategory"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TASK_REF",
+    "from_columns": [
+      "TASK_BEHAVIOR_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TSK_BHVOR_TYPE",
+    "to_columns": [
+      "TASK_BEHAVIOR_TYPE_ID"
+    ],
+    "name": "AS_GSS_TMG_rtskref_taskbehavirtype"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TASK_REF",
+    "from_columns": [
+      "TASK_REF_DOC_UPLOAD_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TSK_RF_DC_UPLD",
+    "to_columns": [
+      "TASK_REF_DOC_UPLOAD_ID"
+    ],
+    "name": "AS_GSS_TMG_rtskrf_dcpldcontext"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TASK_REF",
+    "from_columns": [
+      "TASK_BEHAVIOR_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TSK_BHVOR_TYPE",
+    "to_columns": [
+      "TASK_BEHAVIOR_TYPE_ID"
+    ],
+    "name": "AS_GSS_TMG_rtskrf_tskbhvirtype"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TASK_REF",
+    "from_columns": [
+      "TASK_CATEGORY_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TASK_CATEGORY",
+    "to_columns": [
+      "TASK_CATEGORY_ID"
+    ],
+    "name": "AS_GSS_TMG_rtskrf_taskcategory"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TEMPLATE",
+    "from_columns": [
+      "DOC_TEMPLATE"
+    ],
+    "to_table": "AS_GSS_R_DOCUMENT_TEMPLATE",
+    "to_columns": [
+      "DOCUMENT_TEMPLATE_ID"
+    ],
+    "name": "asgsstmgrtemplate_dctemplate"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TEMPLATE",
+    "from_columns": [
+      "OPERATION"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsstmgrtemplate_operation"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TEMPLATE",
+    "from_columns": [
+      "TEMPLATE_TYPE"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsstmgrtemplte_templtetype"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TEMPLATE_TASK",
+    "from_columns": [
+      "TASK_REF_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TASK_REF",
+    "to_columns": [
+      "TASK_REF_ID"
+    ],
+    "name": "AS_GSS_TMG_rtemplatetask_taskref"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TEMPLATE_TASK",
+    "from_columns": [
+      "TEMPLATE_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TEMPLATE",
+    "to_columns": [
+      "TEMPLATE_ID"
+    ],
+    "name": "AS_GSS_TMG_rtemplte_templtetskmaps"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TEMPLATE_TASK",
+    "from_columns": [
+      "DURATION_UNIT"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsstmgrtempltetsk_drtinnit"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TEMPLATE_TASK",
+    "from_columns": [
+      "TEMPLATE_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TEMPLATE",
+    "to_columns": [
+      "TEMPLATE_ID"
+    ],
+    "name": "AS_GSS_TMG_rtmplt_tmplttskmaps"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TEMPLATE_TASK",
+    "from_columns": [
+      "TASK_REF_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TASK_REF",
+    "to_columns": [
+      "TASK_REF_ID"
+    ],
+    "name": "AS_GSS_TMG_rtmpltetask_taskref"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TMPLT_TSK_PREC",
+    "from_columns": [
+      "TEMPLATE_TASK_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TEMPLATE_TASK",
+    "to_columns": [
+      "TEMPLATE_TASK_ID"
+    ],
+    "name": "AS_GSS_TMG_rtemplatetask_prectasks"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TMPLT_TSK_PREC",
+    "from_columns": [
+      "TEMPLATE_TASK_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TEMPLATE_TASK",
+    "to_columns": [
+      "TEMPLATE_TASK_ID"
+    ],
+    "name": "AS_GSS_TMG_rtmplttsk_prectasks"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TSK_RF_DC_UPLD",
+    "from_columns": [
+      "DOC_TEMPLATE"
+    ],
+    "to_table": "AS_GSS_R_DOCUMENT_TEMPLATE",
+    "to_columns": [
+      "DOCUMENT_TEMPLATE_ID"
+    ],
+    "name": "asgsstmgrtskrfdcpldcn_dctmplt"
+  },
+  {
+    "from_table": "AS_GSS_TMG_R_TSK_RF_DC_UPLD",
+    "from_columns": [
+      "DOC_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsstmgrtskrfdcpldcnt_dctypd"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "TASK_DOC_UPLOAD_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK_DOC_UPLOAD",
+    "to_columns": [
+      "TASK_DOC_UPLOAD_ID"
+    ],
+    "name": "AS_GSS_TMG_task_docuploadcontext"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "TASK_REVIEW_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK_REVIEW",
+    "to_columns": [
+      "TASK_REVIEW_ID"
+    ],
+    "name": "AS_GSS_TMG_task_review"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "TASK_BEHAVIOR_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TSK_BHVOR_TYPE",
+    "to_columns": [
+      "TASK_BEHAVIOR_TYPE_ID"
+    ],
+    "name": "AS_GSS_TMG_task_taskbehaviortype"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "TASK_CATEGORY_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TASK_CATEGORY",
+    "to_columns": [
+      "TASK_CATEGORY_ID"
+    ],
+    "name": "AS_GSS_TMG_task_taskcategory"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "TASK_STATUS_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TASK_STATUS",
+    "to_columns": [
+      "TASK_STATUS_ID"
+    ],
+    "name": "AS_GSS_TMG_task_taskstatus"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "DURATION_UNIT"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsstmgtask_durationunit"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "EVALUATION_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION",
+    "to_columns": [
+      "EVALUATION_ID"
+    ],
+    "name": "asgsstmgtask_evaluation"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "CHECKLIST_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK_CHECKLIST",
+    "to_columns": [
+      "CHECKLIST_ID"
+    ],
+    "name": "asgsstmgtask_taskchecklist"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "VENDOR_ID"
+    ],
+    "to_table": "AS_GSS_EVALUATION_VENDOR",
+    "to_columns": [
+      "VENDOR_ID"
+    ],
+    "name": "asgsstmgtask_vendor"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "CRITERIA_ID"
+    ],
+    "to_table": "AS_GSS_CRITERIA",
+    "to_columns": [
+      "CRITERIA_ID"
+    ],
+    "name": "asgsstmgtask_criteria"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "FINAL_RATING_ID"
+    ],
+    "to_table": "AS_GSS_RATING",
+    "to_columns": [
+      "RATING_ID"
+    ],
+    "name": "asgsstmgtask_rating"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "TASK_DOC_UPLOAD_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK_DOC_UPLOAD",
+    "to_columns": [
+      "TASK_DOC_UPLOAD_ID"
+    ],
+    "name": "AS_GSS_TMG_tsk_dcuploadcontext"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK",
+    "from_columns": [
+      "TASK_BEHAVIOR_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TSK_BHVOR_TYPE",
+    "to_columns": [
+      "TASK_BEHAVIOR_TYPE_ID"
+    ],
+    "name": "AS_GSS_TMG_tsk_tskbehaviortype"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK_CHECKLIST",
+    "from_columns": [
+      "LIST_TYPE"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsstmgtskchecklist_listtype"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK_DOC_UPLOAD",
+    "from_columns": [
+      "DOC_TEMPLATE"
+    ],
+    "to_table": "AS_GSS_R_DOCUMENT_TEMPLATE",
+    "to_columns": [
+      "DOCUMENT_TEMPLATE_ID"
+    ],
+    "name": "asgsstmgtskdcpldcntxt_dctmplt"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK_DOC_UPLOAD",
+    "from_columns": [
+      "DOC_TYPE_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsstmgtskdcpldcntxt_dctypid"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK_PRECEDENT",
+    "from_columns": [
+      "TASK_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK",
+    "to_columns": [
+      "TASK_ID"
+    ],
+    "name": "AS_GSS_TMG_task_taskprecedents"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TASK_REVIEW",
+    "from_columns": [
+      "DECISION"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsstmgtaskreview_decision"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TSK_ACTION_AUDIT",
+    "from_columns": [
+      "TASK_REVIEW_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK_REVIEW",
+    "to_columns": [
+      "TASK_REVIEW_ID"
+    ],
+    "name": "AS_GSS_TMG_auditwork_review"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TSK_ACTION_AUDIT",
+    "from_columns": [
+      "TASK_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK",
+    "to_columns": [
+      "TASK_ID"
+    ],
+    "name": "AS_GSS_TMG_auditwork_task"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TSK_ACTION_AUDIT",
+    "from_columns": [
+      "TASK_ACTION_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TASK_ACTION",
+    "to_columns": [
+      "TASK_ACTION_ID"
+    ],
+    "name": "AS_GSS_TMG_taskactinadit_taskactin"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TSK_ACTION_AUDIT",
+    "from_columns": [
+      "TASK_ACTION_ID"
+    ],
+    "to_table": "AS_GSS_TMG_R_TASK_ACTION",
+    "to_columns": [
+      "TASK_ACTION_ID"
+    ],
+    "name": "AS_GSS_TMG_tskctndit_taskactin"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TSK_CHG_RSN_MAP",
+    "from_columns": [
+      "CHANGE_REASON_ID"
+    ],
+    "to_table": "AS_GSS_R_DATA",
+    "to_columns": [
+      "REF_DATA_ID"
+    ],
+    "name": "asgsstmgtskchngrsnm_chngrsn"
+  },
+  {
+    "from_table": "AS_GSS_TMG_TSK_CHG_RSN_MAP",
+    "from_columns": [
+      "TASK_ID"
+    ],
+    "to_table": "AS_GSS_TMG_TASK",
+    "to_columns": [
+      "TASK_ID"
+    ],
+    "name": "asgsstmgtskchngrsnm_task"
+  }
+]

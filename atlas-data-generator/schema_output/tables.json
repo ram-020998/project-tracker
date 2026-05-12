@@ -1,0 +1,4525 @@
+{
+  "AS_GAM_AWRD_RQRMENT_MAPPING": {
+    "columns": {
+      "ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "AWARD_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REQUIREMENT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATE_TIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATE_TIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "ID"
+    ]
+  },
+  "AS_GAM_A_R_AWRD_REQ_MAP_FLD": {
+    "columns": {
+      "MAPPING_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "MAPPING_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(4000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NEW_VALUE": {
+        "type": "varchar(4000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "MAPPING_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GAM_A_R_AWRD_REQ_MPPNG": {
+    "columns": {
+      "MAPPING_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "MAPPING_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AWARD_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "MAPPING_AUDIT_ID"
+    ]
+  },
+  "AS_GAM_R_BUSINESS_TYPE": {
+    "columns": {
+      "CODE": {
+        "type": "varchar(5)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "DESCRIPTION": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": false,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "CODE"
+    ]
+  },
+  "AS_GAM_R_COUNTRY": {
+    "columns": {
+      "COUNTRY_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "COUNTRY_NAME": {
+        "type": "varchar(50)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "COUNTRY_CODE": {
+        "type": "varchar(5)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": false,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "COUNTRY_ID"
+    ]
+  },
+  "AS_GAM_R_STATE": {
+    "columns": {
+      "STATE_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "STATE_NAME": {
+        "type": "varchar(50)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "STATE_CODE": {
+        "type": "varchar(5)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "IS_TERRITORY": {
+        "type": "tinyint(1)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": false,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "STATE_ID"
+    ]
+  },
+  "AS_GAM_ScriptExecutionHistory": {
+    "columns": {
+      "scriptexecuteid": {
+        "type": "INT(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "represents": {
+        "type": "the",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "executeid": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The execution ID of the set of scripts that are run in a single execution"
+      },
+      "releaseid": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "purely": {
+        "type": "an",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "releasename": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The release name of the script"
+      },
+      "scriptid": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "scriptname": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The name of the script"
+      },
+      "scriptversionid": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "starttime": {
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The start time of script execution"
+      },
+      "endtime": {
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The end time of script execution"
+      },
+      "executetime": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The duration of the script exeuction in milliseconds"
+      },
+      "issuccess": {
+        "type": "TINYINT(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "Flag to desognate if the script was successfully executed"
+      },
+      "executionskipped": {
+        "type": "TINYINT(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "note": {
+        "type": "that",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "scriptexecuteid"
+    ],
+    "comment": "DO NOT DELETE OR MODIFY THIS TABLE, SYSTEM GENERATED - Holds the script execution history for the Government Acquisition Management application"
+  },
+  "AS_GSS_A_R_CNSNSS_RSPNS_FLD": {
+    "columns": {
+      "CONSENSUS_RESPONSE_AUDIT_ID": {
+        "type": "INTEGER",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "FIELD_NAME": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "OLD_VALUE": {
+        "type": "VARCHAR(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "VARCHAR(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "CNSNSS_RESPONSE_AUDIT_FIELD_ID": {
+        "type": "INTEGER",
+        "nullable": false,
+        "auto_increment": true
+      }
+    },
+    "primary_key": [
+      "CONSENSUS_RESPONSE_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_CNSNSUS_REPT_FLD": {
+    "columns": {
+      "CONSENSUS_AUDIT_FIELD_ID": {
+        "type": "INTEGER",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "CONSENSUS_AUDIT_ID": {
+        "type": "INTEGER",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "FIELD_NAME": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "OLD_VALUE": {
+        "type": "VARCHAR(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "VARCHAR(5000)",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "CONSENSUS_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_CNSNSUS_RESPONSE": {
+    "columns": {
+      "CONSENSUS_RESPONSE_AUDIT_ID": {
+        "type": "INTEGER",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "CONSENSUS_RESPONSE_ID": {
+        "type": "INTEGER",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "CONSENSUS_AUDIT_ID": {
+        "type": "INTEGER",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "TIMESTAMP": {
+        "type": "DATETIME",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "USERNAME": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "CONSENSUS_RESPONSE_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_CONSENSUS_REPORT": {
+    "columns": {
+      "CONSENSUS_AUDIT_ID": {
+        "type": "INTEGER",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "CONSENSUS_ID": {
+        "type": "INTEGER",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "TIMESTAMP": {
+        "type": "DATETIME",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "USERNAME": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "CONSENSUS_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_CRITERIA": {
+    "columns": {
+      "CRITERIA_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CRITERIA_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "CRITERIA_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_CRITERIA_FIELD": {
+    "columns": {
+      "CRITERIA_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "CRITERIA_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "CRITERIA_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_CRTR_ASSGNS_FLD": {
+    "columns": {
+      "ASSIGNMENT_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "ASSIGNMENT_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "ASSIGNMENT_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_CRTR_ASSIGNMENTS": {
+    "columns": {
+      "ASSIGNMENT_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "CRITERIA_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "ASSIGNMENT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "ASSIGNMENT_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVALUATION": {
+    "columns": {
+      "EVALUATION_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "EVALUATION_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVALUATION_FIELD": {
+    "columns": {
+      "EVALUATION_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "EVALUATION_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVALUATION_PHASE": {
+    "columns": {
+      "EVALUATION_PHASE_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_PHASE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "EVALUATION_PHASE_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVALUATOR_TEAM": {
+    "columns": {
+      "TEAM_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TEAM_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEAM_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVAL_VDR_BIZ_TYP": {
+    "columns": {
+      "BUSINESS_TYPE_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "VENDOR_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "BUSINESS_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "BUSINESS_TYPE_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVLTION_DOCUMENT": {
+    "columns": {
+      "EVALUATION_DOCUMENT_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "EVALUATION_DOCUMENT_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVLTN_DCMNT_FELD": {
+    "columns": {
+      "EVALUATION_DOC_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_DOCUMENT_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "EVALUATION_DOC_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVLTN_PHSE_FIELD": {
+    "columns": {
+      "EVALUATION_PHASE_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "EVLUATION_PHASE_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      }
+    },
+    "primary_key": [
+      "EVALUATION_PHASE_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVLTN_RSPNSS_FLD": {
+    "columns": {
+      "RESPONSE_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "RESPONSE_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "RESPONSE_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVLTN_VNDR_FIELD": {
+    "columns": {
+      "VENDOR_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "VENDOR_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "VENDOR_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVLTON_RESPONSES": {
+    "columns": {
+      "RESPONSE_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "RESPONSE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "RESPONSE_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVLTR_TEAM_FIELD": {
+    "columns": {
+      "TEAM_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEAM_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "EVAL_TEAM_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEAM_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_EVLUATION_VENDOR": {
+    "columns": {
+      "VENDOR_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "VENDOR_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_EV_VDR_BZ_TP_FLD": {
+    "columns": {
+      "BUSINESS_TYPE_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "BUSINESS_TYPE_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "BUSINESS_TYPE_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_A_R_TEAM_MEMBERSHIP": {
+    "columns": {
+      "TEAM_MEMBERSHIP_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEAM_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TEAM_MEMBERSHIP_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEAM_MEMBERSHIP_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_A_R_TM_MMBRSHP_FIELD": {
+    "columns": {
+      "TEAM_MEMBERSHIP_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEAM_MEMBERSHIP_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_VALUE": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "TEAM_MEMBERSHIP_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEAM_MEMBERSHIP_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_CONSENSUS_REPORT": {
+    "columns": {
+      "CONSENSUS_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FACTOR_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "STATUS_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "RATING_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "RATING_JUSTIFICATION": {
+        "type": "TEXT",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "STARTED_BY": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "STARTED_DATETIME": {
+        "type": "DATETIME",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "CONSENSUS_ID"
+    ]
+  },
+  "AS_GSS_CONSENSUS_RESPONSE": {
+    "columns": {
+      "CONSENSUS_RESPONSE_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "CONSENSUS_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COMBINATION_ORDER": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "RESPONSE_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "RESPONSE": {
+        "type": "TEXT",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "JUSTIFICATION": {
+        "type": "TEXT",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "REFERENCES": {
+        "type": "TEXT",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "IS_SIGNIFICANT": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_RESPONSE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The evaluation response that this consensus response is based on"
+      },
+      "IS_INCLUDED": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "Determines whether or not this response is included in the final consensus report"
+      },
+      "INCLUDED_COMMENTS": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "Additional comments on why the responses was included/excluded from the report"
+      },
+      "COMBINED_CONSENSUS_RESPONSE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "CONSENSUS_RESPONSE_ID"
+    ]
+  },
+  "AS_GSS_CONSENSUS_SIGNATURE": {
+    "columns": {
+      "CONSENSUS_SIGNATURE_ID": {
+        "type": "INT(11)",
+        "nullable": false,
+        "auto_increment": true,
+        "comment": "Primary key"
+      },
+      "CONSENSUS_ID": {
+        "type": "INT(11)",
+        "nullable": false,
+        "auto_increment": false,
+        "comment": "Consensus being signed"
+      },
+      "USERNAME": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The user signing off on the consensus."
+      },
+      "SIGNATURE_TIMESTAMP": {
+        "type": "DATETIME",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "in": {
+        "type": "which",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "CREATED_BY": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The user who created the row"
+      },
+      "CREATED_DATETIME": {
+        "type": "DATETIME",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "Creation timestamp"
+      },
+      "MODIFIED_BY": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "Last user to modify the row"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "DATETIME",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "Modification timestamp"
+      },
+      "IS_ACTIVE": {
+        "type": "TINYINT(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "Is Signature Active"
+      }
+    },
+    "primary_key": [
+      "CONSENSUS_SIGNATURE_ID"
+    ]
+  },
+  "AS_GSS_CRITERIA": {
+    "columns": {
+      "CRITERIA_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "PARENT_CRITERIA_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FACTOR_NUMBER": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CRITERIA_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CRITERIA_DESCRIPTION": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CRITERIA_CHAIR": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DUE_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "RANKING_METHOD_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CRITERIA_STATUS_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COMPLETED_ON": {
+        "type": "DATE",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COMPLETED_BY": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "INSTRUCTION": {
+        "type": "VARCHAR(2000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "CRITERIA_ID"
+    ]
+  },
+  "AS_GSS_CRITERIA_ASSIGNMENTS": {
+    "columns": {
+      "ASSIGNMENT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "CRITERIA_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "ASSIGNED_TEAM_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "ASSIGNEE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "ASSIGNMENT_ID"
+    ]
+  },
+  "AS_GSS_EVALUATION": {
+    "columns": {
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_NUMBER": {
+        "type": "varchar(25)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_TITLE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_DESCRIPTION": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "SOLICITATION_DESCRIPTION": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "SOLICITATION_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_START_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_DUE_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_COMPLETION_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_STATUS_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_METHOD_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_CHIEF": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FOLDER_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OFFICE365_FOLDER_ID": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CONTRACTING_OFFICER": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CONTRACTING_SPECIALIST": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COMPLETED_BY": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "EVALUATION_ID"
+    ]
+  },
+  "AS_GSS_EVALUATION_COMMENTS": {
+    "columns": {
+      "EVALUATION_COMMENT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COMMENT": {
+        "type": "varchar(4000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_DELETED": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "EVALUATION_COMMENT_ID"
+    ]
+  },
+  "AS_GSS_EVALUATION_DOCUMENT": {
+    "columns": {
+      "EVAL_DOCUMENT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "APPIAN_DOC_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CRITERIA_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOCUMENT_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOCUMENT_DESCRIPTION": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FILE_TYPE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOC_TYPE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOCUMENT_TEMPLATE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_DELETED": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "EVAL_DOCUMENT_ID"
+    ]
+  },
+  "AS_GSS_EVALUATION_PHASE": {
+    "columns": {
+      "EVALUATION_PHASE_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DURATION": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DURATION_UNIT": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "START_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "END_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "EVALUATION_PHASE_ID"
+    ]
+  },
+  "AS_GSS_EVALUATION_RESPONSES": {
+    "columns": {
+      "RESPONSE_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CONSENSUS_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FACTOR_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "RESPONSE_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "RESPONSE": {
+        "type": "TEXT",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "JUSTIFICATION": {
+        "type": "TEXT",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "REFERENCES": {
+        "type": "TEXT",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "INCLUDED_COMMENTS": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_SIGNIFICANT": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_INCLUDED": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COMBINATION_ORDER": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "RESPONSE_ORDER": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "RESPONSE_ID"
+    ]
+  },
+  "AS_GSS_EVALUATION_VENDOR": {
+    "columns": {
+      "VENDOR_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "VENDOR_REF_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "SUBMITTED_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "LEGAL_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "BUSINESS_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ADDRESS_LINE1": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ADDRESS_LINE2": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_CITY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_STATE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_COUNTRY": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ZIP_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ZIP_CODE_EXT": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_FOREIGN_POSTAL_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DUNS": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CAGE_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "UNIQUE_ENTITY_ID": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "STATUS": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EXPIRATION_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "VENDOR_ID"
+    ]
+  },
+  "AS_GSS_EVALUATOR_TEAM": {
+    "columns": {
+      "TEAM_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TEAM_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TEAM_DESCRIPTION": {
+        "type": "varchar(1000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "ASSIGNEE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEAM_ID"
+    ]
+  },
+  "AS_GSS_EVLTN_VNDR_BSNSS_TYP": {
+    "columns": {
+      "BUSINESS_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "VENDOR_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TYPE_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "BUSINESS_TYPE_ID"
+    ]
+  },
+  "AS_GSS_FCTR_DCUMENT_MAPPING": {
+    "columns": {
+      "DOCUMENT_MAPPING_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "DOCUMENT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FACTOR_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "DOCUMENT_MAPPING_ID"
+    ]
+  },
+  "AS_GSS_RATING": {
+    "columns": {
+      "RATING_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "PARENT_RATING_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REF_RATING_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DESCRIPTION": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "LABEL": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "ICON": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COLOR": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "SORT_ORDER": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "bit(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "RATING_ID"
+    ]
+  },
+  "AS_GSS_R_DATA": {
+    "columns": {
+      "REF_DATA_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "REF_LABEL": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REF_DESCRIPTION": {
+        "type": "varchar(1000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REF_TYPE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REF_ICON": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REF_COLOR": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "SORT_ORDER": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "REF_DATA_ID"
+    ]
+  },
+  "AS_GSS_R_DOCUMENT_TEMPLATE": {
+    "columns": {
+      "DOCUMENT_TEMPLATE_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "DOCUMENT_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FILE_TYPE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "DOCUMENT_TEMPLATE_ID"
+    ]
+  },
+  "AS_GSS_R_RATING": {
+    "columns": {
+      "RATING_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "PARENT_RATING_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DESCRIPTION": {
+        "type": "varchar(5000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REF_LABEL": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REF_ICON": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REF_COLOR": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "SORT_ORDER": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "RATING_ID"
+    ]
+  },
+  "AS_GSS_R_VENDOR": {
+    "columns": {
+      "VENDOR_REF_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "LEGAL_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "BUSINESS_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ADDRESS_LINE1": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ADDRESS_LINE2": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_CITY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_STATE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_COUNTRY": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ZIP_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_ZIP_CODE_EXT": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "VENDOR_FOREIGN_POSTAL_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DUNS": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CAGE_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "UNIQUE_ENTITY_ID": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "STATUS": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EXPIRATION_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "VENDOR_REF_ID"
+    ]
+  },
+  "AS_GSS_R_VNDR_BUSINESS_TYPE": {
+    "columns": {
+      "BUSINESS_REF_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "VENDOR_REF_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TYPE_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "BUSINESS_REF_TYPE_ID"
+    ]
+  },
+  "AS_GSS_ScriptExecutionHistory": {
+    "columns": {
+      "scriptexecuteid": {
+        "type": "INT(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "represents": {
+        "type": "the",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "executeid": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The execution ID of the set of scripts that are run in a single execution"
+      },
+      "releaseid": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "purely": {
+        "type": "an",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "releasename": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The release name of the script"
+      },
+      "scriptid": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "scriptname": {
+        "type": "VARCHAR(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The name of the script"
+      },
+      "scriptversionid": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "starttime": {
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The start time of script execution"
+      },
+      "endtime": {
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The end time of script execution"
+      },
+      "executetime": {
+        "type": "INT(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "The duration of the script exeuction in milliseconds"
+      },
+      "issuccess": {
+        "type": "TINYINT(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL",
+        "comment": "Flag to desognate if the script was successfully executed"
+      },
+      "executionskipped": {
+        "type": "TINYINT(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "note": {
+        "type": "that",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "scriptexecuteid"
+    ],
+    "comment": "DO NOT DELETE OR MODIFY THIS TABLE, SYSTEM GENERATED - Holds the script execution history for the Source Selection application"
+  },
+  "AS_GSS_TEAM_MEMBERSHIP": {
+    "columns": {
+      "TEAM_MEMBERSHIP_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEAM_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MEMBER": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEAM_MEMBERSHIP_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TASK_REF": {
+    "columns": {
+      "TASK_REF_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_REF_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_REF_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TEMPLATE": {
+    "columns": {
+      "TEMPLATE_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMPLATE_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TMPLATE_TASK": {
+    "columns": {
+      "TEMPLATE_TASK_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TEMPLATE_TASK_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMPLATE_TASK_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TMPLTE_FIELD": {
+    "columns": {
+      "TEMPLATE_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NEW_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMPLATE_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TPL_TK_PRC_F": {
+    "columns": {
+      "TEMP_TASK_PREC_ADT_FLD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_TASK_PREC_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NEW_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMP_TASK_PREC_ADT_FLD_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TPL_TSK_FLD": {
+    "columns": {
+      "TEMPLATE_TASK_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_TASK_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NEW_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMPLATE_TASK_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TPL_TSK_PRC": {
+    "columns": {
+      "TEMPLATE_TASK_PREC_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_TASK_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TEMPLATE_TASK_PRECEDENT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMPLATE_TASK_PREC_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TSK_CATEGORY": {
+    "columns": {
+      "TASK_CATEGORY_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_CATEGORY_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_CATEGORY_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TSK_CAT_FLD": {
+    "columns": {
+      "TASK_CATEGORY_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_CATEGORY_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NEW_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_CATEGORY_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_R_TSK_RF_FIELD": {
+    "columns": {
+      "TASK_REF_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_REF_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NEW_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_REF_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_TK_PRC_STP_FLD": {
+    "columns": {
+      "TASK_PROC_SETUP_AUDIT_FIELD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_PROC_SETUP_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "FIELD_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NEW_VALUE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_PROC_SETUP_AUDIT_FIELD_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_TMPLT_PROC_STP": {
+    "columns": {
+      "TEMPLATE_PROC_SETUP_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_ID_PROCESS_SETUP": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "ORIGINAL_TEMPLATE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NEW_TEMPLATE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIME_STAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TEMPLATE_AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMPLATE_PROC_SETUP_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_TMG_A_TSK_PRCSS_STUP": {
+    "columns": {
+      "TASK_PROC_SETUP_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_PROC_SETUP_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_REF_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIME_STAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AUDIT_ACTION_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TEMPLATE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_PROC_SETUP_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_TMG_R_TASK_ACTION": {
+    "columns": {
+      "TASK_ACTION_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "ACTION_DISPLAY_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_ACTION_ID"
+    ]
+  },
+  "AS_GSS_TMG_R_TASK_CATEGORY": {
+    "columns": {
+      "TASK_CATEGORY_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "CATEGORY_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_CATEGORY_ID"
+    ]
+  },
+  "AS_GSS_TMG_R_TASK_REF": {
+    "columns": {
+      "TASK_REF_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_NAME": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "TASK_BEHAVIOR_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_CATEGORY_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DEFAULT_GROUP_ASSIGNEE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_REF_DOC_UPLOAD_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": false,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "TASK_REF_ID"
+    ]
+  },
+  "AS_GSS_TMG_R_TASK_STATUS": {
+    "columns": {
+      "TASK_STATUS_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "STATUS_DISPLAY_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "ICON": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COLOR": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_STATUS_ID"
+    ]
+  },
+  "AS_GSS_TMG_R_TEMPLATE": {
+    "columns": {
+      "TEMPLATE_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_NAME": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "TEMPLATE_TYPE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TEMPLATE_DESC": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOC_TEMPLATE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMPLATE_ID"
+    ]
+  },
+  "AS_GSS_TMG_R_TEMPLATE_TASK": {
+    "columns": {
+      "TEMPLATE_TASK_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_REF_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "GROUP_ASSIGNEE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_DESC": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DURATION": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "DURATION_UNIT": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NO_OF_DAYS_FROM_START": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMPLATE_TASK_ID"
+    ]
+  },
+  "AS_GSS_TMG_R_TMPLT_TSK_PREC": {
+    "columns": {
+      "TEMPLATE_TASK_PRECEDENT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_TASK_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_REF_ID_PRECEDENT": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "GROUP_ID_PRECEDENT": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TEMPLATE_TASK_PRECEDENT_ID"
+    ]
+  },
+  "AS_GSS_TMG_R_TSK_BHVOR_TYPE": {
+    "columns": {
+      "TASK_BEHAVIOR_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "BEHAVIOR_TYPE_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "BEHAVIOR_DISPLAY_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "BEHAVIOR_SUBTYPE_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CONFIGURATION_LEVEL_CODE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "ICON": {
+        "type": "varchar(50)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COLOR": {
+        "type": "varchar(50)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_BEHAVIOR_TYPE_ID"
+    ]
+  },
+  "AS_GSS_TMG_R_TSK_RF_DC_UPLD": {
+    "columns": {
+      "TASK_REF_DOC_UPLOAD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "DOC_EXTENSION": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOC_DESCRIPTION": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOC_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOC_TEMPLATE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_REF_DOC_UPLOAD_ID"
+    ]
+  },
+  "AS_GSS_TMG_TASK": {
+    "columns": {
+      "TASK_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "EVALUATION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_REF_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_NAME": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "TASK_DESC": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "TASK_BEHAVIOR_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_CATEGORY_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REVIEW_DOCUMENT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "GROUP_ASSIGNEE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USER_ASSIGNEE": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_STATUS_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CHECKLIST_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_DOC_UPLOAD_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_REVIEW_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "AVAILABLE_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DUE_DATE": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "DURATION": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DURATION_UNIT": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "NO_OF_DAYS_FROM_START": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COMPLETED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COMPLETION_DATE": {
+        "type": "date",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "COMPLETED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "REVIEW_COMMENT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "JUSTIFICATION": {
+        "type": "TEXT",
+        "nullable": true,
+        "auto_increment": false
+      }
+    },
+    "primary_key": [
+      "TASK_ID"
+    ]
+  },
+  "AS_GSS_TMG_TASK_CHECKLIST": {
+    "columns": {
+      "CHECKLIST_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TEMPLATE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "LIST_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "LIST_DESC": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "LIST_TYPE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "CHECKLIST_ID"
+    ]
+  },
+  "AS_GSS_TMG_TASK_DOC_UPLOAD": {
+    "columns": {
+      "TASK_DOC_UPLOAD_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "DOC_EXTENSION": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "APPIAN_DOCUMENT_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OFFICE_365_DOCUMENT_ID": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OFFICE_365_DOCUMENT_LINK": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOC_DESCRIPTION": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOC_TYPE_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DOC_TEMPLATE": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_DOC_UPLOAD_ID"
+    ]
+  },
+  "AS_GSS_TMG_TASK_PRECEDENT": {
+    "columns": {
+      "TASK_PRECEDENT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_ID_PRECEDENT": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_PRECEDENT_ID"
+    ]
+  },
+  "AS_GSS_TMG_TASK_REVIEW": {
+    "columns": {
+      "TASK_REVIEW_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "COMMENT": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "DECISION": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_REVIEW_ID"
+    ]
+  },
+  "AS_GSS_TMG_TASK_SET": {
+    "columns": {
+      "TASK_SET_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      }
+    },
+    "primary_key": [
+      "TASK_SET_ID"
+    ]
+  },
+  "AS_GSS_TMG_TSK_ACTION_AUDIT": {
+    "columns": {
+      "TASK_ACTION_AUDIT_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TIMESTAMP": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "ASSIGNED_TO": {
+        "type": "varchar(4000)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_REVIEW_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "TASK_ACTION_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_ACTION_AUDIT_ID"
+    ]
+  },
+  "AS_GSS_TMG_TSK_CHG_RSN_MAP": {
+    "columns": {
+      "TASK_CHANGE_REASON_MAPPING_ID": {
+        "type": "int(11)",
+        "nullable": false,
+        "auto_increment": true
+      },
+      "TASK_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "OLD_DUE_DATE": {
+        "type": "DATETIME",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "NEW_DUE_DATE": {
+        "type": "DATETIME",
+        "nullable": true,
+        "auto_increment": false
+      },
+      "CHANGE_REASON_ID": {
+        "type": "int(11)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "TASK_CHANGE_REASON_MAPPING_ID"
+    ]
+  },
+  "AS_GSS_USER": {
+    "columns": {
+      "USERNAME": {
+        "type": "varchar(255)",
+        "nullable": false,
+        "auto_increment": false
+      },
+      "FIRST_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "LAST_NAME": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "EMAIL": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "PHONE_NUMBER": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "CREATED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_BY": {
+        "type": "varchar(255)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "MODIFIED_DATETIME": {
+        "type": "datetime",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      },
+      "IS_ACTIVE": {
+        "type": "tinyint(1)",
+        "nullable": true,
+        "auto_increment": false,
+        "default": "NULL"
+      }
+    },
+    "primary_key": [
+      "USERNAME"
+    ]
+  }
+}

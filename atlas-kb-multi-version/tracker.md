@@ -76,17 +76,55 @@ The `max_retained_releases` pruning logic must respect the `releases` list — n
 Use the parser's `sort_key` (tuple of integers) for version comparison, not raw strings. This handles format differences correctly.
 
 ## Status
-Design complete — ready for implementation.
+Implementation complete — ready for testing.
+
+## Session Log
+
+### May 6, 2026 — Design and implementation
+
+#### Completed
+- Updated `releases.json` with `releases` field (empty array) for all 15 apps
+- Implemented rebuild detection and multi-version parsing in `sync_packages.py`:
+  - `version_sort_key()` — converts version strings to sortable tuples
+  - `get_parsed_versions()` — reads all parsed versions from `release_index.json`
+  - `download_specific_version()` — downloads specific version using `releaseVersion=AppName-Version` format
+  - `check_rebuild_needed()` — compares configured vs parsed, returns `'none'`/`'rebuild'`/`'forward'`
+  - `rebuild_app()` — deletes app data, re-parses all configured versions in chronological order
+  - `sync_forward_versions()` — parses only missing newer versions
+- Updated `ensure_app_config()` — auto-adjusts `max_retained_releases` to accommodate configured releases (default: 10, minimum: `len(releases) + 2`)
+- Updated `sync_app()` — runs rebuild/forward check before normal latest sync
+- Updated `sync_app_wrapper()` and `main()` — pass `configured_releases` through
+
+#### Decisions Made
+- Default `max_retained_releases` set to 10 (increased from 5)
+- Single-job pipeline approach (no matrix/parallel jobs) — keeps pipeline simple, rebuilds are rare
+- Option B (configured history separate from latest) — `releases.json` is stable config, not auto-modified
+- Full rebuild when older version added — cleanest approach, avoids inserting into middle of history
+- Configured versions are pinned (never pruned via auto-adjusted retention limit)
+- Packager API version-specific retrieval uses format: `SolutionName-M.m.f.h.p`
+
+#### Key Design Points
+- Empty `releases` array → unchanged behavior from today (just sync latest)
+- All configured versions present → normal daily sync (delta/full)
+- Missing older version → full rebuild (delete + re-parse all in order) + latest sync
+- Missing newer version → forward parse + latest sync
+- Failed version downloads are skipped with warning (don't fail entire rebuild)
+- After historical versions handled, normal latest sync always runs
+
+---
 
 ## Remaining Items
-- [ ] Update `releases.json` schema with `releases` field for each app
-- [ ] Implement rebuild detection logic in `sync_packages.py`
-- [ ] Implement sequential multi-version parsing for rebuilds
-- [ ] Implement version-specific download (`releaseVersion=AppName-Version`)
-- [ ] Update pruning logic to respect configured versions
-- [ ] Add retry logic for downloads
+- [x] Update `releases.json` schema with `releases` field for each app
+- [x] Implement rebuild detection logic in `sync_packages.py`
+- [x] Implement sequential multi-version parsing for rebuilds
+- [x] Implement version-specific download (`releaseVersion=AppName-Version`)
+- [x] Update pruning logic to respect configured versions
+- [ ] Add retry logic for downloads (currently single attempt with skip on failure)
 - [ ] Test with a real app (add an older version, verify rebuild works)
+- [ ] Test forward sync (add a newer version not yet parsed)
+- [ ] Verify `max_retained_releases` auto-adjustment works correctly
 - [ ] Document the feature for users (how to add versions, what triggers a rebuild)
+- [ ] Push changes to solutions-os repo
 
 ## Key Decisions
 - Single-job approach (no matrix/parallel jobs) — keeps pipeline simple, rebuilds are rare
