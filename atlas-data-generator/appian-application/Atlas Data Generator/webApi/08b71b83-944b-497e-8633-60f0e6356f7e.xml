@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<webApiHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>6bde6a85-a5d3-45e7-8ec3-11e2632d3888</versionUuid>
+    <webApi a:uuid="08b71b83-944b-497e-8633-60f0e6356f7e" name="ADG_API_recordOperations">
+        <a:description>The api for record operations</a:description>
+        <a:expression>a!localVariables(
+  local!method: index(http!request.pathSegments, 1, null),
+  local!body: #"SYSTEM_SYSRULES_fromJson_v1"(http!request.body),
+  if(
+    a!isNullOrEmpty(local!method),
+    #"SYSTEM_SYSRULES_httpResponse_v1"(
+      statusCode: 400,
+      headers: {
+        #"SYSTEM_SYSRULES_httpHeader"(
+          name: "Content-Type",
+          value: "application/json"
+        )
+      },
+      body: #"SYSTEM_SYSRULES_toJson_v1"(
+        a!map(
+          success: false,
+          error: "MISSING_METHOD",
+          message: "URL path segment required. Valid methods: properties, query, create, update, delete"
+        )
+      )
+    ),
+    if(
+      and(
+        a!isNullOrEmpty(local!body.recordType),
+        a!isNullOrEmpty(local!body.recordData)
+      ),
+      #"SYSTEM_SYSRULES_httpResponse_v1"(
+        statusCode: 400,
+        headers: {
+          #"SYSTEM_SYSRULES_httpHeader"(
+            name: "Content-Type",
+            value: "application/json"
+          )
+        },
+        body: #"SYSTEM_SYSRULES_toJson_v1"(
+          a!map(
+            success: false,
+            error: "MISSING_PARAMETER",
+            message: "recordType is required"
+          )
+        )
+      ),
+      a!match(
+        value: local!method,
+        equals: "properties",
+        then: #"_a-0000efc0-b1bf-8000-9bbd-011c48011c48_56847"(recordTypeUuid: local!body.recordType),
+        equals: "query",
+        then: #"_a-0000efc0-b1bf-8000-9bbd-011c48011c48_56865"(
+          recordTypeUuid: local!body.recordType,
+          selectedFields: local!body.selectedFields,
+          filters: local!body.filters,
+          pagingInfo: local!body.pagingInfo
+        ),
+        equals: "create",
+        then: #"_a-0000efc0-b1bf-8000-9bbd-011c48011c48_56884"(recordData: local!body.recordData),
+        equals: "update",
+        then: #"_a-0000efc0-b1bf-8000-9bbd-011c48011c48_56884"(recordData: local!body.recordData),
+        equals: "delete",
+        then: #"_a-0000efc0-b1bf-8000-9bbd-011c48011c48_56884"(recordData: local!body.recordData),
+        default: #"SYSTEM_SYSRULES_httpResponse_v1"(
+          statusCode: 404,
+          headers: {
+            #"SYSTEM_SYSRULES_httpHeader"(
+              name: "Content-Type",
+              value: "application/json"
+            )
+          },
+          body: #"SYSTEM_SYSRULES_toJson_v1"(
+            a!map(
+              success: false,
+              error: "INVALID_METHOD",
+              message: "Unknown method: " &amp; tostring(local!method) &amp; ". Valid methods: properties, query, create, update, delete"
+            )
+          )
+        )
+      )
+    )
+  )
+)</a:expression>
+        <a:urlAlias>record</a:urlAlias>
+        <a:httpMethod>POST</a:httpMethod>
+        <a:system>false</a:system>
+        <a:requestBodyType>NONE</a:requestBodyType>
+        <a:loggingEnabled>false</a:loggingEnabled>
+    </webApi>
+    <roleMap>
+        <role name="web_api_administrator">
+            <users/>
+            <groups>
+                <groupUuid>af3f8396-530d-42b2-ae98-f95d75dc3dec</groupUuid>
+            </groups>
+        </role>
+        <role name="web_api_viewer">
+            <users/>
+            <groups>
+                <groupUuid>aad245e3-0669-43df-8e22-92ba73ddb222</groupUuid>
+            </groups>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>WebApiRequest?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:path/>
+                <a:body/>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="f0b423e5-e0ed-4e9d-a1b5-489cec1965a9"/>
+        <historyInfo versionUuid="6bde6a85-a5d3-45e7-8ec3-11e2632d3888"/>
+    </history>
+</webApiHaul>

@@ -57,17 +57,76 @@ AI-driven test data generation for Appian applications. Uses Atlas KB (applicati
 
 ---
 
-## Phase 2: Appian Environment APIs 🔄 IN PROGRESS (Owner: Ramaswamy)
+## Phase 2: Appian Environment APIs ✅ COMPLETE (Owner: Ramaswamy)
 
-### What needs to be built (in Appian)
+### APIs Built
 | API | Status | Notes |
 |-----|--------|-------|
-| `POST /api/record/properties` | 🔄 Pending | Returns field UUIDs, types, relationships |
-| `POST /api/record/create` | 🔄 Pending | Creates a record, returns generated ID |
-| `POST /api/record/update` | 🔄 Pending | Partial update by record ID |
-| `POST /api/record/query` | 🔄 Pending | Query with filters |
-| `POST /api/record/delete` | 🔄 Pending | Delete by ID |
-| `GET /api/users/list` | 🔄 Pending | Available usernames |
+| `POST /record/properties` | ✅ Done | Returns field names, types, references, isPrimaryKey, isCustomRecordField |
+| `POST /record/create` | ✅ Done | Creates record (no PK in payload), returns recordsUpdated |
+| `POST /record/update` | ✅ Done | Include PK in fields → updates existing record |
+| `POST /record/delete` | ✅ Done | Include PK + isActive:false → soft delete |
+| `POST /record/query` | ✅ Done | Filters, selectedFields, pagingInfo with sort |
+| `POST /users/list` | ✅ Done | Returns flat username strings |
+
+### Environment
+- URL: `https://merge-assist.appianpreview.com`
+- Web APIs: `ADG_API_recordOperations` (alias: `record`), `ADG_API_users` (alias: `users/list`)
+- Helper rules: `ADG_UT_getRecordTypeProperties`, `ADG_UT_createOrUpdateRecords`, `ADG_UT_queryRecordTypeWithFilters`, `ADG_UT_convertFieldValue`, `ADG_UT_returnFieldReferenceFromFieldName`, `ADG_UT_returnRecordReferenceFromUuid`, `ADG_UT_initialiseEmptyRecordForGivenUuid`, `ADG_UT_queryUsersFromEnvironment`
+
+---
+
+## Phase 3: Data Generator MCP Server ✅ COMPLETE
+
+### Repo
+- Location: `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/solutions-data-generator-mcp`
+- GitLab: `ramaswamy.u/solutions-atlas-dg-mcp-server`
+- Docker image: `registry.gitlab.appian-stratus.com/ramaswamy.u/solutions-atlas-dg-mcp-server:latest`
+- Pipeline: Lint + Test + Build (kaniko) — all passing
+
+### Tools (8)
+| Tool | Status | Notes |
+|------|--------|-------|
+| `get_record_properties` | ✅ | Handles columnar response format from Appian |
+| `create_record` | ✅ | Filters writable fields, tracks session |
+| `update_record` | ✅ | Auto-includes PK field |
+| `delete_record` | ✅ | Soft delete (isActive=false) |
+| `query_records` | ✅ | Filters, selectedFields, pagingInfo (startIndex=1) |
+| `list_users` | ✅ | Returns flat username strings |
+| `get_session` | ✅ | Shared singleton across tools |
+| `rollback_session` | ✅ | Reverse-order soft delete |
+
+### Key Implementation Details
+- Appian returns properties in **columnar format**: `fields: [{"name": [...], "type": [...]}]`
+- `field_registry.py` handles both columnar and row formats
+- All tools share a single `SessionManager` instance via `_shared.py`
+- `startIndex` in Appian paging is **1-based** (not 0)
+- Pipeline uses `gcr.io/kaniko-project/executor:v1.23.2-debug` for Docker builds (no appian/prod access needed)
+
+---
+
+## Phase 4: Agent Integration & Steering ✅ COMPLETE
+
+### Power Created
+- Location: `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-data-generator-power`
+- Both MCP servers configured (Atlas + Data Generator)
+- 6 steering files covering all actions
+
+### Structure
+```
+atlas-data-generator-power/
+├── POWER.md                              # Main instructions + action router
+├── mcp.json                              # Both MCP servers
+├── .kiro/steering.md                     # Power metadata
+├── README.md
+└── steering/
+    ├── action-generate-data.md           # 4-phase workflow
+    ├── action-explore-schema.md          # Schema exploration
+    ├── action-query-and-validate.md      # Query and verify
+    ├── action-rollback.md                # Session cleanup
+    ├── tool-reference-atlas.md           # 5 Atlas schema tools
+    └── tool-reference-data-generator.md  # 8 DG tools
+```
 
 ### Key design decisions (already agreed)
 - API accepts simple field name → value JSON (camelCase field names)
@@ -93,41 +152,11 @@ recordType!{e6bc8561-d3a6-4679-b7af-6e279910468e}AS_GSS_Evaluation_SYNCEDRECORD.
 
 ---
 
-## Phase 3: Data Generator MCP Server ⏳ NOT STARTED
-
-### What needs to be built
-- New Python MCP server (`solutions-data-generator-mcp`)
-- Docker-containerized, communicates via stdio
-- Talks to Appian APIs from Phase 2
-
-### Components planned
-| Component | Purpose |
-|-----------|---------|
-| `config.py` | Environment URL, API key from env vars |
-| `client.py` | HTTP client for Appian APIs |
-| `field_registry.py` | Caches record type properties (field UUIDs + types) |
-| `payload_builder.py` | Converts simple JSON → Appian format |
-| `session_manager.py` | Tracks created records for rollback |
-| `tools/record.py` | create_record, update_record, delete_record, query_records |
-| `tools/properties.py` | get_record_properties |
-| `tools/users.py` | list_users |
-| `tools/session.py` | get_session, rollback_session |
-
-### Depends on
-- Phase 2 APIs deployed and accessible
+## Phase 3: Data Generator MCP Server ⏳ SEE ABOVE (COMPLETE)
 
 ---
 
-## Phase 4: Agent Integration & Steering ⏳ NOT STARTED
-
-### What needs to be built
-| Item | Owner | Status |
-|------|-------|--------|
-| Steering document for data generator power | TBD | ⏳ |
-| Status recipes (JSON) for Source Selection | Ramaswamy | ⏳ |
-| Record type mapping (table → record type ref) | Parser enhancement | ⏳ |
-| Power configuration (mcp.json with both servers) | TBD | ⏳ |
-| End-to-end testing | Both | ⏳ |
+## Phase 4: Agent Integration & Steering ⏳ SEE ABOVE (COMPLETE)
 
 ---
 
@@ -186,12 +215,24 @@ Deferred until Phases 1-4 are complete. Priority order:
 1. **Parser repo:** `/Users/ramaswamy.u/repo-gitlab/appian/solutions-atlas-parser`
    - Schema module: `appian_parser/schema/`
    - Run tests: `python3 -m pytest tests/ --tb=short`
-   - Test against package: `python3 -m appian_parser dump <package.zip> /tmp/output`
 
-2. **MCP Server repo:** `/Users/ramaswamy.u/repo-gitlab/appian/solutions-atlas-mcp-server`
+2. **Atlas MCP Server repo:** `/Users/ramaswamy.u/repo-gitlab/appian/solutions-atlas-mcp-server`
    - Schema tools: `atlas_mcp/tools/schema.py`
    - Run tests: `python3 -m pytest tests/ --tb=short`
 
-3. **Packages for testing:** `/Users/ramaswamy.u/Documents/Backup/package-backup/packages/`
+3. **Data Generator MCP Server:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/solutions-data-generator-mcp`
+   - Run tests: `python3 -m pytest tests/ --tb=short`
+   - E2E test: `python3 /Users/ramaswamy.u/repo/project-tracker/atlas-data-generator/test_mcp_e2e.py`
+   - Docker image: `registry.gitlab.appian-stratus.com/ramaswamy.u/solutions-atlas-dg-mcp-server:latest`
 
-4. **Nothing has been pushed to git yet.**
+4. **Power:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-data-generator-power`
+
+5. **KB repo:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/solutions-atlas-kb`
+   - Schema data at: `data/SourceSelection/current/schema/`
+
+6. **Appian environment:** `https://merge-assist.appianpreview.com`
+   - APIs: `/suite/webapi/record/{method}`, `/suite/webapi/users/list`
+
+7. **Packages for testing:** `/Users/ramaswamy.u/Documents/Backup/package-backup/packages/`
+
+8. **Nothing has been pushed to the appian/prod repos (parser + atlas mcp changes are merged).**

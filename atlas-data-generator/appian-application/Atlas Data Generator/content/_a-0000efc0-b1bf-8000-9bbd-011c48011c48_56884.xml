@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000efc0-b1bf-8000-9bbd-011c48011c48_59893</versionUuid>
+    <rule>
+        <name>ADG_UT_createOrUpdateRecords</name>
+        <uuid>_a-0000efc0-b1bf-8000-9bbd-011c48011c48_56884</uuid>
+        <description>The rule to create or update records</description>
+        <parentUuid>9ea9a774-b9e7-4ea3-99ac-90d4b5788f91</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>if(
+  a!isNullOrEmpty(ri!recordData),
+  #"SYSTEM_SYSRULES_httpResponse_v1"(
+    statusCode: 400,
+    headers: {
+      #"SYSTEM_SYSRULES_httpHeader"(name: "Content-Type", value: "application/json")
+    },
+    body: #"SYSTEM_SYSRULES_toJson_v1"(
+      a!map(
+        success: false,
+        error: "MISSING_PARAMETER",
+        message: "recordData is required"
+      )
+    )
+  ),
+  a!localVariables(
+    local!recordTypeUuid: ri!recordData.recordType,
+    local!fieldData: cast(typeof(a!map()), ri!recordData.fields),
+    if(
+      or(
+        a!isNullOrEmpty(local!recordTypeUuid),
+        a!isNullOrEmpty(local!fieldData)
+      ),
+      #"SYSTEM_SYSRULES_httpResponse_v1"(
+        statusCode: 400,
+        headers: {
+          #"SYSTEM_SYSRULES_httpHeader"(name: "Content-Type", value: "application/json")
+        },
+        body: #"SYSTEM_SYSRULES_toJson_v1"(
+          a!map(
+            success: false,
+            error: "MISSING_PARAMETER",
+            message: "recordData must contain recordType and fields"
+          )
+        )
+      ),
+      a!localVariables(
+        local!properties: a!recordTypeProperties(
+          recordType: eval(concat("recordType!{", local!recordTypeUuid, "}"))
+        ),
+        if(
+          a!isNullOrEmpty(local!properties.recordType.fields),
+          #"SYSTEM_SYSRULES_httpResponse_v1"(
+            statusCode: 404,
+            headers: {
+              #"SYSTEM_SYSRULES_httpHeader"(name: "Content-Type", value: "application/json")
+            },
+            body: #"SYSTEM_SYSRULES_toJson_v1"(
+              a!map(
+                success: false,
+                error: "RECORD_TYPE_NOT_FOUND",
+                message: "No record type found for UUID: " &amp; local!recordTypeUuid
+              )
+            )
+          ),
+          a!localVariables(
+            local!fieldNames: a!keys(local!fieldData),
+            local!record: eval(concat("recordType!{", local!recordTypeUuid, "}()")),
+            local!fieldReferences: #"SYSTEM_SYSRULES_forEach"(
+              items: local!fieldNames,
+              expression: displayvalue(
+                fv!item,
+                local!properties.recordType.fields.name,
+                local!properties.recordType.fields.reference,
+                null
+              )
+            ),
+            local!invalidFields: index(
+              local!fieldNames,
+              where(#"SYSTEM_SYSRULES_forEach"(items: local!fieldReferences, expression: isnull(fv!item))),
+              {}
+            ),
+            if(
+              length(local!invalidFields) &gt; 0,
+              #"SYSTEM_SYSRULES_httpResponse_v1"(
+                statusCode: 400,
+                headers: {
+                  #"SYSTEM_SYSRULES_httpHeader"(name: "Content-Type", value: "application/json")
+                },
+                body: #"SYSTEM_SYSRULES_toJson_v1"(
+                  a!map(
+                    success: false,
+                    error: "INVALID_FIELDS",
+                    message: "Unknown field names: " &amp; tostring(local!invalidFields)
+                  )
+                )
+              ),
+              a!localVariables(
+                local!validRefs: reject(fn!isnull, local!fieldReferences),
+                local!validValues: #"SYSTEM_SYSRULES_forEach"(
+                  items: local!fieldNames,
+                  expression: a!localVariables(
+                    local!fieldType: displayvalue(
+                      fv!item,
+                      local!properties.recordType.fields.name,
+                      local!properties.recordType.fields.type,
+                      "Text"
+                    ),
+                    #"_a-0000efc0-b1bf-8000-9bbd-011c48011c48_59872"(
+                      value: index(local!fieldData, fv!item, null),
+                      fieldType: local!fieldType
+                    )
+                  )
+                ),
+                local!finalRecord: #"urn:appian:function:v1:a:update"(
+                  local!record,
+                  local!validRefs,
+                  local!validValues
+                ),
+                #"SYSTEM_SYSRULES_writeRecords_v2"(
+                  records: local!finalRecord,
+                  onSuccess: #"SYSTEM_SYSRULES_httpResponse_v1"(
+                    statusCode: 200,
+                    headers: {
+                      #"SYSTEM_SYSRULES_httpHeader"(name: "Content-Type", value: "application/json")
+                    },
+                    body: #"SYSTEM_SYSRULES_toJson_v1"(
+                      a!map(
+                        success: true,
+                        recordsUpdated: fv!recordsUpdated
+                      )
+                    )
+                  ),
+                  onError: #"SYSTEM_SYSRULES_httpResponse_v1"(
+                    statusCode: 500,
+                    headers: {
+                      #"SYSTEM_SYSRULES_httpHeader"(name: "Content-Type", value: "application/json")
+                    },
+                    body: #"SYSTEM_SYSRULES_toJson_v1"(
+                      a!map(
+                        success: false,
+                        error: "WRITE_FAILED",
+                        message: tostring(fv!error)
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)</definition>
+        <namedTypedValue>
+            <name>recordData</name>
+            <type>
+                <name>Variant</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>Valid Inputs</a:name>
+                <a:description/>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{
+  "recordType": "e6bc8561-d3a6-4679-b7af-6e279910468e",
+  "fields": {
+    "evaluationTitle": "Test Evaluation for LPTA",
+    "evaluationStatusId": 1,
+    "evaluationStartDate": "2024-12-11",
+    "contractingOfficer": "jason.john",
+    "isActive": true,
+    "isSignaturesRequired": true,
+    "isWeightedFactorsRequired": false,
+    "isEvaluatorMasked": false,
+    "sourceApplicationId": 60
+  }
+}</a:value>
+                    <a:nameRef>recordData</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>true</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000efc0-b1bf-8000-9bbd-011c48011c48_59753"/>
+        <historyInfo versionUuid="_a-0000efc0-b1bf-8000-9bbd-011c48011c48_59893"/>
+    </history>
+</contentHaul>
