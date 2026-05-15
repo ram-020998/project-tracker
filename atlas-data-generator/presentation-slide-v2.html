@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas SQL Forge — How It Works</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #ffffff; color: #1a1a2e; min-height: 100vh; padding: 60px 40px; }
+.slide { max-width: 1100px; margin: 0 auto; }
+
+.header { text-align: center; margin-bottom: 60px; }
+.header h1 { font-size: 2.8em; font-weight: 800; color: #1a1a2e; letter-spacing: -1px; }
+.header h1 span { background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header p { font-size: 1.2em; color: #64748b; margin-top: 12px; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+/* How it works - simple 3 step */
+.how-it-works { margin-bottom: 60px; }
+.how-it-works h2 { font-size: 1.1em; text-transform: uppercase; letter-spacing: 3px; color: #94a3b8; margin-bottom: 30px; text-align: center; }
+.steps { display: flex; align-items: flex-start; gap: 20px; }
+.step { flex: 1; text-align: center; padding: 30px 20px; }
+.step-icon { width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.8em; }
+.step:nth-child(1) .step-icon { background: #ede9fe; }
+.step:nth-child(2) .step-icon { background: #e0f2fe; }
+.step:nth-child(3) .step-icon { background: #dcfce7; }
+.step h3 { font-size: 1.1em; margin-bottom: 8px; color: #1a1a2e; }
+.step p { font-size: 0.9em; color: #64748b; line-height: 1.6; }
+.step-connector { display: flex; align-items: center; padding-top: 30px; color: #cbd5e1; font-size: 1.5em; }
+
+/* Pipeline */
+.pipeline { background: #f8fafc; border-radius: 20px; padding: 40px; margin-bottom: 60px; }
+.pipeline h2 { font-size: 1.1em; text-transform: uppercase; letter-spacing: 3px; color: #94a3b8; margin-bottom: 24px; }
+.pipeline-steps { display: flex; gap: 8px; align-items: stretch; }
+.p-step { flex: 1; background: white; border-radius: 12px; padding: 16px 12px; text-align: center; border: 1px solid #e2e8f0; position: relative; transition: transform 0.2s, box-shadow 0.2s; }
+.p-step:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.p-step .badge { display: inline-block; background: #6366f1; color: white; font-size: 0.65em; font-weight: 700; padding: 3px 8px; border-radius: 10px; margin-bottom: 8px; }
+.p-step h4 { font-size: 0.8em; color: #1a1a2e; margin-bottom: 4px; }
+.p-step p { font-size: 0.7em; color: #94a3b8; }
+.p-step .file { margin-top: 8px; font-size: 0.65em; color: #6366f1; font-family: monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+
+/* What makes it different */
+.differentiators { margin-bottom: 40px; }
+.differentiators h2 { font-size: 1.1em; text-transform: uppercase; letter-spacing: 3px; color: #94a3b8; margin-bottom: 24px; text-align: center; }
+.diff-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.diff-item { display: flex; gap: 14px; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; }
+.diff-item:hover { background: #f8fafc; }
+.diff-icon { font-size: 1.4em; flex-shrink: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #f8fafc; }
+.diff-item h4 { font-size: 0.9em; color: #1a1a2e; margin-bottom: 4px; }
+.diff-item p { font-size: 0.8em; color: #64748b; line-height: 1.5; }
+
+.footer { text-align: center; color: #94a3b8; font-size: 0.85em; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+</style>
+</head>
+<body>
+<div class="slide">
+
+  <div class="header">
+    <h1>Atlas <span>SQL Forge</span></h1>
+    <p>Tell the agent what data you need. It understands the app, finds real examples, and creates everything for you.</p>
+  </div>
+
+  <!-- Simple 3-step explanation -->
+  <div class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon">💬</div>
+        <h3>You Ask</h3>
+        <p>"Create an evaluation in Complete status with 3 vendors using LPTA method"</p>
+      </div>
+      <div class="step-connector">→</div>
+      <div class="step">
+        <div class="step-icon">🧠</div>
+        <h3>Agent Thinks</h3>
+        <p>Analyzes the workflow, finds a real example, maps all tables and relationships, plans every field value</p>
+      </div>
+      <div class="step-connector">→</div>
+      <div class="step">
+        <div class="step-icon">✅</div>
+        <h3>Data Created</h3>
+        <p>Parent + child records created atomically with correct FKs, valid reference data, and proper field values</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="pipeline">
+    <h2>Under the Hood — 6 Milestones</h2>
+    <div class="pipeline-steps">
+      <div class="p-step">
+        <span class="badge">M1</span>
+        <h4>Analyze Workflow</h4>
+        <p>Read process models from Atlas KB</p>
+        <span class="file">analysis.md</span>
+      </div>
+      <div class="p-step">
+        <span class="badge">M2</span>
+        <h4>Find Exemplar</h4>
+        <p>Query a real record as reference</p>
+        <span class="file">exemplar.md</span>
+      </div>
+      <div class="p-step">
+        <span class="badge">M3</span>
+        <h4>Map Architecture</h4>
+        <p>Tables, FKs, ref data, order</p>
+        <span class="file">architecture.md</span>
+      </div>
+      <div class="p-step">
+        <span class="badge">M4</span>
+        <h4>Build Payloads</h4>
+        <p>Every field with reasoning</p>
+        <span class="file">payloads.json</span>
+      </div>
+      <div class="p-step">
+        <span class="badge">M5</span>
+        <h4>Get Approval</h4>
+        <p>Show plan, wait for "yes"</p>
+        <span class="file">you decide</span>
+      </div>
+      <div class="p-step">
+        <span class="badge">M6</span>
+        <h4>Execute</h4>
+        <p>Create & verify records</p>
+        <span class="file">exec-log.md</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- What makes it different -->
+  <div class="differentiators">
+    <h2>Why This Is Different</h2>
+    <div class="diff-grid">
+      <div class="diff-item">
+        <div class="diff-icon">🔍</div>
+        <div>
+          <h4>Learns from Real Data</h4>
+          <p>Queries existing records in the target status and uses them as a template — not guessing.</p>
+        </div>
+      </div>
+      <div class="diff-item">
+        <div class="diff-icon">🧩</div>
+        <div>
+          <h4>Understands Relationships</h4>
+          <p>Knows which child tables need data and creates parent + children together atomically.</p>
+        </div>
+      </div>
+      <div class="diff-item">
+        <div class="diff-icon">📝</div>
+        <div>
+          <h4>Documents Everything</h4>
+          <p>Every value has a reason. Every decision is traceable. Payloads are replayable.</p>
+        </div>
+      </div>
+      <div class="diff-item">
+        <div class="diff-icon">⏪</div>
+        <div>
+          <h4>One-Click Rollback</h4>
+          <p>Don't like the data? One command soft-deletes everything created in the session.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer">Atlas SQL Forge — Integrated into the QE Agent as a Kiro Power</p>
+</div>
+</body>
+</html>

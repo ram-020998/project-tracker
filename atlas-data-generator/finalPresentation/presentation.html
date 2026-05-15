@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas SQL Forge</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;background:#0f0f1a;color:#e2e8f0;scroll-behavior:smooth}
+.slide{min-height:100vh;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;max-width:1100px;margin:0 auto}
+h2{font-size:2.2em;font-weight:700;text-align:center;margin-bottom:10px}
+h2 span{background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{text-align:center;color:#64748b;margin-bottom:36px;font-size:0.95em}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.card{background:rgba(30,30,50,0.6);border:1px solid #2d2d4a;border-radius:14px;padding:24px;transition:border-color 0.2s}
+.card:hover{border-color:#6366f1}
+.card h3{font-size:1.05em;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card p{font-size:0.82em;color:#94a3b8;line-height:1.6}
+.card ul{list-style:none;margin-top:8px}
+.card ul li{font-size:0.8em;color:#cbd5e1;padding:4px 0 4px 16px;position:relative}
+.card ul li::before{content:'→';position:absolute;left:0;color:#6366f1}
+.tag{display:inline-block;background:rgba(99,102,241,0.12);color:#a5b4fc;font-size:0.65em;padding:3px 8px;border-radius:4px;margin-top:8px;margin-right:4px}
+.flow{display:flex;align-items:center;justify-content:center;gap:0;margin:32px 0;flex-wrap:wrap}
+.flow-node{background:rgba(30,30,50,0.8);border:1px solid #2d2d4a;border-radius:12px;padding:14px 18px;text-align:center;min-width:120px}
+.flow-node h4{font-size:0.8em;color:#a5b4fc;margin-bottom:4px}
+.flow-node p{font-size:0.65em;color:#64748b}
+.flow-node.accent{border-color:rgba(99,102,241,0.4);background:rgba(99,102,241,0.08)}
+.flow-arr{padding:0 8px;color:#4b5563;font-size:1.2em}
+.metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:36px}
+.metric{text-align:center;padding:16px 8px}
+.metric .num{font-size:1.8em;font-weight:800;background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.metric h4{font-size:0.72em;color:#e2e8f0;margin-top:4px}
+.metric p{font-size:0.65em;color:#64748b;margin-top:2px}
+.ba{display:grid;grid-template-columns:1fr 40px 1fr;align-items:start;gap:0}
+.ba-col{background:rgba(30,30,50,0.5);border-radius:12px;padding:20px}
+.ba-col h4{font-size:0.85em;margin-bottom:10px}
+.ba-col.before h4{color:#f87171}
+.ba-col.after h4{color:#4ade80}
+.ba-col li{font-size:0.78em;color:#94a3b8;padding:5px 0;list-style:none;border-bottom:1px solid rgba(255,255,255,0.04)}
+.ba-vs{display:flex;align-items:center;justify-content:center;color:#4b5563;font-weight:700}
+.footer{text-align:center;padding:30px;color:#4b5563;font-size:0.75em;border-top:1px solid #1e1e3a}
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Vision -->
+<section class="slide" style="text-align:center">
+<h1 style="font-size:3.2em;font-weight:800;letter-spacing:-2px;margin-bottom:14px">Atlas <span style="background:linear-gradient(135deg,#6366f1,#a78bfa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent">SQL Forge</span></h1>
+<p style="font-size:1.2em;color:#94a3b8;max-width:650px;margin:0 auto 40px;line-height:1.6">Intelligent data tooling for Appian — test data, bulk generation, ERDs, and SAIL-to-SQL, powered by deep application understanding.</p>
+<div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:14px;padding:28px 36px;max-width:750px;margin:0 auto;text-align:left">
+<h3 style="color:#a5b4fc;font-size:0.8em;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">The Problem</h3>
+<p style="color:#cbd5e1;font-size:0.95em;line-height:1.7">Appian apps have 50–200 interconnected tables. A single record in "Awarded" status requires correct data in 7+ tables with valid FKs, reference values, and status-dependent fields. Today this is manual, error-prone, and takes hours. SQL Forge understands the data model and automates it in seconds.</p>
+</div>
+</section>
+
+<!-- SLIDE 2: Capabilities -->
+<section class="slide">
+<h2>What <span>SQL Forge</span> Does</h2>
+<p class="sub"></p>
+<div class="card-grid">
+<div class="card"><h3>🎯 Test Data Setup</h3><p>Creates records in any status with all required children, valid FKs, and proper values.</p><ul><li>Regression — specific scenarios instantly</li><li>Functional testing — exact config needed</li><li>Demo data for POs and stakeholders</li></ul></div>
+<div class="card"><h3>📦 Bulk Data Generation</h3><p>Generates 100s–1000s of records as executable SQL scripts.</p><ul><li>Required status + config (e.g., 50 completed tasks)</li><li>Performance testing at scale</li><li>FK-safe, batched, valid reference data</li></ul></div>
+<div class="card"><h3>🗺️ ERD Generation</h3><p>Creates ER diagrams automatically from the live schema.</p><ul><li>Any application in seconds — automates a 2-pointer</li><li>Always current with latest changes</li><li>Cross-application + scoped views</li></ul></div>
+<div class="card"><h3>⚙️ SAIL to SQL</h3><p>Converts performance-impacting SAIL to SQL Stored Procedures.</p><ul><li>Same logic, faster execution</li><li>Quick POC for verification</li><li>Multi-DB: MariaDB, Oracle</li></ul></div>
+</div>
+</section>
+
+<!-- SLIDE 3: How It Works (Architecture + Flow) -->
+<section class="slide">
+<h2>How It <span>Works</span></h2>
+<p class="sub">Schema intelligence from Atlas KB → Execution via Data Generator MCP → Data in Appian</p>
+
+<div class="flow">
+<div class="flow-node"><h4>📦 App Package</h4><p>DDL scripts</p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node"><h4>🔄 Parser</h4><p>DDL Replay Engine</p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node"><h4>📚 Atlas KB</h4><p>Schema + UUIDs + maps</p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node accent"><h4>📡 Atlas MCP</h4><p>Serves schema tools</p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node accent"><h4>🔨 SQL Forge</h4><p>Plans data</p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node accent"><h4>⚡ Data Gen MCP</h4><p>Writes records</p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node"><h4>🏢 Appian</h4><p>Live database</p></div>
+</div>
+
+<div class="card-grid" style="grid-template-columns:repeat(3,1fr)">
+<div class="card">
+<h3 style="font-size:0.9em">📚 Atlas KB</h3>
+<p>Auto-generated from DDL scripts on every sync. Contains table structures, FK graph, record type UUIDs, field name mappings, and reference data metadata.</p>
+<div><span class="tag">8 files/app</span><span class="tag">15 apps</span><span class="tag">auto-sync</span></div>
+</div>
+<div class="card">
+<h3 style="font-size:0.9em">⚡ Data Gen MCP</h3>
+<p>Dockerized Python server. Connects to any Appian env via API key. Handles type conversion, related records, session tracking, rollback. Zero per-table config.</p>
+<div><span class="tag">8 tools</span><span class="tag">Docker</span><span class="tag">any env</span></div>
+</div>
+<div class="card">
+<h3 style="font-size:0.9em">🏢 Appian APIs</h3>
+<p>6 generic endpoints. Work with any record type. Handle UUID resolution, type formatting, field validation, and atomic nested writes.</p>
+<div><span class="tag">6 endpoints</span><span class="tag">generic</span><span class="tag">atomic writes</span></div>
+</div>
+</div>
+</section>
+
+<!-- SLIDE 4: Workflow -->
+<section class="slide">
+<h2>Intelligent <span>Workflow</span></h2>
+<p class="sub">Every data generation follows a strict process — analyze, discover, plan, approve, execute</p>
+
+<div class="flow">
+<div class="flow-node"><h4>M1</h4><p>Analyze<br><span style="color:#64748b;font-size:0.85em">workflows</span></p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node"><h4>M2</h4><p>Discover<br><span style="color:#64748b;font-size:0.85em">exemplar</span></p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node"><h4>M3</h4><p>Architect<br><span style="color:#64748b;font-size:0.85em">tables + FKs</span></p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node"><h4>M4</h4><p>Plan<br><span style="color:#64748b;font-size:0.85em">payloads</span></p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node"><h4>M5</h4><p>Approve<br><span style="color:#64748b;font-size:0.85em">user confirms</span></p></div>
+<div class="flow-arr">→</div>
+<div class="flow-node accent"><h4>M6</h4><p>Execute<br><span style="color:#64748b;font-size:0.85em">create + verify</span></p></div>
+</div>
+
+<div class="card-grid" style="grid-template-columns:repeat(3,1fr)">
+<div class="card"><h3 style="font-size:0.85em">🧠 Learns from Atlas KB</h3><p>Reads process models and business rules to understand what data should exist at each application state.</p></div>
+<div class="card"><h3 style="font-size:0.85em">🔍 Uses Real Data as Template</h3><p>Queries an existing record in the target status and studies its complete data footprint — then generates matching data.</p></div>
+<div class="card"><h3 style="font-size:0.85em">✅ Self-Validates</h3><p>Checks field coverage (≥80%), verifies FK integrity, documents reasoning for every value, gets user approval before executing.</p></div>
+</div>
+</section>
+
+<!-- SLIDE 5: Impact -->
+<section class="slide">
+<h2>The <span>Impact</span></h2>
+<p class="sub"></p>
+<div class="metrics">
+<div class="metric"><div class="num">10x</div><h4>Faster</h4><p>Hours → minutes</p></div>
+<div class="metric"><div class="num">0</div><h4>FK Errors</h4><p>Topo ordering</p></div>
+<div class="metric"><div class="num">15</div><h4>Apps</h4><p>Zero config</p></div>
+<div class="metric"><div class="num">100%</div><h4>Auditable</h4><p>Every value traced</p></div>
+<div class="metric"><div class="num">1-Click</div><h4>Rollback</h4><p>Instant cleanup</p></div>
+<div class="metric"><div class="num">Auto</div><h4>ERD Sync</h4><p>Always current</p></div>
+</div>
+<div class="ba">
+<div class="ba-col before"><h4>❌ Before</h4><ul><li>Manually write INSERTs for 7+ tables</li><li>Guess FK IDs and reference values</li><li>Constraint violations → hours debugging</li><li>ERD updates = manual 2-pointer</li><li>SAIL → SQL takes days</li><li>No quick cleanup</li></ul></div>
+<div class="ba-vs">VS</div>
+<div class="ba-col after"><h4>✅ After</h4><ul><li>"Create evaluation in Complete with 3 vendors"</li><li>Live ref data queried automatically</li><li>FKs satisfied by topological ordering</li><li>ERD in seconds, always current</li><li>SAIL to SQL in minutes</li><li>One command rolls back everything</li></ul></div>
+</div>
+</section>
+
+<div class="footer">Atlas SQL Forge • Atlas KB + Data Generator MCP + Appian Web APIs</div>
+</body>
+</html>

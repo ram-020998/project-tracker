@@ -1,6 +1,6 @@
 # Atlas Data Generator — Progress Tracker
 
-**Last Updated:** 2026-05-13 (Evening)
+**Last Updated:** 2026-05-14 (Evening)
 
 ---
 
@@ -103,52 +103,57 @@ AI-driven test data generation for Appian applications. Uses Atlas KB (applicati
 
 ## Phase 4: Agent Integration & Steering ✅ COMPLETE
 
-### Power: `atlas-data-generator-power`
-- **Location:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-data-generator-power`
-- **MCP Servers:** Atlas (read) + Data Generator (write)
-- **Docker images:** Both configured in `mcp.json`
+### Power: `atlas-sql-forge` (renamed from atlas-data-generator)
+- **Production Location:** `appian/solutions-os/ai-framework/Engineering/.kiro/powers/atlas-sql-forge/`
+- **Dev Location:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-data-generator-power` (original)
+- **Format:** Standard Kiro power (same as atlas-developer, atlas-dev-documentation)
+- **MCP Servers:** Atlas (read) + Data Generator (write) in `mcp.json`
 
-### Structure
+### Skill: `atlas-data-generator-skill`
+- **Location:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-data-generator-skill/`
+- Standalone skill for integration into any agent
+- 2 files: `SKILL.md` (main, 220 lines) + `rollback.md`
+- `INTEGRATION.md` documents how to plug into testing agents
+
+### Power Structure
 ```
-atlas-data-generator-power/
-├── POWER.md                              # Main instructions + action router + 10 critical rules
-├── mcp.json                              # Both MCP servers configured
+atlas-sql-forge/
+├── POWER.md                              # Main instructions + action router
+├── mcp.json                              # Both MCP servers (Atlas + DG)
 ├── .kiro/steering.md                     # Power metadata
 ├── README.md
 └── steering/
-    ├── action-generate-data.md           # 6-milestone workflow (750+ lines)
-    ├── action-bulk-sql.md                # Bulk SQL generation for 100+ records
+    ├── action-generate-data.md           # 6-milestone workflow (with Step 0 init)
+    ├── action-bulk-sql.md                # SQL generation for 100+ records
     ├── action-explore-schema.md          # Schema exploration
     ├── action-query-and-validate.md      # Query and verify
     ├── action-rollback.md                # Session cleanup
-    ├── tool-reference-atlas.md           # 5 Atlas schema tools
-    └── tool-reference-data-generator.md  # 8 DG tools (with related_records docs)
+    ├── tool-reference-atlas.md           # 7 Atlas schema tools (incl. record_type_map, field_map)
+    └── tool-reference-data-generator.md  # 8 DG tools
 ```
 
 ### Data Generation Workflow (6 Milestones)
 | # | Milestone | Output | Purpose |
 |---|-----------|--------|---------|
-| M1 | Workflow Analysis | `analysis.md` | Query Atlas KB for process models, trace workflow path |
-| M2 | Exemplar Discovery | `exemplar.md` | Find real record in target status, document full data footprint |
-| M3 | Data Architecture | `data-architecture.md` | Map tables, FKs, ref data + record type coverage checklist |
-| M4 | Data Payloads | `payloads.json` | Exact values with reasoning, validated against exemplar |
+| 0 | Initialize | All 5 empty files | Create folder + PENDING files upfront |
+| M1 | Workflow Analysis | `analysis.md` | Query Atlas KB for process models, trace workflow |
+| M2 | Exemplar Discovery | `exemplar.md` | Find real record, document ALL relationships (mandatory, never skipped) |
+| M3 | Data Architecture | `data-architecture.md` | Map tables, FKs, ref data + coverage checklist |
+| M4 | Data Payloads | `payloads.json` | Exact values + field completeness verification (≥80%) |
 | M5 | Validation & Approval | User confirms | Present plan, wait for explicit approval |
 | M6 | Execution | `execution-log.md` | Create records, verify, document |
 
-### Key Steering Rules
-- **Maximize field population** — fill ALL writable fields, document reason for every null
-- **Exemplar as ground truth** — query ALL relationships, not just predicted ones
-- **Record type coverage checklist** — explicit INCLUDE/EXCLUDE for every relationship
-- **Never pass `selected_fields`** — always fetch all fields by default
-- **Related records preferred** — use `related_records` for parent+children (atomic, no FK management)
-- **Never skip milestones** — even simple requests go through all 6
-
-### Bulk SQL Generation (`action-bulk-sql.md`)
-- For 100+ records, generates MySQL INSERT scripts
-- Uses `LAST_INSERT_ID()` for FK linking
-- Batches at 100 rows per INSERT
-- Disables FK checks for speed
-- Includes sync reminder for Appian
+### Key Steering Rules (Latest)
+- **Step 0:** Create all 5 empty files with PENDING status at start — no document forgotten
+- **Exemplar is NEVER skipped** — if no records in target status, try any status; if empty, do structural analysis
+- **Field completeness verification** — call `get_record_properties` for each record type, verify ≥80% coverage
+- **No hardcoded data in steering** — all values from live queries (ref data, users, UUIDs)
+- **`get_record_type_map` first** — one call for all UUIDs + relationships
+- **`get_field_map` second** — one call for all column→field mappings
+- **Reference data queried live** — `query_records(ref_uuid)` not from KB (KB has metadata only)
+- **Documents are mandatory gates** — file must exist before next milestone starts
+- **`payloads.json` is source of truth** — execution reads from it, doesn't improvise
+- **Related records** — use `related_records` for parent+children (atomic, no FK management)
 
 ---
 
@@ -158,8 +163,16 @@ atlas-data-generator-power/
 |-----------|--------|-------|
 | Related record writes | ✅ Done | `create_record` supports `related_records` |
 | Bulk SQL generation | ✅ Done | `action-bulk-sql.md` steering file |
-| Exemplar discovery | ✅ Done | M2 in workflow queries all relationships |
+| Exemplar discovery | ✅ Done | M2 queries all relationships, never skipped |
 | Record type coverage checklist | ✅ Done | M3 verification step |
+| Field completeness verification | ✅ Done | M4 verifies ≥80% coverage via `get_record_properties` |
+| `record_type_map.json` | ✅ Done | Table → UUID + relationships (parser generates) |
+| `field_map.json` | ✅ Done | UPPER_SNAKE → camelCase (parser generates) |
+| Reference data metadata only | ✅ Done | KB stores metadata, agent queries live values |
+| Atlas MCP new tools | ✅ Done | `get_record_type_map`, `get_field_map` (32 tools total) |
+| Step 0 initialization | ✅ Done | Creates all empty files upfront |
+| Power migrated to solutions-os | ✅ Done | `atlas-sql-forge` in Engineering powers |
+| Skill created | ✅ Done | Standalone skill for any agent integration |
 | Record footprint query | ⏳ Pending | Need dedicated API endpoint |
 | Environment management | ⏳ Pending | Cleanup/reset tools |
 | Version-aware generation | ⏳ Pending | Historical schema support |
@@ -205,10 +218,12 @@ atlas-data-generator-power/
 
 ### Repos
 1. **Parser:** `/Users/ramaswamy.u/repo-gitlab/appian/solutions-atlas-parser` — `python3 -m pytest tests/`
-2. **Atlas MCP:** `/Users/ramaswamy.u/repo-gitlab/appian/solutions-atlas-mcp-server` — `python3 -m pytest tests/`
+2. **Atlas MCP:** `/Users/ramaswamy.u/repo-gitlab/appian/solutions-atlas-mcp-server` — `python3 -m pytest tests/` (32 tools)
 3. **DG MCP:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/solutions-data-generator-mcp` — `python3 -m pytest tests/`
-4. **Power:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-data-generator-power`
-5. **KB:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/solutions-atlas-kb`
+4. **Power (prod):** `appian/solutions-os/ai-framework/Engineering/.kiro/powers/atlas-sql-forge/`
+5. **Power (dev):** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-data-generator-power`
+6. **Skill:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-data-generator-skill`
+7. **KB:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/solutions-atlas-kb`
 
 ### Testing
 - E2E test: `python3 /Users/ramaswamy.u/repo/project-tracker/atlas-data-generator/test_mcp_e2e.py`
@@ -220,17 +235,15 @@ atlas-data-generator-power/
 - **APIs:** `/suite/webapi/record/{method}`, `/suite/webapi/users/list`
 - **Docker image:** `registry.gitlab.appian-stratus.com/ramaswamy.u/solutions-atlas-dg-mcp-server:latest`
 
-### Key UUIDs (Source Selection)
-| Table | Record Type UUID |
-|-------|-----------------|
-| AS_GSS_EVALUATION | `e6bc8561-d3a6-4679-b7af-6e279910468e` |
-| AS_GSS_EVALUATION_VENDOR | `b6081510-0d11-4d51-8eba-966610b168db` |
-| AS_GSS_CRITERIA | `11dcc745-3c81-49f9-9cb2-6427680e4b41` |
-| AS_GSS_EVALUATOR_TEAM | `791d954b-beae-4171-808f-876583d707fa` |
-| AS_GSS_EVALUATION_PHASE | `bf3ef3fe-9671-40df-a195-bd71ab8deed8` |
-| AS_GSS_R_DATA | `c34b12a0-4ae7-4d21-adb9-09320118b98e` |
-| AS_GSS_CONSENSUS_REPORT | `53315796-2d3b-4edd-bd96-55f169c999dc` |
-| AS_GSS_TMG_TASK | `9a04b944-b726-41f5-9b37-8ec71b6cc370` |
+### Schema Files in KB (8 files)
+- `tables.json` — table definitions
+- `relationships.json` — FK graph
+- `reference_data.json` — metadata only (UUID, row_count, ref_types)
+- `insertion_order.json` — topological sort
+- `table_classification.json` — business/reference/audit
+- `summary.json` — statistics
+- `record_type_map.json` — table → UUID + relationships
+- `field_map.json` — UPPER_SNAKE → camelCase
 
 ### Reference: Similar Project
-- **ASPECT** (`amrut.rao/ASPECT`) — SQL-only test data generator power for Appian. Schema-driven, no MCP server. Has solution profiles (CCM). Good patterns for SQL formatting, known issues tables, as-built column verification.
+- **ASPECT** (`amrut.rao/ASPECT`) — SQL-only test data generator power. Schema-driven, no MCP. Has solution profiles.
