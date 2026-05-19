@@ -1,6 +1,6 @@
 # Atlas Data Generator — Progress Tracker
 
-**Last Updated:** 2026-05-14 (Evening)
+**Last Updated:** 2026-05-19
 
 ---
 
@@ -165,13 +165,17 @@ atlas-sql-forge/
 | Bulk SQL generation | ✅ Done | `action-bulk-sql.md` steering file |
 | Exemplar discovery | ✅ Done | M2 queries all relationships, never skipped |
 | Record type coverage checklist | ✅ Done | M3 verification step |
+| ERD Generation (Draw.io) | ✅ Done | `action-erd.md` supports .drawio, .md, .html output |
 | Field completeness verification | ✅ Done | M4 verifies ≥80% coverage via `get_record_properties` |
 | `record_type_map.json` | ✅ Done | Table → UUID + relationships (parser generates) |
 | `field_map.json` | ✅ Done | UPPER_SNAKE → camelCase (parser generates) |
 | Reference data metadata only | ✅ Done | KB stores metadata, agent queries live values |
 | Atlas MCP new tools | ✅ Done | `get_record_type_map`, `get_field_map` (32 tools total) |
 | Step 0 initialization | ✅ Done | Creates all empty files upfront |
+| `writes_to` bundle metadata | ✅ Done | Parser extracts write targets from PM nodes + expression rules |
+| Atlas Demo Driver power | ✅ Done | Separate power for live env data generation, sub-agent orchestration |
 | Power migrated to solutions-os | ✅ Done | `atlas-sql-forge` in Engineering powers |
+| Presentation created | ✅ Done | `finalPresentation/presentation.html` |
 | Skill created | ✅ Done | Standalone skill for any agent integration |
 | Record footprint query | ⏳ Pending | Need dedicated API endpoint |
 | Environment management | ⏳ Pending | Cleanup/reset tools |
