@@ -71,14 +71,60 @@ A Kiro power that generates realistic, workflow-aware test and demo data directl
 - `strReplace` fails on complex content — use `create` + `insert` (append) instead
 - Steering files need to say what NOT to do as much as what TO do (common failures table)
 
+### 2026-05-20 — Sub-Agent Testing + Workflow Analysis Enhancements
+
+#### Completed
+
+- Ran successful end-to-end test: 32 records created (26 creates + 3 updates + tasks + consensus) across 9 tables
+- Orchestrator now executes Step 6 directly (user can interact during execution)
+- Sub-agents use `claude-opus-4-20250918` model (added `model` field to all stages)
+- Added 3-part action analysis to Step 1: **PREREQUISITES → ACTION WORK → TRIGGERS**
+- Added **Form Analysis** to ACTION WORK: agent must read action interfaces to find form-created records
+- Added prerequisite rule reading: agent must read visibility/validation rules (BL_can*, BL_isValid*) to find tables that must exist before an action is available
+- Fixed JSON validation issue: agents no longer use shell commands, use file read tool instead
+- Removed all application-specific references from steering files (fully generic)
+- Updated action-generate-data.md: orchestrator reads ALL sub-agent output files before executing Step 6
+
+#### Issues Found in Test Run
+
+| Issue | Root Cause | Fix Applied |
+|-------|-----------|-------------|
+| Evaluation Phases missing | Agent didn't check prerequisites for "Start" action | Added PREREQUISITES section — agent must read visibility rules |
+| Evaluator Responses missing | Agent didn't read the task completion form | Added Form Analysis — agent must read action interfaces and trace saveInto |
+| Documents missing | Excluded as "physical" without checking if UI needs them | Covered by prerequisite/form analysis |
+| Agent using shell for JSON validation | TTY issues in terminal | Added rule: "Do NOT use terminal, use file read tool" |
+| Sub-agents not spawning | Main agent executing steps itself | Made sub-agents mandatory, removed fallback |
+
+#### Decisions Made
+
+- Orchestrator executes Step 6 (reason: user needs real-time interaction during execution, can intervene on errors)
+- Sub-agents use Opus 4.6 (reason: needs high reasoning capability for complex workflow tracing)
+- 3-part action model: Prerequisites/Action/Triggers (reason: prerequisites are #1 source of missed tables)
+- Form analysis mandatory (reason: forms create records the PM alone doesn't reveal)
+
+#### Test Results — 2026-05-20 Run
+
+```
+Evaluation ID: 15993
+Records: 26 creates + 3 updates = 29 operations
+Tables: 9 (EVALUATION, VENDOR, CRITERIA, TEAM, MEMBERSHIP, ASSIGNMENTS, RATING, CONSENSUS, TASK)
+Status: Awardees Selected (79) ✅
+Verification: All 6 checks passed ✅
+
+STILL MISSING:
+- AS_GSS_EVALUATION_PHASE (prerequisite for Start)
+- AS_GSS_EVALUATION_DOCUMENT (form-created)
+- AS_GSS_EVALUATION_RESPONSES (form-created during task completion)
+```
+
 #### Remaining Items
 
-- [ ] Run full end-to-end test with new sub-agent pipeline
-- [ ] Verify `writes_to` field appears in parsed bundles (needs a dump package with PMs)
-- [ ] Add new Atlas MCP tool to serve `writes_to` data (or include in existing bundle response)
-- [ ] Test with applications other than SourceSelection
-- [ ] Consider reducing Step 1 token usage by using `writes_to` from bundles directly
-- [ ] Track if sub-agent handoff loses critical context between steps
+- [ ] Re-run test with updated steering (prerequisites + form analysis)
+- [ ] Verify evaluation phases are now included
+- [ ] Verify evaluator responses are now included
+- [ ] Test with a different application (not SourceSelection)
+- [ ] Deploy parser `writes_to` enhancement and verify in KB
+- [ ] Consider adding form interface reading to `writes_to` metadata in parser
 
 ---
 
