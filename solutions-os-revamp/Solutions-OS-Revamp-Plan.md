@@ -565,7 +565,105 @@ The orchestrator follows these rules (defined in `routing-rules.md`):
 
 ---
 
-## 6. Repository Structure Changes
+## 6. T.I.M.E. Framework Integration
+
+### 6.1 Why T.I.M.E.
+
+The current `products/` structure organizes content by **artifact type** (domain/, features/, arch-decision-logs/). This tells you *what* something is, but not *where it is in the lifecycle*. AI agents have no signal about whether an idea is raw, being refined, committed to a sprint, or shipped.
+
+The T.I.M.E. Framework (Taking Ideas to Market Expeditiously) solves this by organizing content by **SDLC outcome**. The folder structure itself becomes a workflow signal — when a file moves from `01-discovery/` to `02-refinement/`, AI agents know to expand it into a spec.
+
+### 6.2 Revised Product Folder Structure
+
+Each product adopts the T.I.M.E. lifecycle folders:
+
+```
+products/<product-name>/
+├── README.md                    # Product overview
+├── steering/                    # AI directives (always-on context)
+│   └── steering.md
+├── 00-context/                  # Ground truth — vision, architecture, current state
+│   ├── vision.md
+│   ├── personas/
+│   ├── architecture/
+│   ├── competitive-analysis/
+│   └── branding/
+├── 01-discovery/                # Raw ideas, feedback, research
+│   └── <idea-name>.md
+├── 02-refinement/               # Ideas being shaped into specs and prototypes
+│   └── <feature-name>/
+│       ├── spec.md
+│       ├── prototype.html
+│       └── ux-research.md
+├── 03-planning/                 # Committed work, ready for breakdown
+│   └── <feature-name>/
+│       ├── spec.md              # (moved from refinement)
+│       ├── tickets.md           # AI-generated ticket breakdown
+│       └── release-target.md
+├── 04-delivery/                 # Active development and QA
+│   └── <feature-name>/
+│       ├── design.md
+│       ├── tasks.md
+│       └── test-plan.md
+├── 05-shipped/                  # What made it to market
+│   └── <feature-name>/
+│       ├── release-notes.md
+│       └── post-mortem.md
+└── src-appian-atlas/            # Appian source packages for KB generation
+```
+
+### 6.3 How AI Acts on Transitions
+
+The orchestrator and sub-agents use folder location as a **signal for automated actions**:
+
+| Transition | AI Action |
+|-----------|-----------|
+| New file in `01-discovery/` | Scan for duplicates across all products, flag cross-suite dependencies, suggest related context from `00-context/` |
+| Move to `02-refinement/` | Expand idea using product context, generate feature card template, draft spec outline, kick off lightweight HTML prototype |
+| Move to `03-planning/` | Break feature into implementation tickets, estimate complexity using KB data, relate to release |
+| Move to `04-delivery/` | Generate design document from spec, create task breakdown, link to relevant Appian objects via unified MCP |
+| Move to `05-shipped/` | Write release notes, update product README, archive delivery artifacts |
+
+### 6.4 Implementation via Hooks
+
+The orchestrator agent uses `postToolUse` hooks to detect file movements:
+
+```json
+{
+  "hooks": {
+    "postToolUse": [
+      {
+        "matcher": "fs_write",
+        "command": "python3 ai-framework/orchestrator/detect-transition.py"
+      }
+    ]
+  }
+}
+```
+
+The detection script checks if a file was created in a lifecycle folder and triggers the appropriate automation. This keeps the magic invisible — users just move files, AI responds.
+
+### 6.5 Migration from Current Structure
+
+| Current Location | Maps To |
+|-----------------|---------|
+| `domain/` (vision, personas, overview) | `00-context/` |
+| `competitive-analysis/` | `00-context/competitive-analysis/` |
+| `features/<feature>/` (specs in progress) | `02-refinement/` or `03-planning/` depending on state |
+| `arch-decision-logs/` | `00-context/architecture/` |
+| `src-appian-atlas/` | Stays at root level (not lifecycle-bound) |
+
+Teams migrate incrementally — move existing content into the appropriate lifecycle stage based on its current state.
+
+### 6.6 What Stays from Current Structure
+
+- **Suite inheritance** (GAM → child solutions) — unchanged
+- **Cross-product linking** (reference files, steering directives) — unchanged
+- **`steering/`** — stays at product root, not inside a lifecycle folder (it's always-on context for agents, not a lifecycle artifact)
+
+---
+
+## 7. Repository Structure Changes
 
 ### 6.1 Before → After Overview
 
@@ -667,25 +765,23 @@ solutions-os/
 
 ### 6.4 Product Folder Convention (Enforced)
 
-Every product MUST follow this structure:
+Every product MUST follow the T.I.M.E. lifecycle structure (see Section 6):
 
 ```
 products/<product-name>/
 ├── README.md              # Product overview, team, getting started
 ├── steering/              # Product-level AI directives (REQUIRED)
-│   └── steering.md       # Tells agents how to work with this product
-├── domain/                # Business context
-│   ├── personas/          # User personas (if applicable)
-│   └── *.md              # Vision, overview, entities
-├── features/              # Feature specs (one folder per feature)
-│   └── <feature-name>/
-│       └── spec.md
-├── competitive-analysis/  # Market research
-├── arch-decision-logs/    # ADRs
+│   └── steering.md
+├── 00-context/            # Ground truth: vision, personas, architecture
+├── 01-discovery/          # Raw ideas and research
+├── 02-refinement/         # Ideas → specs and prototypes
+├── 03-planning/           # Committed work, ticket breakdowns
+├── 04-delivery/           # Active dev and QA
+├── 05-shipped/            # Released features and notes
 └── src-appian-atlas/      # Appian source packages for KB generation
 ```
 
-**Enforcement:** A CI check validates that every product has at minimum `README.md` and `steering/steering.md`.
+**Enforcement:** A CI check validates that every product has at minimum `README.md`, `steering/steering.md`, and the six lifecycle folders.
 
 ### 6.5 Setup Script
 
@@ -720,7 +816,7 @@ echo "✅ Setup complete. Run: kiro-cli --agent solutions-os"
 
 ---
 
-## 7. Implementation Phases
+## 8. Implementation Phases
 
 ### Phase 1: Unified MCP Server (Weeks 1-3)
 
@@ -793,7 +889,193 @@ echo "✅ Setup complete. Run: kiro-cli --agent solutions-os"
 
 ---
 
-## 8. Risk Assessment
+## 9. Knowledge Base Strategy
+
+### 8.1 Current State
+
+The Atlas KB lives inside the solutions-os repo at `ai-framework/tools/Atlas/solutions-kb/`. It contains parsed JSON data for each registered Appian application (bundles, objects, code, graph, versions, schema). This data is generated by the Atlas Parser and synced via a GitLab CI pipeline.
+
+### 8.2 Two Knowledge Layers
+
+With T.I.M.E. and the orchestrator, we now have **two distinct knowledge layers**:
+
+| Layer | Source | Contains | Used By |
+|-------|--------|----------|---------|
+| **Product Knowledge** | `products/` folders (T.I.M.E. structure) | Vision, personas, feature specs, decisions, competitive analysis | Orchestrator's knowledgeBase resource, product-owner agent |
+| **Application Knowledge** | `ai-framework/tools/Atlas/solutions-kb/data/` | Parsed Appian code, objects, dependencies, schema, bundles | Unified MCP (Cloud Plane), developer agent, sql-forge agent |
+
+These serve different purposes:
+- **Product Knowledge** answers "what should we build and why?"
+- **Application Knowledge** answers "what exists in the code and how does it work?"
+
+### 8.3 Knowledge Base Indexing
+
+The orchestrator agent indexes `products/` as a knowledge base:
+
+```json
+{
+  "resources": [
+    {
+      "type": "knowledgeBase",
+      "source": "file://./products",
+      "name": "ProductKnowledge",
+      "description": "All product domain context, lifecycle artifacts, and decisions",
+      "indexType": "best",
+      "autoUpdate": true
+    }
+  ]
+}
+```
+
+Application Knowledge is accessed via the unified MCP tools (not indexed as a knowledge base — it's already structured JSON queried on demand).
+
+### 8.4 KB Refresh Pipeline
+
+The existing CI pipeline at `ai-framework/tools/Atlas/solutions-kb/.gitlab-ci-sync.yml` continues to handle Application KB refresh. No change needed — it runs when triggered, parses the latest Appian packages, and commits updated JSON to the repo.
+
+Product Knowledge auto-updates on every `git pull` (since it's just the `products/` folder contents indexed by Kiro's knowledge base engine).
+
+---
+
+## 10. Environment Registry
+
+### 9.1 The Problem
+
+Teams work across multiple Appian environments (dev, test, staging, demo). Currently, environment details are scattered:
+- Jarvis stores them in `mcp.json` env vars (one env at a time)
+- API keys live in individual users' configs
+- No shared knowledge of which environments exist, who has access, or what's deployed where
+
+### 9.2 Centralized Environment Registry
+
+A registry file at `.tao/environments.json` (or `.kiro/environments.json`) that all agents can reference:
+
+```json
+{
+  "environments": {
+    "gam-dev2": {
+      "url": "https://eng-test-fed-aq-dev2.appianpreview.com",
+      "api_endpoint": "https://eng-test-fed-aq-dev2.appianpreview.com/suite/webapi/",
+      "products": ["source-selection", "vendor-management", "contract-writing"],
+      "type": "development",
+      "notes": "Primary GAM development environment"
+    },
+    "cms-dev": {
+      "url": "https://eng-test-solutions-cms-dev.appianpreview.com",
+      "api_endpoint": "https://eng-test-solutions-cms-dev.appianpreview.com/suite/webapi/",
+      "products": ["case-management-studio"],
+      "type": "development",
+      "notes": "CMS development environment"
+    },
+    "solutions-global-dev": {
+      "url": "https://eng-test-solutions-global-dev.appianpreview.com",
+      "api_endpoint": "https://eng-test-solutions-global-dev.appianpreview.com/suite/webapi/",
+      "products": ["jarvis-app-intelligence"],
+      "type": "shared",
+      "notes": "Shared environment for cross-product tools"
+    }
+  },
+  "users": {
+    "ramaswamy.u": {
+      "default_env": "gam-dev2",
+      "accessible_envs": ["gam-dev2", "cms-dev", "solutions-global-dev"]
+    }
+  }
+}
+```
+
+### 9.3 How Agents Use It
+
+- **Environment selection** — When a user says "deploy to staging," the agent looks up the environment by name/type
+- **Context-aware routing** — If the user is working on a CMS feature, the agent auto-selects the CMS environment
+- **Multi-env queries** — "Compare the schema between dev and staging" routes to both environments
+- **Credential resolution** — API keys stored separately in a secure credentials file (`~/.tao/env` or `~/.kiro/credentials`), referenced by environment name
+
+### 9.4 Credential Storage (Separate from Registry)
+
+Environment URLs are safe to commit. Credentials are NOT:
+
+```bash
+# ~/.solutions-os/credentials (gitignored, chmod 600)
+GAM_DEV2_API_KEY=<key>
+CMS_DEV_API_KEY=<key>
+SOLUTIONS_GLOBAL_API_KEY=<key>
+GITLAB_TOKEN=<token>
+```
+
+The unified MCP server reads the registry for URLs and the credentials file for auth. The `setup.sh` script guides users through initial credential setup.
+
+### 9.5 Environment Switching in the Unified MCP
+
+The unified server supports a `set_environment` tool or auto-detects from context:
+
+```
+User: "Query the evaluations table in dev2"
+Agent: Uses GAM_DEV2_API_KEY + gam-dev2 URL for SQL query
+
+User: "Now deploy this to staging"
+Agent: Looks up staging env, uses staging credentials
+```
+
+If no environment is specified, the agent uses the user's `default_env` from the registry.
+
+---
+
+## 11. Metrics and Observability
+
+### 10.1 What to Measure
+
+| Category | Metrics |
+|----------|---------|
+| **Adoption** | Daily active users, sessions per user, agent selection distribution |
+| **Efficiency** | Time to first useful response, tool calls per query, session duration |
+| **Quality** | Error rate per tool, failed delegations, user corrections |
+| **Coverage** | Products with steering files, KB freshness (staleCount), lifecycle folder usage |
+| **Tool usage** | Most/least used tools, Cloud vs Live plane distribution, write operation frequency |
+
+### 10.2 Implementation
+
+A lightweight SQLite metrics store (similar to Tao's approach):
+
+```sql
+CREATE TABLE metrics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL,
+    session_id TEXT,
+    agent TEXT,
+    event TEXT NOT NULL,       -- 'tool_call', 'delegation', 'error', 'transition'
+    tool_name TEXT,
+    duration_ms INTEGER,
+    success BOOLEAN,
+    metadata TEXT              -- JSON blob for event-specific data
+);
+```
+
+The unified MCP server logs every tool call with timing. The orchestrator logs delegations and routing decisions. This data feeds a simple dashboard (can be as basic as a CLI report or a future web UI).
+
+### 10.3 Health Dashboard
+
+A `tao doctor`-style command that shows system health:
+
+```bash
+$ solutions-os status
+
+Unified MCP Server:
+  ☁️  Cloud Plane:  ✅ Connected (GitLab KB, 6 apps indexed)
+  🔴 Live Plane:   ✅ Connected (gam-dev2, 42 tools active)
+  📊 Data Gen:     ✅ Connected (8 tools active)
+
+Knowledge Base:
+  📚 Product KB:   6 products indexed, last update 2min ago
+  🔧 App KB:       6 apps, 0 stale
+
+Environments:
+  gam-dev2:        ✅ Reachable
+  cms-dev:         ✅ Reachable
+  solutions-global: ⚠️  API key not configured
+```
+
+---
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|-----------|
@@ -805,7 +1087,7 @@ echo "✅ Setup complete. Run: kiro-cli --agent solutions-os"
 
 ---
 
-## 9. Success Metrics
+## 12. Risk Assessment
 
 | Metric | Target | Measured By |
 |--------|--------|-------------|
@@ -818,7 +1100,7 @@ echo "✅ Setup complete. Run: kiro-cli --agent solutions-os"
 
 ---
 
-## 10. Decision Points for Approval
+## 13. Decision Points for Approval
 
 The following decisions need stakeholder sign-off:
 
@@ -830,7 +1112,105 @@ The following decisions need stakeholder sign-off:
 
 ---
 
-## Appendix A: Current Tool Inventory
+## Appendix A: SWAT-a-Palooza Project Integration Map
+
+All 20 completed projects from SWAT-a-Palooza, organized by theme, with their placement in the revamped Solutions OS architecture.
+
+### Accessibility (2 projects)
+
+| # | Project | Lead | Team | Fits As | Integration |
+|---|---------|------|------|---------|-------------|
+| 1 | **A11Y Fixer** | Soma | Soma, Harish | `a11y-fixer` sub-agent | Uses unified MCP Live Plane (get object, deploy), Jira MCP, Playwright MCP. 56 fix patterns in agent prompt. Orchestrator delegates on "fix accessibility" triggers. |
+| 2 | **AI A11y Audit Power** | Ganesh | Ganesh | Skill: `.kiro/skills/a11y-audit/SKILL.md` | 80+ rule checks, recursive interface discovery, cross-app pattern matching. Loadable by developer, qe-agent, and a11y-fixer agents. Google Doc report via gws CLI. |
+
+### Data Generation (2 projects)
+
+| # | Project | Lead | Team | Fits As | Integration |
+|---|---------|------|------|---------|-------------|
+| 3 | **Atlas SQL Forge** | Ram | Ram, Dineshkumar | `sql-forge` sub-agent | Uses unified MCP Cloud Plane (schema, relationships, insertion-order) + Data Gen Plane (CRUD). 6-step workflow (analyze → discover → architect → plan → approve → execute). |
+| 4 | **DataForge - AI-Powered Test Data at Scale** | Hitesh | Hitesh | `sql-forge` sub-agent capability | Complements SQL Forge with bulk/offline mode. Schema introspection, pattern-matched generators, dependency-ordered inserts. Scale tiers (S/M/L/XL) per solution. |
+
+### Delivery Flow Coach (1 project)
+
+| # | Project | Lead | Team | Fits As | Integration |
+|---|---------|------|------|---------|-------------|
+| 5 | **Flow-Craft Sprint Report** | Josh | Josh, Saravana, Rob | Standalone automation / orchestrator capability | Python-based metrics aggregation (no hallucinations). Uses Jira MCP + custom data sources. Color-coded health reports. Could become a capability triggered by "generate sprint report". |
+
+### Design and UX Handoff (4 projects)
+
+| # | Project | Lead | Team | Fits As | Integration |
+|---|---------|------|------|---------|-------------|
+| 6 | **Atlas UX Designer Power Enhancements** | Vedant | Vedant | `ux-designer` sub-agent | 6 actions become capabilities in agent prompt: Edge Case Analysis, Platform Feasibility, Design Consistency, Component Decomposition, Design-to-Dev Handoff, Aurora Compliance. |
+| 7 | **Kiro to FigJam (Spec to User Flow)** | Anthony | Anthony | `ux-designer` sub-agent capability | Reads specs from T.I.M.E. `02-refinement/`. FigJam MCP for diagram creation. Auto-syncs diagrams as specs evolve. |
+| 8 | **Spec to Slides** | Sonali | Sonali | `product-owner` sub-agent capability | Transforms markdown spec into .pptx with feature titles, interaction callouts, SAIL link placeholders. Exports to Google Slides as single source of truth for handoff. |
+| 9 | **Jarvis SAIL Canvas** | Govind | Govind | `ux-designer` sub-agent capability | Uses unified MCP Live Plane (get object with dependencies). Local React app for interactive preview with state switching. Exports validated SAIL code. |
+
+### Development Tooling and IDE (5 projects)
+
+| # | Project | Lead | Team | Fits As | Integration |
+|---|---------|------|------|---------|-------------|
+| 10 | **Jarvis Sweep** | Khoa | Khoa, Allie, Noah, Will | `developer` sub-agent capability | Workflow (export → analyze → clean → deploy) in `ai-framework/workflows/sweep-workflow.md`. Uses unified MCP Live Plane. Triggered by "sweep X" or "clean up X". |
+| 11 | **Application Performance Profiling (Perf-Profiler)** | Raajiv | Raajiv | Standalone CLI tool / `developer` capability | Package transformation tool. Input: Appian zip. Output: instrumented zip. Invokable by developer sub-agent as shell command. Generic — works across any app. |
+| 12 | **Local-IDE Development** | William Ingold | William Ingold | Standalone tool (IDE extension) | VSCode/Kiro extension. Benefits from environment registry (LCP API target) and unified MCP (same tools). Not a sub-agent itself. |
+| 13 | **LCP APIs / a!migo** | Saurabh | Saurabh, Ayisha, Hunter, Eric, Karan | `developer` sub-agent capability | 130+ Appian operations via LCP API. Data model workflow uses environment registry. Foundation for automating object creation, mockups-to-SAIL, query record generation. |
+| 14 | **Performance Power - SAIL to SQL** | Dineshkumar K | Dineshkumar K, Ram | `sql-forge` sub-agent capability | Converts SAIL code to SQL stored procedures. Uses unified MCP Cloud Plane (get object code) + Live Plane (evaluate). Multiple DB support (MariaDB, Oracle). |
+
+### Documentation and Reporting (2 projects)
+
+| # | Project | Lead | Team | Fits As | Integration |
+|---|---------|------|------|---------|-------------|
+| 15 | **Solutions Feature Doc Genie** | Meenakshi | Meenakshi | `product-owner` sub-agent capability | One prompt → 6 documents (FIP, Tech Design, Perf Review, Security Review, Arch Overview, ADR). Uses unified MCP Cloud Plane (8 Atlas tool calls). Spec readiness validation. Google Docs export. |
+| 16 | **Automate ERD and Release Documentation** | Revathi | Revathi, Ranjith, Gautham | `sql-forge` sub-agent capability | One line → ERDs (simple + complex) in Lucidchart + release notes in Google Docs. Uses unified MCP Cloud Plane for schema. Handles 155+ tables, 199 FKs. |
+
+### Process and Methodology (2 projects)
+
+| # | Project | Lead | Team | Fits As | Integration |
+|---|---------|------|------|---------|-------------|
+| 17 | **AI-assisted Kiro KB Maintenance** | Colin Hutchison | Colin Hutchison | Skill + Hook | Steering file becomes skill. On release: reviews public docs, KB files, app code → updates → quality checklist → cross-document review → commit. Hook automates git operations. |
+| 18 | **The T.I.M.E. Framework** | Ben Lloyd | Ben Lloyd | Core repo structure (Section 6) | Integrated as product folder convention. Six lifecycle stages. AI acts on file transitions. Foundation of the revamp. |
+
+### Testing (2 projects)
+
+| # | Project | Lead | Team | Fits As | Integration |
+|---|---------|------|------|---------|-------------|
+| 19 | **Solutions Test Execution Agent** | Divya | Divya, Annamalai, Ram, Anu, Susheela, Harish, Devin, Rajesh, Asmita, Suganya, Hanna | `qe-agent` sub-agent | Uses unified MCP (Cloud for impact analysis, Live for data gen), Playwright MCP, Jira MCP. Environment registry provides target env. QE knowledge base as skill. Future: zero-touch via GitLab CI. |
+| 20 | **Expression Test Case Generation (Jarvis Assert)** | Abby | Abby, Sarah, Brian | `developer` sub-agent capability | Generates expression rule tests (happy path, null, off-by-one, out-of-bounds). Same deploy pipeline as Sweep. Triggered by "generate tests for X". |
+
+### Summary: Agent Placement
+
+```
+.kiro/agents/
+├── solutions-os.json        # Orchestrator (routes to all below)
+├── developer.json           # Projects: 10 (Sweep), 11 (Perf-Profiler), 13 (LCP/a!migo), 20 (Assert)
+├── product-owner.json       # Projects: 8 (Spec to Slides), 15 (Feature Doc Genie)
+├── ux-designer.json         # Projects: 6 (UX Enhancements), 7 (Kiro→FigJam), 9 (SAIL Canvas)
+├── sql-forge.json           # Projects: 3 (SQL Forge), 4 (DataForge), 14 (SAIL-to-SQL), 16 (ERD Gen)
+├── qe-agent.json            # Projects: 19 (TEA)
+├── code-reviewer.json       # Code review workflows (from Jarvis)
+└── a11y-fixer.json          # Projects: 1 (A11Y Fixer)
+
+.kiro/skills/
+├── a11y-audit/SKILL.md      # Project 2 (AI A11y Audit)
+├── kb-maintenance/SKILL.md  # Project 17 (KB Maintenance)
+├── sail-reference/SKILL.md  # SAIL grammar + best practices
+└── aurora-design/SKILL.md   # Aurora Design System reference
+
+Standalone tools (not sub-agents):
+├── Perf-Profiler             # Project 11 (CLI tool, invokable by developer agent)
+├── Local-IDE Extension       # Project 12 (VSCode/Kiro extension)
+└── Flow-Craft Sprint Report  # Project 5 (metrics automation script)
+```
+
+**Every project works because:**
+1. **Unified MCP** — all agents access both Cloud and Live tools through one server
+2. **Orchestrator** — auto-routes requests to the right specialist, no manual selection
+3. **Environment registry** — handles multi-env targeting without hardcoded URLs
+4. **T.I.M.E. structure** — provides lifecycle context for smarter automation
+5. **Skills** — share reference knowledge (a11y rules, SAIL grammar) across all agents
+
+---
+
+## Appendix B: Current Tool Inventory
 
 ### Atlas MCP Server (30 tools)
 `list_applications`, `get_app_overview`, `search_bundles`, `get_bundle`, `search_objects`, `get_dependencies`, `get_object_detail`, `list_orphans`, `get_orphan`, `get_dependency_path`, `get_transitive_dependencies`, `get_hub_objects`, `get_object_code`, `list_releases`, `get_changelog`, `compare_releases`, `get_object_history`, `get_object_at_release`, `get_release_impact`, `refresh_knowledge_base`, `list_documents`, `get_document`, `list_git_directory`, `get_git_content`, `search_git_content`, `get_app_schema`, `get_schema_relationships`, `get_reference_data`, `get_insertion_order`, `get_schema_summary`, `get_record_type_map`, `get_field_map`

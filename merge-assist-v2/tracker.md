@@ -159,6 +159,109 @@ Dictionary?list where each entry = {
 
 ---
 
+### May 21, 2026 — New Object Type Converters + Process Model Rewrite
+
+#### Completed
+
+**Object type coverage analysis across test packages:**
+
+| Object Type | V1 (GSS) | V2 (CaseManagement) | V2 (RenRe) | Conversion Rule Status |
+|---|---|---|---|---|
+| content (rules/interfaces/constants/integrations/decisions) | 2121 | 1177 | 1982 | ✅ Existed |
+| translationString | — | 793 | 1934 | ✅ NEW - Built & tested |
+| translationSet | — | 1 | 3 | ✅ NEW - Built & tested |
+| groupType | — | — | 1 | ✅ NEW - Built & tested |
+| controlPanel | — | 1 | — | ✅ NEW - Built & tested |
+| aiSkill | 1 | — | — | ⚠️ No native diff config — needs custom renderer |
+| processModel | 108 | 72 | 101 | 🔄 Rewriting — value extraction issue |
+| datatype | 107 | 4 | 49 | ✅ Existed |
+| group | 93 | 9 | 15 | ✅ Existed |
+| recordType | 48 | 70 | 89 | ✅ Existed |
+| dataStore | 9 | 2 | 3 | ✅ Existed |
+| connectedSystem | 6 | — | 2 | ✅ Existed |
+| webApi | 4 | — | 1 | ✅ Existed |
+| processModelFolder | 4 | 2 | 3 | ✅ Existed |
+| site | 3 | 1 | 3 | ✅ Existed |
+| application | 1 | 2 | 4 | ✅ Existed |
+
+**New conversion rules built (file: `sail-conversion-rules/MA_convert_new_types.sail`):**
+
+| Rule | Key Fields | Notes |
+|---|---|---|
+| `MA_convert_translationString` | `id, uuid, description, translationSetId, translatorNotes, versionUuid, translatedText[{id, locale{id,locale}, translatedText}], translationStringVariables` | Working. System expects `translatedText` not `translationTexts`. |
+| `MA_convert_translationSet` | `id, uuid, name, description, versionUuid, enabledLocales[{id,locale}], defaultLocale{id,locale}, enabledLocalesValue, defaultLocaleValue, stringCount, stringData, totalCount, parent, saveIn, roleMap{inherit, entries}` | Working. Required `totalCount: 0` (page handler accesses `ri!left.totalCount`), `stringData: {}`, `enabledLocales.id` must be integer (not null). `en-US` = locale ID 17. |
+| `MA_convert_groupType` | `id, uuid, name, description, groupTypeAttributes[{name, type, value}]` | Working. Simple structure. |
+| `MA_convert_controlPanel` | `controlPanel{id, name, description, urlStub, settings{displayName, objectStorageCfg, primaryRecordCfg, brandingCfg, hierarchyCfg}}, interfaceTypes, interfaces, referenceableRecordTypes, customPages, roleMap` | Working. Deeply nested — diff config uses `fieldPath: {"controlPanel", "settings", "..."}`. |
+
+**Dispatcher updates (in `MA_convertXmlToDiffMap`):**
+- Added: `translationstring`, `translationset`, `aiskill`, `controlpanel`, `grouptype`
+- Improved `content` subtype handling: auto-detects rule/interface/constant/knowledgeCenter/document/ruleFolder/documentFolder
+
+**Process Model converter rewrite (`sail-conversion-rules/MA_convert_processModel_v2_part*.sail`):**
+- Split into 4 parts for manageability
+- Nodes now include framework-expected fields: `inputs`, `hiddenInputs`, `events`, `customOutputs`, `resultOutputs`, `conditions`, `customParameters`, `complexGatewayData`
+- `activityClass.parameters` → named map (name→value) via `a!mapFromLists`
+- `hiddenInputs` → name→value map of hidden ACPs
+- `inputs` → visible non-hidden ACPs as list with string `value`
+- Conditions extracted from XOR (`core.4`) and complex gateway (`core.7`) rules
+- Lanes have `uniqueId` field (format: `"<name><index>"`)
+- `other` map includes `multipleInstance`, `whenNodeIsChained`, `whenNodeIsCompleted`, `whenNodeIsExecuted`
+
+#### Decisions Made
+
+| Decision | Reasoning |
+|---|---|
+| `translationString` doesn't use native diff for translationSet's `stringData` section | We output `stringData: {}` and `totalCount: 0` to skip the translation strings paging section which requires real environment data |
+| `aiSkill` skipped for native diff | No entry in `a!dod_config_getTypeMap()` — it's a "remote design object" type. Needs custom diff interface. |
+| Locale ID `17` hardcoded for `en-US` | Standard across all Appian environments. Other locales mapped in `local!localeIdMap`. |
+| `controlPanel` uses nested `controlPanel.settings.*` structure | Diff config uses `fieldPath: {"controlPanel", "settings", "hierarchyCfg", "..."}` — must match exactly |
+| Process model nodes split into inputs/hiddenInputs/parameters(map) | `a!dod_pm_node_updateFieldsForFramework` does this transformation; we replicate it |
+
+#### Technical Learnings
+
+1. **`translationset` diff uses `diffPresentationConfigFn`** (lambda, not static config) — it passes `ri!left`, `ri!right`, `ri!pagingInfo` to build sections. The `translationStringPageHandler` accesses `ri!left.totalCount` — if missing, crashes.
+2. **`a!dod_fwk_createDiffComponent` wraps handler calls in `fn!try`** — any handler crash becomes generic "An error has occurred on a diff field" message. The catch block calls `a!dod_fwk_logFieldDiffException` then `fn!error()`.
+3. **`enabledLocales[].id` must be integer** for translation sets — the config uses `fv!item.id` to build `fieldPath: "locale-" & fv!item.id` and `"stringCount"` lookup by locale ID.
+4. **`controlpanel` and `grouptype` have native diff configs** but `aiSkill` does not.
+5. **Process model `activityClass.parameters`** must be a named map (not a list) — the setup section configs access `activityClass; parameters; isTransparent` etc. via nested field paths.
+6. **`dod_config_securitySection`** expects `roleMap.inherit` (boolean), `roleMap.entries` (list), `parent`, `saveIn` fields on the object.
+7. **Process model nodes need `inputs`/`hiddenInputs` split** — `dod_config_pm_node_dataSection` accesses these directly. `hiddenInputs` is a name→value map, `inputs` is a list of ACP-like maps.
+8. **`org.json.XML.toJSONObject` value extraction issue** — when XML has `<a:value xsi:type="xsd:boolean">true</a:value>`, it becomes `{xmlns: "", xsi:type: "xsd:boolean", content: true}` in the JSON. However, `fn!index(map, "content", null())` is NOT finding the `content` key in Appian. `fn!try(ri!val.content, null())` also fails. **This is the current blocker for process model rendering.**
+
+#### Issues Encountered
+
+| Issue | Resolution |
+|-------|-----------|
+| `translationSet` crash at section 3 | `totalCount: 0` missing — `translationStringPageHandler` accesses `ri!left.totalCount` |
+| `translationSet` crash — locale iteration | `enabledLocales[].id` was null — must be integer (17 for en-US) |
+| `translationSet` crash — stringData | Changed from `null()` to `{}` — iteration over null crashes |
+| `translationSet` security section crash | Added `roleMap.inherit`, `parent`, `saveIn` fields |
+| `processModel` crash at node setup section | `activityClass.parameters` was a list, must be named map |
+| `processModel` crash — End Node isTransparent | Raw XML typed value map `{xmlns:"", xsi:type:"xsd:boolean", content:true}` passed to checkbox handler instead of boolean `true`. **`fn!index(map, "content", null)` returns null.** Root cause: Appian's map key lookup cannot find `"content"` key on maps produced by `a!fromJson(xmlToMap(...))`. UNRESOLVED. |
+
+#### Current Blocker
+
+**`fn!index` cannot extract `"content"` key from typed value maps produced by `xmlToMap`/`a!fromJson`.**
+
+The XML `<a:value xsi:type="xsd:boolean">true</a:value>` becomes JSON `{"xsi:type":"xsd:boolean","content":true}` via `org.json.XML.toJSONObject`. After `a!fromJson`, accessing `fn!index(map, "content", null)` returns null. Dot access `map.content` also fails.
+
+**Next steps to diagnose:**
+1. Evaluate `tostring(fn!index(nodes, 2, a!map()))` to see the raw ACP structure from xmlToMap
+2. Check if the key is actually `"content"` or something else (empty string, `#text`, etc.)
+3. May need a plugin function to properly extract typed values from XML ACPs
+4. Alternative: pre-process the entire JSON in the plugin before returning (extract all typed values at the Java level)
+
+#### Remaining Items
+
+- [ ] **Process model — resolve `content` key extraction issue** from xmlToMap typed value maps
+- [ ] **Process model — XOR conditions not extracting** (rules ACP value is still raw map with `a:acps`)
+- [ ] **aiSkill — custom diff interface** (no native diff config)
+- [ ] **Content subtype dispatching** — document, ruleFolder, documentFolder cases
+- [ ] **Update tracker.md in project repo** with session findings
+- [ ] **Test all converters with V1 GSS packages** (larger/more complex PMs)
+
+---
+
 ## Build & Deploy
 
 ```bash
