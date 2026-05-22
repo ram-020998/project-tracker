@@ -1,6 +1,6 @@
 # Atlas Data Generator — Progress Tracker
 
-**Last Updated:** 2026-05-19
+**Last Updated:** 2026-05-22
 
 ---
 
@@ -115,22 +115,40 @@ AI-driven test data generation for Appian applications. Uses Atlas KB (applicati
 - 2 files: `SKILL.md` (main, 220 lines) + `rollback.md`
 - `INTEGRATION.md` documents how to plug into testing agents
 
-### Power Structure
+### Power Structure (Updated 2026-05-22)
 ```
 atlas-sql-forge/
-├── POWER.md                              # Main instructions + action router
+├── POWER.md                              # Main instructions + dual-mode action router
 ├── mcp.json                              # Both MCP servers (Atlas + DG)
-├── .kiro/steering.md                     # Power metadata
-├── README.md
+├── .kiro/steering.md                     # Power metadata + architecture diagram
+├── README.md                             # Detailed documentation (576 lines)
 └── steering/
-    ├── action-generate-data.md           # 6-milestone workflow (with Step 0 init)
-    ├── action-bulk-sql.md                # SQL generation for 100+ records
+    ├── action-generate-data.md           # Orchestrator: sub-agents + mode routing
+    ├── action-bulk-sql.md                # Redirect → action-generate-data in sql mode
     ├── action-explore-schema.md          # Schema exploration
     ├── action-query-and-validate.md      # Query and verify
     ├── action-rollback.md                # Session cleanup
-    ├── tool-reference-atlas.md           # 7 Atlas schema tools (incl. record_type_map, field_map)
-    └── tool-reference-data-generator.md  # 8 DG tools
+    ├── step-0-initialize.md             # Create folder + 6 PENDING files + tracker
+    ├── step-1-workflow-analysis.md      # Exhaustive PM/rule trace (3-part per action)
+    ├── step-2-exemplar-discovery.md     # Real record + reconciliation gate
+    ├── step-3-data-architecture.md      # Field maps, live ref data, coverage checklist
+    ├── step-4-data-payloads.md          # Split files, field_reasoning, ≥80% coverage
+    ├── step-5-validation.md             # 4 automated checks
+    ├── step-6-execute.md                # Records mode: API calls + verify
+    ├── step-6-generate-sql.md           # SQL mode: INSERT stmts + LAST_INSERT_ID
+    ├── tool-reference-atlas.md           # Atlas MCP schema tools
+    └── tool-reference-data-generator.md  # DG MCP tools
 ```
+
+### Major Update: Dual-Mode 6-Step Workflow (2026-05-22)
+- Adopted the elaborated 6-step workflow from `atlas-demo-driver` (sub-agent orchestration)
+- SQL Forge now supports **both** test data generation (records via API) AND bulk SQL generation
+- Steps 0-5 are identical for both modes; Step 6 diverges (execute vs generate-sql)
+- Sub-agents run Steps 1-5 (fresh context per step, no token exhaustion)
+- Orchestrator runs Step 6 directly (user interaction during execution)
+- Hardened steering files with blocking checks, quality gates, execution tracker
+- Split payloads into multiple small files (robust writes)
+- Demo Driver stays as-is (records-only, separate power)
 
 ### Data Generation Workflow (6 Milestones)
 | # | Milestone | Output | Purpose |

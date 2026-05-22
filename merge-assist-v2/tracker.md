@@ -257,8 +257,175 @@ The XML `<a:value xsi:type="xsd:boolean">true</a:value>` becomes JSON `{"xsi:typ
 - [ ] **Process model — XOR conditions not extracting** (rules ACP value is still raw map with `a:acps`)
 - [ ] **aiSkill — custom diff interface** (no native diff config)
 - [ ] **Content subtype dispatching** — document, ruleFolder, documentFolder cases
-- [ ] **Update tracker.md in project repo** with session findings
 - [ ] **Test all converters with V1 GSS packages** (larger/more complex PMs)
+
+---
+
+### May 22, 2026 — Plugin Approaches for Universal XML→Diff Conversion (ALL FAILED)
+
+#### Goal
+
+Eliminate per-type SAIL conversion rules by building a plugin that converts vendor package XML directly to the diff-ready JSON format that `a!dod_fwk_sectionsGenerator` expects.
+
+#### Research Findings (AE Repo)
+
+**Key internal classes discovered:**
+
+| Class | Path | Purpose |
+|---|---|---|
+| `XmlContext` | `com.appiancorp.ix.xml.XmlContext` | Holds static `JAXBContext` with all Haul classes registered. Field `context` is package-private. |
+| `XmlProducer` | `com.appiancorp.ix.xml.XmlProducer` | Unmarshals XML via JAXB, calls `registerCustomAdapters()` and `afterUnmarshal()` |
+| `ProcessModelAdapter` | `com.appiancorp.ix.xml.adapters.ProcessModelAdapter` | XmlAdapter for PM. Has `ThreadLocal<ServiceContext> SC` that MUST be set before unmarshal. Calls `ProcessPortService.deserializeProcessModelForIx(Element)` |
+| `ProcessPortService` | `com.appiancorp.process.ProcessPortService` | `deserializeProcessModelForIx(Node)` — converts PM DOM → ProcessModel without needing object in environment |
+| `ProcessPortServiceLocator` | `com.appiancorp.process.ProcessPortServiceLocator` | `getProcessPortService(ServiceContext)` — gets the service via ServiceLocator |
+| `DiffProcessModelConverter` | `com.appiancorp.designobjectdiffs.converters.processmodel.DiffProcessModelConverter` | Spring bean. `convertModel(ProcessModel, EvalPath, AppianScriptContext)` → `DiffProcessModelDto`. Has 8 sub-converter dependencies. |
+| `GetProcessModelVersion` | `com.appiancorp.designobjectdiffs.functions.processmodel.GetProcessModelVersion` | Java function `dod_getprocessmodelversion`. Calls `DiffProcessModelConverter.convertModel()` then `dto.toTypedValue()` then `Value.fromTypedValue(tv)` |
+| `DiffProcessModelDto` | `com.appiancorp.type.cdt.DiffProcessModelDto` | Generated CDT class (not in compile JARs). Has `toTypedValue()`. |
+| `IxDocumentManager` | `com.appiancorp.object.action.IxDocumentManager` | `toJson(TypedValue, TypeService)` → JSON string. `fromJson(String, TypeService)` → TypedValue. Used by Connected Environments. |
+| `DodToJson` / `DodFromJson` | `com.appiancorp.designobjectdiffs.functions.encoding.*` | SAIL functions `a!dod_encoding_toJson` / `a!dod_encoding_fromJson`. JSON channel normalization. |
+| `dod_connEnv_simulateConnectedEnvReturn` | SAIL rule | Just does `a!dod_encoding_fromJson(a!dod_encoding_toJson(ri!diffObject))` — JSON roundtrip normalization |
+| `ApplicationContextHolder` | `com.appiancorp.common.config.ApplicationContextHolder` | Static access to Spring application context. `getBean(Class)` method. |
+| `ServiceContextProvider` | `com.appiancorp.services.spring.ServiceContextProvider` | Spring bean. `getServiceContext()` → ServiceContext |
+| `ContentHaul` | `com.appiancorp.ix.data.ContentHaul` | Haul for content types. `getIxObject()` returns FreeformRule/Constant/Integration/etc. |
+| `ProcessModelHaul` | `com.appiancorp.ix.data.ProcessModelHaul` | Haul for PMs. `getProcessModel()` returns ProcessModel (only works if adapter SC was set) |
+| `Type.HAUL_CLASSES` | `com.appiancorp.ix.Type` | Set of all Haul classes registered for JAXB |
+| `ObjectReadSupport` | `com.appiancorp.object.action.read.ObjectReadSupport` | Interface for reading objects from DB by UUID. Used by `appdesigner_actionReadByUuid`. NOT usable for vendor XML (reads from DB only). |
+| `UuidReadActionHandler` | `com.appiancorp.object.action.read.UuidReadActionHandler` | Handles `readByUuid` action. Calls `ObjectReadSupport.read(uuid)` which reads from **database**. |
+| `JSONSerializerUtil` | `com.appiancorp.process.common.presentation.JSONSerializerUtil` | `marshall(Object, ServiceContext)` / `unmarshall(String, Class, ServiceContext)` — used by Connected Environments for PM JSON transport |
+
+**The diff framework's `testObject` parameter:**
+- `dod_pm_getDiffObject` accepts `ri!testObject` — if provided, skips UUID lookup and uses the object directly
+- `dod_record_getDiffObject`, `dod_config_decision_getObjectFn`, `dod_config_document` also support this
+- BUT: the subsequent transformations in `getDiffObject` (security, display names, etc.) still call environment-dependent functions
+
+**Connected Environment flow:**
+- Remote env calls `getObjectFn(uuid)` → produces diff object → `IxDocumentManager.toJson()` → sends JSON over HTTP → client calls `IxDocumentManager.fromJson()` → produces Map
+- For PM specifically: uses `JSONSerializerUtil.marshall(pm, sc)` to serialize the raw ProcessModel to JSON, then deserializes on client
+
+#### Plugin 1: `xml-converter-plugin` (unmarshalXmlToJson)
+
+**Location:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/merge-assist-v2/xml-converter-plugin/`
+**Approach:** JAXB unmarshal + getter-based serialization to JSON
+
+**What worked:**
+- ✅ `XmlContext.context` accessible via reflection (`Field.setAccessible(true)`)
+- ✅ JAXB unmarshal works for ContentHaul (interfaces, rules, constants)
+- ✅ `ContentHaul.getIxObject()` returns FreeformRule with `getDefinition()` already in display form
+- ✅ Getter-based serialization produces clean JSON with proper field names
+- ✅ Expression resolution happens automatically (`FreeformRule.getDefinition()` converts stored→display form)
+- ✅ All content type fields accessible: name, uuid, description, definition, parameters, attributes, etc.
+
+**What failed:**
+- ❌ `Gson.toJson(haul)` → `StackOverflowError` (circular references in Appian type system objects)
+- ❌ `Gson` with ExclusionStrategy → `Failed making field 'javax.xml.namespace.QName#namespaceURI' accessible` (JDK module access)
+- ❌ `Gson` with TypeAdapters → `Failed making field 'java.util.concurrent.atomic.AtomicReference#value' accessible`
+- ❌ Process Model XML unmarshal → `javax.xml.bind.UnmarshalException` (needs ProcessModelAdapter with ServiceContext ThreadLocal)
+- ❌ Content type output doesn't match diff framework format directly (needs field renaming + `inputs` restructuring)
+
+**Serialization issues encountered:**
+1. Gson reflection fails on JDK internal classes (Java 17 module system)
+2. Object graph has circular references (Type → Storage → Type)
+3. `getCoreTypeInfo()` getter returns the entire Appian type hierarchy (massive recursive structure)
+4. Raw getter serialization includes infrastructure fields not needed for diff
+
+**Final state:** Works for content types but output requires light SAIL transformation. Doesn't work for process models.
+
+#### Plugin 2: `xml-diff-converter-plugin` (convertXmlToDiffObject)
+
+**Location:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/merge-assist-v2/xml-diff-converter-plugin/`
+**Approach:** JAXB unmarshal + Spring DiffProcessModelConverter + getter-based serialization
+
+**What failed:**
+- ❌ PM unmarshal → `javax.xml.bind.UnmarshalException` even with adapters registered
+- ❌ `registerAdapters()` succeeds but PM still fails because `ProcessModelAdapter.SC` ThreadLocal is null during JAXB's internal adapter callback
+- ❌ Setting `ProcessModelAdapter.SC` before calling unmarshal doesn't help — JAXB creates a new adapter instance that doesn't see the ThreadLocal (different thread context)
+- ❌ Even without adapters, PM unmarshal fails because the XML has elements that require custom adapters (`<pm>` contains typed values that JAXB can't handle without the adapter)
+
+**Root cause:** JAXB's unmarshalling of ProcessModelHaul is fundamentally tied to the `XmlProducer` lifecycle which sets up adapters in a specific way. A standalone `Unmarshaller` can't replicate this.
+
+#### Plugin 3: `vendor-diff-plugin` (vendorXmlToDiffJson) — Approach A: IxDocumentManager.toJson
+
+**Location:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/merge-assist-v2/vendor-diff-plugin/`
+**Approach:** JAXB unmarshal → `toTypedValue()` → `IxDocumentManager.toJson(tv, typeService)`
+
+**What failed:**
+- ❌ `FreeformRule` doesn't implement `IsTypedValue` and has no `toTypedValue()` method
+- ❌ Wrapping raw object in `TypedValue` manually → `IxDocumentManager.toJson()` rejects it: "The value parameter must be a CDT, a dictionary, a map, a record, or a list"
+- ❌ `IxDocumentManager.toJson()` ONLY accepts CDTs/Maps/Dictionaries — not raw domain objects like FreeformRule, ProcessModel, Constant
+
+**Root cause:** `IxDocumentManager.toJson()` is designed for already-transformed diff objects (which are Maps/CDTs), not raw domain objects. The transformation step MUST happen before serialization.
+
+#### Plugin 3: `vendor-diff-plugin` — Approach B: DOM + ProcessPortService
+
+**Approach:** Skip JAXB entirely for PM. Parse XML as DOM → find `<process_model_port>` element → `ProcessPortService.deserializeProcessModelForIx(element)` → `DiffProcessModelConverter.convertModel(pm)` → serialize
+
+**Status:** Built but not validated. Expected to work since `ProcessPortService` is designed exactly for this use case (deserialize PM from XML without importing).
+
+**Dependencies required:**
+- `ServiceContext` from `ServiceContextProvider` Spring bean
+- `ProcessPortServiceLocator.getProcessPortService(sc)` → ProcessPortService
+- `DiffProcessModelConverter` from Spring for diff-ready format (optional — raw PM can be serialized via getter-walker as fallback)
+
+#### Why No Plugin Approach Fully Works
+
+1. **The diff framework expects specific map shapes** that are produced by SAIL `getObjectFn` lambdas per-type. These lambdas call environment-dependent functions (`a!dod_security_getRoleMap`, `a!dod_displayName_contentDisplay`, `a!dod_testValues_interface_getTestCases`).
+
+2. **Raw domain objects ≠ diff-ready maps.** A `FreeformRule` has `definition`, `name`, `parameters[]`. The diff framework expects `expression`, `inputs[{key,value,description}]`, `roleMap{...}`, `parent{name,id,uuidForDiff}`. This transformation is NOT a simple rename — it involves resolving type names, security, parent folders.
+
+3. **`IxDocumentManager.toJson()`** only works on CDTs/Maps (output of converters), not on raw objects (input to converters).
+
+4. **JAXB for PM requires the full `XmlProducer` lifecycle** — standalone unmarshalling fails because the `ProcessModelAdapter` callback needs ThreadLocal context that JAXB's internal adapter management doesn't propagate correctly.
+
+5. **`DiffProcessModelConverter`** produces the exact right format but requires Spring beans + the PM must be deserialized first (which requires `ProcessPortService` + `ServiceContext`).
+
+6. **There is no single "XML → diff map" function in Appian.** The architecture is: XML → Haul → import to DB → `ObjectReadSupport.read(uuid)` → DTO → `getObjectFn` SAIL transformation → diff map. Skipping the "import to DB" step breaks the chain.
+
+#### Viable Remaining Options
+
+1. **Continue with SAIL converters (current approach)** — Fix the `content` key extraction issue for PM ACPs. The plugin (`xml-converter-plugin`) works for content types and provides clean typed values. Only PM needs the SAIL-level `unwrapValue` fix.
+
+2. **DOM + ProcessPortService for PM only** — Build a plugin function that takes PM XML, parses as DOM, calls `ProcessPortService.deserializeProcessModelForIx()`, then serializes the raw `ProcessModel` via getter-walker. The SAIL converter then only needs to do the structural transformation (split ACPs, build conditions) on clean typed values.
+
+3. **Accept that SAIL converters are needed** — The diff framework was designed with SAIL `getObjectFn` as the transformation layer. Fighting this architecture has diminishing returns.
+
+#### Decisions
+
+| Decision | Reasoning |
+|---|---|
+| Abandon `IxDocumentManager.toJson()` approach | Only works on already-transformed CDTs, not raw objects |
+| Abandon universal "zero SAIL" plugin approach | Diff framework requires per-type SAIL transformations for security, display names, parent resolution |
+| Keep `xml-converter-plugin` for content types | Works, provides clean typed values, expression resolution is automatic |
+| JAXB cannot unmarshal ProcessModelHaul standalone | Requires XmlProducer lifecycle + ProcessModelAdapter ThreadLocal |
+| DOM + ProcessPortService is viable for PM | Bypasses JAXB entirely, uses Appian's own PM deserializer |
+
+#### Files Created This Session
+
+| File | Purpose |
+|---|---|
+| `xml-converter-plugin/` | JAXB unmarshal + getter-walker. Works for content types. |
+| `xml-diff-converter-plugin/` | Failed attempt with Spring converter + JAXB for all types |
+| `vendor-diff-plugin/` | Latest attempt: DOM for PM, JAXB for content, IxDocumentManager (failed) |
+
+#### Updated Remaining Items
+
+- [ ] **Fix PM `content` key issue** — try DOM+ProcessPortService plugin for clean PM values, OR fix SAIL unwrapValue
+- [ ] **Validate `xml-converter-plugin` for all content types** — rules, constants, integrations, decisions
+- [ ] **Build thin SAIL converters for content types** — ~5 lines each using plugin output
+- [ ] **Process model converter** — either fix SAIL unwrapValue or use ProcessPortService plugin
+- [ ] **aiSkill — custom diff interface**
+- [ ] **Test with full vendor packages (V1 GSS, V2 CaseManagement)**
+- [ ] **Explore `solutions-atlas-parser` approach** — Python-based XML→JSON per-type parser exists at `appian/prod/solutions-atlas-parser`. Could port logic to Java plugin or use as reference for SAIL converters. Has parsers for: process_model, interface, expression_rule, constant, decision, integration, record_type, site, web_api, group, connected_system, control_panel, translation_set, translation_string, ai_skill, data_store, cdt, document, folder, application.
+
+#### GitLab Research (`gitlab.appian-stratus.com/appian/prod`)
+
+| Project | URL | Relevance |
+|---|---|---|
+| `plugin-xmltools` | https://gitlab.appian-stratus.com/appian/prod/plugin-xmltools | Same `org.json.XML.toJSONObject()` approach as our `xmlToMap`. Has `stringsOnly` and `removeNamespace` params. Same `content` key issue applies. |
+| `cs-plugin-cdt-diff-utilities` | https://gitlab.appian-stratus.com/appian/prod/cs-plugin-cdt-diff-utilities | Diffs CDT runtime instances — not useful for package XML comparison |
+| `ps-plugin-ProcessModelUtilities` | https://gitlab.appian-stratus.com/appian/prod/ps-plugin-ProcessModelUtilities | Reads PMs from DB via ProcessDesignService. Not from XML. |
+| **`solutions-atlas-parser`** | https://gitlab.appian-stratus.com/appian/prod/solutions-atlas-parser | **Most relevant.** Python tool that parses ALL Appian package XML types into structured JSON. Per-type parsers in `appian_parser/parsers/`. Validates our SAIL converter approach is correct architecture. Cannot run inside Appian (Python). |
+| `solutions-atlas-mcp-server` | https://gitlab.appian-stratus.com/appian/prod/solutions-atlas-mcp-server | MCP server using atlas-parser output — not directly useful |
+| `solutions-atlas-kb` | https://gitlab.appian-stratus.com/appian/prod/solutions-atlas-kb | Parsed knowledge base output — not useful |
 
 ---
 
