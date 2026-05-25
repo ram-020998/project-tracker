@@ -1,12 +1,12 @@
-# Atlas Data Generator — Progress Tracker
+# Atlas SQL Forge — Progress Tracker
 
-**Last Updated:** 2026-05-22
+**Last Updated:** 2026-05-25
 
 ---
 
 ## Project Overview
 
-AI-driven test data generation for Appian applications. Uses Atlas KB (application structure + workflow logic) combined with a Data Generator MCP server to create realistic, workflow-aware test data via CRUD APIs or bulk SQL scripts.
+AI-driven test data generation and schema tooling for Appian applications. Uses Atlas KB (application structure + workflow logic) combined with a Data Generator MCP server to create realistic, workflow-aware test data via CRUD APIs or bulk SQL scripts. Also provides ERD generation for Lucidchart.
 
 **Repos involved:**
 | Repo | Location | Purpose |
@@ -15,7 +15,9 @@ AI-driven test data generation for Appian applications. Uses Atlas KB (applicati
 | `solutions-atlas-mcp-server` | `appian/solutions-atlas-mcp-server` | Read-only MCP for application intelligence + schema tools |
 | `solutions-atlas-dg-mcp-server` | `ramaswamy.u/solutions-atlas-dg-mcp-server` | Write-capable MCP for data operations |
 | `solutions-atlas-kb` | `ramaswamy.u/solutions-atlas-kb` | KB storage, CI sync pipeline |
-| `atlas-data-generator-power` | `ramaswamy.u/atlas-data-generator-power` | Kiro power with steering files |
+| `atlas-sql-forge` (power dev) | `ramaswamy.u/atlas-sql-forge` | Kiro power with steering files |
+| `atlas-sql-forge` (power prod) | `appian/solutions-os/ai-framework/Engineering/.kiro/powers/atlas-sql-forge/` | Production power |
+| `erd-gen` | `ramaswamy.u/erd-gen` | Standalone ERD generator CLI tool |
 
 ---
 
@@ -269,3 +271,89 @@ atlas-sql-forge/
 
 ### Reference: Similar Project
 - **ASPECT** (`amrut.rao/ASPECT`) — SQL-only test data generator power. Schema-driven, no MCP. Has solution profiles.
+
+## ERD Action — Lucidchart Integration
+
+### 2026-05-25 — Research, Build, Test
+
+#### Objective
+Replace the existing Draw.io/Mermaid ERD output with native Lucidchart integration — generate ERDs programmatically and push them directly to Lucidchart via API.
+
+#### Research Findings
+
+**Lucid Developer Platform:**
+- **Standard Import API** = ZIP file (.lucid) with `document.json` inside
+- Upload via `POST https://api.lucid.co/v1/documents` with OAuth2 bearer token
+- File part must have `Content-Type: x-application/vnd.lucid.standardImport`
+- NO manual import path — `.lucid` files can only be uploaded via REST API
+- Lucid MCP server is documentation-search only (not functional API)
+
+**Shape Limitations (critical):**
+- Native ERD shapes (`ERDEntityBlock2`, `ERDEntityBlock3`, `ERDEntityBlock4`) are **NOT supported** in Standard Import
+- Lucid community confirms: "our native ERD shapes are not supported there"
+- `table` shape type exists with keys: `id, type, x, y, w, h, text, rows` — but correct `rows` format is undocumented and all tested formats fail
+- `rectangle` shapes work but render as plain text blobs — no column alignment
+
+**What works:**
+- `rectangle` with `boundingBox`, `text`, `style.fill: {type: "color", color: "#hex"}`
+- `elbow` lines with `shapeEndpoint` + ERD styles: `exactlyOne`, `zeroOrMore`, `zeroOrOne`, `oneOrMore`
+- Smart line routing (omit `position` from endpoints)
+
+**Standard Template Analysis** (from `/Users/ramaswamy.u/Downloads/GSS ERD - Dev.json`):
+- Uses `ERDEntityBlock2` with `textAreas` (Name + Key1/Field1 pairs)
+- Lines use `CFN ERD One Arrow` / `CFN ERD Many Arrow`
+- `LegendBlockV2` for domain groupings
+- Multiple pages (Full + feature-scoped views)
+- 2-column layout: constraint (PK/FK/"") + field name
+
+#### Decisions Made
+| Decision | Choice | Reasoning |
+|----------|--------|-----------|
+| Output format | Lucid Standard Import (.lucid) | Direct API upload, no manual steps |
+| ERD shapes | `rectangle` type (not native ERD) | Native ERD shapes not in Standard Import |
+| Tool architecture | Standalone Go binary (`erd-gen`) | No runtime deps, single file, cross-platform |
+| Repo structure | Separate `ramaswamy.u/erd-gen` repo | Agent installs from releases, not bundled in power |
+| Layout algorithm | Sugiyama layered graph | Proper topological flow, crossing minimization |
+| Token handling | `LUCID_API_TOKEN` env var | User sets once, agent uses transparently |
+| Upload | Built into CLI (`--upload` flag) | One command does generate + upload |
+
+#### What Was Built
+
+**1. `erd-gen` CLI tool** (Go, 8.3MB binary)
+- Location: `https://gitlab.appian-stratus.com/ramaswamy.u/erd-gen`
+- Local: `/Users/ramaswamy.u/repo/erd-gen`
+- Features: JSON input → layout engine → .lucid generation → Lucid API upload
+- Layout: Sugiyama-style (BFS layering, barycenter crossing minimization, position assignment)
+
+**2. Updated `action-erd.md` steering** in dev power repo
+- Tells agent to: gather schema → write JSON → run `erd-gen` → report result
+- Defines input JSON schema, field selection rules, domain assignment patterns
+
+**3. Verified end-to-end pipeline:**
+- Generated Source Selection ERD (29 tables, 63 relationships, 8 layers)
+- Uploaded to Lucidchart successfully
+- URL: working Lucidchart document with layout
+
+#### Current Problems (visual quality)
+1. **`rectangle` shapes lack proper formatting** — no columns, no row separators, just text blob
+2. **Tables overlap** in dense layers — NodeGap too small
+3. **Diagram too wide** — 8 layers at 380px each
+4. **Lines route through boxes** — Lucid's auto-routing doesn't avoid intermediate shapes well
+5. **`table` shape type** — has `rows` property but correct format is undocumented/broken
+
+#### Next Steps
+| Priority | Task | Status |
+|----------|------|--------|
+| P0 | Test `table` rows format (3 test files ready at /tmp/) | Pending upload test |
+| P0 | If table fails → pivot to Draw.io XML output (.drawio) | Contingency |
+| P1 | Fix layout spacing (NodeGap, LayerGap, vertical centering) | After format resolved |
+| P1 | Update steering to reference tool install from GitLab releases | After tool stable |
+| P2 | CI pipeline for release binaries | After format + layout stable |
+| P2 | Multi-page support (Full + domain-scoped views) | Future |
+
+#### Files Modified
+- `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-sql-forge/steering/action-erd.md` — rewritten for erd-gen tool
+- `/Users/ramaswamy.u/repo/erd-gen/*` — new repo (schema/, layout/, lucid/, main.go)
+- Removed from power repo: all test `.lucid` files, `fix-lucid.py`, `upload-lucid.sh`
+
+---
