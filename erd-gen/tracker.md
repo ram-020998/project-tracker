@@ -1,67 +1,143 @@
 # ERD-Gen CLI Tool — Project Tracker
 
+**Last Updated:** 2026-05-26
+**Repo:** https://gitlab.appian-stratus.com/ramaswamy.u/erd-gen
+**Local:** /Users/ramaswamy.u/repo-gitlab/ramaswamy.u/erd-gen
+**Version:** 1.0.0
+
+---
+
 ## Overview
 
-A self-contained CLI tool (Go binary) that generates Lucidchart ERD diagrams from a structured JSON schema definition. Designed to be called by AI agents (atlas-sql-forge power) or manually.
+A self-contained Go CLI tool that generates ERD diagrams in Lucidchart from a structured JSON schema definition. Used by the atlas-sql-forge power's `action-erd` steering.
 
-**Repo:** https://gitlab.appian-stratus.com/ramaswamy.u/erd-gen
-**Local:** /Users/ramaswamy.u/repo/erd-gen
+---
 
-## Status
+## Current Status: ✅ Production Quality
 
-**Phase: Layout & Rendering Quality** — Core pipeline works (JSON → layout → .lucid → upload) but visual output needs significant improvement.
+- Zero table crossings (all 63 lines route around obstacles)
+- Parallel lines spaced 20px apart (no overlapping)
+- Channel-based Manhattan routing with obstacle avoidance
+- `elbowControlPoints` + `shapeEndpoint` for crow's foot notation + custom routing
+- Domain containers in 3-column grid with 3-column internal table layout
+- Proper cell formatting (PK/FK + field names)
+- Generate, update, export, share, config commands
+- Token stored persistently in `~/.config/erd-gen/config.json`
+
+**Remaining:** Lines still overlap each other in dense areas. Can be further improved with dynamic gap sizing based on line density.
+
+---
 
 ## Session Log
 
-### 2026-05-25 — Initial Build & Discovery
+### 2026-05-25 — Initial Build
 
-#### Completed
-- Created standalone Go repo at `/Users/ramaswamy.u/repo/erd-gen`
-- Implemented Sugiyama-style layered layout engine (BFS layering, barycenter crossing minimization)
-- Implemented Lucid Standard Import renderer (rectangles + elbow lines + crow's foot notation)
-- Implemented ZIP packaging (.lucid output)
-- Implemented Lucid REST API upload with `--upload` flag
-- Fixed MIME type issue (must send `x-application/vnd.lucid.standardImport`)
-- Pushed to GitLab: `ramaswamy.u/erd-gen`
-- Added Source Selection test fixture at `testdata/SourceSelection.json`
-- Successfully uploaded ERD to Lucidchart (29 tables, 63 relationships)
+- Created standalone Go repo
+- Implemented Sugiyama-style layout (BFS layering, barycenter crossing minimization)
+- Discovered Lucid Standard Import format through trial and error
+- Successfully uploaded first ERD (rectangles with text — poor formatting)
+- Pushed to GitLab
 
-#### Decisions Made
-- **Go over Python/Rust** — stdlib has ZIP, HTTP, JSON; cross-compile is trivial; single binary ~8MB
-- **Separate repo from power** — agent installs binary from releases, not bundled in power
-- **Lucid Standard Import over Draw.io** — Direct API upload, no manual file import needed
-- **Rectangle shapes (not native ERD blocks)** — `ERDEntityBlock2`/`ERDEntityBlock3` are NOT supported by Standard Import API (confirmed via Lucid community forum)
-- **`table` shape type exists** — accepts keys: `id, type, x, y, w, h, text, style, rows` — but correct `rows` format is still unknown
+### 2026-05-26 — Format Discovery & v1.0.0
 
-#### Learnings — Lucid Standard Import API
-- `.lucid` file = ZIP containing `document.json`
-- Upload via `POST https://api.lucid.co/v1/documents` with OAuth2 bearer token
-- File part MUST have `Content-Type: x-application/vnd.lucid.standardImport` (not `application/octet-stream`)
-- Cannot import `.lucid` files via Lucidchart UI — UI import only accepts: `.vdx, .vsd, .vsdx, .vsdm, .pdf, .graffle, .xml, .drawio, .gxml, .gliffy, .bpmn, .xpdl`
-- Native ERD shapes (`ERDEntityBlock2`, etc.) are NOT supported in Standard Import
-- `rectangle` shape uses `boundingBox: {x, y, w, h}` + `style.fill: {type: "color", color: "#hex"}`
-- `table` shape uses flat `x, y, w, h` (NOT `boundingBox`) + has `rows` property
-- `table` type does NOT accept `style`, `cells`, `rowCount`, `colCount`, `boundingBox`
-- Valid `table` keys: `id, type, x, y, w, h, text, rows`
-- Endpoint styles for ERD: `exactlyOne`, `zeroOrMore`, `zeroOrOne`, `oneOrMore`
-- Lines: `lineType: "elbow"` with `shapeEndpoint` type
-- Lucid MCP server is docs-only (search their documentation), NOT functional API
+**Routing breakthrough:**
+- Discovered `elbowControlPoints` works WITH `shapeEndpoint` (crow's foot + custom routing)
+- Built Manhattan router with obstacle avoidance (channel-based Z-routes)
+- Achieved **zero table crossings** (63/63 lines route cleanly)
+- Added parallel lane spacing (lines sharing a channel offset 20px apart)
+- Added containers as obstacles so lines route AROUND containers, not through them
 
-#### Issues Encountered
-- `table` type with `rows: [["PK", "ID"]]` → error about `cells`/`rowCount`/`colCount` undefined
-- `table` type with `rows: [{"text": "PK | ID"}]` → same error
-- Rectangles with plain text render poorly — no column alignment, no row separators
-- Layout overlaps — NodeGap too small, tables in middle layers collide
-- Diagram too wide at 8 layers × 380px
-- The power's steering wasn't directing agent to use the erd-gen binary (agent wrote Python instead)
+**Layout engine:**
+- 3-column grid for containers
+- 3-column internal layout for large domains (>6 tables)
+- Connectivity-based container ordering (most-connected domains adjacent)
+- Tables sorted within domains (externally-connected at edges)
+- Dynamic spacing: 200px container gaps, 80px table gaps, 40px internal column gaps
 
-#### Architecture
+**Key discovery: Table shape format**
+- The Lucid docs describe `table` with `boundingBox` + `rowCount` + `colCount` + `cells`
+- The API error messages initially said valid keys are `id, type, x, y, w, h, text, rows` (misleading)
+- After testing, confirmed the DOCUMENTED format IS correct — the error was from other shapes in the same file
+- `rectangleContainer` works perfectly for domain grouping
+
+**Bugs found and fixed:**
+1. `stroke` on table shapes breaks cell content — only use `style.fill`
+2. `text` field with Go's `omitempty` drops the key when constraint is empty — Lucid needs `"text": ""` always present
+3. Row height < 34px makes text invisible
+4. `#hex` with alpha channel (8 chars) not supported in `fill.color`
+5. Upload requires explicit `Content-Type: x-application/vnd.lucid.standardImport` MIME on file part
+
+**Architecture rebuild to v1.0.0:**
+- Subcommand architecture: generate, update, export, share
+- `api.go` centralizes all Lucid REST API calls
+- Generate: build + upload, returns document ID + URL
+- Update: delete old document + create new (full regeneration, not patch)
+- Export: GET /documents/{id}/contents
+- Share: POST /documents/{id}/shareLinks
+
+**Lucid MCP Server exploration:**
+- Official Lucid MCP at `https://mcp.lucid.app/mcp` can create diagrams from text
+- Tested: generates ERDs but ignores formatting requirements (no containers, no 2-column tables, no crow's foot)
+- Conclusion: MCP is unreliable for precision formatting — CLI approach is correct
+- MCP useful for ad-hoc quick diagrams, not production ERDs
+
+---
+
+## Learnings: Lucid Standard Import API
+
+### What Works
+| Feature | Format |
+|---------|--------|
+| Table with cells | `type: "table"` + `boundingBox` + `rowCount` + `colCount` + `cells` |
+| Rectangle | `type: "rectangle"` + `boundingBox` + `text` + `style.fill` |
+| Container | `type: "rectangleContainer"` + `boundingBox` + `containerTitle` + `magnetize` |
+| Lines | `lineType: "elbow"` + `shapeEndpoint` with `style` + `shapeId` |
+| ERD cardinality | `exactlyOne`, `zeroOrMore`, `zeroOrOne`, `oneOrMore` |
+| Endpoint position | `position: {x: 0-1, y: 0-1}` for precise attachment |
+| Cell styling | `cells[].style.fill: {type: "color", color: "#hex"}` |
+| Column widths | `userSpecifiedCols: [{index: 0, size: N}]` |
+
+### What Breaks
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| Cells empty | `stroke` in table `style` | Remove `stroke`, only use `fill` |
+| Cells empty | `text` key missing (Go `omitempty`) | Always include `"text": ""` |
+| Text invisible | Row height < 34px | Use ≥ 34px per field row |
+| Invalid fill | Alpha channel in hex (8 chars) | Use 6-char hex only |
+| Upload fails 415 | Wrong MIME type on file part | Set `x-application/vnd.lucid.standardImport` |
+| Table rejected | Using flat `x,y,w,h` for table | Must use `boundingBox: {x,y,w,h}` |
+| Native ERD shapes | `ERDEntityBlock2` in Standard Import | NOT SUPPORTED — use `table` type |
+| Lines through shapes | Lucid auto-routing | Cannot fix via API (Lucid confirmed) |
+| No UI import for .lucid | File → Import menu | Only accepts .drawio, .vsdx, etc. |
+
+### API Endpoints Used
+| Operation | Method | URL |
+|-----------|--------|-----|
+| Create document | POST | `https://api.lucid.co/v1/documents` |
+| Get contents | GET | `https://api.lucid.co/v1/documents/{id}/contents` |
+| Delete document | DELETE | `https://api.lucid.co/v1/documents/{id}` |
+| Create share link | POST | `https://api.lucid.co/v1/documents/{id}/shareLinks` |
+
+### Auth
+- Bearer token via `Authorization: Bearer <token>` header
+- Token from Lucid developer portal (API Keys page)
+- Environment variable: `LUCID_API_TOKEN`
+
+---
+
+## Architecture
+
 ```
 erd-gen/
-├── schema/schema.go      # Input JSON types (Table, Field, Relationship)
-├── layout/layout.go      # Sugiyama layered graph layout engine
-├── lucid/render.go       # Lucid Standard Import renderer
-├── main.go               # CLI (--input, --output, --upload, --token, --version)
+├── main.go              # Subcommand router (generate|update|export|share|version|help)
+├── cmd_generate.go      # Build + upload → URL + document ID
+├── cmd_update.go        # Delete old + create new (full regen)
+├── cmd_export.go        # GET document contents as JSON
+├── cmd_share.go         # Create view-only share link
+├── api.go               # Lucid REST API client
+├── schema/schema.go     # Input JSON types (Table, Field, Relationship)
+├── layout/layout.go     # Domain-grouped horizontal layout engine
+├── lucid/render.go      # Standard Import renderer (tables, containers, lines)
 ├── testdata/
 │   └── SourceSelection.json
 ├── go.mod
@@ -73,59 +149,9 @@ erd-gen/
 
 ## Next Steps
 
-### Immediate (unblock visual quality)
-
-- [ ] **Resolve `table` shape `rows` format** — 3 test files created at `/tmp/table-test-{1,2,3}.lucid` to try different `rows` formats (strings, arrays, number). Upload and see which succeeds.
-- [ ] **If table works** → update renderer to use proper `table` type with columns
-- [ ] **If table doesn't work** → Fall back to **Draw.io XML** output (`.drawio` imports cleanly into Lucidchart via UI, supports proper table cells with `shape=table` mxGraph format)
-
-### Layout improvements
-
-- [ ] Increase NodeGap (50 → 80+) to prevent vertical overlap
-- [ ] Reduce LayerGap (380 → 300) to compact width
-- [ ] Center layers vertically (align midpoints)
-- [ ] Consider max tables per layer (overflow to next column if > 6)
-
-### Power integration
-
-- [ ] Update `action-erd.md` steering to reference the tool by install path (`~/.local/bin/erd-gen`)
-- [ ] Add install instructions to steering (curl from GitLab releases)
-- [ ] Set up CI pipeline for building release binaries (darwin-arm64, darwin-amd64, linux-amd64)
-
-### Future
-
-- [ ] Multiple pages support (Full view + domain-scoped views)
-- [ ] Support updating an existing Lucid document (PATCH/replace)
-- [ ] Version flag in document title from input JSON
-
----
-
-## Reference
-
-### Sample ERD (standard template)
-- Export JSON: `/Users/ramaswamy.u/Downloads/GSS ERD - Dev.json`
-- Format: Uses `ERDEntityBlock2` class with `textAreas` (Key1/Field1, Key2/Field2 pattern)
-- Lines: `CFN ERD One Arrow` / `CFN ERD Many Arrow` for crow's foot
-
-### CLI Usage
-```bash
-# Generate
-./erd-gen --input schema.json --output myapp-erd.lucid
-
-# Generate + upload
-export LUCID_API_TOKEN="key"
-./erd-gen --input schema.json --upload
-
-# Version
-./erd-gen --version  # → erd-gen 0.1.0
-```
-
-### Input JSON format
-```json
-{
-  "title": "App ERD",
-  "tables": [{"name": "T", "domain": "D", "fields": [{"name": "F", "constraint": "PK|FK|"}]}],
-  "relationships": [{"from": "CHILD", "to": "PARENT", "type": "many_to_one"}],
-  "domains": {"D": "#color"}
-}
-```
+| Priority | Task |
+|----------|------|
+| P2 | Fine-tune lane spacing based on actual line density per gap |
+| P2 | Support multiple pages (Full ERD + domain-scoped views per page) |
+| P2 | CI pipeline for building release binaries (tag v1.0.0 needs Go 1.24 image fix) |
+| P3 | Auto-detect schema changes and highlight new/removed tables |

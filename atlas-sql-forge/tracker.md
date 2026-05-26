@@ -274,86 +274,59 @@ atlas-sql-forge/
 
 ## ERD Action — Lucidchart Integration
 
-### 2026-05-25 — Research, Build, Test
+### Status: ✅ Production Quality (v1.0.0)
 
-#### Objective
-Replace the existing Draw.io/Mermaid ERD output with native Lucidchart integration — generate ERDs programmatically and push them directly to Lucidchart via API.
+ERD generation produces professional diagrams with zero table crossings.
 
-#### Research Findings
+**Tool:** https://gitlab.appian-stratus.com/ramaswamy.u/erd-gen
 
-**Lucid Developer Platform:**
-- **Standard Import API** = ZIP file (.lucid) with `document.json` inside
-- Upload via `POST https://api.lucid.co/v1/documents` with OAuth2 bearer token
-- File part must have `Content-Type: x-application/vnd.lucid.standardImport`
-- NO manual import path — `.lucid` files can only be uploaded via REST API
-- Lucid MCP server is documentation-search only (not functional API)
+### What Works
+- Table shapes with 2-column cells (PK/FK + field name) ✅
+- Colored headers per domain ✅
+- Domain containers with titles (3-col grid layout) ✅
+- Crow's foot notation (exactlyOne/zeroOrMore) ✅
+- **Zero table crossings** — Manhattan routing with `elbowControlPoints` ✅
+- **Parallel line spacing** — overlapping lines offset 20px apart ✅
+- Line attachment to specific FK rows ✅
+- Upload + get URL ✅
+- Update (delete + recreate) ✅
+- Export document contents as JSON ✅
+- Create share links ✅
+- Persistent token config (`~/.config/erd-gen/config.json`) ✅
 
-**Shape Limitations (critical):**
-- Native ERD shapes (`ERDEntityBlock2`, `ERDEntityBlock3`, `ERDEntityBlock4`) are **NOT supported** in Standard Import
-- Lucid community confirms: "our native ERD shapes are not supported there"
-- `table` shape type exists with keys: `id, type, x, y, w, h, text, rows` — but correct `rows` format is undocumented and all tested formats fail
-- `rectangle` shapes work but render as plain text blobs — no column alignment
+### Known Limitations
+- Lines may overlap each other in dense areas (not tables, just other lines)
+- Native ERD shapes (ERDEntityBlock2) cannot be created via API
+- `.lucid` files can only be uploaded via REST API (no UI import)
 
-**What works:**
-- `rectangle` with `boundingBox`, `text`, `style.fill: {type: "color", color: "#hex"}`
-- `elbow` lines with `shapeEndpoint` + ERD styles: `exactlyOne`, `zeroOrMore`, `zeroOrOne`, `oneOrMore`
-- Smart line routing (omit `position` from endpoints)
+### Key Decisions
 
-**Standard Template Analysis** (from `/Users/ramaswamy.u/Downloads/GSS ERD - Dev.json`):
-- Uses `ERDEntityBlock2` with `textAreas` (Name + Key1/Field1 pairs)
-- Lines use `CFN ERD One Arrow` / `CFN ERD Many Arrow`
-- `LegendBlockV2` for domain groupings
-- Multiple pages (Full + feature-scoped views)
-- 2-column layout: constraint (PK/FK/"") + field name
-
-#### Decisions Made
 | Decision | Choice | Reasoning |
 |----------|--------|-----------|
-| Output format | Lucid Standard Import (.lucid) | Direct API upload, no manual steps |
-| ERD shapes | `rectangle` type (not native ERD) | Native ERD shapes not in Standard Import |
-| Tool architecture | Standalone Go binary (`erd-gen`) | No runtime deps, single file, cross-platform |
-| Repo structure | Separate `ramaswamy.u/erd-gen` repo | Agent installs from releases, not bundled in power |
-| Layout algorithm | Sugiyama layered graph | Proper topological flow, crossing minimization |
-| Token handling | `LUCID_API_TOKEN` env var | User sets once, agent uses transparently |
-| Upload | Built into CLI (`--upload` flag) | One command does generate + upload |
+| Generation method | CLI tool (`erd-gen`) | Deterministic output, no format variability |
+| Why not Lucid MCP | MCP ignores formatting requirements | Creates generic shapes, no containers, no 2-column tables |
+| Why not MCP server tool | DG MCP is for Appian env operations | Wrong responsibility, would couple unrelated concerns |
+| Output format | Lucid Standard Import (.lucid ZIP) | Direct REST API upload, no manual steps |
+| ERD shapes | `table` type (not native ERD blocks) | `ERDEntityBlock2` not supported in Standard Import |
+| Upload method | REST API with API key | `.lucid` files can't be imported via UI |
+| Update strategy | Delete + recreate (not patch) | ERD is derived from schema — always regenerate fresh |
 
-#### What Was Built
+### Session Timeline (2026-05-25 to 2026-05-26)
 
-**1. `erd-gen` CLI tool** (Go, 8.3MB binary)
-- Location: `https://gitlab.appian-stratus.com/ramaswamy.u/erd-gen`
-- Local: `/Users/ramaswamy.u/repo/erd-gen`
-- Features: JSON input → layout engine → .lucid generation → Lucid API upload
-- Layout: Sugiyama-style (BFS layering, barycenter crossing minimization, position assignment)
+1. Researched Lucid Developer Platform (Standard Import, MCP, REST API)
+2. Discovered native ERD shapes NOT supported in Standard Import
+3. Built initial version with rectangles (poor formatting)
+4. Discovered `table` shape type works with `boundingBox` + `cells` format
+5. Fixed `stroke` breaking cell content, `omitempty` dropping text keys, row height issues
+6. Added domain containers (`rectangleContainer`) for grouping
+7. Added line attachment to specific FK/PK rows for cleaner routing
+8. Explored Lucid MCP server — tested, found unreliable for precision formatting
+9. Rebuilt as v1.0.0 with subcommands (generate, update, export, share)
+10. Final architecture: CLI tool + REST API upload, Lucid MCP removed as primary method
 
-**2. Updated `action-erd.md` steering** in dev power repo
-- Tells agent to: gather schema → write JSON → run `erd-gen` → report result
-- Defines input JSON schema, field selection rules, domain assignment patterns
-
-**3. Verified end-to-end pipeline:**
-- Generated Source Selection ERD (29 tables, 63 relationships, 8 layers)
-- Uploaded to Lucidchart successfully
-- URL: working Lucidchart document with layout
-
-#### Current Problems (visual quality)
-1. **`rectangle` shapes lack proper formatting** — no columns, no row separators, just text blob
-2. **Tables overlap** in dense layers — NodeGap too small
-3. **Diagram too wide** — 8 layers at 380px each
-4. **Lines route through boxes** — Lucid's auto-routing doesn't avoid intermediate shapes well
-5. **`table` shape type** — has `rows` property but correct format is undocumented/broken
-
-#### Next Steps
-| Priority | Task | Status |
-|----------|------|--------|
-| P0 | Test `table` rows format (3 test files ready at /tmp/) | Pending upload test |
-| P0 | If table fails → pivot to Draw.io XML output (.drawio) | Contingency |
-| P1 | Fix layout spacing (NodeGap, LayerGap, vertical centering) | After format resolved |
-| P1 | Update steering to reference tool install from GitLab releases | After tool stable |
-| P2 | CI pipeline for release binaries | After format + layout stable |
-| P2 | Multi-page support (Full + domain-scoped views) | Future |
-
-#### Files Modified
-- `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/atlas-sql-forge/steering/action-erd.md` — rewritten for erd-gen tool
-- `/Users/ramaswamy.u/repo/erd-gen/*` — new repo (schema/, layout/, lucid/, main.go)
-- Removed from power repo: all test `.lucid` files, `fix-lucid.py`, `upload-lucid.sh`
+### Steering File
+- Location: `steering/action-erd.md`
+- Tells agent: gather schema → build JSON → run `erd-gen generate` → report URL
+- Includes field selection rules, domain assignment patterns, relationship type mapping
 
 ---
