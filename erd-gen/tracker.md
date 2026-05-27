@@ -147,11 +147,30 @@ erd-gen/
 
 ---
 
+## Deployment & Distribution
+
+**CI Pipeline:** ✅ Working (golang:1.22-alpine, builds darwin-arm64/amd64, linux-amd64)
+**Release tags:** v1.1.0 (stale), v1.1.1 (current)
+**Install method:** curl from GitLab releases with `PRIVATE-TOKEN: ${GITLAB_TOKEN}` header
+**Known issue:** First v1.1.0 tag created empty release that blocked re-creation. Used v1.1.1 instead.
+**Binary download issue:** Without auth header, GitLab returns HTML login page instead of binary. Steering updated to include `GITLAB_TOKEN`.
+
+**Steering rules for agent:**
+- Agent MUST install erd-gen silently (no asking, no options)
+- NO Markdown/Mermaid fallbacks — only Lucidchart via erd-gen
+- If install fails via curl, retry with `git clone + go build`
+- Token config is one-time user action (`erd-gen config --token`)
+
+**Repo moved:** `/Users/ramaswamy.u/repo/erd-gen` → `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/erd-gen`
+
+---
+
 ## Next Steps
 
 | Priority | Task |
 |----------|------|
+| P1 | Fix GitLab release download URLs (ensure binaries are accessible with GITLAB_TOKEN) |
 | P2 | Fine-tune lane spacing based on actual line density per gap |
 | P2 | Support multiple pages (Full ERD + domain-scoped views per page) |
-| P2 | CI pipeline for building release binaries (tag v1.0.0 needs Go 1.24 image fix) |
 | P3 | Auto-detect schema changes and highlight new/removed tables |
+| P3 | Add `erd-gen update` self-update command once releases are stable |
