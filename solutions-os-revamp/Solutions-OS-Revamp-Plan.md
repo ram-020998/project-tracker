@@ -11,9 +11,10 @@
 
 Solutions OS is being elevated from a knowledge repository to a **production-grade AI development platform** for Appian Solutions teams. This document proposes three interconnected changes:
 
-1. **Merge Atlas and Jarvis into a single unified Appian Intelligence service** — eliminating tool fragmentation and providing one MCP interface for all application intelligence needs
+1. **Modular MCP Architecture (Read · Write · Deploy)** — A Solutions Intelligence Server for application knowledge (read-only, Cloud + Live planes), complemented by lcp-api (a!migo) for object mutations and Appian Deployment MCP for shipping — leveraging existing maintained projects instead of reinventing
 2. **Introduce a single Orchestrator Agent** — so that any user who clones the repo has immediate access to all capabilities without manual power installation or MCP configuration
 3. **Restructure the repository** — to support the orchestrator pattern, simplify onboarding, and enforce consistency
+4. **Global Configuration Bootstrap** (Section 6.5) — a `buildwithclaude`-inspired `setup.sh` that separates MCP infrastructure from power knowledge, making the platform maintainable and one-command installable
 
 ### Why Now
 
@@ -85,76 +86,89 @@ Current user journey:
 
 ---
 
-## 3. Atlas + Jarvis Merge Strategy
+## 3. Modular MCP Architecture: Read · Write · Deploy
 
-### 3.1 Design Principle: Two Data Planes, One Service
+### 3.1 Design Principle: Separation of Concerns
 
-Atlas and Jarvis are not competitors — they are **complementary data planes** serving different temporal needs:
+Rather than merging everything into a single monolithic server, we split by **verb**:
 
-- **Cloud Plane (Atlas)** — Versioned, shared, offline-capable, multi-release intelligence stored in GitLab
-- **Live Plane (Jarvis)** — Real-time, per-environment, write-capable intelligence via Appian Web APIs
+- **Solutions Intelligence Server** — All READS (understand the application)
+- **lcp-api / a!migo** — All WRITES (create, update, modify objects)
+- **Appian Deployment MCP** — All DEPLOYS (package, deploy, promote)
 
-The merged service exposes a **single unified tool namespace**. Agents never need to know which plane answers their query — the service routes automatically based on operation type.
+This ensures:
+- Each module has a single responsibility and clear boundary
+- We leverage existing maintained projects instead of reinventing them
+- The Intelligence Server stays focused on application knowledge
+- Write operations use the platform's own OOTB APIs (stable, maintained by Appian)
+- Deployment is handled by a dedicated open-source MCP server
+
+### 3.2 Solutions Intelligence Server (Read-Only)
+
+The Intelligence Server combines two data planes into a single service for **application knowledge**:
+
+- **Cloud Plane** — Versioned, shared, offline-capable, multi-release intelligence stored in GitLab (formerly Atlas)
+- **Live Plane** — Real-time per-environment application knowledge via Appian Web APIs (Jarvis, streamlined to read-only)
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                    Unified MCP Server                          │
-│              "appian-intelligence" (single Docker image)       │
+│              Solutions Intelligence Server                     │
+│          (single Docker image — READ ONLY)                    │
 ├─────────────────────────────┬────────────────────────────────┤
 │       Cloud Plane           │         Live Plane              │
-│    (GitLab KB - Atlas)      │    (Appian APIs - Jarvis)       │
+│    (GitLab KB)              │    (Jarvis — streamlined)       │
 │                             │                                 │
-│  • Multi-release history    │  • Real-time object state       │
-│  • Cross-release diffs      │  • SAIL expression eval         │
-│  • Shared team knowledge    │  • SQL queries                  │
-│  • Offline graph analysis   │  • Package create/deploy        │
-│  • Schema snapshots         │  • Object creation              │
+│  • Multi-release history    │  • Real-time object content     │
+│  • Cross-release diffs      │  • Live dependency chain        │
+│  • Shared team knowledge    │  • Live impact analysis         │
+│  • Offline graph analysis   │  • App tree & object search     │
+│  • Schema snapshots         │  • Clusters & patterns          │
 │  • Bundle-based navigation  │  • Semantic search              │
-│  • Pipeline refresh trigger │  • Live dependency lookup       │
+│  • Dead code / orphans      │  • Architecture overview        │
+│  • Pipeline refresh trigger │  • Staleness tracking           │
 └─────────────────────────────┴────────────────────────────────┘
 ```
 
-### 3.2 Routing Logic
+**Key change from original plan:** The Live Plane (Jarvis) is stripped of all write operations (object CRUD, deployment, SAIL eval, SQL queries). It retains only the tools needed for **fetching application knowledge** from the live environment. This makes the Intelligence Server purely read-only — it never modifies anything.
 
-The unified server routes based on the nature of each request:
+### 3.3 Routing Logic (Intelligence Server)
+
+The Intelligence Server routes based on the nature of each **read** request:
 
 | Query Type | Routes To | Reason |
 |-----------|-----------|--------|
-| "What changed between release 2.7 and 2.8?" | Cloud | Only Atlas has version history |
-| "Show me current SAIL code for X" | Live (fallback: Cloud) | Jarvis has real-time; Atlas has last-parsed |
-| "Deploy this package" | Live | Only Jarvis can write |
-| "Evaluate this SAIL expression" | Live | Requires live environment |
-| "Run SQL query" | Live | Requires live database |
-| "Show dependency graph for X" | Cloud (fallback: Live) | Atlas has pre-computed graph; Jarvis has live lookup |
+| "What changed between release 2.7 and 2.8?" | Cloud | Only Cloud has version history |
+| "Show me current SAIL code for X" | Live (fallback: Cloud) | Live has real-time; Cloud has last-parsed |
+| "Show dependency graph for X" | Cloud (fallback: Live) | Cloud has pre-computed graph; Live has live lookup |
 | "What are the orphaned objects?" | Cloud | Pre-computed by parser |
 | "Find objects named 'vendor'" | Both (merge results) | Cloud has full index; Live has latest |
 | "What's the schema for this app?" | Cloud | Parser-generated, stable |
-| "Create a constant" | Live | Write operation |
 | "Show me app architecture/patterns" | Cloud preferred | Pre-computed intelligence |
+| "What's the current state of interface X?" | Live | Real-time from environment |
 
 **Fallback behavior:**
 - If Live Plane is not configured (no `APPIAN_ENV_URL`), all queries go to Cloud
 - If Cloud Plane has no data for an app, route to Live
 - For queries both can answer, prefer the more complete source (usually Cloud for analysis, Live for current state)
 
-### 3.3 Unified Tool Namespace
+### 3.4 Intelligence Server Tool Namespace
 
-The merged server consolidates overlapping tools and preserves unique capabilities:
+The Intelligence Server consolidates overlapping read tools from both planes:
 
 #### Consolidated Tools (overlap eliminated)
 
-| Unified Tool | Replaces (Atlas) | Replaces (Jarvis) | Routing |
-|-------------|------------------|-------------------|---------|
-| `get_app_overview` | `get_app_overview` | `jarvis_get_app_tree` | Cloud preferred |
-| `search_objects` | `search_objects` | `jarvis_search_objects` | Both, merge results |
-| `get_object_code` | `get_object_code` | `jarvis_get_object_content` | Live preferred (latest) |
-| `get_object_context` | `get_object_detail` | `jarvis_get_context` | Cloud (richer context) |
-| `get_dependencies` | `get_dependencies` | `jarvis_get_dependency_chain` | Cloud (pre-computed graph) |
-| `get_impact_analysis` | `get_transitive_dependencies` | `jarvis_get_impact_analysis` | Cloud (blast radius) |
-| `list_dead_code` | `list_orphans` | `jarvis_get_dead_code` | Cloud |
-| `get_data_model` | (schema tools) | `jarvis_get_data_model` | Cloud |
+| Unified Tool | Source (Cloud) | Source (Live) | Routing |
+|-------------|----------------|---------------|---------|
+| `get_app_overview` | Cloud KB | Live app tree | Cloud preferred |
+| `search_objects` | Cloud index | Live search | Both, merge results |
+| `get_object_code` | Cloud snapshots | Live fetch | Live preferred (latest) |
+| `get_object_context` | Cloud detail | Live context | Cloud (richer) |
+| `get_dependencies` | Cloud graph | Live chain | Cloud (pre-computed) |
+| `get_impact_analysis` | Cloud transitive | Live analysis | Cloud (blast radius) |
+| `list_dead_code` | Cloud orphans | Live dead code | Cloud |
+| `get_data_model` | Cloud schema | Live model | Cloud |
 
-#### Cloud-Only Tools (Atlas unique capabilities)
+#### Cloud-Only Tools
 
 | Tool | Purpose |
 |------|---------|
@@ -170,21 +184,57 @@ The merged server consolidates overlapping tools and preserves unique capabiliti
 | `get_dependency_path` | Shortest path between two objects |
 | `refresh_knowledge_base` | Trigger CI pipeline to re-parse |
 
-#### Live-Only Tools (Jarvis unique capabilities)
+#### Live-Only Tools (read-only knowledge from environment)
 
 | Tool | Purpose |
 |------|---------|
-| `evaluate_sail_expression` | Test SAIL in live environment |
-| `query_sql` | Read-only SQL against live database |
-| `create_package_for_ticket` | Create package from JIRA ticket |
-| `inspect_package` | Validate package before deploy |
-| `deploy_package` | Deploy to environment |
-| `get_deployment_results` | Check deployment status |
-| `create_constant` | Create new constant object |
-| `get_object_diff` | Compare object versions (live) |
+| `get_clusters` | Application clusters/modules |
+| `get_patterns` | Recognized design patterns |
+| `get_architecture` | Architecture overview |
 | `search_objects_semantic` | Semantic search (live index) |
+| `get_stale_objects` | Objects changed since last parse |
+| `get_entry_points` | Entry points for an object |
+| `get_shared_objects` | Objects shared across apps |
 
-#### Data Generator Tools (separate plane, integrated)
+### 3.5 Complementary MCP Servers
+
+The capabilities **removed from the Live Plane** are handled by dedicated, independently maintained MCP servers:
+
+#### lcp-api / a!migo (Object CRUD)
+
+**Owner:** Saurabh Sabat (already maintained)
+**Source:** https://gitlab.appian-stratus.com/saurabh.sabat/lcp-api
+**Foundation:** Platform OOTB LCP APIs (stable, Appian-maintained)
+
+| Capability | Details |
+|-----------|---------|
+| Object creation | Record types, fields, interfaces, expressions, constants, groups, process models |
+| Object modification | Update any design object via OOTB API |
+| SAIL evaluation | Test expressions in live environment |
+| SQL queries | Read-only SQL against live database (beta API) |
+| Data model workflows | Google Sheets → Appian record types (full pipeline) |
+| Bulk operations | Rename prefixes, batch updates |
+| Multi-profile | Switch between dev/staging/prod environments |
+| Auth | Basic Auth + JWT for beta API |
+| Coverage | 130 plugin + 107 beta = **237 operations** |
+
+#### Appian Deployment MCP (Package & Deploy)
+
+**Owner:** Open source (Kelsey Ross)
+**Source:** https://github.com/kelseymross/appian-deployment-mcp
+
+| Capability | Details |
+|-----------|---------|
+| Package creation | Create deployment packages from tickets/objects |
+| Package inspection | Validate package contents before deploy |
+| Deployment | Deploy to target environment |
+| Deployment results | Check status and outcomes |
+| Environment promotion | Move packages between environments |
+
+#### Data Generator MCP (Test Data)
+
+**Owner:** Ram
+**Source:** solutions-atlas-dg-mcp-server
 
 | Tool | Purpose |
 |------|---------|
@@ -197,55 +247,91 @@ The merged server consolidates overlapping tools and preserves unique capabiliti
 | `get_session` | Session tracking |
 | `rollback_session` | Undo all session creates |
 
-### 3.4 KB Generation: Unified Pipeline
+### 3.6 Why This Split (Not a Monolith)
+
+| Concern | Monolithic approach (original plan) | Modular approach (revised) |
+|---------|-------------------------------------|---------------------------|
+| Write operations | Rebuild inside unified server | Use a!migo (already 237 ops, maintained) |
+| Deployment | Rebuild inside unified server | Use Deployment MCP (open source, maintained) |
+| Intelligence | Build from scratch | Combine existing Cloud + streamlined Live |
+| Maintenance burden | All on Solutions team | Distributed across maintainers |
+| OOTB API changes | Must track and update | a!migo tracks this natively |
+| New capabilities | Must implement | a!migo adds them via `make generate` |
+
+**Principle: Don't reinvent what's already being built and maintained.**
+
+### 3.7 KB Generation: Unified Pipeline
 
 Today:
-- **Atlas:** Parser runs via GitLab CI → outputs JSON → stored in `solutions-atlas-kb` repo
-- **Jarvis:** JAI Appian app generates KB → stored in Appian folders
+- **Cloud Plane:** Solutions Parser runs via GitLab CI → outputs JSON → stored in `solutions-kb` repo
+- **Live Plane:** Solutions KB App (Appian) generates KB → stored in Appian folders
 
-**After merge:** The Atlas Parser becomes the single KB generation engine for both planes.
+**After revamp:** The Solutions Parser remains the single KB generation engine for the Cloud Plane. The Solutions KB App continues to serve real-time KB data for the Live Plane.
 
 ```
 Appian .zip packages (from test environments)
          │
          ▼
-   Atlas Parser (unified)
+   Solutions Parser (unified)
          │
          ├──→ GitLab KB (Cloud Plane data)
          │    └── JSON files: bundles, objects, code, graph, versions, schema
          │
-         └──→ Appian Environment (Live Plane KB - optional)
-              └── JAI app stores parsed clusters, patterns, architecture
+         └──→ Appian Environment (Live Plane KB)
+              └── Solutions KB App: clusters, patterns, architecture, staleness
 ```
 
-**Key decision:** The JAI Appian app continues to exist for Live Plane KB (clusters, patterns, architecture) because it provides real-time staleness detection (`staleCount`) and in-env semantic search. But the **parsing logic** is unified — Atlas Parser output feeds both storage locations.
-
-### 3.5 Ownership Model
+### 3.8 Ownership Model
 
 | Component | Owner | Responsibility |
 |-----------|-------|---------------|
-| Atlas Parser | Ram | Parsing logic, schema extraction, versioning, graph building |
+| Solutions Parser | Ram | Parsing logic, schema extraction, versioning, graph building |
 | Cloud Plane (GitLab KB + tools) | Ram | Version history, bundles, offline analysis, CI pipeline |
-| Live Plane (Appian APIs + tools) | Soma | Real-time queries, write operations, deployment, SAIL eval |
-| Unified MCP Server | Joint | Routing layer, shared interface, tool registration |
+| Live Plane (Jarvis streamlined + tools) | Soma | Real-time knowledge queries, clusters, patterns, semantic search |
+| Solutions Intelligence Server | Joint (Ram + Soma) | Routing layer, shared interface, tool registration |
+| lcp-api / a!migo | Saurabh | Object CRUD operations (237 ops), OOTB LCP API wrapper |
+| Appian Deployment MCP | Open source (Kelsey Ross) | Package creation and deployment |
 | Data Generator | Ram | Test data CRUD operations |
-| JAI Appian App | Soma | KB storage in Appian, staleness tracking, registration UI |
+| Locust Forge | Ram | Performance test generation |
+| Solutions KB App | Soma | KB storage in Appian, staleness tracking, registration UI |
 
-This preserves clear ownership boundaries while delivering a unified user experience.
+This distributes maintenance across multiple owners while delivering a unified user experience via the orchestrator.
+
+### 3.9 Reference Projects
+
+The modular architecture is informed by two existing internal projects that prove the approach:
+
+| Project | Owner | What it proves | Source |
+|---------|-------|---------------|--------|
+| **buildwithclaude** | John Rogers | Single `setup.sh` can bootstrap an entire AI dev environment (150+ MCP tools, skills symlinked globally, credential sync via hooks) | `gitlab.appian-stratus.com/john.rogers/buildwithclaude` |
+| **lcp-api (a!migo)** | Saurabh Sabat | OOTB LCP APIs are sufficient for full object CRUD (237 ops, multi-profile, JWT auth, Google Sheets workflows) | `gitlab.appian-stratus.com/saurabh.sabat/lcp-api` |
+
+**buildwithclaude** inspires our `setup.sh` pattern (Section 6.5). **lcp-api** becomes our write-layer MCP server directly — we adopt it rather than rebuild.
 
 ---
 
-## 4. Unified MCP Architecture
+## 4. MCP Ecosystem Architecture
 
-### 4.1 Single Docker Image
+### 4.1 Overview
 
-The unified service ships as one Docker image with configurable planes:
+The full MCP ecosystem consists of multiple independently-maintained servers, all configured as global infrastructure via `setup.sh`:
 
-```dockerfile
-# registry.gitlab.appian-stratus.com/appian/prod/appian-intelligence:latest
-FROM python:3.11-slim
-# Contains: Cloud Plane + Live Plane + Data Generator + Router
 ```
+┌─────────────────────────────────────────────────────────────────┐
+│                    MCP Infrastructure Layer                       │
+├─────────────────────────────────────────────────────────────────┤
+│  solutions-intelligence  │ Application knowledge (Cloud + Live) │
+│  lcp-api (a!migo)        │ Object CRUD (237 OOTB operations)   │
+│  appian-deployment       │ Package & deploy                     │
+│  data-generator          │ Test data CRUD                       │
+│  locust-forge            │ Performance test generation          │
+│  jira                    │ Issue tracking                       │
+│  playwright              │ Browser automation                   │
+│  google                  │ Google Workspace (Docs, Sheets)      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 4.2 Solutions Intelligence Server (Docker Image)
 
 **Configuration via environment variables:**
 
@@ -255,26 +341,24 @@ FROM python:3.11-slim
 | `ATLAS_KB_PROJECT_ID` | No (default: 13490) | Which GitLab project holds the KB |
 | `APPIAN_ENV_URL` | No | Live Plane — real-time Appian access |
 | `APPIAN_API_KEY` | No | Live Plane authentication |
-| `DATA_GEN_ENABLED` | No (default: true if APPIAN_ENV_URL set) | Data Generator tools |
 
 **Graceful degradation:**
 - Only `GITLAB_TOKEN` set → Cloud-only mode (30+ tools available)
-- Only `APPIAN_ENV_URL` set → Live-only mode (25+ tools available)
-- Both set → Full mode (all 50+ tools available)
+- Only `APPIAN_ENV_URL` set → Live-only mode (15+ tools available)
+- Both set → Full mode (all 45+ tools available)
 - Neither set → Server refuses to start with clear error
 
-### 4.2 Server Architecture
+### 4.3 Server Architecture
 
 ```python
 # Simplified architecture
-class UnifiedMCPServer:
-    """Single MCP server with pluggable planes."""
+class SolutionsIntelligenceServer:
+    """Single MCP server — read-only application knowledge."""
 
     def __init__(self):
-        self.cloud = CloudPlane()     # Atlas GitLab client
-        self.live = LivePlane()       # Jarvis Appian client
-        self.data_gen = DataGenPlane() # Data Generator client
-        self.router = ToolRouter(self.cloud, self.live, self.data_gen)
+        self.cloud = CloudPlane()     # GitLab KB client
+        self.live = LivePlane()       # Jarvis (streamlined) client
+        self.router = ToolRouter(self.cloud, self.live)
 
     # All tools registered in one namespace
     # Router handles dispatch based on tool category and availability
@@ -300,63 +384,62 @@ appian_intelligence/
 │   │   ├── schema.py
 │   │   └── pipeline.py
 │   └── models.py
-├── live/                      # Live Plane (ex-Jarvis)
+├── live/                      # Live Plane (Jarvis streamlined — read-only)
 │   ├── client.py              # Appian HTTP client
 │   ├── tools/                 # Live-specific tool implementations
 │   │   ├── object.py
-│   │   ├── deployment.py
-│   │   ├── expression.py
-│   │   ├── sql.py
-│   │   ├── creation.py
-│   │   └── kb.py             # Jarvis KB tools (clusters, patterns)
+│   │   ├── search.py
+│   │   ├── dependency.py
+│   │   ├── kb.py             # Clusters, patterns, architecture
+│   │   └── semantic.py       # Semantic search
 │   └── models.py
-├── data_gen/                  # Data Generator Plane
-│   ├── client.py
-│   ├── tools/
-│   │   ├── record.py
-│   │   ├── properties.py
-│   │   └── session.py
-│   └── field_registry.py
 └── shared/                    # Shared across planes
     ├── tool_schemas.py        # Unified tool definitions
     ├── logging_config.py
     └── utils.py
 ```
 
-### 4.3 MCP Configuration (User-Facing)
+### 4.4 MCP Configuration (User-Facing)
 
-Users configure ONE entry in their MCP settings:
+Users don't configure these manually — `setup.sh` writes all entries. The resulting `~/.kiro/settings/mcp.json`:
 
 ```json
 {
   "mcpServers": {
-    "appian": {
+    "solutions-intelligence": {
       "command": "docker",
-      "args": [
-        "run", "--rm", "-i",
-        "--env", "GITLAB_TOKEN",
-        "--env", "APPIAN_ENV_URL",
-        "--env", "APPIAN_API_KEY",
-        "registry.gitlab.appian-stratus.com/appian/prod/appian-intelligence:latest"
-      ],
-      "env": {
-        "GITLAB_TOKEN": "${GITLAB_TOKEN}",
-        "APPIAN_ENV_URL": "${APPIAN_ENV_URL}",
-        "APPIAN_API_KEY": "${APPIAN_API_KEY}"
-      }
-    }
+      "args": ["run", "--rm", "-i", "--env", "GITLAB_TOKEN", "--env", "APPIAN_ENV_URL", "--env", "APPIAN_API_KEY",
+        "registry.gitlab.appian-stratus.com/appian/prod/solutions-intelligence-server:latest"],
+      "env": { "GITLAB_TOKEN": "${GITLAB_TOKEN}", "APPIAN_ENV_URL": "${APPIAN_ENV_URL}", "APPIAN_API_KEY": "${APPIAN_API_KEY}" }
+    },
+    "lcp-api": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/lcp-api", "python", "-m", "appian_lcp.ops"],
+      "env": { "APPIAN_PROFILE": "${APPIAN_PROFILE}" }
+    },
+    "appian-deployment": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "--env", "APPIAN_URL", "--env", "APPIAN_API_KEY",
+        "ghcr.io/kelseymross/appian-deployment-mcp:latest"],
+      "env": { "APPIAN_URL": "${APPIAN_URL}", "APPIAN_API_KEY": "${APPIAN_API_KEY}" }
+    },
+    "data-generator": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "--env", "APPIAN_ENV_URL", "--env", "APPIAN_API_KEY",
+        "registry.gitlab.appian-stratus.com/ramaswamy.u/solutions-atlas-dg-mcp-server:latest"],
+      "env": { "APPIAN_ENV_URL": "${APPIAN_ENV_URL}", "APPIAN_API_KEY": "${APPIAN_API_KEY}" }
+    },
+    "jira": { "..." : "..." },
+    "playwright": { "..." : "..." }
   }
 }
 ```
 
-This replaces:
-- `atlas-mcp.json` (current Atlas config)
-- Jarvis power `mcp.json` (current Jarvis config)
-- Data Generator `mcp.json` (current DG config)
+This replaces the previous approach where each power bundled its own `mcp.json`. All servers are infrastructure — configured once, available to all powers/agents.
 
-### 4.4 Tool Registration: Self-Describing
+### 4.5 Tool Registration: Self-Describing
 
-The unified server dynamically registers tools based on which planes are active:
+The Intelligence Server dynamically registers tools based on which planes are active:
 
 ```python
 async def list_tools() -> list[Tool]:
@@ -367,21 +450,18 @@ async def list_tools() -> list[Tool]:
         tools.extend(CLOUD_TOOLS)  # Version, bundle, graph tools
 
     if self.live.is_configured():
-        tools.extend(LIVE_TOOLS)  # Deploy, SAIL eval, SQL tools
-
-    if self.data_gen.is_configured():
-        tools.extend(DATA_GEN_TOOLS)  # Record CRUD tools
+        tools.extend(LIVE_TOOLS)  # Live knowledge tools
 
     return tools
 ```
 
 This means agents see only the tools they can actually use — no confusing "tool not available" errors.
 
-### 4.5 Extensibility: Adding New Tools
+### 4.6 Extensibility: Adding New Tools
 
-When a developer wants to add a new tool:
+When a developer wants to add a new intelligence tool:
 
-1. Create a handler function in the appropriate plane (`cloud/tools/`, `live/tools/`, or `data_gen/tools/`)
+1. Create a handler function in the appropriate plane (`cloud/tools/` or `live/tools/`)
 2. Add the tool schema to `shared/tool_schemas.py`
 3. Register in `server.py`
 4. The tool is immediately available to all agents through the unified server
@@ -783,57 +863,271 @@ products/<product-name>/
 
 **Enforcement:** A CI check validates that every product has at minimum `README.md`, `steering/steering.md`, and the six lifecycle folders.
 
-### 6.5 Setup Script
+### 6.5 Global Configuration Bootstrap (`setup.sh`)
 
-`setup.sh` — One-command onboarding:
+#### 6.5.1 Design Principle: Centralized Infrastructure, Lightweight Knowledge
+
+**Reference pattern:** [buildwithclaude](https://gitlab.appian-stratus.com/john.rogers/buildwithclaude) by John Rogers demonstrates this approach for Claude Code — a single `setup.sh` that installs dependencies, syncs credentials into the tool's native config format, and symlinks skills into the global location. Users clone one repo and get everything with no manual configuration.
+
+Solutions OS adopts the same pattern but adapted for Kiro's multi-surface configuration model. The key architectural decision:
+
+> **MCP servers are infrastructure, not power-scoped resources.**
+> Powers are lightweight knowledge (prompts + steering) that reference tools already available in the session.
+
+This means:
+- MCP servers are set up **once globally** by the setup script
+- Powers **no longer bundle their own `mcp.json`** — they call tools that are already running
+- Adding a new power = adding a folder with `POWER.md` + `steering/`. Zero MCP config changes.
+- Updating the MCP server = `docker pull` + restart. All powers immediately get new tools.
+
+#### 6.5.2 Two-Layer Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    INFRASTRUCTURE LAYER                               │
+│              (set up once by setup.sh, shared by all)                 │
+│                                                                      │
+│   ~/.kiro/settings/mcp.json                                          │
+│   ┌─────────────────┐  ┌──────────┐  ┌────────────┐  ┌──────────┐ │
+│   │ appian           │  │ jira     │  │ playwright │  │ google   │ │
+│   │ (unified server) │  │          │  │            │  │          │ │
+│   └─────────────────┘  └──────────┘  └────────────┘  └──────────┘ │
+│         ↑                    ↑              ↑              ↑        │
+│         │   Tools available to ALL powers/agents/sessions  │        │
+└─────────┼────────────────────┼──────────────┼──────────────┼────────┘
+          │                    │              │              │
+┌─────────┼────────────────────┼──────────────┼──────────────┼────────┐
+│         ▼                    ▼              ▼              ▼        │
+│                    KNOWLEDGE LAYER                                    │
+│     (symlinked by setup.sh, activates context per session)           │
+│                                                                      │
+│   ~/.kiro/powers/installed/                                          │
+│   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
+│   │ developer    │  │ sql-forge    │  │ ux-designer  │  ...        │
+│   │ POWER.md     │  │ POWER.md     │  │ POWER.md     │             │
+│   │ steering/    │  │ steering/    │  │ steering/    │             │
+│   │ (no mcp.json)│  │ (no mcp.json)│  │ (no mcp.json)│             │
+│   └──────────────┘  └──────────────┘  └──────────────┘             │
+│                                                                      │
+│   ~/.kiro/skills/        ~/.kiro/agents/        ~/.kiro/steering/   │
+│   ┌──────────────┐      ┌──────────────────┐   ┌────────────────┐  │
+│   │ sail-ref     │      │ solutions-os.json │   │ git-workflow   │  │
+│   │ aurora       │      │ (orchestrator)    │   │ conventions    │  │
+│   └──────────────┘      └──────────────────┘   └────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**How it works at runtime:**
+1. User activates a power (e.g., `atlas-developer`)
+2. Power's `POWER.md` and `steering/` load into context
+3. Steering references tools like `get_app_overview`, `search_objects`, `get_dependencies`
+4. These tools resolve to the global `appian` MCP server already running via infrastructure layer
+5. No server startup, no Docker pull, no credential prompt — it just works
+
+#### 6.5.3 Declarative Manifest
+
+The setup script is driven by a manifest file (`solutions-os.manifest.json`) at the repo root. This is the single source of truth for what gets installed globally:
+
+```json
+{
+  "version": "1.0.0",
+  "description": "Solutions OS global configuration manifest",
+
+  "infrastructure": {
+    "mcpServers": {
+      "appian": {
+        "image": "registry.gitlab.appian-stratus.com/appian/prod/appian-intelligence:latest",
+        "env_keys": ["GITLAB_TOKEN", "ATLAS_KB_PROJECT_ID", "APPIAN_ENV_URL", "APPIAN_API_KEY"],
+        "autoApprove": ["*"],
+        "description": "Unified Appian Intelligence (Cloud + Live + Data Gen)"
+      },
+      "jira": {
+        "image": "registry.gitlab.appian-stratus.com/appian/prod/jira-mcp-proxy/jira-mcp-proxy:latest",
+        "env_keys": ["JIRA_URL", "JIRA_EMAIL", "JIRA_TOKEN"],
+        "autoApprove": ["get_jira_issue", "get_issue_comments", "search_jira_issues", "get_user_info", "get_jira_projects"],
+        "description": "Jira issue tracking"
+      },
+      "playwright": {
+        "command": "npx",
+        "args": ["@playwright/mcp@latest"],
+        "autoApprove": ["browser_navigate", "browser_take_screenshot", "browser_snapshot", "browser_click", "browser_type", "browser_press_key", "browser_close"],
+        "description": "Browser automation for testing and demos"
+      }
+    }
+  },
+
+  "knowledge": {
+    "powers": [
+      { "name": "atlas-developer", "path": "ai-framework/Engineering/.kiro/powers/atlas-developer" },
+      { "name": "atlas-sql-forge", "path": "ai-framework/Engineering/.kiro/powers/atlas-sql-forge" },
+      { "name": "atlas-demo-driver", "path": "ai-framework/Engineering/.kiro/powers/atlas-demo-driver" },
+      { "name": "atlas-locust-forge", "path": "ai-framework/Engineering/.kiro/powers/atlas-locust-forge" },
+      { "name": "atlas-product-owner", "path": "ai-framework/Product/.kiro/powers/atlas-product-owner" },
+      { "name": "atlas-ux-designer", "path": "ai-framework/Product/.kiro/powers/atlas-ux-designer" },
+      { "name": "jarvis", "path": "ai-framework/Engineering/.kiro/powers/jarvis" }
+    ],
+    "skills": [
+      { "name": "sail-reference", "path": "ai-framework/Engineering/.kiro/skills/sail-reference" },
+      { "name": "appian-best-practices", "path": "ai-framework/Engineering/.kiro/skills/appian-best-practices" },
+      { "name": "aurora-design-system", "path": "ai-framework/Product/.kiro/skills/aurora-design-system" }
+    ],
+    "agents": [
+      { "name": "solutions-os", "path": ".kiro/agents/solutions-os.json" }
+    ],
+    "steering": [
+      { "name": "git-workflow", "path": ".kiro/steering/git-workflow.md" }
+    ]
+  },
+
+  "profiles": {
+    "full": { "powers": "*", "skills": "*", "agents": "*" },
+    "engineering": { "powers": ["atlas-developer", "atlas-sql-forge", "atlas-demo-driver", "atlas-locust-forge", "jarvis"], "skills": ["sail-reference", "appian-best-practices"] },
+    "product": { "powers": ["atlas-product-owner", "atlas-ux-designer"], "skills": ["aurora-design-system"] },
+    "minimal": { "powers": ["atlas-developer"], "skills": [] }
+  }
+}
+```
+
+**Why a manifest:**
+- Adding a new power to Solutions OS = one line in this file + the power folder. Re-run `./setup.sh`.
+- No user needs to understand Kiro's internal file layout
+- CI can validate manifest integrity (all paths exist, no stale references)
+- Enables selective install via profiles (see below)
+
+#### 6.5.4 Setup Script Behavior
 
 ```bash
-#!/bin/bash
-# Solutions OS Setup
-# Usage: ./setup.sh
-
-echo "🔧 Solutions OS Setup"
-
-# Check prerequisites
-command -v docker >/dev/null || { echo "❌ Docker required"; exit 1; }
-command -v kiro-cli >/dev/null || { echo "❌ Kiro CLI required"; exit 1; }
-
-# Check env vars
-[[ -z "$GITLAB_TOKEN" ]] && echo "⚠️  Set GITLAB_TOKEN for full functionality"
-[[ -z "$APPIAN_ENV_URL" ]] && echo "ℹ️  Set APPIAN_ENV_URL for live environment access"
-
-# Docker login
-echo "📦 Authenticating with Docker registry..."
-docker login registry.gitlab.appian-stratus.com 2>/dev/null
-
-# Pull unified image
-echo "📥 Pulling Appian Intelligence image..."
-docker pull registry.gitlab.appian-stratus.com/appian/prod/appian-intelligence:latest
-
-# Verify
-echo "✅ Setup complete. Run: kiro-cli --agent solutions-os"
+./setup.sh                       # Full install (all powers, skills, agents, MCP servers)
+./setup.sh --profile engineering # Engineering powers + skills only
+./setup.sh --profile product     # Product powers + skills only
+./setup.sh --update              # Re-symlink + pull latest Docker images (after git pull)
+./setup.sh --uninstall           # Remove all symlinks and MCP entries cleanly
+./setup.sh --verify              # Check credentials, Docker images, symlink health
+./setup.sh --status              # Show what's installed and what's available
 ```
+
+**Detailed steps (full install):**
+
+| Step | Action | Target |
+|------|--------|--------|
+| 1. Preflight | Verify Docker, Kiro CLI, git | Terminal |
+| 2. Credentials | Create `.env` from `.env.example` if missing; validate tokens | `.env` |
+| 3. Docker login | Authenticate with GitLab container registry | Docker daemon |
+| 4. Pull images | Pull all MCP server images from manifest | Docker daemon |
+| 5. Write MCP config | Generate `~/.kiro/settings/mcp.json` with servers + credentials from `.env` | `~/.kiro/settings/mcp.json` |
+| 6. Symlink powers | For each power in manifest: `ln -s <repo-path> ~/.kiro/powers/installed/<name>` | `~/.kiro/powers/installed/` |
+| 7. Register powers | Update `~/.kiro/powers/installed.json` with installed power entries | `~/.kiro/powers/installed.json` |
+| 8. Symlink skills | For each skill: `ln -s <repo-path> ~/.kiro/skills/<name>` | `~/.kiro/skills/` |
+| 9. Symlink agents | For each agent: `ln -s <repo-path> ~/.kiro/agents/<name>` | `~/.kiro/agents/` |
+| 10. Symlink steering | For each steering file: `ln -s <repo-path> ~/.kiro/steering/<name>` | `~/.kiro/steering/` |
+| 11. Verify | Validate all symlinks resolve, MCP servers respond, credentials work | Terminal output |
+
+**Idempotency:** Every step checks current state before acting. Re-running after `git pull` picks up new powers/skills without duplicating anything.
+
+#### 6.5.5 Credential Management
+
+```bash
+# .env.example (committed to repo)
+# === Required: Cloud Plane (Atlas) ===
+GITLAB_TOKEN=
+ATLAS_KB_PROJECT_ID=13490
+
+# === Optional: Live Plane (Jarvis) ===
+APPIAN_ENV_URL=
+APPIAN_API_KEY=
+
+# === Optional: Jira ===
+JIRA_URL=https://appian-eng.atlassian.net
+JIRA_EMAIL=
+JIRA_TOKEN=
+
+# === Optional: Data Generator ===
+DATA_GEN_ENV_URL=
+DATA_GEN_API_KEY=
+```
+
+The script reads `.env` and injects values into `~/.kiro/settings/mcp.json`'s env blocks. Credentials never live in the manifest or in power folders.
+
+**Credential sync hook (from `buildwithclaude` pattern):** When `.env` is edited inside Kiro, a `PostToolUse` hook detects the change and re-runs the credential sync automatically — so users don't need to re-run `./setup.sh` after a password rotation.
+
+#### 6.5.6 Power Lifecycle Without MCP Bundling
+
+**Before (current):** Each power has its own `mcp.json` → installed into `powers.mcpServers` → duplicate containers:
+
+```
+# Current: 3 powers using Atlas = 3 identical entries in mcp.json
+power-atlas-developer-appian-atlas → docker run ... atlas-mcp-server:latest
+power-atlas-sql-forge-appian-atlas → docker run ... atlas-mcp-server:latest
+power-atlas-locust-forge-appian-atlas → docker run ... atlas-mcp-server:latest
+```
+
+**After (revamp):** One global `appian` server, powers reference tools by name:
+
+```
+# After: 1 server, all powers call the same tools
+appian → docker run ... appian-intelligence:latest
+
+# Powers just contain steering that says:
+# "Use get_app_overview to understand app structure"
+# "Use search_objects to find relevant code"
+# "Use get_dependencies to trace impact"
+```
+
+**Impact on power authors:**
+- Remove `mcp.json` from power folders entirely
+- Steering files reference tool names directly (e.g., "call `get_app_overview`")
+- Tool names are the contract — they must match what the unified MCP server exposes
+- Power testing: activate power → tools are already available → no setup friction
+
+#### 6.5.7 Comparison with `buildwithclaude` Pattern
+
+| Aspect | `buildwithclaude` (Claude Code) | Solutions OS (Kiro) |
+|--------|--------------------------------|---------------------|
+| Setup command | `./setup.sh` | `./setup.sh` |
+| Credentials | `.env` → `.claude/settings.local.json` | `.env` → `~/.kiro/settings/mcp.json` |
+| Knowledge distribution | Skills symlinked to `~/.claude/skills/` | Powers + skills symlinked to `~/.kiro/powers/` + `~/.kiro/skills/` |
+| MCP registration | `.mcp.json` in repo (project-scoped) | Global `~/.kiro/settings/mcp.json` (user-scoped) |
+| Server lifecycle | Per-project (starts with session) | Global (always available, shared across sessions) |
+| Multi-tool routing | Single MCP server (150+ tools) | Single MCP server (unified, 60+ tools) |
+| Adding capabilities | Add skill folder + re-run setup | Add power/skill folder + re-run setup |
+| Credential refresh | PostToolUse hook auto-syncs | PostToolUse hook auto-syncs |
+| Selective install | N/A (all skills always on) | `--profile engineering/product/minimal` |
+| Teardown | Manual removal | `./setup.sh --uninstall` |
+
+#### 6.5.8 Maintainability Guarantees
+
+This approach ensures Solutions OS is maintainable long-term:
+
+1. **Single source of truth** — `solutions-os.manifest.json` defines what's installable. No scattered configs.
+2. **No drift** — Symlinks point to the repo. After `git pull`, knowledge is automatically current.
+3. **No orphans** — `--uninstall` removes everything cleanly. No leftover MCP entries from deleted powers.
+4. **CI-verifiable** — A pipeline can validate that every path in the manifest exists, every power has valid structure, and no power bundles an `mcp.json`.
+5. **Onboarding is one command** — New team member: clone → `./setup.sh` → working in < 5 minutes.
+6. **Offboarding is one command** — Leaving the project: `./setup.sh --uninstall` → clean system.
+7. **Updates are one command** — After `git pull`: `./setup.sh --update` → latest powers, skills, Docker images.
 
 ---
 
 ## 8. Implementation Phases
 
-### Phase 1: Unified MCP Server (Weeks 1-3)
+### Phase 1: Solutions Intelligence Server + MCP Ecosystem (Weeks 1-3)
 
-**Goal:** Single Docker image that serves tools from both planes.
+**Goal:** Intelligence Server (read-only, Cloud + Live) operational. Complementary MCP servers (a!migo, Deployment) integrated.
 
 | Task | Owner | Deliverable |
 |------|-------|------------|
-| Create `appian-intelligence` repo with module structure | Ram | Repo scaffolded with cloud/, live/, data_gen/, shared/ |
-| Port Atlas MCP tools into `cloud/` module | Ram | All 30 Atlas tools working |
-| Port Jarvis MCP tools into `live/` module | Soma | All 42 Jarvis tools working |
-| Port Data Generator tools into `data_gen/` module | Ram | All 8 DG tools working |
+| Create `solutions-intelligence-server` repo with module structure | Ram | Repo scaffolded with cloud/, live/, shared/ |
+| Port Cloud Plane tools into `cloud/` module | Ram | All 30+ Cloud tools working |
+| Streamline Jarvis to read-only, port into `live/` module | Soma | Live knowledge tools only (remove CRUD, deploy, eval) |
 | Implement router with plane detection | Ram | Auto-routing based on config |
-| Consolidate overlapping tools (Section 3.3) | Joint | Unified namespace, no duplicates |
+| Consolidate overlapping tools (Section 3.4) | Joint | Unified namespace, no duplicates |
 | Docker image build pipeline | Ram | CI builds + publishes to registry |
-| Integration tests | Joint | All tools pass against test env |
+| Integrate lcp-api (a!migo) as standalone MCP server | Saurabh | Object CRUD accessible via MCP protocol |
+| Integrate Appian Deployment MCP | Ram | Deployment operations accessible |
+| Configure Data Generator + Locust Forge as standalone MCPs | Ram | All supporting MCPs operational |
+| Integration tests | Joint | All servers pass against test env |
 
-**Exit criteria:** `docker run appian-intelligence` with both env vars set → all tools available via single MCP connection.
+**Exit criteria:** `docker run solutions-intelligence-server` serves read-only knowledge. `lcp-api` serves object CRUD. Deployment MCP serves deploy operations. All accessible as separate MCP servers.
 
 ### Phase 2: Orchestrator + Sub-Agents (Weeks 2-4, parallel with Phase 1)
 
@@ -850,9 +1144,13 @@ echo "✅ Setup complete. Run: kiro-cli --agent solutions-os"
 | Convert Jarvis workflows → sub-agent prompts | Soma | code-reviewer, design-doc integration |
 | Convert sail-reference power → skill | Ram | SKILL.md with frontmatter |
 | Create `.kiro/settings/mcp.json` (unified) | Ram | Single MCP config |
-| Write `setup.sh` onboarding script | Ram | Docker + token validation |
+| Write `setup.sh` bootstrap script (Section 6.5) | Ram | Manifest-driven global config: MCP infra + power/skill symlinks + credential sync + profiles |
+| Create `solutions-os.manifest.json` | Ram | Declarative registry of all installable powers, skills, agents, MCP servers |
+| Remove `mcp.json` from all power folders | Joint | Powers become prompt-only (POWER.md + steering/) — tools resolve via global infra |
+| Implement `PostToolUse` credential sync hook | Ram | `.env` edits auto-propagate to `~/.kiro/settings/mcp.json` without re-running setup |
+| Write `--uninstall` and `--verify` modes | Ram | Clean teardown + health check for support |
 
-**Exit criteria:** New user runs `./setup.sh && kiro-cli --agent solutions-os` → can explore apps, ask questions, and delegate to specialists.
+**Exit criteria:** New user runs `./setup.sh && kiro-cli --agent solutions-os` → can explore apps, ask questions, and delegate to specialists. No power carries its own `mcp.json`.
 
 ### Phase 3: Repo Restructure (Week 4-5)
 
@@ -1109,6 +1407,7 @@ The following decisions need stakeholder sign-off:
 3. **Enforce product folder conventions** — All teams must add `steering/steering.md` at minimum
 4. **Single orchestrator as default** — When users open the repo, they get the orchestrator, not the default Kiro agent
 5. **KB generation ownership** — Atlas Parser as the single parsing engine, JAI app as optional live storage
+6. **Decouple MCP from powers** (Section 6.5) — Powers lose their `mcp.json`; MCP servers become global infrastructure managed by `setup.sh`. This changes how power authors think about tool access (reference by name, not configure per-power) and requires all existing powers to be refactored.
 
 ---
 
