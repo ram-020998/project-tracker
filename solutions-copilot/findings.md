@@ -501,3 +501,67 @@ Key properties:
 - PostToolUse hook auto-syncs on .env edits inside Claude
 - `./claude-appian` wrapper re-syncs on every launch
 - `./verify` tests credentials and re-syncs on success
+
+---
+
+## 12. Live Validation — LCP API on merge-assist Environment
+
+**Date:** June 5, 2026
+**Environment:** https://merge-assist.appianpreview.com
+**Credentials:** admin.user / soloLeveling@98
+**Auth method:** HTTP Basic Auth
+
+### Endpoint Confirmed
+
+```
+https://merge-assist.appianpreview.com/suite/webapi/lcp-api/*
+```
+
+- Returns `401` without credentials (endpoint exists, plugin deployed)
+- Returns `200` with valid Basic Auth
+
+### Operations Tested
+
+| Operation | Endpoint | Result |
+|-----------|----------|--------|
+| List applications | `GET /applications?limit=3` | ✅ 200 — returns 10 apps (GSS, Atlas Data Generator, etc.) |
+| List record types | `GET /applications/{uuid}/record-types?limit=3` | ✅ 200 — 58 record types in GSS |
+| List interfaces | `GET /applications/{uuid}/interfaces?limit=2` | ✅ 200 — 19 interfaces in DD app |
+| Get interface (with SAIL) | `GET /interfaces/{uuid}` | ✅ 200 — full SAIL expression returned (3666 chars) |
+| Search objects | `GET /objects?query=evaluation` | ❌ "Access denied" — may need different permissions or endpoint |
+
+### Sample Responses
+
+**List Applications:**
+```json
+{
+  "items": [
+    {"uuid": "03d67dba-a648-4392-937d-b441a4617c8f", "name": "AS GSS Demo Driver Application", "prefix": "AS_GSS_DD"},
+    {"uuid": "_a-0000e5bc-4a9a-8000-9bbc-011c48011c48_930416", "name": "AS GSS Full Application", "prefix": ""},
+    {"uuid": "1df31c0a-6067-46b6-b39c-d8a3b60bb073", "name": "Atlas Data Generator", "prefix": "ADG"}
+  ],
+  "total": 10, "limit": 3, "offset": 0
+}
+```
+
+**Get Interface (SAIL code):**
+```json
+{
+  "name": "AS_GSS_DD_FM_DemoDriverActions",
+  "description": "This interface has has all the action related to GSS Demo Driver",
+  "expression": "a!localVariables(\n  local!columns: 3,\n  local!loadEvaluation: and(\n    cons!AS_GSS_DD_ARE_USERS_LOADED, ..."
+}
+```
+
+### Key Takeaways
+
+1. **LCP plugin is already deployed** on merge-assist — no setup needed for POC
+2. **Basic Auth works** — standard HTTP username/password, no JWT needed for core operations
+3. **Response format is clean JSON** — `items` array with pagination (`total`, `limit`, `offset`)
+4. **SAIL code is returned as plain text** in the `expression` field — perfect for intelligence/analysis
+5. **Object UUIDs** are the primary identifiers (mix of standard UUIDs and Appian internal format `_a-...`)
+6. **The "Access denied" on /objects search** is a gap to investigate — may need app-scoped search instead (`/applications/{uuid}/objects`)
+
+### Conclusion
+
+The `solutions-lcp-mcp-server` approach is **validated**. The endpoint responds correctly to Basic Auth HTTP requests. Building MCP tools on top of this is straightforward — each tool is a 5-10 line function that makes an HTTP call and returns the JSON response.
