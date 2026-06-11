@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solutions OS Revamp — Executive Presentation</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface-2: #242836;
+  --border: #2e3348;
+  --accent: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.2);
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --text: #e8eaf0;
+  --text-muted: #8892a8;
+  --text-dim: #5a6380;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+}
+
+.presentation { height: 100vh; display: flex; flex-direction: column; }
+
+.slide {
+  display: none;
+  flex: 1;
+  padding: 60px 80px;
+  overflow-y: auto;
+  animation: fadeIn 0.4s ease;
+}
+.slide.active { display: flex; flex-direction: column; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(15, 17, 23, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1000;
+}
+.nav-progress { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; max-width: 60%; }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all 0.3s; }
+.nav-dot.active { background: var(--accent); transform: scale(1.4); box-shadow: 0 0 8px var(--accent-glow); }
+.nav-dot.visited { background: var(--text-dim); }
+.nav-buttons { display: flex; gap: 12px; align-items: center; }
+.nav-btn {
+  padding: 10px 24px; border-radius: 8px; border: 1px solid var(--border);
+  background: transparent; color: var(--text); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+}
+.nav-btn:hover { background: var(--surface); border-color: var(--accent); }
+.nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+.nav-btn.primary:hover { background: #5558e6; }
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.slide-counter { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+
+.slide-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 16px; }
+.act-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 8px; }
+.slide h1 { font-size: clamp(36px, 4vw, 56px); font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+.slide h2 { font-size: clamp(28px, 3vw, 40px); font-weight: 700; line-height: 1.2; margin-bottom: 16px; }
+.slide h3 { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+.slide p { font-size: 18px; line-height: 1.7; color: var(--text-muted); max-width: 850px; }
+.slide p.large { font-size: 22px; }
+
+.gradient-text {
+  background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--purple) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; transition: all 0.3s; }
+.card:hover { border-color: var(--accent); box-shadow: 0 4px 30px var(--accent-glow); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+.stat-card { text-align: center; padding: 32px 20px; }
+.stat-value { font-size: 42px; font-weight: 800; margin-bottom: 8px; }
+.stat-label { font-size: 14px; color: var(--text-muted); }
+
+.comparison-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 24px; font-size: 15px; }
+.comparison-table th { text-align: left; padding: 14px 20px; background: var(--surface-2); color: var(--text-muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.comparison-table th:first-child { border-radius: 10px 0 0 0; }
+.comparison-table th:last-child { border-radius: 0 10px 0 0; }
+.comparison-table td { padding: 16px 20px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.comparison-table tr:last-child td { border-bottom: none; }
+.comparison-table .before { color: var(--red); }
+.comparison-table .after { color: var(--green); }
+
+.tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.tag-red { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+.tag-green { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+.tag-blue { background: rgba(59, 130, 246, 0.15); color: var(--blue); }
+.tag-purple { background: rgba(139, 92, 246, 0.15); color: var(--purple); }
+.tag-orange { background: rgba(245, 158, 11, 0.15); color: var(--orange); }
+
+.icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px; }
+
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(to bottom, var(--accent), var(--purple), var(--green)); border-radius: 2px; }
+.timeline-item { position: relative; margin-bottom: 28px; padding: 20px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.timeline-item::before { content: ''; position: absolute; left: -28px; top: 24px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); }
+.timeline-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--accent); }
+.timeline-item p { font-size: 14px; line-height: 1.5; }
+
+.pain-point { display: flex; gap: 16px; align-items: flex-start; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 0 12px 12px 0; margin-bottom: 16px; }
+.pain-point .number { background: rgba(239, 68, 68, 0.15); color: var(--red); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.pain-point h4 { font-size: 16px; margin-bottom: 4px; }
+.pain-point p { font-size: 14px; color: var(--text-muted); }
+
+.solution-point { display: flex; gap: 16px; align-items: flex-start; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 12px 12px 0; margin-bottom: 16px; }
+.solution-point .number { background: rgba(16, 185, 129, 0.15); color: var(--green); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.solution-point h4 { font-size: 16px; margin-bottom: 4px; }
+.solution-point p { font-size: 14px; color: var(--text-muted); }
+
+.flex-col { display: flex; flex-direction: column; }
+.gap-24 { gap: 24px; } .gap-16 { gap: 16px; }
+.mt-24 { margin-top: 24px; } .mt-32 { margin-top: 32px; } .mt-40 { margin-top: 40px; }
+
+.slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-bottom: 80px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+
+.highlight-box { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05)); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 24px; margin-top: 20px; }
+.quote { border-left: 3px solid var(--accent); padding-left: 20px; font-style: italic; font-size: 20px; color: var(--text); margin: 24px 0; }
+
+.step-list { counter-reset: step; list-style: none; padding: 0; }
+.step-list li { counter-increment: step; position: relative; padding: 16px 20px 16px 60px; margin-bottom: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; font-size: 15px; line-height: 1.5; }
+.step-list li::before { content: counter(step); position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+.user-journey { display: flex; align-items: center; gap: 12px; padding: 16px; flex-wrap: wrap; }
+.journey-step { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 13px; color: var(--text-muted); }
+.journey-arrow { color: var(--text-dim); font-size: 18px; }
+
+.kbd { font-family: 'SF Mono', monospace; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 14px; color: var(--green); }
+
+.animate-in { opacity: 0; transform: translateY(30px); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-in.visible { opacity: 1; transform: translateY(0); }
+
+code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.9em; color: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="presentation">
+
+<!-- ════════════ ACT 1 — CONTEXT ════════════ -->
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide active" id="slide-1">
+  <div class="slide-content" style="align-items: center; text-align: center;">
+    <h1 class="gradient-text" style="max-width: 900px;">Solutions OS Revamp</h1>
+    <p class="large" style="max-width: 720px; margin-top: 16px;">
+      From a collection of fragmented tools to a unified AI development platform — one repo, one command, every capability.
+    </p>
+    <p style="margin-top: 32px; font-size: 15px; color: var(--text-dim);">
+      Proposal for Approval · Author: Ram · 4 interconnected changes · 6-week rollout
+    </p>
+  </div>
+</div>
+
+<!-- SLIDE 2: WHAT IS SOLUTIONS OS TODAY -->
+<div class="slide" id="slide-2">
+  <div class="slide-content">
+    <div class="act-label">Act 1 · Context</div>
+    <div class="slide-label">Where we are today</div>
+    <h2>What is Solutions OS?</h2>
+    <p style="margin-bottom: 32px;">A shared repository that gives AI coding agents deep knowledge about our Appian applications — enabling AI-assisted development, design docs, code review, test data generation, and more.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="icon-box" style="background: rgba(99, 102, 241, 0.15);">🧠</div>
+        <h3>Knowledge Layer</h3>
+        <p style="font-size: 14px;">Product context, feature specs, personas, architecture decisions — organized per product.</p>
+      </div>
+      <div class="card">
+        <div class="icon-box" style="background: rgba(16, 185, 129, 0.15);">🔧</div>
+        <h3>AI Tools (MCP Servers)</h3>
+        <p style="font-size: 14px;">Cloud Plane, Live Plane, Data Generator — give AI agents real access to our Appian environments.</p>
+      </div>
+      <div class="card">
+        <div class="icon-box" style="background: rgba(139, 92, 246, 0.15);">⚡</div>
+        <h3>Powers (Capabilities)</h3>
+        <p style="font-size: 14px;">Pre-built AI workflows — developer, product owner, UX designer, SQL forge, and more.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-32">
+      <p style="font-size: 15px; color: var(--text);">
+        In one line: <strong>Solutions OS makes AI agents experts on our Appian products</strong> — so a developer, PO, or QE can get useful, context-aware help in seconds instead of reading code for hours.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: PROVEN VALUE -->
+<div class="slide" id="slide-3">
+  <div class="slide-content">
+    <div class="act-label">Act 1 · Context</div>
+    <div class="slide-label">It already works</div>
+    <h2>20 projects built on this platform</h2>
+    <p style="margin-bottom: 32px;">During SWAT-a-Palooza, teams built <strong>20 working projects</strong> on Solutions OS — spanning the full software lifecycle. The value is proven. The question is how to scale it to everyone.</p>
+
+    <div class="grid-3" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+      <div class="card stat-card"><div class="stat-value" style="color: var(--blue);">5</div><div class="stat-label">Dev tooling projects</div></div>
+      <div class="card stat-card"><div class="stat-value" style="color: var(--purple);">5</div><div class="stat-label">Docs &amp; reporting</div></div>
+      <div class="card stat-card"><div class="stat-value" style="color: var(--orange);">4</div><div class="stat-label">Design &amp; UX handoff</div></div>
+      <div class="card stat-card"><div class="stat-value" style="color: var(--green);">2</div><div class="stat-label">Test &amp; QE</div></div>
+      <div class="card stat-card"><div class="stat-value" style="color: var(--red);">2</div><div class="stat-label">Accessibility</div></div>
+      <div class="card stat-card"><div class="stat-value" style="color: var(--accent);">2</div><div class="stat-label">Data generation</div></div>
+    </div>
+
+    <div class="highlight-box mt-32">
+      <p style="font-size: 15px;">
+        <strong>The takeaway:</strong> Solutions OS has proven its value across every discipline. But scaling it from a hackathon to <em>all Solutions teams</em> has exposed structural problems — which is exactly what this revamp addresses.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ACT 2 — THE PROBLEMS ════════════ -->
+
+<!-- SLIDE 4: WHY WE NEED A REVAMP -->
+<div class="slide" id="slide-4">
+  <div class="slide-content">
+    <div class="act-label">Act 2 · The Problems</div>
+    <div class="slide-label">Why now</div>
+    <h2>Four structural problems slow adoption</h2>
+    <p style="margin-bottom: 32px;">As Solutions OS moves to production across all teams, four problems have surfaced. They share a root cause: <strong>the platform grew organically as separate tools, never designed as one system.</strong></p>
+
+    <div class="pain-point animate-in"><div class="number">1</div><div>
+      <h4>Tool fragmentation</h4>
+      <p>Two tools (Atlas &amp; Jarvis) solve the same problem with different backends. 6+ capabilities are duplicated.</p>
+    </div></div>
+    <div class="pain-point animate-in"><div class="number">2</div><div>
+      <h4>Three overlapping tools for the live environment</h4>
+      <p>Jarvis, buildwithclaude, and lcp-api all talk to live Appian. Users pick one and miss the others.</p>
+    </div></div>
+    <div class="pain-point animate-in"><div class="number">3</div><div>
+      <h4>Painful onboarding — 30 to 60 minutes</h4>
+      <p>Manual power install, MCP config, Docker auth, env vars — repeated for every single power.</p>
+    </div></div>
+    <div class="pain-point animate-in"><div class="number">4</div><div>
+      <h4>Unmaintainable at scale</h4>
+      <p>Every power bundles its own MCP config. Same server duplicated across powers. No central control.</p>
+    </div></div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px; color: var(--text-muted);">
+        <strong style="color: var(--red);">Net result:</strong> most users install one power, never discover the rest. Capabilities stay siloed, and the support burden grows with every new power. We'll look at each problem, then the solution.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: PROBLEM 1 — FRAGMENTATION -->
+<div class="slide" id="slide-5">
+  <div class="slide-content">
+    <div class="act-label">Act 2 · The Problems</div>
+    <div class="slide-label">Problem 1 — Fragmentation</div>
+    <h2>Atlas vs Jarvis: two tools, one job</h2>
+    <p style="margin-bottom: 24px;">Both answer the same question — <em>"give AI agents structured knowledge about Appian applications"</em> — but they were built independently with different storage strategies.</p>
+
+    <table class="comparison-table">
+      <thead><tr><th>Dimension</th><th style="color: var(--accent);">Atlas (Cloud KB)</th><th style="color: var(--green);">Jarvis (Live env)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Storage</strong></td><td>GitLab — versioned JSON</td><td>Live Appian environment</td></tr>
+        <tr><td><strong>Multi-release history</strong></td><td style="color: var(--green);">✓ Full history &amp; diffs</td><td style="color: var(--red);">✗ Current state only</td></tr>
+        <tr><td><strong>Offline analysis</strong></td><td style="color: var(--green);">✓ No connection needed</td><td style="color: var(--red);">✗ Requires live env</td></tr>
+        <tr><td><strong>Freshness</strong></td><td style="color: var(--orange);">Point-in-time snapshots</td><td style="color: var(--green);">✓ Always latest</td></tr>
+        <tr><td><strong>Overlapping tools</strong></td><td colspan="2" style="text-align: center; color: var(--orange);">6+ duplicates: overview, search, code, dependencies, dead-code, impact</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>The key insight:</strong> these aren't competitors — they're <strong>complementary data planes</strong>. Cloud excels at history &amp; offline analysis; Live excels at real-time state. The problem is they were built separately, so a power built on one can't use the other.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: PROBLEM 2 — LIVE PLANE OVERLAP -->
+<div class="slide" id="slide-6">
+  <div class="slide-content">
+    <div class="act-label">Act 2 · The Problems</div>
+    <div class="slide-label">Problem 2 — Live Env overlap</div>
+    <h2>Three tools all talk to live Appian</h2>
+    <p style="margin-bottom: 24px;">Three independent projects give AI agents access to live environments. They overlap heavily but sit on different foundations — so which do we standardize on?</p>
+
+    <div class="grid-3">
+      <div class="card" style="border-top: 3px solid var(--orange);">
+        <h3 style="color: var(--orange);">Jarvis</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;"><strong>Custom Appian app</strong> deployed per environment. 42 tools.</p>
+        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
+          <div>• Semantic search, clusters, patterns</div>
+          <div>• Dead code &amp; staleness tracking</div>
+          <div>• Package create/deploy</div>
+          <div style="margin-top: 8px; color: var(--orange); font-weight: 600;">Needs: app deployed on target env</div>
+        </div>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--blue);">
+        <h3 style="color: var(--blue);">buildwithclaude</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;"><strong>MCP server</strong> over OOTB LCP APIs. 150+ tools.</p>
+        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
+          <div>• Full CRUD on design objects</div>
+          <div>• SAIL eval, test expressions</div>
+          <div>• Record data operations</div>
+          <div style="margin-top: 8px; color: var(--blue); font-weight: 600;">Needs: LCP plugin on site</div>
+        </div>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--green);">
+        <h3 style="color: var(--green);">lcp-api (a!migo)</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;"><strong>Python library</strong> over OOTB LCP APIs. 237 operations.</p>
+        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
+          <div>• 130 plugin + 107 beta operations</div>
+          <div>• Multi-profile (dev/staging/prod)</div>
+          <div>• Google Sheets → data model</div>
+          <div style="margin-top: 8px; color: var(--green); font-weight: 600;">Needs: LCP plugin + toggles</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong style="color: var(--red);">The problem:</strong> three teams built three ways to talk to live Appian. The overlap is large, but each has unique strengths — so we need to decide <em>which tool owns which responsibility</em> rather than maintaining all three in parallel.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: PROBLEM 3 — ONBOARDING -->
+<div class="slide" id="slide-7">
+  <div class="slide-content">
+    <div class="act-label">Act 2 · The Problems</div>
+    <div class="slide-label">Problem 3 — Onboarding</div>
+    <h2>30–60 minutes before the first useful answer</h2>
+    <p style="margin-bottom: 28px;">Here's what a new team member goes through today just to start using one capability:</p>
+
+    <div class="user-journey">
+      <div class="journey-step">Clone repo</div><div class="journey-arrow">→</div>
+      <div class="journey-step">Navigate folder maze</div><div class="journey-arrow">→</div>
+      <div class="journey-step">Find the right power</div><div class="journey-arrow">→</div>
+      <div class="journey-step">Install power</div><div class="journey-arrow">→</div>
+      <div class="journey-step">Configure MCP server</div><div class="journey-arrow">→</div>
+      <div class="journey-step">Set env vars</div><div class="journey-arrow">→</div>
+      <div class="journey-step">Docker login</div><div class="journey-arrow">→</div>
+      <div class="journey-step">Docker pull</div><div class="journey-arrow">→</div>
+      <div class="journey-step">Verify connection</div><div class="journey-arrow">→</div>
+      <div class="journey-step" style="border-color: var(--red); color: var(--red);">Repeat for every other power</div>
+    </div>
+
+    <div class="grid-2 mt-32">
+      <div class="card" style="border-color: var(--red);">
+        <h3 style="color: var(--red);">⏱️ 30–60 minutes</h3>
+        <p style="font-size: 14px;">To first useful AI interaction — if nothing goes wrong. SSL errors, Docker auth failures, and wrong env vars are common.</p>
+      </div>
+      <div class="card" style="border-color: var(--red);">
+        <h3 style="color: var(--red);">📦 3+ MCP configs per user</h3>
+        <p style="font-size: 14px;">Each power adds its own server entries. Three powers using the same server = three identical Docker containers, configured separately.</p>
+      </div>
+    </div>
+
+    <div class="quote mt-32">
+      "I installed the developer power but didn't know sql-forge and ux-designer existed. Each one was another 15 minutes of setup."
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: PROBLEM 4 — MAINTAINABILITY -->
+<div class="slide" id="slide-8">
+  <div class="slide-content">
+    <div class="act-label">Act 2 · The Problems</div>
+    <div class="slide-label">Problem 4 — Maintainability</div>
+    <h2>Every power bundles its own MCP config</h2>
+    <p style="margin-bottom: 16px;">This is the root cause of the onboarding pain — and it gets worse with every power added.</p>
+
+    <svg viewBox="0 0 800 330" style="width: 100%; max-width: 760px; margin: 0 auto; display: block;" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="20" width="230" height="70" rx="10" fill="#1a1d27" stroke="#ef4444" stroke-width="2"/>
+      <text x="135" y="48" text-anchor="middle" fill="#e8eaf0" font-size="14" font-weight="700">developer</text>
+      <text x="135" y="68" text-anchor="middle" fill="#ef4444" font-size="11">+ own mcp.json</text>
+      <rect x="285" y="20" width="230" height="70" rx="10" fill="#1a1d27" stroke="#ef4444" stroke-width="2"/>
+      <text x="400" y="48" text-anchor="middle" fill="#e8eaf0" font-size="14" font-weight="700">sql-forge</text>
+      <text x="400" y="68" text-anchor="middle" fill="#ef4444" font-size="11">+ own mcp.json</text>
+      <rect x="550" y="20" width="230" height="70" rx="10" fill="#1a1d27" stroke="#ef4444" stroke-width="2"/>
+      <text x="665" y="48" text-anchor="middle" fill="#e8eaf0" font-size="14" font-weight="700">locust-forge</text>
+      <text x="665" y="68" text-anchor="middle" fill="#ef4444" font-size="11">+ own mcp.json</text>
+
+      <line x1="135" y1="90" x2="135" y2="130" stroke="#5a6380" stroke-width="2"/>
+      <line x1="400" y1="90" x2="400" y2="130" stroke="#5a6380" stroke-width="2"/>
+      <line x1="665" y1="90" x2="665" y2="130" stroke="#5a6380" stroke-width="2"/>
+
+      <rect x="40" y="135" width="720" height="120" rx="10" fill="#1a1d27" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="400" y="162" text-anchor="middle" fill="#8892a8" font-size="12">~/.kiro/settings/mcp.json</text>
+      <text x="80" y="190" fill="#ef4444" font-size="13">→ docker run solutions-server:latest</text>
+      <rect x="560" y="178" width="80" height="20" rx="4" fill="rgba(239,68,68,0.15)"/><text x="600" y="192" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="700">DUPLICATE</text>
+      <text x="80" y="212" fill="#ef4444" font-size="13">→ docker run solutions-server:latest</text>
+      <rect x="560" y="200" width="80" height="20" rx="4" fill="rgba(239,68,68,0.15)"/><text x="600" y="214" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="700">DUPLICATE</text>
+      <text x="80" y="234" fill="#ef4444" font-size="13">→ docker run solutions-server:latest</text>
+      <rect x="560" y="222" width="80" height="20" rx="4" fill="rgba(239,68,68,0.15)"/><text x="600" y="236" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="700">DUPLICATE</text>
+
+      <text x="400" y="288" text-anchor="middle" fill="#f59e0b" font-size="13" font-weight="600">Same image duplicated 3×. Credentials scattered. Updates break.</text>
+      <text x="400" y="312" text-anchor="middle" fill="#8892a8" font-size="12">Power authors must understand Docker, the MCP protocol, and credential management.</text>
+    </svg>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        Adding a power shouldn't require Docker and MCP expertise. <strong>The fix is to treat MCP servers as shared infrastructure, not power-scoped resources</strong> — which is exactly what the solution does.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ACT 3 — THE SOLUTION ════════════ -->
+
+<!-- SLIDE 9: SOLUTION OVERVIEW -->
+<div class="slide" id="slide-9">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">The plan</div>
+    <h2>Four interconnected changes</h2>
+    <p style="margin-bottom: 32px;">Each change reinforces the others. Together they turn Solutions OS from a fragile tool collection into a production-grade platform. We'll walk through each one.</p>
+
+    <div class="grid-2">
+      <div class="solution-point"><div class="number">1</div><div>
+        <h4>Modular MCP — Read · Write · Deploy</h4>
+        <p>Split tools by verb. One Intelligence Server reads; a!migo writes; Deployment MCP ships. Reuse what's already maintained.</p>
+      </div></div>
+      <div class="solution-point"><div class="number">2</div><div>
+        <h4>Single Orchestrator Agent</h4>
+        <p>One entry point that routes to specialist sub-agents. No manual power selection.</p>
+      </div></div>
+      <div class="solution-point"><div class="number">3</div><div>
+        <h4>Global Config Bootstrap</h4>
+        <p>One setup script installs everything. MCP = infrastructure. Powers = lightweight knowledge.</p>
+      </div></div>
+      <div class="solution-point"><div class="number">4</div><div>
+        <h4>Repository Restructure (T.I.M.E.)</h4>
+        <p>Lifecycle folders, enforced conventions, single source of truth.</p>
+      </div></div>
+    </div>
+
+    <table class="comparison-table mt-32">
+      <thead><tr><th>Metric</th><th class="before">Today</th><th class="after">After Revamp</th></tr></thead>
+      <tbody>
+        <tr><td>Time to first AI interaction</td><td class="before">30–60 min</td><td class="after">&lt; 5 min</td></tr>
+        <tr><td>MCP configs to manage</td><td class="before">3+ per user</td><td class="after">1 (unified)</td></tr>
+        <tr><td>Powers that use both backends</td><td class="before">0</td><td class="after">All of them</td></tr>
+        <tr><td>Adding a new power</td><td class="before">Folder + mcp.json + Docker + docs</td><td class="after">Folder + POWER.md. Done.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SLIDE 10: CORE PRINCIPLE -->
+<div class="slide" id="slide-10">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">The organizing idea</div>
+    <h2>Separate by verb: Read · Write · Deploy</h2>
+    <p style="margin-bottom: 28px;">The single decision that resolves both the fragmentation and the "three Live tools" problem: <strong>stop merging everything into one tool, and split responsibilities by what the agent is doing.</strong></p>
+
+    <div class="grid-3">
+      <div class="card" style="border-top: 3px solid var(--accent);">
+        <div style="font-size: 32px; margin-bottom: 8px;">🧠</div>
+        <h3 style="color: var(--accent);">READ</h3>
+        <p style="font-size: 14px; margin-bottom: 8px;"><strong>Intelligence Server</strong></p>
+        <p style="font-size: 13px;">Understand the application. Cloud Plane (history) + Live Plane (real-time). Read-only — never modifies anything.</p>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--green);">
+        <div style="font-size: 32px; margin-bottom: 8px;">✏️</div>
+        <h3 style="color: var(--green);">WRITE</h3>
+        <p style="font-size: 14px; margin-bottom: 8px;"><strong>a!migo (lcp-api)</strong></p>
+        <p style="font-size: 13px;">Create &amp; modify objects via Appian's own OOTB APIs. 237 operations, already maintained.</p>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--purple);">
+        <div style="font-size: 32px; margin-bottom: 8px;">🚀</div>
+        <h3 style="color: var(--purple);">DEPLOY</h3>
+        <p style="font-size: 14px; margin-bottom: 8px;"><strong>Deployment MCP</strong></p>
+        <p style="font-size: 13px;">Package, deploy, and promote between environments. Open-source, dedicated.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-32">
+      <p style="font-size: 15px;">
+        <strong>Why split instead of building one monolith?</strong> Each module gets a single, clear responsibility — and we <em>reuse existing maintained projects</em> for writes and deploys instead of reinventing them. The orchestrator simply routes by the verb in the request.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: NAMING -->
+<div class="slide" id="slide-11">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Unified identity</div>
+    <h2>One Unified MCP: Solutions Intelligence</h2>
+    <p style="margin-bottom: 8px;">Before the details — a quick naming reset. "Atlas" and "Jarvis" served well as prototypes. Going to production, components are named by <em>what they do</em>, not by codename.</p>
+
+    <table class="comparison-table mt-24">
+      <thead><tr><th>Old Name</th><th>New Name</th><th>What it is</th></tr></thead>
+      <tbody>
+        <tr><td class="before" style="text-decoration: line-through;">Atlas MCP Server</td><td class="after"><strong>Solutions Intelligence Server</strong></td><td>The unified read-only MCP server</td></tr>
+        <tr><td class="before" style="text-decoration: line-through;">Atlas (Cloud KB)</td><td class="after"><strong>Cloud Plane</strong></td><td>Versioned, offline-capable layer (GitLab KB)</td></tr>
+        <tr><td class="before" style="text-decoration: line-through;">Jarvis (Live env)</td><td class="after"><strong>Live Plane</strong></td><td>Real-time, per-environment layer (Appian APIs)</td></tr>
+        <tr><td class="before" style="text-decoration: line-through;">Atlas Parser</td><td class="after"><strong>Solutions Parser</strong></td><td>KB generation engine (.zip → JSON)</td></tr>
+        <tr><td class="before" style="text-decoration: line-through;">JAI App</td><td class="after"><strong>Solutions KB App</strong></td><td>Appian app for live KB &amp; staleness tracking</td></tr>
+        <tr><td class="before" style="text-decoration: line-through;">atlas-developer, atlas-sql-forge…</td><td class="after"><strong>developer, sql-forge…</strong></td><td>Powers named by function, not backend</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>Principle:</strong> components are named by what they do. This makes the platform self-documenting and approachable to new team members. The rest of this deck uses the new names.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: INTELLIGENCE SERVER — CLOUD PLANE -->
+<div class="slide" id="slide-12">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Change 1 — Read · Cloud Plane</div>
+    <h2>Intelligence Server: the Cloud Plane</h2>
+    <p style="margin-bottom: 24px;">The Cloud Plane keeps the existing Atlas architecture — pre-parsed application data stored as versioned JSON in GitLab. Fast, offline-capable, multi-release.</p>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <h3 style="color: var(--accent);">How it works</h3>
+        <div style="font-size: 14px; color: var(--text-muted); line-height: 1.9; margin-top: 12px;">
+          <div>1. Appian .zip packages exported from environments</div>
+          <div>2. <strong>Solutions Parser</strong> extracts code, dependencies, schema, patterns</div>
+          <div>3. Structured JSON committed to <code>solutions-kb</code></div>
+          <div>4. Cloud Plane reads from GitLab (cached, fast)</div>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <h3 style="color: var(--accent);">What it provides</h3>
+        <div style="font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-top: 12px;">
+          <div>• Multi-release history &amp; changelogs</div>
+          <div>• Cross-release comparison &amp; diffs</div>
+          <div>• Pre-computed dependency graphs</div>
+          <div>• Dead code / orphan analysis</div>
+          <div>• Schema snapshots &amp; relationships</div>
+          <div>• Hub objects &amp; dependency paths</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>Strengths:</strong> works offline · shared across the team (one KB serves everyone) · full version history · pre-computed analysis with no runtime cost. Already operational with 6+ apps indexed.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: INTELLIGENCE SERVER — LIVE PLANE -->
+<div class="slide" id="slide-13">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Change 1 — Read · Live Plane</div>
+    <h2>Intelligence Server: the Live Plane</h2>
+    <p style="margin-bottom: 24px;">The Live Plane is Jarvis, <strong>streamlined to read-only</strong>. It serves application knowledge from the live environment — all CRUD and deployment tools are removed and handed to dedicated servers.</p>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <h3 style="color: var(--green);">Stays in the Live Plane (read)</h3>
+        <div style="font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-top: 12px;">
+          <div>• Real-time object code &amp; content</div>
+          <div>• Live dependency chains &amp; impact analysis</div>
+          <div>• App tree &amp; object search</div>
+          <div>• Clusters, patterns, architecture</div>
+          <div>• Semantic search on live data</div>
+          <div>• Staleness tracking</div>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--red);">
+        <h3 style="color: var(--red);">Removed (moves elsewhere)</h3>
+        <div style="font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-top: 12px;">
+          <div><s>Object creation</s></div>
+          <div><s>Object modification</s></div>
+          <div><s>Package creation &amp; deployment</s></div>
+          <div><s>SAIL expression evaluation</s></div>
+          <div><s>SQL queries</s></div>
+          <div style="margin-top: 12px; color: var(--text); font-weight: 600;">→ to dedicated write/deploy servers (next slide)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>Result:</strong> the Intelligence Server (Cloud + Live) answers exactly one question — <em>"help me understand this application"</em> — and never modifies anything. A request auto-routes to the right plane: Cloud for history, Live for current state.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14: COMPLEMENTARY SERVERS -->
+<div class="slide" id="slide-14">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Change 1 — Write &amp; Deploy</div>
+    <h2>The removed capabilities are already solved</h2>
+    <p style="margin-bottom: 24px;">We don't reinvent what's already built and maintained. The write and deploy concerns go to dedicated, independently-maintained servers.</p>
+
+    <div class="grid-2">
+      <div class="card" style="border-top: 3px solid var(--green);">
+        <h3 style="color: var(--green);">✏️ a!migo (lcp-api) — WRITE</h3>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8; margin-top: 8px;">
+          <div>• 237 CRUD operations via OOTB LCP APIs</div>
+          <div>• Create/update record types, interfaces, rules</div>
+          <div>• Modify process models, constants, groups</div>
+          <div>• SAIL evaluation &amp; SQL queries</div>
+          <div>• Data model from Google Sheets</div>
+          <div>• Multi-profile environment switching</div>
+        </div>
+        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; color: var(--green);">Maintained by Saurabh · uses Appian's own OOTB APIs</div>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--purple);">
+        <h3 style="color: var(--purple);">🚀 Deployment MCP — DEPLOY</h3>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8; margin-top: 8px;">
+          <div>• Create deployment packages</div>
+          <div>• Inspect package contents</div>
+          <div>• Deploy to target environment</div>
+          <div>• Check deployment results</div>
+          <div>• Promote between environments</div>
+        </div>
+        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; color: var(--purple);">Open source · github.com/kelseymross/appian-deployment-mcp</div>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>Principle — don't reinvent:</strong> the Intelligence Server reads, a!migo writes, Deployment MCP ships. Each module stays focused, maintenance is distributed across owners, and the orchestrator routes by the verb.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15: FULL ECOSYSTEM -->
+<div class="slide" id="slide-15">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Change 1 — The full picture</div>
+    <h2>The complete MCP ecosystem</h2>
+    <p style="margin-bottom: 16px;">All servers configured once as shared infrastructure. Every agent can call any of them.</p>
+
+    <svg viewBox="0 0 800 250" style="width: 100%; max-width: 800px; margin: 0 auto; display: block;" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="10" width="780" height="180" rx="14" fill="#12131a" stroke="#6366f1" stroke-width="2"/>
+      <text x="400" y="35" text-anchor="middle" fill="#6366f1" font-size="12" font-weight="700" letter-spacing="1">MCP INFRASTRUCTURE LAYER — set up once, shared by all sessions</text>
+
+      <rect x="30" y="56" width="175" height="50" rx="8" fill="#1a1d27" stroke="#6366f1" stroke-width="1.5"/>
+      <text x="117" y="76" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="700">🧠 intelligence</text>
+      <text x="117" y="92" text-anchor="middle" fill="#5a6380" font-size="9">Cloud + Live (read)</text>
+      <rect x="215" y="56" width="145" height="50" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/>
+      <text x="287" y="76" text-anchor="middle" fill="#10b981" font-size="11" font-weight="700">✏️ a!migo</text>
+      <text x="287" y="92" text-anchor="middle" fill="#5a6380" font-size="9">object CRUD (write)</text>
+      <rect x="370" y="56" width="145" height="50" rx="8" fill="#1a1d27" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="442" y="76" text-anchor="middle" fill="#8b5cf6" font-size="11" font-weight="700">🚀 deployment</text>
+      <text x="442" y="92" text-anchor="middle" fill="#5a6380" font-size="9">package &amp; deploy</text>
+      <rect x="525" y="56" width="125" height="50" rx="8" fill="#1a1d27" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="587" y="76" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">📊 data-gen</text>
+      <text x="587" y="92" text-anchor="middle" fill="#5a6380" font-size="9">test data</text>
+      <rect x="660" y="56" width="115" height="50" rx="8" fill="#1a1d27" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="717" y="76" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">🦗 locust</text>
+      <text x="717" y="92" text-anchor="middle" fill="#5a6380" font-size="9">perf tests</text>
+
+      <rect x="30" y="118" width="120" height="40" rx="8" fill="#1a1d27" stroke="#5a6380" stroke-width="1"/><text x="90" y="142" text-anchor="middle" fill="#8892a8" font-size="11" font-weight="600">jira</text>
+      <rect x="160" y="118" width="120" height="40" rx="8" fill="#1a1d27" stroke="#5a6380" stroke-width="1"/><text x="220" y="142" text-anchor="middle" fill="#8892a8" font-size="11" font-weight="600">playwright</text>
+      <rect x="290" y="118" width="120" height="40" rx="8" fill="#1a1d27" stroke="#5a6380" stroke-width="1"/><text x="350" y="142" text-anchor="middle" fill="#8892a8" font-size="11" font-weight="600">google</text>
+      <rect x="420" y="118" width="120" height="40" rx="8" fill="#1a1d27" stroke="#5a6380" stroke-width="1" stroke-dasharray="4,3"/><text x="480" y="142" text-anchor="middle" fill="#5a6380" font-size="11">+ more…</text>
+      <text x="400" y="178" text-anchor="middle" fill="#5a6380" font-size="11">Read · Write · Deploy + supporting servers — all behind one config</text>
+    </svg>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        Maintenance is distributed: Intelligence (Ram + Soma), a!migo (Saurabh), Deployment (open source), Data Gen &amp; Locust (Ram). Users experience it as <strong>one unified set of tools</strong>.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 16: ORCHESTRATOR -->
+<div class="slide" id="slide-16">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Change 2 — Orchestrator</div>
+    <h2>A single orchestrator agent</h2>
+    <p style="margin-bottom: 24px;">Users never choose which power to activate. The orchestrator understands the request and either handles it directly or delegates to the right specialist.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 style="margin-bottom: 16px;">How it routes</h3>
+        <div class="card" style="font-size: 14px; line-height: 1.9;">
+          <div>"<em>How does scoring work in GSS?</em>"</div>
+          <div style="color: var(--accent);">→ handles directly (read tools)</div>
+          <div style="margin-top: 12px;">"<em>Generate a design doc for GAMS-7126</em>"</div>
+          <div style="color: var(--purple);">→ delegates to developer</div>
+          <div style="margin-top: 12px;">"<em>Create test data for evaluations</em>"</div>
+          <div style="color: var(--orange);">→ delegates to sql-forge</div>
+          <div style="margin-top: 12px;">"<em>Fix accessibility on this interface</em>"</div>
+          <div style="color: var(--green);">→ delegates to a11y-fixer</div>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 16px;">Available specialists</h3>
+        <div class="flex-col gap-16">
+          <div class="card" style="padding: 12px 18px;"><span class="tag tag-blue">ENG</span> <span style="font-size: 14px; margin-left: 8px;"><strong>developer</strong> — code, impact, design docs</span></div>
+          <div class="card" style="padding: 12px 18px;"><span class="tag tag-purple">PRODUCT</span> <span style="font-size: 14px; margin-left: 8px;"><strong>product-owner</strong> — specs, release summaries</span></div>
+          <div class="card" style="padding: 12px 18px;"><span class="tag tag-purple">UX</span> <span style="font-size: 14px; margin-left: 8px;"><strong>ux-designer</strong> — prototypes, Aurora compliance</span></div>
+          <div class="card" style="padding: 12px 18px;"><span class="tag tag-orange">DATA</span> <span style="font-size: 14px; margin-left: 8px;"><strong>sql-forge</strong> — test data, ERDs, SAIL→SQL</span></div>
+          <div class="card" style="padding: 12px 18px;"><span class="tag tag-green">QE</span> <span style="font-size: 14px; margin-left: 8px;"><strong>qe-agent</strong> — test execution, verification</span></div>
+          <div class="card" style="padding: 12px 18px;"><span class="tag tag-red">A11Y</span> <span style="font-size: 14px; margin-left: 8px;"><strong>a11y-fixer</strong> — automated a11y fixes</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 17: GLOBAL BOOTSTRAP -->
+<div class="slide" id="slide-17">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Change 3 — The key architectural change</div>
+    <h2>Global Configuration Bootstrap</h2>
+    <div class="quote">MCP servers are infrastructure, not power-scoped resources. Powers are lightweight knowledge that references tools already available.</div>
+
+    <svg viewBox="0 0 800 300" style="width: 100%; max-width: 800px; margin: 0 auto; display: block;" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="10" width="780" height="115" rx="14" fill="#12131a" stroke="#6366f1" stroke-width="2"/>
+      <text x="400" y="33" text-anchor="middle" fill="#6366f1" font-size="12" font-weight="700" letter-spacing="1">INFRASTRUCTURE LAYER — MCP SERVERS</text>
+      <text x="400" y="50" text-anchor="middle" fill="#5a6380" font-size="11">Set up once by setup.sh. Shared by all sessions. Every agent can call any of these.</text>
+      <rect x="40" y="62" width="160" height="46" rx="8" fill="#1a1d27" stroke="#6366f1" stroke-width="1.5"/><text x="120" y="82" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="700">🧠 intelligence</text><text x="120" y="98" text-anchor="middle" fill="#5a6380" font-size="9">read</text>
+      <rect x="215" y="62" width="130" height="46" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/><text x="280" y="82" text-anchor="middle" fill="#10b981" font-size="11" font-weight="700">✏️ a!migo</text><text x="280" y="98" text-anchor="middle" fill="#5a6380" font-size="9">write</text>
+      <rect x="360" y="62" width="140" height="46" rx="8" fill="#1a1d27" stroke="#8b5cf6" stroke-width="1.5"/><text x="430" y="82" text-anchor="middle" fill="#8b5cf6" font-size="11" font-weight="700">🚀 deployment</text><text x="430" y="98" text-anchor="middle" fill="#5a6380" font-size="9">deploy</text>
+      <rect x="515" y="62" width="110" height="46" rx="8" fill="#1a1d27" stroke="#f59e0b" stroke-width="1.5"/><text x="570" y="82" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">📊 data-gen</text>
+      <rect x="640" y="62" width="120" height="46" rx="8" fill="#1a1d27" stroke="#5a6380" stroke-width="1" stroke-dasharray="4,3"/><text x="700" y="89" text-anchor="middle" fill="#5a6380" font-size="11">jira, … </text>
+
+      <line x1="400" y1="125" x2="400" y2="150" stroke="#5a6380" stroke-width="2"/><polygon points="394,147 400,157 406,147" fill="#5a6380"/>
+
+      <rect x="10" y="160" width="780" height="135" rx="14" fill="#12131a" stroke="#10b981" stroke-width="2"/>
+      <text x="400" y="183" text-anchor="middle" fill="#10b981" font-size="12" font-weight="700" letter-spacing="1">KNOWLEDGE LAYER — POWERS, SKILLS, AGENTS</text>
+      <text x="400" y="200" text-anchor="middle" fill="#5a6380" font-size="11">Symlinked by setup.sh. Lightweight prompts + steering. No bundled MCP configs.</text>
+      <rect x="40" y="212" width="165" height="50" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/><text x="122" y="232" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="700">developer</text><text x="122" y="250" text-anchor="middle" fill="#10b981" font-size="9">calls: intelligence, a!migo</text>
+      <rect x="220" y="212" width="165" height="50" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/><text x="302" y="232" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="700">sql-forge</text><text x="302" y="250" text-anchor="middle" fill="#10b981" font-size="9">calls: intelligence, data-gen</text>
+      <rect x="400" y="212" width="165" height="50" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/><text x="482" y="232" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="700">qe-agent</text><text x="482" y="250" text-anchor="middle" fill="#10b981" font-size="9">calls: intelligence, playwright</text>
+      <rect x="580" y="212" width="165" height="50" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/><text x="662" y="240" text-anchor="middle" fill="#5a6380" font-size="12">+ more…</text>
+      <text x="400" y="283" text-anchor="middle" fill="#5a6380" font-size="11">Adding a power = add a folder with POWER.md. Re-run setup.sh. Done.</text>
+    </svg>
+  </div>
+</div>
+
+<!-- SLIDE 18: ONE COMMAND -->
+<div class="slide" id="slide-18">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Change 3 — In practice</div>
+    <h2>One command does everything</h2>
+
+    <div class="user-journey" style="margin-bottom: 28px;">
+      <div class="journey-step" style="border-color: var(--green); color: var(--green);">git clone</div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-step" style="border-color: var(--green); color: var(--green);">./setup.sh</div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-step" style="border-color: var(--green); color: var(--green);">Start coding with AI</div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <h3 style="margin-bottom: 16px;">What <span class="kbd">./setup.sh</span> does</h3>
+        <ol class="step-list">
+          <li>Checks prerequisites (Docker, Kiro CLI)</li>
+          <li>Creates <code>.env</code>, validates credentials</li>
+          <li>Pulls Docker images for all MCP servers</li>
+          <li>Writes unified MCP config globally</li>
+          <li>Symlinks powers, skills, agents, steering</li>
+          <li>Registers everything &amp; verifies it works</li>
+        </ol>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 16px;">Maintenance commands</h3>
+        <div class="card" style="font-family: 'SF Mono', monospace; font-size: 13px; line-height: 2.2;">
+          <div><span style="color: var(--green);">./setup.sh</span>              <span style="color: var(--text-dim);"># Full install</span></div>
+          <div><span style="color: var(--green);">./setup.sh --update</span>     <span style="color: var(--text-dim);"># After git pull</span></div>
+          <div><span style="color: var(--green);">./setup.sh --verify</span>     <span style="color: var(--text-dim);"># Health check</span></div>
+          <div><span style="color: var(--green);">./setup.sh --uninstall</span>  <span style="color: var(--text-dim);"># Clean removal</span></div>
+          <div><span style="color: var(--green);">./setup.sh --profile eng</span><span style="color: var(--text-dim);"># Eng only</span></div>
+        </div>
+        <h3 style="margin-top: 20px; margin-bottom: 12px;">Why it works</h3>
+        <div class="card" style="font-size: 14px; line-height: 1.8;">
+          <div>✓ <strong>Idempotent</strong> — safe to re-run</div>
+          <div>✓ <strong>No drift</strong> — symlinks track git</div>
+          <div>✓ <strong>No orphans</strong> — clean uninstall</div>
+          <div>✓ <strong>Credential isolation</strong> — secrets in .env only</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 19: POWER AUTHORS -->
+<div class="slide" id="slide-19">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Change 3 — Impact</div>
+    <h2>What changes for power authors</h2>
+    <p style="margin-bottom: 28px;">Powers become dramatically simpler to create and maintain — this is the payoff for the Problem 4 maintainability issue.</p>
+
+    <div class="grid-2">
+      <div class="card" style="border-color: var(--red);">
+        <h3 style="color: var(--red);">Before: heavy powers</h3>
+        <div style="font-family: monospace; font-size: 13px; margin-top: 14px; line-height: 1.8; color: var(--text-muted);">
+          <div>my-power/</div>
+          <div>├── POWER.md</div>
+          <div>├── steering/</div>
+          <div style="color: var(--red);">├── mcp.json          ← Docker config</div>
+          <div style="color: var(--red);">│   ├── cloud server   ← credentials</div>
+          <div style="color: var(--red);">│   ├── live server    ← credentials</div>
+          <div style="color: var(--red);">│   └── data-gen server← credentials</div>
+          <div style="margin-top: 12px; color: var(--red);">Must understand: Docker, MCP protocol,</div>
+          <div style="color: var(--red);">registry auth, credentials, image tags</div>
+        </div>
+      </div>
+      <div class="card" style="border-color: var(--green);">
+        <h3 style="color: var(--green);">After: lightweight powers</h3>
+        <div style="font-family: monospace; font-size: 13px; margin-top: 14px; line-height: 1.8; color: var(--text-muted);">
+          <div>my-power/</div>
+          <div>├── POWER.md</div>
+          <div>└── steering/</div>
+          <div style="margin-top: 12px; color: var(--green);">That's it.</div>
+          <div style="margin-top: 16px; color: var(--green);">Steering just says:</div>
+          <div style="color: var(--green);">"Use get_app_overview to understand apps"</div>
+          <div style="color: var(--green);">"Use search_objects to find code"</div>
+          <div style="margin-top: 12px; color: var(--green);">Tools already run. No config needed.</div>
+          <div style="color: var(--green);">Author only needs to know: prompting.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-32">
+      <p style="font-size: 15px;">
+        <strong>Adding a new power:</strong> create a folder with POWER.md + steering, add one line to the manifest, re-run <code>./setup.sh</code>. No Docker knowledge. No MCP expertise. No credential handling.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 20: T.I.M.E. -->
+<div class="slide" id="slide-20">
+  <div class="slide-content">
+    <div class="act-label">Act 3 · The Solution</div>
+    <div class="slide-label">Change 4 — Repository structure</div>
+    <h2>Repository Restructure + T.I.M.E.</h2>
+    <p style="margin-bottom: 24px;">Products organized by lifecycle stage. The folder structure itself becomes a workflow signal — agents know what to do based on where a file lives.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 style="margin-bottom: 16px;">T.I.M.E. lifecycle per product</h3>
+        <div class="card" style="font-family: monospace; font-size: 13px; line-height: 2; color: var(--text-muted);">
+          <div>products/&lt;product&gt;/</div>
+          <div>├── <span style="color: var(--text-dim);">00-context/</span>     <span style="color: var(--text-dim);">← ground truth</span></div>
+          <div>├── <span style="color: var(--blue);">01-discovery/</span>   <span style="color: var(--text-dim);">← raw ideas</span></div>
+          <div>├── <span style="color: var(--purple);">02-refinement/</span>  <span style="color: var(--text-dim);">← specs + prototypes</span></div>
+          <div>├── <span style="color: var(--orange);">03-planning/</span>    <span style="color: var(--text-dim);">← committed work</span></div>
+          <div>├── <span style="color: var(--accent);">04-delivery/</span>    <span style="color: var(--text-dim);">← active dev</span></div>
+          <div>└── <span style="color: var(--green);">05-shipped/</span>     <span style="color: var(--text-dim);">← released</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 16px;">AI acts on transitions</h3>
+        <div class="flex-col gap-16">
+          <div class="card" style="padding: 12px 18px; font-size: 14px;"><span class="tag tag-blue">→ discovery</span> <span style="margin-left: 8px;">scan for duplicates, flag dependencies</span></div>
+          <div class="card" style="padding: 12px 18px; font-size: 14px;"><span class="tag tag-purple">→ refinement</span> <span style="margin-left: 8px;">expand into spec, draft prototype</span></div>
+          <div class="card" style="padding: 12px 18px; font-size: 14px;"><span class="tag tag-orange">→ planning</span> <span style="margin-left: 8px;">break into tickets, estimate</span></div>
+          <div class="card" style="padding: 12px 18px; font-size: 14px;"><span class="tag tag-blue" style="background: rgba(99,102,241,0.15); color: var(--accent);">→ delivery</span> <span style="margin-left: 8px;">generate design doc + tasks</span></div>
+          <div class="card" style="padding: 12px 18px; font-size: 14px;"><span class="tag tag-green">→ shipped</span> <span style="margin-left: 8px;">write release notes, archive</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">Users just move files between folders. AI responds automatically. No commands to memorize.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ACT 4 — WHY THIS DESIGN WINS ════════════ -->
+
+<!-- SLIDE 21: EXTENSIBILITY -->
+<div class="slide" id="slide-21">
+  <div class="slide-content">
+    <div class="act-label">Act 4 · Why this design wins</div>
+    <div class="slide-label">Advantage 1 — Extensibility</div>
+    <h2>A living, extensible ecosystem</h2>
+    <p style="margin-bottom: 16px;">Solutions OS is a central repository for <strong>every kind of AI capability</strong> — powers, skills, agents, steering. Teams contribute incrementally; everyone benefits immediately.</p>
+
+    <div class="grid-2 mt-24">
+      <div class="card"><h3>🧩 Incremental growth</h3><p style="font-size: 14px;">Anyone adds a new skill or agent → next <code>./setup.sh --update</code> and it's available to everyone. No deployment, no coordination.</p></div>
+      <div class="card"><h3>🤖 Orchestrator-driven</h3><p style="font-size: 14px;">The orchestrator sees all registered agents and skills, and delegates automatically — <em>including ones added after it was written.</em></p></div>
+      <div class="card"><h3>📚 Skills as shared knowledge</h3><p style="font-size: 14px;">Reusable reference docs (SAIL patterns, a11y rules, Aurora specs) any agent can load on demand. Write once, used by all.</p></div>
+      <div class="card"><h3>🔄 Composable agents</h3><p style="font-size: 14px;">Sub-agents invoke other sub-agents. developer can call sql-forge; qe-agent can call a11y-fixer. Modular composition.</p></div>
+    </div>
+
+    <div class="highlight-box mt-32">
+      <p style="font-size: 15px;">
+        <strong>The compound effect:</strong> every new skill or agent makes every <em>other</em> agent smarter. A new "performance-patterns" skill instantly improves developer, code-reviewer, and qe-agent — without touching their code.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 22: PLATFORM AGNOSTIC -->
+<div class="slide" id="slide-22">
+  <div class="slide-content">
+    <div class="act-label">Act 4 · Why this design wins</div>
+    <div class="slide-label">Advantage 2 — Portability</div>
+    <h2>Platform agnostic — write once, configure anywhere</h2>
+    <p style="margin-bottom: 16px;">The entire knowledge layer is platform-independent. Only the thin setup script is platform-specific.</p>
+
+    <svg viewBox="0 0 800 250" style="width: 100%; max-width: 800px; margin: 0 auto; display: block;" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="10" width="780" height="80" rx="14" fill="#12131a" stroke="#6366f1" stroke-width="2"/>
+      <text x="400" y="36" text-anchor="middle" fill="#6366f1" font-size="14" font-weight="700">Solutions OS Repository (THE PRODUCT)</text>
+      <text x="400" y="58" text-anchor="middle" fill="#e8eaf0" font-size="12">Powers · Skills · Agents · Products · MCP Servers · T.I.M.E. — never changes per platform</text>
+      <text x="400" y="78" text-anchor="middle" fill="#5a6380" font-size="11">one thin adapter script per platform ↓</text>
+
+      <rect x="60" y="110" width="200" height="120" rx="12" fill="#1a1d27" stroke="#6366f1" stroke-width="2"/>
+      <text x="160" y="135" text-anchor="middle" fill="#6366f1" font-size="14" font-weight="700">Kiro (today)</text>
+      <rect x="90" y="150" width="140" height="26" rx="6" fill="#242836" stroke="#6366f1" stroke-width="1"/><text x="160" y="168" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="600">setup-kiro.sh</text>
+      <text x="160" y="196" text-anchor="middle" fill="#5a6380" font-size="10">→ ~/.kiro/powers/</text>
+      <text x="160" y="212" text-anchor="middle" fill="#5a6380" font-size="10">→ ~/.kiro/agents/</text>
+
+      <rect x="300" y="110" width="200" height="120" rx="12" fill="#1a1d27" stroke="#f59e0b" stroke-width="2"/>
+      <text x="400" y="135" text-anchor="middle" fill="#f59e0b" font-size="14" font-weight="700">Claude Code</text>
+      <rect x="330" y="150" width="140" height="26" rx="6" fill="#242836" stroke="#f59e0b" stroke-width="1"/><text x="400" y="168" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="600">setup-claude.sh</text>
+      <text x="400" y="196" text-anchor="middle" fill="#5a6380" font-size="10">→ ~/.claude/skills/</text>
+      <text x="400" y="212" text-anchor="middle" fill="#5a6380" font-size="10">→ .mcp.json</text>
+
+      <rect x="540" y="110" width="200" height="120" rx="12" fill="#1a1d27" stroke="#10b981" stroke-width="2"/>
+      <text x="640" y="135" text-anchor="middle" fill="#10b981" font-size="14" font-weight="700">Gemini CLI</text>
+      <rect x="570" y="150" width="140" height="26" rx="6" fill="#242836" stroke="#10b981" stroke-width="1"/><text x="640" y="168" text-anchor="middle" fill="#10b981" font-size="11" font-weight="600">setup-gemini.sh</text>
+      <text x="640" y="196" text-anchor="middle" fill="#5a6380" font-size="10">→ ~/.gemini/commands/</text>
+      <text x="640" y="212" text-anchor="middle" fill="#5a6380" font-size="10">→ .mcp.json</text>
+    </svg>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>Why this matters:</strong> AI tooling moves fast. If a better platform emerges next quarter, we don't rewrite Solutions OS — we write a ~100-line setup script. All knowledge and workflows carry forward. <strong>Zero vendor lock-in.</strong>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 23: ENV REGISTRY -->
+<div class="slide" id="slide-23">
+  <div class="slide-content">
+    <div class="act-label">Act 4 · Why this design wins</div>
+    <div class="slide-label">Supporting infrastructure</div>
+    <h2>Centralized environment registry</h2>
+    <p style="margin-bottom: 24px;">Teams work across many Appian environments. Today credentials are scattered across individual configs. The registry centralizes URLs (safe to commit) and keeps secrets separate.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 style="margin-bottom: 16px;">Shared registry (in repo)</h3>
+        <div class="card" style="font-family: 'SF Mono', monospace; font-size: 12px; line-height: 1.8; color: var(--text-muted);">
+          <div style="color: var(--accent);">// environments.json</div>
+          <div>{</div>
+          <div>&nbsp;&nbsp;"<span style="color: var(--green);">gam-dev2</span>": {</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;"url": "https://…dev2.appianpreview.com",</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;"products": ["source-selection", "vendor-mgmt"]</div>
+          <div>&nbsp;&nbsp;},</div>
+          <div>&nbsp;&nbsp;"<span style="color: var(--green);">cms-dev</span>": {</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;"products": ["case-management-studio"]</div>
+          <div>&nbsp;&nbsp;}</div>
+          <div>}</div>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 16px;">How agents use it</h3>
+        <div class="flex-col gap-16">
+          <div class="card" style="padding: 12px 18px; font-size: 14px;"><span class="tag tag-green">Auto-select</span> <span style="margin-left: 8px;">working on CMS? picks cms-dev automatically</span></div>
+          <div class="card" style="padding: 12px 18px; font-size: 14px;"><span class="tag tag-blue">Multi-env</span> <span style="margin-left: 8px;">"compare schema dev vs staging" → queries both</span></div>
+          <div class="card" style="padding: 12px 18px; font-size: 14px;"><span class="tag tag-purple">Secure</span> <span style="margin-left: 8px;">URLs in registry; API keys in private creds file</span></div>
+          <div class="card" style="padding: 12px 18px; font-size: 14px;"><span class="tag tag-orange">Switching</span> <span style="margin-left: 8px;">"deploy to staging" → resolves env by name</span></div>
+        </div>
+        <div class="highlight-box mt-24"><p style="font-size: 14px;">No more hardcoded URLs in power configs. No more "which environment am I pointed at?"</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 24: KNOWLEDGE LAYERS -->
+<div class="slide" id="slide-24">
+  <div class="slide-content">
+    <div class="act-label">Act 4 · Why this design wins</div>
+    <div class="slide-label">Knowledge architecture</div>
+    <h2>Two knowledge layers, one platform</h2>
+    <p style="margin-bottom: 28px;">Solutions OS serves two distinct kinds of intelligence — they answer fundamentally different questions.</p>
+
+    <div class="grid-2">
+      <div class="card" style="border-top: 3px solid var(--purple);">
+        <h3 style="color: var(--purple);">📚 Product Knowledge</h3>
+        <p style="font-size: 14px; margin-bottom: 12px; color: var(--text);">"What should we build and why?"</p>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+          <div><strong>Source:</strong> <code>products/</code> folders (T.I.M.E.)</div>
+          <div><strong>Contains:</strong> vision, personas, specs, decisions</div>
+          <div><strong>Indexed by:</strong> Kiro KB engine (auto-updates on git pull)</div>
+          <div><strong>Used by:</strong> orchestrator, product-owner</div>
+        </div>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--blue);">
+        <h3 style="color: var(--blue);">🔧 Application Knowledge</h3>
+        <p style="font-size: 14px; margin-bottom: 12px; color: var(--text);">"What exists in the code and how does it work?"</p>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+          <div><strong>Source:</strong> Solutions Parser → GitLab KB (JSON)</div>
+          <div><strong>Contains:</strong> objects, dependencies, schema, versions</div>
+          <div><strong>Accessed via:</strong> Intelligence Server tools (on demand)</div>
+          <div><strong>Used by:</strong> developer, sql-forge, code-reviewer</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-32">
+      <p style="font-size: 15px;">
+        One <strong>Solutions Parser</strong> feeds both: Appian .zip packages → JSON for the Cloud Plane, and live KB data for the Live Plane. Product knowledge auto-updates on git pull; application knowledge refreshes via the CI pipeline.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ACT 5 — EXECUTION ════════════ -->
+
+<!-- SLIDE 25: SWAT FIT -->
+<div class="slide" id="slide-25">
+  <div class="slide-content">
+    <div class="act-label">Act 5 · Execution</div>
+    <div class="slide-label">Proven feasibility</div>
+    <h2>All 20 SWAT-a-Palooza projects fit</h2>
+    <p style="margin-bottom: 24px;">This isn't theoretical. Every hackathon project maps cleanly into the revamped architecture — no project needs a rewrite, just repositioning.</p>
+
+    <div class="grid-3" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+      <div class="card" style="padding: 18px;"><div style="margin-bottom: 10px;"><span class="tag tag-red">A11Y</span> <span style="font-size: 13px; font-weight: 600; margin-left:6px;">2</span></div><div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">A11Y Fixer → <strong>a11y-fixer agent</strong><br>A11y Audit → <strong>shared skill</strong></div></div>
+      <div class="card" style="padding: 18px;"><div style="margin-bottom: 10px;"><span class="tag tag-orange">DATA</span> <span style="font-size: 13px; font-weight: 600; margin-left:6px;">2</span></div><div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">SQL Forge + DataForge → <strong>sql-forge agent</strong></div></div>
+      <div class="card" style="padding: 18px;"><div style="margin-bottom: 10px;"><span class="tag tag-purple">UX</span> <span style="font-size: 13px; font-weight: 600; margin-left:6px;">4</span></div><div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">UX Enhancements, Kiro→FigJam, Spec→Slides, SAIL Canvas → <strong>ux-designer</strong></div></div>
+      <div class="card" style="padding: 18px;"><div style="margin-bottom: 10px;"><span class="tag tag-blue">DEV</span> <span style="font-size: 13px; font-weight: 600; margin-left:6px;">5</span></div><div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">Sweep, Perf-Profiler, a!migo, SAIL→SQL, Assert → <strong>developer</strong></div></div>
+      <div class="card" style="padding: 18px;"><div style="margin-bottom: 10px;"><span class="tag tag-green">QE</span> <span style="font-size: 13px; font-weight: 600; margin-left:6px;">2</span></div><div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">Test Execution Agent → <strong>qe-agent</strong><br>Expression Assert → <strong>developer</strong></div></div>
+      <div class="card" style="padding: 18px;"><div style="margin-bottom: 10px;"><span class="tag tag-orange">DOCS</span> <span style="font-size: 13px; font-weight: 600; margin-left:6px;">5</span></div><div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">Feature Doc Genie, ERD Gen, T.I.M.E., KB Maintenance, Sprint Report</div></div>
+    </div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>Why every project fits:</strong> unified read tools give all agents both data planes · the orchestrator auto-routes · the environment registry handles multi-env targeting · skills share reference knowledge across agents.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 26: BUILDWITHCLAUDE -->
+<div class="slide" id="slide-26">
+  <div class="slide-content">
+    <div class="act-label">Act 5 · Execution</div>
+    <div class="slide-label">Reference architecture</div>
+    <h2>Proven pattern: <code>buildwithclaude</code></h2>
+    <p style="margin-bottom: 24px;">John Rogers' project demonstrates this exact approach for Claude Code + Appian. We're adapting the same principles for Kiro + Solutions OS at larger scale — this de-risks the whole proposal.</p>
+
+    <table class="comparison-table">
+      <thead><tr><th>Aspect</th><th>buildwithclaude (Claude)</th><th>Solutions OS (Kiro)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Setup</strong></td><td><code>./setup.sh</code></td><td><code>./setup.sh</code></td></tr>
+        <tr><td><strong>Credentials</strong></td><td>.env → settings.local.json</td><td>.env → ~/.kiro/settings/mcp.json</td></tr>
+        <tr><td><strong>Knowledge</strong></td><td>Skills symlinked globally</td><td>Powers + skills symlinked globally</td></tr>
+        <tr><td><strong>MCP servers</strong></td><td>1 unified (150+ tools)</td><td>1 unified read + write/deploy + Jira/Playwright</td></tr>
+        <tr><td><strong>Adding capability</strong></td><td>Add skill folder → re-run setup</td><td>Add power folder → re-run setup</td></tr>
+        <tr><td><strong>Credential refresh</strong></td><td>PostToolUse hook auto-syncs</td><td>PostToolUse hook auto-syncs</td></tr>
+        <tr><td><strong>Teardown</strong></td><td>Manual</td><td><code>./setup.sh --uninstall</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>buildwithclaude proves this works at Appian.</strong> We scale it from "one MCP server for one tool" to "one platform for an entire AI development workflow." Same pattern, bigger scope.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 27: GOVERNANCE -->
+<div class="slide" id="slide-27">
+  <div class="slide-content">
+    <div class="act-label">Act 5 · Execution</div>
+    <div class="slide-label">Governance</div>
+    <h2>Ownership, risks, and success metrics</h2>
+
+    <div class="two-col" style="margin-bottom: 24px;">
+      <div>
+        <h3 style="margin-bottom: 16px;">Ownership model</h3>
+        <table class="comparison-table" style="font-size: 13px; margin-top: 0;">
+          <thead><tr><th>Component</th><th>Owner</th></tr></thead>
+          <tbody>
+            <tr><td>Solutions Parser + Cloud Plane</td><td><strong>Ram</strong></td></tr>
+            <tr><td>Live Plane + Solutions KB App</td><td><strong>Soma</strong></td></tr>
+            <tr><td>Intelligence Server (routing)</td><td><strong>Joint</strong></td></tr>
+            <tr><td>a!migo (write)</td><td><strong>Saurabh</strong></td></tr>
+            <tr><td>Deployment MCP</td><td><strong>Open source</strong></td></tr>
+            <tr><td>Orchestrator + Setup</td><td><strong>Ram</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 16px;">Success metrics</h3>
+        <table class="comparison-table" style="font-size: 13px; margin-top: 0;">
+          <thead><tr><th>Metric</th><th>Target</th></tr></thead>
+          <tbody>
+            <tr><td>Onboarding time</td><td style="color: var(--green);"><strong>&lt; 5 min</strong></td></tr>
+            <tr><td>Users with 3+ capabilities</td><td style="color: var(--green);"><strong>&gt; 70%</strong></td></tr>
+            <tr><td>Power install support tickets</td><td style="color: var(--green);"><strong>0</strong></td></tr>
+            <tr><td>Duplicated powers</td><td style="color: var(--green);"><strong>0</strong></td></tr>
+            <tr><td>Products with steering files</td><td style="color: var(--green);"><strong>100%</strong></td></tr>
+            <tr><td>Delegation success rate</td><td style="color: var(--green);"><strong>&gt; 90%</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom: 16px;">Key risks &amp; mitigations</h3>
+    <div class="grid-2">
+      <div class="card" style="padding: 14px 18px;"><div style="margin-bottom: 6px;"><span class="tag tag-orange">MEDIUM</span> <strong style="font-size: 14px; margin-left:6px;">Dev resistance to merge</strong></div><p style="font-size: 13px;">Clear ownership model — neither tool "loses." Both devs keep their domain.</p></div>
+      <div class="card" style="padding: 14px 18px;"><div style="margin-bottom: 6px;"><span class="tag tag-orange">MEDIUM</span> <strong style="font-size: 14px; margin-left:6px;">Breaking existing workflows</strong></div><p style="font-size: 13px;">Old powers kept running until new agents verified. Parallel operation.</p></div>
+      <div class="card" style="padding: 14px 18px;"><div style="margin-bottom: 6px;"><span class="tag tag-orange">MEDIUM</span> <strong style="font-size: 14px; margin-left:6px;">Context window bloat</strong></div><p style="font-size: 13px;">Dynamic tool registration — agents only see tools for their configured planes.</p></div>
+      <div class="card" style="padding: 14px 18px;"><div style="margin-bottom: 6px;"><span class="tag tag-red">HIGH</span> <strong style="font-size: 14px; margin-left:6px;">Teams don't update folders</strong></div><p style="font-size: 13px;">CI enforcement, workshops, a champion per product team.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 28: TIMELINE -->
+<div class="slide" id="slide-28">
+  <div class="slide-content">
+    <div class="act-label">Act 5 · Execution</div>
+    <div class="slide-label">Implementation</div>
+    <h2>6-week rollout, 4 phases</h2>
+    <p style="margin-bottom: 28px;">Phased delivery with clear exit criteria. No big bang — incremental value at each stage.</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <h4>Phase 1 — Intelligence Server + MCP ecosystem (Weeks 1–3)</h4>
+        <p>Unify Cloud + streamlined Live into one read-only image. Integrate a!migo (write) and Deployment MCP. Smart router. CI builds.</p>
+        <div style="margin-top: 8px;"><span class="tag tag-blue">Ram</span> <span class="tag tag-green">Soma</span> <span class="tag tag-purple">Saurabh</span></div>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--text-dim);">Exit: read, write, and deploy each work as separate MCP servers.</div>
+      </div>
+      <div class="timeline-item">
+        <h4>Phase 2 — Orchestrator + Bootstrap (Weeks 2–4)</h4>
+        <p>Orchestrator, sub-agents, setup.sh, manifest, credential sync hook. Remove mcp.json from all powers.</p>
+        <div style="margin-top: 8px;"><span class="tag tag-blue">Ram</span> <span class="tag tag-green">Soma</span></div>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--text-dim);">Exit: <code>./setup.sh</code> → everything works; no power carries mcp.json.</div>
+      </div>
+      <div class="timeline-item">
+        <h4>Phase 3 — Repo Restructure (Weeks 4–5)</h4>
+        <p>T.I.M.E. folders, enforced conventions, CI checks, remove deprecated paths, update docs.</p>
+        <div style="margin-top: 8px;"><span class="tag tag-blue">Ram</span> <span class="tag tag-orange">All teams</span></div>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--text-dim);">Exit: repo matches new structure, CI passes, no old paths.</div>
+      </div>
+      <div class="timeline-item">
+        <h4>Phase 4 — Migration &amp; Deprecation (Weeks 5–6)</h4>
+        <p>Migration guide, workshop, verify SWAT projects, remove old images.</p>
+        <div style="margin-top: 8px;"><span class="tag tag-blue">Ram</span> <span class="tag tag-green">Soma</span> <span class="tag tag-orange">All teams</span></div>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--text-dim);">Exit: zero users on old workflow; all teams on the orchestrator.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 29: CLOSING -->
+<div class="slide" id="slide-29">
+  <div class="slide-content" style="align-items: center; text-align: center;">
+    <div class="slide-label">Summary</div>
+    <h1 class="gradient-text" style="max-width: 800px;">One repo. One command. Every capability.</h1>
+    <p class="large" style="margin-top: 16px; max-width: 700px;">
+      Solutions OS becomes a platform that's as easy to install as it is powerful to use.
+    </p>
+
+    <div class="grid-2 mt-40" style="max-width: 800px; width: 100%;">
+      <div class="card stat-card" style="border-color: var(--red);">
+        <div style="font-size: 14px; color: var(--red); font-weight: 600; margin-bottom: 12px;">TODAY</div>
+        <div class="stat-value" style="color: var(--red); font-size: 32px;">30–60 min</div>
+        <div class="stat-label">to first interaction</div>
+        <div style="margin-top: 12px; font-size: 13px; color: var(--text-dim);">3+ MCP configs · manual install · scattered credentials</div>
+      </div>
+      <div class="card stat-card" style="border-color: var(--green);">
+        <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 12px;">AFTER REVAMP</div>
+        <div class="stat-value" style="color: var(--green); font-size: 32px;">&lt; 5 min</div>
+        <div class="stat-label">to first interaction</div>
+        <div style="margin-top: 12px; font-size: 13px; color: var(--text-dim);">1 command · all powers · centralized · maintainable</div>
+      </div>
+    </div>
+
+    <div class="mt-40" style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+      <span class="tag tag-green" style="font-size: 14px; padding: 8px 16px;">✓ Read · Write · Deploy</span>
+      <span class="tag tag-blue" style="font-size: 14px; padding: 8px 16px;">✓ Orchestrator Agent</span>
+      <span class="tag tag-purple" style="font-size: 14px; padding: 8px 16px;">✓ One-Command Setup</span>
+      <span class="tag tag-orange" style="font-size: 14px; padding: 8px 16px;">✓ T.I.M.E. Framework</span>
+    </div>
+
+    <p style="margin-top: 40px; font-size: 16px; color: var(--text-muted);">
+      6 weeks · 4 phases · clear ownership · proven pattern
+    </p>
+  </div>
+</div>
+
+</div>
+
+<div class="nav-bar">
+  <div class="nav-progress" id="nav-progress"></div>
+  <div class="nav-buttons">
+    <span class="slide-counter" id="slide-counter">1 / 1</span>
+    <button class="nav-btn" id="btn-prev" disabled>← Back</button>
+    <button class="nav-btn primary" id="btn-next">Next →</button>
+  </div>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentSlide = 0;
+const progress = document.getElementById('nav-progress');
+const counter = document.getElementById('slide-counter');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+
+for (let i = 0; i < totalSlides; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.addEventListener('click', () => goToSlide(i));
+  progress.appendChild(dot);
+}
+function goToSlide(n) {
+  slides[currentSlide].classList.remove('active');
+  currentSlide = Math.max(0, Math.min(n, totalSlides - 1));
+  slides[currentSlide].classList.add('active');
+  updateNav();
+  animateSlideContent();
+}
+function updateNav() {
+  counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+  btnPrev.disabled = currentSlide === 0;
+  btnNext.textContent = currentSlide === totalSlides - 1 ? 'Done ✓' : 'Next →';
+  const dots = progress.querySelectorAll('.nav-dot');
+  dots.forEach((dot, i) => {
+    dot.className = 'nav-dot';
+    if (i === currentSlide) dot.classList.add('active');
+    else if (i < currentSlide) dot.classList.add('visited');
+  });
+}
+function animateSlideContent() {
+  const items = slides[currentSlide].querySelectorAll('.animate-in');
+  items.forEach((item, i) => {
+    item.classList.remove('visible');
+    setTimeout(() => item.classList.add('visible'), 150 * (i + 1));
+  });
+}
+btnNext.addEventListener('click', () => { if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1); });
+btnPrev.addEventListener('click', () => { if (currentSlide > 0) goToSlide(currentSlide - 1); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); goToSlide(currentSlide - 1); }
+  if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+  if (e.key === 'End') { e.preventDefault(); goToSlide(totalSlides - 1); }
+});
+updateNav();
+animateSlideContent();
+</script>
+
+</body>
+</html>

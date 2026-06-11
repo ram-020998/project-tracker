@@ -590,7 +590,6 @@ body {
 <body>
 
 <div class="presentation">
-
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 1: TITLE -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -1014,71 +1013,9 @@ body {
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- SLIDE 11: LIVE PLANE — PROPOSED DIRECTION -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-11">
-  <div class="slide-content">
-    <div class="slide-label">Solution — Live Plane</div>
-    <h2>Split by responsibility: Read · Write · Deploy</h2>
-    <p style="margin-bottom: 24px;">Instead of one monolithic server, we separate concerns into purpose-built modules — each independently maintained.</p>
-
-    <div class="grid-3">
-      <div class="card" style="border-top: 3px solid var(--accent);">
-        <h3 style="color: var(--accent); font-size: 16px;">🧠 Solutions Intelligence</h3>
-        <p style="font-size: 12px; color: var(--text); margin-bottom: 8px; font-weight: 600;">All READS — understand the application</p>
-        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
-          <div><strong>Cloud Plane:</strong> App knowledge from GitLab (versioned, offline, multi-release)</div>
-          <div><strong>Live Plane:</strong> App knowledge from environment (real-time object details, SAIL code, dependencies)</div>
-          <div style="margin-top: 8px;">• Get object code & content</div>
-          <div>• Dependencies & impact analysis</div>
-          <div>• Dead code, patterns, clusters</div>
-          <div>• Search objects</div>
-          <div>• Schema & data model info</div>
-        </div>
-        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 11px; color: var(--accent);">Owned by Solutions team (Ram + Soma)</div>
-      </div>
-      <div class="card" style="border-top: 3px solid var(--green);">
-        <h3 style="color: var(--green); font-size: 16px;">✏️ lcp-api (a!migo)</h3>
-        <p style="font-size: 12px; color: var(--text); margin-bottom: 8px; font-weight: 600;">All WRITES — modify objects</p>
-        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
-          <div>Uses platform OOTB LCP APIs</div>
-          <div style="margin-top: 8px;">• Create record types, fields</div>
-          <div>• Update interfaces, expressions</div>
-          <div>• Create constants, groups</div>
-          <div>• Modify process models</div>
-          <div>• Data model from Google Sheets</div>
-          <div>• Bulk rename operations</div>
-          <div>• 237 CRUD operations</div>
-        </div>
-        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 11px; color: var(--green);">Owned by Saurabh — already maintained</div>
-      </div>
-      <div class="card" style="border-top: 3px solid var(--purple);">
-        <h3 style="color: var(--purple); font-size: 16px;">🚀 Deployment MCP</h3>
-        <p style="font-size: 12px; color: var(--text); margin-bottom: 8px; font-weight: 600;">All DEPLOYS — ship changes</p>
-        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
-          <div>Package and deploy across environments</div>
-          <div style="margin-top: 8px;">• Create deployment packages</div>
-          <div>• Inspect package contents</div>
-          <div>• Deploy to target environment</div>
-          <div>• Check deployment results</div>
-          <div>• Promote between environments</div>
-        </div>
-        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 11px; color: var(--purple);">Open source — github.com/kelseymross/appian-deployment-mcp</div>
-      </div>
-    </div>
-
-    <div class="highlight-box mt-24">
-      <p style="font-size: 15px;">
-        <strong>Why this works:</strong> Each module has a clear verb. <em>Understand</em> → Intelligence. <em>Change</em> → a!migo. <em>Ship</em> → Deployment. No overlap. We leverage existing projects instead of reinventing them. The orchestrator agent routes based on intent.
-      </p>
-    </div>
-  </div>
-</div>
-
 <!-- SLIDE 12: SOLUTION OVERVIEW -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-12">
+<div class="slide" id="slide-11">
   <div class="slide-content">
     <div class="slide-label">The Solution</div>
     <h2>Four interconnected changes</h2>
@@ -1132,7 +1069,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 8: NAMING & IDENTITY -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-13">
+<div class="slide" id="slide-12">
   <div class="slide-content">
     <div class="slide-label">Unified Identity</div>
     <h2>One product, one name: Solutions OS</h2>
@@ -1199,63 +1136,124 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 9: UNIFIED MCP -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-13">
+  <div class="slide-content">
+    <div class="slide-label">Solution #1 — Cloud Plane</div>
+    <h2>Solutions Intelligence Server: Cloud Plane</h2>
+    <p style="margin-bottom: 24px;">The Cloud Plane uses the existing <strong>Atlas architecture</strong> — pre-parsed application data stored as versioned JSON in GitLab. Fast, offline-capable, multi-release.</p>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <h3 style="color: var(--accent);">How it works</h3>
+        <div style="font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-top: 12px;">
+          <div>1. Appian .zip packages exported from environments</div>
+          <div>2. <strong>Solutions Parser</strong> extracts code, dependencies, schema, patterns</div>
+          <div>3. Structured JSON committed to <code>solutions-kb</code> GitLab repo</div>
+          <div>4. Cloud Plane reads from GitLab API (cached, fast)</div>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <h3 style="color: var(--accent);">What it provides</h3>
+        <div style="font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-top: 12px;">
+          <div>• Multi-release history &amp; changelogs</div>
+          <div>• Cross-release comparison &amp; diffs</div>
+          <div>• Pre-computed dependency graphs</div>
+          <div>• Dead code / orphan analysis</div>
+          <div>• Bundle-based navigation</div>
+          <div>• Schema snapshots &amp; relationships</div>
+          <div>• Hub objects &amp; dependency paths</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>Strengths:</strong> Works offline. Shared across team (one GitLab KB serves everyone). Full version history. Pre-computed analysis (no runtime cost). Already operational with 6+ apps indexed.
+      </p>
+    </div>
+  </div>
+</div>
+
 <div class="slide" id="slide-14">
   <div class="slide-content">
-    <div class="slide-label">Solution #1</div>
-    <h2>Solutions Intelligence Server</h2>
-    <p style="margin-bottom: 24px;">A single MCP server for <strong>application knowledge</strong> — all reads, understanding, and analysis. Cloud Plane serves versioned data from GitLab. Live Plane (Jarvis, streamlined) serves real-time data from the environment.</p>
+    <div class="slide-label">Solution #1 — Live Plane</div>
+    <h2>Solutions Intelligence Server: Live Plane</h2>
+    <p style="margin-bottom: 24px;">The Live Plane uses a <strong>streamlined version of Jarvis</strong> — stripped down to serve only application knowledge from the live environment. All CRUD and deployment tools are removed.</p>
 
-    <svg viewBox="0 0 800 380" style="width: 100%; max-width: 800px; margin: 0 auto; display: block;" xmlns="http://www.w3.org/2000/svg">
-      <!-- Outer container -->
-      <rect x="10" y="10" width="780" height="200" rx="14" fill="#1a1d27" stroke="#6366f1" stroke-width="2"/>
-      <text x="400" y="38" text-anchor="middle" fill="#e8eaf0" font-size="13" font-weight="700">SOLUTIONS INTELLIGENCE SERVER (single Docker image)</text>
-
-      <!-- Cloud Plane -->
-      <rect x="30" y="55" width="360" height="140" rx="10" fill="#12131a" stroke="#6366f1" stroke-width="1.5"/>
-      <text x="210" y="80" text-anchor="middle" fill="#6366f1" font-size="14" font-weight="700">☁️ Cloud Plane</text>
-      <text x="50" y="105" fill="#8892a8" font-size="12">• Multi-release history &amp; diffs</text>
-      <text x="50" y="125" fill="#8892a8" font-size="12">• Shared team knowledge (GitLab)</text>
-      <text x="50" y="145" fill="#8892a8" font-size="12">• Offline graph analysis</text>
-      <text x="50" y="165" fill="#8892a8" font-size="12">• Schema snapshots &amp; bundles</text>
-      <text x="50" y="185" fill="#8892a8" font-size="12">• 30+ tools</text>
-
-      <!-- Live Plane -->
-      <rect x="410" y="55" width="360" height="140" rx="10" fill="#12131a" stroke="#10b981" stroke-width="1.5"/>
-      <text x="590" y="80" text-anchor="middle" fill="#10b981" font-size="14" font-weight="700">⚡ Live Plane</text>
-      <text x="430" y="105" fill="#8892a8" font-size="12">• Real-time object state</text>
-      <text x="430" y="125" fill="#8892a8" font-size="12">• SAIL evaluation &amp; SQL queries</text>
-      <text x="430" y="145" fill="#8892a8" font-size="12">• Package deployment</text>
-      <text x="430" y="165" fill="#8892a8" font-size="12">• Object creation</text>
-      <text x="430" y="185" fill="#8892a8" font-size="12">• 25+ tools</text>
-
-      <!-- Router -->
-      <rect x="300" y="222" width="200" height="36" rx="18" fill="#242836" stroke="#f59e0b" stroke-width="2"/>
-      <text x="400" y="245" text-anchor="middle" fill="#f59e0b" font-size="13" font-weight="700">↕ Smart Router</text>
-
-      <!-- Routing examples -->
-      <text x="40" y="290" fill="#8892a8" font-size="12" font-style="italic">"What changed between releases?"</text>
-      <text x="520" y="290" fill="#6366f1" font-size="12" font-weight="600">→ Cloud</text>
-      <text x="40" y="312" fill="#8892a8" font-size="12" font-style="italic">"Deploy this package"</text>
-      <text x="520" y="312" fill="#10b981" font-size="12" font-weight="600">→ Live</text>
-      <text x="40" y="334" fill="#8892a8" font-size="12" font-style="italic">"Search for objects named vendor"</text>
-      <text x="520" y="334" fill="#f59e0b" font-size="12" font-weight="600">→ Both (merged)</text>
-      <text x="40" y="356" fill="#8892a8" font-size="12" font-style="italic">"Show dependency graph"</text>
-      <text x="520" y="356" fill="#6366f1" font-size="12" font-weight="600">→ Cloud</text>
-
-      <!-- Connecting lines to router -->
-      <line x1="210" y1="195" x2="350" y2="230" stroke="#5a6380" stroke-width="1" stroke-dasharray="4,3"/>
-      <line x1="590" y1="195" x2="450" y2="230" stroke="#5a6380" stroke-width="1" stroke-dasharray="4,3"/>
-    </svg>
-
-    <div class="grid-2 mt-24">
-      <div class="card">
-        <h3>Graceful Degradation</h3>
-        <p style="font-size: 14px;">Only GitLab token? Cloud-only mode (30+ tools). Only Appian URL? Live-only mode (25+ tools). Both? Full power (60+ tools).</p>
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <h3 style="color: var(--green);">What stays in Jarvis (Live Plane)</h3>
+        <div style="font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-top: 12px;">
+          <div>• Get real-time object code &amp; content</div>
+          <div>• Live dependency chain lookups</div>
+          <div>• Live impact analysis</div>
+          <div>• App tree &amp; object search</div>
+          <div>• Clusters, patterns, architecture</div>
+          <div>• Semantic search on live data</div>
+          <div>• Data model &amp; entry points</div>
+          <div>• Staleness tracking</div>
+        </div>
       </div>
-      <div class="card">
-        <h3>Single Docker Image</h3>
-        <p style="font-size: 14px;">One image, one config entry, one set of credentials. All tools registered dynamically based on what's configured.</p>
+      <div class="card" style="border-left: 3px solid var(--red);">
+        <h3 style="color: var(--red);">What's removed from Jarvis</h3>
+        <div style="font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-top: 12px;">
+          <div><s>Object creation (constants, etc.)</s></div>
+          <div><s>Object modification/updates</s></div>
+          <div><s>Package creation</s></div>
+          <div><s>Package deployment</s></div>
+          <div><s>SAIL expression evaluation</s></div>
+          <div><s>SQL queries</s></div>
+          <div style="margin-top: 12px; color: var(--text); font-weight: 600;">→ These move to dedicated MCP servers (next slide)</div>
+        </div>
       </div>
+    </div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>Result:</strong> The Intelligence Server (Cloud + Live) answers one question: <em>"Help me understand this application."</em> It never modifies anything. Both planes serve knowledge — Cloud from snapshots, Live from the real environment.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="slide" id="slide-15">
+  <div class="slide-content">
+    <div class="slide-label">Solution #1 — Complementary MCP Servers</div>
+    <h2>The capabilities removed from Jarvis are already solved</h2>
+    <p style="margin-bottom: 24px;">We don't reinvent what's already being built and maintained. Dedicated MCP servers handle writes and deployment.</p>
+
+    <div class="grid-2">
+      <div class="card" style="border-top: 3px solid var(--green);">
+        <h3 style="color: var(--green);">✏️ lcp-api (a!migo)</h3>
+        <p style="font-size: 13px; color: var(--text); margin-bottom: 8px;"><strong>Object creation &amp; modification</strong></p>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+          <div>• 237 CRUD operations via platform OOTB APIs</div>
+          <div>• Create/update record types, interfaces, rules</div>
+          <div>• Modify process models, constants, groups</div>
+          <div>• SAIL evaluation &amp; SQL queries</div>
+          <div>• Data model from Google Sheets</div>
+          <div>• Multi-profile environment switching</div>
+        </div>
+        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; color: var(--green);">Already maintained by Saurabh · Uses Appian's own OOTB APIs</div>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--purple);">
+        <h3 style="color: var(--purple);">🚀 Appian Deployment MCP</h3>
+        <p style="font-size: 13px; color: var(--text); margin-bottom: 8px;"><strong>Package &amp; deploy</strong></p>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+          <div>• Create deployment packages</div>
+          <div>• Inspect package contents</div>
+          <div>• Deploy to target environment</div>
+          <div>• Check deployment results</div>
+          <div>• Promote between environments</div>
+        </div>
+        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; color: var(--purple);">Open source · github.com/kelseymross/appian-deployment-mcp</div>
+      </div>
+    </div>
+
+    <div class="highlight-box mt-24">
+      <p style="font-size: 15px;">
+        <strong>Principle:</strong> Don't reinvent. These projects are actively maintained and purpose-built. By splitting concerns, each module stays focused — the Intelligence Server reads, a!migo writes, Deployment MCP ships. The orchestrator routes based on the verb.
+      </p>
     </div>
   </div>
 </div>
@@ -1263,7 +1261,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 9: SOLUTION 2 — ORCHESTRATOR -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-15">
+<div class="slide" id="slide-16">
   <div class="slide-content">
     <div class="slide-label">Solution #2</div>
     <h2>Single Orchestrator Agent</h2>
@@ -1331,7 +1329,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 10: SOLUTION 3 — GLOBAL BOOTSTRAP -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-16">
+<div class="slide" id="slide-17">
   <div class="slide-content">
     <div class="slide-label">Solution #3 — The Key Architectural Change</div>
     <h2>Global Configuration Bootstrap</h2>
@@ -1341,57 +1339,74 @@ body {
 
     <svg viewBox="0 0 800 400" style="width: 100%; max-width: 800px; margin: 0 auto; display: block;" xmlns="http://www.w3.org/2000/svg">
       <!-- Infrastructure Layer -->
-      <rect x="10" y="10" width="780" height="155" rx="14" fill="#12131a" stroke="#6366f1" stroke-width="2"/>
-      <text x="400" y="35" text-anchor="middle" fill="#6366f1" font-size="12" font-weight="700" letter-spacing="1">INFRASTRUCTURE LAYER</text>
-      <text x="400" y="52" text-anchor="middle" fill="#5a6380" font-size="11">Set up once. Shared by all sessions. Lives in ~/.kiro/settings/mcp.json</text>
+      <rect x="10" y="10" width="780" height="175" rx="14" fill="#12131a" stroke="#6366f1" stroke-width="2"/>
+      <text x="400" y="35" text-anchor="middle" fill="#6366f1" font-size="12" font-weight="700" letter-spacing="1">INFRASTRUCTURE LAYER — MCP SERVERS</text>
+      <text x="400" y="52" text-anchor="middle" fill="#5a6380" font-size="11">Set up once by setup.sh. Shared by all sessions. All agents can call any of these.</text>
 
-      <!-- MCP Server boxes -->
-      <rect x="40" y="68" width="160" height="50" rx="8" fill="#1a1d27" stroke="#6366f1" stroke-width="1.5"/>
-      <text x="120" y="90" text-anchor="middle" fill="#6366f1" font-size="13" font-weight="700">appian</text>
-      <text x="120" y="108" text-anchor="middle" fill="#5a6380" font-size="10">(unified server)</text>
+      <!-- Row 1: Core Appian servers -->
+      <rect x="30" y="66" width="175" height="50" rx="8" fill="#1a1d27" stroke="#6366f1" stroke-width="1.5"/>
+      <text x="117" y="86" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="700">🧠 intelligence</text>
+      <text x="117" y="102" text-anchor="middle" fill="#5a6380" font-size="9">Cloud + Live (read)</text>
 
-      <rect x="220" y="68" width="140" height="50" rx="8" fill="#1a1d27" stroke="#6366f1" stroke-width="1.5"/>
-      <text x="290" y="96" text-anchor="middle" fill="#6366f1" font-size="13" font-weight="700">jira</text>
+      <rect x="215" y="66" width="145" height="50" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/>
+      <text x="287" y="86" text-anchor="middle" fill="#10b981" font-size="11" font-weight="700">✏️ a!migo</text>
+      <text x="287" y="102" text-anchor="middle" fill="#5a6380" font-size="9">object CRUD (write)</text>
 
-      <rect x="380" y="68" width="140" height="50" rx="8" fill="#1a1d27" stroke="#6366f1" stroke-width="1.5"/>
-      <text x="450" y="96" text-anchor="middle" fill="#6366f1" font-size="13" font-weight="700">playwright</text>
+      <rect x="370" y="66" width="145" height="50" rx="8" fill="#1a1d27" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="442" y="86" text-anchor="middle" fill="#8b5cf6" font-size="11" font-weight="700">🚀 deployment</text>
+      <text x="442" y="102" text-anchor="middle" fill="#5a6380" font-size="9">package &amp; deploy</text>
 
-      <rect x="540" y="68" width="140" height="50" rx="8" fill="#1a1d27" stroke="#6366f1" stroke-width="1.5"/>
-      <text x="610" y="96" text-anchor="middle" fill="#6366f1" font-size="13" font-weight="700">google</text>
+      <rect x="525" y="66" width="125" height="50" rx="8" fill="#1a1d27" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="587" y="86" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">📊 data-gen</text>
+      <text x="587" y="102" text-anchor="middle" fill="#5a6380" font-size="9">test data</text>
 
-      <text x="400" y="145" text-anchor="middle" fill="#8892a8" font-size="11">Tools available to ALL powers, agents, and sessions automatically</text>
+      <rect x="660" y="66" width="115" height="50" rx="8" fill="#1a1d27" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="717" y="86" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">🦗 locust</text>
+      <text x="717" y="102" text-anchor="middle" fill="#5a6380" font-size="9">perf tests</text>
+
+      <!-- Row 2: Supporting servers -->
+      <rect x="30" y="126" width="120" height="40" rx="8" fill="#1a1d27" stroke="#5a6380" stroke-width="1"/>
+      <text x="90" y="150" text-anchor="middle" fill="#8892a8" font-size="11" font-weight="600">jira</text>
+
+      <rect x="160" y="126" width="120" height="40" rx="8" fill="#1a1d27" stroke="#5a6380" stroke-width="1"/>
+      <text x="220" y="150" text-anchor="middle" fill="#8892a8" font-size="11" font-weight="600">playwright</text>
+
+      <rect x="290" y="126" width="120" height="40" rx="8" fill="#1a1d27" stroke="#5a6380" stroke-width="1"/>
+      <text x="350" y="150" text-anchor="middle" fill="#8892a8" font-size="11" font-weight="600">google</text>
+
+      <rect x="420" y="126" width="120" height="40" rx="8" fill="#1a1d27" stroke="#5a6380" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="480" y="150" text-anchor="middle" fill="#5a6380" font-size="11">+ more...</text>
 
       <!-- Arrow -->
-      <line x1="400" y1="165" x2="400" y2="195" stroke="#5a6380" stroke-width="2"/>
-      <polygon points="394,192 400,202 406,192" fill="#5a6380"/>
-      <text x="400" y="186" text-anchor="middle" fill="#5a6380" font-size="10">powers call these tools directly</text>
+      <line x1="400" y1="185" x2="400" y2="210" stroke="#5a6380" stroke-width="2"/>
+      <polygon points="394,207 400,217 406,207" fill="#5a6380"/>
 
       <!-- Knowledge Layer -->
-      <rect x="10" y="205" width="780" height="185" rx="14" fill="#12131a" stroke="#10b981" stroke-width="2"/>
-      <text x="400" y="230" text-anchor="middle" fill="#10b981" font-size="12" font-weight="700" letter-spacing="1">KNOWLEDGE LAYER</text>
-      <text x="400" y="247" text-anchor="middle" fill="#5a6380" font-size="11">Symlinked by setup.sh. Lightweight prompts + steering. NO mcp.json.</text>
+      <rect x="10" y="220" width="780" height="170" rx="14" fill="#12131a" stroke="#10b981" stroke-width="2"/>
+      <text x="400" y="245" text-anchor="middle" fill="#10b981" font-size="12" font-weight="700" letter-spacing="1">KNOWLEDGE LAYER — POWERS, SKILLS, AGENTS</text>
+      <text x="400" y="262" text-anchor="middle" fill="#5a6380" font-size="11">Symlinked by setup.sh. Lightweight prompts + steering. No bundled MCP configs.</text>
 
       <!-- Power boxes -->
-      <rect x="40" y="262" width="160" height="65" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/>
-      <text x="120" y="285" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="700">developer</text>
-      <text x="120" y="303" text-anchor="middle" fill="#5a6380" font-size="10">POWER.md + steering/</text>
-      <text x="120" y="318" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">no mcp.json ✓</text>
+      <rect x="40" y="278" width="160" height="55" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/>
+      <text x="120" y="298" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="700">developer</text>
+      <text x="120" y="316" text-anchor="middle" fill="#5a6380" font-size="10">POWER.md + steering/</text>
+      <text x="120" y="329" text-anchor="middle" fill="#10b981" font-size="9">calls: intelligence, a!migo</text>
 
-      <rect x="220" y="262" width="160" height="65" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/>
-      <text x="300" y="285" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="700">sql-forge</text>
-      <text x="300" y="303" text-anchor="middle" fill="#5a6380" font-size="10">POWER.md + steering/</text>
-      <text x="300" y="318" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">no mcp.json ✓</text>
+      <rect x="220" y="278" width="160" height="55" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/>
+      <text x="300" y="298" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="700">sql-forge</text>
+      <text x="300" y="316" text-anchor="middle" fill="#5a6380" font-size="10">POWER.md + steering/</text>
+      <text x="300" y="329" text-anchor="middle" fill="#10b981" font-size="9">calls: intelligence, data-gen</text>
 
-      <rect x="400" y="262" width="160" height="65" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/>
-      <text x="480" y="285" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="700">ux-designer</text>
-      <text x="480" y="303" text-anchor="middle" fill="#5a6380" font-size="10">POWER.md + steering/</text>
-      <text x="480" y="318" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">no mcp.json ✓</text>
+      <rect x="400" y="278" width="160" height="55" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5"/>
+      <text x="480" y="298" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="700">qe-agent</text>
+      <text x="480" y="316" text-anchor="middle" fill="#5a6380" font-size="10">POWER.md + steering/</text>
+      <text x="480" y="329" text-anchor="middle" fill="#10b981" font-size="9">calls: intelligence, playwright</text>
 
-      <rect x="580" y="262" width="160" height="65" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
-      <text x="660" y="295" text-anchor="middle" fill="#5a6380" font-size="12">+ more...</text>
+      <rect x="580" y="278" width="160" height="55" rx="8" fill="#1a1d27" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="660" y="305" text-anchor="middle" fill="#5a6380" font-size="12">+ more...</text>
 
-      <text x="400" y="365" text-anchor="middle" fill="#10b981" font-size="12" font-weight="600">Adding a new power = add a folder. Re-run setup.sh. Done.</text>
-      <text x="400" y="383" text-anchor="middle" fill="#5a6380" font-size="11">No Docker knowledge. No MCP expertise. No credential handling.</text>
+      <text x="400" y="365" text-anchor="middle" fill="#10b981" font-size="12" font-weight="600">Powers don't bundle MCP configs — they call infrastructure tools directly</text>
+      <text x="400" y="383" text-anchor="middle" fill="#5a6380" font-size="11">Adding a power = add a folder with POWER.md. Re-run setup.sh. Done.</text>
     </svg>
   </div>
 </div>
@@ -1399,7 +1414,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 11: BOOTSTRAP — HOW IT WORKS -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-17">
+<div class="slide" id="slide-18">
   <div class="slide-content">
     <div class="slide-label">Solution #3 — In Practice</div>
     <h2>One command does everything</h2>
@@ -1453,7 +1468,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 12: BOOTSTRAP — IMPACT ON POWER AUTHORS -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-18">
+<div class="slide" id="slide-19">
   <div class="slide-content">
     <div class="slide-label">Solution #3 — Impact</div>
     <h2>What changes for power authors</h2>
@@ -1505,7 +1520,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 13: SOLUTION 4 — REPO STRUCTURE + T.I.M.E. -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-19">
+<div class="slide" id="slide-20">
   <div class="slide-content">
     <div class="slide-label">Solution #4</div>
     <h2>Repository Restructure + T.I.M.E. Framework</h2>
@@ -1560,7 +1575,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 14: EXTENSIBILITY — LIVING ECOSYSTEM -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-20">
+<div class="slide" id="slide-21">
   <div class="slide-content">
     <div class="slide-label">Key Advantage #1</div>
     <h2>A living, extensible ecosystem</h2>
@@ -1647,7 +1662,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 15: PLATFORM AGNOSTICISM -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-21">
+<div class="slide" id="slide-22">
   <div class="slide-content">
     <div class="slide-label">Key Advantage #2</div>
     <h2>Platform agnostic — write once, configure anywhere</h2>
@@ -1737,7 +1752,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 16: ENVIRONMENT REGISTRY -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-22">
+<div class="slide" id="slide-23">
   <div class="slide-content">
     <div class="slide-label">Supporting Infrastructure</div>
     <h2>Centralized Environment Registry</h2>
@@ -1795,7 +1810,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 17: KNOWLEDGE BASE STRATEGY -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-23">
+<div class="slide" id="slide-24">
   <div class="slide-content">
     <div class="slide-label">Knowledge Architecture</div>
     <h2>Two knowledge layers, one platform</h2>
@@ -1864,7 +1879,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 18: SWAT-A-PALOOZA INTEGRATION -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-24">
+<div class="slide" id="slide-25">
   <div class="slide-content">
     <div class="slide-label">Proven Feasibility</div>
     <h2>20 SWAT-a-Palooza projects — all fit</h2>
@@ -1944,7 +1959,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 19: OWNERSHIP + RISKS + METRICS -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-25">
+<div class="slide" id="slide-26">
   <div class="slide-content">
     <div class="slide-label">Governance</div>
     <h2>Ownership, risks, and success metrics</h2>
@@ -2021,7 +2036,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 20: IMPLEMENTATION TIMELINE -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-26">
+<div class="slide" id="slide-27">
   <div class="slide-content">
     <div class="slide-label">Implementation</div>
     <h2>6-week rollout plan</h2>
@@ -2059,7 +2074,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 15: REFERENCE — BUILDWITHCLAUDE -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-27">
+<div class="slide" id="slide-28">
   <div class="slide-content">
     <div class="slide-label">Reference Architecture</div>
     <h2>Proven pattern: <code>buildwithclaude</code></h2>
@@ -2092,7 +2107,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SLIDE 16: CLOSING -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div class="slide" id="slide-28">
+<div class="slide" id="slide-29">
   <div class="slide-content" style="align-items: center; text-align: center;">
     <div class="slide-label">Summary</div>
     <h1 class="gradient-text" style="max-width: 800px;">One repo. One command. Every capability.</h1>
@@ -2128,15 +2143,11 @@ body {
   </div>
 </div>
 
-</div><!-- /presentation -->
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- NAVIGATION BAR -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
 <div class="nav-bar">
   <div class="nav-progress" id="nav-progress"></div>
   <div class="nav-buttons">
-    <span class="slide-counter" id="slide-counter">1 / 28</span>
+    <span class="slide-counter" id="slide-counter">1 / 29</span>
     <button class="nav-btn" id="btn-prev" disabled>← Back</button>
     <button class="nav-btn primary" id="btn-next">Next →</button>
   </div>
