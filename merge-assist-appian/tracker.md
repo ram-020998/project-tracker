@@ -147,6 +147,45 @@ Classification: NEW=1, UPDATED=2, CONFLICT=3. Plus `MA_GRP_ALERTS`,
 
 ## Session Log
 
+### 2026-06-15 — Single-inspect classification via native conflict detection
+
+**Big simplification: the base-package inspection is being removed.** Discovered that the Appian SDK's
+`ImportResults` exposes a first-class **`getConflictedObjects()`** bucket (native conflict detection)
+that the plugin's `InspectPackageService` had been ignoring. A **single inspect of the vendor package**
+now yields the full three-way result directly: `created` → New, `updated` (minus `conflicted`) → Safe,
+`conflicted` → Conflict. This replaces the dual-inspect (base + vendor) cross-reference.
+
+#### Completed
+- **Plugin (`InspectPackageService.java`, merge-assist-v2):** now emits the `conflicted` bucket (array
+  + `summary.conflicted` count + log). **Additive, signature unchanged** → key `inspectPackageV2` kept
+  (no bump). Rebuilt with JDK 17; user redeployed and confirmed `conflicted` is populated on a real run.
+- **Verified bucket semantics on a real sample:** `summary {created:1, updated:6, notChanged:31,
+  conflicted:5, failed:0}`. **`updated` is a superset that already contains `conflicted`** (not
+  disjoint) → **Safe = updated − conflicted**. Also: `conflicted` entries can omit the `type` field, so
+  name/type are read from the `updated`/`created` entries and `conflicted` is used only as a UUID set.
+- **`MA_UT_constructObjectClassifications` (live via LCP MCP):** rewritten — `baseResponse` input
+  removed (signature now `(vendorResponse, session)`); conflict set = `vendorResponse.conflicted`;
+  validity/G6 now checks only the vendor response; G7 counts unchanged. `validateDesignObject` clean.
+- **Docs:** created `docs/04-single-inspect-conflict-detection.md` (+ README index); supersedes the
+  dual-inspect description in `docs/02` / steering `12`.
+
+#### Decisions
+- **Use native conflict detection (`getConflictedObjects`)** instead of reconstructing conflicts via a
+  base inspect. (Standard Appian feature; halves inspect work; removes cross-reference complexity.)
+- **Keep the base package upload + extraction.** It is still used by the **"Base Vs Vendor Latest"**
+  diff option (`baseXmlDocId` → `MA_UT_deriveDiffObjectDataFromXml` → `MA_renderDiffViewForObject`
+  diffViewType 2). Only the base **inspection** is removed — the upload form, `basePackageDocId`,
+  `baseXmlDocId`, base extraction node, and `MA_UT_updateDocumentIdForObjects` are unchanged.
+
+#### Remaining / handed to user (Designer)
+- [ ] **`MA Process Session Packages`** (`0002efa8-20a2-…`): delete node 2 "Inspect Base Package",
+      reconnect Start(0)→Inspect Vendor(14), update node 3 "Construct Object Classification" expression
+      to call `MA_UT_constructObjectClassifications(vendorResponse: pv!vendorInspectionResults,
+      session: pv!session)`. (`baseInspectionResults` PV becomes orphaned — harmless.)
+- [ ] End-to-end test: `new + safe + conflict = total`; sample app → 1 New / 1 Safe / 5 Conflict; both
+      diff modes still render; failed/empty vendor inspect → session **Failed**.
+- [ ] Sync `MergeAssist_Documentation.md` + steering `11`/`12` to the single-inspect model.
+
 ### 2026-06-10 — Discovery, documentation, reprioritization, Priority 1 plan
 
 #### Completed

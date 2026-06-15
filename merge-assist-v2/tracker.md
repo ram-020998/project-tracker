@@ -429,6 +429,53 @@ Eliminate per-type SAIL conversion rules by building a plugin that converts vend
 
 ---
 
+### June 15, 2026 — Native conflict detection: base inspect removed, plugin emits `conflicted`
+
+#### Context
+The classification used **two** `inspectPackage` calls (base + vendor) cross-referenced to find
+conflicts. Discovered that `com.appiancorp.suiteapi.ix.ImportResults` already exposes a first-class
+**`getConflictedObjects()`** bucket (native conflict detection) that `InspectPackageService` was
+ignoring — so a **single vendor inspect** can yield New/Safe/Conflict directly.
+
+#### Completed
+
+**Plugin — `InspectPackageService.java`:** emit the `conflicted` bucket.
+- Added `json.put("conflicted", toObjectArray(results.getConflictedObjects()))` + `summary.conflicted`
+  count + updated `LOG.info`. No other accessors changed.
+- **Signature unchanged** (1 input `PackageDocument`, 1 output `ResultJson`) → smart-service key
+  **`inspectPackageV2` kept** (no `IncompatibleSmartServiceRegistrationException`; hot-deployable).
+- Built with JDK 17 (`JAVA_HOME=temurin-17 ./gradlew clean jar`) → `merge-assist-plugin-1.0.0.jar`.
+  Redeployed + tested by user: `conflicted` is populated.
+
+**Verified bucket semantics (real sample):** `summary {created:1, updated:6, notChanged:31,
+conflicted:5, failed:0}`. **`updated` ⊇ `conflicted`** (all 5 conflicted UUIDs were also in updated) →
+**Safe = updated − conflicted**. `conflicted` entries can omit `type`, so name/type come from
+`updated`/`created`; `conflicted` used only as a UUID set. Sample ⇒ 1 New / 1 Safe / 5 Conflict.
+
+**Appian app — `MA_UT_constructObjectClassifications` (via LCP MCP):** rewritten to the single-inspect
+model. `baseResponse` input removed; conflict set = `vendorResponse.conflicted`; validity checks only
+the vendor response; G7 count logic preserved. `validateDesignObject` clean.
+
+#### Decisions
+| Decision | Reasoning |
+|---|---|
+| Use `getConflictedObjects()` (native conflict detection) | Standard Appian feature; one inspect instead of two; removes cross-reference complexity |
+| Keep base upload + extraction (`baseXmlDocId`) | Still powers the "Base Vs Vendor Latest" diff (`MA_renderDiffViewForObject` diffViewType 2) — only the base **inspect** is removed |
+| Don't bump the smart-service key | Output JSON content changed but the parameter signature didn't, so `inspectPackageV2` stays valid |
+
+#### Remaining (user / Designer)
+- [ ] `MA Process Session Packages` (`0002efa8-20a2-…`): remove node 2 "Inspect Base Package",
+      reconnect Start→Inspect Vendor, update node 3 to call the rule with `vendorResponse` + `session`
+      only.
+- [ ] End-to-end validation on a real session; confirm both diff modes still render.
+
+#### Files changed
+`plugin/src/main/java/com/appiancorp/mergeassist/smartservice/InspectPackageService.java`
+(+ live edit of `MA_UT_constructObjectClassifications`). Full write-up:
+`merge-assist-appian/docs/04-single-inspect-conflict-detection.md`.
+
+---
+
 ## Build & Deploy
 
 ```bash
