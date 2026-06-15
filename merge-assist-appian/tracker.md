@@ -1,6 +1,6 @@
 # Merge Assist (Appian) — Project Tracker
 
-> **Session ID:** `<FILL IN — this session's id>`  *(retrieve via `/chat` session list or `/chat save` metadata; could not be read programmatically from within the session)*
+> **Session ID:** 0b713875-1426-4a88-9ef8-62b661a17ef6
 > **Tracked by:** Project Tracker Agent
 > **Model:** claude-opus-4.8
 > **Primary working repo:** `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/merge-assist-appian`
