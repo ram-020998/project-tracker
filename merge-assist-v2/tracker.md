@@ -476,6 +476,109 @@ the vendor response; G7 count logic preserved. `validateDesignObject` clean.
 
 ---
 
+### June 19, 2026 — Native process-model diff (no SAIL converter); right-side PM blocker solved
+
+#### Goal
+Replace the blocked `MA_convert_processModel` SAIL converter (stuck on the `xmlToMap` `content`-key
+extraction bug, §"May 21/22" current blocker) by reusing Appian's own machinery: the **import
+deserializer** + the **native diff converter**.
+
+#### What works (validated end-to-end — the PM diff renders)
+- **New plugin function `pmXmlToDiffJson(documentId)`** added to the **merge-assist plugin**
+  (`plugin/src/main/java/com/appiancorp/mergeassist/functions/PmXmlToDiffJsonFunction.java`; registered
+  in `appian-plugin.xml`; bundle `pmXmlToDiffJson_en_US.properties`; builds into
+  `merge-assist-plugin-1.0.0.jar`).
+- Pipeline: read package XML → **namespace-aware** DOM, re-root `<process_model_port>` into its own doc
+  → `ProcessPortService.deserializeProcessModelForIx(node)` (off-DB; defers datatype resolution; skips
+  XSD validation) → sanitize → `DiffProcessModelConverter.convertModel(pm, evalPath, ctx)` (reflective)
+  → return `DiffProcessModelDto.toTypedValue()`.
+- Context: `ServiceContext` injected as a function param; `AppianScriptContextBuilder.init().serviceContext(sc).build()`
+  + `EvalPath.init().insideDiffGetObjectFunction()`.
+- **SAIL wiring (Designer):** feed the raw DTO through the diff config's getObjectFn via its `testObject`
+  hook so it gets the framework transforms (esp. `node_updateFieldsForFramework`, parameters list →
+  name-keyed map): `a!dod_pm_getDiffObject(testObject: pmXmlToDiffJson(documentId: rv!vendorXmlDocId))`
+  on the right side of `MA_renderDiffViewForObject`.
+
+#### How the earlier blockers were cleared (iteration log)
+1. plugin i18n bundle path must match `<plugin-key>.<module-key>`.
+2. `ServiceContext` via Spring bean returned null → inject it as a function parameter instead.
+3. deserialize NPE → parse DOM **namespace-aware** + **re-root** the port element (JAXB `W3CDomHandler` parity).
+4. `getProcessModelFromPortXml(false)` failed XSD on record-type datatype QName (`n1:<uuid>`) → use the
+   **IX** deserializer (`deserializeProcessModelForIx`), which defers datatype resolution.
+5. `convertModel` "Invalid class for Value of type Group" (custom alert recipients) → `setNtfSettings(null)`.
+6. `IxDocumentManager.toJson` / SAIL "No DataHandler for ExternalTypedValue" → return the `TypedValue`
+   directly AND null deferred `ExternalTypedValue` placeholders on process variables + node ACPs
+   (ProcessVariable/ActivityClassParameter both extend TypedValue; carried values were null → ~lossless).
+7. `sectionsGenerator` "Cannot index 'pmUUID' into DiffActivityClassParameterDto?list" → the missing
+   framework reshaping → fixed by the `a!dod_pm_getDiffObject(testObject: …)` wiring (step above).
+
+#### Decisions
+| Decision | Reasoning |
+|---|---|
+| Reuse import deserialize + native `DiffProcessModelConverter` instead of SAIL | `convertModel` takes an in-memory `ProcessModel` bean off-DB; `deserializeProcessModelForIx` produces it from XML without persisting |
+| IX deserializer (not `getProcessModelFromPortXml`) | IX defers datatype resolution + skips XSD validation that rejects record-type datatype UUID-QNames |
+| Feed DTO through `a!dod_pm_getDiffObject(testObject:)` | applies the framework transforms (`node_updateFieldsForFramework` etc.) so both diff sides share one pipeline |
+| Sanitize alerts + ExternalTypedValue | env-absent groups/record-types can't resolve off-import; values were null → near-lossless |
+| Reflective calls for `DiffProcessModelConverter`/`DiffProcessModelDto`/`ApplicationContextHolder` | no compile dependency on the `design-object-diffs` jar |
+
+#### Files
+- `plugin/src/main/java/com/appiancorp/mergeassist/functions/PmXmlToDiffJsonFunction.java` (new)
+- `plugin/src/main/resources/appian-plugin.xml`, `.../mergeassist/pmXmlToDiffJson_en_US.properties`
+- Standalone POC (built first, then ported): `pm-diff-poc-plugin/` (key `com.appiancorp.pmdiff`).
+  **Undeploy it before deploying the merge-assist plugin** — same `pmXmlToDiffJson` key would conflict.
+
+#### Remaining
+- [ ] Harden against PMs with explicit user/group node assignees, subprocess nodes, and the large
+      V1 (GSS) / V2 packages.
+- [ ] Generalize to **record types** (the other blocked converter) via the same pattern (deserialize
+      haul → native record diff converter → config `testObject` hook).
+
+Full write-up: `merge-assist-appian/docs/05-native-process-model-diff.md`.
+
+---
+
+### June 22, 2026 — PM diff integration; diagram-section fix; open record-view NPE
+
+Integrated the native PM diff into the live app and worked through two post-deployment runtime issues.
+
+#### Integration
+- `MA_renderDiffViewForObject` refactored into `{data,error}` helpers (`MA_UT_deriveDiffObjectDataFromXml`
+  / `…FromEnv`, `MA_UT_returnDiffConfigForGivenObject`, `MA_UT_updateDiffConfigsWithSupportedSections`),
+  generator `try`-wrapped.
+- `MA_convertXmlToDiffMap` gained an `xmlDoc` param; **PM branch routes to**
+  `a!dod_pm_getDiffObject(testObject: pmXmlToDiffJson(documentId: xmlDoc))`.
+
+#### Issue 1 — PM diagram → `GeneratePmDocAction` "Does not exist: Process Model" (✅ fixed)
+First PM `diffPresentationConfig` section is the diagram (`a!dod_config_pm_diagramSection()`), which draws
+the model image via `GeneratePmDocAction` → `getProcessModelVersion` against the DB; the vendor version
+isn't resident → error (separate servlet request; diff body still renders). **Fix:** drop the diagram
+section for PMs, keyed off **`objectTypeName`** (not `objectTypeId` — at runtime in the record-action
+path the id wasn't reliably 23, so an id branch silently didn't fire though it worked in Designer).
+
+#### Issue 2 — record-view context NPE on opening the PM diff (⏳ open)
+After a restart, opening the PM diff → `NPE Value.getMemoryWeight() because "o" is null` at
+`AppianBindingsTop.initializeMemoryWeightAndAttachListener` on `reevaluateRecordView` (preceded by
+`Unable to find bindings … Using initial bindings`) for the `MA_REC_MergeSession` record view — a
+**Java-null binding** during context build. Live `MA_renderDiffViewForObject` + helper were read; SAIL is
+sound → persistence/context-layer failure. **Hypothesis:** the `DiffProcessModelDto` can't be
+persisted/rehydrated in saved record-view state (same family as the `ExternalTypedValue` "No DataHandler"
+issue) → rehydrates null after restart. **Mitigations:** hard-refresh; render diff as a **transient
+related-action dialog** (keep the DTO out of persisted bindings); stub the PM branch to confirm causation.
+
+**Update (later 2026-06-22):** root cause confirmed/refined — the diff value carries record-type/Variant
+typed Values that don't survive **live stateful-UI state serialization** (Designer renders; record
+action *and* start form fail; other object types fine). Plugin fix: `nullIfExternal` now also **retypes**
+unresolved `ExternalTypedValue` PV/ACP slots to Text (`setInstanceType(3)`) — rebuilt, compile-verified.
+That cleared the NPE but live render then failed with `Variant?list must be used within a SAIL
+component`; section-by-section testing localized it to PM config **index 6 = `node_main`** (per-node
+detail: ACP params, event mappings, MNI/other-data, assignment — sites the PV/ACP retype misses).
+**Fix path:** type-erase the PM diff object via `a!fromJson(a!toJson(...))` around `MA_convert_processModel`
+output (class-level fix); stopgap = drop `node_main` for PMs (lossy). ⏳ awaiting live verification.
+
+Full detail: `merge-assist-appian/docs/05-native-process-model-diff.md` §10–§11.
+
+---
+
 ## Build & Deploy
 
 ```bash
