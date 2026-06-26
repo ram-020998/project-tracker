@@ -64,6 +64,12 @@ Kiro **CLI and IDE** are targeted; the orchestrator is deferred.
 | [10-backlog-future-work.md](./10-backlog-future-work.md) | Post-slice work: environment/secrets registry (BL-1) and installer web app/HTML page (BL-2) |
 | [11-implementation-status-and-handoff.md](./11-implementation-status-and-handoff.md) | **Read first for handoff** — full status, conventions, mistakes/fixes, what's done, what's next |
 | [12-runbook-build-a-role.md](./12-runbook-build-a-role.md) | Step-by-step runbook (copy-paste templates + commands) to build the next role |
+| [13-configuration-app-design.md](./13-configuration-app-design.md) | **Design spec** for the configuration & onboarding app (wizard UX, environment registry, secret→MCP injection, env-by-label). Realizes BL-1/BL-2 |
+| [14-configuration-app-implementation-plan.md](./14-configuration-app-implementation-plan.md) | **Detailed implementation plan** for doc 13 — tech stack, phases, schemas, message protocol, testing, acceptance |
+| [15-gitlab-cicd-pipeline.md](./15-gitlab-cicd-pipeline.md) | **GitLab CI/CD pipeline** to build the `.vsix` on push and publish it (Release + Package Registry) on tag. Implemented last (doc 14 Phase F) |
+| [16-dashboard-command-center.md](./16-dashboard-command-center.md) | **Dashboard / command center** design — scope-aware (Workspace/Global) inventory, per-agent skills, update detection, recent activity. The wizard becomes Catalog/Add |
+| [17-installer-architecture-and-review.md](./17-installer-architecture-and-review.md) | **Installer architecture & code review** — layered design, OOP service decomposition, and the manifest-driven "add a new agent without code changes" contract |
+| [18-build-tracker-and-accomplishments.md](./18-build-tracker-and-accomplishments.md) | **Build tracker** — complete record of everything accomplished (program + extension), version history, architecture, features, decisions, tests, and remaining work |
 
 ## Companion source documents (in `solutions-os-revamp`)
 

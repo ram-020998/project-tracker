@@ -3,6 +3,11 @@
 Items captured for later. **Scheduling:** start **after the Developer role vertical slice is
 complete** (Phase 2), as part of Phase 4 hardening. Recorded now so they aren't lost.
 
+> **Update 2026-06-26:** BL-1 (environment & secrets registry) and BL-2 (installer app) are now fully
+> specified in **doc 13 (design)** and **doc 14 (implementation plan)**, after a working POC of the
+> installer extension (`solutions-copilot/installer/`). Treat docs 13/14 as authoritative; the BL-1/BL-2
+> notes below are the original seed requirements.
+
 ---
 
 ## BL-1 — Environment Registry + Secrets Registry
