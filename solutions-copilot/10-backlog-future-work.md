@@ -79,3 +79,22 @@ agent configs.
   the **agent/skill layout** — which the Developer vertical slice (Phase 2) establishes.
 - BL-2 consumes BL-1's `environments.json` schema, so **BL-1 precedes BL-2**.
 - Slots into the plan at **Phase 4 (Hardening)** in `07-sequencing-plan.md`.
+
+---
+
+## BL-3 — Workflows / Orchestration (DEFERRED — not required now)
+
+**Goal:** a dashboard-authored, human-gated, multi-step **workflow** an orchestrator runs over the
+role agents (e.g. the dev SDLC: design → approve → implement → review → deploy-test → test →
+deploy-prod). Explored in full in **doc 19** (idea, 2026 best-practice research, Kiro capability spike,
+and native IDE design options C2/C1).
+
+**Status:** 🅿️ **Deferred (2026-06-29).** Sound concept, feasible substrate (native IDE inline approval
+gates work; orchestrator delegates to the MCP-owning agents, never nests role agents), **but parked**
+behind two prerequisites:
+1. The six role agents are **tested, hardened, and verified working** end-to-end (doc 11 §7).
+2. **Agent-driven Appian object development is solved** — today implement/deploy is effectively a
+   **manual step**; without a reliable agent path to author/deploy Appian objects, the most valuable
+   workflow steps can't be automated, so orchestrating them is premature. **This is the real blocker.**
+
+Revisit after those land; doc 19 preserves the design + the two open questions to verify first.

@@ -70,6 +70,8 @@ Kiro **CLI and IDE** are targeted; the orchestrator is deferred.
 | [16-dashboard-command-center.md](./16-dashboard-command-center.md) | **Dashboard / command center** design — scope-aware (Workspace/Global) inventory, per-agent skills, update detection, recent activity. The wizard becomes Catalog/Add |
 | [17-installer-architecture-and-review.md](./17-installer-architecture-and-review.md) | **Installer architecture & code review** — layered design, OOP service decomposition, and the manifest-driven "add a new agent without code changes" contract |
 | [18-build-tracker-and-accomplishments.md](./18-build-tracker-and-accomplishments.md) | **Build tracker** — complete record of everything accomplished (program + extension), version history, architecture, features, decisions, tests, and remaining work |
+| [19-workflows-orchestration-deferred.md](./19-workflows-orchestration-deferred.md) | **Workflows / orchestration** — exploration + Kiro capability spike + native (C2/C1) design options. **DEFERRED / not required now** — blocked on agent hardening and agent-driven Appian object development |
+| [20-dashboard-ux-standards.md](./20-dashboard-ux-standards.md) | **Dashboard UX standards & contribution guide** — the design-token system, component library, layer architecture (gateway/model/sections), and the step-by-step checklist for adding new screens/components/actions consistently |
 
 ## Companion source documents (in `solutions-os-revamp`)
 
