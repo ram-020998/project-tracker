@@ -9,7 +9,11 @@ Paths:
 
 > **Golden rules:** (1) preserve source workflows **verbatim** in `references/`; (2) skills **delegate**
 > to sub-agents, never call MCP directly; (3) every agent needs **two files** (`.json` + `-prompt.md`);
-> (4) `mcpServers` in frontmatter is **block-style YAML**; (5) validate after each step.
+> (4) `mcpServers` in frontmatter is **block-style YAML**; (5) validate after each step;
+> (6) **delegate the COMPLETE objective in ONE hand-off per sub-agent** (plan all questions first, send
+> one `subagent` call with a return contract) — analysis sub-agents (atlas-intel/jarvis-intel) run the
+> whole investigation in a single spawn, **write a full analysis document to `.kiro/analysis/`**, and
+> return its path; the role agent **reads that document** rather than relying on the lossy chat summary.
 
 ---
 
@@ -153,8 +157,13 @@ below and route to the matching skill.
 ...
 **Shared reference knowledge** — `sail-reference`, `sail-code-hygiene`, `sail-documentation-standards`.
 
-## Delegate for data/actions
-- atlas-intel — read/KB. jarvis-intel — live + write/deploy (prompts). integrations — Jira/Google/Playwright.
+## Delegate for data/actions — ONE complete hand-off, then read the document
+When a task needs Appian facts/actions, **plan the whole objective first**, then make a **single**
+`subagent` call to the right sub-agent with all questions + a return contract (use the real KB
+**application name**, not an object prefix). Don't bounce per hop.
+- atlas-intel — read/KB (writes an analysis doc to `.kiro/analysis/`, returns its path → **read it**).
+- jarvis-intel — live + write/deploy (prompts; writes an analysis doc for investigation tasks → **read it**).
+- data-generator — record/test data CRUD; integrations — Jira/Google/Playwright. *(Both return results directly — no doc.)*
 
 ## Anti-hallucination & style
 Every Appian object cited comes from a sub-agent result with a real UUID; never invent. Use precise
@@ -167,6 +176,15 @@ Appian terminology.
 
 ### 6a. Reuse existing
 `atlas-intel`, `jarvis-intel`, `integrations` already exist — just list them in `availableAgents`.
+
+> **Analysis sub-agents write a hand-off document.** `atlas-intel` and `jarvis-intel` are configured to
+> complete the full investigation in one spawn and **write a complete analysis document** to
+> `./.kiro/analysis/<agent>-<topic>-<timestamp>.md`, returning its path (the role agent reads it — this
+> avoids data loss from `summary` truncation). To support that they carry a **scoped `write` tool**:
+> `"tools": ["read","write","@server"]`, `allowedTools` includes `"write"`, and
+> `"toolsSettings": { "write": { "allowedPaths": ["./.kiro/analysis/**"] } }`. `.kiro/analysis/` is
+> gitignored. **Any new sub-agent whose job is analysis/investigation should follow this same pattern;**
+> pure action/data sub-agents (data-generator, integrations) do **not** write a document.
 
 ### 6b. Build `data-generator` (only when a role needs it; same two-file pattern)
 `$KB/.kiro/agents/data-generator.json`:

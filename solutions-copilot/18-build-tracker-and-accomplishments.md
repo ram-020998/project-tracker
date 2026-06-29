@@ -34,15 +34,24 @@ GitLab: `gitlab.appian-stratus.com`, project `ramaswamy.u/solutions-copilot` (pr
 ---
 
 ## 2. The agents/skills product (`.kiro/`) — current state
-- **Role agents:** `developer` (complete). Planned: tester, ux-designer, product-owner, devops,
-  documentation.
+- **Role agents:** `developer`, `tester`, `product-owner`, `ux-designer`, `devops` (all complete). Planned: documentation.
 - **Sub-agents:** `atlas-intel` (read-only Atlas KB), `jarvis-intel` (live + write/deploy),
-  `integrations` (Jira · Google · Playwright). Planned: `data-generator`.
+  `data-generator` (live test/demo data CRUD + rollback), `integrations` (Jira · Google · Playwright).
 - **Developer skills (15):** appian-explore, impact-analysis, technical-debt, code-review,
   design-document, implementation, implementation-summary, feature-breakdown, spike-research,
   refactor-redeploy, expression-test-generation, knowledge-query, i18n, a11y-fix,
   database-script-management.
-- **Shared skills (3):** sail-reference, sail-code-hygiene, sail-documentation-standards.
+- **Tester skills (3):** test-execution (TEA), unit-test (←jarvis-verify), test-data-generation
+  (sql-forge pipeline).
+- **Product-owner skills (9):** onboarding, explore, feature-inventory, feature-spec, research,
+  cross-app-analysis, feature-impact-analysis, release-review, chat-triage (←ChatTriage).
+- **UX-designer skills (10):** aurora-compliance, branding-compliance (←Jarvis), design-consistency-review,
+  edge-case-analysis, component-decomposition, platform-feasibility-check, create-html-prototype,
+  create-sailwind-prototype, generate-sail, design-to-dev-handoff.
+- **DevOps skills (4):** pipeline-check (←Jarvis pipeline-check-workflow), package-management, deployment,
+  promote (last three authored over Jarvis deploy/package handlers).
+- **Shared skills (5):** sail-reference, sail-code-hygiene, sail-documentation-standards, a11y-audit,
+  guide-appian-docs.
 - **Conventions:** dual-surface agents (`.json` for CLI + `-prompt.md` v3 frontmatter for IDE);
   lossless skill migration (verbatim source in `references/` + Delegation Protocol); skills never
   call MCP directly — they delegate to sub-agents.

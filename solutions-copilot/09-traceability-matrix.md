@@ -128,3 +128,119 @@ those steps are explicitly stubbed in each SKILL.md until those sub-agents land.
 - Standalone deploy MCP vs. continued reuse of Jarvis deploy handlers (v1 = Jarvis).
 - Eventual home for deferred CLI tools (this repo vs. separate tools repo).
 - Whether `jarvis-intel` should be split into read-only vs. write/deploy surfaces later.
+
+---
+
+## Build progress (2026-06-29) — Tester role COMPLETE + data-generator sub-agent
+
+`tester` role built with the same validated pattern (verbatim source in `references/` + Delegation
+Protocol on tool-bearing refs + thin orchestrating `SKILL.md`). 30 references (~9,150 lines) preserved;
+24 carry the protocol; 6 pure-knowledge refs left clean; all frontmatter valid; `tester` +
+`data-generator` load in `kiro-cli`.
+
+| Skill | Role | Source(s) | Refs (protocol) |
+|---|---|---|---|
+| test-execution (TEA) | tester | qe-agent.md + QE_Agent_Steering_File + atlas-tools-steering (branch `dev/dp-test-execution-agent`, INV-A01/A02) | 3 (3) |
+| unit-test | tester | jarvis-verify: verify-workflow + verify-reference + verify-data-setup (INV-T09) | 3 (3) |
+| test-data-generation | tester | sql-forge step-0..6 (+step-6-generate-sql) + action-generate-data/query-validate/rollback/bulk-sql + tool-reference-data-generator/atlas + QE atlas-data-generator (INV-E02/A02) | 15 (15) |
+| a11y-audit | **shared** | A11yAudit: audit-workflow + sail-rules(+proposed) + jira-patterns + jira-validation + gchat-kb + gchat-response-policy + doc-output-format + menu (INV-T03) | 9 (3) |
+
+Sub-agent built: `data-generator` (dual files, block-style v3 frontmatter, `${VAR}` placeholders;
+reads auto-run, create/update/delete prompt). `tester` wires availableAgents = atlas-intel,
+jarvis-intel, data-generator, integrations (trusted: atlas-intel, integrations).
+
+Status flips: **INV-A01/A02/A03 (TEA), INV-T09 (jarvis-verify), INV-T03 (a11y-audit), INV-E02 (data
+pipeline → test-data-generation)** = **done** for the tester role.
+
+**Deviations/notes:** (1) `test-data-generation` consolidates the full sql-forge pipeline (including
+both `step-6-execute` and `step-6-generate-sql`); `action-erd`/`action-explore-schema` were excluded
+(ERD → documentation role; schema-explore → developer). (2) `qe-environments` → environment registry;
+`qe-knowledge-base-GSS` and other solution KBs stay as product knowledge in `solutions-os` (not copied).
+(3) Live write/data steps stub until `jarvis-intel`/`data-generator` are configured with creds/Docker.
+
+## Build progress (2026-06-29) — Product Owner role COMPLETE
+
+`product-owner` role built with the same pattern (verbatim source in `references/` + Delegation
+Protocol on tool-bearing refs + thin orchestrating `SKILL.md` + the single-complete-delegation/analysis-
+document doctrine). 12 references (~900 lines) preserved; 10 carry the protocol; `product-owner` loads
+in `kiro-cli`.
+
+| Skill | Role | Source (atlas-product-owner / ChatTriage) | Refs (protocol) |
+|---|---|---|---|
+| onboarding | product-owner | action-onboarding | 1 (1) |
+| explore | product-owner | action-explore | 1 (1) |
+| feature-inventory | product-owner | action-feature-inventory | 1 (1) |
+| feature-spec | product-owner | action-feature-spec | 1 (1) |
+| research | product-owner | action-research | 1 (1) |
+| cross-app-analysis | product-owner | action-cross-app-analysis | 1 (1) |
+| feature-impact-analysis | product-owner | action-impact-analysis | 1 (1) |
+| release-review | product-owner | action-release-review | 1 (1) |
+| chat-triage | product-owner | ChatTriage: chat-triage-workflow + deduplication-strategy + response-policy (INV-T04) | 3 (2) |
+| guide-appian-docs | **shared** | atlas-product-owner guide-appian-docs | 1 (0) |
+
+Status flips: **INV-P01 (atlas-product-owner → 8 PO skills + shared guide-appian-docs)** and
+**INV-T04 (ChatTriage → product-owner/chat-triage)** = **done**.
+
+**Deviations/notes:** (1) PO `impact-analysis` renamed **`feature-impact-analysis`** to avoid a
+name clash with the developer technical `impact-analysis` (different lens, both kept). (2) PO
+`action-technical-debt` was **excluded** — the matrix assigns `technical-debt` to developer only.
+(3) PO `explore` (product lens) is distinct from developer `appian-explore` (technical) — no clash.
+(4) `guide-appian-docs` references an optional **appian-docs** MCP not wired in solutions-copilot;
+the skill degrades gracefully (points to docs.appian.com). (5) ChatTriage **hook** not yet wired —
+chat-triage ships as the triggered workflow skill. (6) PO actions are concise guides (36–72 lines),
+not the large Jarvis workflows, so reference sizes are small by nature.
+
+## Build progress (2026-06-29) — UX Designer role COMPLETE
+
+`ux-designer` role built with the same pattern (verbatim source + Delegation Protocol on tool-bearing
+refs + thin `SKILL.md` + single-complete-delegation/analysis-document doctrine). 10 references
+(~2,500 lines) preserved; 9 carry the protocol; `ux-designer` loads in `kiro-cli`.
+
+| Skill | Source | Refs (protocol) |
+|---|---|---|
+| aurora-compliance | atlas-ux-designer action-aurora-compliance-check | 1 (1) |
+| component-decomposition | action-component-decomposition | 1 (1) |
+| create-html-prototype | action-create-html-prototype | 1 (1) |
+| create-sailwind-prototype | action-create-sailwind-prototype | 1 (1) |
+| design-consistency-review | action-design-consistency-review | 1 (1) |
+| design-to-dev-handoff | action-design-to-dev-handoff | 1 (1) |
+| edge-case-analysis | action-edge-case-analysis | 1 (1) |
+| generate-sail | action-generate-sail | 1 (1) |
+| platform-feasibility-check | action-platform-feasibility-check | 1 (1) |
+| branding-compliance | Jarvis power `branding-compliance` (INV-T01) | 1 (0) |
+
+Status flips: **INV-P02 (atlas-ux-designer → 9 ux skills)** and the **`branding-compliance`** slice of
+**INV-T01** = **done**. ux-designer wires availableAgents = atlas-intel, jarvis-intel, integrations
+(trusted: atlas-intel, integrations); reuses shared `a11y-audit` + `sail-reference`.
+
+**Deviations/notes:** (1) `branding-compliance` reference is pure branding rules (no tool calls) → no
+protocol; its SKILL.md handles delegation (atlas-intel fetches SAIL). (2) `create-html-prototype`/
+`create-sailwind-prototype`/`generate-sail` write local artifacts; SAIL is validated via jarvis-intel
+`evaluate_sail_expression` when configured. (3) No separate `aurora-design-system` shared skill was
+needed — the Aurora rule set lives inside `aurora-compliance`'s reference; accessibility stays in the
+shared `a11y-audit`.
+
+## Build progress (2026-06-29) — DevOps role COMPLETE
+
+`devops` role built. Only `pipeline-check` had a large verbatim source (654-line Jarvis
+pipeline-check-workflow, protocol-prepended); `deployment`/`package-management`/`promote` are **authored
+orchestration** over the Jarvis MCP deploy/package handlers (there was no standalone source workflow to
+preserve — the capability is the Jarvis tools, reached via jarvis-intel). `devops` loads in `kiro-cli`.
+
+| Skill | Source | Refs (protocol) |
+|---|---|---|
+| pipeline-check | Jarvis `pipeline-check-workflow` (INV-T01) — verbatim, gated workflow | 1 (1) |
+| deployment | authored over Jarvis deploy handlers (`deploy_package`) via jarvis-intel | 0 |
+| package-management | authored over Jarvis package handlers (create/inspect) via jarvis-intel | 0 |
+| promote | authored over package-management + deployment + the environment registry | 0 |
+
+Status flips: **INV-T01 `pipeline-check-workflow` → devops/pipeline-check** = done; the **deploy/package
+handlers** slice of INV-T01 is realized as devops deployment/package-management/promote (delegating to
+jarvis-intel). **INV-G02 `acli-usage`** added to `.kiro/steering/acli-usage.md` (matrix-aligned).
+
+**Deviations/notes:** (1) `database-script-management` is **developer's** (decision #9), NOT devops —
+excluded here. (2) `acli-usage` is Jira-CLI guidance (`acli jira`), so it went to general steering, not
+under a deploy skill. (3) deployment/package-management/promote are thin authored skills (no verbatim
+source) — documented as such; they enforce a confirm-before-deploy + production-needs-approval safety
+posture and resolve targets from the environment registry. (4) A standalone deploy MCP remains a
+future option (doc 09 "Still open"); v1 uses Jarvis deploy handlers via jarvis-intel.

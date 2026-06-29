@@ -72,8 +72,13 @@ markdown format) and Anthropic's "Building multi-agent systems" guidance. See do
 | Agent | Kind | MCP it owns | Status |
 |---|---|---|---|
 | `developer` | **role** | none (delegates) | ✅ complete, full capability menu, loads in CLI **and** IDE |
+| `tester` | **role** | none (delegates) | ✅ complete, full capability menu, loads in CLI **and** IDE |
+| `product-owner` | **role** | none (delegates) | ✅ complete, full capability menu, loads in CLI **and** IDE |
+| `ux-designer` | **role** | none (delegates) | ✅ complete, full capability menu, loads in CLI **and** IDE |
+| `devops` | **role** | none (delegates) | ✅ complete, full capability menu, loads in CLI **and** IDE |
 | `atlas-intel` | sub-agent | Atlas (read-only KB) | ✅ loads CLI+IDE |
 | `jarvis-intel` | sub-agent | Jarvis (live, **read+write/deploy**) | ✅ loads CLI+IDE |
+| `data-generator` | sub-agent | Data Generator (live, **read+write data**) | ✅ built, loads CLI+IDE (live run needs creds/Docker) |
 | `integrations` | sub-agent | Jira · Google Workspace · Playwright | ✅ loads CLI+IDE |
 
 ### 4.2 Skills
@@ -82,9 +87,25 @@ markdown format) and Anthropic's "Building multi-agent systems" guidance. See do
   `design-document`, `implementation`, `implementation-summary`, `feature-breakdown`,
   `spike-research`, `refactor-redeploy`, `expression-test-generation`, `knowledge-query`, `i18n`,
   `a11y-fix`, `database-script-management`.
-- **Shared (3):** `sail-reference`, `sail-code-hygiene`, `sail-documentation-standards`.
-- **~19,700 lines** of source workflow preserved **verbatim** in skill `references/` (37 reference files).
-- **21 reference files** carry the **Delegation Protocol** header (tool-bearing workflows).
+- **Shared (5):** `sail-reference`, `sail-code-hygiene`, `sail-documentation-standards`, `a11y-audit`,
+  `guide-appian-docs`.
+- **Tester (3):** `test-execution` (TEA, end-to-end ticket QE), `unit-test` (test-case/AC verification,
+  ←jarvis-verify), `test-data-generation` (sql-forge 6-step data pipeline). Uses shared `a11y-audit`.
+- **Product-owner (9):** `onboarding`, `explore`, `feature-inventory`, `feature-spec`, `research`,
+  `cross-app-analysis`, `feature-impact-analysis` (renamed from PO `impact-analysis` to avoid clashing
+  with the developer technical skill), `release-review`, `chat-triage` (←ChatTriage). Uses shared
+  `guide-appian-docs`.
+- **UX-designer (10):** `aurora-compliance`, `branding-compliance` (←Jarvis), `design-consistency-review`,
+  `edge-case-analysis`, `component-decomposition`, `platform-feasibility-check`, `create-html-prototype`,
+  `create-sailwind-prototype`, `generate-sail`, `design-to-dev-handoff`. Uses shared `a11y-audit` +
+  `sail-reference`.
+- **DevOps (4):** `pipeline-check` (←Jarvis pipeline-check-workflow, verbatim), `package-management`,
+  `deployment`, `promote` (the last three are **authored orchestration** over the Jarvis MCP deploy/
+  package handlers — no standalone source workflow existed). `acli-usage` added to `.kiro/steering/`.
+- **~33,000 lines** of source workflow preserved **verbatim** in skill `references/` (90 reference
+  files): developer 37 + tester/a11y 30 + product-owner/shared 12 + ux-designer 10 + devops 1 (pipeline).
+- **65 reference files** carry the **Delegation Protocol** header (developer 21 + tester/a11y 24 +
+  product-owner 10 + ux-designer 9 + devops 1).
 
 ### 4.3 Config / scaffold (repo root)
 
@@ -152,6 +173,16 @@ The Delegation Protocol header (in each tool-bearing reference) maps original to
 sub-agent: Atlas/KB → `atlas-intel`; live/SQL/eval/write/deploy → `jarvis-intel`; record data →
 `data-generator`; Jira/Docs/browser → `integrations`.
 
+**Single complete delegation + document hand-off (2026-06-29).** Role agents (`developer`, `tester`,
+and per doc 12 every future role) **delegate the COMPLETE objective in ONE `subagent` call** — plan all
+questions first, pass the real KB **application name** (not an object prefix like `AS_GSS_`) + a return
+contract — rather than bouncing per hop. The **analysis sub-agents** (`atlas-intel`, `jarvis-intel`)
+run the whole investigation in a single spawn and **write a full analysis document to `.kiro/analysis/`**
+(`<agent>-<topic>-<timestamp>.md`), returning its path; the role agent **reads that document** for
+loss-free detail (the chat summary is only an orientation). They carry a **scoped `write` tool**
+(`toolsSettings.write.allowedPaths: ["./.kiro/analysis/**"]`); `.kiro/analysis/` is gitignored.
+`data-generator`/`integrations` return results directly — no document.
+
 ### 5.4 Validation commands (use these every time)
 
 ```bash
@@ -183,11 +214,11 @@ kiro-cli agent list 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
 
 ## 7. What is NOT done (remaining work, roughly prioritized)
 
-1. **Remaining role agents (5):** `tester`, `ux-designer`, `product-owner`, `devops`, `documentation`
-   — each = role agent (dual files + capability menu) + its skills (per matrix doc 09). **Use doc 12.**
-2. **`data-generator` sub-agent** (dedicated; image `…/ramaswamy.u/solutions-atlas-dg-mcp-server:latest`,
-   env `APPIAN_ENV_URL`/`APPIAN_API_KEY`). Pattern = same as the other sub-agents.
-3. **Live end-to-end validation** of `jarvis-intel` + `integrations` (needs creds/Docker).
+1. **Remaining role agent (1):** `documentation`
+   — role agent (dual files + capability menu) + its skills (doc-fip, doc-tech-design, doc-perf-review,
+   doc-security-review, doc-arch-overview, doc-adr, generate-erd; per matrix doc 09). **Use doc 12.**
+   (`developer`, `tester`, `product-owner`, `ux-designer`, `devops` ✅ done; `data-generator` ✅ built.)
+2. **Live end-to-end validation** of `jarvis-intel`, `data-generator` + `integrations` (needs creds/Docker).
 4. **`setup.sh`** global install (symlink/copy `.kiro/*` → `~/.kiro/*`, write creds, profiles) +
    keep `.json`↔frontmatter in sync.
 5. **Environment & secrets registry (BL-1)** and **installer web app (BL-2)** — see doc 10.
