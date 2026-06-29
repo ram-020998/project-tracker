@@ -34,7 +34,7 @@ GitLab: `gitlab.appian-stratus.com`, project `ramaswamy.u/solutions-copilot` (pr
 ---
 
 ## 2. The agents/skills product (`.kiro/`) — current state
-- **Role agents:** `developer`, `tester`, `product-owner`, `ux-designer`, `devops` (all complete). Planned: documentation.
+- **Role agents:** `developer`, `tester`, `product-owner`, `ux-designer`, `devops`, `documentation` — **all 6 complete**.
 - **Sub-agents:** `atlas-intel` (read-only Atlas KB), `jarvis-intel` (live + write/deploy),
   `data-generator` (live test/demo data CRUD + rollback), `integrations` (Jira · Google · Playwright).
 - **Developer skills (15):** appian-explore, impact-analysis, technical-debt, code-review,
@@ -50,6 +50,8 @@ GitLab: `gitlab.appian-stratus.com`, project `ramaswamy.u/solutions-copilot` (pr
   create-sailwind-prototype, generate-sail, design-to-dev-handoff.
 - **DevOps skills (4):** pipeline-check (←Jarvis pipeline-check-workflow), package-management, deployment,
   promote (last three authored over Jarvis deploy/package handlers).
+- **Documentation skills (7):** doc-fip, doc-tech-design, doc-adr, doc-perf-review, doc-security-review,
+  doc-arch-overview (←feature-docgenie), generate-erd (←erd-generator; Lucid diagram step not wired).
 - **Shared skills (5):** sail-reference, sail-code-hygiene, sail-documentation-standards, a11y-audit,
   guide-appian-docs.
 - **Conventions:** dual-surface agents (`.json` for CLI + `-prompt.md` v3 frontmatter for IDE);

@@ -76,6 +76,7 @@ markdown format) and Anthropic's "Building multi-agent systems" guidance. See do
 | `product-owner` | **role** | none (delegates) | ✅ complete, full capability menu, loads in CLI **and** IDE |
 | `ux-designer` | **role** | none (delegates) | ✅ complete, full capability menu, loads in CLI **and** IDE |
 | `devops` | **role** | none (delegates) | ✅ complete, full capability menu, loads in CLI **and** IDE |
+| `documentation` | **role** | none (delegates) | ✅ complete, full capability menu, loads in CLI **and** IDE |
 | `atlas-intel` | sub-agent | Atlas (read-only KB) | ✅ loads CLI+IDE |
 | `jarvis-intel` | sub-agent | Jarvis (live, **read+write/deploy**) | ✅ loads CLI+IDE |
 | `data-generator` | sub-agent | Data Generator (live, **read+write data**) | ✅ built, loads CLI+IDE (live run needs creds/Docker) |
@@ -102,10 +103,15 @@ markdown format) and Anthropic's "Building multi-agent systems" guidance. See do
 - **DevOps (4):** `pipeline-check` (←Jarvis pipeline-check-workflow, verbatim), `package-management`,
   `deployment`, `promote` (the last three are **authored orchestration** over the Jarvis MCP deploy/
   package handlers — no standalone source workflow existed). `acli-usage` added to `.kiro/steering/`.
-- **~33,000 lines** of source workflow preserved **verbatim** in skill `references/` (90 reference
-  files): developer 37 + tester/a11y 30 + product-owner/shared 12 + ux-designer 10 + devops 1 (pipeline).
-- **65 reference files** carry the **Delegation Protocol** header (developer 21 + tester/a11y 24 +
-  product-owner 10 + ux-designer 9 + devops 1).
+- **Documentation (7):** `doc-fip`, `doc-tech-design`, `doc-adr`, `doc-perf-review`, `doc-security-review`,
+  `doc-arch-overview` (←feature-docgenie INV-E04; E06 deduped), `generate-erd` (←erd-generator INV-T05).
+  Each doc skill carries its workflow + markdown template; shared `document.css` in
+  `skills/documentation/_assets/`. Uses shared `sail-documentation-standards` + `guide-appian-docs`.
+- **~35,900 lines** of source workflow preserved **verbatim** in skill `references/` (105 reference
+  files): developer 37 + tester/a11y 30 + product-owner/shared 12 + ux-designer 10 + devops 1 +
+  documentation 15.
+- **74 reference files** carry the **Delegation Protocol** header (developer 21 + tester/a11y 24 +
+  product-owner 10 + ux-designer 9 + devops 1 + documentation 9).
 
 ### 4.3 Config / scaffold (repo root)
 
@@ -214,10 +220,9 @@ kiro-cli agent list 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
 
 ## 7. What is NOT done (remaining work, roughly prioritized)
 
-1. **Remaining role agent (1):** `documentation`
-   — role agent (dual files + capability menu) + its skills (doc-fip, doc-tech-design, doc-perf-review,
-   doc-security-review, doc-arch-overview, doc-adr, generate-erd; per matrix doc 09). **Use doc 12.**
-   (`developer`, `tester`, `product-owner`, `ux-designer`, `devops` ✅ done; `data-generator` ✅ built.)
+1. **Role agents — ALL 6 COMPLETE** ✅ `developer`, `tester`, `product-owner`, `ux-designer`, `devops`,
+   `documentation`. Sub-agents `atlas-intel`, `jarvis-intel`, `data-generator`, `integrations` all built.
+   The full Agents+Skills role set is in place. Remaining work is hardening/validation (below), not new roles.
 2. **Live end-to-end validation** of `jarvis-intel`, `data-generator` + `integrations` (needs creds/Docker).
 4. **`setup.sh`** global install (symlink/copy `.kiro/*` → `~/.kiro/*`, write creds, profiles) +
    keep `.json`↔frontmatter in sync.

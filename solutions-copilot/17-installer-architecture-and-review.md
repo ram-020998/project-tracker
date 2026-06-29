@@ -66,4 +66,7 @@ webview is typechecked (`npm run typecheck:webview`); host compiled with `tsc`.
 - Managed-agent **overlays** (custom skills/MCP onto built-in agents, surviving update regen).
 - Per-object **update diff** (git-blob-sha vs GitLab tree ids) — H2 in doc 16.
 - Per-agent **activity attribution** (session-format spike).
-- Optional: move `profileMeta` descriptions fully into the manifest (UI already supports a fallback).
+- ✅ **Done (2026-06-29):** `agentMeta` (titles + summaries) and `profileMeta` (profile descriptions)
+  added to the manifest and wired through `toCatalog` → `Catalog.profileMeta` → webview; the catalog
+  now surfaces all six roles with proper titles, summaries, and manifest-driven profile descriptions
+  (installer v0.8.0). Confirms the manifest-driven contract end-to-end.

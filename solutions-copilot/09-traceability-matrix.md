@@ -244,3 +244,37 @@ under a deploy skill. (3) deployment/package-management/promote are thin authore
 source) — documented as such; they enforce a confirm-before-deploy + production-needs-approval safety
 posture and resolve targets from the environment registry. (4) A standalone deploy MCP remains a
 future option (doc 09 "Still open"); v1 uses Jarvis deploy handlers via jarvis-intel.
+
+## Build progress (2026-06-29) — Documentation role COMPLETE → ALL 6 ROLES DONE 🎉
+
+`documentation` role built (the final role). 15 markdown references preserved; 9 carry the protocol;
+`documentation` loads in `kiro-cli` alongside the other five roles.
+
+| Skill | Source | Refs (protocol) |
+|---|---|---|
+| doc-fip | feature-docgenie workflow-fip + template fip.md (INV-E04) | 2 (1) |
+| doc-tech-design | workflow-tech-design + template tech-design.md | 2 (1) |
+| doc-perf-review | workflow-perf-review + template perf-review.md | 2 (1) |
+| doc-security-review | workflow-security-review + template security-review.md | 2 (1) |
+| doc-arch-overview | workflow-arch-overview + template arch-overview.md | 2 (1) |
+| doc-adr | workflow-adr + template adr.md | 2 (1) |
+| generate-erd | erd-generator generate-erd + simple-erd-all-tables + sql-release-lookup (INV-T05) | 3 (3) |
+
+Shared asset: `skills/documentation/_assets/styles/document.css`. Status flips: **INV-E04
+(feature-docgenie → 6 doc skills)**, **INV-E06 (atlas-dev-documentation)** = **done via DEDUPE into
+E04** (its `google-workspace-cli` superseded by the integrations Google MCP; `atlas-usage` by atlas-intel),
+and **INV-T05 (erd-generator → generate-erd)** = **done** (no longer deferred, per decision 2026-06-25).
+
+**Deviations/notes:** (1) The binary **`.docx` templates** (and `fix_table_borders.py`) were **NOT**
+copied — the agent works in markdown/Google Docs and docx production is the deferred CLI concern; the
+markdown templates + `document.css` capture structure losslessly. The `.docx` originals remain in
+`solutions-os` if a converter is wired later. (2) **`generate-erd`** draws diagrams via a **Lucid MCP**
+(`lucid_create_diagram_from_specification`) that is **not wired** in solutions-copilot — the skill
+produces the full ERD specification and stubs the Lucid diagram step. (3) `doc-tech-design` (documentation
+role, doc lens) coexists with the developer role's `design-document` (engineering lens) — distinct skills.
+
+## ✅ MILESTONE — all 6 role agents + 4 sub-agents complete
+developer · tester · product-owner · ux-designer · devops · documentation
++ atlas-intel · jarvis-intel · data-generator · integrations. The lossless migration of the Agents+Skills
+role set from solutions-os is structurally complete; remaining work is live validation, setup.sh, and the
+installer roadmap (see doc 11 §7, docs 13–17).
