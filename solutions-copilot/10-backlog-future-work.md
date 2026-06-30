@@ -100,3 +100,28 @@ behind two prerequisites:
    workflow steps can't be automated, so orchestrating them is premature. **This is the real blocker.**
 
 Revisit after those land; doc 19 preserves the design + the two open questions to verify first.
+
+---
+
+## BL-4 — Installer: merge-on-write for `mcp.json` (Global-scope safety)
+
+**Status:** 🅿️ Backlog (noted 2026-06-30) — look at later. **Severity:** medium (potential data loss on Global installs).
+
+**Problem.** The installer writes the generated `.kiro/settings/mcp.json` with a **full overwrite**
+(`writeText` in `InstallService`). For a **Workspace** install the file is new, so this is safe. For a
+**Global** install (`~/.kiro/settings/mcp.json`) the file usually **already exists and holds the user's
+other MCP servers** (e.g. their `powers` block, `jira`, `lcp-mcp-server`, `playwright`) — a full
+overwrite **wipes all of them**, replacing the file with only the installer's generated servers.
+
+**Current mitigation (interim).** Documented to **install to Workspace scope only**; Global installs are
+unsafe until this is fixed (installer README, doc 11 §6.6, doc 18 §12).
+
+**Fix (merge-on-write).** Before writing `mcp.json`, **read** the existing file (if any), **merge** the
+generated servers into its `mcpServers` (add/update only our keys — `appian-atlas`, `jarvis`,
+`appian-data-generator`, `jira`, `playwright`), **preserve everything else** (the user's other servers
+and any top-level keys like `powers`), then write the merged result. Small, contained change in
+`InstallService` + a merge helper in `infra/writer.ts` (or `core/mcpConfig.ts`), plus a headless test
+asserting existing servers survive and ours are added/updated.
+
+**Acceptance.** A Global install adds the solution's MCP servers without removing or altering the user's
+pre-existing servers in `~/.kiro/settings/mcp.json`. Workspace behavior unchanged.

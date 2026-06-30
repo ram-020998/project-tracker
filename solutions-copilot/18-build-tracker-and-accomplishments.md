@@ -185,16 +185,26 @@ link, mcp add, applyCustom idempotence). Plus host `tsc` compile + webview typec
 ---
 
 ## 12. What's NOT done (prioritized next)
-1. **Remaining role agents** (tester, ux-designer, product-owner, devops, documentation) + the
-   `data-generator` sub-agent (use doc 12 runbook).
-2. **Managed-agent overlays** — add custom skills/MCP to built-in agents, surviving update-regen.
-3. **Per-object update diff** (git-blob-sha vs GitLab tree ids) — doc 16 H2; "what changed" view.
-4. **Per-agent activity attribution** (locate the agent field in session data); IDE sessions.
-5. **CI/CD pipeline** (doc 15) + bootstrap installer script.
-6. **Keychain provider** (roadmap) — swap `PlaintextProvider` → macOS `security` behind `SecretProvider`.
-7. **JSON Schemas (ajv)** for manifest/registry/secrets/lockfile + schema validation in CI.
-8. **Live end-to-end validation** of jarvis-intel/integrations (needs creds + Docker).
-9. Nothing is committed/pushed yet in the working repo (per session).
+All six role agents + four sub-agents are complete (§2). MCP delivery via `mcp.json` is fixed and an
+end-to-end install is validated (doc 11 §6.5/§6.6). Remaining:
+1. **Installer `mcp.json` merge-on-write** — a **Global** install currently **overwrites**
+   `~/.kiro/settings/mcp.json` (would wipe other servers); make it merge. Workspace installs are safe.
+2. **Live end-to-end validation of the write paths** — `jarvis-intel` / `data-generator` /
+   `integrations` (needs creds + Docker). The read path (`developer → atlas-intel` → KB) is ✅ validated.
+3. **Managed-agent overlays** — add custom skills/MCP to built-in agents, surviving update-regen.
+4. **Per-object update diff** (git-blob-sha vs GitLab tree ids) — doc 16 H2; "what changed" view.
+5. **Per-agent activity attribution** (locate the agent field in session data); IDE sessions.
+6. **CI/CD pipeline** (doc 15) + bootstrap installer script.
+7. **Keychain provider** (roadmap) — swap `PlaintextProvider` → macOS `security` behind `SecretProvider`.
+8. **JSON Schemas (ajv)** for manifest/registry/secrets/lockfile + schema validation in CI.
+9. **`setup.sh`** global install (doc 11 §7).
+10. **Google Workspace MCP not wired** — no verified public server; omitted from `mcp.json.template`,
+    marked NOT WIRED in the manifest; Google Docs/Sheets export in skills stays stubbed until one exists.
+    (Jira is wired via the `jira-mcp-proxy` Docker image as of 2026-06-30; `@playwright` works.)
+
+> **Install gotcha (doc 11 §6.6):** a new `.vsix` only activates after a **Kiro window reload** —
+> always reload after `--install-extension`, then verify the install log shows
+> `Wrote settings/mcp.json (N MCP servers)`.
 
 ---
 
@@ -204,8 +214,10 @@ cd /Users/ramaswamy.u/repo-gitlab/ramaswamy.u/solutions-copilot/installer
 npm install
 npm run build            # tsc host + esbuild webview
 npm run typecheck:webview
-npm test                 # 11 headless tests
+npm test                 # 12 headless tests
 npm run package          # -> solutions-copilot.vsix (prod build + vsce)
-kiro --install-extension solutions-copilot.vsix --force   # then reload Kiro
+kiro --install-extension solutions-copilot.vsix --force
+# ⚠️ MUST reload: Cmd+Shift+P → "Developer: Reload Window" (else the old version keeps running)
 # open: activity-bar "Solutions Copilot" → Open Configuration (or 🚀 status bar)
+# install to WORKSPACE scope (Global currently overwrites ~/.kiro/settings/mcp.json)
 ```

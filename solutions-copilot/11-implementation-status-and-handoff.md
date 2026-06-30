@@ -231,6 +231,16 @@ kiro-cli agent list 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
    servers). This **preserves the architecture** — role agents still delegate to MCP-owning sub-agents;
    only *where the server is declared* changed. Docs 02 §2.6 / 03 §3.2 / 04 corrected. (Also removed a
    stale hardcoded GITLAB_TOKEN that had been left in `atlas-intel-prompt.md`.)
+6. **A new `.vsix` doesn't take effect until the Kiro window is reloaded (found 2026-06-30).** After
+   `kiro --install-extension …vsix --force`, the registry points to the new version but the
+   **previously-running extension host keeps executing** until a **window reload** (Cmd+Shift+P →
+   "Developer: Reload Window"). Symptom that flagged this: after installing v0.10.0 (which generates
+   `.kiro/settings/mcp.json`), the `settings/` folder wasn't created — because the still-running v0.9.0
+   host (no MCP-config logic) did the install. Fix/process: **always reload after installing**, then
+   verify the install log shows `Wrote settings/mcp.json (N MCP servers)`. With the reload, the MCP fix
+   (#5) is **confirmed working end-to-end**: a fresh workspace install generates `mcp.json` and
+   `developer → atlas-intel` reaches the KB. *(Note: a Global install currently overwrites an existing
+   `~/.kiro/settings/mcp.json` — prefer Workspace scope until merge-on-write lands.)*
 
 ## 7. What is NOT done (remaining work, roughly prioritized)
 
@@ -265,8 +275,12 @@ To build a role (e.g. `tester`):
 ## 9. Open questions / pending decisions
 
 - `i18n` was consolidated to **one skill with 3 modes** (vs 3 skills in the matrix) — confirm OK.
-- Jira/Google MCP **package names** (`@anthropic-ai/jira-mcp-server`, `…/google-workspace-mcp-server`)
-  came from the team's QE config and look placeholder — **verify they resolve** before relying on them.
+- Jira/Google MCP servers (**resolved 2026-06-30**): the placeholder `npx @anthropic-ai/jira-mcp-server`
+  did **not** exist (it silently failed to start → `integrations` had no `@jira` tools). **Jira now uses
+  the working `jira-mcp-proxy` Docker image** (`registry.gitlab.appian-stratus.com/appian/prod/jira-mcp-proxy/jira-mcp-proxy:latest`,
+  env `JIRA_URL`/`JIRA_EMAIL`/`JIRA_TOKEN`) in `mcp.json.template` + the manifest. **Google Workspace
+  has no verified public server** — it's omitted from the template and marked NOT WIRED in the manifest;
+  the Google-export steps in skills stay stubbed until a real server is added. (`@playwright` works as-is.)
 - IDE auto-approve: we omitted per-tool approval in frontmatter (default prompt). Add `permissions`
   if the team wants read-only sub-agents to run without prompts.
 - `.json` ↔ frontmatter duplication: decide whether `setup.sh` generates one from the other.

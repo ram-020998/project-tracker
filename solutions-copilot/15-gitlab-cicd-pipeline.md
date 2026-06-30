@@ -196,6 +196,10 @@ curl -s --header "PRIVATE-TOKEN: $TOKEN" -o sc.vsix \
   "https://gitlab.appian-stratus.com/api/v4/projects/$PROJ/packages/generic/solutions-copilot/$TAG/solutions-copilot-$TAG.vsix"
 kiro --install-extension sc.vsix --force
 ```
+> ⚠️ **Reload after install.** A newly sideloaded `.vsix` only activates after a **window reload**
+> (Cmd+Shift+P → "Developer: Reload Window", or quit & reopen). The previously-running extension host
+> keeps executing until then — installing without reloading runs the *old* version (see doc 11 §6.6).
+
 (The extension's own update-check reuses the same Releases/tags API to notify users of new versions.)
 
 ---
