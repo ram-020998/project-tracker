@@ -26,7 +26,9 @@ consumed by the sub-agents (atlas-intel, jarvis-intel, data-generator) and role 
 - One canonical schema for an environment entry (name, url, apiEndpoint, products[], dbType, type, notes).
 - Credentials referenced **by environment name**, never inlined in the registry.
 - `setup.sh` reads the environment registry for URLs and the secrets registry for auth, and injects
-  them into the generated `~/.kiro/settings/mcp.json` (and per-sub-agent `mcpServers` env).
+  them into the generated **`~/.kiro/settings/mcp.json` (or workspace `.kiro/settings/mcp.json`)** —
+  MCP servers must be declared there (sub-agents set `includeMcpJson:true`); embedded per-agent
+  `mcpServers` don't reach spawned sub-agents (doc 11 §6.5).
 - A credential-sync hook (PostToolUse) re-syncs when `.env` changes, so rotations don't require a
   manual re-run.
 - Agents resolve an environment by name ("deploy to staging" → look up staging URL + creds).

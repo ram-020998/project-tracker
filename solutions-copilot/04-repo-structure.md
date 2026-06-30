@@ -53,8 +53,11 @@ solutions-copilot/
 
 - **Agent filename = agent name.** Keep names tool-agnostic (`developer`, not `atlas-developer`).
 - **Skill folder name = `name` in frontmatter.** One purpose per skill.
-- **Heavy MCPs are embedded in their owning sub-agent**, not in role agents and not (by default) in
-  the global `mcp.json`. Role agents set `includeMcpJson: false`.
+- **Heavy MCP servers are declared in `.kiro/settings/mcp.json`** (workspace-scoped); the owning
+  **sub-agent** sets `includeMcpJson: true` with `tools` scoped to that server. **Role agents set
+  `includeMcpJson: false`** and carry no MCP — they delegate. *(Corrected 2026-06-30: embedded
+  per-agent `mcpServers` do NOT start for spawned sub-agents in the Kiro IDE; only `mcp.json`-declared
+  servers reach them. The installer generates `mcp.json` from `mcp.json.template`. See doc 11 §6.5.)*
 - **Secrets never committed.** `.env.example` shows the shape; real values in `.env` (gitignored).
 - **Dual surface:** the same `agents/`, `skills/`, `steering/` work in CLI and IDE because both read
   the `.kiro/` model and the open Agent Skills format. `setup.sh` handles install for both.

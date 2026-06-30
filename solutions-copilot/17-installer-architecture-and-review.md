@@ -29,7 +29,7 @@ webview/ (Preact)  ──postMessage──▶  app/ (controller)  ──▶  ser
 | `SecretsService` | Own the `SecretProvider`; token + fields/cards/value-resolution. |
 | `ConnectionService` | GitLab client + manifest/catalog lifecycle; sub-agent list. |
 | `EnvironmentService` | Environment registry CRUD + steering delivery. |
-| `InstallService` | plan → substitute secrets → write → lockfile → deliver registry → apply custom. |
+| `InstallService` | plan → substitute secrets → write agent/skill files + generate **`.kiro/settings/mcp.json`** (from `mcp.json.template`, filtered to installed servers) → lockfile → deliver registry → apply custom. |
 | `DashboardService` | Assemble per-scope `DashboardData`. |
 | `AuthoringService` | Custom agents/skills/MCP. |
 

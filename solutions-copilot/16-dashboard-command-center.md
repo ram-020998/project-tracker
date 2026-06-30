@@ -140,7 +140,10 @@ Users can extend their setup with **custom** objects, tracked in `<kiroDir>/.sol
 - **Add skill (existing)** — links a catalog skill (`shared/<s>` or `<role>/<s>`) by adding a
   `skill://` resource to the custom agent.
 - **Add MCP server** — adds an entry to the custom agent's `mcpServers` (+ `@server` tool + block-style
-  frontmatter), with literal `env` values.
+  frontmatter), with literal `env` values. *(Caveat per doc 11 §6.5: an embedded `mcpServers` block
+  works when the custom agent is run **directly**, but does NOT reach it when it's spawned as a
+  sub-agent. For delegated use, declare the server in `.kiro/settings/mcp.json` + set the agent
+  `includeMcpJson:true` instead.)*
 - **Survives updates** — `applyCustom()` re-asserts all custom agents/skills after any install/update.
 - **Dashboard** — custom agents appear tagged **custom**, included in the inventory (not treated as
   foreign), with their skills.

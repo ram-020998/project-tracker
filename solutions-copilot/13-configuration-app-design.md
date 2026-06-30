@@ -22,7 +22,7 @@ not be conflated:
 | Secret? | Yes (API keys). | **No** — pure connection metadata. |
 | Who consumes it | The MCP **server process**, via its launch env. | The **agent's reasoning** (and its `read` tool), by label, per request. |
 | When | At MCP launch. | Whenever the user references an environment ("pull this from gam-dev2"). |
-| This release | **Plaintext** store, substituted into the generated MCP configs (keychain on the roadmap). | Managed data file + steering pointer; agent looks it up. |
+| This release | **Plaintext** store, substituted into a generated **`.kiro/settings/mcp.json`** (keychain on the roadmap). | Managed data file + steering pointer; agent looks it up. |
 
 Example registry entry (exactly the shape we support):
 ```jsonc
@@ -237,6 +237,15 @@ detection, repair, and clean uninstall.
 ## 7. MCP secrets → server (how values reach the MCP)
 
 ### 7.1 Mechanism: substitution at generation time (no launcher in v1)
+
+> **⚠️ Correction (2026-06-30) — verified in the Kiro IDE.** Secrets are substituted into a generated
+> **`.kiro/settings/mcp.json`** (built from a committed `mcp.json.template`), **not** into each
+> (sub-)agent's embedded `mcpServers` block. Reason: **MCP servers embedded in an agent config do NOT
+> start when that agent is spawned as a *sub-agent*** — only servers declared in `mcp.json` reach
+> spawned sub-agents (workspace-scoped confirmed working). So the MCP-owning sub-agents now set
+> **`includeMcpJson: true`** with `tools` scoped to their server, and the installer writes the resolved
+> `mcp.json` (mode 0600, filtered to the installed servers). The substitution concept below is
+> unchanged — only the *target file* moved from agent blocks to `mcp.json`. See doc 11 §6.5.
 Kiro launches each MCP from the `mcpServers.<name>.env` block. Source configs in GitLab keep
 `${VAR}` placeholders (no secrets in the repo). At **install/update and on any secret change**, the
 app **fetches the (sub-)agent configs, substitutes `${VAR}` → the stored value, and writes the

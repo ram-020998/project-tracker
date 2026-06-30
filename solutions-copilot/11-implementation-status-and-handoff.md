@@ -217,6 +217,20 @@ kiro-cli agent list 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
    `toolsSettings` from frontmatter (§5.1).
 4. **Prompt files were in a `prompts/` subfolder** — moved to siblings of the `.json` so the IDE
    scans them and relative `file://`/`skill://` paths still resolve.
+5. **MCP-owning sub-agents got NO tools when delegated to (the big one — found & fixed 2026-06-30).**
+   Symptom: `developer → atlas-intel`/`jarvis-intel` returned "unreachable"/"no @jarvis tools" and fell
+   back to file reads, while running `atlas-intel` **directly** worked. **Root cause (verified via the
+   IDE `mcp.log`):** MCP servers **embedded** in an agent's `mcpServers` block start only when that
+   agent is run **directly** — they are **NOT started when the agent is spawned as a sub-agent**.
+   Servers declared in **`.kiro/settings/mcp.json`** (with the sub-agent set `includeMcpJson: true`)
+   **do** reach spawned sub-agents (workspace-scoped `mcp.json` confirmed working). **Fix:** declare the
+   heavy servers in `mcp.json`; the 4 sub-agents (atlas-intel, jarvis-intel, data-generator,
+   integrations) now set `includeMcpJson: true`, dropped their embedded `mcpServers`, and keep `tools`
+   scoped to their server; role agents stay `includeMcpJson: false`. The installer generates
+   `mcp.json` from a committed `mcp.json.template` (substituting secrets, filtering to installed
+   servers). This **preserves the architecture** — role agents still delegate to MCP-owning sub-agents;
+   only *where the server is declared* changed. Docs 02 §2.6 / 03 §3.2 / 04 corrected. (Also removed a
+   stale hardcoded GITLAB_TOKEN that had been left in `atlas-intel-prompt.md`.)
 
 ## 7. What is NOT done (remaining work, roughly prioritized)
 
@@ -224,6 +238,8 @@ kiro-cli agent list 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
    `documentation`. Sub-agents `atlas-intel`, `jarvis-intel`, `data-generator`, `integrations` all built.
    The full Agents+Skills role set is in place. Remaining work is hardening/validation (below), not new roles.
 2. **Live end-to-end validation** of `jarvis-intel`, `data-generator` + `integrations` (needs creds/Docker).
+   *(Unblocked 2026-06-30: the role→sub-agent MCP path now works once `mcp.json` is generated — see §6.5.
+   The `developer → atlas-intel` KB delegation is confirmed working end-to-end.)*
 4. **`setup.sh`** global install (symlink/copy `.kiro/*` → `~/.kiro/*`, write creds, profiles) +
    keep `.json`↔frontmatter in sync.
 5. **Environment & secrets registry (BL-1)** and **installer web app (BL-2)** — see doc 10.

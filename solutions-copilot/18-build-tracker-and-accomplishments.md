@@ -73,6 +73,9 @@ GitLab: `gitlab.appian-stratus.com`, project `ramaswamy.u/solutions-copilot` (pr
 | 0.5.0 | **Custom authoring** (point 8): create custom agents; add new/existing skills; add custom MCP servers; tracked in `custom.json`; shown tagged "custom"; survives updates via `applyCustom()`. |
 | 0.6.0 | **Code review + refactor:** decomposed god-class into 8 DI **services**; **manifest-driven** secret/global classification (removed hardcoded var lists); manifest agent metadata surfaced. |
 | 0.7.0 | **UX redesign:** dropped three-pane → two-pane; Agents = card grid + full-width drill-in detail; consistent toolbars/alignment; **fixed** custom-skill display (new + linked existing). |
+| 0.8.0 | Catalog made self-describing: manifest `agentMeta` (titles/summaries) + `profileMeta` wired through `toCatalog` → webview; all six roles shown with proper titles. |
+| 0.9.0 | Dashboard fixes: scope race (stale-closure → `scopeRef`); agent detail shows the read-only **steering/instructions** doc (replaces recent interactions); MCP Connections **edit opens a separate panel** (no row-stretch). |
+| 0.10.0 | **MCP-delivery fix:** servers now declared in generated **`.kiro/settings/mcp.json`** (from `mcp.json.template`, secrets substituted, filtered to installed servers); sub-agents `includeMcpJson:true`. Fixes sub-agents getting no MCP tools when delegated to (doc 11 §6.5). |
 
 ---
 
@@ -112,8 +115,10 @@ webview/ (Preact) ──postMessage──▶ app/ConfigPanel (controller) ──
   custom; survives updates.
 - **Status:** health checks (token, manifest, MCP secrets).
 - **Updates:** coarse (lockfile `ref` vs latest tag).
-- **Secret → MCP:** plaintext store (`secrets.json`, 0600, gitignored) substituted into generated
-  agent configs; `SecretProvider` seam for the keychain roadmap.
+- **Secret → MCP:** plaintext store (`secrets.json`, 0600, gitignored) substituted into a generated
+  **`.kiro/settings/mcp.json`** (from `mcp.json.template`); MCP-owning sub-agents set
+  `includeMcpJson:true` (embedded per-agent `mcpServers` don't reach spawned sub-agents in the IDE —
+  doc 11 §6.5). `SecretProvider` seam for the keychain roadmap.
 
 ---
 
@@ -158,6 +163,7 @@ link, mcp add, applyCustom idempotence). Plus host `tsc` compile + webview typec
 - `<kiroDir>/.solutions-copilot/installed.lock.json` — install provenance.
 - `<kiroDir>/.solutions-copilot/custom.json` — custom registry.
 - `<kiroDir>/environments.json` + `<kiroDir>/steering/environments.md` — env registry + steering.
+- `<kiroDir>/settings/mcp.json` (0600, gitignored) — MCP server declarations with substituted secrets (from `mcp.json.template`); read by sub-agents via `includeMcpJson:true`.
 - `<kiroDir>/agents/*.{json,-prompt.md}`, `skills/**` — installed (secrets substituted; gitignored).
 
 ---

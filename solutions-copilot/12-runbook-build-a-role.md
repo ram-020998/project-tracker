@@ -9,7 +9,11 @@ Paths:
 
 > **Golden rules:** (1) preserve source workflows **verbatim** in `references/`; (2) skills **delegate**
 > to sub-agents, never call MCP directly; (3) every agent needs **two files** (`.json` + `-prompt.md`);
-> (4) `mcpServers` in frontmatter is **block-style YAML**; (5) validate after each step;
+> (4) **MCP servers are declared in `.kiro/settings/mcp.json`** (the IDE only starts servers from
+> there — embedded per-agent `mcpServers` do NOT reach spawned sub-agents; see doc 11 §6.5). The
+> owning sub-agent sets `includeMcpJson: true` + scoped `tools`; role agents stay
+> `includeMcpJson: false`. The installer generates `mcp.json` from `mcp.json.template`.
+> (5) **validate after each step.**
 > (6) **delegate the COMPLETE objective in ONE hand-off per sub-agent** (plan all questions first, send
 > one `subagent` call with a return contract) — analysis sub-agents (atlas-intel/jarvis-intel) run the
 > whole investigation in a single spawn, **write a full analysis document to `.kiro/analysis/`**, and
@@ -187,27 +191,37 @@ Appian terminology.
 > pure action/data sub-agents (data-generator, integrations) do **not** write a document.
 
 ### 6b. Build `data-generator` (only when a role needs it; same two-file pattern)
+
+> **MCP for sub-agents lives in `mcp.json`, not embedded** (see Golden rule 4 / doc 11 §6.5). A sub-agent
+> with an *embedded* `mcpServers` block gets **no MCP when spawned** by a role agent. So a new
+> MCP-owning sub-agent: (1) **declares its server in `.kiro/settings/mcp.json`** (the installer
+> generates this from `.kiro/settings/mcp.json.template` — add the server there with `${VAR}` for
+> secrets), and (2) sets **`includeMcpJson: true`** with `tools`/`allowedTools` scoped to that server.
+> No `mcpServers` block in the agent config.
+
 `$KB/.kiro/agents/data-generator.json`:
 ```json
 {
   "name": "data-generator",
   "description": "Test/demo data CRUD against a live Appian environment: record properties, create/update/delete/query records, list users, session tracking + rollback.",
   "prompt": "file://./data-generator-prompt.md",
-  "mcpServers": {
-    "appian-data-generator": {
-      "command": "docker",
-      "args": ["run","--rm","-i","--env","APPIAN_ENV_URL","--env","APPIAN_API_KEY","registry.gitlab.appian-stratus.com/ramaswamy.u/solutions-atlas-dg-mcp-server:latest"],
-      "env": {"APPIAN_ENV_URL": "${APPIAN_ENV_URL}", "APPIAN_API_KEY": "${APPIAN_API_KEY}"}
-    }
-  },
   "tools": ["read", "@appian-data-generator"],
   "allowedTools": ["@appian-data-generator/get_*", "@appian-data-generator/query_*", "@appian-data-generator/list_*"],
-  "includeMcpJson": false
+  "includeMcpJson": true
 }
 ```
-`data-generator-prompt.md` frontmatter — **block-style** `mcpServers` (copy the shape from
-`atlas-intel-prompt.md`); create/update/delete tools should prompt (omit them from any allow list).
-`APPIAN_ENV_URL`/`APPIAN_API_KEY` are already in `.env.example`.
+Add the matching server to `$KB/.kiro/settings/mcp.json.template`:
+```json
+"appian-data-generator": {
+  "command": "docker",
+  "args": ["run","--rm","-i","--env","APPIAN_ENV_URL","--env","APPIAN_API_KEY","registry.gitlab.appian-stratus.com/ramaswamy.u/solutions-atlas-dg-mcp-server:latest"],
+  "env": {"APPIAN_ENV_URL": "${APPIAN_ENV_URL}", "APPIAN_API_KEY": "${APPIAN_API_KEY}"}
+}
+```
+`data-generator-prompt.md` frontmatter mirrors the `.json` (`includeMcpJson: true`, scoped `tools`, **no
+`mcpServers` block**); create/update/delete tools should prompt (omit them from any allow list).
+`APPIAN_ENV_URL`/`APPIAN_API_KEY` are already in `.env.example`. Also add the server to the manifest
+`mcp` block with its `owner` so the installer filters it to installs that include this sub-agent.
 
 ## Step 7 — Update the manifest
 

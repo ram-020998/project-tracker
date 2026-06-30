@@ -52,7 +52,9 @@ Rules:
 | `jarvis-intel` | Jarvis (live env) | read + write/eval | cheap/standard | real-time state, `query_sql`, `evaluate_sail`, deploy/package handlers |
 | `data-generator` | Data-Gen | read/write data | standard | **dedicated sub-agent** (decision 2026-06-25) |
 
-- Each owns its MCP in its own `mcpServers` block; `allowedTools` scoped to that server.
+- Each owns its MCP via **`.kiro/settings/mcp.json`** (declared there; the sub-agent sets
+  `includeMcpJson: true` with `tools`/`allowedTools` scoped to that server). *(Corrected 2026-06-30:
+  embedded per-agent `mcpServers` don't reach spawned sub-agents in the Kiro IDE — see doc 11 §6.5.)*
 - Returns via the `summary` tool with a **return contract** defined in its prompt.
 - Deploy/package capability currently lives in the Jarvis server (deployment/package handlers), so
   `devops` reaches it via `jarvis-intel`. A standalone deploy MCP is a later option (not v1).

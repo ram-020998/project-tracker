@@ -142,8 +142,15 @@ description: Analyze blast radius of a change to an Appian object. Use when aske
 
 - Servers can be embedded per-agent (`mcpServers`) or declared globally in
   `~/.kiro/settings/mcp.json` / workspace `.kiro/settings/mcp.json` (loaded when `includeMcpJson:true`).
-- **Our convention:** each heavy MCP is embedded in **its owning sub-agent**, so role agents carry
-  **zero** heavy MCP schemas.
+- **Our convention (corrected 2026-06-30):** each heavy MCP server is declared in
+  **`.kiro/settings/mcp.json`**, and its **owning sub-agent** is set `includeMcpJson: true` with
+  `tools` scoped to just that server (e.g. `@appian-atlas`). **Role agents stay `includeMcpJson: false`
+  and carry no MCP** — they delegate to the sub-agents.
+  > ⚠️ **Why not embed the server in the sub-agent's own `mcpServers` block?** Verified empirically in
+  > the Kiro IDE: **MCP servers embedded in an agent config do NOT start when that agent is spawned as
+  > a *sub-agent*** (they only start when the agent is run directly). Servers declared in `mcp.json`
+  > *do* reach spawned sub-agents. So MCP-owning sub-agents must source their server from `mcp.json`
+  > (workspace-scoped works) + `includeMcpJson:true`, not from an embedded block. See doc 11 §6.5.
 
 ## Sources
 - Agent configuration reference — kiro.dev/docs/cli/custom-agents/configuration-reference/

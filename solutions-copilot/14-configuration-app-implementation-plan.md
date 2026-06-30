@@ -29,7 +29,7 @@
 | Webview UI (D2) | **Preact + esbuild** | Tiny, componentized, fast builds, single bundle for a tight CSP. |
 | Build | **esbuild** for host (`out/`) + webview (`media/dist/`) | One fast bundler. |
 | Secrets backend (D7) | **`PlaintextProvider`** over `~/.kiro/.solutions-copilot/secrets.json` (`0600`, gitignored), behind a `SecretProvider` interface | Lightest path now; **`KeychainProvider` (macOS `security` CLI) is the one-line roadmap swap** (D1). |
-| Secret delivery | **Substitution at generation time** — generator replaces `${VAR}` with stored values when writing agent configs | No launcher needed in v1; works with Kiro's existing `env` block. |
+| Secret delivery | **Substitution at generation time** — the installer substitutes `${VAR}` with stored values into a generated **`.kiro/settings/mcp.json`** (from `mcp.json.template`); sub-agents set `includeMcpJson:true` | **Corrected 2026-06-30:** embedded per-agent `mcpServers` don't reach spawned sub-agents in the IDE; only `mcp.json` servers do. See doc 11 §6.5. |
 | Launcher (D3) | **None in v1.** `sc-mcp` (bundled Node script) arrives only with the keychain roadmap. | Substitution removes the need. |
 | State (webview) | Typed store + `postMessage` bus | Explicit protocol (§5). |
 | Validation | **JSON Schema (ajv)** for manifest, registry, secrets, lockfile | Validate inputs; power form validation. |
@@ -58,7 +58,8 @@ installer/
 │   │   ├── secretProvider.ts    # SecretProvider interface (+ future KeychainProvider)
 │   │   ├── lockfile.ts          # installed.lock.json read/write/diff
 │   │   ├── planner.ts           # selection → file plan (extends POC installer.ts)
-│   │   ├── generator.ts         # generate agent .json + v3 frontmatter; SUBSTITUTE ${VAR}->value
+│   │   ├── generator.ts         # substituteVars(${VAR}->value) for agent files
+│   │   ├── mcpConfig.ts         # build .kiro/settings/mcp.json from mcp.json.template (secrets + filter)
 │   │   ├── steering.ts          # generate steering/environments.md (label vocabulary + pointer)
 │   │   └── gitlab.ts            # (exists) GitLab client
 │   ├── infra/                   # vscode/OS-touching
@@ -128,6 +129,12 @@ packaged; manual checklist passes.
 agent can resolve a label by reading the file. Unit tests for registry + steering generation.
 
 ### Phase D — MCP secrets + substitution generator (the core)
+
+> **⚠️ Corrected 2026-06-30 (implemented):** the generator writes a **`.kiro/settings/mcp.json`** (from
+> `mcp.json.template`, secrets substituted, filtered to the installed servers) — **not** per-agent
+> `mcpServers` blocks. MCP-owning sub-agents set `includeMcpJson:true` + scoped `tools`; role agents
+> stay `includeMcpJson:false`. Implemented in `core/mcpConfig.ts` (`buildMcpJson`/`serversForAgents`)
+> + `InstallService`. Reason + evidence: doc 11 §6.5.
 - `core/secretProvider.ts` interface + `core/secretsStore.ts` (`PlaintextProvider` over
   `secrets.json`, `0600`).
 - `core/generator.ts`: fetch sub-agent configs (placeholders) → **substitute `${VAR}` → value** via
