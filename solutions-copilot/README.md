@@ -72,6 +72,7 @@ Kiro **CLI and IDE** are targeted; the orchestrator is deferred.
 | [18-build-tracker-and-accomplishments.md](./18-build-tracker-and-accomplishments.md) | **Build tracker** — complete record of everything accomplished (program + extension), version history, architecture, features, decisions, tests, and remaining work |
 | [19-workflows-orchestration-deferred.md](./19-workflows-orchestration-deferred.md) | **Workflows / orchestration** — exploration + Kiro capability spike + native (C2/C1) design options. **DEFERRED / not required now** — blocked on agent hardening and agent-driven Appian object development |
 | [20-dashboard-ux-standards.md](./20-dashboard-ux-standards.md) | **Dashboard UX standards & contribution guide** — the design-token system, component library, layer architecture (gateway/model/sections), and the step-by-step checklist for adding new screens/components/actions consistently |
+| [21-final-summary-and-accomplishments.md](./21-final-summary-and-accomplishments.md) | **Final summary & accomplishments** — the capstone overview: what Solutions Copilot is, what we achieved, the hard problems we solved, outcomes, current status, and what's next. Start here for a one-document picture |
 
 ## Companion source documents (in `solutions-os-revamp`)
 
