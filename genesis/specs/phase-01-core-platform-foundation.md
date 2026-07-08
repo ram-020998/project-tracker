@@ -182,20 +182,20 @@ On `retry`, the agent's `prompt_fn` receives the validator message
 - `ensure(name)` (verify present, optional install hint), `run(name, argv) -> CompletedProcess`.
 - Mirrors the ERD `erd-gen` preflight/parse pattern.
 
-### 4.9 Engine (`runtime/engine.py`)
-- `compile(graph) -> CompiledStateGraph` with the SQLite checkpointer.
-- `run(compiled, inputs, thread_id)` and `resume(thread_id, command)`.
+### 4.9 Engine (`runtime/engine.py`) — async-first (ADR-024)
+- `compile(graph) -> CompiledStateGraph` with the async SQLite checkpointer.
+- `async run(compiled, inputs, thread_id)` and `async resume(thread_id, command)` using `ainvoke`/`astream` (agent nodes are async → sync `invoke` cannot bridge them; verified in the spike).
 - Threads = runs; `thread_id == run_id`.
 
-### 4.10 Checkpointer (`runtime/checkpoint.py`)
-- SQLite saver at `~/.genesis/genesis.db`; per-superstep snapshots (durability=full for HITL correctness).
+### 4.10 Checkpointer (`runtime/checkpoint.py`) — async (ADR-024)
+- `AsyncSqliteSaver` (dependency: `aiosqlite`) at `~/.genesis/genesis.db`; per-superstep snapshots (durability=full for HITL correctness). The sync `SqliteSaver` is not used — it raises `NotImplementedError` under async execution.
 
 ---
 
 ## 5. Task breakdown
 
 0. **De-risking spike (do first).** Validate the load-bearing assumptions on the pinned LangGraph version before building: (a) SQLite checkpointer per-superstep snapshots; (b) `interrupt()` + resume via `Command`; (c) `update_state` edit + resume + fork (time-travel); (d) an **async** node runs cleanly; (e) **subprocess worker** boundary — run a graph in a child process against the shared checkpointer, kill it mid-run, and **resume from a fresh worker**; (f) a `sys.exit()`/hang in the worker does not take down the parent; (g) sketch the genesis-core **major-compat gate** (refuse-to-load on major mismatch). Record findings; adjust the phase if any assumption fails.
-1. Scaffold `genesis` repo, `pyproject.toml`, deps (`langgraph`, `langgraph-checkpoint-sqlite`, `kiro-agent-sdk`, `genesis-core`), tooling (pytest, ruff).
+1. Scaffold `genesis` repo (**Python 3.13**), `pyproject.toml`, deps (`langgraph`, `langgraph-checkpoint-sqlite`, `aiosqlite`, `kiro-agent-sdk`, `genesis-core`), tooling (pytest, ruff). Engine is async-first (ADR-024).
 2. `runtime/settings.py` — `~/.genesis` (state root) path resolution + **`artifacts_dir`** (dedicated bulk root; default `~/Genesis/runs/`, override via `GENESIS_ARTIFACTS_DIR`/config) + `Settings`.
 3. `runtime/checkpoint.py` — SQLite checkpointer factory.
 4. `common/state.py` — `PlatformState`, reducers, helpers + tests.

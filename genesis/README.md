@@ -17,6 +17,7 @@ and realizes its deferred (doc-19) orchestration vision.
 **Start here**
 - [`tracker.md`](tracker.md) — master tracker: status, the Q1–Q14 locked decisions, phase index, reuse map, open items.
 - [`specs/00-architecture-overview.md`](specs/00-architecture-overview.md) — the layered architecture, domain model, node taxonomy, state/blackboard rule. **Read before any phase spec.**
+- [`progress/`](progress/) — as-built implementation records per phase (evidence, decisions, deviations). Start with [`progress/phase-01-implementation.md`](progress/phase-01-implementation.md).
 
 **Phase specs (the build plans)** — `specs/`
 | Phase | Spec | Title |

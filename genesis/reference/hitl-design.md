@@ -101,8 +101,11 @@ state**, then continues — the "enhance the agent / give thoughts" capability.
 - Server-side validation: the merged state must satisfy the workflow's state
   schema before resume is allowed.
 - **Fork (time-travel):** `POST /runs/{id}/fork {from_checkpoint, edits}` creates
-  a new thread from a chosen past checkpoint with edits — the original run is
-  untouched. Used to explore an alternate path.
+  a **new run (new `thread_id`)** seeded from the chosen checkpoint's state via
+  `update_state(new_cfg, values, as_node=<producing_node>)` (+ edits), then
+  resumes it — the original run is untouched (ADR-025; verified in the spike).
+  Note: LangGraph's raw `update_state` on a past checkpoint rewinds the *same*
+  thread; Genesis deliberately seeds a new thread instead so the original stays intact.
 
 **API:** `GET /runs/{id}/state`, `PATCH /runs/{id}/state`, `POST /runs/{id}/fork`.
 

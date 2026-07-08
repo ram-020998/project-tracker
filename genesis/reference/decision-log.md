@@ -184,6 +184,38 @@ interaction is per-node ACP sessions with injected MCP. (Consequence of ADR-004.
 
 ---
 
+## ADR-024 — Async-first engine (`AsyncSqliteSaver` + `aiosqlite`); Python 3.13 pin
+- **Decision:** Genesis executes graphs via the LangGraph **async API**
+  (`ainvoke`/`astream`) with the **`AsyncSqliteSaver`** checkpointer (dependency:
+  **`aiosqlite`**). The subprocess worker (ADR-012) is an async entrypoint.
+- **Context (spike, 2026-07-08):** `kiro_node` is async (`kiro-agent-sdk.collect()`
+  is a coroutine). The Phase-1 spike proved (i) sync `invoke()` **cannot** run an
+  async node (`TypeError: No synchronous function provided`), and (ii) the sync
+  `SqliteSaver` raises `NotImplementedError` under async execution. So a
+  consistent async execution path + async checkpointer is required, not optional.
+- **Version pin:** **Python 3.13** (langgraph 1.2.8 verified on 3.13 and 3.14;
+  3.13 chosen for full wheel-ecosystem support — FastAPI/uvicorn/native deps).
+  Refines the "3.11+" placeholder in ADR-017.
+- **Alternatives:** wrap `collect()` in `asyncio.run()` inside a sync node +
+  sync saver (rejected — blocks the loop, fights LangGraph's async streaming,
+  loses concurrency for `Send` fan-out).
+- **Consequences:** `runtime/checkpoint.py` builds `AsyncSqliteSaver`;
+  `runtime/engine.py` exposes `async run()/resume()`; add `aiosqlite` to deps.
+
+## ADR-025 — Fork = seed a NEW thread (not in-thread time-travel)
+- **Decision:** Genesis "fork from a past checkpoint" creates an **independent
+  run (new `thread_id`)** by copying the chosen checkpoint's `values` into a new
+  thread via `update_state(new_cfg, values, as_node="<producing_node>")`, then
+  resuming it. The original run is left untouched.
+- **Context (spike):** `update_state()` on a *past* checkpoint of a thread
+  **branches within that same thread** (LangGraph time-travel rewinds the head) —
+  which does not satisfy the spec's "original intact." The new-thread seeding
+  pattern was validated in the spike.
+- **Consequences:** `hitl-design.md` Mode 3 fork + Phase 5 `runs/hitl.py` `/fork`
+  implement new-thread seeding; the run record links `forked_from={run_id, checkpoint}`.
+
+---
+
 ## Open decisions (to resolve early — see tracker §5)
 - **OD-1:** Does LCP MCP reliably author Appian objects? (Unblocks write-path/flagship workflows — Phase 8 spike.)
 - **OD-2:** Does ACP honor `KIRO_API_KEY` for headless/CI contexts?

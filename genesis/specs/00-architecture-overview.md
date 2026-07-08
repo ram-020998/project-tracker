@@ -149,9 +149,9 @@ handoff. This rule directly resolved the failures found while building the SDK.
 
 | Concern | Choice | Notes |
 |---|---|---|
-| Language (platform + workflows) | Python 3.11+ | LangGraph is Python-first; `kiro-agent-sdk` is Python |
-| Engine | LangGraph v1 (`langgraph`) | graph API + checkpointer + interrupts + streaming |
-| Checkpointer | `langgraph-checkpoint-sqlite` | local durable state |
+| Language (platform + workflows) | **Python 3.13** (pin) | Spike-verified; langgraph 1.2.8 runs on 3.13 & 3.14, 3.13 chosen for wheel-ecosystem support (ADR-024) |
+| Engine | LangGraph v1 (`langgraph` 1.2.8) | graph API + checkpointer + interrupts + streaming; **async execution** (ADR-024) |
+| Checkpointer | `AsyncSqliteSaver` (`langgraph-checkpoint-sqlite` + `aiosqlite`) | local durable state; async (agent nodes are async — ADR-024) |
 | Backend/API | FastAPI (embeds LangGraph as a library) | serves local web UI + run/catalog/config APIs; NOT a LangGraph Server (ADR-023) |
 | Interim UI | LangGraph Studio | Phase 5 |
 | Custom UI (Phase 7) | Preact + esbuild (reuse solutions-copilot webview stack) or React | local web app |
