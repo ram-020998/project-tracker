@@ -102,6 +102,14 @@ early** (spike within Wave A/B): can an `lcp` agent node deterministically autho
 yes, Wave C write-path workflows and the Wave D flagship become real end-to-end —
 this is the strategic payoff of the whole program.
 
+### 5.2 Appian-object validators land here (deferred from Phase 1)
+The generic validator toolkit (`genesis_core.validators`, Phase 1) covers all
+read/generation workflows. **Appian-object validators** — `record_type_exists`,
+`fields_match`, `sail_compiles`, etc., which confirm a mutation by re-reading via
+LCP/Atlas/Jarvis — are built **in this phase**, together with the LCP-authoring
+unlock, since only write-path workflows (Wave C) need them. They extend the
+toolkit under `genesis_core.validators.appian`.
+
 ---
 
 ## 6. Traceability matrix (tracked artifact)

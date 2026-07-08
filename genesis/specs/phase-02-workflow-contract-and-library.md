@@ -46,7 +46,7 @@ contribution).
 ### 4.1 The workflow contract
 Each workflow package must expose, in `graph.py`:
 ```python
-from genesis_common import PlatformContext
+from genesis_core import PlatformContext
 from langgraph.graph import StateGraph
 
 META: dict = {
@@ -145,7 +145,7 @@ genesis-workflows/
   mcp-registry.json
   cli-registry.json
   bundles.json
-  common/                     # genesis_common package (shared node lib + state + RunWorkspace)
+  common/                     # genesis_core package (shared node lib + state + RunWorkspace)
   steering/                   # AUTHORING GUIDES (Q12)
     01-authoring-overview.md
     02-node-taxonomy-and-reliability.md   # the mandatory trio, examples
@@ -196,6 +196,7 @@ Publish-time gates (a workflow cannot be tagged/released unless all pass):
 4. **MCP/CLI refs:** every `required_mcp`/`required_cli` exists in the registries.
 5. **Tests:** each workflow's `tests/` pass.
 6. **State-size guard:** static/dynamic check that nodes don't push bulk into state.
+7. **HITL lint (auto-approve posture):** every `hitl_gate` is one of the sanctioned classes (`approval`/`escalation`/`pre_mutation`); every node using a write/deploy/data MCP server (registry `mode`) is preceded by a `pre_mutation` gate; `META.auto_approve=false` requires a documented reason. Violations fail (or warn, then block on repeat) — the approver-fatigue guard.
 
 ### 4.11 Structural lint implementation note
 Provide `genesis.lint.check_reliability(compiled_graph, meta)` that walks the
@@ -208,7 +209,7 @@ Agent nodes are identified by a marker set on nodes created via `kiro_node`
 ## 5. Task breakdown
 
 1. Define + document the contract (`build()`+`META`) and `PlatformContext` expectations.
-2. `genesis-common` package (from Phase 1 `common/`) published/importable by the library.
+2. `genesis-core` package (from Phase 1 `common/`) published/importable by the library.
 3. Author `mcp-registry.json`, `cli-registry.json`, `registry.json`, `bundles.json` schemas + JSON-Schema validators.
 4. Build `genesis-workflows` skeleton + `_template/` + `hello-appian` example.
 5. Write the 7 **authoring steering** docs (the Q12 guide set).
@@ -234,7 +235,7 @@ Agent nodes are identified by a marker set on nodes created via `kiro_node`
 
 ## 7. Risks
 
-- **`common` versioning:** platform and library must agree on `genesis-common`
+- **`common` versioning:** platform and library must agree on `genesis-core`
   version. Pin it; CI checks compatibility. (Ties to Phase 1 §7.)
 - **Static reliability lint completeness:** conditional/dynamic edges (`Send`)
   may obscure structure. Mitigation: require agent nodes to be declared via
@@ -248,6 +249,6 @@ Agent nodes are identified by a marker set on nodes created via `kiro_node`
 ## 8. Deliverables
 
 - `genesis-workflows` repo skeleton (registries, `_template`, `hello-appian`, steering, CI).
-- Contract spec + `genesis-common` package boundary.
+- Contract spec + `genesis-core` package boundary.
 - `create-workflow` + `test-workflow` CLIs + reliability lint.
 - CI that enforces the Q9 hard-requirement, proven by a failing fixture.

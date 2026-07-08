@@ -62,13 +62,12 @@ Library (genesis-workflows repo)
       ├── nodes.py, prompts/   # implementation
       └── tests/               # local test harness cases
 
-Installation (per user machine, under ~/.genesis/)
- ├── config/                  # gitlab token ref, settings
- ├── secrets.json (0600)      # SecretProvider store (scope/VAR)
- ├── environments.json        # credential-free Appian env registry
- ├── installed.lock.json      # what workflows are installed + pinned refs
- ├── library/                 # pulled workflow packages (pinned)
- └── runs/<run_id>/           # per-run artifacts folder (blackboard) + local state db refs
+Installation (per user machine)
+ ├── ~/.genesis/            # STATE root (small, stable): config, secrets, genesis.db, lockfile, library
+ │   ├── config/  secrets.json(0600)  environments.json  installed.lock.json  genesis.db
+ │   └── library/           # pulled workflow packages (pinned)
+ └── $GENESIS_ARTIFACTS_DIR (default ~/Genesis/runs/)   # ARTIFACTS root (unbounded bulk; ADR-022)
+      └── <workflow_id>/<run_id>/   # per-run blackboard + handoff docs (retention-managed)
 ```
 
 ---
@@ -119,12 +118,15 @@ handoff. This rule directly resolved the failures found while building the SDK.
 
 ## 6. Runtime topology
 
-- **Single local app** (Q6): a backend process (Python; FastAPI or the LangGraph
-  Server app) that hosts the engine + app services, serving a local web UI on
-  `localhost`. Interim UI = LangGraph Studio pointed at the local server.
-- **Kiro execution** is local: each `kiro_node` spawns `kiro-cli acp` (one short
-  session per node) with per-node MCP injection, using the user's local creds.
-- **Checkpointer** = SQLite at `~/.genesis/genesis.db` (per-superstep snapshots).
+- **Single local app** (Q6): a **FastAPI** backend embedding LangGraph as a library,
+  hosting app services + serving a local web UI on `localhost`. Interim debug view =
+  LangGraph Studio via `langgraph dev` against the shared checkpointer (ADR-023).
+- **Graph execution runs in a subprocess worker** (ADR-012), not in the app process:
+  one disposable worker per run; the app supervises it over IPC. A worker crash/hang/
+  exit fails only that run; resume spawns a fresh worker from the last checkpoint.
+- **Kiro execution** is local: each `kiro_node` (inside the worker) spawns `kiro-cli acp`
+  (one short session per node) with per-node MCP injection, using the user's local creds.
+- **Checkpointer** = SQLite at `~/.genesis/genesis.db` (per-superstep snapshots) — makes workers disposable and resume checkpoint-driven.
 - **All three HITL modes** rely on the checkpointer: gates (`interrupt()`),
   pause/resume (stop + resume from last checkpoint), and state injection (edit
   the checkpointed state, then resume).
@@ -150,7 +152,7 @@ handoff. This rule directly resolved the failures found while building the SDK.
 | Language (platform + workflows) | Python 3.11+ | LangGraph is Python-first; `kiro-agent-sdk` is Python |
 | Engine | LangGraph v1 (`langgraph`) | graph API + checkpointer + interrupts + streaming |
 | Checkpointer | `langgraph-checkpoint-sqlite` | local durable state |
-| Backend/API | FastAPI (or LangGraph Server app) | serves local web UI + run APIs |
+| Backend/API | FastAPI (embeds LangGraph as a library) | serves local web UI + run/catalog/config APIs; NOT a LangGraph Server (ADR-023) |
 | Interim UI | LangGraph Studio | Phase 5 |
 | Custom UI (Phase 7) | Preact + esbuild (reuse solutions-copilot webview stack) or React | local web app |
 | Agent runtime | `kiro-agent-sdk` (ACP) | per-node sessions |

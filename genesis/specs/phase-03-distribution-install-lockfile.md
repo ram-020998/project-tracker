@@ -33,7 +33,7 @@ remove; lockfile; role-filtered + bundle install; prerequisite checks (which
 ## 3. Decisions applied
 
 Q1 (shared GitLab library pulled locally), Q4 (selective install + lockfile), Q5
-(role filter + bundles + cross-role picking), Q10 (pinned refs; in-process load).
+(role filter + bundles + cross-role picking), Q10 (pinned refs; subprocess-worker execution + genesis-core major-compat gate).
 
 ---
 
@@ -59,7 +59,7 @@ Minimal REST v4 client (std-lib HTTP), `PRIVATE-TOKEN` header:
 - `install(plan)`:
   1. `list_tree` + `get_raw_file` each selected `workflows/<id>/**` + shared files at the chosen ref.
   2. Write under `~/.genesis/library/` preserving structure.
-  3. Ensure `genesis-common` present/compatible.
+  3. Ensure `genesis-core` present and **major-compatible** with the platform (ADR-019); refuse the install if the library ref targets a different `genesis_core` major.
   4. Update `installed.lock.json`.
 - `update(id)` / `update_all()` — re-fetch at latest tag; bump lockfile.
 - `remove(id)` — delete files; update lockfile; keep shared files if still needed.
@@ -74,19 +74,31 @@ Minimal REST v4 client (std-lib HTTP), `PRIVATE-TOKEN` header:
     "erd-generation": {"version":"1.2.0","ref":"v3.4.0","files":[…],"installedAt":"…"},
     "code-review":    {"version":"0.9.0","ref":"v3.4.0","files":[…]}
   },
-  "common": {"version":"1.0.0","ref":"v3.4.0"}
+  "genesis_core": {"version":"1.0.0","major":1,"ref":"v3.4.0"}
 }
 ```
 Update detection: compare per-workflow `ref`/`version` in the lockfile vs latest
 catalog; surface `updatable: true`. (Coarse ref-level like solutions-copilot;
 optional per-file blob-sha later.)
 
-### 4.5 Loader (`genesis/dist/loader.py`)
+### 4.5 Loader + compat gate (`genesis/dist/loader.py`)
 - `installed() -> list[InstalledWorkflow]` from filesystem + lockfile.
-- `load(id) -> LoadedWorkflow`: import `~/.genesis/library/workflows/<id>/graph.py`,
-  read `META`, return `{meta, build}`. In-process import (Q10). Sanity: `META.id==id`.
-- Import isolation: add the library root to `sys.path`; catch import errors and
-  surface them (don't crash the app).
+- **genesis-core major-compat gate (ADR-019):** before loading, compare the
+  installed library's declared `genesis_core` **major** (from the lockfile) with
+  the platform's pinned `genesis_core` major. On mismatch, **refuse to load** with
+  a clear, actionable message (upgrade platform or install a compatible library
+  ref) — never load a skewed workflow.
+- `meta_of(id) -> META`: read a workflow's static `META` **without executing the
+  graph** — parse `workflow.yaml` (the side-effect-free twin) for the catalog +
+  prereq checks. `META` in `graph.py` is only imported inside the worker.
+- `spawn(id) -> Worker`: the loader does **not** import/run `build()` in the app
+  process. It hands the workflow id + resolved `PlatformContext` inputs to a
+  **subprocess worker** (ADR-012) which imports `graph.py`, calls `build(ctx)`,
+  and runs the graph against the shared `genesis.db`. Sanity: `META.id==id`.
+- **Containment (honest):** because execution is out-of-process, a workflow's
+  `sys.exit()`, segfault, hang, leak, or global mutation kills only the worker,
+  not the app/UI. `meta_of` (yaml parse) is safe in-process; anything that
+  imports workflow Python happens in the worker.
 
 ### 4.6 Backend API surface (consumed by UI later)
 `GET /catalog?role=`, `GET /installed`, `POST /install {ids|bundle}`,
@@ -100,7 +112,7 @@ optional per-file blob-sha later.)
 1. `dist/gitlab.py` — REST client + tests (mock HTTP).
 2. `dist/catalog.py` — fetch/parse/filter/prereqs + tests.
 3. `dist/install.py` — resolve/install/update/remove + lockfile writes + tests (mock GitLab tree/raw).
-4. `dist/loader.py` — in-process import of an installed workflow + `META` read + tests.
+4. `dist/loader.py` — `meta_of` (side-effect-free `workflow.yaml` read), the **genesis-core major-compat gate**, and `spawn` (hand off to a subprocess worker; no graph import in the app process) + tests incl. a refused-load-on-major-mismatch test.
 5. Lockfile model + update detection + tests.
 6. Bundle expansion + role filtering + cross-role selection + tests.
 7. Prerequisite checks (MCP configured? CLI present?) — stub MCP-config source until Phase 4, then wire.
@@ -113,7 +125,8 @@ optional per-file blob-sha later.)
 
 - [ ] Browse catalog filtered by role; bundles expand to the right workflow sets.
 - [ ] Install a selection → files under `~/.genesis/library/`, lockfile updated with pinned ref.
-- [ ] Loader imports an installed workflow and returns a runnable `build` + valid `META`.
+- [ ] Loader reads a workflow's `META` (from `workflow.yaml`) **without executing graph code**; graph build/run happens only in a subprocess worker.
+- [ ] **Compat gate:** installing/loading a library ref that targets a different `genesis_core` major is **refused** with a clear message (never silently loaded).
 - [ ] Newer tag in the (fixture) repo → `updatable: true`; `update` bumps files + lockfile.
 - [ ] `remove` deletes a workflow, retains shared files still in use.
 - [ ] Prereq check reports which required MCP/CLI are missing before a run is attempted.
@@ -125,10 +138,14 @@ optional per-file blob-sha later.)
 
 - **Fetching many small files via REST** is slow. Mitigation: fetch by folder
   tree in batches; consider a tarball endpoint or shallow `git archive` if slow.
-- **`common` version skew** between library ref and platform. Mitigation:
-  lockfile records `common` version; loader checks compatibility; warn/refuse on mismatch.
-- **In-process import safety** (Q10 accepted): keep import failures contained;
-  never let a bad workflow crash the app; log + mark the workflow unloadable.
+- **`genesis-core` version skew** between library ref and platform. Mitigation:
+  semver + additive-within-major; lockfile records `genesis_core` version + major;
+  loader **refuses to load** on major mismatch (ADR-019) — detection-only is not enough.
+- **Execution safety:** graph code runs in a **subprocess worker** (ADR-012), not
+  in-process — so `sys.exit()`, segfaults, hangs, leaks, and global mutation kill
+  only the worker, not the app. (In-process `except ImportError` would contain
+  only Python exceptions; that was the flaw in the original plan.) The app only
+  parses `workflow.yaml` for `META`; it never imports workflow Python.
 
 ---
 

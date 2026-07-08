@@ -306,6 +306,7 @@ The workflow reads the Atlas MCP config from the atlas-sql-forge workspace
 ## 13. Next Steps / Backlog
 
 1. **Live ERD run** — drop `--dry-run`, publish `SourceSelection` to Lucidchart; capture doc ID + URL.
+2. **Expose usage/metrics in `TurnResult`** — surface ACP usage (credits/tokens), turn count, and tool-call count + wall-clock duration so downstream (Genesis per-node telemetry, `state-and-data-model` §1.4) can record `credits`. Capture `duration_ms/tool_calls/turns` regardless; `credits` when ACP provides usage.
 2. **Generalize a workflow base** on top of `RunWorkspace` so new actions (e.g. `action-generate-data`) reuse the blackboard + step-orchestration scaffolding.
 3. **Multi-turn sessions** — expose `session/load` + follow-up prompts; keep a `KiroSession` object open across steps.
 4. **TypeScript port** of the SDK for parity with Claude Agent SDK ergonomics.

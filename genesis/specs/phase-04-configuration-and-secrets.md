@@ -25,8 +25,9 @@ secrets); and passes health checks. Thereafter, MCP injection resolves all
 
 **In scope:** SecretProvider (plaintext v1, keychain-ready interface); secret
 field derivation from the MCP registry; environment registry (CRUD, credential-
-free); GitLab token capture; `${VAR}` resolution service; health checks; the
-**config API** + a **setup/settings UI** in the app.
+free); GitLab token capture; `${VAR}` resolution service; health checks; **the
+artifacts-root location + retention policy settings**; the **config API** + a
+**setup/settings UI** in the app.
 **Out of scope:** run/HITL (Phase 5); the full workbench (Phase 7 — but the
 settings UI here can be minimal/functional and later restyled).
 
@@ -102,6 +103,7 @@ GitLab client and by the `appian-atlas` MCP server (shared global secret).
 3. `config/environments.py` — registry CRUD + credential-free validator + resolve + tests.
 4. Wire `${VAR}` resolution into `McpRegistry.acp_servers` (Phase 1) + tests (resolved + unresolved fail-fast).
 5. GitLab token storage + consumption by Phase 3 client.
+5a. **Artifacts & retention settings** — configure `artifacts_dir` (default `~/Genesis/runs/`, `GENESIS_ARTIFACTS_DIR` override) + retention policy (keep-last-N / delete-after-X-days / intermediate-vs-final); validate the dir is writable; surface current disk usage.
 6. `config/health.py` — checks incl. the **MCP literal-env probe** via a real ACP session.
 7. Config API endpoints.
 8. Setup/settings UI (functional): connect, MCP cards, environments, review, verify.

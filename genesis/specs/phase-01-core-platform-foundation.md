@@ -45,7 +45,7 @@ workflow" that exercises all of the above.
 
 Q2 (per-node MCP injection), Q3 (MCP registry, no profiles), Q8 (small state +
 blackboard + SQLite checkpointer), Q9 (reliability trio as a primitive), Q10
-(in-process execution).
+(subprocess-worker execution — validated in the spike).
 
 ---
 
@@ -69,6 +69,7 @@ genesis/                              # platform repo
         agent.py          # kiro_node (ACP)
         cli.py            # cli_node
         validator.py      # validator_node + schema/checks helpers
+        validators.py     # BATTERIES-INCLUDED validator toolkit (generic, composable)
         gate.py           # hitl_gate (interrupt wrapper)
         subgraph.py       # subgraph_node
         reliability.py    # attach_reliability(agent_node, validator, retry_max, on_exhaust)
@@ -193,16 +194,18 @@ On `retry`, the agent's `prompt_fn` receives the validator message
 
 ## 5. Task breakdown
 
-1. Scaffold `genesis` repo, `pyproject.toml`, deps (`langgraph`, `langgraph-checkpoint-sqlite`, `kiro-agent-sdk`), tooling (pytest, ruff).
-2. `runtime/settings.py` — `~/.genesis` path resolution + `Settings`.
+0. **De-risking spike (do first).** Validate the load-bearing assumptions on the pinned LangGraph version before building: (a) SQLite checkpointer per-superstep snapshots; (b) `interrupt()` + resume via `Command`; (c) `update_state` edit + resume + fork (time-travel); (d) an **async** node runs cleanly; (e) **subprocess worker** boundary — run a graph in a child process against the shared checkpointer, kill it mid-run, and **resume from a fresh worker**; (f) a `sys.exit()`/hang in the worker does not take down the parent; (g) sketch the genesis-core **major-compat gate** (refuse-to-load on major mismatch). Record findings; adjust the phase if any assumption fails.
+1. Scaffold `genesis` repo, `pyproject.toml`, deps (`langgraph`, `langgraph-checkpoint-sqlite`, `kiro-agent-sdk`, `genesis-core`), tooling (pytest, ruff).
+2. `runtime/settings.py` — `~/.genesis` (state root) path resolution + **`artifacts_dir`** (dedicated bulk root; default `~/Genesis/runs/`, override via `GENESIS_ARTIFACTS_DIR`/config) + `Settings`.
 3. `runtime/checkpoint.py` — SQLite checkpointer factory.
 4. `common/state.py` — `PlatformState`, reducers, helpers + tests.
-5. Promote `RunWorkspace`/`Doc` into `common/workspace.py` (from `kiro-agent-sdk`) + tests.
+5. Promote `RunWorkspace`/`Doc` into `common/workspace.py` (from `kiro-agent-sdk`) — `for_run(run_id, workflow_id)` resolves under the configured **artifacts root** (`<GENESIS_ARTIFACTS_DIR>/<workflow_id>/<run_id>/`), `manifest()` reports `total_bytes` — + tests.
 6. `common/mcp/registry.py` — registry loader + `acp_servers()` + unresolved-var reporting + tests (offline).
 7. `common/clis/registry.py` — CLI registry + `ensure/run` + tests.
 8. `common/nodes/program.py`, `cli.py` — factories + tests.
-9. `common/nodes/agent.py` — `kiro_node` (ACP via `collect`) + unit test with a stubbed transport.
+9. `common/nodes/agent.py` — `kiro_node` (ACP via `collect`) + unit test with a stubbed transport. **Capture per-node telemetry** (`attempts/duration_ms/tool_calls/turns/credits/retries`) into `state.telemetry[node]` + run aggregate; `_last_turn` extended. `credits` best-effort pending SDK usage exposure.
 10. `common/nodes/validator.py` — `validator_node` + `ValidationResult` + JSON-schema helper + tests.
+10a. `common/nodes/validators.py` — **batteries-included validator toolkit** (generic composable validators + `all_of`/`any_of`); each emits an actionable failure message; extensive unit tests. Appian-object validators explicitly deferred (see reliability-standard §3.2).
 11. `common/nodes/gate.py` — `hitl_gate` primitive over `interrupt()` (full UX in Phase 5).
 12. `common/nodes/reliability.py` — `attach_reliability` + tests (pass / retry / escalate routing).
 13. `runtime/engine.py` + `runtime/context.py` — compile/run/resume + `PlatformContext`.
@@ -218,8 +221,10 @@ On `retry`, the agent's `prompt_fn` receives the validator message
 - [ ] Killing the process mid-run and re-running with the same `thread_id` **resumes** from the last checkpoint (no re-execution of completed nodes).
 - [ ] `kiro_node` spawns an ACP session with injected MCP (verified against a real MCP, e.g. `appian-atlas`, or a stub) and writes to its blackboard doc.
 - [ ] Reliability trio: a deliberately-failing validator triggers exactly `retry_max` retries then routes to escalation.
+- [ ] The validator toolkit (`validators.py`) covers the common cases as one-liners (non_empty, parses_json, json_schema, required_keys, values_in_set, count_between, first_field_is, excludes, referential_integrity, all_items_present, matches_predicate, all_of/any_of); each produces an actionable failure message.
 - [ ] MCP registry reports unresolved `${VAR}` before spawning Kiro (fail fast).
 - [ ] Bulk data never appears in `PlatformState`; only paths/decisions do (asserted in the smoke test).
+- [ ] Every agent node records telemetry into `state.telemetry[node]` (`attempts/duration_ms/tool_calls/turns/retries`, `credits` best-effort) and updates the run aggregate; retries accumulate correctly.
 - [ ] All unit tests pass in CI.
 
 ---
@@ -228,7 +233,7 @@ On `retry`, the agent's `prompt_fn` receives the validator message
 
 - **`common/` duplication:** `common/` is authored in the platform but must also
   be importable by workflows in `genesis-workflows`. Decision: publish `common`
-  as an installable package (`genesis-common`) that both the platform and the
+  as an installable package (`genesis-core`) that both the platform and the
   library depend on — avoids copy drift. (Confirm in Phase 2.)
 - **Async in LangGraph:** `kiro_node` is async; ensure the engine runs the graph
   in an event loop consistently (LangGraph supports async nodes).
@@ -236,11 +241,15 @@ On `retry`, the agent's `prompt_fn` receives the validator message
   return validation (reject large blobs into state in dev mode).
 - **ACP session cost:** one session per agent node; acceptable for Phase 1;
   revisit pooling if the smoke tests show high latency.
+- **Telemetry / credits dependency:** capturing `credits` requires
+  `kiro-agent-sdk` to expose usage in `TurnResult` (ACP usage events). Track as a
+  dependency; capture `duration_ms/tool_calls/turns/retries` regardless. The
+  telemetry schema ships now so credits slot in without retrofit.
 
 ---
 
 ## 8. Deliverables
 
 - `genesis` repo with `runtime/` + `common/` + `testing/` + tests + CI.
-- `genesis-common` package boundary defined.
+- `genesis-core` package boundary defined.
 - A passing smoke workflow proving engine + nodes + checkpointer + MCP injection + reliability trio.

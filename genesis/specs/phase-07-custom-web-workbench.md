@@ -46,19 +46,20 @@ render + edit it directly).
   (token-based design system in `media/style.css`, primitives: Button/Badge/Card/
   Toolbar/StatCard/EmptyState/ProgressBar/Field/TextInput/Segmented) — proven,
   zero-heavy-deps. (React acceptable if preferred.)
-- Served by the local backend (FastAPI/LangGraph Server) on `localhost`.
+- Served by the local backend (FastAPI, embedding LangGraph) on `localhost`.
 - Live data via SSE/WebSocket (Phase 5 stream) + REST for actions.
 
 ### 4.2 Information architecture (surfaces)
 1. **Home / Overview** — installed workflows, recent runs, health at a glance.
 2. **Catalog** — all library workflows; filter by role; bundles ("install Tester set"); install/update/remove; per-workflow prereq badges (MCP/CLI configured?).
-3. **Config / Settings** — GitLab token; MCP secret cards (auto-derived); environment registry CRUD; health panel (incl. MCP literal-env probe).
+3. **Config / Settings** — GitLab token; MCP secret cards (auto-derived); environment registry CRUD; health panel (incl. MCP literal-env probe); **artifacts location + retention policy + total disk usage + "purge all completed"**.
 4. **Run** — pick a workflow → typed input form (from `inputs_schema`) → launch.
 5. **Run Detail** — the heart:
    - **Step timeline** (graph nodes; current node highlighted; per-node status).
    - **Live activity** stream (agent messages + ACP tool calls; program/CLI logs).
-   - **Artifacts viewer** (browse the run's blackboard files; view JSON/text/diagrams).
+   - **Artifacts viewer** (browse the run's blackboard files; view JSON/text/diagrams; per-file + run **disk usage**; **purge** this run's artifacts if terminal).
    - **State panel** (the small `PlatformState`, pretty-printed; editable at a pause).
+   - **Telemetry / cost panel** — per-node `{duration, tool_calls, turns, retries, credits}` + run totals (from `state.telemetry`); highlights expensive/retried nodes.
    - **HITL controls** (contextual):
      - at a **gate**: approve / reject / feedback textarea → `POST /respond`.
      - **pause/resume/cancel** buttons (mode 2).
