@@ -14,7 +14,7 @@
 | **Agent adapter** | `kiro-agent-sdk` (Kiro ACP node adapter — already built) |
 | **Engine** | LangGraph (v1) |
 | **Users** | Internal Solutions dept — Dev, Tester, PO, UX |
-| **Status** | 🟢 Phases 1–3 COMPLETE (M1–M3) — engine, contract+library+lint, distribution (install/lockfile/loader+compat gate). 24 platform tests green; CI green. Next: Phase 4. |
+| **Status** | 🟢 Phases 1–4 COMPLETE (M1–M4) — engine, contract+library+lint, distribution (install/lockfile/loader+compat gate), configuration & secrets. 26 platform + 15 core + 2 workflow tests green; CI green. Next: Phase 5 (run orchestration & HITL). |
 | **Supersedes** | solutions-copilot (retired) — Genesis realizes its deferred doc-19 orchestrator |
 | **Created** | 2026-07-07 |
 
@@ -89,6 +89,7 @@ Detailed, evidence-backed records of what was actually built each phase live in
 | 1 | [`progress/phase-01-implementation.md`](progress/phase-01-implementation.md) | ✅ Complete (M1) — repos/tags, modules, evidence, decisions |
 | 2 | [`progress/phase-02-implementation.md`](progress/phase-02-implementation.md) | ✅ Complete (M2) — contract, library, scaffolder, reliability lint (CI-proven) |
 | 3 | [`progress/phase-03-implementation.md`](progress/phase-03-implementation.md) | ✅ Complete (M3) — GitLab pull, install, lockfile, loader + compat gate |
+| 4 | [`progress/phase-04-implementation.md`](progress/phase-04-implementation.md) | ✅ Complete (M4) — SecretProvider, MCP cards, env registry, health, retention, ConfigService |
 
 ---
 
@@ -126,3 +127,4 @@ Detailed, evidence-backed records of what was actually built each phase live in
 - 📄 **Full detail:** [`progress/phase-01-implementation.md`](progress/phase-01-implementation.md) — repos/tags, module inventory, evidence table, implementation decisions, deviations, deferred items, dev run instructions.
 - **2026-07-09** — CI fixed: `git+ssh` deps couldn't clone in runners; each `.gitlab-ci.yml` now rewrites to HTTPS via `GITLAB_PUSH_TOKEN` (matches solutions-atlas-kb). All three pipelines green (genesis-workflows `library-validate` runs the reliability-lint gate + fixture proof in real CI).
 - **2026-07-09** — **Phase 3 COMPLETE + pushed** (M3 — Distribution works). Added `genesis/dist/`: GitLab REST client, catalog (filter + bundle expand + cross-role selection + prereqs), lockfile (+ update detection), installer (resolve/install/update/remove), and the loader with the **genesis-core major-compat gate** (ADR-019 — refuses load on major skew). Proven end-to-end: install `hello` from a fake GitLab → load → run to completion. **24 platform tests green**, ruff clean. Tags: genesis **v0.3.0**, genesis-workflows **v0.1.1**. 📄 Detail: [`progress/phase-03-implementation.md`](progress/phase-03-implementation.md). **Next: Phase 4** (configuration & secrets).
+- **2026-07-09** — **Phase 4 COMPLETE + pushed** (M4 — Config & secrets). Added `genesis/config/`: `SecretProvider`/`PlaintextProvider` (0600, `scope/VAR`, server→global resolve, collisions), MCP-registry-derived config cards + `missing_secrets`, credential-free `EnvironmentRegistry` (rejects credential-looking fields; requires url+api_endpoint), artifacts **retention** (keep-last-N / max-age over terminal runs) + Settings, **health checks** incl. the stubbable **MCP literal-env probe**, and the `ConfigService` facade. genesis-core `McpRegistry` `${VAR}` resolution is now **server-scoped** (additive, backward-compatible — MAJOR stays 1) with **fail-fast before Kiro spawns**; `build_context` default-wires the providers. **26 platform + 15 core + 2 workflow tests green**, ruff clean, library validation passing. Tags: genesis-core **v0.3.0**, genesis **v0.4.0**, genesis-workflows **v0.1.2**. 📄 Detail: [`progress/phase-04-implementation.md`](progress/phase-04-implementation.md). **Next: Phase 5** (run orchestration & HITL).
