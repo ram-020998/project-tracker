@@ -220,3 +220,30 @@ interaction is per-node ACP sessions with injected MCP. (Consequence of ADR-004.
 - **OD-1:** Does LCP MCP reliably author Appian objects? (Unblocks write-path/flagship workflows — Phase 8 spike.)
 - **OD-2:** Does ACP honor `KIRO_API_KEY` for headless/CI contexts?
 - **OD-3:** Session-pooling for many one-shot ACP sessions (perf) — measure first.
+
+---
+
+## ADR-026 — Web workbench stack: React + TypeScript (supersedes the Preact default)
+
+**Status:** Accepted (2026-07-09) · **Context:** Phase 7.
+
+**Decision.** Build the Phase-7 web workbench with **React + TypeScript** (Vite,
+Vitest), not Preact as originally written in `specs/phase-07` §4.1.
+
+**Why.** The product destination was clarified as **enterprise-grade** (while
+remaining **local, single-user** — Q1/ADR-012/ADR-023 unchanged). React+TS gives a
+larger enterprise ecosystem (component/data-grid/auth libraries), a bigger hiring
+pool, first-class typing, and a cleaner path if a hosted/multi-user track is ever
+opened. Preact remains technically capable but its `compat` shim adds friction with
+heavy enterprise React libraries.
+
+**Scope.** Frontend only. The backend stays a local FastAPI app driving
+disposable subprocess workers against `~/.genesis/genesis.db`. No change to the
+execution model, secrets, or auth posture. Bundle is built with Vite and the
+compiled assets are committed so runtime needs no Node; `genesis serve` launches
+the app.
+
+**Consequences.** If enterprise **multi-user/hosted** is later pursued, that is a
+separate architecture track (auth/RBAC, vault-based secrets, hosted execution) and
+must re-open ADR-012/ADR-023 — the framework choice here does not, by itself,
+deliver it.
