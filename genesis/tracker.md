@@ -15,6 +15,7 @@
 | **Engine** | LangGraph (v1) |
 | **Users** | Internal Solutions dept — Dev, Tester, PO, UX |
 | **Status** | 🟢 Phases 1–7 COMPLETE (M1–M7) + post-M7 live bring-up. Workbench runs real workflows: **hello-appian green end-to-end**; **erd-generation** past MCP init into the live Atlas fetch after fixing the ACP MCP env-shape bug (+ `genesis install` CLI, SSE loop, diagnostics, real MCP images). Latest: genesis-core **v0.3.3**, genesis **v0.6.4**, genesis-workflows **v0.2.1**. 43 platform + 5 frontend + 16 core + 9 workflow tests green; CI green. Next: Phase 8 (skill migration). |
+| **Agent onboarding** | [`AGENT_ONBOARDING.md`](AGENT_ONBOARDING.md) — paste into any new agent session working on fixes/enhancements |
 | **Supersedes** | solutions-copilot (retired) — Genesis realizes its deferred doc-19 orchestrator |
 | **Created** | 2026-07-07 |
 
