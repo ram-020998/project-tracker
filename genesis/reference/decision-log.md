@@ -247,3 +247,42 @@ the app.
 separate architecture track (auth/RBAC, vault-based secrets, hosted execution) and
 must re-open ADR-012/ADR-023 — the framework choice here does not, by itself,
 deliver it.
+
+
+## ADR-027 — Web revamp frontend stack (Tailwind + shadcn/ui + React Router + TanStack Query + React Flow)
+
+**Status:** Accepted (2026-07-10). Extends ADR-026 (React+TS). Governs the Phase-7
+web-revamp sub-series (`specs/phase-07-0N-*`).
+
+**Decision.** Rebuild the web workbench on a standard, expandable React stack:
+**Vite + React 18 + TypeScript (strict)**; **React Router v6** (data router) for
+routing; **TanStack Query v5** for server-state (caching/polling/invalidation) with a
+typed **`EventSource`→Query** bridge for live SSE; **Zustand** for client/UI state;
+**Tailwind CSS + shadcn/ui** (Radix primitives, source owned in-repo) for the design
+system; **React Flow (`@xyflow/react`)** for the workflow graph; **react-hook-form +
+zod** for schema-driven forms; **react-markdown + mermaid + shiki** for document
+preview; **Recharts** for telemetry; **lucide-react** for icons; **Vitest + RTL +
+MSW** and **Playwright** for tests. The interim hand-rolled `web/` (hash router, raw
+fetch, `theme.css`) is fully replaced.
+
+**Why.** The interim workbench proved the API contract but is not an enterprise
+foundation (no design system, no server-state cache, no route model, no component
+library, shallow tests) and cannot absorb the planned features. The chosen libraries
+are the boring, widely-adopted, TypeScript-first standards; shadcn/ui gives a bespoke
+"Overcut-class" look while keeping component source in-repo (no kit lock-in); React
+Flow is the standard for interactive DAG visualization (the run-detail centerpiece);
+TanStack Query removes the manual effect/poll code that caused the SSE reconnect bug.
+
+**Scope.** Frontend only. Backend stays a local FastAPI app driving disposable
+subprocess workers (ADR-012/023/024). **Local single-user only** — no auth/RBAC/
+multi-tenancy (ADR-026 unchanged); the UI may reserve a user-menu slot but must not
+implement auth. The production bundle is built with Vite and **committed** to
+`web/static/` so runtime needs no Node.
+
+**Consequences.** Larger frontend dependency surface (managed via the frontend CI
+job: lint + typecheck + test + build + stale-bundle guard). The revamp is **full-
+stack**: the run-detail vision (live Kiro conversation, live graph, document preview,
+durable HITL gates) requires backend/core/SDK data-plane work (`specs/phase-07-02`) —
+persistent event log, gate-from-checkpoint, ACP conversation streaming, topology and
+artifact-content endpoints. If hosted/multi-user is ever pursued, that remains a
+separate track re-opening ADR-012/023.
