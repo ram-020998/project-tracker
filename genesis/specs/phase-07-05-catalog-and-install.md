@@ -5,9 +5,13 @@
 > library, and launch a run via a schema-driven form. Turns the current read-only
 > catalog into a full lifecycle-managed library surface.
 
-Prereq: 07-02 (catalog + graph + install endpoints), 07-03 (design system). Feature
-dir: `features/catalog/`. Routes: `/catalog`, `/catalog/:workflowId`,
-`/catalog/:workflowId/launch`.
+Prereq: 07-02 (catalog + graph + install endpoints), 07-03 (design system) + 07-03a
+(visual language). Feature dir: `features/catalog/`. Routes: `/catalog`,
+`/catalog/:workflowId`, `/catalog/:workflowId/launch`.
+
+> **Visual (per `phase-07-03a`):** the catalog uses Overcut's **search + CategoryChips
+> + card grid** pattern; workflow detail uses **sub-tabs** (Overview / Graph / Runs)
+> like Overcut's per-workflow Dashboard/Builder/History tabs.
 
 ---
 

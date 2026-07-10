@@ -7,7 +7,18 @@
 > This is typically the user's first stop, so it must feel trustworthy and obvious.
 
 Prereq: 07-02 (per-integration status/test endpoints, mcp/cli cards), 07-03 (design
-system). Feature dir: `features/settings/`. Routes: `/settings`, `/settings/:server`.
+system) + 07-03a (visual language). Feature dir: `features/settings/`. Routes:
+`/settings`, `/settings/:server`.
+
+> **Layout update (per `phase-07-03a`):** adopt Overcut's **master-detail** pattern
+> for MCP/CLI configuration instead of a slide-over drawer — a left **list panel**
+> ("N servers", "+ Add", search, rows with a **StatusDot**) beside a right **detail
+> form** whose header shows the server name + a **status pill** (● Active/● Inactive)
+> and **Save state / Delete**. The detail form is sectioned exactly like Overcut's
+> MCP detail: **General** (name/note), **Configuration** (read-only resolved config),
+> **Allowed Tools** (toggle rows), **Secrets** (write-only fields). `/settings/:server`
+> selects the row (deep-linkable). Cards-grid remains an acceptable alternative for
+> the top-level integrations overview; the edit surface is master-detail.
 
 ---
 

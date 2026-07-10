@@ -4,8 +4,12 @@
 > with live status, meaningful filtering/search, quick actions, and a clear path into
 > each run's detail. This is the operator's "mission control" list.
 
-Prereq: 07-02 (runs + status), 07-03 (design system). Feature dir: `features/runs/`.
-Route: `/runs`.
+Prereq: 07-02 (runs + status), 07-03 (design system) + 07-03a (visual language).
+Feature dir: `features/runs/`. Route: `/runs`.
+
+> **Visual (per `phase-07-03a`):** mirrors Overcut's **Executions** table — FilterBar
+> with removable chips + "Add filter", an **AutoRefreshChip**, count + pagination, and
+> **StatusPill** cells — plus Genesis additions (current-node column + a progress bar).
 
 ---
 

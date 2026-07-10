@@ -27,6 +27,11 @@ dark-first, calm, dense, high signal-to-noise.
 
 ## 2. Design tokens
 
+> **Concrete values updated per the first-hand Overcut study — see
+> `phase-07-03a-visual-language-reference.md §3.2`, which is the source of truth for
+> palette, radius, and the display-numeral treatment.** The structure below stands;
+> the literal hex values come from 03a.
+
 Defined as CSS custom properties in `styles/tokens.css`, surfaced to Tailwind via
 `tailwind.config.ts` `theme.extend`. Two themes (`.theme-dark` default,
 `.theme-light`) set the same variable names to different values.
@@ -107,15 +112,24 @@ Pagination, Breadcrumb.
 **Domain patterns (`shared/ui/patterns/`):**
 - **StatusPill** — dot + label; maps run/node status → semantic color; animated dot
   when `running`.
+- **StatusDot** — bare active/inactive/running dot for list rows (Overcut master-
+  detail lists).
+- **ActionPill** — Create/Update/Delete-style colored pill for audit/log rows.
+- **MetricCard** — icon + label + **oversized display numeral** + sub-stat/trend
+  (the signature Overcut dashboard tile). Uses the `.metric-value` type token.
+- **SegmentedControl** — date-range / group-by / view toggles.
+- **DateRangeControl**, **GroupByControl**, **AutoRefreshChip** — dashboard controls.
+- **FilterChip** (removable) + **FilterBar** (search + chips + "Add filter").
+- **CategoryChips** — catalog category filtering.
+- **ToolChipRow** — capability/tool chips with a "+N" overflow (node/agent tools).
+- **NodeCard** — React Flow custom node: title bar (kind icon + label + StatusPill) +
+  config-summary lines + counters/colored dots (Overcut node-card aesthetic applied
+  to the live run graph).
+- **TrendChart** — Recharts line/area with the dark axis + hover-tooltip treatment.
 - **MetricTile** — label + big value + delta + optional sparkline.
 - **HealthDot** — configured/missing/reachable indicator for integrations.
-- **RelativeTime** — auto-updating "2m ago" with absolute tooltip.
-- **Duration** — humanized ms → "1m 12s".
-- **KindBadge** — node kind (program/agent/cli/validator/gate/subgraph) with icon.
-- **CopyButton** — copy value with confirmation.
-- **JsonTree** — collapsible JSON viewer (developer-inspect only).
-- **CodeBlock** — shiki-highlighted, with language + copy.
-- **MarkdownView** — react-markdown + remark-gfm + mermaid, sanitized.
+- **RelativeTime** / **Duration** / **KindBadge** / **CopyButton** / **JsonTree** /
+  **CodeBlock** / **MarkdownView** — as before.
 
 ---
 

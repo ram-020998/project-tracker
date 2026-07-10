@@ -8,9 +8,17 @@
 > telemetry; node inspection/conversation (07-08), HITL (07-08), and documents
 > (07-09) plug into the layout defined here.
 
-Prereq: 07-02 (topology, events, steps, gate), 07-03 (design system). Feature dir:
-`features/run-detail/`. Routes: `/runs/:runId` (+ nested `/node/:nodeId`,
-`/docs/:docName`).
+Prereq: 07-02 (topology, events, steps, gate), 07-03 (design system) + 07-03a (visual
+language). Feature dir: `features/run-detail/`. Routes: `/runs/:runId` (+ nested
+`/node/:nodeId`, `/docs/:docName`).
+
+> **Visual update (per `phase-07-03a`):** the React Flow custom nodes use the
+> **NodeCard** aesthetic derived from Overcut's workflow-builder canvas — a title bar
+> (kind icon + label + StatusPill), config-summary lines, and counters/colored dots —
+> but Genesis makes them **live** (status overlay + current-node pulse), which Overcut
+> does not. Run Detail also gains a **Dashboard sub-tab** using **MetricCards**
+> (Overcut's per-workflow dashboard applied to a single run's telemetry: duration,
+> tokens, tool calls, retries) alongside the Graph, Inspector, and Docs regions.
 
 ---
 

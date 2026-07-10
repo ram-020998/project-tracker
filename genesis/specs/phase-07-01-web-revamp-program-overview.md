@@ -172,6 +172,14 @@ web/
 
 ### 4.3 Routing map (URLs are first-class)
 
+> **Shell (per `phase-07-03a`):** a ~280px collapsible **left sidebar** with a Genesis
+> brand tile + active-environment/health indicator at top, then nav grouped under
+> small-caps section labels — **MONITOR** (Overview, Runs) · **LIBRARY** (Catalog) ·
+> **CONFIGURE** (Integrations, Environments) · **SETTINGS** — and a footer (theme
+> toggle, version, reserved copilot slot). A **top bar** with a breadcrumb page title
+> and a contextual **right-rail toggle** (Run Detail inspector/docs; reserved for a
+> future run-aware copilot). No project switcher / billing (local single-user).
+
 | Route | Screen | Spec |
 |---|---|---|
 | `/` | Overview / dashboard | this doc §7 |
@@ -237,28 +245,39 @@ document is deep-linkable and back-button friendly.
 
 ---
 
-## 6. Visual/design direction (summary; full system in phase-07-03)
+## 6. Visual/design direction (summary; full system in phase-07-03 + phase-07-03a)
 
-Dark-first, calm, dense. Persistent **left sidebar** (primary nav) + **top context
-bar** (breadcrumb, run status, global actions). Card surfaces with restrained
-borders and elevation. Status expressed through a consistent **pill + dot** system.
-The Run Detail uses a **three-region layout**: graph canvas (center), node
-inspector (bottom or right, resizable), documents drawer (right, collapsible).
-Monospace for logs/transcripts. Subtle, purposeful motion (node state transitions,
-drawer slides) that respects reduced-motion.
+Direction is now grounded in a first-hand study of the Overcut app — see
+**`phase-07-03a-visual-language-reference.md`** (the visual north star). We adopt
+Overcut's *vocabulary*: near-black calm surface, dark hairline-bordered cards,
+**metric cards with oversized display numerals** + date-range/group-by segmented
+controls + auto-refresh, **master-detail** config, **category-chip + card-grid**
+catalogs, **node-card** canvases, **status pills / dots** and **tool chips**, and a
+grouped left sidebar. We **innovate on top**: the **live run is the hero** (a live
+node-status graph + timeline scrubber), a **per-node Kiro conversation inspector**
+(vs. Overcut's single global chat), first-class **HITL controls**, and a **document
+preview drawer** — none of which Overcut has. Genesis stays **local single-user**
+(no projects/billing/agent-role authoring). The Run Detail uses a **three-region
+layout**: graph canvas (center), node inspector (bottom/right, resizable), documents
+drawer (right, collapsible). Monospace for logs/transcripts. Purposeful motion
+(node-state transitions, drawer slides) that respects reduced-motion.
 
 ---
 
 ## 7. Overview / dashboard screen (defined here)
 
-The landing screen answers "what's the state of my Genesis?" in one glance:
+The landing screen answers "what's the state of my Genesis?" in one glance, using the
+Overcut dashboard pattern (`phase-07-03a §3.4`): a **date-range + group-by**
+segmented control row with an **auto-refresh** chip, a grid of **MetricCards** with
+oversized display numerals (Total Runs, Success Rate, Avg Duration, Currently
+Running, Total Tokens — with sub-stats/trends), and **TrendCharts** (runs over time,
+token usage). Genesis-specific additions above the metrics:
 
-- **Integrations health strip** — compact status of MCP/CLI/GitLab (green/amber/red)
-  linking into Settings.
-- **Active runs** — cards for non-terminal runs with live status + a jump-in link.
-- **Recent runs** — last N terminal runs with outcome + duration.
-- **Installed workflows** — count + quick launch of favorites.
-- **Getting-started** empty state when nothing is installed (deep link to Catalog).
+- **Active runs strip** — cards for non-terminal runs with live status + jump-in link
+  (our hero surfacing; Overcut has no live-run emphasis).
+- **Integrations health strip** — compact MCP/CLI/GitLab status (green/amber/red)
+  linking into CONFIGURE.
+- **Installed workflows** — count + quick launch; getting-started empty state.
 
 Data: `GET /home` (extended in `phase-07-02` to include active-run summaries and
 per-integration status).
@@ -275,6 +294,7 @@ session model + `AGENT_ONBOARDING.md`). Recommended sequence:
 | 07-01 | Program Overview & Frontend Architecture (this) | — | — |
 | 07-02 | Backend & Core Data-Plane Enhancements | genesis / genesis-core / kiro-agent-sdk | — |
 | 07-03 | Design System & Component Library | web | 07-01 |
+| 07-03a | Visual Language Reference (Overcut-inspired) | web | 07-01 |
 | 07-04 | Settings & Configuration Experience | web | 07-02, 07-03 |
 | 07-05 | Workflow Catalog & Install Management | web (+ install API) | 07-02, 07-03 |
 | 07-06 | Runs List & History | web | 07-02, 07-03 |

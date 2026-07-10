@@ -286,3 +286,16 @@ durable HITL gates) requires backend/core/SDK data-plane work (`specs/phase-07-0
 persistent event log, gate-from-checkpoint, ACP conversation streaming, topology and
 artifact-content endpoints. If hosted/multi-user is ever pursued, that remains a
 separate track re-opening ADR-012/023.
+### ADR-027 addendum (2026-07-10) — Overcut visual study
+
+After a first-hand study of the Overcut app (19 screenshots of dashboard/executions/
+mcp/skills/agent-roles/workflow-builder/audit screens), the visual direction was made
+concrete in `specs/phase-07-03a-visual-language-reference.md`. Genesis **adopts
+Overcut's vocabulary** (near-black calm surface, metric cards with oversized display
+numerals + date-range/group-by/auto-refresh, master-detail config, category-chip card
+catalogs, node-card canvases, status pills/dots, tool chips, grouped sidebar) and
+**innovates on top** where Genesis is stronger: the **live run is the hero** (live
+node-status graph + timeline), a **per-node Kiro conversation** inspector (vs.
+Overcut's single global chat), first-class **HITL controls**, and a **document preview
+drawer**. Genesis remains local single-user (no projects/billing/agent-role authoring).
+Stack (ADR-027 body) is unchanged; this addendum only fixes the visual language.
