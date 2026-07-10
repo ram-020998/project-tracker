@@ -8,8 +8,13 @@
 > is where the platform's full HITL power finally reaches the UI.
 
 Prereq: 07-02 (agent.* events, GateDescriptor, respond/pause/resume/fork endpoints),
-07-07 (screen layout + node selection). Feature dir:
-`features/run-detail/components/{inspector,hitl}/`.
+07-03/07-03a (design system + visual language), 07-07 (screen layout + node selection).
+Feature dir: `features/run-detail/components/{inspector,hitl}/`.
+
+> **Visual (per `phase-07-03a`):** the conversation transcript uses the message/tool-
+> card treatment (mono for tool args/results, MarkdownView for assistant text,
+> collapsible thoughts); the HITL bar uses StatusPill + Button variants. This is a
+> Genesis original — Overcut has only a single global chat, not a per-node inspector.
 
 ---
 

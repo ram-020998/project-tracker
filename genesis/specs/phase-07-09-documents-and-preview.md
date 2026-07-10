@@ -7,9 +7,13 @@
 > produced.
 
 Prereq: 07-02 (artifact listing with media_type/preview_kind, content, download),
-07-03 (design system: MarkdownView, CodeBlock, JsonTree, Drawer), 07-07 (Run Detail
-layout). Feature dirs: `features/run-detail/components/docs/` + shared
-`features/documents/` renderers. Route: `/runs/:runId/docs/:docName`.
+07-03/07-03a (design system + visual language: MarkdownView, CodeBlock, JsonTree,
+Drawer), 07-07 (Run Detail layout). Feature dirs:
+`features/run-detail/components/docs/` + shared `features/documents/` renderers.
+Route: `/runs/:runId/docs/:docName`.
+
+> **Visual (per `phase-07-03a`):** the documents drawer reuses the Drawer + list-row
+> treatment; previews use MarkdownView/CodeBlock/JsonTree from the design system.
 
 ---
 
