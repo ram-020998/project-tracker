@@ -12,12 +12,14 @@
 
 ````
 You are joining "Genesis" — an agentic SDLC platform for the Appian Solutions department.
-Phases 1–7 are COMPLETE and the app runs real workflows end-to-end. We are now in a
-HARDENING / ENHANCEMENT phase (issue fixes + improvements) BEFORE Phase 8. Your job this
-session is to work on specific fix/enhancement items I will give you AFTER you've absorbed
-this context. First read everything below and the referenced docs/code, then briefly restate
-the architecture + current state and confirm the non-negotiables before changing anything.
-Do NOT start coding until you've read the docs and can restate the design.
+Phases 1–7 are COMPLETE and the app runs real workflows end-to-end. We are now executing the
+**WEB REVAMP program (milestone M7.1)** — a spec-first, full rebuild of the web workbench into
+an enterprise-grade, Overcut-inspired app. The backend data plane (07-02) and the frontend
+design system (07-03/07-03a) are DONE; the remaining work is the **screen specs 07-04 → 07-10**.
+Your job this session is the specific spec/item I give you AFTER you've absorbed this context.
+First read everything below and the referenced docs/code, then briefly restate the architecture
++ current state and confirm the non-negotiables before changing anything. Do NOT start coding
+until you've read the docs and can restate the design.
 
 ════════════════════════════════════════════════════════════════════════
 0. WHAT GENESIS IS (one paragraph)
@@ -43,13 +45,20 @@ A) Design + as-built docs — /Users/ramaswamy.u/repo/project-tracker/genesis/
    2. tracker.md  — locked decisions Q1–Q14, phase index (§3a), and §6 STATUS LOG
       (READ §6 fully — it is the running history incl. every post-Phase-7 fix).
    3. specs/00-architecture-overview.md  — layers, domain model, node taxonomy, state/blackboard rule.
-   4. reference/decision-log.md — ADR-001..026 (the "why"; 026 = React+TS choice).
+   4. reference/decision-log.md — ADR-001..027 (the "why"; 026 = React+TS, 027 = web-revamp stack + Overcut study).
    5. reference/ (all): repo-structure, node-taxonomy-reference, state-and-data-model,
       mcp-and-cli-registry, workflow-authoring-standard, reliability-standard, hitl-design,
       security-and-secrets, testing-strategy, langgraph-capability-map,
       solutions-copilot-relationship, glossary, roadmap-and-sequencing, spike-findings.
-   6. progress/phase-01..07-implementation.md — the as-built record for each milestone.
-   7. specs/phase-08-skill-migration-program.md — what comes next (context only).
+   6. **WEB REVAMP specs (the active program) — specs/phase-07-0N-*:**
+      - 07-01 program overview & frontend architecture (ANCHOR: stack, folder structure, routing, sequencing)
+      - 07-02 backend & core data plane (DONE — persistent event log, gate-from-checkpoint, ACP conversation streaming, topology/steps/artifact APIs)
+      - 07-03 design system + 07-03a visual-language reference (DONE — the Overcut study; tokens/components)
+      - 07-04 settings · 07-05 catalog · 07-06 runs list · 07-07 run-detail graph ·
+        07-08 node inspection + Kiro conversation + HITL · 07-09 documents · 07-10 testing/CI/rollout (REMAINING)
+   7. progress/phase-01..07-implementation.md + phase-07-01-revamp-kickoff.md +
+      phase-07-02-implementation.md + phase-07-03-implementation.md — as-built records.
+   8. specs/phase-08-skill-migration-program.md — what comes AFTER the web revamp (context only).
 
 B) The code — /Users/ramaswamy.u/repo-gitlab/ramaswamy.u/  (read before editing; §3 is the map)
    - genesis-core/genesis_core/**   (shared SDK)
@@ -68,22 +77,26 @@ for / proceed with my task.
 ════════════════════════════════════════════════════════════════════════
 Four repos at /Users/ramaswamy.u/repo-gitlab/ramaswamy.u/, all pushed to
 git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git:
-  - kiro-agent-sdk    tag v0.0.1   branch main    (ACP adapter; KiroAgentOptions, collect, load_mcp_servers)
-  - genesis-core      tag v0.3.3   branch master  (state, workspace, node factories, validators, MCP/CLI registries, compat gate)
-  - genesis           tag v0.6.4   branch master  (runtime engine, dist, config, runs, api, cli, web workbench)
-  - genesis-workflows tag v0.2.1   branch master  (registries, steering, hello-appian + erd-generation, fixture)
+  - kiro-agent-sdk    tag v0.1.0   branch main    (ACP adapter; + collect_streaming for live conversation)
+  - genesis-core      tag v0.4.0   branch master  (nodes/state/registries; kiro_node streams agent.* events; hitl_gate = GateDescriptor; CORE_MAJOR still 1)
+  - genesis           tag v0.7.0   branch master  (runtime, dist, config, runs, api, cli, web; + data plane 07-02)
+  - genesis-workflows tag v0.3.0   branch master  (registries, steering, hello-appian + erd-generation [+ graph: topology], fixture)
 
 Dependency chain (git-pinned by tag; CI rewrites ssh→https):
-  genesis → genesis-core@v0.3.3 → kiro-agent-sdk@v0.0.1 ;
-  genesis-workflows → genesis-core (runtime) + genesis (dev).
+  genesis → genesis-core@v0.4.0 → kiro-agent-sdk@v0.1.0 ;
+  genesis-workflows → genesis-core@v0.4.0 (runtime) + genesis@v0.7.0 (dev).
 
-Tests (all green): genesis 43 · genesis-core 16 · genesis-workflows 9 · web (Vitest) 5. ruff clean. CI green.
+Tests (all green): genesis 48 · genesis-core 17 · genesis-workflows 9 · web (Vitest) 14. ruff clean. CI green (frontend + python jobs).
 
-What works TODAY (verified live):
-  - `genesis serve` → React workbench at http://127.0.0.1:8760 (+ /docs Swagger).
-  - `genesis install --from <genesis-workflows dir>`  (or GitLab pull via stored token) → populates ~/.genesis/library.
-  - hello-appian runs GREEN end-to-end (real Kiro turn → validator pass → result.json).
-  - erd-generation runs past MCP init into the live Atlas schema fetch (the ACP env-shape bug is fixed).
+WEB REVAMP status (M7.1 — the active program):
+  - 07-01 (program/architecture), 07-02 (backend data plane), 07-03 + 07-03a (design system + Overcut visual language) — DONE, released, CI-green.
+  - 07-04..07-10 (Settings, Catalog, Runs list, Run-detail graph, node conversation + HITL, Documents, testing/rollout) — REMAINING. Build these next.
+
+What works TODAY (verified):
+  - `genesis serve` → the INTERIM workbench at http://127.0.0.1:8760 (the committed static/ bundle; NOT yet the new app — cutover is 07-10).
+  - `npm run dev` in genesis/web → the NEW app at http://localhost:5173/ (grouped shell + placeholder Overview; screens land at their routes as built). Design-system gallery at /dev (and /dev.html).
+  - Data plane (07-02): durable event log survives restart; gate reachable from durable state (approval bug fixed); Kiro conversation streamed as agent.* events; /workflows/{id}/graph, /runs/{id}/events(+/stream), /steps, artifact content/download all live.
+  - hello-appian runs GREEN end-to-end; erd-generation past MCP init into the live Atlas fetch.
   - All three HITL modes, streaming, worker isolation, checkpoint resume — implemented + tested.
 
 ════════════════════════════════════════════════════════════════════════
@@ -129,28 +142,34 @@ genesis/genesis/
                  health.py (checks + mcp_literal_env_probe [stubbable] + run_all/all_ok),
                  service.py (ConfigService facade).
   runs/    store.py (RunStore/RunRecord; statuses pending|running|awaiting_input:gate|
-                 awaiting_input:paused|done|failed|cancelled; TERMINAL set), events.py
-                 (Event, EventBus with history replay), validation.py (validate_inputs jsonschema,
-                 check_editable guardrails, merge_patch), worker.py (SUBPROCESS entry:
-                 `python -m genesis.runs.worker`; ops run|resume|get_state|update_state|fork;
-                 emits JSONL {node|custom|final|error}), supervisor.py (Supervisor.spawn/Worker.kill;
-                 reader thread; worker-death detection), manager.py (RunManager: start/pause/resume/
-                 cancel/respond/get_state/patch_state/fork/list/wait; per-run EventBus;
-                 event_run_id for fork; on_exit keeps bus open until terminal).
-  api/     app.py (create_app FastAPI: POST/GET /runs, /runs/{id}/{state,stream(SSE),pause,resume,
-                 cancel,respond,fork,artifacts}, PATCH /state, /catalog, /workflows/{id}, /home,
-                 /config/{health,gitlab-token,mcp-cards,secrets,environments}, /artifacts/usage;
-                 serves the built SPA at "/" + /assets), studio.py (langgraph dev graph).
-  cli/     main.py (dispatcher: create-workflow, test-workflow, serve, install, list),
-                 create_workflow.py, test_workflow.py, install.py.
-  lint/    reliability.py (check_reliability — the Q9 CI gate), contract.py (load_meta,
-                 check_meta_yaml_parity, check_hitl_posture).
-  testing/ harness.py (run_graph — headless run for tests / `genesis test-workflow`).
-  web/     React+TS+Vite SPA. src/: api.ts (typed REST + subscribeRun SSE), types.ts,
-                 components.tsx (StatusBadge, Field, useAsync…), surfaces.tsx (Home/Catalog/
-                 Config/History), run.tsx (RunLaunch schema form + RunDetail: timeline/activity/
-                 state editor/fork/HITL), App.tsx (hash router + sidebar), theme.css (tokens),
-                 *.test.* (Vitest). static/ = BUILT bundle (committed; runtime needs no node).
+                 awaiting_input:paused|done|failed|cancelled; TERMINAL set), eventlog.py
+                 (EventLog — DURABLE run_events table; append/list/last_seq/latest/purge — 07-02),
+                 events.py (Event, in-memory EventBus + canonical bus), validation.py
+                 (validate_inputs, check_editable, merge_patch), worker.py (SUBPROCESS entry;
+                 ops run|resume|get_state|update_state|fork; emits JSONL), supervisor.py, manager.py
+                 (RunManager: start/pause/resume/cancel/respond/patch_state/fork/list/wait; writes
+                 canonical events to EventLog + fans out; pending_gate [durable fast + checkpoint cold
+                 path]; log_events; steps; GateResponseError).
+  api/     app.py (create_app FastAPI). Data-plane endpoints (07-02): GET /runs/{id} (+gate),
+                 /runs/{id}/events(?after,kinds,node), /runs/{id}/events/stream (canonical replay+live),
+                 /runs/{id}/steps, /workflows/{id}/graph, /runs/{id}/artifacts + /{name}(?mode) + /download,
+                 mcp-cards (+status); plus the Phase-5 run-control + config + SSE endpoints. Serves the
+                 committed static/ SPA at "/". studio.py (langgraph dev graph).
+  ...
+  web/     React + TS + Vite. NEW app (phase-07-03, ADR-027 stack): Tailwind + Radix/shadcn-style +
+                 Zustand + React Router + TanStack Query (screens) + Recharts + sonner + lucide.
+                 Structure: src/styles/{tokens.css,index.css} (Overcut-derived dark/light palette);
+                 src/lib/cn.ts; src/stores/theme.ts; src/shared/ui/** (primitives + patterns:
+                 Button/Card/Input/Badge+StatusPill/StatusDot/KindBadge/Switch/Tooltip/Tabs/Dialog+Drawer/
+                 MetricCard/SegmentedControl/chips/HealthDot/TrendChart/format/toast/icons); src/shared/
+                 layout/** (AppShell/Sidebar[grouped nav]/Topbar/SplitPane/Page); src/shared/feedback/**
+                 (Empty/Error/Loading); src/app/** (providers, router, RootLayout, routes/Overview
+                 [placeholder] + ComingSoon); src/dev/KitchenSink.tsx (gallery at /dev + /dev.html);
+                 main.tsx → new app. INTERIM app (App.tsx, surfaces.tsx, run.tsx, components.tsx,
+                 theme.css, api.ts, types.ts) is RETAINED but unreferenced — deleted at cutover (07-10).
+                 static/ = the COMMITTED bundle still serving the INTERIM app (do NOT rebuild/commit it
+                 until cutover). Feature dirs src/features/{settings,catalog,runs,run-detail,documents}
+                 are created as 07-04..09 land.
   langgraph.json, docs/debug-in-studio.md.
 genesis-workflows/
   registry.json (catalog + genesis_core_major=1), mcp-registry.json (REAL internal images),
@@ -201,10 +220,18 @@ Key implementation contracts:
     genesis-core:      cd genesis-core && ../genesis/.venv/bin/python -m pytest -q -p no:warnings  (+ ruff check genesis_core)
     genesis-workflows: cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_library.py
                        and  ../genesis/.venv/bin/python -m pytest -q workflows --ignore=workflows/_fixtures
-    web (frontend):    cd genesis/web && npx tsc --noEmit && npx vitest run && npx vite build
-- Frontend: source in genesis/web/src; BUILT bundle in genesis/web/static is COMMITTED (so runtime needs
-  no node). If you change web/**, you MUST rebuild (`npm run build` / `npx vite build`) and commit static/,
-  then the user hard-refreshes the browser (no server restart needed for static files).
+    web (frontend):    cd genesis/web && npm ci && npx tsc --noEmit && npx vitest run
+                       (VERIFY a build with `npx vite build --outDir /tmp/verify --emptyOutDir` —
+                        do NOT run `npm run build`, which writes to static/ and would clobber the
+                        committed INTERIM bundle before cutover.)
+- Frontend (WEB REVAMP, build-alongside per 07-10): the NEW app is the dev root — `npm run dev`
+  → http://localhost:5173/ (screens), /dev = design-system gallery. The committed genesis/web/static
+  bundle STILL serves the INTERIM app (via `genesis serve` on :8760); **do NOT rebuild or commit
+  static/ until the 07-10 cutover.** New screens go under src/features/** + src/app/router.tsx and
+  compose from src/shared/** (the design system). Keep interim App.tsx/etc. untouched until cutover.
+- NPM REGISTRY: the local ~/.npmrc points at Appian Artifactory with an EXPIRED token (E401 on new
+  installs). Install with `--registry=https://registry.npmjs.org/` for local dev (do NOT edit the
+  global ~/.npmrc). CI's node:20 has no ~/.npmrc and resolves the lockfile's public-npm URLs fine.
 - Run the app:  .venv/bin/genesis serve   (→ http://127.0.0.1:8760, /docs for Swagger)
   Install workflows:  .venv/bin/genesis install --from ../genesis-workflows   (or `genesis install` for GitLab pull)
   List installed:     .venv/bin/genesis list
@@ -243,6 +270,20 @@ Key implementation contracts:
 - LangGraph specifics: sync invoke can't run async nodes; sync SqliteSaver fails under async (use
   AsyncSqliteSaver). Command(resume=...) needs a checkpointer-compiled graph. Fork seeds a NEW thread.
 - Loader compat gate: lockfile genesis_core.major vs CORE_MAJOR — refuse-to-load on mismatch.
+- WEB-REVAMP data plane (07-02): the durable EventLog (run_events table) is the source of truth for a
+  run's timeline/conversation — the in-memory EventBus is only live fan-out. Gate/approval controls MUST
+  derive from durable state (`GET /runs/{id}.gate` via manager.pending_gate), NEVER from a transient event
+  (that ephemerality was the original "can't approve from UI" bug). Canonical events: run.started/
+  node.completed/agent.message|thought|tool_call|tool_update|result/validator.result/retry.scheduled/
+  gate.awaiting|resolved/run.final/error. Kiro conversation = kiro_node forwarding SDK messages via ctx.emit
+  (graceful fallback to non-streaming collect when the SDK/stub lacks streaming; _STUBBED guards this).
+- WEB-REVAMP frontend contract: mirror the 07-02 event/GateDescriptor/topology/steps shapes in web/src/
+  types + MSW fixtures; a drift should fail a test (the "stub hid the contract" lesson applies to the FE too).
+- workflow.yaml may carry UI-only keys (e.g. `graph:` topology) — the contract parity lint exempts them
+  via YAML_ONLY_KEYS in genesis/lint/contract.py. Node ids in `graph:` must match the LangGraph node names.
+- jest-axe (v9) ships no types: ambient `declare module "jest-axe"` in web/src/types/jest-axe.d.ts +
+  the vitest matcher augmentation in web/src/vitest-axe.d.ts. Keep them as PURE ambient / module-aug files.
+- Recharts bloats the bundle (chunk-size warning) — route-level code-splitting is deferred to 07-10.
 
 ════════════════════════════════════════════════════════════════════════
 7. HOW TO WORK ON A FIX/ENHANCEMENT ITEM (the loop I want you to follow)
@@ -252,8 +293,8 @@ Key implementation contracts:
 3. Make the change in the smallest correct scope. Match existing style/patterns.
 4. Add/adjust tests (pytest for backend/core; Vitest for web). For bugs, add a regression test that would
    have caught it — and if a stub hid the bug, fix the stub to mirror reality.
-5. Run ALL affected suites + ruff (backend) / tsc + vitest (frontend) until green. If web changed, rebuild
-   the bundle and commit static/.
+5. Run ALL affected suites + ruff (backend) / tsc + vitest (frontend) until green. For web work,
+   VERIFY the build to a temp dir; do NOT rebuild/commit static/ before the 07-10 cutover.
 6. Release: bump version(s) + tag + push the changed repo(s) + update dependent pins; verify CI green via glab.
 7. Update project-tracker (tracker.md §6 status log; a progress note if substantial) and push it.
 8. Report with CITED evidence (test output, run ids, file diffs). Be honest about what you verified vs. couldn't
@@ -262,14 +303,23 @@ Key implementation contracts:
 ════════════════════════════════════════════════════════════════════════
 8. KNOWN OPEN FOLLOW-UPS (candidate work; I may assign these or others)
 ════════════════════════════════════════════════════════════════════════
-- Catalog install/update/remove BUTTONS in the workbench (backend Installer exists via `genesis install`
-  CLI + dist.Installer; needs API endpoints + UI wiring).
-- Browser/UX pass on the workbench (accessibility audit, visual polish, empty/error states, stream reconnect UX).
-- Full ERD dry-run parity check (~37 tables / 174 relationships) once the two agent turns complete; record it.
-- Retention purge endpoints (/runs/purge, DELETE /runs/{id}/artifacts) — retention module exists; wire the API/UI.
-- In-flight ACP session/cancel on pause (SDK enhancement) so a slow Kiro turn cancels promptly.
-- Rotate the shared GITLAB_PUSH_TOKEN.
-- lcp MCP image is still a placeholder (<lcp-image>) in mcp-registry.json (OD-1 future).
+8. THE ACTIVE PROGRAM — WEB REVAMP (M7.1). Remaining specs, in recommended order (each is a
+   self-contained session; read the spec, then build the screen composing src/shared/** + the
+   07-02 data plane, wire it into src/app/router.tsx replacing its ComingSoon placeholder):
+   - 07-04 Settings/Integrations — MCP/CLI master-detail, write-only secrets, connection status, environments.
+   - 07-05 Catalog & install — category chips + card grid, install/update/remove, schema-driven launch.
+   - 07-06 Runs list & history — Executions-style table, filter chips, auto-refresh, status pills.
+   - 07-07 Run Detail: graph — React Flow (@xyflow/react) live node-status graph from /workflows/{id}/graph + /events fold.
+   - 07-08 Run Detail: node inspection + Kiro conversation + HITL — per-node transcript from /events, all 3 HITL modes from durable gate.
+   - 07-09 Documents & preview — artifacts drawer + rendered preview (md/json/mermaid/csv/text).
+   - 07-10 Testing/CI/rollout — MSW contract fixtures, Playwright smoke (incl. approve-a-gate), CI (lint/typecheck/test/build + stale-bundle guard), then the CUTOVER: repoint the served bundle to the new app, delete interim files, rebuild + commit static/.
+   New deps for screens (add + install from public npm): @tanstack/react-query, @xyflow/react,
+   react-hook-form + zod, react-markdown + remark-gfm + mermaid, shiki, eslint (+ config, for 07-10).
+   Post-revamp / other open items:
+   - Full ERD dry-run parity check (~37 tables / 174 rels) once the two agent turns complete; record it.
+   - Per-integration connection TEST endpoint + cli-cards; artifact.written events; retention eventlog purge (07-02 deferred).
+   - Rotate the shared GITLAB_PUSH_TOKEN; refresh the expired Artifactory npm token.
+   - lcp MCP image placeholder (<lcp-image>) in mcp-registry.json. Then PHASE 8 (skill migration).
 
 ════════════════════════════════════════════════════════════════════════
 9. RULES OF ENGAGEMENT
@@ -279,10 +329,13 @@ Key implementation contracts:
 - Don't push directly to main/master of shared repos without permission beyond the normal Genesis release flow
   we already use; never commit secrets; reference secrets by key name only.
 - If stuck twice on the same error, stop and diagnose root cause; try a different approach.
-- Keep changes scoped to the item; don't refactor unrelated code or start Phase 8 unless asked.
+- Keep changes scoped to the item; don't refactor unrelated code. The active program is the WEB
+  REVAMP (07-04 → 07-10); do NOT start Phase 8 (skill migration) unless asked.
 
 Now: read the docs/code in §1, restate the architecture + current state + the non-negotiables,
-then ask me for (or proceed with) the specific fix/enhancement item. My task for this session is:
+then ask me for (or proceed with) the specific item. The active program is the web revamp;
+unless I say otherwise, the next item is the lowest-numbered UNDONE spec in §8. My task for
+this session is:
 
-<<< PASTE THE SPECIFIC ITEM(S) HERE >>>
+<<< PASTE THE SPECIFIC ITEM(S) HERE — e.g. "Implement specs/phase-07-04-settings-configuration.md" >>>
 ````
