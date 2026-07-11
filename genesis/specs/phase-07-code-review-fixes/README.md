@@ -91,7 +91,7 @@ flagged). 06 is a self-contained frontend win that can run alongside. 03 is the 
 | Doc | Status |
 |-----|--------|
 | 00 code review | ✅ Drafted |
-| 01 persistence/migrations | ✅ Spec drafted — not implemented |
+| 01 persistence/migrations | ✅ Implemented — genesis v0.12.0 |
 | 02 overview dashboard | ✅ Spec drafted — not implemented |
 | 03 integrations studio | ✅ Spec drafted — not implemented |
 | 04 retention + bus | ✅ Spec drafted — not implemented |
