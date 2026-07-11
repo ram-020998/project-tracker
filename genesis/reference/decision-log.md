@@ -338,3 +338,44 @@ client routes and break full-page refreshes on them.
   `/api`-prefixed call-sites across the API test suites.
 - This also de-risks the 07-10 cutover: production static-serving already resolves client
   routes via the fallback.
+
+---
+
+### ADR-029 — Two-Tier MCP/CLI Registry (revises ADR-005/020)
+
+**Status:** Accepted (2026-07-11) · **Revises:** ADR-005 (shared registry), ADR-020 (no global mcp.json)
+
+**Context:** Genesis resolves MCP servers and CLIs from a single read-only manifest installed from
+the `genesis-workflows` library. Users cannot add custom integrations from the app — they must MR
+into the shared library. This blocks experimentation and per-user MCP servers (e.g. local dev tools,
+team-specific APIs).
+
+**Decision:** Genesis resolves integrations from **two layers**:
+- **Curated (Tier-1):** the library's `mcp-registry.json` / `cli-registry.json` — reproducible,
+  MR-governed, **read-only in the app**. Preserves ADR-005 for shared workflows.
+- **Custom (Tier-2):** a **user-writable** local store (`~/.genesis/mcp-custom.json`,
+  `~/.genesis/cli-custom.json`). Editable from the Settings UI via CRUD API.
+
+Resolution merges by name; a custom entry with the same name **overrides** the curated one (with a
+visible "overrides curated" flag in the UI). ADR-020 is preserved: Genesis still never writes a
+global Kiro `mcp.json` — custom servers are injected per-node via `acp_servers`, exactly like
+curated ones.
+
+**Tool allowlist (new):** Each server may declare a `tool_allowlist` (list of tool names). At
+runtime, effective trust = `node.tools ∩ server.allowlist` — the server allowlist is a hard cap
+a workflow node cannot exceed. This is a safety improvement over the pre-029 model (node-only trust).
+
+**Tool introspection (new):** `genesis-core/mcp/introspect.py` speaks MCP JSON-RPC 2.0 directly
+(stdio) to discover tools from a server without Kiro. The upgraded `test_server` uses this for a
+real handshake.
+
+**Security:** A custom MCP server is an arbitrary local command run with the user's privileges.
+This is acceptable for a local single-user tool but is surfaced in the UI with a warning. Secret
+values flow through the existing `SecretProvider` (0600, scope/VAR) — never exposed by any API.
+
+**Consequences:**
+- `McpRegistry.from_layers(curated, custom)` replaces `McpRegistry.load()` in the config layer.
+- Custom servers appear in cards, health, and per-node injection automatically.
+- `missing_secrets()` and `health()` remain scoped to *installed* (workflow-required) servers.
+- The `CustomMcpStore`/`CustomCliStore` interface is the seam for a future DB migration (spec 05).
+- stdio transport only in v1; HTTP/remote MCP is a documented follow-on.

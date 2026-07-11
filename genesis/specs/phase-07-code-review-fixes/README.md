@@ -93,7 +93,7 @@ flagged). 06 is a self-contained frontend win that can run alongside. 03 is the 
 | 00 code review | ✅ Drafted |
 | 01 persistence/migrations | ✅ Implemented — genesis v0.12.0 |
 | 02 overview dashboard | ✅ Implemented — genesis v0.12.1 |
-| 03 integrations studio | ✅ Spec drafted — not implemented |
+| 03 integrations studio | ✅ Implemented — genesis-core v0.5.0 + genesis v0.13.1 |
 | 04 retention + bus | ✅ Spec drafted — not implemented |
 | 05 scale decision | ✅ Spec drafted — decision pending trigger |
 | 06 conversation rich chat | ✅ Spec drafted — not implemented |
