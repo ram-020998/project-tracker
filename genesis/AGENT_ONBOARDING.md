@@ -79,18 +79,18 @@ Four repos at /Users/ramaswamy.u/repo-gitlab/ramaswamy.u/, all pushed to
 git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git:
   - kiro-agent-sdk    tag v0.1.0   branch main    (ACP adapter; + collect_streaming for live conversation)
   - genesis-core      tag v0.4.0   branch master  (nodes/state/registries; kiro_node streams agent.* events; hitl_gate = GateDescriptor; CORE_MAJOR still 1)
-  - genesis           tag v0.9.0   branch master  (runtime, dist, config, runs, api, cli, web; data plane 07-02; **API namespaced under /api + SPA history fallback — ADR-028**)
+  - genesis           tag v0.10.0  branch master  (runtime, dist, config, runs, api, cli, web; data plane 07-02; API under /api + SPA fallback — ADR-028; install-lifecycle API — 07-05)
   - genesis-workflows tag v0.3.0   branch master  (registries, steering, hello-appian + erd-generation [+ graph: topology], fixture)
 
 Dependency chain (git-pinned by tag; CI rewrites ssh→https):
-  genesis (v0.9.0) → genesis-core@v0.4.0 → kiro-agent-sdk@v0.1.0 ;
+  genesis (v0.10.0) → genesis-core@v0.4.0 → kiro-agent-sdk@v0.1.0 ;
   genesis-workflows → genesis-core@v0.4.0 (runtime) + genesis@v0.7.0 (dev).
 
 Tests (all green): genesis 48 · genesis-core 17 · genesis-workflows 9 · web (Vitest) 14. ruff clean. CI green (frontend + python jobs).
 
 WEB REVAMP status (M7.1 — the active program):
   - 07-01 (program/architecture), 07-02 (backend data plane), 07-03 + 07-03a (design system + Overcut visual language) — DONE, released, CI-green.
-  - 07-04 (Settings & Configuration) — DONE (genesis v0.9.0; incl. the /api namespacing fix). 07-05..07-10 (Catalog, Runs list, Run-detail graph, node conversation + HITL, Documents, testing/rollout) — REMAINING. Build these next.
+  - 07-04 (Settings) — DONE (genesis v0.9.0; incl. /api namespacing). 07-05 (Catalog & Install) — DONE (genesis v0.10.0; install-lifecycle API + browse/detail/launch). 07-06..07-10 (Runs list, Run-detail graph, node conversation + HITL, Documents, testing/rollout) — REMAINING. Build these next.
 
 What works TODAY (verified):
   - `genesis serve` → FastAPI backend at http://127.0.0.1:8760; **API under /api** (e.g. `/api/config/mcp-cards`), Swagger at `/docs`. It also serves the committed `static/` bundle at `/` with a **SPA history fallback** — but that bundle is the OLD interim app which calls root paths, so its UI no longer reaches the API (retired at the 07-10 cutover). Use it as the BACKEND for the new dev app.
@@ -153,7 +153,9 @@ genesis/genesis/
   api/     app.py (create_app FastAPI). Data-plane endpoints (07-02): GET /runs/{id} (+gate),
                  /runs/{id}/events(?after,kinds,node), /runs/{id}/events/stream (canonical replay+live),
                  /runs/{id}/steps, /workflows/{id}/graph, /runs/{id}/artifacts + /{name}(?mode) + /download,
-                 mcp-cards (+status), cli-cards, mcp-cards/{server}/test (readiness probe); plus the
+                 mcp-cards (+status), cli-cards, mcp-cards/{server}/test (readiness probe);
+                 catalog/available + library/install|update + DELETE library/{id} (install lifecycle via
+                 Installer, source_factory-injectable — 07-05); plus the
                  Phase-5 run-control + config endpoints. ALL routes are on an APIRouter mounted at
                  **prefix="/api"** (ADR-028); a catch-all serves index.html for non-/api,/assets paths
                  (SPA history fallback). Serves the committed static/ SPA at "/". studio.py (langgraph dev graph).
@@ -324,8 +326,8 @@ Key implementation contracts:
    self-contained session; read the spec, then build the screen composing src/shared/** + the
    07-02 data plane, wire it into src/app/router.tsx replacing its ComingSoon placeholder):
    - 07-04 Settings/Integrations — ✅ DONE (genesis v0.9.0; MCP master-detail, CLI cards, GitLab token, environments CRUD, storage; + the /api namespacing fix, ADR-028).
-   - 07-05 Catalog & install — category chips + card grid, install/update/remove, schema-driven launch.  ← NEXT
-   - 07-06 Runs list & history — Executions-style table, filter chips, auto-refresh, status pills.
+   - 07-05 Catalog & install — ✅ DONE (genesis v0.10.0; install-lifecycle API + browse/detail/launch; static graph preview pending 07-07's React Flow renderer).
+   - 07-06 Runs list & history — Executions-style table, filter chips, auto-refresh, status pills.  ← NEXT
    - 07-07 Run Detail: graph — React Flow (@xyflow/react) live node-status graph from /workflows/{id}/graph + /events fold.
    - 07-08 Run Detail: node inspection + Kiro conversation + HITL — per-node transcript from /events, all 3 HITL modes from durable gate.
    - 07-09 Documents & preview — artifacts drawer + rendered preview (md/json/mermaid/csv/text).
