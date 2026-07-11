@@ -51,6 +51,10 @@ A) Design + as-built docs — /Users/ramaswamy.u/repo/project-tracker/genesis/
    4. reference/decision-log.md — ADR-001..028 (the "why"). Key: 010 (small state + blackboard),
       011 (reliability trio), 012 (subprocess worker), 019 (core semver gate), 023/024 (FastAPI +
       async engine), 026 (React+TS), 027 (web-revamp stack + Overcut study), 028 (/api namespacing).
+   4b. **reference/coding-standards.md — the enforcement-anchored coding standards (READ + FOLLOW).**
+       §1 is the hard floor (lints/typecheck/CI gates that fail your build); §2–§6 are the Python/
+       frontend/testing/cross-cutting conventions + the Definition of Done. Do not deviate; if a task
+       needs to, flag it. When it conflicts with an ADR, the ADR wins.
    5. reference/ (all): repo-structure, node-taxonomy-reference, state-and-data-model,
       mcp-and-cli-registry, workflow-authoring-standard, reliability-standard, hitl-design,
       security-and-secrets, testing-strategy, langgraph-capability-map,
