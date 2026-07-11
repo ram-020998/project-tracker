@@ -8,6 +8,10 @@
 > telemetry; node inspection/conversation (07-08), HITL (07-08), and documents
 > (07-09) plug into the layout defined here.
 
+> **API paths (ADR-028):** endpoints referenced here are served under **`/api`** (the
+> `lib/api` client prepends it centrally; the SSE stream is `/api/runs/{id}/events/stream`);
+> non-`/api` paths hit the SPA history fallback.
+
 Prereq: 07-02 (topology, events, steps, gate), 07-03 (design system) + 07-03a (visual
 language). Feature dir: `features/run-detail/`. Routes: `/runs/:runId` (+ nested
 `/node/:nodeId`, `/docs/:docName`).

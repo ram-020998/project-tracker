@@ -299,3 +299,42 @@ node-status graph + timeline), a **per-node Kiro conversation** inspector (vs.
 Overcut's single global chat), first-class **HITL controls**, and a **document preview
 drawer**. Genesis remains local single-user (no projects/billing/agent-role authoring).
 Stack (ADR-027 body) is unchanged; this addendum only fixes the visual language.
+
+
+### ADR-028 (2026-07-11) — Backend API namespaced under `/api` + SPA history fallback
+
+**Status:** Accepted · **Context:** phase-07-04 bring-up (M7.1).
+
+**Context.** The revamped web app uses a **browser (history) router** (ADR-027), so its
+client-side routes are real URL paths: `/runs`, `/catalog`, `/settings`, `/runs/:id`, …
+The Phase-5 backend served its REST API at those same root paths (`GET /runs`,
+`GET /catalog`, `GET /config/*`, …). This is a direct **path collision**: a browser
+request to `/runs` is ambiguous between "the SPA route" and "the API endpoint". It broke
+two ways during 07-04 dev: (a) the Vite dev server (`:5173`) has no reason to forward
+`/config/*` to the backend (`:8760`), so a relative `fetch` hit the SPA fallback and got
+HTML instead of JSON; (b) even with a proxy, proxying `/runs`/`/catalog` would shadow the
+client routes and break full-page refreshes on them.
+
+**Decision.**
+1. **Namespace the entire backend API under `/api`.** All endpoints move onto a FastAPI
+   `APIRouter` included with `prefix="/api"` (`/api/config/*`, `/api/runs/*`,
+   `/api/workflows/*`, `/api/catalog`, `/api/home`, `/api/artifacts/*`, incl. the SSE
+   streams). `/docs` + `/openapi.json` are unaffected.
+2. **SPA history fallback.** A catch-all `GET /{full_path:path}` serves `index.html` for
+   any non-`/api`, non-`/assets` path (returning 404 for unknown `api/`/`assets/` paths),
+   so browser-router deep links and refreshes resolve to the SPA shell — in production,
+   same-origin, no server config needed.
+3. **Frontend** talks to `/api` centrally: the typed client prepends the base once; the
+   Vite dev proxy forwards a single `/api` → `:8760`. Same-origin preserved (ADR-026).
+
+**Consequences.**
+- The **interim served bundle** (`genesis serve` → the committed `web/static/`) calls the
+  old root paths and therefore **no longer reaches the API** after this change. This is
+  accepted: the interim UI is already superseded and is **retired at the 07-10 cutover**;
+  the new app is developed via `npm run dev` + a running `genesis serve` backend. The API
+  itself (and `/docs`) is fully functional at `/api`.
+- Released in **genesis v0.9.0**. Purely a path move for our own single-user client — no
+  external consumers. Regression tests: `test_spa_history_fallback` +
+  `/api`-prefixed call-sites across the API test suites.
+- This also de-risks the 07-10 cutover: production static-serving already resolves client
+  routes via the fallback.

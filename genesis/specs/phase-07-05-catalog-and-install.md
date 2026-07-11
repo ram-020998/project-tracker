@@ -5,6 +5,9 @@
 > library, and launch a run via a schema-driven form. Turns the current read-only
 > catalog into a full lifecycle-managed library surface.
 
+> **API paths (ADR-028):** endpoints referenced here are served under **`/api`** (the
+> `lib/api` client prepends it centrally); non-`/api` paths hit the SPA history fallback.
+
 Prereq: 07-02 (catalog + graph + install endpoints), 07-03 (design system) + 07-03a
 (visual language). Feature dir: `features/catalog/`. Routes: `/catalog`,
 `/catalog/:workflowId`, `/catalog/:workflowId/launch`.

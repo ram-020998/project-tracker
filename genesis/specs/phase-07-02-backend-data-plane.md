@@ -10,6 +10,12 @@
 
 Prereq: 07-01. Consumers: every screen spec (04–09), especially Run Detail (07-07/08/09).
 
+> **Serving path (ADR-028, added 2026-07-11):** all endpoints below are served under the
+> **`/api`** prefix (e.g. `GET /runs/{id}/events` → `GET /api/runs/{id}/events`). This doc
+> writes the logical paths without the prefix for brevity; the prefix is applied by the
+> FastAPI `APIRouter` and prepended centrally by the frontend client. Non-`/api` paths fall
+> through to the SPA history fallback. See ADR-028.
+
 Design tenets: **durable-first** (nothing critical lives only in an in-memory bus),
 **typed contracts** (stable JSON shapes the frontend mirrors in `types/`),
 **backward-compatible** within genesis-core major 1 (ADR-019), **subprocess-safe**

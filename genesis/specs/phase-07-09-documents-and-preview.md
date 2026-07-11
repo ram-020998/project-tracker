@@ -6,6 +6,10 @@
 > This closes the loop: the user not only watches the work happen but reads what it
 > produced.
 
+> **API paths (ADR-028):** endpoints referenced here are served under **`/api`** (the
+> `lib/api` client prepends it centrally; artifact download is
+> `/api/runs/{id}/artifacts/{name}/download`); non-`/api` paths hit the SPA history fallback.
+
 Prereq: 07-02 (artifact listing with media_type/preview_kind, content, download),
 07-03/07-03a (design system + visual language: MarkdownView, CodeBlock, JsonTree,
 Drawer), 07-07 (Run Detail layout). Feature dirs:

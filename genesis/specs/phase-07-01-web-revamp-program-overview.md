@@ -212,6 +212,15 @@ document is deep-linkable and back-button friendly.
 - **Optimistic mutations** for safe actions (pause, select) with rollback; gate
   responses and forks are confirmed against server state before UI commit.
 
+> **API base path (ADR-028):** every backend endpoint is served under **`/api`**
+> (`/api/config/*`, `/api/runs/*`, `/api/catalog`, `/api/home`, `/api/artifacts/*`, incl.
+> the SSE streams) so it never collides with the browser-router client routes in §4.3.
+> The typed client in `lib/api` prepends `/api` **centrally** — feature hooks, SSE URLs,
+> and MSW fixtures use it implicitly. In dev, Vite proxies a single `/api` → the backend
+> (`:8760`); in production the same-origin FastAPI app serves the built bundle and applies
+> a **SPA history fallback** (any non-`/api`, non-`/assets` path returns `index.html`), so
+> deep links / refreshes on client routes resolve to the shell.
+
 ### 4.5 State ownership
 
 - **Server state** → TanStack Query (source of truth for anything the backend owns).

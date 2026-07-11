@@ -79,22 +79,22 @@ Four repos at /Users/ramaswamy.u/repo-gitlab/ramaswamy.u/, all pushed to
 git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git:
   - kiro-agent-sdk    tag v0.1.0   branch main    (ACP adapter; + collect_streaming for live conversation)
   - genesis-core      tag v0.4.0   branch master  (nodes/state/registries; kiro_node streams agent.* events; hitl_gate = GateDescriptor; CORE_MAJOR still 1)
-  - genesis           tag v0.7.0   branch master  (runtime, dist, config, runs, api, cli, web; + data plane 07-02)
+  - genesis           tag v0.9.0   branch master  (runtime, dist, config, runs, api, cli, web; data plane 07-02; **API namespaced under /api + SPA history fallback — ADR-028**)
   - genesis-workflows tag v0.3.0   branch master  (registries, steering, hello-appian + erd-generation [+ graph: topology], fixture)
 
 Dependency chain (git-pinned by tag; CI rewrites ssh→https):
-  genesis → genesis-core@v0.4.0 → kiro-agent-sdk@v0.1.0 ;
+  genesis (v0.9.0) → genesis-core@v0.4.0 → kiro-agent-sdk@v0.1.0 ;
   genesis-workflows → genesis-core@v0.4.0 (runtime) + genesis@v0.7.0 (dev).
 
 Tests (all green): genesis 48 · genesis-core 17 · genesis-workflows 9 · web (Vitest) 14. ruff clean. CI green (frontend + python jobs).
 
 WEB REVAMP status (M7.1 — the active program):
   - 07-01 (program/architecture), 07-02 (backend data plane), 07-03 + 07-03a (design system + Overcut visual language) — DONE, released, CI-green.
-  - 07-04..07-10 (Settings, Catalog, Runs list, Run-detail graph, node conversation + HITL, Documents, testing/rollout) — REMAINING. Build these next.
+  - 07-04 (Settings & Configuration) — DONE (genesis v0.9.0; incl. the /api namespacing fix). 07-05..07-10 (Catalog, Runs list, Run-detail graph, node conversation + HITL, Documents, testing/rollout) — REMAINING. Build these next.
 
 What works TODAY (verified):
-  - `genesis serve` → the INTERIM workbench at http://127.0.0.1:8760 (the committed static/ bundle; NOT yet the new app — cutover is 07-10).
-  - `npm run dev` in genesis/web → the NEW app at http://localhost:5173/ (grouped shell + placeholder Overview; screens land at their routes as built). Design-system gallery at /dev (and /dev.html).
+  - `genesis serve` → FastAPI backend at http://127.0.0.1:8760; **API under /api** (e.g. `/api/config/mcp-cards`), Swagger at `/docs`. It also serves the committed `static/` bundle at `/` with a **SPA history fallback** — but that bundle is the OLD interim app which calls root paths, so its UI no longer reaches the API (retired at the 07-10 cutover). Use it as the BACKEND for the new dev app.
+  - `npm run dev` in genesis/web → the NEW app at http://localhost:5173/ (grouped shell + placeholder Overview; Settings is live; screens land at their routes as built). Dev needs BOTH `npm run dev` (:5173) AND `genesis serve` (:8760) running — Vite proxies `/api` → :8760. Design-system gallery at /dev (and /dev.html).
   - Data plane (07-02): durable event log survives restart; gate reachable from durable state (approval bug fixed); Kiro conversation streamed as agent.* events; /workflows/{id}/graph, /runs/{id}/events(+/stream), /steps, artifact content/download all live.
   - hello-appian runs GREEN end-to-end; erd-generation past MCP init into the live Atlas fetch.
   - All three HITL modes, streaming, worker isolation, checkpoint resume — implemented + tested.
@@ -153,8 +153,10 @@ genesis/genesis/
   api/     app.py (create_app FastAPI). Data-plane endpoints (07-02): GET /runs/{id} (+gate),
                  /runs/{id}/events(?after,kinds,node), /runs/{id}/events/stream (canonical replay+live),
                  /runs/{id}/steps, /workflows/{id}/graph, /runs/{id}/artifacts + /{name}(?mode) + /download,
-                 mcp-cards (+status); plus the Phase-5 run-control + config + SSE endpoints. Serves the
-                 committed static/ SPA at "/". studio.py (langgraph dev graph).
+                 mcp-cards (+status), cli-cards, mcp-cards/{server}/test (readiness probe); plus the
+                 Phase-5 run-control + config endpoints. ALL routes are on an APIRouter mounted at
+                 **prefix="/api"** (ADR-028); a catch-all serves index.html for non-/api,/assets paths
+                 (SPA history fallback). Serves the committed static/ SPA at "/". studio.py (langgraph dev graph).
   ...
   web/     React + TS + Vite. NEW app (phase-07-03, ADR-027 stack): Tailwind + Radix/shadcn-style +
                  Zustand + React Router + TanStack Query (screens) + Recharts + sonner + lucide.
@@ -225,9 +227,13 @@ Key implementation contracts:
                         do NOT run `npm run build`, which writes to static/ and would clobber the
                         committed INTERIM bundle before cutover.)
 - Frontend (WEB REVAMP, build-alongside per 07-10): the NEW app is the dev root — `npm run dev`
-  → http://localhost:5173/ (screens), /dev = design-system gallery. The committed genesis/web/static
-  bundle STILL serves the INTERIM app (via `genesis serve` on :8760); **do NOT rebuild or commit
-  static/ until the 07-10 cutover.** New screens go under src/features/** + src/app/router.tsx and
+  → http://localhost:5173/ (screens), /dev = design-system gallery. **Dev needs BOTH servers up:**
+  `npm run dev` (:5173) AND `genesis serve` (:8760); Vite proxies **`/api` → :8760** (single prefix —
+  the API is namespaced under /api, ADR-028). Data-access goes through `src/lib/api` (typed client that
+  prepends `/api` + `ApiError`) + `src/lib/query` (TanStack Query keys/client); NEVER hard-code URLs or
+  the /api prefix in components. The committed genesis/web/static bundle STILL serves the INTERIM app
+  (via `genesis serve` on :8760) but it calls root paths so its UI is now API-broken; **do NOT rebuild or
+  commit static/ until the 07-10 cutover.** New screens go under src/features/** + src/app/router.tsx and
   compose from src/shared/** (the design system). Keep interim App.tsx/etc. untouched until cutover.
 - NPM REGISTRY: the local ~/.npmrc points at Appian Artifactory with an EXPIRED token (E401 on new
   installs). Install with `--registry=https://registry.npmjs.org/` for local dev (do NOT edit the
@@ -270,6 +276,17 @@ Key implementation contracts:
 - LangGraph specifics: sync invoke can't run async nodes; sync SqliteSaver fails under async (use
   AsyncSqliteSaver). Command(resume=...) needs a checkpointer-compiled graph. Fork seeds a NEW thread.
 - Loader compat gate: lockfile genesis_core.major vs CORE_MAJOR — refuse-to-load on mismatch.
+- WEB-REVAMP API namespacing (ADR-028, genesis v0.9.0): the new app uses a BROWSER router, so its
+  client routes (/runs, /catalog, /settings) are real paths that collided with the root-path API. ALL
+  backend endpoints now live under **/api** (APIRouter prefix), and a catch-all serves index.html for
+  non-/api,/assets paths (SPA history fallback). The frontend client prepends /api centrally; the Vite
+  dev proxy is a single `/api` → :8760. TWO consequences to remember: (1) the dev app needs BOTH
+  `npm run dev` AND a running `genesis serve` — a relative fetch with no backend/proxy hits the SPA
+  fallback and returns HTML (which crashed the MCP sorter once); (2) the committed interim static/ bundle
+  calls root paths and is now API-broken until the 07-10 cutover. The API client also REJECTS non-JSON
+  responses (throws ApiError → ErrorState) and there is a route error boundary — don't regress these.
+- Uniform 500s on every /config/* call in the browser usually means the BACKEND ISN'T RUNNING: the Vite
+  proxy returns 500 on connection-refused. Check `curl http://127.0.0.1:8760/api/config/mcp-cards` first.
 - WEB-REVAMP data plane (07-02): the durable EventLog (run_events table) is the source of truth for a
   run's timeline/conversation — the in-memory EventBus is only live fan-out. Gate/approval controls MUST
   derive from durable state (`GET /runs/{id}.gate` via manager.pending_gate), NEVER from a transient event
@@ -306,8 +323,8 @@ Key implementation contracts:
 8. THE ACTIVE PROGRAM — WEB REVAMP (M7.1). Remaining specs, in recommended order (each is a
    self-contained session; read the spec, then build the screen composing src/shared/** + the
    07-02 data plane, wire it into src/app/router.tsx replacing its ComingSoon placeholder):
-   - 07-04 Settings/Integrations — MCP/CLI master-detail, write-only secrets, connection status, environments.
-   - 07-05 Catalog & install — category chips + card grid, install/update/remove, schema-driven launch.
+   - 07-04 Settings/Integrations — ✅ DONE (genesis v0.9.0; MCP master-detail, CLI cards, GitLab token, environments CRUD, storage; + the /api namespacing fix, ADR-028).
+   - 07-05 Catalog & install — category chips + card grid, install/update/remove, schema-driven launch.  ← NEXT
    - 07-06 Runs list & history — Executions-style table, filter chips, auto-refresh, status pills.
    - 07-07 Run Detail: graph — React Flow (@xyflow/react) live node-status graph from /workflows/{id}/graph + /events fold.
    - 07-08 Run Detail: node inspection + Kiro conversation + HITL — per-node transcript from /events, all 3 HITL modes from durable gate.

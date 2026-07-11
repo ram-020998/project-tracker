@@ -7,6 +7,10 @@
 > state, or fork**, all from purpose-built controls surfaced from durable state. This
 > is where the platform's full HITL power finally reaches the UI.
 
+> **API paths (ADR-028):** endpoints referenced here are served under **`/api`** (the
+> `lib/api` client prepends it centrally; the SSE stream is `/api/runs/{id}/events/stream`);
+> non-`/api` paths hit the SPA history fallback.
+
 Prereq: 07-02 (agent.* events, GateDescriptor, respond/pause/resume/fork endpoints),
 07-03/07-03a (design system + visual language), 07-07 (screen layout + node selection).
 Feature dir: `features/run-detail/components/{inspector,hitl}/`.

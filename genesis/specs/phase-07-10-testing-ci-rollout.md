@@ -6,6 +6,13 @@
 > frontend and backend in lockstep, the CI pipeline, and the removal of the old
 > `web/` in a single safe cutover.
 
+> **API paths + serving (ADR-028):** all backend endpoints are under **`/api`** and the
+> FastAPI app serves the built bundle with a **SPA history fallback** (non-`/api`,
+> non-`/assets` paths → `index.html`). The cutover here must (a) rebuild + commit the new
+> app into `web/static/`, (b) delete the interim app files, and (c) verify deep-link
+> refreshes on client routes (`/settings`, `/runs/:id`, …) resolve via the fallback. The
+> stale-bundle CI guard should build and diff `static/`.
+
 Prereq: all prior 07-0N specs. Touches `genesis/web/`, `genesis/.gitlab-ci.yml`, and
 the tracker.
 

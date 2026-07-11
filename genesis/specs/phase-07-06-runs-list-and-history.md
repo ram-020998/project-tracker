@@ -4,6 +4,9 @@
 > with live status, meaningful filtering/search, quick actions, and a clear path into
 > each run's detail. This is the operator's "mission control" list.
 
+> **API paths (ADR-028):** endpoints referenced here are served under **`/api`** (the
+> `lib/api` client prepends it centrally); non-`/api` paths hit the SPA history fallback.
+
 Prereq: 07-02 (runs + status), 07-03 (design system) + 07-03a (visual language).
 Feature dir: `features/runs/`. Route: `/runs`.
 

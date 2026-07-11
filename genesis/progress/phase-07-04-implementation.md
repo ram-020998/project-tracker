@@ -4,10 +4,10 @@
 > of the web revamp — establishes the data-access layer (lib/api + lib/query +
 > TanStack Query) that all later screens build on. Part of milestone M7.1.
 
-**Date:** 2026-07-11 · **Status:** ✅ COMPLETE — backend released (**genesis v0.8.0**,
-51 pytest + ruff, CI green); frontend committed `9655fb0` (18 web tests, tsc strict,
+**Date:** 2026-07-11 · **Status:** ✅ COMPLETE — backend released (**genesis v0.9.0**,
+52 pytest + ruff, CI green); frontend committed (19 web tests, tsc strict,
 **frontend + genesis CI green**). Built **alongside** the interim app (served `static/`
-untouched — cutover is 07-10).
+untouched — cutover is 07-10). See §8 for the `/api` namespacing follow-on (ADR-028).
 
 ---
 
@@ -137,3 +137,39 @@ react-hook-form, zod, @hookform/resolvers; msw (dev).
 
 07-05 (Workflow Catalog & Install Management) — category chips + card grid, install/
 update/remove, schema-driven launch — reusing this phase's `lib/api` + `lib/query`.
+
+---
+
+## 8. Post-implementation follow-on — `/api` namespacing + SPA fallback (ADR-028, genesis v0.9.0)
+
+During live bring-up of the Settings screen two related defects surfaced, both rooted in
+the same architectural gap:
+
+1. **Dev had no API proxy.** The interim app used a hash router and was viewed at the
+   FastAPI origin (`:8760`); the new app uses a **browser router** at Vite's `:5173`, so a
+   relative `fetch("/config/mcp-cards")` hit Vite's SPA fallback and returned `index.html`.
+   That HTML string flowed into the MCP list sorter → `localeCompare` on `undefined` →
+   white-screen.
+2. **Path collision.** Client routes (`/runs`, `/catalog`, `/settings`) share prefixes with
+   the root-path API, so a naive proxy would break full-page refreshes on those routes, and
+   a running-but-wrong target returned 500s (the console `500`s were actually the Vite proxy
+   getting connection-refused because the backend wasn't running).
+
+**Fix (ADR-028), shipped as genesis v0.9.0:**
+- **Backend:** all endpoints moved onto a FastAPI `APIRouter` mounted at **`prefix="/api"`**;
+  a catch-all `GET /{full_path:path}` serves `index.html` for non-`/api`/`/assets` paths
+  (**SPA history fallback**), returning 404 for unknown `api/`/`assets/`. Regression test
+  `test_spa_history_fallback`; all API test call-sites re-prefixed. 52 pytest + ruff green.
+- **Frontend:** `lib/api/client.ts` prepends a single `API_BASE = "/api"`; Vite dev proxy
+  simplified to one `/api` → `:8760`; MSW handlers re-prefixed. Also hardened the client to
+  **reject non-JSON** (throws `ApiError` → ErrorState instead of crashing) and added a
+  **route error boundary**; `McpSection` guards non-array data. Regression test added
+  (non-JSON response → ErrorState).
+- **Verified live:** `:8760/api/config/mcp-cards` = 200 JSON; `:5173` proxied = 200 JSON
+  (real data); `:8760/settings` = 200 (SPA fallback).
+
+**Accepted consequence:** the committed `web/static/` interim bundle calls the old root
+paths, so `genesis serve`'s bundled UI no longer reaches the API. This is fine — the interim
+UI is superseded and **retired at the 07-10 cutover**; the new app is developed via
+`npm run dev` + a running `genesis serve`. Docs updated: ADR-028, specs 07-01/02/05..10,
+tracker, and AGENT_ONBOARDING.
