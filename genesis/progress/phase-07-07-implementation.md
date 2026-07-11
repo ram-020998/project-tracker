@@ -122,3 +122,30 @@ Unit-tested with scripted fixtures (running/skipped/failed/awaiting + current-no
 07-08 (Node Inspection, Kiro Conversation & HITL) — fills the Inspector with the per-node
 conversation transcript (agent.* events) + Inputs/Outputs/Validation/Raw tabs, and adds the
 HITL bar (approve/reject/feedback/pause/resume/cancel/fork) driven by the durable gate.
+
+---
+
+## 10. Post-ship fix — blank graph (2026-07-11)
+
+On first use the graph rendered blank in both graph and list modes. Root causes:
+- The **installed library workflow.yaml files carried no `graph:` topology** — `hello-appian`
+  never had one, and the installed `erd-generation` was stale (pre-07-02). `graph_of`'s
+  `steps:` fallback also found nothing (the META format keeps no `steps:` list — the topology
+  lives in `graph.py`, which the loader can't import). So `/workflows/{id}/graph` returned
+  `{nodes:[],edges:[]}`.
+- The running `genesis serve` was also **stale** (v0.9.0) → `/api/catalog/available` 404.
+
+Fixes:
+1. **Frontend resilience** (`topologyFromSteps`): Run Detail now derives a linear topology from
+   the run's `/steps` (or events) when the authored graph is empty — so it is **never blank**
+   for a run that produced activity. Node names come from events, so statuses/cursor map exactly.
+   +2 unit tests. Committed `7bc3dcb` (CI green).
+2. **Authored graph for `hello-appian`** (matching `graph.py`: `make_result→v_result→finish`
+   + `escalate`) added to `genesis-workflows`; `erd-generation` already had one. Released
+   **genesis-workflows v0.3.1**; library validator passes.
+3. **Re-installed the library** (`genesis install --from ../genesis-workflows`) and **restarted
+   the backend to v0.10.0**. Verified: `/api/workflows/hello-appian/graph` → 4 nodes/4 edges,
+   `/api/workflows/erd-generation/graph` → 11 nodes/16 edges, `/api/catalog/available` → 200.
+
+Lesson: workflows must declare a `graph:` section for the authored diagram (catalog preview
+depends on it); Run Detail additionally self-heals from `/steps`. Both paths are now covered.

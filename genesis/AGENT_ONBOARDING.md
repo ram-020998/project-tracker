@@ -80,7 +80,7 @@ git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git:
   - kiro-agent-sdk    tag v0.1.0   branch main    (ACP adapter; + collect_streaming for live conversation)
   - genesis-core      tag v0.4.0   branch master  (nodes/state/registries; kiro_node streams agent.* events; hitl_gate = GateDescriptor; CORE_MAJOR still 1)
   - genesis           tag v0.10.0  branch master  (runtime, dist, config, runs, api, cli, web; data plane 07-02; API under /api + SPA fallback — ADR-028; install-lifecycle API — 07-05)
-  - genesis-workflows tag v0.3.0   branch master  (registries, steering, hello-appian + erd-generation [+ graph: topology], fixture)
+  - genesis-workflows tag v0.3.1   branch master  (registries, steering, hello-appian + erd-generation [+ graph: topology], fixture)
 
 Dependency chain (git-pinned by tag; CI rewrites ssh→https):
   genesis (v0.10.0) → genesis-core@v0.4.0 → kiro-agent-sdk@v0.1.0 ;
