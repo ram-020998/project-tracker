@@ -55,7 +55,8 @@ A) Design + as-built docs — /Users/ramaswamy.u/repo/project-tracker/genesis/
       - 07-02 backend & core data plane (DONE — persistent event log, gate-from-checkpoint, ACP conversation streaming, topology/steps/artifact APIs)
       - 07-03 design system + 07-03a visual-language reference (DONE — the Overcut study; tokens/components)
       - 07-04 settings · 07-05 catalog · 07-06 runs list · 07-07 run-detail graph ·
-        07-08 node inspection + Kiro conversation + HITL · 07-09 documents · 07-10 testing/CI/rollout (REMAINING)
+        07-08 node inspection + Kiro conversation + HITL · 07-09 documents · 07-10 testing/CI/rollout (ALL DONE — WEB REVAMP COMPLETE, genesis v0.11.0)
+      - **specs/phase-07-code-review-fixes/ — the ACTIVE program** (post-revamp): `00-code-review.md` + P0 `01` persistence/migrations, `02` Overview dashboard; P1 `03` Integrations Studio (MCP/CLI modularity, ADR-029), `06` Conversation rich-chat; P2 `04` retention+bus, `05` Postgres decision. Start with P0.
    7. progress/phase-01..07-implementation.md + phase-07-01-revamp-kickoff.md +
       phase-07-02-implementation.md + phase-07-03-implementation.md — as-built records.
    8. specs/phase-08-skill-migration-program.md — what comes AFTER the web revamp (context only).
@@ -350,22 +351,24 @@ Key implementation contracts:
 - Don't push directly to main/master of shared repos without permission beyond the normal Genesis release flow
   we already use; never commit secrets; reference secrets by key name only.
 - If stuck twice on the same error, stop and diagnose root cause; try a different approach.
-- Keep changes scoped to the item; don't refactor unrelated code. The active program is the WEB
-  REVAMP (07-04 → 07-10); do NOT start Phase 8 (skill migration) unless asked.
+- Keep changes scoped to the item; don't refactor unrelated code. The WEB REVAMP (07-01 → 07-10) is
+  **COMPLETE** (genesis v0.11.0); the active program is now **specs/phase-07-code-review-fixes/**
+  (start with P0: `01` persistence/migrations + `02` Overview dashboard). Do NOT start Phase 8 (skill migration) unless asked.
 
 Now: read the docs/code in §1, restate the architecture + current state + the non-negotiables,
-then PROCEED (you don't need to wait for me) with the next phase. The active program is the web
-revamp; the next item is the lowest-numbered UNDONE spec in §8. My task for this session is:
+then PROCEED (you don't need to wait for me) with the next item. The WEB REVAMP (07-01…07-10) is
+COMPLETE; the active program is the **code-review fix package** in
+`specs/phase-07-code-review-fixes/`. My task for this session is:
 
-**Continue the web revamp — implement the next undone phase in §8, currently
-`specs/phase-07-08-node-inspection-conversation-hitl.md`** (fill the Run Detail Inspector with the
-per-node Kiro conversation transcript from `agent.*` events + Inputs/Outputs/Validation/Raw tabs,
-and add the HITL bar — approve/reject/feedback/pause/resume/cancel/fork — driven by the DURABLE
-gate, `GET /runs/{id}.gate`; this is the ADR-028/07-02 "approval-from-durable-state" guarantee
-reaching the UI). Work the full loop in §7 end-to-end and autonomously: read the spec, flag any
-contract gap + get sign-off only for a genuine scope/architecture decision, implement, add tests,
-run all suites (backend pytest+ruff / web tsc+vitest+build), release the affected repo(s) + verify
-CI green via glab if a backend changed, keep `web/static/` untouched (build-alongside), then update
-the tracker §6 + a `progress/phase-07-08-implementation.md` and push project-tracker. When 07-08 is
-done and pushed, continue to 07-09, then 07-10 — one phase per session unless I say otherwise.
+**Implement the code-review fix program, lowest-priority-number first — start with P0:
+`specs/phase-07-code-review-fixes/01-p0-persistence-and-migrations.md`** (introduce the
+`genesis/db/` layer + a minimal migration framework + a baseline migration that adopts the existing
+`runs`/`run_events` tables with zero data loss; refactor `EventLog`/`RunStore` onto it), then
+**`02-p0-overview-dashboard.md`** (extend `GET /home` + wire the static `Overview.tsx` to it).
+Then P1 (`03` Integrations Studio, `06` Conversation rich-chat) and P2 (`04`, `05`). Read the spec's
+current-state citations, flag any contract gap + get sign-off only for a genuine scope/architecture
+decision, implement, add tests, run all suites (backend pytest+ruff / web tsc+vitest+build), release
+the affected repo(s) + verify CI green via glab if a backend changed, keep `web/static/` in sync per
+each spec's guidance, then update tracker §6 + a `progress/` doc and push project-tracker. One
+spec item per session unless I say otherwise.
 ````
