@@ -354,9 +354,18 @@ Key implementation contracts:
   REVAMP (07-04 → 07-10); do NOT start Phase 8 (skill migration) unless asked.
 
 Now: read the docs/code in §1, restate the architecture + current state + the non-negotiables,
-then ask me for (or proceed with) the specific item. The active program is the web revamp;
-unless I say otherwise, the next item is the lowest-numbered UNDONE spec in §8. My task for
-this session is:
+then PROCEED (you don't need to wait for me) with the next phase. The active program is the web
+revamp; the next item is the lowest-numbered UNDONE spec in §8. My task for this session is:
 
-<<< PASTE THE SPECIFIC ITEM(S) HERE — e.g. "Implement specs/phase-07-04-settings-configuration.md" >>>
+**Continue the web revamp — implement the next undone phase in §8, currently
+`specs/phase-07-08-node-inspection-conversation-hitl.md`** (fill the Run Detail Inspector with the
+per-node Kiro conversation transcript from `agent.*` events + Inputs/Outputs/Validation/Raw tabs,
+and add the HITL bar — approve/reject/feedback/pause/resume/cancel/fork — driven by the DURABLE
+gate, `GET /runs/{id}.gate`; this is the ADR-028/07-02 "approval-from-durable-state" guarantee
+reaching the UI). Work the full loop in §7 end-to-end and autonomously: read the spec, flag any
+contract gap + get sign-off only for a genuine scope/architecture decision, implement, add tests,
+run all suites (backend pytest+ruff / web tsc+vitest+build), release the affected repo(s) + verify
+CI green via glab if a backend changed, keep `web/static/` untouched (build-alongside), then update
+the tracker §6 + a `progress/phase-07-08-implementation.md` and push project-tracker. When 07-08 is
+done and pushed, continue to 07-09, then 07-10 — one phase per session unless I say otherwise.
 ````
