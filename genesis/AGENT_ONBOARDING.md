@@ -90,7 +90,7 @@ Tests (all green): genesis 48 · genesis-core 17 · genesis-workflows 9 · web (
 
 WEB REVAMP status (M7.1 — the active program):
   - 07-01 (program/architecture), 07-02 (backend data plane), 07-03 + 07-03a (design system + Overcut visual language) — DONE, released, CI-green.
-  - 07-04 (Settings) — DONE (genesis v0.9.0; incl. /api namespacing). 07-05 (Catalog & Install) — DONE (genesis v0.10.0; install-lifecycle API + browse/detail/launch). 07-06..07-10 (Runs list, Run-detail graph, node conversation + HITL, Documents, testing/rollout) — REMAINING. Build these next.
+  - 07-04 (Settings) — DONE (genesis v0.9.0; incl. /api namespacing). 07-05 (Catalog) — DONE (v0.10.0). 07-06 (Runs List & History) — DONE (frontend-only). 07-07..07-10 (Run-detail graph, node conversation + HITL, Documents, testing/rollout) — REMAINING. Build these next.
 
 What works TODAY (verified):
   - `genesis serve` → FastAPI backend at http://127.0.0.1:8760; **API under /api** (e.g. `/api/config/mcp-cards`), Swagger at `/docs`. It also serves the committed `static/` bundle at `/` with a **SPA history fallback** — but that bundle is the OLD interim app which calls root paths, so its UI no longer reaches the API (retired at the 07-10 cutover). Use it as the BACKEND for the new dev app.
@@ -327,7 +327,8 @@ Key implementation contracts:
    07-02 data plane, wire it into src/app/router.tsx replacing its ComingSoon placeholder):
    - 07-04 Settings/Integrations — ✅ DONE (genesis v0.9.0; MCP master-detail, CLI cards, GitLab token, environments CRUD, storage; + the /api namespacing fix, ADR-028).
    - 07-05 Catalog & install — ✅ DONE (genesis v0.10.0; install-lifecycle API + browse/detail/launch; static graph preview pending 07-07's React Flow renderer).
-   - 07-06 Runs list & history — Executions-style table, filter chips, auto-refresh, status pills.  ← NEXT
+   - 07-06 Runs list & history — ✅ DONE (frontend-only; Active/History tables, filters, active-scoped polling, quick actions).
+   - 07-07 Run Detail: graph — React Flow (@xyflow/react) live node-status graph from /workflows/{id}/graph + /events fold.  ← NEXT
    - 07-07 Run Detail: graph — React Flow (@xyflow/react) live node-status graph from /workflows/{id}/graph + /events fold.
    - 07-08 Run Detail: node inspection + Kiro conversation + HITL — per-node transcript from /events, all 3 HITL modes from durable gate.
    - 07-09 Documents & preview — artifacts drawer + rendered preview (md/json/mermaid/csv/text).
