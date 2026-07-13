@@ -212,17 +212,23 @@ Tools exposed:
   absolute paths). No secrets, no network.
 
 ### 4.4 `kiro_node(blackboard=True)` — injection, trust, events, telemetry
-- **Injection:** when `blackboard=True`, `kiro_node` prepends the blackboard server to the ACP
+- **Injection & default (IMPORTANT — this is a *standard, always-available* capability):** the
+  blackboard tools are injected for **every agent node by default** (`blackboard=True` is the default;
+  set `blackboard=False` to opt out). `kiro_node` prepends the blackboard server to the ACP
   `mcp_servers` list (alongside the node's real servers), shaped exactly like `McpRegistry.acp_servers`
   entries: `{"name":"blackboard","command":sys.executable,
   "args":["-m","genesis_core.mcp.blackboard_server","--root",str(ctx.workspace.root)],"env":[]}`.
+  Rationale: the whole point is that **any agent, in any workflow, can save any tool output to any
+  document at any time** — that only holds if the tools are present without the author remembering to
+  enable them. The cost is one lean stdio subprocess per agent node (pure-Python, fast start); acceptable
+  for a local single-user app, and opt-out is available for nodes that make no tool calls.
 - **Trust:** `kiro_node` auto-adds the blackboard tool names to the effective trust set —
   `node.tools ∩ server.allowlist ∪ {list_tool_outputs, save_tool_output, read_tool_output}` — or keeps
   `trust_all_tools=True` when the node has no allowlist. (The spike ran `trust_all_tools=True`; both
   servers' tools were callable with no permission stall.)
-- **Recording is always on for an agent node** (it's cheap and generically useful); the *tools* are
-  only injected when `blackboard=True`. (A node can therefore record without exposing the tools, e.g.
-  for a future auto-capture mode.)
+- **Recording is always on for an agent node** (it's cheap and generically useful) whenever the store
+  exists; the tools are what let the agent *act* on it. With the default above, both are present for
+  every agent node.
 - **Events (additive, dotted convention):** `tool_output.recorded {node, ref, tool, bytes}` on each
   record; `artifact.saved {node, ref, document, bytes}` on each `save_tool_output`. Emitted via
   `ctx.emit`, persisted by the `EventLog`. Rendering these in the web timeline is **optional/out of
@@ -254,6 +260,16 @@ Identical mechanics to how the agent already learns about `get_app_schema` (inje
 ---
 
 ## 5. Persistence modes
+
+### 5.0 A standard, always-available capability (convention for ALL workflows)
+This is **not** an erd-specific feature. Once shipped, **every agent node** (by default, §4.4) has the
+tool-output store and its tools available: the agent can call `list_tool_outputs()` to see everything it
+has fetched this session and `save_tool_output(ref, document)` to persist **any** tool output to **any**
+blackboard document **at any point in its turn** — without ever retyping the bytes. Workflow authors get
+this for free and should treat it as the default way an agent moves large tool results into the
+blackboard. The authoring guides (§11) document it as a first-class convention so future workflows use
+it consistently instead of asking agents to re-emit bulk (which risks `turn_timeout` and violates
+ADR-010/018).
 
 **Primary (Phase 9 core): agent-driven save-by-reference.** The agent explores, then uses
 `list_tool_outputs` + `save_tool_output(ref, document)` to place exactly the outputs it wants. General,
@@ -353,10 +369,11 @@ gateway/`ResourceLink` route is the deferred way to also trim input context.
 fetch = kiro_node(name="fetch_schema", prompt_fn=fetch_prompt,
                   output_doc="raw_schema.json", mcp=["appian-atlas"])
 
-# AFTER — opt into the blackboard tool-output store
+# AFTER — the blackboard tool-output store is default-on for agent nodes (§4.4);
+# no node change is strictly required. The prompt (10.2) drives the save-by-reference.
 fetch = kiro_node(name="fetch_schema", prompt_fn=fetch_prompt,
-                  output_doc="raw_schema.json", mcp=["appian-atlas"],
-                  blackboard=True)
+                  output_doc="raw_schema.json", mcp=["appian-atlas"])
+# (blackboard=True is the default; pass blackboard=False only to opt a node out.)
 ```
 
 ### 10.2 `graph.py` — `fetch_prompt` (navigation + save-by-reference; no verbatim dump)
@@ -406,30 +423,34 @@ def fetch_prompt(state, ctx: PlatformContext, out_path: str) -> str:
 
 ## 11. `genesis-workflows` docs to update (exact)
 
-1. **`steering/04-mcp-and-cli-usage.md`** — add a section **"Large tool outputs — the session store &
-   save-by-reference"**:
-   > When an agent must persist a **large** tool result (schemas, exports, transcripts), do **not** ask
-   > it to write the bytes to a file — regenerating that many output tokens can exceed `turn_timeout`.
-   > Instead set `blackboard=True` on the node. Genesis records **every** tool result of the session to
-   > a per-run store and gives the agent two tools: `list_tool_outputs()` (metadata) and
-   > `save_tool_output(ref, document)` (saves a captured output to a blackboard doc **by reference** —
-   > no bytes through the model). Prompt the agent to fetch, `list_tool_outputs()`, then
-   > `save_tool_output` the right refs. See `erd-generation/fetch_schema`.
-   ```python
-   fetch = kiro_node(name="fetch_schema", prompt_fn=_p, output_doc="raw_schema.json",
-                     mcp=["appian-atlas"], blackboard=True)
-   ```
-2. **`steering/03-state-and-blackboard-rules.md`** — reinforce ADR-010/018: add a note that **bulk tool
-   outputs must be persisted via the tool-output store / `save_tool_output`, never re-typed by the
-   agent or inlined into state/chat**, with a one-line pointer to `blackboard=True`.
-3. **`README.md`** (repo root) — under "Author a workflow" / capabilities, add a bullet:
-   *"Agent nodes that fetch large data can opt into the **blackboard tool-output store**
-   (`kiro_node(blackboard=True)`) to save results by reference — see `steering/04`."*
-4. **`workflows/erd-generation/`** — add a short `README.md` documenting the fetch step's new
-   list/save-by-reference behavior and why (the timeout fix), so the reference workflow teaches the
-   pattern. *(Currently erd has no README; this creates one.)*
-5. **`MIGRATION.md`** — if it references the erd fetch behavior, note the switch from verbatim-dump to
-   save-by-reference (traceability).
+> **Framing (per the "make this a common thing" requirement):** these updates must present the store +
+> `save_tool_output` as a **standard, always-available capability for every agent node**, not an
+> erd-specific trick. The message future authors must absorb: *"An agent can save any tool output to any
+> document at any time via `save_tool_output` — never make an agent retype bulk."*
+
+1. **`steering/01-authoring-overview.md`** — add the capability to the overview so it's seen first:
+   a short "Agent nodes can persist large tool results to the blackboard by reference (the tool-output
+   store) — it's on by default; see `steering/04`." bullet.
+2. **`steering/02-node-taxonomy-and-reliability.md`** — in the **agent node** description, state that
+   every agent node gets `list_tool_outputs()` + `save_tool_output(ref, document)` by default, and that
+   this is the standard way to move bulk tool output into the blackboard (contrast with re-typing,
+   which is forbidden).
+3. **`steering/04-mcp-and-cli-usage.md`** — the primary reference section **"Large tool outputs — the
+   session store & save-by-reference"** (the full how-to + code, as previously specified), explicitly
+   noting it's default-on and available in any agent node.
+4. **`steering/03-state-and-blackboard-rules.md`** — reinforce ADR-010/018: **bulk tool outputs must be
+   persisted via the store / `save_tool_output`, never re-typed by the agent or inlined into
+   state/chat**, with a pointer to §04.
+5. **`README.md`** (repo root) — capabilities bullet: *"Every agent node can save tool results to the
+   blackboard by reference via the built-in tool-output store — see `steering/04`."*
+6. **`workflows/erd-generation/README.md`** (new) — document the fetch step's list/save-by-reference
+   behavior as the reference example of the convention.
+7. **`MIGRATION.md`** — note the erd switch from verbatim-dump to save-by-reference (traceability).
+
+**Also in the tracker (design docs):** `reference/workflow-authoring-standard.md` and
+`reference/node-taxonomy-reference.md` gain the same convention (agent nodes have the tool-output store
+by default; save-by-reference is the standard bulk path) so the canonical standard reflects it. Applied
+when Phase 9 ships (so the standard tracks reality).
 
 ---
 
@@ -438,8 +459,8 @@ def fetch_prompt(state, ctx: PlatformContext, out_path: str) -> str:
 | Repo | Change |
 |------|--------|
 | `kiro-agent-sdk` | `ToolCall/ToolCallUpdate`: `name`, `raw_input`, `output`; `extract_tool_output` helper. Tests. **Release minor (→ v0.2.0).** |
-| `genesis-core` | `nodes/tool_store.py` (store format + recorder); `mcp/blackboard_server.py`; `kiro_node(blackboard=…)` injection + trust + recording + events + telemetry; bump SDK pin. Tests. **Release minor** (`CORE_MAJOR` stays 1 — additive). |
-| `genesis-workflows` | `erd-generation`: `fetch_schema` `blackboard=True` + `fetch_prompt` rewrite + tests; docs (§11); bump genesis-core pin; re-publish (7-gate CI). |
+| `genesis-core` | `nodes/tool_store.py` (store format + recorder); `mcp/blackboard_server.py`; `kiro_node` **default-on** blackboard injection (`blackboard=True` default + opt-out) + trust + recording + events + telemetry; bump SDK pin. Tests. **Release minor** (`CORE_MAJOR` stays 1 — additive). |
+| `genesis-workflows` | `erd-generation`: `fetch_prompt` rewrite (node needs no change — default-on) + tests; docs (§11: steering 01/02/03/04 + README + erd README + MIGRATION); bump genesis-core pin; re-publish (7-gate CI). |
 | `genesis` | none required; optional genesis-core pin bump + release so `genesis serve` runs the new core. |
 
 **Release order:** `kiro-agent-sdk` → `genesis-core` → `genesis-workflows` (→ optional `genesis`).
@@ -502,8 +523,10 @@ sequence (deferred, §5/§9).
 
 - Do we expose `read_tool_output` (preview) in v1, or add it only if agents need to disambiguate by
   content? (Lean: include it — cheap, helps selection.)
-- Should recording be unconditional for all agent nodes, or gated behind `blackboard=True`? (Lean:
-  record always for agent nodes; inject *tools* only when `blackboard=True`.)
+- **Resolved:** the blackboard tools are **on by default for every agent node** (opt-out via
+  `blackboard=False`), so the capability is universally available (§4.4/§5.0). Remaining sub-question:
+  is the per-node subprocess cost ever high enough to warrant a shared/session-level server instead of
+  per-node? (Lean: per-node for now; revisit if startup latency shows up.)
 - `_toolcalls/` retention policy — reclaim immediately post-run, or with the standard retention window?
 
 ---
