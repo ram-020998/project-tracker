@@ -257,6 +257,33 @@ Identical mechanics to how the agent already learns about `get_app_schema` (inje
   orthogonal to the curated/custom tiers (ADR-005/029). A workflow's `required_mcp` does **not** list
   it — `kiro_node(blackboard=True)` injects it internally.
 
+### 4.7 Storage location & lifecycle (where it lives; purge/retention)
+- **Location — the per-run blackboard, not the DB:**
+  `<artifacts_root>/<workflow_id>/<run_id>/_toolcalls/` (`index.json` + `call_<n>.out`), where
+  `artifacts_root = $GENESIS_ARTIFACTS_DIR or ~/Genesis/runs` (`default_artifacts_root`, ADR-022) — the
+  same tree as the workflow's real artifacts. **Not** under `~/.genesis/` (DB + config) and **not** in
+  SQLite: bulk stays on the filesystem per ADR-010/018. Only the small metadata events
+  (`tool_output.recorded`, `artifact.saved`) are written to the durable event log — the DB does not
+  bloat.
+- **During the run:** the store must persist — the agent may `list`/`save` at any point in its turn,
+  and on retry/resume a fresh agent turn simply re-records with new refs (stale entries are harmless).
+- **After terminal — it's scratch and should be reclaimed:** the deliverables the agent saved (e.g.
+  `raw_schema.json`) live alongside and are what downstream/users need; `_toolcalls/` is redundant and
+  can be **large** (it captures *every* tool output, including exploratory calls the agent didn't save).
+  Two layers:
+  1. **Baseline (no new mechanism):** `_toolcalls/` lives inside the run's blackboard dir, so the
+     existing spec-04 `RetentionService` (`genesis/config/retention.py`, keep-last / max-age) already
+     reclaims it together with the run's blackboard. Covered by default.
+  2. **Recommended addition:** eagerly purge `_toolcalls/` at run finalization (via the `_finalize`
+     terminal chokepoint in `runs/manager.py`), keeping the named artifacts. It has no post-run
+     execution purpose, so dropping it immediately bounds disk regardless of the retention window.
+     Gate behind a setting (`purge_tool_store_on_final`, default **True**) so a debugging session can
+     retain it. This also removes the redundancy where a saved output exists both as `<ref>.out` and as
+     the named doc.
+- **Not a `genesis` platform change beyond the optional purge hook:** the store lives in genesis-core's
+  `RunWorkspace`; the eager-purge hook (if adopted) is a few lines in the platform's existing
+  `_finalize` path + one setting — small, and the baseline retention path needs nothing.
+
 ---
 
 ## 5. Persistence modes
@@ -461,7 +488,7 @@ when Phase 9 ships (so the standard tracks reality).
 | `kiro-agent-sdk` | `ToolCall/ToolCallUpdate`: `name`, `raw_input`, `output`; `extract_tool_output` helper. Tests. **Release minor (→ v0.2.0).** |
 | `genesis-core` | `nodes/tool_store.py` (store format + recorder); `mcp/blackboard_server.py`; `kiro_node` **default-on** blackboard injection (`blackboard=True` default + opt-out) + trust + recording + events + telemetry; bump SDK pin. Tests. **Release minor** (`CORE_MAJOR` stays 1 — additive). |
 | `genesis-workflows` | `erd-generation`: `fetch_prompt` rewrite (node needs no change — default-on) + tests; docs (§11: steering 01/02/03/04 + README + erd README + MIGRATION); bump genesis-core pin; re-publish (7-gate CI). |
-| `genesis` | none required; optional genesis-core pin bump + release so `genesis serve` runs the new core. |
+| `genesis` | none required for the core mechanism (retention already reclaims `_toolcalls/`). **Optional:** the eager-purge-at-finalization hook + `purge_tool_store_on_final` setting (§4.7) — a few lines in `runs/manager.py._finalize` + `runtime/settings.py`; and an optional genesis-core pin bump + release so `genesis serve` runs the new core. |
 
 **Release order:** `kiro-agent-sdk` → `genesis-core` → `genesis-workflows` (→ optional `genesis`).
 
@@ -527,7 +554,10 @@ sequence (deferred, §5/§9).
   `blackboard=False`), so the capability is universally available (§4.4/§5.0). Remaining sub-question:
   is the per-node subprocess cost ever high enough to warrant a shared/session-level server instead of
   per-node? (Lean: per-node for now; revisit if startup latency shows up.)
-- `_toolcalls/` retention policy — reclaim immediately post-run, or with the standard retention window?
+- **Resolved (§4.7):** `_toolcalls/` is reclaimed by the existing retention service as a baseline, plus
+  a recommended eager purge at run finalization (`purge_tool_store_on_final`, default True). Remaining
+  sub-question: purge eagerly always, or keep for a short debug window when a run failed? (Lean: purge
+  on success; retain on failure to aid diagnosis — a cheap refinement.)
 
 ---
 
