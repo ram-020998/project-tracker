@@ -179,6 +179,22 @@ node's real servers). `kiro_node` taps its `write_document`/`append_document` `t
 `artifact.captured`/write events for observability. Prompt authors then say *"write your answer to
 document `enriched.json`"* instead of passing an absolute path to `fs_write`.
 
+### 4.2a How the agent discovers + is directed to use the tools (three layers)
+Symmetric with how the agent already learns about `get_app_schema` (injected server → `tools/list`):
+1. **Discovery (automatic):** injecting the blackboard server means Kiro runs `tools/list` on it, so
+   the model sees `save_result` / `write_document` / … in its function list **with their descriptions
+   + JSON input schemas**. The tool **description is the teaching surface** — write it action-first,
+   e.g. *"`save_result(source, document)` — persist a tool result you already made into a run document
+   BY REFERENCE (the system copies the bytes; do NOT paste the content). `source`='last' for the most
+   recent tool result, or a tool name."*
+2. **Direction (explicit):** the **node prompt** names the tool + `source` + target doc at the right
+   moments (see §3.4). The prompt is the imperative; the description is the reference. Steering/system
+   context is the fallback if a model under-uses it.
+3. **Trust (so it doesn't hang):** when `blackboard=True`, `kiro_node` **auto-adds the blackboard tool
+   names to the effective trust set** (`node.tools ∩ allowlist ∪ {blackboard tools}`, or keeps
+   trust-all when there's no allowlist), so the call is auto-approved in autonomous mode instead of
+   stalling on `session/request_permission`.
+
 ### 4.3 Why B does NOT replace A (be explicit)
 `write_document(content)` still requires the agent to **produce** `content` as output tokens — so it
 does **not** help the bulk verbatim-copy case (that's A's job). B is purely an ergonomics + safety +
