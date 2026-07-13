@@ -424,3 +424,50 @@ store (Keychain/vault) as part of the hosted track.
   swap + data migration + CI Postgres service), low risk if the abstraction held. pgvector search
   and hosted/multi-user are each separate, larger initiatives.
 - No code changes result from this ADR today — it records the standing decision and the guardrail.
+
+---
+
+## ADR-031 — Chat is a read-only conversational assistant (never orchestrates)
+
+**Status:** Accepted (Phase 10). **Context:** Genesis gains a **Chat** page — a persistent, multi-turn
+Kiro conversation that (1) answers using the `appian-atlas` read MCP and (2) answers about the
+platform's own state (runs, failures, progress, workflows, health) via a new read-only
+Genesis-introspection MCP server. A free-form chat agent is the same shape that sank the retired
+solutions-copilot (LLM-as-orchestrator, ADR-001), so the boundary must be explicit and **enforced**.
+
+**Decision.** Chat is an **assistant / observability co-pilot, not a controller**: it **observes and
+answers**, it never drives or mutates anything. LangGraph still owns all *workflow* control flow
+(ADR-001 intact); Chat is a parallel **read-only** surface that cannot influence it.
+
+**Hard boundary (enforced, not merely prompted):** no run control (start/pause/resume/cancel/fork/
+respond-to-gate), no config/secret/workflow mutation, no fs writes, no terminal, no CLI, no deploy;
+tools limited to the Atlas **read** allowlist + the read-only introspection tools.
+
+**Enforcement (defense in depth), priority order:**
+1. **Capability restriction** — the ACP session runs with `trust_all_tools=False` and a `trust_tools`
+   allowlist of read tools only. *Spike finding (10-01): kiro-cli matches MCP tools by the namespaced
+   name `@<server>/<tool>`* — so the allowlist is built as `@appian-atlas/<tool>` + `@genesis/<tool>`.
+2. **Permission auto-deny** — the SDK runs with the new `permission_mode="auto_deny"` (10-01), so any
+   non-trusted tool the agent attempts (which triggers `session/request_permission`) is denied, not
+   auto-approved (the default). Validated live against kiro-cli 2.12.1.
+3. **No fs-write capability** — `allow_fs_write=False` refuses `fs/write_text_file` and advertises
+   `clientCapabilities.fs.writeTextFile=false`.
+4. **Read-only data source** — the introspection server opens `genesis.db` with a read-only
+   connection (`file:…?mode=ro`) and exposes only SELECT-backed tools; secret-looking values redacted.
+5. **Steering** — a chat persona reiterating the read-only contract (secondary reinforcement only).
+
+**Execution model.** Chat runs **in-process** (an async `ChatManager` holding one persistent
+`KiroACPClient` per live session). ADR-012's subprocess isolation exists to keep *workflow Python*
+out of the app process; Chat executes no workflow code, and the agent is already isolated as the
+kiro-cli subprocess the SDK spawns. A bespoke chat "worker" would add complexity with no isolation
+benefit.
+
+**Persistence.** Sessions + transcripts persist in `genesis.db` (migration m0002: `chat_sessions` +
+`chat_messages`, FK cascade on delete). Kiro conversation state lives in the (ephemeral) kiro-cli
+subprocess; on a cold client (app restart / idle-reap) a bounded transcript **preamble** is replayed
+to recover context (best-effort). Single-user/local (ADR-026); Atlas-only MCP for v1.
+
+**Consequences.** If Chat is ever given a mutating action, this ADR must be revisited — that would
+re-open the copilot-orchestrator failure mode ADR-001 exists to prevent. Live-verified end to end
+(real kiro-cli): Genesis questions answered via introspection tools; a "cancel the run" request was
+refused.

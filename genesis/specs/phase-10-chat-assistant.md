@@ -1,6 +1,6 @@
 # Phase 10 — Chat: a read-only conversational assistant (umbrella spec)
 
-**Status:** 📋 Planned — spec complete, implementation pending approval.
+**Status:** ✅ SHIPPED (2026-07-13) — sdk v0.3.0, genesis-core v0.7.0, genesis v0.19.0. See `progress/phase-10-chat-assistant.md`.
 **Owns:** a new **Chat** page in the Genesis workbench + the backend to power it.
 **Sub-phase docs:** `specs/phase-10-chat-assistant/10-01 … 10-07` (one per sub-phase).
 **ADR:** ADR-031 (read-only assistant boundary) — text in §3 here; to be appended to
