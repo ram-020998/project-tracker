@@ -379,3 +379,48 @@ values flow through the existing `SecretProvider` (0600, scope/VAR) — never ex
 - `missing_secrets()` and `health()` remain scoped to *installed* (workflow-required) servers.
 - The `CustomMcpStore`/`CustomCliStore` interface is the seam for a future DB migration (spec 05).
 - stdio transport only in v1; HTTP/remote MCP is a documented follow-on.
+
+---
+
+## ADR-030 — Persistence engine: SQLite now, Postgres/pgvector only on an explicit trigger
+
+**Status:** Accepted (2026-07-13) · **Formalizes:** spec `05-p2-persistence-scale-decision.md` ·
+**Relates:** ADR-010 (small state + blackboard), ADR-024 (async SQLite saver), ADR-026 (local
+single-user posture), ADR-012/023 (embedded engine + subprocess worker).
+
+**Context:** Run lifecycle, the full agent conversation (`run_events`), and LangGraph checkpoints
+live in a single local `~/.genesis/genesis.db` (SQLite, WAL). Bulk artifacts are files; config is
+JSON files. Spec 01 refactored the repositories onto a `genesis/db/` layer with **DB-agnostic
+signatures** + a migration runner. The recurring question — "should we move to Postgres/pgvector?"
+— needs an answer anchored in triggers, not vibes.
+
+**Decision:** **Remain on SQLite.** For a local, single-user app this is the correct zero-ops
+choice: the access pattern (single writer; append-only `run_events`; reads by `run_id`) is SQLite's
+sweet spot and scales to millions of rows. Do **not** adopt Postgres "to be safe" — premature
+adoption imposes ops cost with no single-user return. Re-open this decision only when one of the
+triggers below fires, and write the adoption ADR **at that point**.
+
+**Triggers (any one re-opens the decision):**
+1. **Multi-user / hosted / concurrent writers** — SQLite's single-writer model is the wall. This is
+   a whole track (auth/RBAC, secrets vault, hosted execution) that re-opens ADR-012/023/026, not a
+   mere DB swap.
+2. **Semantic search / RAG over transcripts & runs** — the most probable, lowest-drama trigger.
+   `pgvector` is the durable home for embeddings; this is the likeliest reason to adopt Postgres.
+3. **Heavy cross-run analytics** beyond the bounded `/home` aggregates (spec 02) — large JSONB
+   querying, concurrent dashboards, reporting.
+
+**Migration path (when a trigger fires):** (a) re-home repositories onto SQLAlchemy Core + Alembic
+(portability + autogenerate); (b) swap `runtime/checkpoint.py`'s `AsyncSqliteSaver` →
+`langgraph-checkpoint-postgres` (isolated behind one factory); (c) one-shot export/import
+(runs + run_events) via a `genesis db migrate-to-postgres` command — the append-only shape makes
+this straightforward; (d) for trigger 2, add a pgvector `embeddings` table keyed by
+`(run_id, node, seq)` + a retrieval API (specced separately as a feature); (e) revisit the secret
+store (Keychain/vault) as part of the hosted track.
+
+**Consequences:**
+- Repository return values stay **DB-agnostic** (no SQLite-only types leak to callers) so the seam
+  spec 01 created remains cheap to cross.
+- Estimated effort if trigger 1-sans-search fires: ~2–4 days (Core/Alembic re-home + checkpointer
+  swap + data migration + CI Postgres service), low risk if the abstraction held. pgvector search
+  and hosted/multi-user are each separate, larger initiatives.
+- No code changes result from this ADR today — it records the standing decision and the guardrail.

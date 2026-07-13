@@ -1,7 +1,8 @@
 # 05 — P2 (Decision): Persistence Scale — SQLite vs Postgres/pgvector
 
 **Type:** Decision framework (not an implementation spec) · **Depends on:** `01` (repositories
-must be DB-agnostic in signature first). **Status:** **Decision deferred** until a §2 trigger fires.
+must be DB-agnostic in signature first). **Status:** **Decided (2026-07-13) — remain on SQLite;
+ratified as [ADR-030](../../reference/decision-log.md). Re-open only when a §2 trigger fires.**
 
 > This exists so the SQLite→Postgres question is answered by **explicit triggers and a documented
 > migration path**, not by accident or vibe. Today's answer: **stay on SQLite.**
