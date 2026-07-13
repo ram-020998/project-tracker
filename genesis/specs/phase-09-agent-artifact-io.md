@@ -207,6 +207,27 @@ the heavy genesis stack). **Alternative considered:** keep using Kiro's built-in
 blackboard-relative path plus a prompt/lint convention (zero new process). Given the modest benefit,
 **B is lower priority than A**; ship A first, evaluate B against the fs_write convention before building.
 
+### 4.5 Packaging & shipping (no repo, no image)
+The blackboard server ships **inside `genesis-core`** and is launched as a local Python module — it is
+NOT a separate repo, NOT a Docker image, and NOT a registry entry:
+- **Where:** `genesis_core/mcp/blackboard_server.py`, beside `mcp/introspect.py`. It's Genesis's own
+  code and is coupled to the `kiro_node` tap that services `save_result`, so they version in lockstep
+  (one genesis-core release; no cross-repo skew).
+- **How it's launched:** `kiro_node` injects it with `command=sys.executable`,
+  `args=["-m","genesis_core.mcp.blackboard_server","--root",str(ctx.workspace.root)]`. Using
+  `sys.executable` guarantees the same interpreter/venv that already has genesis-core installed — no
+  install step, no registry pull, no image build.
+- **Why not a Docker image (unlike appian-atlas/jarvis):** those are third-party/internal *services*
+  shipped as images; the blackboard server is a trivial, local, filesystem-bound facade coupled to
+  genesis-core. Dockerizing it would force per-run bind-mounts, a Docker dependency, startup latency,
+  and version skew for zero benefit. It's the `introspect.py` category (Genesis-owned local MCP stdio),
+  not the external-image category.
+- **Platform-provided, not a registry integration:** it is **not** in `mcp-registry.json`, does **not**
+  appear in Settings → MCP, and is orthogonal to the curated/custom tiers (ADR-005/029). `kiro_node`
+  injects it internally when `blackboard=True`; users never see or configure it.
+- **Future optimization (not now):** the only way to drop even the subprocess would be Kiro/ACP
+  supporting client-provided tools (as the SDK already special-cases `fs/read`/`fs/write`); out of scope.
+
 ---
 
 ## 5. Performance analysis (the explicit requirement)
