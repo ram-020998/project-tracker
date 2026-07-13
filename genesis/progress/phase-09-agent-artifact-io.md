@@ -45,8 +45,10 @@ Fixes the **output** re-emission (the `turn_timeout` bug). The model still *rece
 once in its input context because kiro-cli owns the model loop and Genesis only observes ACP — trimming
 input context would need an MCP gateway (deferred, spec §9).
 
-## Pending / follow-ups
-- **Manual acceptance:** a live `genesis serve` erd run against Atlas (Docker up) to confirm one short
-  `fetch_schema` turn, no `turn_timeout`, and that the real Atlas `rawOutput` wrapping matches
-  `extract_tool_output` (spike used an echo stub with the same MCP content shape).
+## Acceptance / follow-ups
+- **Live acceptance — VERIFIED (2026-07-13):** on `genesis serve` v0.17.0 (genesis-core v0.6.0) with
+  erd-generation refreshed to v0.4.0, a real erd run's `fetch_schema` used `list_tool_outputs` +
+  `save_tool_output` to write the Atlas schema to the blackboard **by reference** — the agent no longer
+  re-emits the payload, and the real Atlas `rawOutput` wrapping was handled correctly by
+  `extract_tool_output`. The `turn_timeout` failure mode is resolved.
 - Deferred: automatic/threshold capture, `write_document` authoring tools, the MCP gateway.
