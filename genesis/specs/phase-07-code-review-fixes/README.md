@@ -96,6 +96,6 @@ flagged). 06 is a self-contained frontend win that can run alongside. 03 is the 
 | 03 integrations studio | ✅ Implemented — genesis-core v0.5.0 + genesis v0.13.1 |
 | 04 retention + bus | ✅ Implemented — genesis v0.14.0 |
 | 05 scale decision | ✅ Decided — remain on SQLite (ADR-030); re-open on trigger |
-| 06 conversation rich chat | ✅ Spec drafted — not implemented |
+| 06 conversation rich chat | ✅ Implemented — genesis v0.15.0 |
 
 Update this table + `tracker.md` §6 as each item is implemented.
