@@ -43,8 +43,12 @@ genesis_core/nodes/agent.py`, `mcp/registry.py`, `workspace.py` on 2026-07-13:
 2. **MCP servers are children of `kiro-cli`, not Genesis.** They're passed to `session/new` as
    `mcpServers` and launched by the ACP process; Genesis never proxies MCP traffic. **Consequence:**
    a Genesis-owned "blackboard MCP server" (which would also be a Kiro child) **cannot access another
-   server's tool results** held in Genesis's memory. → A `save_tool_result(tool_call_id, name)`
-   blackboard tool is **not cleanly implementable** and is rejected (see §7).
+   server's tool results** held in Genesis's memory — so the *server* cannot perform a
+   `save_tool_result` write by itself. **However**, `kiro_node` observes *both* the real tool results
+   *and* any call to a Genesis tool in the **same ACP stream**, so a `save_result` *signal* can be
+   **serviced by the `kiro_node` tap from its own buffer** (the server just acks). This is the key
+   that makes save-by-reference work (see §3.3) — the earlier "impossible" verdict applied only to a
+   server doing the write on its own.
 3. **Agent file writes are invisible to Genesis.** When the agent uses Kiro's built-in file write,
    the SDK handles the `fs/write_text_file` agent→client request **in-process**
    (`_handle_agent_request` writes the file directly) — it is NOT surfaced as a `Message`, so
@@ -55,11 +59,19 @@ genesis_core/nodes/agent.py`, `mcp/registry.py`, `workspace.py` on 2026-07-13:
    `name`** (the tool name shows up embedded in `title`, e.g. `"Running: @appian-atlas/get_app_schema"`).
    Matching on the display title is brittle → the SDK should surface a stable `name` + `raw_input`.
 
-**Design conclusion:** the correct, performant mechanism is a **passive capture tap** on the
-tool-result stream `kiro_node` already receives — not a proxy, not a program node, not a
-save-by-reference tool. The agent keeps all its intelligence; Genesis silently persists designated
-raw tool outputs to the blackboard. This is the core of Phase 9 (**Capability A**). A separate,
-opt-in **blackboard write server** (**Capability B**) covers agents that *author* content.
+**Design conclusion:** `kiro_node` **buffers the full tool results it already receives** and persists
+them to the blackboard on a **cheap agent signal** (`save_result`, carrying only a pointer — not the
+bytes) and/or a **declarative arg-matched `capture` rule**. The agent keeps all its intelligence and
+explicitly chooses *which* result to keep even while navigating many tool calls; Genesis supplies the
+bytes from its buffer so nothing large is re-emitted. This is the core of Phase 9 (**Capability A**).
+A separate, opt-in **blackboard write server** (**Capability B**) covers agents that *author* content;
+the `save_result` tool lives on that same server (facade only — the write is done by the tap).
+
+### 2.1 Why a blanket capture-by-tool-name is not enough (the multi-call problem)
+If the agent explores — e.g. calls `get_app_schema` for several apps before settling on the target —
+a rule "capture every `get_app_schema` result → `raw_schema.json`" is **ambiguous**: `mode=last` keeps
+whatever was called last, not necessarily the intended app. So capture must let the agent (or a
+precise arg filter) say **which** result is authoritative. Hence the two mechanisms in §3.3.
 
 ---
 
@@ -75,49 +87,68 @@ Surface the tool name + raw input, and guarantee the full result content, on the
   consumer can match without tracking ids.
 - No behavior change to prompting/turns; purely richer typed messages. Bump kiro-agent-sdk minor.
 
-### 3.2 `genesis-core` — `kiro_node(capture=…)`
-Add an optional declarative capture map to `kiro_node`:
+### 3.2 `genesis-core` — the result buffer
+`kiro_node` maintains a per-turn **result buffer** populated from the stream it already receives: for
+each completed `ToolCallUpdate` it stores the full extracted content, keyed by `tool_call_id` and by
+tool `name`, plus a `"last"` slot (the most recent completed result). Bounded (keep the last result
+per tool + the last N overall) to cap memory; large results are written straight to disk rather than
+held (see §5). This buffer is what both persistence mechanisms below draw from — **the bytes are
+never sent back through the model.**
+
+### 3.3 `genesis-core` — two ways to persist (the agent chooses what to keep)
+
+**(a) Explicit `save_result` signal — primary, robust to navigation.**
+The agent gets a tiny tool (on the blackboard server, §4) — `save_result(source, document)` — where
+`source` is `"last"` (default; the result it just received) or a tool `name`. It carries only a
+pointer, not the payload. When the `kiro_node` tap sees that tool call in the stream, it writes
+`buffer[source]` to `ctx.workspace.doc(document)` and emits `artifact.captured`; the server merely
+acks. This lets the agent explore freely and then persist exactly the authoritative results:
+```
+… explore/list_apps … choose target …
+get_app_schema(app=target)              → save_result("last", "raw_schema.json")
+get_schema_relationships(app=target)    → save_result("last", "raw_relationships.json")
+DONE
+```
+Robust to multiple/probe calls and to the agent resolving a fuzzy name to a canonical app id.
+
+**(b) Declarative `capture` rule — convenience for the no-navigation case.**
 ```python
 @dataclass
 class Capture:
-    tool: str            # MCP tool name to match, e.g. "get_app_schema"
-    doc: str             # blackboard doc to write, e.g. "raw_schema.json"
-    extract: str = "text"  # "text" (concatenate text blocks) | "json" (first json/text block, validated)
-    mode: str = "last"     # "last" (last completed call wins) | "first"
+    tool: str                 # MCP tool name to match, e.g. "get_app_schema"
+    doc: str                  # blackboard doc to write
+    where: dict | None = None # optional arg filter on raw_input, e.g. {"app_name": "{app}"}
+    extract: str = "text"     # "text" | "json" (parsed+re-dumped so the validator's JSON check holds)
+    mode: str = "last"        # "last" | "first" among matching calls
 
 def kiro_node(..., capture: list[Capture] | None = None) -> Node: ...
 ```
-- **Tap:** wrap the existing `on_message` so that, in addition to `_emit_message`, when a
-  `ToolCallUpdate` with `status ∈ {completed, success}` matches a `Capture.tool` (by
-  `ToolCallUpdate.name`, falling back to the `ToolCall` recorded for its `tool_call_id`), extract the
-  content and **write it to `ctx.workspace.doc(capture.doc)`** — verbatim for `text`, parsed+re-dumped
-  for `json` (so the validator's JSON check is guaranteed).
-- **Extraction:** ACP content is `[{type:content, content:{type:text, text:"…"}}]`; concatenate the
-  text blocks (reuse the SDK's `_extract_text` logic, exposed as a helper).
-- **Streaming/large results:** write to the doc as blocks arrive (append) or on the terminal
-  `completed` update; either way the bytes never pass back through the model. The SDK already raises
-  the ACP stream limit to 64 MB for large payloads — consistent.
-- **Multiplicity:** `mode="last"` (default) — if a tool is called more than once (retry, or the agent
-  probing), the last completed result wins. `first` available for idempotent fetches.
-- **Event:** emit a canonical **`artifact.captured`** event `{node, tool, doc, bytes}` (observable in
-  the timeline; the UI can show "captured raw_schema.json ← get_app_schema (103 KB)").
-- **Telemetry:** add `captured_docs` to the node telemetry.
+The tap auto-persists the matching result with **no agent action**. `where` (matched against the
+SDK's new `raw_input`) disambiguates when the agent calls a tool for several targets but the target is
+known up-front (`{app}` is templated from `state["inputs"]`). Use this only when there's no
+identifier transformation; otherwise prefer (a).
 
-### 3.3 Workflow change (`genesis-workflows` — `erd-generation`)
-Rewrite `fetch_prompt` to be **navigation-only** and drop the "write the raw JSON to a file"
-instruction:
-> *"Explore the available apps, identify the schema for "{app}", then call `get_app_schema(...)` and
-> `get_schema_relationships(...)` for it. You do not need to save anything — reply DONE when both
-> tool calls have returned."*
+**For `fetch_schema` we use (a)** — the agent navigates, so it must choose; the prompt instructs it to
+`save_result("last", …)` after each authoritative call.
 
-Declare capture on the node:
+Common to both: extraction reuses the SDK's `_extract_text` (exposed as a helper); `extract="json"`
+validates + re-dumps; a canonical **`artifact.captured`** event `{node, tool, doc, bytes}` is emitted;
+node telemetry gains `captured_docs`.
+
+### 3.4 Workflow change (`genesis-workflows` — `erd-generation`)
+`fetch_schema` opts into the blackboard tools (`blackboard=True`, §4) and its prompt becomes
+**navigation + explicit save** (no verbatim re-typing):
+> *"Explore the available apps and identify the one matching "{app}". Then, for that app: call
+> `get_app_schema(...)` and immediately `save_result("last", "raw_schema.json")`; call
+> `get_schema_relationships(...)` and immediately `save_result("last", "raw_relationships.json")`. Do
+> not paste tool output into your reply. Reply DONE when both files are saved."*
+
 ```python
 fetch = kiro_node(name="fetch_schema", prompt_fn=fetch_prompt, output_doc="raw_schema.json",
-                  mcp=["appian-atlas"],
-                  capture=[Capture(tool="get_app_schema", doc="raw_schema.json", extract="json"),
-                           Capture(tool="get_schema_relationships", doc="raw_relationships.json", extract="json")])
+                  mcp=["appian-atlas"], blackboard=True)   # save_result serviced by the tap
 ```
-`v_fetch` (`check_fetch`) is unchanged — the captured docs satisfy it. The agent's turn now emits a
+`v_fetch` (`check_fetch`) is unchanged — the saved docs satisfy it. The agent may probe several apps'
+schemas while navigating; only the two it explicitly `save_result`s are persisted, and it emits a
 handful of navigation tokens instead of regenerating 145 KB → the timeout disappears.
 
 ---
@@ -129,12 +160,18 @@ Genesis-owned **blackboard MCP server** injected per node when requested.
 
 ### 4.1 The server (`genesis-core/mcp/blackboard_server.py`)
 A tiny stdio MCP server (JSON-RPC 2.0, same protocol as `introspect.py` speaks) exposing:
-- `write_document(name, content)` — write/overwrite a blackboard doc **by logical name**.
+- **`save_result(source, document)`** — persist a *previously returned* tool result by pointer
+  (`source="last"` or a tool name). **Facade only: it returns `{ok:true}`; the actual write is done by
+  the `kiro_node` tap from its result buffer (§3.2/§3.3a)** — the bytes never flow through this server
+  or the model. This is the tool that makes save-by-reference work.
+- `write_document(name, content)` — write/overwrite a blackboard doc **by logical name** (for content
+  the agent *authors*).
 - `append_document(name, content)` — append (chunked authoring of larger content).
 - `read_document(name)` / `list_documents()`.
 Scoped to the run's blackboard dir, passed via argv/env at launch
 (`python -m genesis_core.mcp.blackboard_server --root <workspace.root>`). Rejects paths that escape
-the root. No secrets, no network.
+the root. No secrets, no network. (`write/append/read/list` operate on the dir directly; `save_result`
+is the facade the tap services.)
 
 ### 4.2 Injection (`genesis-core` — `kiro_node(blackboard=True)`)
 When `blackboard=True`, `kiro_node` prepends the blackboard server to `mcp_servers` (alongside the
@@ -190,9 +227,10 @@ blackboard-relative path plus a prompt/lint convention (zero new process). Given
 1. **Program node calling the MCP tool directly (`tools/call`).** Rejected: the step needs agent
    intelligence to navigate/choose the app (domain-owner constraint). (Still noted as valid for
    *purely* deterministic fetches elsewhere.)
-2. **`save_tool_result(tool_call_id, doc)` blackboard tool.** Rejected: MCP servers are Kiro children
-   isolated from Genesis's memory (research §2.2), so a blackboard server cannot retrieve another
-   server's captured result. The tap (A) achieves the same outcome without cross-process state.
+2. **A blackboard *server* that performs the `save_tool_result` write itself.** Rejected: MCP servers
+   are Kiro children isolated from Genesis's memory (research §2.2), so the server can't read another
+   server's result. **The adopted design keeps `save_result` as a server-side *facade* but does the
+   write in the `kiro_node` tap from its buffer** (§3.3a) — same ergonomics, correct layer.
 3. **MCP gateway/proxy that Genesis interposes.** Rejected for now: a faithful multiplexing proxy
    (initialize/tools/list/tools/call/notifications, N backing servers, secret resolution) is a large
    moving part; the tap gets the same result far more cheaply. Kept as a future option if we later
@@ -220,25 +258,36 @@ Release order: **kiro-agent-sdk → genesis-core → genesis-workflows** (→ op
 - **SDK:** `ToolCall.name`/`raw_input` parsed from representative ACP `tool_call` payloads (snake/Pascal
   variants); `ToolCallUpdate.content` carries full multi-block content; `_extract_text` unit tests.
 - **genesis-core (capture):** with a stubbed `collect_streaming` that emits a `ToolCall` +
-  `ToolCallUpdate{completed, content=<big JSON>}` for `get_app_schema`, assert the tap writes
-  `raw_schema.json` verbatim/parsed, emits `artifact.captured`, and does **not** require the agent to
-  write; `mode=last` wins on repeated calls; `extract=json` rejects non-JSON; escape-path guard on B.
+  `ToolCallUpdate{completed, content=<big JSON>}` for `get_app_schema`, assert the tap buffers it and
+  the declarative `capture` rule writes `raw_schema.json` verbatim/parsed, emits `artifact.captured`,
+  requires **no** agent write; `where` arg-filter selects the matching call; `extract=json` rejects
+  non-JSON.
+- **genesis-core (save_result / navigation — the multi-call case):** stub a turn that calls
+  `get_app_schema` for **app A, app B, then the target**, each returning different content, followed by
+  `save_result("last", "raw_schema.json")` after the *target* call → assert the file holds the
+  **target's** result (not A's or B's), proving the agent controls which result is kept; a
+  `save_result("get_schema_relationships", …)` by tool-name also resolves from the buffer.
 - **genesis-core (blackboard server):** `write/append/read/list` scoped to root; path-escape rejected;
-  MCP handshake works (reuse the introspect test harness).
-- **genesis-workflows:** an `erd-generation` graph test with a stubbed agent that "calls" the two
-  tools (emitting capture-shaped updates) → `raw_schema.json` + `raw_relationships.json` land and
-  `v_fetch` passes **without** the agent writing files.
+  `save_result` returns `{ok:true}` (facade); MCP handshake works (reuse the introspect test harness).
+- **genesis-workflows:** an `erd-generation` graph test with a stubbed agent that probes two apps then
+  `save_result("last", …)`s the target's schema + relationships → the two docs land and `v_fetch`
+  passes **without** the agent writing files verbatim.
 - **DoD:** all suites green (pytest+ruff across sdk/core/workflows; `ci/validate_library.py`); a manual
   `genesis serve` erd run (Docker up) shows `fetch_schema` completing in one short turn with the raw
-  docs captured; no `turn_timeout`. Update tracker §6 + `progress/phase-09-…`.
+  docs saved by reference; no `turn_timeout`. Update tracker §6 + `progress/phase-09-…`.
 
 ---
 
 ## 10. Sequencing
 
-1. **A first** (sdk → core → erd workflow) — unblocks `erd-generation` and is the performance fix.
-2. **B second, only if warranted** — evaluate the blackboard server vs. the `fs_write`-to-blackboard
-   convention; build the server only if the ergonomics/observability justify the per-node subprocess.
+1. **A first** (sdk `name`/`raw_input`/full-content → genesis-core buffer + `save_result` tap + the
+   minimal blackboard server that exposes `save_result` → erd workflow prompt). This is the
+   performance fix and unblocks `erd-generation`. The declarative `capture` rule ships here too (it's
+   pure tap, no server needed).
+2. **B second, only if warranted** — the *authoring* tools (`write/append/read/list_document`) on the
+   same server; evaluate vs. the `fs_write`-to-blackboard convention before building, since they add
+   agent-authored-write ergonomics but not bulk help. (`save_result` from step 1 already establishes
+   the server, so B is incremental.)
 
 **Non-goals:** no MCP proxy/gateway; no auth/multi-tenancy (ADR-026); no change to the reliability
 trio, the data plane, or the platform API.
