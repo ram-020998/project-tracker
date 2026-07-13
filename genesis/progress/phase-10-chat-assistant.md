@@ -98,3 +98,26 @@ clean; eslint 0 errors.
 Restart `genesis serve` to pick up the v0.19.0 bundle (and to apply migration m0002). Configure the
 `appian-atlas` MCP (token + a read `tool_allowlist`) for document Q&A; Genesis-introspection chat works
 without it. Chat is read-only by design.
+
+## Post-ship fix — Atlas read `tool_allowlist` (genesis-workflows v0.4.2)
+
+**Trigger:** live-checking the first real chat session showed the Genesis-data half worked but
+**Atlas document Q&A was blocked** — the agent's `list_applications` calls were auto-denied. Root
+cause: the curated `appian-atlas` registry entry had **no `tool_allowlist`**, so `build_chat_mcp`
+(fail-closed, never trust-all) trusted only the 9 `@genesis/*` introspection tools and zero Atlas
+tools; the Atlas server was still injected, so the agent tried its tools and hit `auto_deny`.
+
+**Fix:** enumerated Atlas's tools from the live MCP (via a chat turn — the direct-stdio introspect
+path failed with "closed stdout before responding") = **33 READ tools + 1 WRITE**
+(`refresh_knowledge_base`). Added a `tool_allowlist` of the 33 read tools to `appian-atlas` in
+`mcp-registry.json` (excludes the write tool). Shipped **genesis-workflows v0.4.2** (CI #6335515
+green) + patched the user's installed `~/.genesis/library/mcp-registry.json` for immediate effect.
+
+**Verified live:** a new chat session asked "list the available Appian applications" → `list_applications`
+ran to `completed` and returned real data (15 apps incl. SourceSelection). Read-only still holds
+(`refresh_knowledge_base` untrusted). The allowlist also caps Atlas trust to read-only for workflow
+agent nodes (ADR-029); erd-generation uses only read tools, unaffected (9 workflow tests pass).
+
+**User action:** re-install to pick up the curated allowlist durably
+(`genesis install erd-generation --from …/genesis-workflows`, or via the Catalog) — the local patch
+already makes it work now; re-install ensures it survives future library updates.
