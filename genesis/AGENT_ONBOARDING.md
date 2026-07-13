@@ -387,18 +387,4 @@ Other open follow-ups (may be assigned):
 - If stuck twice on the same error, stop and diagnose root cause; try a different approach.
 - Keep changes scoped to the item; don't refactor unrelated code. Do NOT start Phase 8 unless asked.
 
-Now: read the docs/code in §1, restate the architecture + current state + the non-negotiables, then
-PROCEED (you don't need to wait for me). My task for this session is:
-
-**Implement the code-review fix program in `specs/phase-07-code-review-fixes/`, lowest-priority-number
-first — START with P0 `01-p0-persistence-and-migrations.md`** (introduce the `genesis/db/` layer + a
-minimal migration framework + a baseline migration that adopts the existing `runs`/`run_events` tables
-with ZERO data loss; refactor `EventLog`/`RunStore` onto it; add tests incl. the data-safety adoption
-test). Then **`02-p0-overview-dashboard.md`** (extend `GET /home` + wire the static `Overview.tsx`).
-Then P1 (`03` Integrations Studio, `06` Conversation rich-chat) and P2 (`04`, `05`). Follow the §7 loop
-end-to-end and autonomously: read the spec's current-state citations, flag any real scope/architecture
-decision for sign-off, implement, add tests, run all suites (backend pytest+ruff / web lint+tsc+vitest+
-build), rebuild + COMMIT web/static/ if web changed, release the affected repo(s) + verify CI green via
-glab, then update tracker §6 + a progress/ doc and push project-tracker. One spec item per session unless
-I say otherwise.
 ````
