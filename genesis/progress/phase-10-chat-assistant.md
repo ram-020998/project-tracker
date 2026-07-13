@@ -121,3 +121,20 @@ agent nodes (ADR-029); erd-generation uses only read tools, unaffected (9 workfl
 **User action:** re-install to pick up the curated allowlist durably
 (`genesis install erd-generation --from …/genesis-workflows`, or via the Catalog) — the local patch
 already makes it work now; re-install ensures it survives future library updates.
+
+## Post-ship fix — live streaming (CRLF SSE framing); genesis v0.19.1
+
+**Symptom (user-reported):** during a chat turn only "Thinking…" showed; the thoughts, tool calls,
+and token-by-token answer never streamed — the full answer "popped in" at the end.
+
+**Root cause:** the server streams correctly (verified: 8 message chunks live), but sse-starlette
+frames events with **CRLF** (`\r\n\r\n` between frames, `\r\n` line ends). The web `readSse` reader
+split frames on `"\n\n"`, which never matches inside `\r\n\r\n` — so no frame ever parsed, `liveEvents`
+stayed empty (UI stuck on "Thinking…"), and the answer only appeared when the turn ended and the
+persisted transcript was re-fetched. The `readSse` unit test had used LF framing, so it passed while
+the real (CRLF) path was broken — a "stub hid the contract" miss.
+
+**Fix (genesis v0.19.1, web-only):** `readSse` now splits on `/\r?\n\r?\n/` (frames) and `/\r?\n/`
+(lines), handling CRLF + LF. The test now uses the **real CRLF framing** (+ an LF case) so it would
+catch a regression. Rebuilt web/static; 74 web tests green; CI #6335667. Live thoughts, tool cards,
+and the token-by-token answer now render in real time.
