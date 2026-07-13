@@ -17,7 +17,9 @@ application + ERD" milestone (Q13). This is the map; each phase's detail lives i
 | **M5 — Supervised runs** | 5 | Start/stream/pause/resume/edit/fork + gates, demoed in Studio. |
 | **M6 — Complete app + ERD** ⭐ | 1–6 | The Q13 milestone: full backend + ERD workflow runnable end-to-end (Studio interim UI). |
 | **M7 — Product surface** | 7 | Custom web workbench; Studio no longer required. |
-| **M8 — Coverage** | 8 (ongoing) | Skills migrated wave-by-wave; flagship SDLC pipeline. |
+| **M7.2 — Foundation hardening** | 07-code-review-fixes | Persistence/migrations, Overview, Integrations Studio, retention, conversation rich-chat (01–06 ✅). |
+| **M8 — Settings & config polish** | 8 | Tabbed Settings workspace + one standardized integration master-detail/add-edit pattern (enterprise polish). A few more polish phases planned next. |
+| **M9+ — Coverage (deferred)** | backlog: skill migration | Skills migrated wave-by-wave; flagship SDLC pipeline. **Moved to backlog** (was Phase 8/M8) — resumes after the polish phases. |
 
 **M6 is the primary near-term target** ("we should be completing the full
 application along with the ERD workflow", Q13).

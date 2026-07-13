@@ -1,4 +1,10 @@
-# Phase 8 — Skill → Workflow Migration Program
+# Backlog — Skill → Workflow Migration Program (formerly Phase 8)
+
+> **⏸️ DEFERRED (2026-07-13).** This was Phase 8; it is moved to the backlog and not scheduled for
+> now. The Phase 8 slot is reassigned to the **Settings & Integrations Revamp**
+> (`specs/phase-08-settings-revamp.md`), with a few more enterprise-polish phases planned before the
+> migration program resumes. When it resumes it will be renumbered to the then-current phase.
+> The methodology below remains valid; only the sequencing changed.
 
 > **Goal:** Systematically migrate solutions-copilot's 45 skills into Genesis
 > workflows, one by one, using a repeatable methodology and the ERD workflow as
