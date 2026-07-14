@@ -90,7 +90,7 @@ computation.
   finish + verdict; per-object retry reset.
 - **All 22 genesis-workflows tests pass**; `ci/validate_library.py` 7-gate **PASSED (3 workflows)**
   (contract parity + reliability lint + the non-compliant fixture still correctly fails); ruff clean.
-- genesis **CI #6344231 ✅** (v0.20.2). genesis-workflows **v0.5.0 CI**: (verify green).
+- genesis **CI #6344231 ✅** (v0.20.2). genesis-workflows **v0.5.0 CI #6344394 ✅**.
 
 ## Not done / follow-ups
 - **Live run** against a real GAMS ticket + package (needs `genesis serve` restart on ≥ v0.20.2 and the
