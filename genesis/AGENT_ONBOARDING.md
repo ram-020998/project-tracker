@@ -12,7 +12,7 @@
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
 > §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-14 — genesis v0.20.2 +
-> genesis-workflows v0.5.0** (Phases 9 Agent-Artifact-I/O, 10 Chat-assistant, 11 Credit-tracking,
+> genesis-workflows v0.5.3** (Phases 9 Agent-Artifact-I/O, 10 Chat-assistant, 11 Credit-tracking,
 > 12 Appian Code-Review Workflow all shipped).
 
 ---
@@ -82,7 +82,7 @@ Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 | `kiro-agent-sdk` | **v0.4.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`+`allow_fs_write` (10-01); **per-turn credit metering from `_kiro.dev/metadata` → `ResultMessage.usage`/`TurnResult.usage` (11-01)** |
 | `genesis-core` | **v0.8.0** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1` |
 | `genesis` | **v0.20.2** | master | runtime, dist, config, runs, **db (m0001–m0003)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); **worker loop `recursion_limit` from META (12-01)** |
-| `genesis-workflows` | **v0.5.0** | master | registries (incl. `jarvis`+`jira` MCP), steering, `hello-appian` + `erd-generation` + **`code-review` (Phase 12)** |
+| `genesis-workflows` | **v0.5.3** | master | registries (incl. `jarvis`+`jira` MCP), steering, `hello-appian` + `erd-generation` + **`code-review` (Phase 12; v0.5.1–v0.5.3 = live-data robustness fixes)** |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
 `genesis (v0.20.2) → genesis-core@v0.8.0 → kiro-agent-sdk@v0.4.0`;
@@ -116,7 +116,7 @@ has no CI — validated transitively by core+genesis installing its tag).
   Then **v0.20.1**: chat shows the credit count in place of the "Turn complete" chip + a secrets
   atomic-write crash fix (see §7).
 - **Phase 12 — Appian Code-Review Workflow — SHIPPED** (genesis v0.20.2 for 12-01; genesis-workflows
-  v0.5.0 for 12-02..12-05): a deterministic port of the Jarvis code-review process (Google-Docs export
+  v0.5.3 for 12-02..12-05): a deterministic port of the Jarvis code-review process (Google-Docs export
   excluded). Entry via JIRA ticket / package URL / object names; per-object review loop (diff-aware →
   `analyze_appian_code` → dynamic checklist → SQL/i18n `query_sql` → RecordType relationships) with a
   code-enforced PRE-WRITE CHECKPOINT validator; agent-proposed / program-confirmed verdict. Read-only
@@ -404,6 +404,20 @@ genesis-workflows/
   reviewed: Annotated[list, add]` dies with `NameError: Annotated`. Eager (non-`__future__`) evaluation
   stores real `Annotated` objects and works. (erd-generation's state has no reducer keys, so it never hit
   this; the code-review workflow did.) Also: quote YAML flow-scalars containing `?`/`:` (e.g. `label: "Stale?"`).
+- **Parse saved MCP tool outputs DEFENSIVELY — real shapes vary per tool (Phase 12 live-run lesson).**
+  `save_tool_output` persists a tool's result verbatim, and jarvis tools are inconsistent: some wrap
+  JSON in a human-readable preamble (`get_package_contents_from_url` → `Package Contents from URL:\n\n[…]`;
+  `get_application_info` → `Application Info:\n{…}`), others return clean JSON (`get_jira_issue`,
+  `get_review_checklist`). Shapes also differ from the obvious guess: object `type` is a QName
+  (`{http://…/types/2009}Interface`) with a separate `typeId`; `get_review_checklist` is **3-level
+  nested** (`parentCategory→categories→checkListItems`) with `applicableObjectTypes` as display names
+  ("Expression Rule", not "ExpressionRule"); `jarvis_config` nests `appUuid`/`kbFolderId` under
+  `applications[].appConfig` with `globalSettings` a list. The code-review workflow added `_coerce_json`
+  (strip preamble), `flatten_checklist`, and normalized type matching. **Systemic gotcha:** a
+  `validator_node`'s `check_fn(data,…)` receives `data` from a plain `json.loads` that falls back to
+  raw text on failure — so any JSON-consuming validator must coerce `data` itself (don't assume it's a
+  dict). Stubbed tests won't catch these; validate against real captured artifacts under
+  `~/Genesis/runs/<wf>/<run>/`.
 
 ---
 

@@ -3,7 +3,8 @@
 **Status:** ✅ Shipped (code + tests + CI). Live run against a real ticket/package pending (needs a
 `genesis serve` restart on ≥ v0.20.2 + jarvis/jira secrets, which are connected).
 **Releases:** genesis **v0.20.2** (12-01 engine loop support) + genesis-workflows **v0.5.0**
-(`code-review` workflow, 12-02..12-05). **Spec:** `specs/phase-12-code-review-workflow.md`.
+(`code-review` workflow, 12-02..12-05), then **v0.5.1 → v0.5.3** (live-data robustness fixes — see
+"Live-run hardening" below). **Spec:** `specs/phase-12-code-review-workflow.md`.
 
 ## What shipped
 
@@ -79,6 +80,47 @@ computation.
    fixes it — this would have failed at real runtime too, not just in tests.
 2. **Quoted `"Stale?"`** in `workflow.yaml` — a `?` in a YAML flow-scalar (`{label: Stale?, ...}`) breaks
    the parser.
+
+## Live-run hardening (v0.5.1 → v0.5.3)
+
+The first live runs against a real JIRA ticket (**GAMS-9256**) surfaced real tool-output shapes the
+stubbed tests couldn't. Each fix was verified against the actual run artifacts under
+`~/Genesis/runs/code-review/<run>/` and synced into the installed `~/.genesis/library` for immediate
+effect (no server restart needed — the worker re-imports graph.py per run).
+
+- **v0.5.1** — run `r-69a92cf7edf4` escalated at `fetch_package` (`v_package`: "parsed to zero
+  objects"). `get_package_contents_from_url` returns JSON **wrapped in a text preamble**
+  (`Package Contents from URL: …\n\n[…]`) and each object's `type` is an Appian **QName**
+  (`{http://www.appian.com/ae/types/2009}Interface`) with a separate `typeId`. Added `_coerce_json`
+  (strip preamble + extract outer JSON) and `_local_type` (QName→local name, typeId fallback); made
+  the JSON doc-readers tolerant. Verified on the real `package.json`.
+- **v0.5.2** — run `r-2382da6e4169` escalated at `fetch_context` (`v_context`: "checklist items must
+  carry a 'severity'"). Live `get_review_checklist` is **3-level nested**
+  (`parentCategory → categories → checkListItems`, **112 items**) and `applicableObjectTypes` uses
+  **display names** ("Expression Rule" vs my "ExpressionRule"); `jarvis_config` nests
+  `appUuid`/`kbFolderId`/`reviewDocFolderId` under `applications[].appConfig`, with `globalSettings`
+  a **list**. Added `flatten_checklist`, `_type_key`/`item_applies` (normalized matching, incl.
+  Decision↔DecisionRule alias), `_pick_appconfig` (match by app_info uuid, else object-name prefix)
+  and `_primary_db`. Wired into `check_context`, `count_applicable`, the review prompt, `check_object`,
+  and `_validate_app`. Verified live: 112 items flatten, applicable-to-Interface=75, `check_context`
+  passes, `_pick_appconfig` finds AS_GSS (uuid + kbFolderId 1619984).
+- **v0.5.3** — proactive audit ("check the other validators too"). Found the **systemic** gap:
+  validators consuming `validator_node`'s `data` (a plain `json.loads` that falls back to raw text)
+  weren't preamble-robust. `check_ticket`/`check_kb_stale`/`check_verdict` now coerce. Also made
+  `v_object`'s `analyze_appian_code` detection tolerant of the uuid arg name
+  (`object_uuid`/`uuid`/`object_id`, or the uuid anywhere in the recorded input), since the tool-store
+  `raw_input` shape can't be confirmed until the loop runs. Verified the full Path-A pre-loop chain
+  against live artifacts (reference_date from a real status transition, package URL, assignee, app
+  record). 18 code-review tests, 7-gate CI, ruff clean.
+
+**Lesson:** jarvis MCP tools are inconsistent — some wrap JSON in a human-readable preamble
+(`get_package_contents_from_url`, `get_application_info`), others return clean JSON
+(`get_jira_issue`, `get_review_checklist`); nested/QName/display-name shapes differ from the obvious
+assumptions. Every consumer of a saved tool output must parse defensively (coerce + normalize).
+
+**Still un-exercised against live data** (no run has reached the per-object loop yet): `v_object`'s
+parse of the agent's `object_review.md` structure and the real `analyze_appian_code` `raw_input`
+shape; `v_verdict` against a real agent `verdict.json`. Hardened defensively; confirm on a live loop run.
 
 ## Verification
 - **13 code-review tests** (`tests/test_workflow.py`): pure functions (typeId/needs_sql, parse+queue
