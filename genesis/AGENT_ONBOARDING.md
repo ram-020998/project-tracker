@@ -11,8 +11,9 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-13 — genesis v0.16.0**
-> (code-review fix program 01–06 done; Phase 8 Settings Revamp shipped).
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-14 — genesis v0.20.1**
+> (Phases 9 Agent-Artifact-I/O, 10 Chat-assistant, 11 Credit-tracking all shipped; Phase 12
+> code-review workflow spec drafted).
 
 ---
 
@@ -40,7 +41,8 @@ future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
 2. `tracker.md` — the master record. **Read §6 STATUS LOG top-down** (it is the running history and
    the source of truth for "what is done"); §2 has the locked decisions Q1–Q14; §3 is the phase index.
 3. `specs/00-architecture-overview.md` — layers, domain model, node taxonomy, state/blackboard rule.
-4. `reference/decision-log.md` — **ADR-001…030** (the "why"). Every non-negotiable lives here.
+4. `reference/decision-log.md` — **ADR-001…032** (the "why"). Every non-negotiable lives here.
+   (Recent: ADR-031 Chat is read-only; ADR-032 credits are REAL metered data from Kiro ACP.)
 5. `reference/coding-standards.md` — enforcement-anchored standards. §1 is the hard floor (lints/
    typecheck/CI gates that fail the build); §2–§6 are Python/frontend/testing conventions + the
    Definition of Done. When it conflicts with an ADR, the ADR wins; if a task needs a deviation, flag it.
@@ -49,9 +51,11 @@ future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
    security-and-secrets, testing-strategy, langgraph-capability-map, solutions-copilot-relationship,
    glossary, roadmap-and-sequencing, spike-findings.
 7. `specs/` — the plan for each phase. Phases 1–6, the web-revamp (`phase-07-0N-*`), the
-   `phase-07-code-review-fixes/` program (01–06), and `phase-08-settings-revamp.md` are all **shipped**.
-   `specs/backlog/` holds deferred work (the skill-migration program).
-8. `progress/` — the as-built record, one file per phase/item (`phase-01..08-*`). Read the one(s)
+   `phase-07-code-review-fixes/` program (01–06), `phase-08-settings-revamp.md`, **`phase-09-agent-artifact-io.md`,
+   `phase-10-chat-assistant.md` (+ `phase-10-.../10-01..07`), `phase-11-credit-usage-tracking.md`** are all
+   **shipped**. `phase-12-code-review-workflow.md` is a **DRAFT** (not built). `specs/backlog/` holds
+   deferred work (the skill-migration program).
+8. `progress/` — the as-built record, one file per phase/item (`phase-01..11-*`). Read the one(s)
    relevant to the area you're touching; they cite commits, tags, CI pipelines, and decisions.
 
 **B) The code — `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`** (read before editing; §4 is the map)
@@ -68,64 +72,77 @@ and the release/versioning protocol.
 
 ---
 
-## 2. Current state (as of genesis v0.16.0)
+## 2. Current state (as of genesis v0.20.1)
 
 Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git`:
 
 | Repo | Tag | Branch | Role |
 |---|---|---|---|
-| `kiro-agent-sdk` | **v0.1.0** | main | ACP adapter; `collect` + `collect_streaming` for live conversation |
-| `genesis-core` | **v0.5.0** | master | nodes/state/registries/validators; `kiro_node` streams `agent.*`; two-tier MCP/CLI registry + introspection (ADR-029); `CORE_MAJOR=1` |
-| `genesis` | **v0.16.0** | master | runtime, dist, config, runs, **db (migrations)**, api (`/api` + SPA fallback), cli, web (the shipped SPA) |
-| `genesis-workflows` | **v0.3.1** | master | registries, steering, `hello-appian` + `erd-generation` (with `graph:` topology), noncompliant fixture |
+| `kiro-agent-sdk` | **v0.4.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`+`allow_fs_write` (10-01); **per-turn credit metering from `_kiro.dev/metadata` → `ResultMessage.usage`/`TurnResult.usage` (11-01)** |
+| `genesis-core` | **v0.8.0** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1` |
+| `genesis` | **v0.20.1** | master | runtime, dist, config, runs, **db (migrations m0001–m0003)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11) |
+| `genesis-workflows` | **v0.4.2** | master | registries (incl. `jarvis`+`jira` MCP), steering, `hello-appian` + `erd-generation`; Atlas read `tool_allowlist` |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
-`genesis (v0.16.0) → genesis-core@v0.5.0 → kiro-agent-sdk@v0.1.0`;
+`genesis (v0.20.1) → genesis-core@v0.8.0 → kiro-agent-sdk@v0.4.0`;
 `genesis-workflows → genesis-core@v0.5.0 (runtime) + genesis (dev pin)`.
 
-**Tests, all green at last release:** genesis **83** pytest · genesis-core **45** · genesis-workflows
-**~9** · web **67** Vitest (incl. contract-fixture drift tests + jest-axe). ruff clean; eslint clean
-(0 errors); `tsc` strict clean. CI green on all repos (genesis has a python `genesis` job + a
-`frontend` job with a stale-bundle guard).
+**Tests, all green at last release:** genesis **118** pytest · genesis-core **57** · kiro-agent-sdk
+**62** · genesis-workflows **~9** · web **78** Vitest (incl. contract-fixture drift tests + jest-axe).
+ruff clean; eslint clean (0 errors); `tsc` strict clean. CI green on all code repos (genesis has a
+python `genesis` job + a `frontend` job with a stale-bundle guard; the SDK repo has no CI — it is
+validated transitively by core+genesis installing its tag).
 
 **Milestones (see `roadmap-and-sequencing.md`):**
 - **Phases 1–6 — DONE (M1–M6):** engine + node framework + state/checkpointer/blackboard + MCP
-  registry + reliability trio; workflow contract + library + scaffolder + CI enforcement; distribution
-  (GitLab pull/install/lockfile/loader); config + secrets + env registry + health; run orchestration +
-  all 3 HITL modes + streaming; the ERD reference workflow.
-- **Phase 7 WEB REVAMP (M7.1) — DONE + shipped:** the React+TS workbench (specs 07-01…07-10). The
-  07-10 cutover is complete; the interim UI was deleted; `genesis serve` serves only the new SPA.
-- **Code-Review Fix Program (M7.2) — DONE:** `specs/phase-07-code-review-fixes/` 01–06 —
-  01 persistence & migrations (`genesis/db/`), 02 Overview dashboard (live), 03 Integrations Studio
-  (two-tier registry + ADR-029), 04 event-log retention + bus consolidation, 05 persistence-scale
-  decision (ADR-030: stay on SQLite), 06 conversation rich-chat.
-- **Phase 8 — Settings & Integrations Revamp — SHIPPED (v0.16.0):** tabbed Settings workspace + one
-  standardized master-detail + add/edit pattern for all integration types.
-- **Backlog:** `specs/backlog/skill-migration-program.md` (the 45-skill migration; deferred). A few
-  more enterprise-polish phases are anticipated before it resumes. **Do not start backlog/Phase-N work
-  unless asked.**
+  registry + reliability trio; workflow contract + library + scaffolder + CI enforcement; distribution;
+  config + secrets + env registry + health; run orchestration + all 3 HITL modes + streaming; ERD.
+- **Phase 7 WEB REVAMP + Code-Review Fix Program (01–06) — DONE + shipped.** React+TS workbench;
+  persistence/migrations, Overview, Integrations Studio (ADR-029), retention, SQLite decision (ADR-030),
+  conversation rich-chat.
+- **Phase 8 — Settings & Integrations Revamp — SHIPPED (v0.16.0).**
+- **Phase 9 — Agent Artifact I/O — SHIPPED** (sdk v0.2.0, core v0.6.0, genesis v0.17.0, workflows v0.4.0):
+  a per-run tool-output store + agent `save_tool_output`/`list_tool_outputs` (save-by-reference) so large
+  MCP results land in the blackboard with zero re-emission into the context window.
+- **Phase 10 — Chat Assistant — SHIPPED** (sdk v0.3.0, core v0.7.0, genesis v0.19.0; ADR-031;
+  m0002 migration): a read-only conversational Chat page — talk to Kiro (Atlas read MCP) + query all
+  Genesis state via a read-only introspection MCP server (`genesis/mcp/introspection_server.py`).
+  Follow-ups: Atlas read `tool_allowlist` (workflows v0.4.2), CRLF SSE streaming fix (v0.19.1), a UI
+  polish batch (v0.19.2: breadcrumbs, list-view, collapsed nav, clickable catalog cards).
+- **Phase 11 — Credit & Usage Tracking — SHIPPED** (sdk v0.4.0, core v0.8.0, genesis v0.20.0; ADR-032;
+  m0003 migration): REAL metered per-turn Kiro credits surfaced everywhere — per agent node + run-total
+  (Run Detail), Overview KPI (**Credits Used** replaced Tool-Calls), per chat message + session total.
+  Then **v0.20.1**: chat shows the credit count in place of the "Turn complete" chip + a secrets
+  atomic-write crash fix (see §7).
+- **Phase 12 — Code-Review Workflow — DRAFT spec** (`phase-12-code-review-workflow.md`): port the
+  Jarvis Appian code-review workflow into Genesis (minus Google-Docs export). NOT started. Needs a small
+  genesis engine change first (raise the loop `recursion_limit`). `jarvis`+`jira` MCP are registered +
+  connected.
+- **Backlog:** `specs/backlog/skill-migration-program.md` (45-skill migration; deferred). **Do not start
+  backlog/Phase-N work unless asked.**
 
 **What works today (verified):**
-- `genesis serve` → FastAPI backend + the SPA at `http://127.0.0.1:8760`. API under **`/api`**
-  (e.g. `/api/config/mcp-cards`, `/api/runs`, `/api/home`), Swagger at `/docs`; a catch-all serves
-  `index.html` for non-`/api`,`/assets` paths (SPA history fallback, ADR-028).
-- **Screens (all live):** Overview dashboard (metrics/trend/active-runs/integration health, wired to
-  `/api/home`); Runs list; Run Detail (React Flow live graph + node inspector + turn-grouped Kiro
-  conversation with markdown + all-3-mode HITL + documents drawer/preview); Catalog (browse/detail/
-  launch); **Settings — a tabbed workspace: MCP · CLI · GitLab · Environments · General** (Storage +
-  retention), with a standardized master-detail + add/edit/delete for custom MCP servers and CLIs
-  (curated tier read-only), secrets, tool introspection + allowlist, and a readiness/handshake test.
-- **Data plane:** durable SQLite (`~/.genesis/genesis.db`, WAL) via the `genesis/db/` migration layer;
-  runs + full agent conversation + checkpoints persist across restart; gate/approval derives from
-  durable state; canonical event log + single live `EventBus` (legacy dual bus removed in spec 04);
-  event-log/blackboard **retention** (plan + reclaim) available.
-- **Integrations Studio (ADR-029):** curated (library, MR-governed, read-only) + custom (user-writable,
-  `~/.genesis/mcp-custom.json` / `cli-custom.json`) tiers; per-node injection unchanged.
-- `hello-appian` runs GREEN end-to-end; `erd-generation` runs into the live Atlas fetch. All three HITL
+- `genesis serve` → FastAPI backend + SPA at `http://127.0.0.1:8760`. API under **`/api`**, Swagger at
+  `/docs`, SPA history fallback (ADR-028).
+- **Screens (all live):** Overview (metrics incl. **Credits Used** KPI + trend + active runs + integration
+  health); Runs list; Run Detail (React Flow graph + inspector + turn-grouped Kiro conversation + all-3
+  HITL + documents drawer + **per-node & run-total credits**); Catalog (browse/detail/launch, clickable
+  cards); **Chat** (read-only assistant, persisted sessions, per-message credit footer); **Settings**
+  (MCP · CLI · GitLab · Environments · General). Left nav collapsed by default.
+- **Data plane:** durable SQLite (`~/.genesis/genesis.db`, WAL) via `genesis/db/` migrations
+  (m0001 runs+events, m0002 chat, m0003 chat_usage; `current_version=3`); runs + full conversation +
+  checkpoints + chat sessions/messages persist across restart; retention available.
+- **Credits (Phase 11):** every agent turn (workflow node OR chat message) reports real credits from
+  Kiro's `_kiro.dev/metadata.meteringUsage`; aggregated per-run (`eventlog.aggregate_credits` via
+  `json_extract` over `agent.result`) and per-session (`chat_messages.usage`). Provenance
+  `metered`/`partial`/`unavailable` — the UI shows honest "n/a", never a fabricated number.
+- **Integrations Studio (ADR-029):** curated (MR-governed) + custom (`~/.genesis/mcp-custom.json` /
+  `cli-custom.json`) tiers; per-node injection. `jarvis` (read-write-deploy) + `jira` registered.
+- `hello-appian` runs GREEN end-to-end; `erd-generation` runs into the live Atlas fetch. All 3 HITL
   modes, streaming, worker isolation, checkpoint resume — implemented + tested.
 - **Dev:** `npm run dev` in `genesis/web` → `http://localhost:5173/` (Vite proxies `/api` → :8760).
-  Dev needs BOTH `npm run dev` and `genesis serve`. Design-system gallery at `/dev`.
+  Design-system gallery at `/dev`.
 
 ---
 
@@ -194,41 +211,59 @@ genesis-core/genesis_core/
   clis/custom_store.py CustomCliStore: JSON-file CRUD + validation.
   nodes/  program.py; agent.py (kiro_node: prompt_fn(state,ctx,out_path), output_doc, mcp=[],
           tools→trust_tools, _compute_effective_trust = node.tools ∩ server.allowlist, turn_timeout=420,
-          startup_timeout=120; emits agent.message|thought|tool_call|tool_update|result); cli.py;
+          startup_timeout=120; emits agent.message|thought|tool_call|tool_update|result; the result
+          carries Phase-11 credits/context_pct/provenance from turn.usage); cli.py;
           validator.py; gate.py (hitl_gate via interrupt(); kinds approval|escalation|pre_mutation|review);
-          subgraph.py; reliability.py (attach_reliability = the trio).
+          subgraph.py; reliability.py (attach_reliability = the trio); tool_store.py + mcp/blackboard_server.py
+          (Phase 9: per-run ToolOutputStore + save_tool_output/list_tool_outputs — save-by-reference).
+  state.py `_telemetry_merge` sums `credits` (None never clobbers an accumulated total; Phase 11).
 
 genesis/genesis/
   db/       database.py (Database: connection factory + PRAGMA WAL/busy_timeout/foreign_keys/row_factory
             + tx()); runner.py (Migration + migrate() + current_version/pending + contiguity guard);
-            migrations/ (m0001_baseline adopts runs + run_events). Schema is owned HERE (spec 01).
+            migrations/ (m0001_baseline adopts runs+run_events; m0002_chat adds chat_sessions+chat_messages;
+            m0003_chat_usage adds chat_messages.usage — current_version=3). Schema is owned HERE (spec 01).
   runtime/  settings.py (Settings: state_dir ~/.genesis, artifacts_dir ~/Genesis/runs, db_path,
             library_dir, lockfile_path, secrets_path, environments_path, custom_mcp_path,
             custom_cli_path, retention_keep_last/max_age_days, retention_on_start); checkpoint.py
             (AsyncSqliteSaver); context.py (build_context); engine.py (async run/resume/get_state/stream).
   dist/     gitlab.py, local.py, catalog.py, lockfile.py, install.py, loader.py (check_compat gate,
             meta_of [yaml, no import], graph_of, installed, load_build).
-  config/   secrets.py (SecretProvider/PlaintextProvider 0600), fields.py (mcp_cards/cli_cards/
+  config/   secrets.py (SecretProvider/PlaintextProvider 0600; **atomic writes: temp+os.replace, and
+            set/delete serialize read-modify-write under a per-path lock** — v0.20.1 crash fix), fields.py (mcp_cards/cli_cards/
             secret_fields/missing_secrets; GLOBAL_KEYS={GITLAB_TOKEN}), environments.py, retention.py
             (disk_usage, plan_prune/apply_prune [artifacts], prunable_runs + RetentionService [events +
             blackboard, spec 04]), health.py, service.py (ConfigService facade: merged registries, MCP/CLI
             CRUD, introspect, allowlist, test_server, secrets, environments, health).
   runs/     store.py (RunStore/RunRecord; statuses pending|running|awaiting_input:gate|
             awaiting_input:paused|done|failed|cancelled; TERMINAL set), eventlog.py (EventLog — durable
-            run_events; append/list/last_seq/latest/purge/count/aggregate_tool_calls), events.py (Event +
+            run_events; append/list/last_seq/latest/purge/count/aggregate_tool_calls; **aggregate_credits/
+            run_credits/credits_provenance via json_extract over agent.result — Phase 11**), steps.py
+            (fold_steps → per-node summary incl. credits/context_pct), events.py (Event +
             single canonical EventBus — legacy dual bus removed in spec 04), validation.py, worker.py
             (SUBPROCESS entry; ops run|resume|get_state|update_state|fork; emits JSONL), supervisor.py,
             manager.py (RunManager: start/pause/resume/cancel/respond/patch_state/fork/list/wait; writes
-            canonical events to EventLog + fans out on cbus; pending_gate [durable + checkpoint cold path];
-            log_events; steps; opt-in retention purge at init).
-  api/      app.py (create_app FastAPI; version 0.16.0). ALL routes on an APIRouter at prefix="/api"
-            (ADR-028) + a catch-all SPA fallback. Routes: catalog(+available), library install|update|
-            DELETE; workflows/{id}(+/graph); config/health, gitlab-token, mcp-cards, cli-cards,
-            mcp-cards/{server}/test, secrets, environments; config/mcp-servers CRUD(+tools+allowlist+test),
-            config/clis CRUD; config/retention/{plan,apply}; artifacts/usage; home; runs (POST/GET),
+            canonical events to EventLog + fans out on cbus; `_CANONICAL_CUSTOM` persists agent.result &c
+            with node+full payload; pending_gate [durable + checkpoint cold path]; log_events; steps).
+  chat/     (Phase 10) manager.py (ChatManager/ChatSession: persistent read-only ACP client per live
+            session, in-process — NOT a subprocess; stream_turn persists per-message usage + emits credits),
+            store.py (ChatStore/ChatMessageStore on genesis.db: sessions + messages + usage; session_usage_total),
+            events.py (map_message_to_events → canonical agent.* shapes), mcp.py (Atlas + introspection wiring
+            + read-tool trust set). Read-only enforcement (ADR-031): trust_tools allowlist + permission_mode
+            auto_deny + allow_fs_write=False.
+  mcp/      introspection_server.py (read-only Genesis-introspection MCP server: list_runs/get_run/steps/
+            events/list_failures/list_workflows/get_workflow/integration_health/platform_stats over a
+            read-only genesis.db connection — Phase 10-02).
+  api/      app.py (create_app FastAPI; version 0.20.1; instantiates ChatManager + registers chat routes).
+            ALL routes on an APIRouter at prefix="/api" (ADR-028) + a catch-all SPA fallback. Routes:
+            catalog(+available), library install|update|DELETE; workflows/{id}(+/graph); config/health,
+            gitlab-token, mcp-cards, cli-cards, mcp-cards/{server}/test, secrets, environments;
+            config/mcp-servers CRUD(+tools+allowlist+test), config/clis CRUD; config/retention/{plan,apply};
+            artifacts/usage; home (metrics incl. **total_credits + credits_provenance**); runs (POST/GET),
             runs/{id}(+gate), runs/{id}/state (GET/PATCH), pause|resume|cancel|respond|fork,
             runs/{id}/artifacts(+/{name}(?mode)+/download), runs/{id}/events(?after,kinds,node)+/steps,
-            runs/{id}/events/stream (canonical SSE; the legacy /stream was removed in spec 04). studio.py.
+            runs/{id}/events/stream (canonical SSE); **chat/sessions CRUD + chat/sessions/{id}/messages
+            (SSE turn) + /cancel (Phase 10)**. studio.py.
   cli/      main.py (genesis serve|install|list|create-workflow|test-workflow|db upgrade|db status …).
   lint/     contract.py (workflow.yaml↔META parity; YAML_ONLY_KEYS exempts UI-only keys like `graph:`),
             reliability.py (trio enforcement).
@@ -241,7 +276,7 @@ genesis/genesis/
             Textarea/HealthDot/MetricCard/TrendChart/format/icons); src/shared/layout/** (AppShell/
             Sidebar/Topbar/SplitPane/Page); src/shared/feedback/** (Empty/Error/Loading); src/app/**
             (providers, router, RootLayout, routes); src/features/{overview,settings,catalog,runs,
-            run-detail,documents}/**; src/test/fixtures (golden contract fixtures); src/dev/KitchenSink.
+            run-detail,documents,chat}/**; src/test/fixtures (golden contract fixtures); src/dev/KitchenSink.
             **static/ = the COMMITTED, built app** served by `genesis serve`.
             Settings (Phase 8): SettingsPage = Tabs shell (/settings/:tab?/:id?); components/manager/**
             (ResourceManager, ResourceFormDialog, SpecForm, ConfirmDialog — the standardized pattern);
@@ -249,9 +284,15 @@ genesis/genesis/
             StorageSection reused; hooks.useMcpResources/useCliResources merge cards ⋈ custom entries.
             Run-detail conversation (spec 06): conversation.ts buildTranscript + groupTurns; inspector/
             TurnView + ThinkingTimeline + AssistantAnswer + conversationParts.
+            Chat (Phase 10): features/chat/** — ChatThread REUSES the run-detail Conversation via a
+            `hideResultChip` prop; Composer; SessionList; lib/api/chat.ts `readSse` (CRLF SSE framing).
+            Credits (Phase 11): shared/ui `formatCredits` + `CreditBadge` + `Coins`; Overview "Credits
+            Used" KPI (replaced Tool-Calls); run-detail TelemetryStrip Credits stat + per-node + header
+            run-total; chat per-message credit footer (in the ResultChip's old position).
 
 genesis-workflows/
-  registry.json (catalog + genesis_core_major=1), mcp-registry.json (REAL internal images),
+  registry.json (catalog + genesis_core_major=1), mcp-registry.json (REAL internal images:
+  appian-atlas [read-only], jarvis [read-write-deploy], appian-data-generator, lcp, jira),
   cli-registry.json, bundles.json, schemas/, steering/01-07, ci/validate_library.py (7-gate publish
   runner), workflows/{_template, hello-appian, erd-generation, _fixtures/noncompliant}, MIGRATION.md.
 ```
@@ -276,6 +317,8 @@ genesis-workflows/
 - **ADR-028** — ALL backend endpoints under `/api` (APIRouter) + SPA history fallback; the web client prepends `/api` centrally (never hard-code it in components); the Vite dev proxy is a single `/api` → :8760.
 - **ADR-029** — two-tier MCP/CLI registry (curated read-only + custom writable) + tool allowlist + direct-stdio introspection.
 - **ADR-030** — persistence stays **SQLite**; move to Postgres/pgvector only on an explicit trigger (multi-user, transcript RAG, or heavy analytics). Repositories keep DB-agnostic signatures so the seam stays cheap.
+- **ADR-031** — **Chat is a read-only assistant** (never orchestrates): it observes/answers, never drives or mutates. Enforced (defense in depth): `trust_tools` allowlist of read tools only + SDK `permission_mode="auto_deny"` + `allow_fs_write=False` + a read-only `genesis.db` connection in the introspection server. kiro-cli matches MCP tools by the **namespaced** `@server/tool` name — build allowlists as `@server/<tool>`. Chat runs in-process (no subprocess worker; ADR-012 is about workflow Python).
+- **ADR-032** — **credit usage is REAL metered data from Kiro ACP** (`_kiro.dev/metadata.meteringUsage`, verified per-turn not cumulative), NOT estimated — there is no pricing engine. SDK captures it → telemetry + `agent.result` + `run_events`/`chat_messages.usage`. Every figure carries `provenance` (`metered`/`partial`/`unavailable`); the UI shows honest "n/a", never a fabricated number.
 
 **Key implementation contracts:**
 - Node fns are `async fn(state, config: RunnableConfig)`. LangGraph injects `config` only when the param is annotated `RunnableConfig`; nodes read ctx via `ctx_from_config(config)`.
@@ -321,6 +364,35 @@ genesis-workflows/
 - **`workflow.yaml`** may carry UI-only keys (e.g. `graph:` topology) — the parity lint exempts them via `YAML_ONLY_KEYS`.
 - **jest-axe (v9)** ships no types: ambient `declare module` + the vitest matcher augmentation live in `web/src/types/jest-axe.d.ts` + `web/src/vitest-axe.d.ts` (keep them pure ambient / module-aug); the matcher is extended globally in `web/src/test-setup.ts`.
 - **mermaid + Recharts are heavy;** mermaid is dynamic-imported (lazy chunk). Keep new heavy libs lazy.
+- **Credits are REAL, not estimated (Phase 11 / ADR-032).** Kiro reports per-turn credits via the
+  `_kiro.dev/metadata` notification: the final one of a turn carries `meteringUsage:[{value,unit:"credit"}]`
+  + `contextUsagePercentage` + `turnDurationMs`. Verified **per-turn, not cumulative** (spike: 0.184 then
+  0.113 in one session). The SDK captures it into `ResultMessage.usage`/`TurnResult.usage`; agent.py puts
+  it on the `agent.result` event; `manager._CANONICAL_CUSTOM` persists that payload verbatim into
+  `run_events`, so `aggregate_credits` (json_extract) + `fold_steps` + SSE all get it for free. The
+  `_telemetry_merge` reducer must NOT let a None (unavailable) credits value clobber an accumulated sum.
+- **Chat read-only (Phase 10 / ADR-031):** trust is fail-CLOSED — never trust-all; build the allowlist
+  with the namespaced `@server/tool` form (kiro-cli matches that way). A curated server with NO registry
+  `tool_allowlist` (e.g. `jarvis`, which is read-write-deploy) means the ONLY cap is the node's `tools=`
+  list — a read-only workflow MUST set an explicit read-only `tools=` allowlist on every agent node
+  (effective trust = node.tools ∩ server.allowlist).
+- **SSE framing is CRLF:** sse-starlette frames events with `\r\n\r\n`. A client reader that splits on
+  `\n\n` never parses a frame (the "stuck on Thinking…" chat bug, fixed v0.19.1). `readSse` splits on
+  `/\r?\n\r?\n/`. Don't let a LF-only test fixture hide it.
+- **Secret writes must be atomic + serialized (v0.20.1 crash fix).** FastAPI runs sync route handlers in
+  a threadpool, so two secret-set requests (e.g. two fields of one MCP server) run concurrently. A plain
+  `write_text` isn't atomic → concurrent writers corrupt `secrets.json` (a valid object + leftover tail =
+  "Extra data"), which 500s `/api/config/mcp-cards` and crashes the UI. Fix: temp-file + `os.replace`
+  (atomic) + a per-path lock around read-modify-write. The other JSON stores (mcp-custom/cli-custom/
+  environments) share the old non-atomic pattern — harden them the same way if touched.
+- **Looping workflows (Phase 12 note):** LangGraph's default `recursion_limit` is **25 supersteps** and
+  the worker doesn't raise it, so a per-item loop dies after ~6 items — a looping workflow needs the
+  worker to set a higher limit (from META). Also, `attach_reliability` keys retries by agent NODE NAME, so
+  a re-entered loop node must RESET `retries[node]=0` each iteration or later items get no retry budget.
+- **Phase 9 save-by-reference:** a huge MCP result (e.g. a 3000-line process model) must not re-enter the
+  context window — the agent calls `save_tool_output(ref, document=...)` to persist it to the blackboard
+  by reference (the per-run ToolOutputStore records every tool result). Prompts instruct "never paste
+  tool output into your reply — save it BY REFERENCE".
 
 ---
 
@@ -332,7 +404,10 @@ genesis-workflows/
 4. **Test.** pytest for backend/core; Vitest for web. For bugs, add a regression test that would have caught it — and if a stub hid the bug, fix the stub to mirror reality. Add jest-axe for new interactive UI.
 5. **Run all affected gates until green:** backend `pytest` + `ruff`; web `lint` + `tsc` + `vitest`. For web changes, also `npm run build` and **commit the updated `web/static/`** (the stale-bundle guard requires it).
 6. **Release (if a code repo changed):** bump version(s) + tag + push + update dependent pins; verify CI green via `glab`. Frontend-only genesis changes still ship a genesis release.
-7. **Document:** update `tracker.md` §6 + a `progress/` doc (and the spec/README status tables); push project-tracker.
+7. **Document:** update `tracker.md` §6 + a `progress/` doc (and the spec/README status tables); push
+   project-tracker. **Also refresh THIS doc (`AGENT_ONBOARDING.md`)** when tags/architecture/ADRs/
+   hard-won lessons change — §2 (state + tag table + test counts), §4 (map), §5 (ADRs), §7 (lessons),
+   §9 (roadmap), and the "Last refreshed" header. Keeping the bible current is part of Definition of Done.
 8. **Report with cited evidence** (test output, run ids, CI pipeline ids, file diffs). Be honest about what you verified vs. couldn't — live Kiro/MCP/browser steps can't be driven headlessly; say so and give the manual check.
 
 **When the task is planning/analysis** (not "make this change"): respond with the plan/analysis and, if asked, write it as a spec + update the phase docs — but do NOT start implementing until asked.
@@ -341,10 +416,21 @@ genesis-workflows/
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-- **Shipped:** Phases 1–6, the web revamp (7.1), the code-review fix program (01–06), Phase 8 (settings revamp). See `tracker.md` §3/§6 and `reference/roadmap-and-sequencing.md`.
-- **Anticipated:** a few more **enterprise-polish** phases (TBD) before coverage work resumes.
-- **Backlog (`specs/backlog/`):** the **skill → workflow migration program** (the 45 solutions-copilot skills, waves A–D) — deferred; the methodology is intact and resumes when scheduled.
-- **Open follow-ups (may be assigned):** full ERD dry-run parity check (~37 tables / 174 rels) once the two agent turns complete; **rotate the shared `GITLAB_PUSH_TOKEN`** + refresh the expired Artifactory npm token; the `lcp` MCP image placeholder (`<lcp-image>`) in `mcp-registry.json`.
+- **Shipped:** Phases 1–6, the web revamp (7.1), the code-review fix program (01–06), Phase 8 (settings
+  revamp), **Phase 9 (agent artifact I/O), Phase 10 (chat assistant), Phase 11 (credit tracking)**. See
+  `tracker.md` §3/§6 and `reference/roadmap-and-sequencing.md`.
+- **Drafted, not built:** **Phase 12 — Appian Code-Review Workflow** (`specs/phase-12-code-review-workflow.md`):
+  port the Jarvis code-review workflow into Genesis (minus Google-Docs export) as a deterministic
+  LangGraph workflow. First sub-phase (12-01) is a small genesis engine change (raise the loop
+  `recursion_limit`); then an MVP workflow using the registered `jarvis`+`jira` MCP (read-only tool
+  allowlist). `jarvis`+`jira` are connected in the app; secrets configured by the user.
+- **Backlog (`specs/backlog/`):** the **skill → workflow migration program** (the 45 solutions-copilot
+  skills, waves A–D) — deferred; the methodology is intact and resumes when scheduled.
+- **Open follow-ups (may be assigned):** build Phase 12; restart the running `genesis serve` to load
+  v0.20.1 + the Phase 11 credit UI; harden the other JSON stores' writes to be atomic (like secrets);
+  a live end-to-end credit check against a real workflow run + chat turn; **rotate the shared
+  `GITLAB_PUSH_TOKEN`** + refresh the expired Artifactory npm token; the `lcp` MCP image placeholder
+  (`<lcp-image>`) in `mcp-registry.json`.
 
 **Do not start backlog or a new phase unless explicitly asked.**
 
