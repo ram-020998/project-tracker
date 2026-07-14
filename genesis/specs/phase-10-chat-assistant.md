@@ -110,10 +110,10 @@ Browser (SPA)                         FastAPI app process (genesis serve)
 │  transcript       │ ◄─ reader) ──── │ ChatManager (async, in-process)             │
 │  composer         │   agent.* events│   ├── ChatStore / ChatMessageStore (SQLite) │
 └───────────────────┘                 │   └── per-session ChatSession               │
-                                       │         ├── KiroACPClient (persistent) ─────┼──► kiro-cli acp (subprocess)
-                                       │         │      trust=read-only, auto_deny    │        │  MCP stdio
-                                       │         └── per-turn EventBus (live fan-out) │        ▼
-                                       └───────────────────────────────────────────┘   ┌──────────────┐
+                                      │         ├── KiroACPClient (persistent) ─────┼──► kiro-cli acp (subprocess)
+                                      │         │      trust=read-only, auto_deny   │         │  MCP stdio
+                                      │         └── per-turn EventBus (live fan-out)│         ▼
+                                      └─────────────────────────────────────────────┘   ┌──────────────┐
                                                                                         │ appian-atlas │ (read tools)
                                                                                         │ genesis-     │ (read-only,
                                                                                         │ introspection│  own ro conn to
