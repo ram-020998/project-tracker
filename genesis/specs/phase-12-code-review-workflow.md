@@ -8,6 +8,10 @@
 > engine change (loop recursion limit) + an **mcp-registry** allowlist edit. `genesis-core` needs no
 > change. **Secrets** for `jarvis` + `jira` will be configured by the user after the workflow is built.
 > **Source:** `…/Jarvis/jarvis-power/steering/code-review-workflow.md` (analyzed in full).
+> **Open questions resolved (2026-07-14):** R5 JIRA tool confirmed live (`get_jira_issue`); Q1 no
+> registry allowlist on `jarvis` (future write workflows need it) → read-only cap is per-node; R4
+> validators enforce structure/coverage only (agent owns finding correctness); Q2 verdict is
+> agent-proposed + program-confirmed against a severity floor. Ready to implement (start 12-01).
 
 ---
 
@@ -82,10 +86,16 @@ Both servers are **already registered** in `genesis-workflows/mcp-registry.json`
 | `jarvis_get_app_tree` / `jarvis_search_objects` / `jarvis_get_cluster` | `parentFolderId`(+`query`/`clusterName`) | KB feature context |
 | `query_sql` | `sql` | **read-only** SQL (SELECT/WITH/EXPLAIN, LIMIT≤500) for SMT/i18n/DB checks |
 
-### 2.2 JIRA tool
-`get_jira_issue` (exact tool name to be confirmed from `jira-mcp-proxy` `tools/list` at build time),
-returning `summary`, `description`, `customfield_10227` (acceptance criteria), `customfield_10173`
-(package URL), `status`, `assignee`, and `changelog` (for reference-date extraction).
+### 2.2 JIRA tool (CONFIRMED live via Genesis introspection, 2026-07-14)
+`get_jira_issue` — args `issue_key` (required), `fields?: string[]`, `expand?: string[]` (supports
+`changelog`, `comments`). Explicitly **read-only** ("This tool cannot and will not modify any data").
+Path A calls it as `get_jira_issue(issue_key={jira_ticket}, expand=["changelog"], fields=[summary,
+description, status, assignee, customfield_10173, customfield_10227])`. The Appian-JIRA custom fields
+`customfield_10173` (package URL) + `customfield_10227` (acceptance criteria) are requested by name;
+if absent in the instance they return null (verified at first live run — harmless to request).
+Other read tools available (namespaced `@jira/…`): `search_jira_issues` (JQL), `get_issue_comments`,
+`get_issue_transitions`, `get_project_details`, `get_issue_types`, `get_jira_projects`, `get_user_info`,
+`search_users`, `get_issue_worklogs`. **Read-only allowlist for `fetch_ticket` = `[@jira/get_jira_issue]`.**
 
 ### 2.3 Security — read-only enforcement (ADR-021 / ADR-029)
 `jarvis` is `read-write-deploy` and has **no registry allowlist**, so per ADR-029 the effective tool
@@ -105,10 +115,13 @@ kiro-cli matches MCP tools by `@server/tool`):**
 @jarvis/query_sql
 ```
 Explicitly EXCLUDED: `create_constant`, `preview_constant`, and every creation/deployment/refactor
-tool. **Recommended registry hardening:** add a `tool_allowlist` (the read set above, un-namespaced)
-to the `jarvis` entry in `mcp-registry.json` so the cap is enforced at the registry tier for *all*
-read-only workflows — but keep the per-node `tools=` too (defense in depth). *(If other workflows
-need Jarvis's write tools, keep the registry allowlist off and rely on per-node `tools=`.)*
+tool. **Registry-tier hardening DECIDED AGAINST (2026-07-14):** other Genesis workflows WILL need
+Jarvis's write/deploy tools (implementation/deploy workflows), so the `jarvis` entry in
+`mcp-registry.json` keeps **no** `tool_allowlist` — the read-only cap for this workflow is enforced
+**purely per-node** via `tools=[@jarvis/…]` on every agent node. This is a hard, structural cap
+(effective trust = `node.tools` since the server allowlist is absent), so the workflow is still
+incapable of mutation; it just isn't enforced at the registry tier (which would break the future
+write workflows).
 
 ### 2.4 Secrets to configure (user, post-build)
 `APPIAN_BASE_URL`, `APPIAN_API_KEY` (jarvis); `JIRA_URL`, `JIRA_EMAIL`, `JIRA_TOKEN` (jira). Set via
@@ -162,7 +175,8 @@ in `decisions`/dedicated fields:
 | `queue.json` | `parse_package` | sorted, tagged review queue |
 | `obj/{NN}-{name}.md` | `review_object` (per object) | that object's implementation notes + findings |
 | `review.md` | `scaffold` + `compile` | **the master deliverable** (incrementally assembled) |
-| `report.json` | `compile` | machine-readable scorecard + verdict |
+| `report.json` | `compile` | machine-readable scorecard + findings + **computed severity floor** |
+| `verdict.json` | `propose_verdict` | `{verdict, rationale, floor}` (agent proposal, floor-confirmed) |
 
 Large tool outputs (a 3000-line process model, a full `analyze_appian_code` report) are saved **by
 reference** via the Phase-9 blackboard MCP (`save_tool_output`), so they never re-enter the context
@@ -181,20 +195,22 @@ START ─▶ resolve_inputs ─▶ (path A?) ──▶ fetch_ticket(agent,jira) 
    ─▶ fetch_context(agent,jarvis: get_jarvis_config+get_application_info+get_review_checklist) ─▶ v_context
    ─▶ validate_app(prog: appUuid+namingConvention, scaffold review.md)
    ─▶ [kb_stale?(prog+gate)] ─▶ [kb_preanalysis(agent,jarvis KB)]        (optional branch)
-   ─▶ next_object(prog router) ──(queue empty)──▶ compile(prog) ─▶ present(prog) ─▶ END
-        │  (queue non-empty: pop → current_object, reset retries)
-        ▼
-      review_object(agent, jarvis[read-only]) ─▶ v_object(validator)
+   ─▶ next_object(prog router) ──(queue empty)──▶ compile(prog: scorecard+severity floor)
+        │  (queue non-empty: pop → current_object, reset retries)                    │
+        ▼                                                                            ▼
+      review_object(agent, jarvis[read-only]) ─▶ v_object(validator)      propose_verdict(agent) ─▶ v_verdict(validator)
         ├─ pass     ─▶ advance(prog: append obj section to review.md, mark reviewed) ─▶ next_object
-        ├─ retry    ─▶ review_object
-        └─ exhaust  ─▶ escalate(gate, escalation)   [approve→advance(skip note) | abort→compile]
+        ├─ retry    ─▶ review_object                                       │  ├─ pass   ─▶ present(prog) ─▶ END
+        └─ exhaust  ─▶ escalate(gate, escalation)                          │  ├─ retry  ─▶ propose_verdict
+             [approve→advance(skip note) | abort→compile]                  │  └─ exhaust─▶ verdict_gate(escalation, human sets verdict) ─▶ present
 ```
 
 **Node kinds:** `resolve_inputs, compute_reference, parse_package, validate_app, kb_stale, next_object,
 advance, compile, present` = **program**; `fetch_ticket, fetch_package, fetch_context, kb_preanalysis,
-review_object` = **agent (kiro_node)**; `v_ticket, v_package, v_context, v_object` = **validator**;
-`kb_gate, escalate` = **gate**. The four agent nodes that must be reliable (`review_object` above all)
-are wrapped by `attach_reliability` (validator + retry + escalation).
+review_object, propose_verdict` = **agent (kiro_node)**; `v_ticket, v_package, v_context, v_object,
+v_verdict` = **validator**; `kb_gate, escalate, verdict_gate` = **gate**. The agent nodes that must be
+reliable (`review_object` and `propose_verdict` above all) are wrapped by `attach_reliability`
+(validator + retry + escalation).
 
 The `graph:` block in `workflow.yaml` mirrors this exactly (node ids == LangGraph node names) so the
 Run-Detail graph renders it (a fallback is derived from `/steps` if omitted, but we declare it).
@@ -315,11 +331,28 @@ Reached when `review_object` exhausts retries on one object. Options `[skip, abo
 `advance` writes a "⚠️ review incomplete for {object}" stub and continues; `abort` → `compile` with a
 partial verdict. (HITL, ADR-021 — a human decides whether one bad object blocks the batch.)
 
-### 6.14 `compile` (program)
+### 6.14 `compile` (program) — aggregation only
 Pure aggregation over the per-object docs + findings: Overall Scorecard, Ticket-Fix Verification
-(Path A only), Cross-Object Analysis, Positives, Recommendations, and the **Verdict** (Approved /
-Approved with Comments / Needs Rework — derived deterministically from the max severity present).
-Append all to `review.md`; write `report.json`; set `status=done`.
+(Path A only), Cross-Object Analysis, Positives, Recommendations. Append all to `review.md`; write
+`report.json` with the per-object findings + the **computed severity floor** (`max_severity` across
+all findings → the *minimum acceptable verdict*, e.g. any Critical/High ⇒ Needs Rework;
+Medium/Low only ⇒ Approved with Comments; none ⇒ Approved). The floor is recorded but NOT yet the
+final verdict — it is the hard cap the agent's proposal is confirmed against (Q2 → option b).
+
+### 6.14b `propose_verdict` (agent, mcp=[], no tools) — the verdict proposer (Q2 = b)
+Reads the assembled `review.md` + `report.json` scorecard from the blackboard and proposes a
+**Verdict + rationale** (Approved / Approved with Comments / Needs Rework). The agent MAY be
+*stricter* than the computed floor (e.g. raise to Needs Rework for a cross-cutting concern the
+severities didn't capture) but is instructed it may NOT be more lenient than the floor. Writes
+`verdict.json` `{verdict, rationale, floor}` by reference and appends a `## Verdict` section to
+`review.md`. This node carries no MCP tools (pure reasoning over blackboard artifacts).
+
+### 6.14c `v_verdict` (validator, target_artifact = `verdict.json`) — program-confirms the proposal
+`check_fn` asserts: (1) `verdict` ∈ {Approved, Approved with Comments, Needs Rework}; (2) `rationale`
+non-empty; (3) **the proposed verdict is not more lenient than `report.json`'s severity floor** (the
+program-confirm — an agent can't approve away a Critical). Fail → `attach_reliability` retries
+`propose_verdict` with the message; on exhaust → `verdict_gate` (escalation) where a human sets the
+final verdict. Pass → `present`.
 
 ### 6.15 `present` (program)
 Finalize: set the review-doc status to Complete; record `decisions.review_doc` pointer +
@@ -339,6 +372,12 @@ Finalize: set the review-doc status to Complete; record `decisions.review_doc` p
 - **Genuinely agentic judgment stays in agents**: implementation-notes prose, checklist evaluation,
   business-logic review of process models, cross-object narrative. These are wrapped by validators
   that check *structure and coverage* (not semantic correctness) — the right boundary.
+- **The final verdict is agent-proposed + program-confirmed (Q2 = b):** the program computes a
+  deterministic **severity floor** (max-severity → minimum acceptable verdict) and the agent proposes
+  the verdict + rationale; `v_verdict` confirms the proposal is a valid enum with a rationale and is
+  **not more lenient than the floor** (an agent cannot approve away a Critical). The agent may be
+  *stricter* than the floor (holistic/cross-cutting judgment); the program guarantees it cannot be
+  laxer. This keeps auditability (the floor is code) while giving the reviewer's narrative authority.
 - The per-object **baseline-version resolution** is a hybrid: the *rule* is deterministic but needs
   `get_version_context` (MCP) mid-review, so it lives in the `review_object` agent with explicit rule
   text + a validator that a diff was obtained or explicitly skipped. *(A future enhancement — a
@@ -395,9 +434,12 @@ workflows/code-review/
 ```
 - **`registry.json`**: add a `code-review` entry — `path: workflows/code-review`,
   `required_mcp: [jarvis, jira]`, `required_cli: []`, roles `[developer, reviewer]`.
-- **`mcp-registry.json`**: (optional) add the read-only `tool_allowlist` to `jarvis` (§2.3).
-- **`META`** keys mirror ERD's, plus `hitl_points: [kb-gate, escalate]`, `required_mcp: [jarvis, jira]`,
-  `artifacts: [jira.json, package.json, checklist.json, review.md, report.json]`,
+- **`mcp-registry.json`**: **no change** — the `jarvis` entry keeps no `tool_allowlist` (decided
+  2026-07-14: future write/deploy workflows need those tools; this workflow's read-only cap is
+  per-node, §2.3).
+- **`META`** keys mirror ERD's, plus `hitl_points: [kb-gate, escalate, verdict-gate]`,
+  `required_mcp: [jarvis, jira]`,
+  `artifacts: [jira.json, package.json, checklist.json, review.md, report.json, verdict.json]`,
   `editable: [inputs, decisions]`, and `execution: {recursion_limit: 150}` (new; consumed by 12-01).
 - `workflow.yaml` must mirror `META` (contract parity lint; `graph:` is a `YAML_ONLY_KEYS` exemption).
 
@@ -407,10 +449,11 @@ workflows/code-review/
 
 Following the ERD test pattern (`set_collect_impl` to stub Kiro; pure functions unit-tested):
 - **Pure functions** (no Kiro): `compute_reference` (changelog → reference_date, all 3 fallbacks),
-  `parse_package` (filter/sort/typeId/SQL-tags), verdict derivation, scorecard aggregation, the
-  per-object-doc parser used by `v_object`.
+  `parse_package` (filter/sort/typeId/SQL-tags), **severity-floor computation** (max-severity →
+  minimum verdict), scorecard aggregation, the per-object-doc parser used by `v_object`.
 - **Validators**: `v_object` — feed synthetic object docs (good; wrong severity; invented checklist
-  item; wrong count; missing `analyze_appian_code`) and assert ok/fail + message.
+  item; wrong count; missing `analyze_appian_code`) and assert ok/fail + message. `v_verdict` — feed
+  proposals (valid; lenient-below-floor → fail; stricter-than-floor → pass; bad enum; empty rationale).
 - **Graph wiring**: build with a stubbed `collect`/`stream` that writes canned tool outputs + a
   findings doc; run a 2-object queue end-to-end; assert the loop advances, resets retries, compiles a
   verdict, and produces `review.md`. Assert the reliability trio retries on a bad object.
@@ -429,8 +472,9 @@ Following the ERD test pattern (`set_collect_impl` to stub Kiro; pure functions 
   loop.** *(Only genesis-side change in the whole phase.)*
 - **12-02 — MVP workflow (genesis-workflows).** Paths A+B, `fetch_package`→`parse_package`→
   `fetch_context`→`validate_app`→ per-object loop (source+diff+`analyze_appian_code`+dynamic checklist+
-  naming/folder) → compile → present. **No KB pre-analysis, no SQL/SMT/i18n.** Reliability trio +
-  escalate gate. Ships a runnable, valuable review.
+  naming/folder) → `compile` (scorecard+floor) → `propose_verdict`→`v_verdict` → `present`. **No KB
+  pre-analysis, no SQL/SMT/i18n.** Reliability trio on `review_object` + `propose_verdict`; escalate +
+  verdict gates. Ships a runnable, valuable review.
 - **12-03 — DB verification.** Add `query_sql` SMT + i18n checks in `review_object` + `v_object` SQL
   assertion. (Needs Appian DB reachable via jarvis creds.)
 - **12-04 — KB pre-analysis + staleness gate.** `kb_check`/`kb_gate`/`kb_preanalysis` branch.
@@ -453,20 +497,27 @@ whole workflow on one credentialed dependency.
   required SQL ran) + retry, but a stubborn agent could loop-to-exhaust → escalate. Acceptable.
 - **R4 — the dynamic checklist is external.** Validators enforce *structure/coverage*, not the
   semantic correctness of each finding (that's the agent's judgment). Align expectations with the user.
-- **R5 — JIRA tool exact name/fields.** Confirm from `jira-mcp-proxy` `tools/list` at build; custom
-  fields (`customfield_10173/10227`) are Appian-JIRA-specific — verify they exist in this instance.
+- **R5 — JIRA tool exact name/fields. ✅ RESOLVED (2026-07-14):** confirmed live via Genesis
+  introspection — `get_jira_issue(issue_key, fields?, expand?)`, read-only, `expand=["changelog"]`
+  supported (§2.2). Custom fields `customfield_10173/10227` are requested by name; existence in this
+  instance is verified at first live run (absent → null, harmless).
 - **R6 — SQL dialect branching.** `query_sql` supports MariaDB + PostgreSQL with different syntax;
   the prompt must branch on `globalSettings.primaryDb`. Both documented; tested against one dialect.
-- **Q1 — registry allowlist vs per-node only?** Recommend per-node `tools=` (always) + optional
-  registry `tool_allowlist` on `jarvis`. Confirm no other workflow needs Jarvis write tools before
-  adding a registry-tier cap.
-- **Q2 — verdict authority.** Derive deterministically from max severity (program), or let the agent
-  propose and a program confirm? Recommend deterministic (program) for auditability.
+- **Q1 — registry allowlist vs per-node only? ✅ RESOLVED (2026-07-14):** per-node `tools=` ONLY.
+  No registry `tool_allowlist` on `jarvis` — future write/deploy workflows need Jarvis's mutating
+  tools, so the registry tier stays open and this workflow enforces read-only structurally per node.
+- **Q2 — verdict authority. ✅ RESOLVED (2026-07-14) → option (b):** agent-**proposed**,
+  program-**confirmed**. `compile` computes a deterministic severity floor; `propose_verdict` (agent)
+  proposes verdict + rationale; `v_verdict` confirms it is a valid enum, has a rationale, and is not
+  more lenient than the floor (agent may be stricter). Exhaust → `verdict_gate` (human sets verdict).
+  See §6.14/6.14b/6.14c.
 
 ## 14. Acceptance criteria
 1. `genesis install` picks up `code-review`; Catalog shows it; launch validates `required_mcp` secrets.
 2. A run against a package URL (Path B) reviews every object one-at-a-time, writes `review.md` with
-   per-object Implementation Notes + Findings + checklist status, and a final Scorecard + Verdict.
+   per-object Implementation Notes + Findings + checklist status, and a final Scorecard + a
+   **verdict that the agent proposed and `v_verdict` confirmed against the severity floor** (a proposal
+   more lenient than the floor is rejected/retried, then escalated to a human).
 3. Each agent review turn is validator-gated (analyze ran, checklist coverage matches, severities
    valid); a bad object retries then escalates to a HITL gate.
 4. The workflow is **incapable of mutating Appian** (read-only tool allowlist; no `pre_mutation` gate
