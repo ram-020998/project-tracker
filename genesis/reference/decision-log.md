@@ -471,3 +471,39 @@ to recover context (best-effort). Single-user/local (ADR-026); Atlas-only MCP fo
 re-open the copilot-orchestrator failure mode ADR-001 exists to prevent. Live-verified end to end
 (real kiro-cli): Genesis questions answered via introspection tools; a "cancel the run" request was
 refused.
+
+---
+
+## ADR-032 — Credit usage is REAL metered data from Kiro ACP (not estimated)
+
+**Status:** Accepted (Phase 11). **Context:** Genesis needs to show users how many credits an agent
+invocation and a whole run consume (and each chat message). The initial assumption — from ACP/Kiro
+docs and GitHub issues (ACP "end-turn token usage" RFD has no stable shape; Kiro#8524 "export
+per-session credits" is an open request; dashboard shows only a monthly cumulative) — was that
+per-turn credits were **not** programmatically available, implying Genesis would have to *estimate*.
+
+**Spike (decisive).** A raw JSON-RPC ACP spike against **kiro-cli 2.12.1** disproved that: Kiro emits
+a custom notification **`_kiro.dev/metadata`**, and the final one of each turn carries
+`meteringUsage: [{value, unit: "credit", unitPlural: "credits"}]` plus `contextUsagePercentage` and
+`turnDurationMs`. Verified **per-turn, not cumulative** (two turns in one persistent session reported
+0.184 then 0.113 credits independently).
+
+**Decision.** Surface **real, metered per-turn credits**; there is **no estimation/pricing engine**
+(the draft's `CreditModel`/`credit-pricing.json` were dropped). The SDK captures the metered value
+into `ResultMessage.usage`/`TurnResult.usage`; genesis-core writes it to node telemetry + the
+`_run` aggregate + the `agent.result` event; genesis aggregates it from `run_events`
+(`aggregate_credits` via `json_extract`) + folds per-node (`fold_steps`); chat persists it on the
+assistant message (`m0003`). Every figure carries a **`provenance`** — `metered` (real), or
+`unavailable`/`partial` when an older kiro-cli omits metering — so the UI shows honest "n/a" gaps and
+never a fabricated number.
+
+**Alternatives considered.** (a) Estimate from tokens/tool-calls via a configurable pricing model —
+rejected as unnecessary and less honest once real data was found; kept only as a mental fallback if a
+future kiro-cli drops metering. (b) A new credits table — rejected (ADR-030: derive from
+`run_events`; chat needs only one additive column).
+
+**Consequences.** Credits are exact to what Kiro bills, at zero estimation risk. The capture is
+tolerant (matches `_kiro.dev/metadata`, sums `unit=="credit"`) and degrades to `unavailable` rather
+than crashing if the shape changes across kiro-cli versions — pinned by an SDK fixture test. Reducer
+hardened so a `None` (unavailable) turn never clobbers an accumulated credit total. Shipped:
+kiro-agent-sdk v0.4.0, genesis-core v0.8.0, genesis v0.20.0.
