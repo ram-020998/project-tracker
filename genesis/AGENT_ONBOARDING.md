@@ -11,9 +11,9 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-14 — genesis v0.20.1**
-> (Phases 9 Agent-Artifact-I/O, 10 Chat-assistant, 11 Credit-tracking all shipped; Phase 12
-> code-review workflow spec drafted).
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-14 — genesis v0.20.2 +
+> genesis-workflows v0.5.0** (Phases 9 Agent-Artifact-I/O, 10 Chat-assistant, 11 Credit-tracking,
+> 12 Appian Code-Review Workflow all shipped).
 
 ---
 
@@ -52,8 +52,8 @@ future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
    glossary, roadmap-and-sequencing, spike-findings.
 7. `specs/` — the plan for each phase. Phases 1–6, the web-revamp (`phase-07-0N-*`), the
    `phase-07-code-review-fixes/` program (01–06), `phase-08-settings-revamp.md`, **`phase-09-agent-artifact-io.md`,
-   `phase-10-chat-assistant.md` (+ `phase-10-.../10-01..07`), `phase-11-credit-usage-tracking.md`** are all
-   **shipped**. `phase-12-code-review-workflow.md` is a **DRAFT** (not built). `specs/backlog/` holds
+   `phase-10-chat-assistant.md` (+ `phase-10-.../10-01..07`), `phase-11-credit-usage-tracking.md`,
+   `phase-12-code-review-workflow.md`** are all **shipped**. `specs/backlog/` holds
    deferred work (the skill-migration program).
 8. `progress/` — the as-built record, one file per phase/item (`phase-01..11-*`). Read the one(s)
    relevant to the area you're touching; they cite commits, tags, CI pipelines, and decisions.
@@ -72,7 +72,7 @@ and the release/versioning protocol.
 
 ---
 
-## 2. Current state (as of genesis v0.20.1)
+## 2. Current state (as of genesis v0.20.2)
 
 Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git`:
@@ -81,18 +81,18 @@ Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 |---|---|---|---|
 | `kiro-agent-sdk` | **v0.4.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`+`allow_fs_write` (10-01); **per-turn credit metering from `_kiro.dev/metadata` → `ResultMessage.usage`/`TurnResult.usage` (11-01)** |
 | `genesis-core` | **v0.8.0** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1` |
-| `genesis` | **v0.20.1** | master | runtime, dist, config, runs, **db (migrations m0001–m0003)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11) |
-| `genesis-workflows` | **v0.4.2** | master | registries (incl. `jarvis`+`jira` MCP), steering, `hello-appian` + `erd-generation`; Atlas read `tool_allowlist` |
+| `genesis` | **v0.20.2** | master | runtime, dist, config, runs, **db (m0001–m0003)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); **worker loop `recursion_limit` from META (12-01)** |
+| `genesis-workflows` | **v0.5.0** | master | registries (incl. `jarvis`+`jira` MCP), steering, `hello-appian` + `erd-generation` + **`code-review` (Phase 12)** |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
-`genesis (v0.20.1) → genesis-core@v0.8.0 → kiro-agent-sdk@v0.4.0`;
-`genesis-workflows → genesis-core@v0.5.0 (runtime) + genesis (dev pin)`.
+`genesis (v0.20.2) → genesis-core@v0.8.0 → kiro-agent-sdk@v0.4.0`;
+`genesis-workflows → genesis-core@v0.5.0 (runtime) + genesis (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.)
 
-**Tests, all green at last release:** genesis **118** pytest · genesis-core **57** · kiro-agent-sdk
-**62** · genesis-workflows **~9** · web **78** Vitest (incl. contract-fixture drift tests + jest-axe).
-ruff clean; eslint clean (0 errors); `tsc` strict clean. CI green on all code repos (genesis has a
-python `genesis` job + a `frontend` job with a stale-bundle guard; the SDK repo has no CI — it is
-validated transitively by core+genesis installing its tag).
+**Tests, all green at last release:** genesis **122** pytest · genesis-core **57** · kiro-agent-sdk
+**62** · genesis-workflows **~22** (incl. 13 code-review) · web **78** Vitest (incl. contract-fixture
+drift tests + jest-axe). ruff clean; eslint clean (0 errors); `tsc` strict clean. CI green on all code
+repos (genesis has a python `genesis` job + a `frontend` job with a stale-bundle guard; the SDK repo
+has no CI — validated transitively by core+genesis installing its tag).
 
 **Milestones (see `roadmap-and-sequencing.md`):**
 - **Phases 1–6 — DONE (M1–M6):** engine + node framework + state/checkpointer/blackboard + MCP
@@ -115,10 +115,14 @@ validated transitively by core+genesis installing its tag).
   (Run Detail), Overview KPI (**Credits Used** replaced Tool-Calls), per chat message + session total.
   Then **v0.20.1**: chat shows the credit count in place of the "Turn complete" chip + a secrets
   atomic-write crash fix (see §7).
-- **Phase 12 — Code-Review Workflow — DRAFT spec** (`phase-12-code-review-workflow.md`): port the
-  Jarvis Appian code-review workflow into Genesis (minus Google-Docs export). NOT started. Needs a small
-  genesis engine change first (raise the loop `recursion_limit`). `jarvis`+`jira` MCP are registered +
-  connected.
+- **Phase 12 — Appian Code-Review Workflow — SHIPPED** (genesis v0.20.2 for 12-01; genesis-workflows
+  v0.5.0 for 12-02..12-05): a deterministic port of the Jarvis code-review process (Google-Docs export
+  excluded). Entry via JIRA ticket / package URL / object names; per-object review loop (diff-aware →
+  `analyze_appian_code` → dynamic checklist → SQL/i18n `query_sql` → RecordType relationships) with a
+  code-enforced PRE-WRITE CHECKPOINT validator; agent-proposed / program-confirmed verdict. Read-only
+  by construction (per-node `@jarvis`/`@jira` allowlists; no registry cap on jarvis). 12-01 added the
+  worker loop `recursion_limit` (from `META.execution.recursion_limit`, default 150). `jarvis`+`jira`
+  MCP registered + connected. Live run against a real ticket still pending.
 - **Backlog:** `specs/backlog/skill-migration-program.md` (45-skill migration; deferred). **Do not start
   backlog/Phase-N work unless asked.**
 
@@ -241,7 +245,8 @@ genesis/genesis/
             run_credits/credits_provenance via json_extract over agent.result — Phase 11**), steps.py
             (fold_steps → per-node summary incl. credits/context_pct), events.py (Event +
             single canonical EventBus — legacy dual bus removed in spec 04), validation.py, worker.py
-            (SUBPROCESS entry; ops run|resume|get_state|update_state|fork; emits JSONL), supervisor.py,
+            (SUBPROCESS entry; ops run|resume|get_state|update_state|fork; emits JSONL; sets the
+            LangGraph `recursion_limit` from `META.execution.recursion_limit`, default 150 — 12-01), supervisor.py,
             manager.py (RunManager: start/pause/resume/cancel/respond/patch_state/fork/list/wait; writes
             canonical events to EventLog + fans out on cbus; `_CANONICAL_CUSTOM` persists agent.result &c
             with node+full payload; pending_gate [durable + checkpoint cold path]; log_events; steps).
@@ -294,7 +299,7 @@ genesis-workflows/
   registry.json (catalog + genesis_core_major=1), mcp-registry.json (REAL internal images:
   appian-atlas [read-only], jarvis [read-write-deploy], appian-data-generator, lcp, jira),
   cli-registry.json, bundles.json, schemas/, steering/01-07, ci/validate_library.py (7-gate publish
-  runner), workflows/{_template, hello-appian, erd-generation, _fixtures/noncompliant}, MIGRATION.md.
+  runner), workflows/{_template, hello-appian, erd-generation, code-review, _fixtures/noncompliant}, MIGRATION.md.
 ```
 
 ---
@@ -393,6 +398,12 @@ genesis-workflows/
   context window — the agent calls `save_tool_output(ref, document=...)` to persist it to the blackboard
   by reference (the per-run ToolOutputStore records every tool result). Prompts instruct "never paste
   tool output into your reply — save it BY REFERENCE".
+- **Workflow graph.py with custom reducer state keys must NOT use `from __future__ import annotations`.**
+  The loader imports graph.py standalone (`spec_from_file_location` → not registered in `sys.modules`),
+  so LangGraph's `get_type_hints()` can't re-resolve stringized annotations — a `class MyState(PlatformState):
+  reviewed: Annotated[list, add]` dies with `NameError: Annotated`. Eager (non-`__future__`) evaluation
+  stores real `Annotated` objects and works. (erd-generation's state has no reducer keys, so it never hit
+  this; the code-review workflow did.) Also: quote YAML flow-scalars containing `?`/`:` (e.g. `label: "Stale?"`).
 
 ---
 
@@ -417,20 +428,16 @@ genesis-workflows/
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
 - **Shipped:** Phases 1–6, the web revamp (7.1), the code-review fix program (01–06), Phase 8 (settings
-  revamp), **Phase 9 (agent artifact I/O), Phase 10 (chat assistant), Phase 11 (credit tracking)**. See
-  `tracker.md` §3/§6 and `reference/roadmap-and-sequencing.md`.
-- **Drafted, not built:** **Phase 12 — Appian Code-Review Workflow** (`specs/phase-12-code-review-workflow.md`):
-  port the Jarvis code-review workflow into Genesis (minus Google-Docs export) as a deterministic
-  LangGraph workflow. First sub-phase (12-01) is a small genesis engine change (raise the loop
-  `recursion_limit`); then an MVP workflow using the registered `jarvis`+`jira` MCP (read-only tool
-  allowlist). `jarvis`+`jira` are connected in the app; secrets configured by the user.
+  revamp), **Phase 9 (agent artifact I/O), Phase 10 (chat assistant), Phase 11 (credit tracking),
+  Phase 12 (Appian code-review workflow)**. See `tracker.md` §3/§6 and `reference/roadmap-and-sequencing.md`.
 - **Backlog (`specs/backlog/`):** the **skill → workflow migration program** (the 45 solutions-copilot
   skills, waves A–D) — deferred; the methodology is intact and resumes when scheduled.
-- **Open follow-ups (may be assigned):** build Phase 12; restart the running `genesis serve` to load
-  v0.20.1 + the Phase 11 credit UI; harden the other JSON stores' writes to be atomic (like secrets);
-  a live end-to-end credit check against a real workflow run + chat turn; **rotate the shared
-  `GITLAB_PUSH_TOKEN`** + refresh the expired Artifactory npm token; the `lcp` MCP image placeholder
-  (`<lcp-image>`) in `mcp-registry.json`.
+- **Open follow-ups (may be assigned):** the Phase-12 **live run** against a real GAMS ticket/package
+  (needs a `genesis serve` restart on ≥ v0.20.2 + the connected jarvis/jira secrets) to confirm per-object
+  findings, checklist coverage, SQL checks, the diff baseline rule, and metered credits; restart the
+  running `genesis serve` to load v0.20.x; harden the other JSON stores' writes to be atomic (like
+  secrets); **rotate the shared `GITLAB_PUSH_TOKEN`** + refresh the expired Artifactory npm token; the
+  `lcp` MCP image placeholder (`<lcp-image>`) in `mcp-registry.json`.
 
 **Do not start backlog or a new phase unless explicitly asked.**
 
