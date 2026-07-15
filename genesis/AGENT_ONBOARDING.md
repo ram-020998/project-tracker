@@ -11,13 +11,14 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-15 — genesis v0.21.0 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-15 — genesis v0.22.0 +
 > genesis-core v0.8.1 + kiro-agent-sdk v0.5.0 + genesis-workflows v0.5.3** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow all shipped). **ACTIVE: Phase 13
-> — Chat Copilot & Run Orchestrator IN PROGRESS — 13-01/13-02/13-03 SHIPPED (copilot mode works: launch +
-> supervise runs via the control MCP server, human-confirmed mutations); 13-04 supervision bridge, 13-05
-> slash/HITL UI, 13-06 safety+release remain.** If your session continues Phase 13, read §9's Phase-13
-> block + `specs/phase-13-copilot-orchestrator/13-04..13-06` + ADR-033 + `progress/phase-13-copilot-orchestrator.md`.
+> — Chat Copilot & Run Orchestrator IN PROGRESS — 13-01/13-02/13-03/13-04 SHIPPED (copilot launches +
+> supervises runs: control MCP server, human-confirmed mutations, and gate/terminal notifications + nudges
+> via the run-supervision bridge); 13-05 slash/HITL UI, 13-06 safety+release remain.** If your session
+> continues Phase 13, read §9's Phase-13 block + `specs/phase-13-copilot-orchestrator/13-05..13-06` +
+> ADR-033 + `progress/phase-13-copilot-orchestrator.md`.
 
 ---
 
@@ -88,14 +89,14 @@ Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 |---|---|---|---|
 | `kiro-agent-sdk` | **v0.5.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)** |
 | `genesis-core` | **v0.8.1** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1` (v0.8.1 = sdk pin→v0.5.0, no code change) |
-| `genesis` | **v0.21.0** | master | runtime, dist, config, runs, **db (m0001–m0004)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot chat mode — control MCP server + permission bridge + run↔session link (Phase 13-01/02/03)** |
+| `genesis` | **v0.22.0** | master | runtime, dist, config, runs, **db (m0001–m0005)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot: control MCP server + permission bridge + run↔session link + run-supervision bridge (Phase 13-01..04)** |
 | `genesis-workflows` | **v0.5.3** | master | registries (incl. `jarvis`+`jira` MCP), steering, `hello-appian` + `erd-generation` + **`code-review` (Phase 12; v0.5.1–v0.5.3 = live-data robustness fixes)** |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
-`genesis (v0.21.0) → genesis-core@v0.8.1 → kiro-agent-sdk@v0.5.0`;
+`genesis (v0.22.0) → genesis-core@v0.8.1 → kiro-agent-sdk@v0.5.0`;
 `genesis-workflows → genesis-core@v0.5.0 (runtime) + genesis (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) The Phase-13 SDK `permission_mode="ask"` bridge (v0.5.0) is now pinned across genesis + genesis-core (bumped together since both pin the SDK directly).
 
-**Tests, all green at last release:** genesis **158** pytest · genesis-core **57** · kiro-agent-sdk
+**Tests, all green at last release:** genesis **166** pytest · genesis-core **57** · kiro-agent-sdk
 **62** · genesis-workflows **~22** (incl. 13 code-review) · web **78** Vitest (incl. contract-fixture
 drift tests + jest-axe). ruff clean; eslint clean (0 errors); `tsc` strict clean. CI green on all code
 repos (genesis has a python `genesis` job + a `frontend` job with a stale-bundle guard; the SDK repo
@@ -143,7 +144,7 @@ has no CI — validated transitively by core+genesis installing its tag).
   (MCP · CLI · GitLab · Environments · General). Left nav collapsed by default.
 - **Data plane:** durable SQLite (`~/.genesis/genesis.db`, WAL) via `genesis/db/` migrations
   (m0001 runs+events, m0002 chat, m0003 chat_usage, m0004 copilot [chat_sessions.mode +
-  chat_run_links + chat_permissions]; `current_version=4`); runs + full conversation +
+  chat_run_links + chat_permissions], m0005 supervision [chat_notifications]; `current_version=5`); runs + full conversation +
   checkpoints + chat sessions/messages persist across restart; retention available.
 - **Credits (Phase 11):** every agent turn (workflow node OR chat message) reports real credits from
   Kiro's `_kiro.dev/metadata.meteringUsage`; aggregated per-run (`eventlog.aggregate_credits` via
@@ -235,7 +236,7 @@ genesis/genesis/
             + tx()); runner.py (Migration + migrate() + current_version/pending + contiguity guard);
             migrations/ (m0001_baseline adopts runs+run_events; m0002_chat adds chat_sessions+chat_messages;
             m0003_chat_usage adds chat_messages.usage; m0004_copilot adds chat_sessions.mode +
-            chat_run_links + chat_permissions — current_version=4). Schema is owned HERE (spec 01).
+            chat_run_links + chat_permissions; m0005_supervision adds chat_notifications — current_version=5). Schema is owned HERE (spec 01).
   runtime/  settings.py (Settings: state_dir ~/.genesis, artifacts_dir ~/Genesis/runs, db_path,
             library_dir, lockfile_path, secrets_path, environments_path, custom_mcp_path,
             custom_cli_path, retention_keep_last/max_age_days, retention_on_start); checkpoint.py
@@ -487,8 +488,10 @@ genesis-workflows/
     spike confirmed; genesis/core pin bump deferred to 13-03)** → **13-02 control server + ADR-033 —
     BUILT (genesis/mcp/control_server.py on master `b6edf7c`; requests not httpx; token gating deferred to
     13-06)** → **13-03 copilot chat mode + run↔session link (`m0004`) + coordinated sdk-v0.5.0 pin bump —
-    SHIPPED (genesis v0.21.0 + genesis-core v0.8.1; the 13-02 control server ships here, now live)** → 13-04 supervision
-    bridge → 13-05 slash launch + in-chat HITL/confirm UI → 13-06 safety/audit/advanced-gate + live acceptance
+    SHIPPED (genesis v0.22.0 + genesis-core v0.8.1; the 13-02 control server ships here, now live)** → **13-04
+    run-supervision bridge — SHIPPED (genesis v0.22.0: ChatRunSupervisor observes gate/terminal for linked
+    runs → durable notifications [m0005] + per-session SSE + deterministic system nudge; level-triggered
+    reconcile + SLA)** → 13-05 slash launch + in-chat HITL/confirm UI → 13-06 safety/audit/advanced-gate + live acceptance
     + release. `genesis-core` unchanged. After any `web/src` change: `npm run build` + commit `web/static`.
 - **Backlog (`specs/backlog/`):** the **skill → workflow migration program** (the 45 solutions-copilot
   skills, waves A–D) — deferred; the methodology is intact and resumes when scheduled.

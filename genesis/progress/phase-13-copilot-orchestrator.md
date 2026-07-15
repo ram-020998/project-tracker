@@ -202,3 +202,48 @@ ruff-clean.** (Pre-existing test-only lint in other files left as-is — CI lint
 directly, they were bumped together: **genesis-core v0.8.1** (SDK pin v0.4.0→v0.5.0, dependency-only, no code
 change) → **genesis v0.21.0** (SDK pin→v0.5.0, core pin→v0.8.1, copilot mode; version + FastAPI version
 string bumped). 13-02's control server ships here (it was inert on master until now). CI verified on both.
+
+
+---
+
+## 13-04 — Run-supervision bridge (SHIPPED — genesis v0.22.0)
+
+Makes the copilot **sense** what happens to a run it started without staying alive.
+
+**Mechanism.** `RunManager` gained a lightweight `add_event_observer(cb)` hook invoked in `_log` for every
+canonical event. `ChatRunSupervisor` (`genesis/chat/supervisor.py`) registers an observer; for a
+**session-linked** run (via `chat_run_links`, 13-03) hitting `gate.awaiting` or a terminal `run.final` it:
+(1) writes a durable `chat_notification` (m0005; UNIQUE `dedup_key = run_id:kind:seq`); (2) pushes a
+`run.notification` on a **per-session notification SSE**; (3) injects a **deterministic system nudge**
+(role=`system`) into the transcript so the copilot surfaces the gate + options. The user replies → the
+agent calls `respond_to_gate` (confirm card, 13-03) → the run resumes.
+
+**Threading.** The observer fires on the **worker reader thread** (`RunManager._log`), so it does
+thread-safe DB writes then schedules the SSE push + nudge on the captured app loop via
+`loop.call_soon_threadsafe` (bound at FastAPI startup; runs inline when no loop is bound, e.g. tests).
+
+**Level-triggered robustness.** `reconcile(session|all)` recovers a pending gate / missed terminal from
+`RunManager.pending_gate` + `RunStore` + `eventlog.latest` — run at **startup** (all links) and on **each
+notification-stream connect** (one session). Idempotent: reconcile reuses the event's `seq` in the dedup
+key, so a live event + a reconcile of the same gate nudge exactly once (survives restart / dropped stream).
+
+**SLA.** `check_sla(now)` re-nudges a gate left unconsumed past `copilot_gate_sla_minutes` (env, default 0 =
+off) with a windowed dedup key; it **never auto-answers** — timeout only escalates attention.
+
+**Design decision (flagged).** The "nudge" is a **deterministic system message**, not an LLM-generated
+turn: it surfaces the gate + options with **no surprise credit spend** and no risk of a hallucinated nudge;
+the agent does the real work when the user replies. (The spec said "nudge turn" — this is a cleaner,
+cheaper realization of the same intent.)
+
+**API.** `GET /api/chat/sessions/{id}/notifications` (+`?unconsumed`), `POST …/notifications/{id}/ack`,
+`GET …/notifications/stream` (SSE: reconcile + SLA on connect, replay unconsumed, tail live).
+
+**Tests.** `tests/test_supervisor.py` (8, `FakeRunManager`): gate on a linked run notifies + nudges once +
+dedups on replay; unlinked run ignored; terminal notifies once; non-terminal `run.final` marker skipped;
+reconcile recovers a pending gate after a simulated restart (idempotent); reconcile + live same-gate no
+double; SLA re-nudge past the window; SLA disabled by default. Updated `test_db.py` + `test_chat_store.py`
+for schema **version 5** (synthetic next-migration bumped to 6). **Full genesis suite 166 passed; genesis
+package ruff-clean.** Exposed `app.state.supervisor`.
+
+**Release.** genesis **v0.22.0** (`a51c79b`). No SDK/core change (observer hook + supervisor + m0005 are all
+in genesis). Bundles nothing else.
