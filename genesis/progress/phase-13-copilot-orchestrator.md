@@ -247,3 +247,45 @@ package ruff-clean.** Exposed `app.state.supervisor`.
 
 **Release.** genesis **v0.22.0** (`a51c79b`). No SDK/core change (observer hook + supervisor + m0005 are all
 in genesis). Bundles nothing else.
+
+
+---
+
+## 13-05 — Slash-command launch & in-chat HITL/confirm UI (SHIPPED — genesis v0.23.0, frontend)
+
+The copilot UX — the whole launch → supervise → decide loop happens in the conversation.
+
+**Slash palette** (`Composer.tsx`): in copilot mode, typing `/` opens a fuzzy list of installed workflows
+(`useInstalled` + `prereqFor` → unready ones annotated "needs setup"); arrow/enter/click selects one and
+opens the **LaunchDialog**; Escape/newline dismisses. Read-only mode has no palette.
+
+**LaunchDialog** (`LaunchDialog.tsx`): reuses the 07-05 `buildLaunchForm`/`toRunInputs` to render the
+workflow's `inputs_schema` (react-hook-form + zod). On submit it does **not** call `/api/runs` — it emits a
+`start_run` **intent chat turn** (`Please start the "<name>" workflow (id: …) with these inputs …`) so the
+KIRO AGENT starts the run (ADR-033); the agent's untrusted `start_run` then raises a confirm card. Dialog
+submit + confirm card = the human confirmation.
+
+**In-chat cards** (`cards.tsx`): **PermissionCard** (from the live turn's `permission.request`; Allow picks
+the allow-kind optionId, Deny → null → `POST …/permissions/{tcid}`; shows a resolved state after);
+**GateCard** (from a `run.notification` kind=gate; option buttons + a feedback textarea compose a decision
+message the agent relays); **TerminalCard** (kind=final; status + a Run-Detail link). **SupervisedRunsStrip**
+lists the session's linked runs (`GET /chat/runs`) with live status dots ("awaiting you" highlighted).
+
+**Wiring** (`ChatThread.tsx`): a per-session **mode toggle** (`useSetMode`); `SupervisedRunsStrip` + a
+`useSessionNotifications` stream (opens the notification SSE, seeds unconsumed, dedups by id) rendering the
+gate/terminal cards; `SystemNudge` renders `role=system` transcript messages (the 13-04 nudges);
+`LivePermissions` derives confirm cards from the live turn events. Read-only chat is visually + functionally
+unchanged.
+
+**SSE**: `readSse` made generic (`<T=ChatEvent>`) so it serves both the turn stream (ChatEvent, incl.
+`permission.request`/`permission.resolved`) and the per-session `run.notification` stream. New API methods:
+`setMode`, `resolvePermission`, `sessionRuns`, `notifications`/`ackNotification`, `streamNotifications`.
+Types: `ChatSessionMode`, `ChatMessage.role +system`, `RunNotification`, `SessionRunRow`.
+
+**Tests.** `copilot.test.tsx` (11): readSse run.notification; palette lists/filters/picks + no-palette in
+read-only; LaunchDialog schema→onLaunch inputs; PermissionCard allow→optionId/deny→null + resolved state;
+GateCard option→decision text; TerminalCard status+link; SupervisedRunsStrip status mapping + empty + a11y.
+**Full web suite 89 passed** (was 78); lint 0 errors, tsc clean, jest-axe green.
+
+**Release.** genesis **v0.23.0** (`e74e896`); frontend-only but still a genesis release (`web/static`
+rebuilt + committed — the CI stale-bundle guard requires it). No SDK/core change.
