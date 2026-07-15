@@ -507,3 +507,44 @@ tolerant (matches `_kiro.dev/metadata`, sums `unit=="credit"`) and degrades to `
 than crashing if the shape changes across kiro-cli versions — pinned by an SDK fixture test. Reducer
 hardened so a `None` (unavailable) turn never clobbers an accumulated credit total. Shipped:
 kiro-agent-sdk v0.4.0, genesis-core v0.8.0, genesis v0.20.0.
+
+
+## ADR-033 — The Chat copilot may operate runs (human-confirmed, run-management layer only), never owns control flow
+
+**Status:** Proposed (Phase 13 — planning). **Context:** Phase 10 made Chat strictly read-only
+(ADR-031). Users want a **copilot** that starts workflows from chat and supervises them (sensing HITL
+gates, relaying decisions). This appears to collide with **ADR-001** (LangGraph owns control flow;
+agents never orchestrate) and **ADR-031** (chat is read-only).
+
+**Decision.** Distinguish two layers. **Workflow control flow** (which node runs next, gates, retries,
+loops) stays owned by **LangGraph** (ADR-001, unchanged). **Run management** (start a run, read its
+status, answer its gates, cancel) is the **operator layer** — what a human already does in the Runs UI.
+The chat copilot becomes a **second operator client** at that layer, via a write-capable **Genesis
+Control MCP server** that *proxies the existing `RunManager` API* (it adds no run logic; `RunManager`
+stays the single source of truth). Constraints:
+1. **Run-management layer only** — start / read status / read + answer gates / cancel. The copilot never
+   alters graph edges, node order, retries, or gate placement; it cannot bypass or auto-approve a
+   workflow's own HITL gate — it only **relays** the human's decision to it.
+2. **Every mutation is human-confirmed** — `start_run` via the schema-driven launch dialog; `respond_to_gate`
+   / `cancel_run` via a per-call confirm card. This uses ACP's native `session/request_permission`: mutating
+   control tools are left **untrusted**, so each call prompts; a new SDK `permission_mode="ask"` bridge
+   routes the prompt to the chat UI (fail-closed on timeout). No dependence on MCP elicitation.
+3. **No config / secrets / registry / workflow-definition / deploy access** — the control tool set excludes
+   all of these (ADR-029 authority-by-tool-set).
+4. **Auditable** — every agent-initiated action is logged with its confirming user decision.
+5. **Read-only default** — a session is read-only until the user launches/toggles copilot; a global
+   kill-switch reverts everything to read-only.
+
+**Alternatives considered.** (a) Let the chat agent be the orchestrator (drive workflow steps itself) —
+rejected: violates ADR-001, discards LangGraph's durability/checkpointing, and is the exact
+solutions-copilot anti-pattern Genesis exists to replace. (b) UI-mediated pending-action confirmation
+(mutating tool returns "pending", the UI confirms, a release endpoint executes) — kept as the **fallback**
+if the 13-01 spike shows kiro-cli does not fire `request_permission` for untrusted MCP tools. (c) MCP
+elicitation for confirmation — rejected (kiro-cli client support unconfirmed; the ACP permission
+mechanism already exists).
+
+**Consequences.** ADR-031 is **refined** (chat is read-write at the run-management layer, human-gated),
+ADR-001 is **preserved** (agent ≠ workflow engine — it calls the same durable API a human clicks). The
+copilot is a *supervised operator*, not an autonomous agent. Matches the industry-standard "agents
+orchestrate; a durable engine executes" pattern. Planned: kiro-agent-sdk (permission bridge) → genesis
+(control server + copilot mode + supervision bridge + web).
