@@ -11,9 +11,12 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-14 — genesis v0.20.2 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-15 — genesis v0.20.2 +
 > genesis-workflows v0.5.3** (Phases 9 Agent-Artifact-I/O, 10 Chat-assistant, 11 Credit-tracking,
-> 12 Appian Code-Review Workflow all shipped).
+> 12 Appian Code-Review Workflow all shipped). **ACTIVE NEXT WORK: Phase 13 — Chat Copilot & Run
+> Orchestrator (spec DRAFTED, spike-first, not started).** If your session is to implement Phase 13,
+> read §9's Phase-13 block + `specs/phase-13-copilot-orchestrator.md` (umbrella) + `…/13-01..13-06` +
+> ADR-033 FIRST, then start with the 13-01 spike.
 
 ---
 
@@ -41,8 +44,9 @@ future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
 2. `tracker.md` — the master record. **Read §6 STATUS LOG top-down** (it is the running history and
    the source of truth for "what is done"); §2 has the locked decisions Q1–Q14; §3 is the phase index.
 3. `specs/00-architecture-overview.md` — layers, domain model, node taxonomy, state/blackboard rule.
-4. `reference/decision-log.md` — **ADR-001…032** (the "why"). Every non-negotiable lives here.
-   (Recent: ADR-031 Chat is read-only; ADR-032 credits are REAL metered data from Kiro ACP.)
+4. `reference/decision-log.md` — **ADR-001…033** (the "why"). Every non-negotiable lives here.
+   (Recent: ADR-031 Chat is read-only; ADR-032 credits are REAL metered data; ADR-033 **proposed** —
+   the Chat copilot may operate runs at the run-management layer, human-confirmed, Phase 13.)
 5. `reference/coding-standards.md` — enforcement-anchored standards. §1 is the hard floor (lints/
    typecheck/CI gates that fail the build); §2–§6 are Python/frontend/testing conventions + the
    Definition of Done. When it conflicts with an ADR, the ADR wins; if a task needs a deviation, flag it.
@@ -53,7 +57,9 @@ future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
 7. `specs/` — the plan for each phase. Phases 1–6, the web-revamp (`phase-07-0N-*`), the
    `phase-07-code-review-fixes/` program (01–06), `phase-08-settings-revamp.md`, **`phase-09-agent-artifact-io.md`,
    `phase-10-chat-assistant.md` (+ `phase-10-.../10-01..07`), `phase-11-credit-usage-tracking.md`,
-   `phase-12-code-review-workflow.md`** are all **shipped**. `specs/backlog/` holds
+   `phase-12-code-review-workflow.md`** are all **shipped**. **`phase-13-copilot-orchestrator.md`
+   (+ `phase-13-copilot-orchestrator/13-01..13-06`) is a DRAFT — the active next work (planning only,
+   spike-first).** `specs/backlog/` holds
    deferred work (the skill-migration program).
 8. `progress/` — the as-built record, one file per phase/item (`phase-01..11-*`). Read the one(s)
    relevant to the area you're touching; they cite commits, tags, CI pipelines, and decisions.
@@ -324,6 +330,7 @@ genesis-workflows/
 - **ADR-030** — persistence stays **SQLite**; move to Postgres/pgvector only on an explicit trigger (multi-user, transcript RAG, or heavy analytics). Repositories keep DB-agnostic signatures so the seam stays cheap.
 - **ADR-031** — **Chat is a read-only assistant** (never orchestrates): it observes/answers, never drives or mutates. Enforced (defense in depth): `trust_tools` allowlist of read tools only + SDK `permission_mode="auto_deny"` + `allow_fs_write=False` + a read-only `genesis.db` connection in the introspection server. kiro-cli matches MCP tools by the **namespaced** `@server/tool` name — build allowlists as `@server/<tool>`. Chat runs in-process (no subprocess worker; ADR-012 is about workflow Python).
 - **ADR-032** — **credit usage is REAL metered data from Kiro ACP** (`_kiro.dev/metadata.meteringUsage`, verified per-turn not cumulative), NOT estimated — there is no pricing engine. SDK captures it → telemetry + `agent.result` + `run_events`/`chat_messages.usage`. Every figure carries `provenance` (`metered`/`partial`/`unavailable`); the UI shows honest "n/a", never a fabricated number.
+- **ADR-033 (PROPOSED — Phase 13)** — the **Chat copilot may operate runs** (start / read status / answer gates / cancel) at the **run-management layer only**, but (a) LangGraph still owns each workflow's control flow (ADR-001 intact — the copilot calls the same `RunManager` API a human clicks, it is NOT the workflow engine), (b) **every mutation is human-confirmed** (launch dialog for `start_run`; per-call confirm card for `respond_to_gate`/`cancel_run`, via the untrusted-tool → `session/request_permission` → SDK `permission_mode="ask"` bridge), (c) it can NEVER auto-approve/bypass a workflow's own HITL gate — only relay the human's decision, (d) NO config/secret/registry/workflow-definition/deploy tools, (e) read-only default + global kill-switch. Refines ADR-031; preserves ADR-001. Not yet accepted — implement per the Phase 13 specs.
 
 **Key implementation contracts:**
 - Node fns are `async fn(state, config: RunnableConfig)`. LangGraph injects `config` only when the param is annotated `RunnableConfig`; nodes read ctx via `ctx_from_config(config)`.
@@ -444,6 +451,39 @@ genesis-workflows/
 - **Shipped:** Phases 1–6, the web revamp (7.1), the code-review fix program (01–06), Phase 8 (settings
   revamp), **Phase 9 (agent artifact I/O), Phase 10 (chat assistant), Phase 11 (credit tracking),
   Phase 12 (Appian code-review workflow)**. See `tracker.md` §3/§6 and `reference/roadmap-and-sequencing.md`.
+- **ACTIVE NEXT WORK — Phase 13: Chat Copilot & Run Orchestrator (spec DRAFTED, spike-first, not started).**
+  Read `specs/phase-13-copilot-orchestrator.md` (umbrella) + `phase-13-copilot-orchestrator/13-01..13-06`
+  + **ADR-033** before touching code. **Goal:** evolve read-only Chat (Phase 10) into a copilot — type `/`
+  in chat → pick a workflow → schema-driven inputs → the Kiro agent **starts the run** and **supervises**
+  it (senses HITL gates, presents options, relays the user's decision, reports outcomes) without staying
+  alive. **Architecture (decided, code-grounded):**
+  - **Genesis Control MCP server** (`genesis/mcp/control_server.py`) — a write-capable sibling of the
+    read-only `introspection_server`, but a **thin MCP→HTTP facade over `/api`** (`POST /api/runs`, `GET
+    /api/runs/{id}`(+`.gate`), `/respond`, `/cancel`, `/api/catalog`, `GET /api/workflows/{id}`) so
+    `RunManager` stays the single source of truth. Tools: `list_launchable_workflows`,
+    `get_workflow_inputs_schema`, `check_launch_readiness`, `start_run`, `get_run_status`, `get_run_steps`,
+    `get_pending_gate`, `respond_to_gate`, `cancel_run`, `list_session_runs`. NO config/secret/registry/deploy tools.
+  - **Human-confirmed mutations via ACP's native permission mechanism** — the SDK permission model is binary
+    (`auto_approve`/`auto_deny`) and *trusted tools skip the prompt*. So keep **read tools trusted (silent)**
+    and leave **mutating tools UNTRUSTED** → kiro-cli fires `session/request_permission` per call → a new SDK
+    **`permission_mode="ask"`** + async `on_permission` callback (13-01) routes it to a **chat confirm card**
+    (fail-closed on timeout). **Load-bearing spike (13-01, do FIRST):** prove kiro-cli actually fires
+    `request_permission` for untrusted MCP tools; if not, use the ADR-033 fallback (UI-mediated pending-action confirm).
+  - **Event-driven supervision** — a `ChatRunSupervisor` (app process) subscribes to `RunManager`'s EventBus
+    for **session-linked runs** (`m0004 chat_run_links`); on `gate.awaiting`/`run.final` it emits a notification
+    + a proactive **nudge turn** so the copilot surfaces the gate + options; **level-triggered reconcile** from
+    durable state (`pending_gate` + `EventLog`) on restart (don't rely on the live subscription). Nudges queue
+    behind the session lock + de-dup by `(run_id, gate_node, raised_at)`.
+  - **Slash UX** — Composer `/` palette from the catalog; **reuse the 07-05 launch form** for schema inputs;
+    on submit the UI hands the agent the `start_run` action (agent is the actor) → confirm card → run linked +
+    supervised. In-chat cards: permission-confirm, gate, terminal; a supervised-runs strip.
+  - **ADR-033 reconciliation:** ADR-001 preserved (LangGraph still owns each workflow's control flow; copilot
+    = operator at the run-management layer = what a human does in the Runs UI); ADR-031 refined (read-write at
+    that layer, every mutation human-confirmed, no config/secret/deploy, read-only default + kill-switch).
+  - **Sub-phase order + release chain:** 13-01 SDK permission bridge (kiro-agent-sdk minor) → 13-02 control
+    server + ADR-033 (genesis) → 13-03 copilot chat mode + run↔session link (`m0004`) → 13-04 supervision
+    bridge → 13-05 slash launch + in-chat HITL/confirm UI → 13-06 safety/audit/advanced-gate + live acceptance
+    + release. `genesis-core` unchanged. After any `web/src` change: `npm run build` + commit `web/static`.
 - **Backlog (`specs/backlog/`):** the **skill → workflow migration program** (the 45 solutions-copilot
   skills, waves A–D) — deferred; the methodology is intact and resumes when scheduled.
 - **Open follow-ups (may be assigned):** the Phase-12 **live run** against a real GAMS ticket/package
