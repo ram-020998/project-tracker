@@ -511,7 +511,8 @@ kiro-agent-sdk v0.4.0, genesis-core v0.8.0, genesis v0.20.0.
 
 ## ADR-033 — The Chat copilot may operate runs (human-confirmed, run-management layer only), never owns control flow
 
-**Status:** Proposed (Phase 13 — planning). **Context:** Phase 10 made Chat strictly read-only
+**Status:** **Accepted** (Phase 13 — SHIPPED, 13-01..13-06; genesis v0.24.0 + kiro-agent-sdk v0.5.0).
+**Context:** Phase 10 made Chat strictly read-only
 (ADR-031). Users want a **copilot** that starts workflows from chat and supervises them (sensing HITL
 gates, relaying decisions). This appears to collide with **ADR-001** (LangGraph owns control flow;
 agents never orchestrate) and **ADR-031** (chat is read-only).
@@ -548,3 +549,16 @@ ADR-001 is **preserved** (agent ≠ workflow engine — it calls the same durabl
 copilot is a *supervised operator*, not an autonomous agent. Matches the industry-standard "agents
 orchestrate; a durable engine executes" pattern. Planned: kiro-agent-sdk (permission bridge) → genesis
 (control server + copilot mode + supervision bridge + web).
+
+**As-built (SHIPPED).** All six sub-phases delivered: 13-01 SDK `permission_mode="ask"` + `on_permission`
+bridge (kiro-agent-sdk v0.5.0, spike-confirmed); 13-02 Genesis Control MCP server (thin proxy over
+`/api`, run-management tools only); 13-03 copilot chat mode + run↔session link (`m0004`) + the
+permission→chat bridge; 13-04 `ChatRunSupervisor` (gate/terminal → durable notifications `m0005` +
+per-session SSE + system nudge, level-triggered reconcile + SLA); 13-05 the slash-launch/HITL web UI;
+13-06 the safety/audit hardening — global kill-switch + per-session concurrency/rate limits + workflow
+allow/deny (enforced app-side, gated on the control token; browser Runs-UI unaffected), the
+`copilot_actions` audit trail (`m0006`, proposal→confirmation→outcome), and the structural guarantee
+that `pre_mutation`/any gate is never auto-approved (the copilot only relays via the always-confirmed,
+never-trusted `respond_to_gate`). The R1 fallback (UI-mediated pending-action confirmation) was NOT
+needed — the spike confirmed kiro-cli fires `request_permission` for untrusted MCP tools. Live
+acceptance against real kiro-cli remains a manual step (can't be driven headlessly).

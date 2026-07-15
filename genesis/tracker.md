@@ -90,7 +90,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
 | 10 | `specs/phase-10-chat-assistant.md` (+ `phase-10-chat-assistant/10-01..10-07`) | Chat assistant ✅ | Read-only conversational Chat page: talk to Kiro (Atlas read MCP) + query all Genesis data via a read-only introspection MCP server (runs/failures/progress/health). Persisted, deletable sessions; single-user. **Shipped — sdk v0.3.0, genesis-core v0.7.0, genesis v0.19.0; ADR-031; spike + live-verified.** |
 | 11 | `specs/phase-11-credit-usage-tracking.md` | Credit & Usage Tracking ✅ | Real, metered per-turn Kiro credits (ACP `_kiro.dev/metadata.meteringUsage`, spike-verified per-turn) surfaced everywhere: per agent node + run-total (run detail), Overview KPI (replaces Tool-Calls), per chat message + session total. SDK captures usage → telemetry/`agent.result` → `run_events`/`fold_steps`/`aggregate_credits` → UI (`formatCredits`/`CreditBadge`). **Shipped — sdk v0.4.0, genesis-core v0.8.0, genesis v0.20.0; m0003; ADR-032.** |
 | 12 | `specs/phase-12-code-review-workflow.md` | Appian Code-Review Workflow ✅ | Deterministic port of the Jarvis code-review process (Google-Docs export excluded): entry via JIRA ticket / package URL / object names; per-object review loop (diff-aware → `analyze_appian_code` → dynamic checklist → SQL/i18n) → agent-proposed / program-confirmed verdict. Read-only by construction (per-node `@jarvis`/`@jira` allowlists). **Shipped — genesis v0.20.2 (worker loop `recursion_limit`, 12-01) + genesis-workflows v0.5.3 (`code-review` workflow, 12-02..12-05; v0.5.1–v0.5.3 = live-data robustness fixes).** |
-| 13 | `specs/phase-13-copilot-orchestrator.md` (+ `phase-13-copilot-orchestrator/13-01..13-06`) | Chat Copilot & Run Orchestrator 🚧 | Evolve read-only Chat into a **copilot**: slash-command to launch any workflow (schema-driven inputs), the Kiro agent **starts the run** and **supervises** it (senses HITL gates, relays the user's decision, reports outcomes) without staying alive. A write-capable **Genesis Control MCP server** (proxies `RunManager` API), human-confirmed mutations via a new SDK `permission_mode="ask"` bridge, and an event-driven supervision bridge (gate/terminal → proactive chat nudges). **ADR-033** (copilot = run-operator, human-gated, LangGraph still owns control flow). **IN PROGRESS: 13-01..13-05 SHIPPED — copilot fully usable end-to-end (slash-launch → confirm → supervise gates/terminals in-chat) at genesis v0.23.0 + genesis-core v0.8.1; only 13-06 (safety/audit/advanced-gate + live acceptance + finalize ADR-033) remains.** |
+| 13 | `specs/phase-13-copilot-orchestrator.md` (+ `phase-13-copilot-orchestrator/13-01..13-06`) | Chat Copilot & Run Orchestrator 🚧 | Evolve read-only Chat into a **copilot**: slash-command to launch any workflow (schema-driven inputs), the Kiro agent **starts the run** and **supervises** it (senses HITL gates, relays the user's decision, reports outcomes) without staying alive. A write-capable **Genesis Control MCP server** (proxies `RunManager` API), human-confirmed mutations via a new SDK `permission_mode="ask"` bridge, and an event-driven supervision bridge (gate/terminal → proactive chat nudges). **ADR-033** (copilot = run-operator, human-gated, LangGraph still owns control flow). **COMPLETE: Phase 13 shipped in full (13-01..13-06) — the Chat copilot launches, confirms every mutation, supervises gates/terminals in-chat, and is safety-hardened (kill-switch + concurrency/rate/allow-deny + audit trail); genesis v0.24.0 + kiro-agent-sdk v0.5.0 + genesis-core v0.8.1; ADR-033 Accepted. Only manual live-acceptance vs. real kiro-cli remains.** |
 | — | `specs/backlog/skill-migration-program.md` | ⏸️ Backlog — Skill → Workflow Migration (was Phase 8) | Deferred; methodology + backlog to migrate 45 skills — resumes after the upcoming polish phases |
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
@@ -138,6 +138,22 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+- **2026-07-15 (Phase 13-06 — Copilot safety, audit & advanced-gate hardening — SHIPPED, genesis v0.24.0;
+  PHASE 13 COMPLETE):** Global **kill-switch** + per-session **concurrency cap** + **rate limit** +
+  **workflow allow/deny** (persisted `CopilotConfig` at `~/.genesis/copilot.json`, runtime-toggleable),
+  enforced **app-side on `POST /api/runs` gated on the control token** (browser Runs-UI untouched — a
+  flagged, stronger deviation from the spec's "enforce in the control server"). Kill-switch off ⇒ the
+  copilot surface is demoted to read-only (control tools gone) at 3 layers. **Audit trail** (`m0006
+  copilot_actions`, schema v6): every agent-initiated mutation logged proposal → human confirmation →
+  outcome; `GET /api/chat/actions`. **Advanced-gate:** `pre_mutation`/any gate can never be auto-approved
+  (relayed only via the always-confirmed, never-trusted `respond_to_gate`); SLA re-nudge reads the
+  persisted `gate_sla_minutes` and only escalates. `GET/PUT /api/config/copilot`. **Web:** Settings →
+  General **Copilot** section (kill-switch + limits + allow/deny + activity table); the Chat mode toggle
+  is gated on the kill-switch. Tests: `test_copilot_safety.py` (13) + `test_copilot_e2e.py` (1) →
+  **genesis 180 pytest** (was 166), ruff clean; `copilot-settings.test.tsx` (4) → **web 93** (was 89),
+  lint 0 errors, tsc clean, jest-axe green; `web/static` rebuilt. **ADR-033 flipped Proposed → Accepted.**
+  Live acceptance vs. real kiro-cli remains a manual step (can't be driven headlessly). Released genesis
+  **v0.24.0** (`237d411`; no SDK/core change). Progress: `progress/phase-13-copilot-orchestrator.md`.
 - **2026-07-15 (Phase 13-05 — Slash-command launch + in-chat HITL/confirm UI — SHIPPED, genesis v0.23.0,
   frontend):** The copilot UX. Composer **`/` palette** (fuzzy installed-workflow list from `/catalog`,
   readiness-annotated) → schema-driven **LaunchDialog** (reuses the 07-05 `buildLaunchForm`/`toRunInputs`)

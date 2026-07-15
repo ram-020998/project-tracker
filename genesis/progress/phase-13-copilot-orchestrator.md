@@ -289,3 +289,75 @@ GateCard option→decision text; TerminalCard status+link; SupervisedRunsStrip s
 
 **Release.** genesis **v0.23.0** (`e74e896`); frontend-only but still a genesis release (`web/static`
 rebuilt + committed — the CI stale-bundle guard requires it). No SDK/core change.
+
+
+---
+
+## 13-06 — Safety, audit, advanced-gate patterns & release (SHIPPED — genesis v0.24.0)
+
+Hardens the copilot for real use and finalizes ADR-033 (→ Accepted). **Phase 13 complete.**
+
+**Persisted safety config** (`genesis/config/copilot.py` — `CopilotConfig`, atomic
+`~/.genesis/copilot.json`, the hardened secrets pattern; defaults from env/`Settings`):
+`enabled` (kill-switch), `max_active_runs` (3), `rate_limit_per_min` (10), `gate_sla_minutes`,
+`workflow_allow`/`workflow_deny`. Runtime-toggleable (unlike env-only `Settings`).
+
+**Kill-switch** (defense in depth, 3 layers): `ChatSession._ensure_started` demotes a
+`copilot` session to the read-only surface when disabled (the control server is never wired
+→ mutating tools gone); `ChatManager.set_session_mode` refuses `copilot` when disabled;
+`POST /api/runs` refuses a copilot-token start (403). Instant + reversible.
+
+**Blast-radius enforcement — app-side, gated on the control token** (`_enforce_copilot_start`
+in `app.py`, BEFORE `manager.start`): kill-switch (403), workflow allow/deny (403), per-session
+concurrency cap (429, counts non-terminal linked runs), per-session rate limit (429, in-memory
+60s window). **Deviation from the spec §7 (flagged):** the spec said "enforce in
+`control_server.py`", but the control server is a bypassable HTTP proxy subprocess — the
+authoritative point is the app endpoint, keyed on `X-Genesis-Control-Token`. Browser Runs-UI
+starts are tokenless → **never** gated (they hit the same endpoint the copilot does; hard-gating
+would break the UI and be incoherent on a single-user localhost, ADR-026).
+
+**Audit trail** (`m0006 copilot_actions`, schema v6; `CopilotActionStore`): one row per
+agent-initiated mutating tool call, keyed by `tool_call_id`. `ChatSession._on_permission`
+records the **proposal** (tool + args + best-effort run_id); `ChatManager.resolve_permission`
+records the **human decision** (allowed/denied) + `confirmed_by_user`; the `_on_permission`
+timeout `finally` records `timeout`. `GET /api/chat/actions[?session=]` surfaces it read-only.
+**Honest scope (flagged):** the tool's deep return value isn't observable from genesis, so
+`outcome` = the confirmed decision + linkage (the `run_id` for `start_run` comes via
+`chat_run_links`), not the run's eventual result.
+
+**Advanced-gate patterns.** *Conditional/pre_mutation:* structurally, a workflow's own gates
+(incl. `pre_mutation`) can **never** be auto-approved — the copilot only RELAYS a decision via
+the untrusted, always-confirmed `respond_to_gate`; no mutating control tool is ever in the
+trust set (asserted by test). *Timeout:* the 13-04 SLA re-nudge now reads the persisted
+`gate_sla_minutes` (`supervisor._sla_effective`); it only escalates attention, never
+auto-answers. *Batch review:* the supervised-runs strip already consolidates multiple awaiting
+runs (each still individually confirmed) — kept as the light realization.
+
+**API.** `GET/PUT /api/config/copilot`; `GET /api/chat/actions`.
+
+**Web.** Settings → General **Copilot** section (`CopilotSection.tsx`): kill-switch `Switch` +
+concurrency/rate/SLA number fields + allow/deny (raw-text, split-on-save to avoid the
+controlled-input separator round-trip) + a read-only **activity table** (tool · run · outcome
+badge · when). The Chat **mode toggle is gated on the kill-switch** (`useCopilotEnabled` → GET
+`/config/copilot`; disabled + read-only ⇒ the toggle is disabled with a hint).
+
+**Live acceptance (NOT run by me — flagged).** The stubbed E2E (below) proves the genesis-side
+loop; a real-kiro-cli session (untrusted control tools fire `request_permission`, launch
+`erd-generation`/`hello-appian`, answer the approve-domains gate from chat, run completes) is a
+manual step — it can't be driven headlessly. Procedure: `genesis serve` on ≥ v0.24.0 with a
+connected Atlas secret; enable copilot in Settings → General; in Chat type `/`, pick a workflow,
+submit the dialog, allow the confirm card, then answer the gate card; verify Settings → Copilot
+activity shows the two confirmed rows.
+
+**Tests.** `tests/test_copilot_safety.py` (13): kill-switch demotes the session + refuses start;
+setmode refused when disabled; browser start unaffected; workflow deny/allow; concurrency cap
+(seeds a running `RunRecord`); rate limit; audit proposal→confirmation→outcome (+ denial); the
+actions endpoint; config get/update (comma-string coerced to list); mutating tools never
+trusted. `tests/test_copilot_e2e.py` (1): a scripted client + `test_supervisor.FakeRunManager`
+drive launch(confirm+audit) → link → gate nudge → respond(confirm+audit) → terminal, asserting
+two allowed audit rows. **genesis 180 pytest** (was 166); ruff clean; `test_db`/`test_chat_store`
+bumped to schema v6. Web `copilot-settings.test.tsx` (4, incl jest-axe) → **web 93** (was 89);
+lint 0 errors, tsc clean; `web/static` rebuilt.
+
+**Release.** genesis **v0.24.0** (`237d411`). No SDK/core change (all in genesis: config store +
+m0006 + app enforcement + web). ADR-033 flipped **Proposed → Accepted**.
