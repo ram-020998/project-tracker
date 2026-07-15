@@ -90,7 +90,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
 | 10 | `specs/phase-10-chat-assistant.md` (+ `phase-10-chat-assistant/10-01..10-07`) | Chat assistant ✅ | Read-only conversational Chat page: talk to Kiro (Atlas read MCP) + query all Genesis data via a read-only introspection MCP server (runs/failures/progress/health). Persisted, deletable sessions; single-user. **Shipped — sdk v0.3.0, genesis-core v0.7.0, genesis v0.19.0; ADR-031; spike + live-verified.** |
 | 11 | `specs/phase-11-credit-usage-tracking.md` | Credit & Usage Tracking ✅ | Real, metered per-turn Kiro credits (ACP `_kiro.dev/metadata.meteringUsage`, spike-verified per-turn) surfaced everywhere: per agent node + run-total (run detail), Overview KPI (replaces Tool-Calls), per chat message + session total. SDK captures usage → telemetry/`agent.result` → `run_events`/`fold_steps`/`aggregate_credits` → UI (`formatCredits`/`CreditBadge`). **Shipped — sdk v0.4.0, genesis-core v0.8.0, genesis v0.20.0; m0003; ADR-032.** |
 | 12 | `specs/phase-12-code-review-workflow.md` | Appian Code-Review Workflow ✅ | Deterministic port of the Jarvis code-review process (Google-Docs export excluded): entry via JIRA ticket / package URL / object names; per-object review loop (diff-aware → `analyze_appian_code` → dynamic checklist → SQL/i18n) → agent-proposed / program-confirmed verdict. Read-only by construction (per-node `@jarvis`/`@jira` allowlists). **Shipped — genesis v0.20.2 (worker loop `recursion_limit`, 12-01) + genesis-workflows v0.5.3 (`code-review` workflow, 12-02..12-05; v0.5.1–v0.5.3 = live-data robustness fixes).** |
-| 13 | `specs/phase-13-copilot-orchestrator.md` (+ `phase-13-copilot-orchestrator/13-01..13-06`) | Chat Copilot & Run Orchestrator 🚧 | Evolve read-only Chat into a **copilot**: slash-command to launch any workflow (schema-driven inputs), the Kiro agent **starts the run** and **supervises** it (senses HITL gates, relays the user's decision, reports outcomes) without staying alive. A write-capable **Genesis Control MCP server** (proxies `RunManager` API), human-confirmed mutations via a new SDK `permission_mode="ask"` bridge, and an event-driven supervision bridge (gate/terminal → proactive chat nudges). **ADR-033** (copilot = run-operator, human-gated, LangGraph still owns control flow). **IN PROGRESS: 13-01 SDK permission bridge SHIPPED (kiro-agent-sdk v0.5.0, spike confirmed); 13-02 Control MCP server built (genesis master `b6edf7c`, no release yet); 13-03..13-06 pending.** |
+| 13 | `specs/phase-13-copilot-orchestrator.md` (+ `phase-13-copilot-orchestrator/13-01..13-06`) | Chat Copilot & Run Orchestrator 🚧 | Evolve read-only Chat into a **copilot**: slash-command to launch any workflow (schema-driven inputs), the Kiro agent **starts the run** and **supervises** it (senses HITL gates, relays the user's decision, reports outcomes) without staying alive. A write-capable **Genesis Control MCP server** (proxies `RunManager` API), human-confirmed mutations via a new SDK `permission_mode="ask"` bridge, and an event-driven supervision bridge (gate/terminal → proactive chat nudges). **ADR-033** (copilot = run-operator, human-gated, LangGraph still owns control flow). **IN PROGRESS: 13-01 SDK permission bridge (kiro-agent-sdk v0.5.0) + 13-02 Control MCP server + 13-03 copilot chat mode/run-link/permission bridge all SHIPPED (genesis v0.21.0 + genesis-core v0.8.1); 13-04 supervision bridge, 13-05 slash/HITL UI, 13-06 safety+release pending.** |
 | — | `specs/backlog/skill-migration-program.md` | ⏸️ Backlog — Skill → Workflow Migration (was Phase 8) | Deferred; methodology + backlog to migrate 45 skills — resumes after the upcoming polish phases |
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
@@ -138,6 +138,24 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+- **2026-07-15 (Phase 13-03 — Copilot chat mode + run↔session link — SHIPPED, genesis v0.21.0 +
+  genesis-core v0.8.1):** Chat can now act as a supervised run **operator** (ADR-033). A per-session
+  **mode** (`read_only` default | `copilot`; `m0004`). Copilot wires the 13-02 **control MCP server** with
+  read tools trusted and mutating tools (`start_run`/`respond_to_gate`/`cancel_run`) **untrusted**, so each
+  fires `session/request_permission` → the SDK `permission_mode="ask"` bridge (13-01) → a **confirm card**:
+  `_on_permission` persists a `chat_permissions` row, emits a `permission.request` on the turn SSE (via an
+  out-of-band queue merged into a refactored `stream_turn` — read-only output unchanged), and awaits a
+  Future resolved by `POST /api/chat/sessions/{id}/permissions/{tcid}` (allow optionId → tool runs;
+  null/timeout → deny, fail-closed). A per-session **control token** maps token→session so `POST /api/runs`
+  **links** the run (`chat_run_links`); `GET /api/chat/runs` returns a session's runs + live status;
+  `POST …/mode` toggles mode. `Settings.api_base` (set by `serve` from `--host/--port`) lets the in-process
+  chat tell the control subprocess where to call back. Copilot steering preamble (relay — never invent —
+  gate decisions; every mutation confirmed; no config/secret/deploy). `app.state.chat`/`run_manager` exposed
+  for the 13-04 supervisor. 13 new tests; **full genesis suite 158 passed**; genesis package ruff-clean.
+  **Coordinated release (resolves the 13-01 deferral):** both genesis + genesis-core pin the SDK directly,
+  so bumped together — genesis-core **v0.8.1** (SDK pin→v0.5.0, dependency-only) → genesis **v0.21.0** (SDK
+  pin→v0.5.0, core pin→v0.8.1, copilot mode; also ships the 13-02 control server, previously inert). CI
+  green on both. Progress: `progress/phase-13-copilot-orchestrator.md`.
 - **2026-07-15 (Phase 13-02 — Genesis Control MCP server — code committed, no release yet):** Built
   `genesis/mcp/control_server.py`, the write-capable sibling of the read-only introspection server, as a
   **thin MCP→HTTP facade over `/api`** (Codex-as-MCP pattern) so `RunManager` stays the single source of

@@ -148,3 +148,57 @@ protocol. Full genesis suite **145 passed**; ruff clean on touched files. Also s
 Genesis code committed to master (`b6edf7c`, pushed) but **NOT tagged**. The control server is inert until
 13-03 wires it into a copilot chat session, and 13-03 also carries the coordinated `kiro-agent-sdk` v0.5.0
 pin bump (genesis + genesis-core together). So genesis is released once at 13-03.
+
+
+---
+
+## 13-03 — Copilot chat mode + run↔session link (SHIPPED — genesis v0.21.0 + genesis-core v0.8.1)
+
+Turns a chat session into a supervised run **operator** (ADR-033). Bundles the 13-02 control server
+(previously inert) into a working feature, and cuts the coordinated SDK-v0.5.0 pin bump.
+
+**Wiring resolved.** `Settings.api_base` (env `GENESIS_API_BASE`, default `http://127.0.0.1:8760`); the
+`genesis serve` command exports it from `--host/--port` (normalizing `0.0.0.0`/`::` → `127.0.0.1`) so the
+in-process chat can tell the control **subprocess** where to call back. Each copilot session mints a
+per-session control **token**, registered in a ChatManager `token→session` map and passed to the control
+server via `--token`; `POST /api/runs` reads `X-Genesis-Control-Token` and links the run to the session.
+
+**Schema (`m0004_copilot`, version=4).** `chat_sessions.mode` (`read_only` default | `copilot`);
+`chat_run_links` (run_id PK → session, cascade); `chat_permissions` (tool_call_id PK, tool_name, args,
+options, status pending|allowed|denied, decision, timestamps). New stores `ChatRunLinkStore` +
+`ChatPermissionStore`; `ChatStore.set_mode`; `ChatSessionRecord.mode`.
+
+**MCP surface (`build_chat_mcp(config, settings, mode, *, base_url, token)`).** Copilot mode adds the
+`genesis-control` server; its **read** tools are trusted (`@genesis-control/<tool>`), its **mutating**
+tools (`start_run`/`respond_to_gate`/`cancel_run`) are left UNTRUSTED so each fires
+`session/request_permission`. Read-only mode is byte-for-byte unchanged (no control server).
+
+**Permission bridge (the core).** Copilot sessions use `permission_mode="ask"` + a session-bound
+`_on_permission` callback that: (1) persists a pending `chat_permissions` row; (2) emits a
+`permission.request` event on the live turn's SSE via an **out-of-band queue merged into `stream_turn`**
+(refactored to a pump-task + merged queue carrying `msg`/`err`/`end`/`perm` — read-only output unchanged);
+(3) awaits an `asyncio.Future` keyed by `tool_call_id`. `POST /api/chat/sessions/{id}/permissions/{tcid}`
+(`option_id`|null) resolves it → the SDK responds to kiro (allow optionId → tool runs; null/timeout → deny).
+On timeout/cancel the callback's `finally` marks the row denied (fail-closed). A `permission.resolved` event
+is emitted on resolution.
+
+**API.** `GET /api/chat/runs` (session from the control-token header OR `?session=`, joins live run status
+via RunManager); `POST /api/chat/sessions/{id}/mode` (toggle; closes the live client so the next turn
+rebuilds the surface); `POST …/permissions/{tcid}` (resolve). `app.state.chat` + `app.state.run_manager`
+exposed for the 13-04 supervisor + tests.
+
+**Steering.** A copilot preamble replaces the read-only one (operator rules: only start on confirmed
+inputs; relay — never invent — gate decisions; every mutation is confirmed; no config/secret/deploy).
+
+**Tests.** `tests/test_copilot_mode.py` (13): MCP surface (reads trusted / mutations untrusted / no config;
+read-only has no control); copilot options (`ask` + on_permission + `allow_fs_write=False`); permission
+allow (tool runs, row `allowed`, `permission.resolved`), deny (tool refused, row `denied`), timeout
+(finally marks denied); read-only unchanged; token registry; link + list session runs; resolve-returns-False
+when nothing pending; API mode-toggle + resolve + `/chat/runs` scoped by query & token. Updated
+`test_chat_store.py` + `test_db.py` for schema version 4. **Full genesis suite 158 passed; genesis package
+ruff-clean.** (Pre-existing test-only lint in other files left as-is — CI lints the `genesis` package only.)
+
+**Release (coordinated, resolves the 13-01 deferral).** Because both genesis AND genesis-core pin the SDK
+directly, they were bumped together: **genesis-core v0.8.1** (SDK pin v0.4.0→v0.5.0, dependency-only, no code
+change) → **genesis v0.21.0** (SDK pin→v0.5.0, core pin→v0.8.1, copilot mode; version + FastAPI version
+string bumped). 13-02's control server ships here (it was inert on master until now). CI verified on both.
