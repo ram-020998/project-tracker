@@ -11,7 +11,7 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-15 — genesis v0.24.1 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-15 — genesis v0.25.0 +
 > genesis-core v0.8.1 + kiro-agent-sdk v0.5.0 + genesis-workflows v0.5.3** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow all shipped). **Phase 13 —
 > Chat Copilot & Run Orchestrator — COMPLETE (13-01..13-06 shipped): the copilot slash-launches a
@@ -90,15 +90,15 @@ Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 |---|---|---|---|
 | `kiro-agent-sdk` | **v0.5.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)** |
 | `genesis-core` | **v0.8.1** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1` (v0.8.1 = sdk pin→v0.5.0, no code change) |
-| `genesis` | **v0.24.1** | master | runtime, dist, config, runs, **db (m0001–m0006)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot: control MCP server + permission bridge + run↔session link + run-supervision bridge + slash-launch/HITL web UI + safety/audit hardening (Phase 13-01..06 COMPLETE)** |
+| `genesis` | **v0.25.0** | master | runtime, dist, config, runs, **db (m0001–m0006)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot: control MCP server + permission bridge + run↔session link + run-supervision bridge + slash-launch/HITL web UI + safety/audit hardening (Phase 13-01..06 COMPLETE)** |
 | `genesis-workflows` | **v0.5.3** | master | registries (incl. `jarvis`+`jira` MCP), steering, `hello-appian` + `erd-generation` + **`code-review` (Phase 12; v0.5.1–v0.5.3 = live-data robustness fixes)** |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
-`genesis (v0.24.1) → genesis-core@v0.8.1 → kiro-agent-sdk@v0.5.0`;
+`genesis (v0.25.0) → genesis-core@v0.8.1 → kiro-agent-sdk@v0.5.0`;
 `genesis-workflows → genesis-core@v0.5.0 (runtime) + genesis (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) The Phase-13 SDK `permission_mode="ask"` bridge (v0.5.0) is now pinned across genesis + genesis-core (bumped together since both pin the SDK directly).
 
 **Tests, all green at last release:** genesis **180** pytest · genesis-core **57** · kiro-agent-sdk
-**62** · genesis-workflows **~22** (incl. 13 code-review) · web **93** Vitest (incl. contract-fixture
+**62** · genesis-workflows **~22** (incl. 13 code-review) · web **101** Vitest (incl. contract-fixture
 drift tests + jest-axe). ruff clean; eslint clean (0 errors); `tsc` strict clean. CI green on all code
 repos (genesis has a python `genesis` job + a `frontend` job with a stale-bundle guard; the SDK repo
 has no CI — validated transitively by core+genesis installing its tag).
@@ -335,7 +335,7 @@ genesis-workflows/
 - **ADR-030** — persistence stays **SQLite**; move to Postgres/pgvector only on an explicit trigger (multi-user, transcript RAG, or heavy analytics). Repositories keep DB-agnostic signatures so the seam stays cheap.
 - **ADR-031** — **Chat is a read-only assistant** (never orchestrates): it observes/answers, never drives or mutates. Enforced (defense in depth): `trust_tools` allowlist of read tools only + SDK `permission_mode="auto_deny"` + `allow_fs_write=False` + a read-only `genesis.db` connection in the introspection server. kiro-cli matches MCP tools by the **namespaced** `@server/tool` name — build allowlists as `@server/<tool>`. Chat runs in-process (no subprocess worker; ADR-012 is about workflow Python).
 - **ADR-032** — **credit usage is REAL metered data from Kiro ACP** (`_kiro.dev/metadata.meteringUsage`, verified per-turn not cumulative), NOT estimated — there is no pricing engine. SDK captures it → telemetry + `agent.result` + `run_events`/`chat_messages.usage`. Every figure carries `provenance` (`metered`/`partial`/`unavailable`); the UI shows honest "n/a", never a fabricated number.
-- **ADR-033 (ACCEPTED — Phase 13, SHIPPED)** — the **Chat copilot may operate runs** (start / read status / answer gates / cancel) at the **run-management layer only**, but (a) LangGraph still owns each workflow's control flow (ADR-001 intact — the copilot calls the same `RunManager` API a human clicks, it is NOT the workflow engine), (b) **every mutation is human-confirmed** (launch dialog for `start_run`; per-call confirm card for `respond_to_gate`/`cancel_run`, via the untrusted-tool → `session/request_permission` → SDK `permission_mode="ask"` bridge), (c) it can NEVER auto-approve/bypass a workflow's own HITL gate — only relay the human's decision, (d) NO config/secret/registry/workflow-definition/deploy tools, (e) read-only default + global kill-switch + per-session concurrency/rate/allow-deny limits (13-06, enforced app-side on `POST /api/runs` gated on the control token) + a `copilot_actions` audit trail. Refines ADR-031; preserves ADR-001. Delivered 13-01..13-06 (genesis v0.24.1 + sdk v0.5.0).
+- **ADR-033 (ACCEPTED — Phase 13, SHIPPED)** — the **Chat copilot may operate runs** (start / read status / answer gates / cancel) at the **run-management layer only**, but (a) LangGraph still owns each workflow's control flow (ADR-001 intact — the copilot calls the same `RunManager` API a human clicks, it is NOT the workflow engine), (b) **every mutation is human-confirmed** (launch dialog for `start_run`; per-call confirm card for `respond_to_gate`/`cancel_run`, via the untrusted-tool → `session/request_permission` → SDK `permission_mode="ask"` bridge), (c) it can NEVER auto-approve/bypass a workflow's own HITL gate — only relay the human's decision, (d) NO config/secret/registry/workflow-definition/deploy tools, (e) read-only default + global kill-switch + per-session concurrency/rate/allow-deny limits (13-06, enforced app-side on `POST /api/runs` gated on the control token) + a `copilot_actions` audit trail. Refines ADR-031; preserves ADR-001. Delivered 13-01..13-06 (genesis v0.25.0 + sdk v0.5.0).
 
 **Key implementation contracts:**
 - Node fns are `async fn(state, config: RunnableConfig)`. LangGraph injects `config` only when the param is annotated `RunnableConfig`; nodes read ctx via `ctx_from_config(config)`.

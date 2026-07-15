@@ -138,6 +138,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+- **2026-07-15 (Run Detail UX — tabbed page + Documents master-detail + hide tool outputs — SHIPPED,
+  genesis v0.25.0, frontend):** Documents are a primary run output, so Run Detail is now **tabbed
+  (Flow | Documents)**. **Flow** = the existing graph/list + inspector (Graph/List moved into it).
+  **Documents** = a master-detail view — a left rail of document **cards** (icon · name · kind · size ·
+  a pinned + auto-selected **Result**) → a **wide** `DocumentViewer` (sticky header + download/copy/raw/
+  load-full, reusing the shared renderers), resizable `SplitPane`. Default tab: **Graph while running,
+  Documents when completed** (seeded once; a `/docs/:name` deep-link also lands on Documents). The two
+  right **Drawers** (`DocumentsList` + `DocumentPreviewSheet`) are **retired/deleted**. Also a shared
+  **"Show tool activity" toggle** (`useUiPrefs`, OFF by default) hides the agent's tool calls/updates from
+  the conversation — applied to **both Run Detail and Chat** (`Conversation` gained a `showTools` filter).
+  Tests: `documents.test` rewritten (DocumentsTab + DocumentViewer + jest-axe); `run-detail.test` +
+  tool-activity hide/show + toggle-store. **web 101** (was 89); lint 0 errors, tsc clean; `web/static`
+  rebuilt. Released genesis **v0.25.0** (`d14dfe7`); frontend-only, no SDK/core/backend change.
 - **2026-07-15 (genesis v0.24.1 — bugfix):** the Chat copilot mode toggle could get stranded as
   "Copilot disabled". `useCopilotEnabled` treated ANY non-success from `GET /api/config/copilot`
   (loading, network error, or a **404 from a stale `genesis serve` that predates the 13-06 endpoint**)
