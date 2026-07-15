@@ -138,6 +138,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+- **2026-07-15 (genesis v0.24.1 — bugfix):** the Chat copilot mode toggle could get stranded as
+  "Copilot disabled". `useCopilotEnabled` treated ANY non-success from `GET /api/config/copilot`
+  (loading, network error, or a **404 from a stale `genesis serve` that predates the 13-06 endpoint**)
+  as "kill-switch off", greying out "Enable copilot" with no way back. Fixed to mirror the backend
+  default — ENABLED unless the server explicitly returns `enabled:false` (retry off). Root trigger was an
+  old running server; **restarting `genesis serve` onto ≥ v0.24.0 also resolves it** (the endpoint then
+  exists). Regression tests added (404→enabled, explicit-false→disabled); web 95. Reinforces the standing
+  lesson: restart `genesis serve` after a server-side change.
 - **2026-07-15 (Phase 13-06 — Copilot safety, audit & advanced-gate hardening — SHIPPED, genesis v0.24.0;
   PHASE 13 COMPLETE):** Global **kill-switch** + per-session **concurrency cap** + **rate limit** +
   **workflow allow/deny** (persisted `CopilotConfig` at `~/.genesis/copilot.json`, runtime-toggleable),
