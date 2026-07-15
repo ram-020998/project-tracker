@@ -85,14 +85,14 @@ Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 
 | Repo | Tag | Branch | Role |
 |---|---|---|---|
-| `kiro-agent-sdk` | **v0.4.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`+`allow_fs_write` (10-01); **per-turn credit metering from `_kiro.dev/metadata` → `ResultMessage.usage`/`TurnResult.usage` (11-01)** |
+| `kiro-agent-sdk` | **v0.5.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)** |
 | `genesis-core` | **v0.8.0** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1` |
 | `genesis` | **v0.20.2** | master | runtime, dist, config, runs, **db (m0001–m0003)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); **worker loop `recursion_limit` from META (12-01)** |
 | `genesis-workflows` | **v0.5.3** | master | registries (incl. `jarvis`+`jira` MCP), steering, `hello-appian` + `erd-generation` + **`code-review` (Phase 12; v0.5.1–v0.5.3 = live-data robustness fixes)** |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
 `genesis (v0.20.2) → genesis-core@v0.8.0 → kiro-agent-sdk@v0.4.0`;
-`genesis-workflows → genesis-core@v0.5.0 (runtime) + genesis (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.)
+`genesis-workflows → genesis-core@v0.5.0 (runtime) + genesis (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) **NOTE (Phase 13-01):** kiro-agent-sdk is tagged **v0.5.0** (the `permission_mode="ask"` bridge), but genesis + genesis-core still pin **v0.4.0** — the pin bump is deferred to 13-03 (both pin the SDK directly, so they must bump together, and nothing consumes `ask` until the copilot mode).
 
 **Tests, all green at last release:** genesis **122** pytest · genesis-core **57** · kiro-agent-sdk
 **62** · genesis-workflows **~22** (incl. 13 code-review) · web **78** Vitest (incl. contract-fixture
@@ -480,7 +480,8 @@ genesis-workflows/
   - **ADR-033 reconciliation:** ADR-001 preserved (LangGraph still owns each workflow's control flow; copilot
     = operator at the run-management layer = what a human does in the Runs UI); ADR-031 refined (read-write at
     that layer, every mutation human-confirmed, no config/secret/deploy, read-only default + kill-switch).
-  - **Sub-phase order + release chain:** 13-01 SDK permission bridge (kiro-agent-sdk minor) → 13-02 control
+  - **Sub-phase order + release chain:** **13-01 SDK permission bridge — SHIPPED (kiro-agent-sdk v0.5.0;
+    spike confirmed; genesis/core pin bump deferred to 13-03)** → 13-02 control
     server + ADR-033 (genesis) → 13-03 copilot chat mode + run↔session link (`m0004`) → 13-04 supervision
     bridge → 13-05 slash launch + in-chat HITL/confirm UI → 13-06 safety/audit/advanced-gate + live acceptance
     + release. `genesis-core` unchanged. After any `web/src` change: `npm run build` + commit `web/static`.
