@@ -90,7 +90,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
 | 10 | `specs/phase-10-chat-assistant.md` (+ `phase-10-chat-assistant/10-01..10-07`) | Chat assistant ✅ | Read-only conversational Chat page: talk to Kiro (Atlas read MCP) + query all Genesis data via a read-only introspection MCP server (runs/failures/progress/health). Persisted, deletable sessions; single-user. **Shipped — sdk v0.3.0, genesis-core v0.7.0, genesis v0.19.0; ADR-031; spike + live-verified.** |
 | 11 | `specs/phase-11-credit-usage-tracking.md` | Credit & Usage Tracking ✅ | Real, metered per-turn Kiro credits (ACP `_kiro.dev/metadata.meteringUsage`, spike-verified per-turn) surfaced everywhere: per agent node + run-total (run detail), Overview KPI (replaces Tool-Calls), per chat message + session total. SDK captures usage → telemetry/`agent.result` → `run_events`/`fold_steps`/`aggregate_credits` → UI (`formatCredits`/`CreditBadge`). **Shipped — sdk v0.4.0, genesis-core v0.8.0, genesis v0.20.0; m0003; ADR-032.** |
 | 12 | `specs/phase-12-code-review-workflow.md` | Appian Code-Review Workflow ✅ | Deterministic port of the Jarvis code-review process (Google-Docs export excluded): entry via JIRA ticket / package URL / object names; per-object review loop (diff-aware → `analyze_appian_code` → dynamic checklist → SQL/i18n) → agent-proposed / program-confirmed verdict. Read-only by construction (per-node `@jarvis`/`@jira` allowlists). **Shipped — genesis v0.20.2 (worker loop `recursion_limit`, 12-01) + genesis-workflows v0.5.3 (`code-review` workflow, 12-02..12-05; v0.5.1–v0.5.3 = live-data robustness fixes).** |
-| 13 | `specs/phase-13-copilot-orchestrator.md` (+ `phase-13-copilot-orchestrator/13-01..13-06`) | Chat Copilot & Run Orchestrator 🚧 | Evolve read-only Chat into a **copilot**: slash-command to launch any workflow (schema-driven inputs), the Kiro agent **starts the run** and **supervises** it (senses HITL gates, relays the user's decision, reports outcomes) without staying alive. A write-capable **Genesis Control MCP server** (proxies `RunManager` API), human-confirmed mutations via a new SDK `permission_mode="ask"` bridge, and an event-driven supervision bridge (gate/terminal → proactive chat nudges). **ADR-033** (copilot = run-operator, human-gated, LangGraph still owns control flow). **IN PROGRESS: 13-01 SDK permission bridge SHIPPED (kiro-agent-sdk v0.5.0, spike confirmed); 13-02..13-06 pending.** |
+| 13 | `specs/phase-13-copilot-orchestrator.md` (+ `phase-13-copilot-orchestrator/13-01..13-06`) | Chat Copilot & Run Orchestrator 🚧 | Evolve read-only Chat into a **copilot**: slash-command to launch any workflow (schema-driven inputs), the Kiro agent **starts the run** and **supervises** it (senses HITL gates, relays the user's decision, reports outcomes) without staying alive. A write-capable **Genesis Control MCP server** (proxies `RunManager` API), human-confirmed mutations via a new SDK `permission_mode="ask"` bridge, and an event-driven supervision bridge (gate/terminal → proactive chat nudges). **ADR-033** (copilot = run-operator, human-gated, LangGraph still owns control flow). **IN PROGRESS: 13-01 SDK permission bridge SHIPPED (kiro-agent-sdk v0.5.0, spike confirmed); 13-02 Control MCP server built (genesis master `b6edf7c`, no release yet); 13-03..13-06 pending.** |
 | — | `specs/backlog/skill-migration-program.md` | ⏸️ Backlog — Skill → Workflow Migration (was Phase 8) | Deferred; methodology + backlog to migrate 45 skills — resumes after the upcoming polish phases |
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
@@ -138,6 +138,23 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+- **2026-07-15 (Phase 13-02 — Genesis Control MCP server — code committed, no release yet):** Built
+  `genesis/mcp/control_server.py`, the write-capable sibling of the read-only introspection server, as a
+  **thin MCP→HTTP facade over `/api`** (Codex-as-MCP pattern) so `RunManager` stays the single source of
+  truth. 10 run-management tools (`list_launchable_workflows`, `get_workflow_inputs_schema`,
+  `check_launch_readiness`, `start_run`, `get_run_status`, `get_run_steps`, `get_pending_gate`,
+  `respond_to_gate`, `cancel_run`, `list_session_runs`); `MUTATING_TOOLS={start_run,respond_to_gate,cancel_run}`
+  exported for the 13-03 untrusted-wiring. Run-management ONLY — **no** config/secret/registry/deploy tools
+  (ADR-033/ADR-029). `respond_to_gate` validates the decision against the gate options. Added a
+  `GET /api/chat/runs` placeholder (filled by 13-03). 23 tests; full genesis suite **145 passed**; ruff
+  clean; stdio-smoke-tested. **Two intentional deviations (flagged):** (a) used `requests` not `httpx`
+  (httpx is dev-only; requests is a runtime dep and the subprocess needs it); (b) token gating deferred —
+  the shared mutation endpoints are the SAME ones the browser Runs UI calls tokenless, so a hard token
+  gate would break the UI and is incoherent on an unauthenticated-localhost app (ADR-026); the server
+  *sends* `X-Genesis-Control-Token` for future audit/identification, but the security model is finalized
+  in 13-06. Committed to genesis master (`b6edf7c`), **not tagged** — genesis releases once at 13-03 (with
+  the coordinated sdk v0.5.0 pin bump), since the control server is inert until wired. Progress:
+  `progress/phase-13-copilot-orchestrator.md`.
 - **2026-07-15 (Phase 13-01 — SDK interactive permission bridge — SHIPPED, kiro-agent-sdk v0.5.0):**
   The load-bearing enabler for the copilot's human-confirmed actions. **Spike CONFIRMED** first (against
   real kiro-cli 2.12.2): an **untrusted** MCP tool call fires `session/request_permission` (options

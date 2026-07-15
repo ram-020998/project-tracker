@@ -481,8 +481,10 @@ genesis-workflows/
     = operator at the run-management layer = what a human does in the Runs UI); ADR-031 refined (read-write at
     that layer, every mutation human-confirmed, no config/secret/deploy, read-only default + kill-switch).
   - **Sub-phase order + release chain:** **13-01 SDK permission bridge — SHIPPED (kiro-agent-sdk v0.5.0;
-    spike confirmed; genesis/core pin bump deferred to 13-03)** → 13-02 control
-    server + ADR-033 (genesis) → 13-03 copilot chat mode + run↔session link (`m0004`) → 13-04 supervision
+    spike confirmed; genesis/core pin bump deferred to 13-03)** → **13-02 control server + ADR-033 —
+    BUILT (genesis/mcp/control_server.py on master `b6edf7c`; requests not httpx; token gating deferred to
+    13-06; no genesis release yet — inert until wired)** → 13-03 copilot chat mode + run↔session link
+    (`m0004`) + the coordinated genesis+core sdk-v0.5.0 pin bump + first genesis release → 13-04 supervision
     bridge → 13-05 slash launch + in-chat HITL/confirm UI → 13-06 safety/audit/advanced-gate + live acceptance
     + release. `genesis-core` unchanged. After any `web/src` change: `npm run build` + commit `web/static`.
 - **Backlog (`specs/backlog/`):** the **skill → workflow migration program** (the 45 solutions-copilot
