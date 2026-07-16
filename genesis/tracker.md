@@ -91,6 +91,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
 | 11 | `specs/phase-11-credit-usage-tracking.md` | Credit & Usage Tracking ✅ | Real, metered per-turn Kiro credits (ACP `_kiro.dev/metadata.meteringUsage`, spike-verified per-turn) surfaced everywhere: per agent node + run-total (run detail), Overview KPI (replaces Tool-Calls), per chat message + session total. SDK captures usage → telemetry/`agent.result` → `run_events`/`fold_steps`/`aggregate_credits` → UI (`formatCredits`/`CreditBadge`). **Shipped — sdk v0.4.0, genesis-core v0.8.0, genesis v0.20.0; m0003; ADR-032.** |
 | 12 | `specs/phase-12-code-review-workflow.md` | Appian Code-Review Workflow ✅ | Deterministic port of the Jarvis code-review process (Google-Docs export excluded): entry via JIRA ticket / package URL / object names; per-object review loop (diff-aware → `analyze_appian_code` → dynamic checklist → SQL/i18n) → agent-proposed / program-confirmed verdict. Read-only by construction (per-node `@jarvis`/`@jira` allowlists). **Shipped — genesis v0.20.2 (worker loop `recursion_limit`, 12-01) + genesis-workflows v0.5.3 (`code-review` workflow, 12-02..12-05; v0.5.1–v0.5.3 = live-data robustness fixes).** |
 | 13 | `specs/phase-13-copilot-orchestrator.md` (+ `phase-13-copilot-orchestrator/13-01..13-06`) | Chat Copilot & Run Orchestrator 🚧 | Evolve read-only Chat into a **copilot**: slash-command to launch any workflow (schema-driven inputs), the Kiro agent **starts the run** and **supervises** it (senses HITL gates, relays the user's decision, reports outcomes) without staying alive. A write-capable **Genesis Control MCP server** (proxies `RunManager` API), human-confirmed mutations via a new SDK `permission_mode="ask"` bridge, and an event-driven supervision bridge (gate/terminal → proactive chat nudges). **ADR-033** (copilot = run-operator, human-gated, LangGraph still owns control flow). **COMPLETE: Phase 13 shipped in full (13-01..13-06) — the Chat copilot launches, confirms every mutation, supervises gates/terminals in-chat, and is safety-hardened (kill-switch + concurrency/rate/allow-deny + audit trail); genesis v0.24.0 + kiro-agent-sdk v0.5.0 + genesis-core v0.8.1; ADR-033 Accepted. Only manual live-acceptance vs. real kiro-cli remains.** |
+| 14 | `specs/phase-14-skills-in-chat.md` (+ `phase-14-skills-in-chat/14-01..14-05`) | Skills in Chat 📋 | Add **Skills** (Kiro's portable `SKILL.md` instruction packages) as a **second first-class capability** beside Workflows: a **standalone activity** (draft a document, build a checklist, apply a body of knowledge like GAM) with no stages/orchestration, owned by the Kiro agent — vs a Workflow (staged/orchestrated, owned by LangGraph). Filesystem-provisioned into a managed Kiro workspace (`~/.genesis/.kiro/skills/` = the chat cwd; **spike-proven** over ACP). **Install from a `genesis-workflows` skills library** OR **author in-flight** (SKILL.md + scripts/references/assets). Catalog gets **Workflows \| Skills** sub-tabs; Chat's `/` palette lists skills + auto-activation. **ADR-034.** Chat is priority 1; workflow-node skills later. **SPEC DRAFTED (umbrella + 5 sub-phase docs + ADR-034); not started.** |
 | — | `specs/backlog/skill-migration-program.md` | ⏸️ Backlog — Skill → Workflow Migration (was Phase 8) | Deferred; methodology + backlog to migrate 45 skills — resumes after the upcoming polish phases |
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
@@ -138,6 +139,24 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+- **2026-07-16 (Phase 14 spec — Skills in Chat 📋 + skills-over-ACP spike ✅):** Explored the chat/catalog/dist/
+  genesis-workflows architecture and wrote a full, standard, multi-sub-phase plan to add **Skills** (Kiro's portable
+  `SKILL.md` packages) as a **second first-class capability** beside Workflows, invocable from **Chat** (priority 1).
+  **Concept boundary (ADR-034):** a **Skill** = a *standalone activity* (draft a doc, build a checklist, apply a body
+  of knowledge like GAM) owned by the Kiro agent — no stages, no run; a **Workflow** = a *staged/orchestrated* activity
+  owned by LangGraph (ADR-001 preserved). **Spike first (`spike/2026-07-16-kiro-skills-in-acp-and-chat.md`):** proved
+  real kiro-cli 2.12.2 **discovers + activates skills over ACP** (the chat channel) via both **auto-activation**
+  (description match) and **explicit `/skill-name`** — skills are a **filesystem convention** (`.kiro/skills/`), NOT an
+  ACP wire param like MCP, so Genesis provisions them by writing into a **managed workspace at `~/.genesis/.kiro/skills/`**
+  (= the chat `cwd`); no SDK/protocol/core change. **Two acquisition paths:** install from a new `skills/` library in
+  `genesis-workflows` (mirrors the workflow install/lockfile path), or **author in-flight** (SKILL.md body + scripts/
+  references/assets uploads). **Catalog** gains **Workflows \| Skills** sub-tabs; **Chat** `/` palette becomes a unified
+  command menu (workflows + skills), skills available in read-only chat too. **v1 safety:** skills shape the chat
+  *output* (document-as-reply); executing bundled scripts / writing files is a later, explicit fs-policy decision.
+  Umbrella `specs/phase-14-skills-in-chat.md` + **5 sub-phase docs** (14-01 foundation+chat-discovery → 14-02 library+
+  install → 14-03 catalog Skills tab + authoring → 14-04 chat invocation → 14-05 safety/lifecycle+release) + **ADR-034
+  (proposed)**. Release chain: `genesis-workflows` (skills library) → `genesis`; genesis-core/sdk unchanged.
+  **Spec-only; spike-first done; awaiting approval to implement.**
 - **2026-07-15 (Run Detail UX — tabbed page + Documents master-detail + hide tool outputs — SHIPPED,
   genesis v0.25.0, frontend):** Documents are a primary run output, so Run Detail is now **tabbed
   (Flow | Documents)**. **Flow** = the existing graph/list + inspector (Graph/List moved into it).

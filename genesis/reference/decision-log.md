@@ -562,3 +562,62 @@ that `pre_mutation`/any gate is never auto-approved (the copilot only relays via
 never-trusted `respond_to_gate`). The R1 fallback (UI-mediated pending-action confirmation) was NOT
 needed — the spike confirmed kiro-cli fires `request_permission` for untrusted MCP tools. Live
 acceptance against real kiro-cli remains a manual step (can't be driven headlessly).
+
+
+---
+
+## ADR-034 — Skills are first-class "standalone activities", chat-invoked and filesystem-provisioned (Phase 14)
+
+**Status:** Proposed (Phase 14 — planning). **Context:** Genesis has one unit of packaged capability today — the
+**workflow** (a LangGraph graph with stages, gates, reliability). But many valuable tasks are **single, standalone
+activities** with no backend orchestration: "produce this document in our house format", "build a checklist for X",
+"answer using the GAM (Government Acquisition Management) body of knowledge + templates". Forcing those into a
+LangGraph workflow is overkill. Kiro natively supports **Agent Skills** (https://kiro.dev/docs/skills/, the open
+[Agent Skills standard](https://agentskills.io)): portable `SKILL.md` instruction packages (+ optional
+`scripts/`/`references/`/`assets/`) that the agent activates on demand. A spike (2026-07-16,
+`spike/2026-07-16-kiro-skills-in-acp-and-chat.md`) confirmed skills load + activate over **ACP** — the exact channel
+Genesis Chat uses.
+
+**Decision.** Introduce **Skills** as a **second first-class capability concept** alongside Workflows, and surface
+them **in Chat**:
+1. **Two concepts, clear boundary.** A **Workflow** = an activity that needs *stages / a backend process* (e.g.
+   code-review: pull the JIRA ticket → fetch environment data → review) — owned by LangGraph (ADR-001). A **Skill** =
+   a *standalone activity* with no stages and no orchestration (e.g. draft a document from a template, apply a body of
+   knowledge) — owned by the **Kiro agent**, driven by its `SKILL.md`. Skills never start runs; workflows never live
+   in `.kiro/skills/`.
+2. **Filesystem-provisioned, not wire-injected.** Unlike MCP servers (pushed over ACP `session/new.mcpServers`),
+   skills are **discovered from disk**. Genesis provisions them into a **managed Kiro workspace at
+   `~/.genesis/.kiro/skills/`** — which is exactly the Chat session's `cwd` (`state_dir`), so kiro-cli auto-discovers
+   them (workspace scope). Genesis does **not** set `KIRO_HOME` (that would hide the user's personal `~/.kiro`
+   agents/sessions/settings). The user's own global `~/.kiro/skills/` remain active too; workspace wins on name
+   conflict (Kiro's rule).
+3. **Two acquisition paths.** (a) **Install from the library** — `genesis-workflows` gains a `skills/` folder + a
+   skills registry, and Genesis pulls + installs a selected skill into the managed workspace (mirrors the workflow
+   install/lockfile path). (b) **Author in-flight** — the user creates a skill in the app (name + description +
+   `SKILL.md` body, plus optional `scripts/`/`references/`/`assets/` uploads); it is written into the managed
+   workspace and is immediately usable.
+4. **Chat is the invocation surface (priority 1).** In Chat, a skill activates **automatically** when the request
+   matches its `description`, and can be invoked **explicitly** via the `/` command palette (which today lists
+   workflows — it becomes a unified command menu that also lists installed skills). Both paths are spike-proven over
+   ACP.
+5. **Catalog gets Workflows | Skills sub-tabs.** The Catalog page splits into two standard sub-tabs; Skills lists
+   installed + library skills with install/remove and a **"New skill"** authoring entry.
+6. **Safety.** Skills are *instruction/context* packages — they carry no inherent authority; any tool a skill asks
+   the agent to use is still gated by the session's trust/permission model (ADR-031/033). In v1, skills shape the
+   agent's **chat output** (e.g. produce a formatted document as the reply); **executing bundled `scripts/` and
+   writing files to disk are deferred** behind an explicit fs/tool-policy decision (chat is `allow_fs_write=False`
+   today). Imported/authored skills are validated (`SKILL.md` schema, name rules, size caps); arbitrary imported
+   `scripts/` are treated as untrusted content.
+
+**Alternatives considered.** (a) Model every standalone activity as a trivial one-node workflow — rejected: heavy,
+and it wouldn't leverage Kiro's native progressive-disclosure skill activation. (b) Inject skill text as steering —
+rejected: steering is always-on (context bloat) and not portable/sharable; skills load on-demand and follow an open
+standard. (c) Wire skills over ACP like MCP — impossible: ACP defines no skills channel; skills are filesystem-based
+(confirmed by spike + kiro-cli).
+
+**Consequences.** Genesis becomes a two-concept platform — **Workflows (orchestrated) + Skills (standalone)** — both
+discoverable in the Catalog and usable from Chat. Preserves ADR-001 (skills don't orchestrate; LangGraph still owns
+workflow control flow), refines ADR-031/033 (Chat/copilot gains a new *instruction* capability, still no unsanctioned
+mutation). New surface area: a managed skills workspace, a `genesis-workflows` skills library, a skills
+install/author backend + API, Catalog sub-tabs, and the chat command palette. Delivered per the Phase 14 sub-phase
+specs; this ADR flips to Accepted when Phase 14 ships.
