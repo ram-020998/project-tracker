@@ -568,7 +568,8 @@ acceptance against real kiro-cli remains a manual step (can't be driven headless
 
 ## ADR-034 — Skills are first-class "standalone activities", chat-invoked and filesystem-provisioned (Phase 14)
 
-**Status:** Proposed (Phase 14 — planning). **Context:** Genesis has one unit of packaged capability today — the
+**Status:** Accepted — SHIPPED (Phase 14, 14-01..14-05: kiro-agent-sdk v0.6.0 + genesis-workflows v0.6.0 +
+genesis v0.26.1). **Context:** Genesis has one unit of packaged capability today — the
 **workflow** (a LangGraph graph with stages, gates, reliability). But many valuable tasks are **single, standalone
 activities** with no backend orchestration: "produce this document in our house format", "build a checklist for X",
 "answer using the GAM (Government Acquisition Management) body of knowledge + templates". Forcing those into a
