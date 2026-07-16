@@ -52,9 +52,11 @@ future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
 2. `tracker.md` — the master record. **Read §6 STATUS LOG top-down** (it is the running history and
    the source of truth for "what is done"); §2 has the locked decisions Q1–Q14; §3 is the phase index.
 3. `specs/00-architecture-overview.md` — layers, domain model, node taxonomy, state/blackboard rule.
-4. `reference/decision-log.md` — **ADR-001…033** (the "why"). Every non-negotiable lives here.
-   (Recent: ADR-031 Chat is read-only; ADR-032 credits are REAL metered data; ADR-033 **proposed** —
-   the Chat copilot may operate runs at the run-management layer, human-confirmed, Phase 13.)
+4. `reference/decision-log.md` — **ADR-001…034** (the "why"). Every non-negotiable lives here.
+   (Recent: ADR-031 Chat is read-only; ADR-032 credits are REAL metered data; ADR-033 **Accepted** —
+   the Chat copilot may operate runs at the run-management layer, human-confirmed (Phase 13, shipped);
+   ADR-034 **proposed** — Skills as first-class standalone activities, chat-invoked + filesystem-provisioned
+   (Phase 14).)
 5. `reference/coding-standards.md` — enforcement-anchored standards. §1 is the hard floor (lints/
    typecheck/CI gates that fail the build); §2–§6 are Python/frontend/testing conventions + the
    Definition of Done. When it conflicts with an ADR, the ADR wins; if a task needs a deviation, flag it.
@@ -65,11 +67,10 @@ future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
 7. `specs/` — the plan for each phase. Phases 1–6, the web-revamp (`phase-07-0N-*`), the
    `phase-07-code-review-fixes/` program (01–06), `phase-08-settings-revamp.md`, **`phase-09-agent-artifact-io.md`,
    `phase-10-chat-assistant.md` (+ `phase-10-.../10-01..07`), `phase-11-credit-usage-tracking.md`,
-   `phase-12-code-review-workflow.md`** are all **shipped**. **`phase-13-copilot-orchestrator.md`
-   (+ `phase-13-copilot-orchestrator/13-01..13-06`) is a DRAFT — the active next work (planning only,
-   spike-first).** `specs/backlog/` holds
-   deferred work (the skill-migration program).
-8. `progress/` — the as-built record, one file per phase/item (`phase-01..11-*`). Read the one(s)
+   `phase-12-code-review-workflow.md`, `phase-13-copilot-orchestrator.md` (+ `phase-13-.../13-01..06`)** are all
+   **shipped**. **`phase-14-skills-in-chat.md` (+ `phase-14-skills-in-chat/14-01..14-05`) is a DRAFT — the active
+   next work (planning only, spike-first done).** `specs/backlog/` holds deferred work (the skill-migration program).
+8. `progress/` — the as-built record, one file per phase/item (`phase-01..13-*`). Read the one(s)
    relevant to the area you're touching; they cite commits, tags, CI pipelines, and decisions.
 9. `spike/` — time-boxed feasibility probes (throwaway code, durable findings). Read the relevant one before
    building on its area (e.g. `spike/2026-07-16-kiro-skills-in-acp-and-chat.md` proves Kiro Skills over ACP for
@@ -89,7 +90,7 @@ and the release/versioning protocol.
 
 ---
 
-## 2. Current state (as of genesis v0.20.2)
+## 2. Current state (as of genesis v0.25.0)
 
 Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git`:
@@ -278,7 +279,7 @@ genesis/genesis/
   mcp/      introspection_server.py (read-only Genesis-introspection MCP server: list_runs/get_run/steps/
             events/list_failures/list_workflows/get_workflow/integration_health/platform_stats over a
             read-only genesis.db connection — Phase 10-02).
-  api/      app.py (create_app FastAPI; version 0.20.1; instantiates ChatManager + registers chat routes).
+  api/      app.py (create_app FastAPI; version 0.25.0; instantiates ChatManager + ChatRunSupervisor + registers chat/copilot routes).
             ALL routes on an APIRouter at prefix="/api" (ADR-028) + a catch-all SPA fallback. Routes:
             catalog(+available), library install|update|DELETE; workflows/{id}(+/graph); config/health,
             gitlab-token, mcp-cards, cli-cards, mcp-cards/{server}/test, secrets, environments;
@@ -287,7 +288,8 @@ genesis/genesis/
             runs/{id}(+gate), runs/{id}/state (GET/PATCH), pause|resume|cancel|respond|fork,
             runs/{id}/artifacts(+/{name}(?mode)+/download), runs/{id}/events(?after,kinds,node)+/steps,
             runs/{id}/events/stream (canonical SSE); **chat/sessions CRUD + chat/sessions/{id}/messages
-            (SSE turn) + /cancel (Phase 10)**. studio.py.
+            (SSE turn) + /cancel (Phase 10); chat/sessions/{id}/mode + /notifications + GET/PUT config/copilot
+            + chat/actions + resolve-permission (Phase 13 copilot)**. studio.py.
   cli/      main.py (genesis serve|install|list|create-workflow|test-workflow|db upgrade|db status …).
   lint/     contract.py (workflow.yaml↔META parity; YAML_ONLY_KEYS exempts UI-only keys like `graph:`),
             reliability.py (trio enforcement).
