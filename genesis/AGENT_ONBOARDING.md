@@ -40,6 +40,13 @@ served by the same backend. It runs on localhost with the user's own credentials
 "enterprise-grade polish" but **still local single-user** — multi-user/hosted is an explicitly separate
 future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
 
+Since Phase 14 there is a **second first-class capability beside workflows: Skills** (ADR-034) — Kiro's
+portable `SKILL.md` instruction packages for **standalone activities** (draft a document, apply a body of
+knowledge like GAM) that the Kiro agent performs in **Chat**, with **no stages/orchestration**. A *Workflow*
+= staged/orchestrated, owned by LangGraph; a *Skill* = a single standalone activity, owned by the Kiro agent.
+Skills are filesystem-provisioned into a managed Kiro workspace (`~/.genesis/.kiro/skills/`) and invoked from
+the Chat `/` palette (or auto-activated by description).
+
 ---
 
 ## 1. How to onboard (read order — don't skip)
@@ -52,8 +59,8 @@ future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
 4. `reference/decision-log.md` — **ADR-001…034** (the "why"). Every non-negotiable lives here.
    (Recent: ADR-031 Chat is read-only; ADR-032 credits are REAL metered data; ADR-033 **Accepted** —
    the Chat copilot may operate runs at the run-management layer, human-confirmed (Phase 13, shipped);
-   ADR-034 **proposed** — Skills as first-class standalone activities, chat-invoked + filesystem-provisioned
-   (Phase 14).)
+   ADR-034 **Accepted** — Skills as first-class standalone activities, chat-invoked + filesystem-provisioned
+   (Phase 14, shipped).)
 5. `reference/coding-standards.md` — enforcement-anchored standards. §1 is the hard floor (lints/
    typecheck/CI gates that fail the build); §2–§6 are Python/frontend/testing conventions + the
    Definition of Done. When it conflicts with an ADR, the ADR wins; if a task needs a deviation, flag it.
@@ -64,10 +71,11 @@ future track (ADR-026); **do not build auth/multi-tenancy unless asked.**
 7. `specs/` — the plan for each phase. Phases 1–6, the web-revamp (`phase-07-0N-*`), the
    `phase-07-code-review-fixes/` program (01–06), `phase-08-settings-revamp.md`, **`phase-09-agent-artifact-io.md`,
    `phase-10-chat-assistant.md` (+ `phase-10-.../10-01..07`), `phase-11-credit-usage-tracking.md`,
-   `phase-12-code-review-workflow.md`, `phase-13-copilot-orchestrator.md` (+ `phase-13-.../13-01..06`)** are all
-   **shipped**. **`phase-14-skills-in-chat.md` (+ `phase-14-skills-in-chat/14-01..14-05`) is a DRAFT — the active
-   next work (planning only, spike-first done).** `specs/backlog/` holds deferred work (the skill-migration program).
-8. `progress/` — the as-built record, one file per phase/item (`phase-01..13-*`). Read the one(s)
+   `phase-12-code-review-workflow.md`, `phase-13-copilot-orchestrator.md` (+ `phase-13-.../13-01..06`),
+   `phase-14-skills-in-chat.md` (+ `phase-14-skills-in-chat/14-01..14-05`)** are all **shipped**. No phase is
+   currently active — the next task comes from the human. `specs/backlog/` holds deferred work (the
+   skill-migration program).
+8. `progress/` — the as-built record, one file per phase/item (`phase-01..14-*`). Read the one(s)
    relevant to the area you're touching; they cite commits, tags, CI pipelines, and decisions.
 9. `spike/` — time-boxed feasibility probes (throwaway code, durable findings). Read the relevant one before
    building on its area (e.g. `spike/2026-07-16-kiro-skills-in-acp-and-chat.md` proves Kiro Skills over ACP for
@@ -246,10 +254,13 @@ genesis/genesis/
             chat_run_links + chat_permissions; m0005_supervision adds chat_notifications; m0006_copilot_actions adds the copilot audit trail — current_version=6). Schema is owned HERE (spec 01).
   runtime/  settings.py (Settings: state_dir ~/.genesis, artifacts_dir ~/Genesis/runs, db_path,
             library_dir, lockfile_path, secrets_path, environments_path, custom_mcp_path,
-            custom_cli_path, retention_keep_last/max_age_days, retention_on_start); checkpoint.py
+            custom_cli_path, **skills_dir=~/.genesis/.kiro/skills + skill_output_dir=~/.genesis/skill-output [Phase 14]**,
+            retention_keep_last/max_age_days, retention_on_start); checkpoint.py
             (AsyncSqliteSaver); context.py (build_context); engine.py (async run/resume/get_state/stream).
-  dist/     gitlab.py, local.py, catalog.py, lockfile.py, install.py, loader.py (check_compat gate,
-            meta_of [yaml, no import], graph_of, installed, load_build).
+  dist/     gitlab.py, local.py, catalog.py, lockfile.py (**+InstalledSkill / Lockfile.skills — Phase 14, additive/back-compat**),
+            install.py, loader.py (check_compat gate, meta_of [yaml, no import], graph_of, installed, load_build);
+            **skill_catalog.py (reads skills-registry.json) + skill_install.py (SkillInstaller: pull skills/<id>/** at a
+            ref into settings.skills_dir + record Lockfile.skills; update/remove) — Phase 14-02**.
   config/   secrets.py (SecretProvider/PlaintextProvider 0600; **atomic writes: temp+os.replace, and
             set/delete serialize read-modify-write under a per-path lock** — v0.20.1 crash fix), fields.py (mcp_cards/cli_cards/
             secret_fields/missing_secrets; GLOBAL_KEYS={GITLAB_TOKEN}), environments.py, retention.py
@@ -272,7 +283,9 @@ genesis/genesis/
             store.py (ChatStore/ChatMessageStore on genesis.db: sessions + messages + usage; session_usage_total),
             events.py (map_message_to_events → canonical agent.* shapes), mcp.py (Atlas + introspection wiring
             + read-tool trust set). Read-only enforcement (ADR-031): trust_tools allowlist + permission_mode
-            auto_deny + allow_fs_write=False.
+            auto_deny. Phase 14: allow_fs_write=True but **sandboxed** via SDK fs_write_root to the per-session
+            skill-output dir only (skill_output_dir/<session_id>); reload_skills/reload_all_skill_clients close
+            live clients so a workspace change is picked up next turn.
   mcp/      introspection_server.py (read-only Genesis-introspection MCP server: list_runs/get_run/steps/
             events/list_failures/list_workflows/get_workflow/integration_health/platform_stats over a
             read-only genesis.db connection — Phase 10-02).
@@ -282,7 +295,7 @@ genesis/genesis/
             service.py (facade + reload hook). dist/skill_catalog.py + dist/skill_install.py pull a library
             skill into the workspace + record Lockfile.skills. Chat auto-discovers the workspace (cwd/.kiro/skills)
             + writes documents to the per-session skill-output sandbox (SDK fs_write_root).
-  api/      app.py (create_app FastAPI; version 0.26.0; instantiates ChatManager + ChatRunSupervisor + SkillService; registers chat/copilot/skills routes + per-session skill-output endpoints).
+  api/      app.py (create_app FastAPI; version 0.26.1; instantiates ChatManager + ChatRunSupervisor + SkillService; registers chat/copilot/skills routes + per-session skill-output endpoints).
             ALL routes on an APIRouter at prefix="/api" (ADR-028) + a catch-all SPA fallback. Routes:
             catalog(+available), library install|update|DELETE; workflows/{id}(+/graph); config/health,
             gitlab-token, mcp-cards, cli-cards, mcp-cards/{server}/test, secrets, environments;
@@ -292,7 +305,9 @@ genesis/genesis/
             runs/{id}/artifacts(+/{name}(?mode)+/download), runs/{id}/events(?after,kinds,node)+/steps,
             runs/{id}/events/stream (canonical SSE); **chat/sessions CRUD + chat/sessions/{id}/messages
             (SSE turn) + /cancel (Phase 10); chat/sessions/{id}/mode + /notifications + GET/PUT config/copilot
-            + chat/actions + resolve-permission (Phase 13 copilot)**. studio.py.
+            + chat/actions + resolve-permission (Phase 13 copilot); skills (GET/POST author/DELETE) +
+            skills/available + skills/install + skills/update + chat/sessions/{id}/reload +
+            chat/sessions/{id}/outputs(+/{name}(?mode)+/download) (Phase 14 skills)**. studio.py.
   cli/      main.py (genesis serve|install|list|create-workflow|test-workflow|db upgrade|db status …).
   lint/     contract.py (workflow.yaml↔META parity; YAML_ONLY_KEYS exempts UI-only keys like `graph:`),
             reliability.py (trio enforcement).
@@ -315,6 +330,12 @@ genesis/genesis/
             TurnView + ThinkingTimeline + AssistantAnswer + conversationParts.
             Chat (Phase 10): features/chat/** — ChatThread REUSES the run-detail Conversation via a
             `hideResultChip` prop; Composer; SessionList; lib/api/chat.ts `readSse` (CRLF SSE framing).
+            Skills (Phase 14): features/catalog/CatalogPage = Tabs shell (Workflows | Skills; static
+            `catalog/skills` route ahead of `catalog/:workflowId` to dodge the dynamic-route collision);
+            features/catalog/skills/** (SkillsTab + SkillCard + SkillAuthorDialog + hooks); shared/ui/file-drop
+            (FileDropList); lib/api/skills.ts (+ client.postForm multipart). Chat `/` palette (Composer) is a
+            unified Workflows(copilot-only)+Skills(both modes) menu → skill pick sends `/<name>`; features/chat/
+            SessionOutputs renders the per-session skill-output sandbox via the shared DocumentPreview.
             Credits (Phase 11): shared/ui `formatCredits` + `CreditBadge` + `Coins`; Overview "Credits
             Used" KPI (replaced Tool-Calls); run-detail TelemetryStrip Credits stat + per-node + header
             run-total; chat per-message credit footer (in the ResultChip's old position).
@@ -324,6 +345,8 @@ genesis-workflows/
   appian-atlas [read-only], jarvis [read-write-deploy], appian-data-generator, lcp, jira),
   cli-registry.json, bundles.json, schemas/, steering/01-07, ci/validate_library.py (7-gate publish
   runner), workflows/{_template, hello-appian, erd-generation, code-review, _fixtures/noncompliant}, MIGRATION.md.
+  skills/{gam/SKILL.md + references/, _fixtures/noncompliant} + skills-registry.json + ci/validate_skills.py
+  (self-contained pyyaml validator: registry+manifest+parity+fixture gate; a `skills-validate` CI job) — Phase 14-02.
 ```
 
 ---
@@ -346,7 +369,7 @@ genesis-workflows/
 - **ADR-028** — ALL backend endpoints under `/api` (APIRouter) + SPA history fallback; the web client prepends `/api` centrally (never hard-code it in components); the Vite dev proxy is a single `/api` → :8760.
 - **ADR-029** — two-tier MCP/CLI registry (curated read-only + custom writable) + tool allowlist + direct-stdio introspection.
 - **ADR-030** — persistence stays **SQLite**; move to Postgres/pgvector only on an explicit trigger (multi-user, transcript RAG, or heavy analytics). Repositories keep DB-agnostic signatures so the seam stays cheap.
-- **ADR-031** — **Chat is a read-only assistant** (never orchestrates): it observes/answers, never drives or mutates. Enforced (defense in depth): `trust_tools` allowlist of read tools only + SDK `permission_mode="auto_deny"` + `allow_fs_write=False` + a read-only `genesis.db` connection in the introspection server. kiro-cli matches MCP tools by the **namespaced** `@server/tool` name — build allowlists as `@server/<tool>`. Chat runs in-process (no subprocess worker; ADR-012 is about workflow Python).
+- **ADR-031** — **Chat is a read-only assistant** (never orchestrates): it observes/answers, never drives or mutates. Enforced (defense in depth): `trust_tools` allowlist of read tools only + SDK `permission_mode="auto_deny"` + `allow_fs_write=False` + a read-only `genesis.db` connection in the introspection server. kiro-cli matches MCP tools by the **namespaced** `@server/tool` name — build allowlists as `@server/<tool>`. Chat runs in-process (no subprocess worker; ADR-012 is about workflow Python). **(ADR-034 refines this: since Phase 14 chat runs `allow_fs_write=True` but SANDBOXED via the SDK `fs_write_root` to the per-session skill-output dir only — a skill may write documents there, nothing else on disk.)**
 - **ADR-032** — **credit usage is REAL metered data from Kiro ACP** (`_kiro.dev/metadata.meteringUsage`, verified per-turn not cumulative), NOT estimated — there is no pricing engine. SDK captures it → telemetry + `agent.result` + `run_events`/`chat_messages.usage`. Every figure carries `provenance` (`metered`/`partial`/`unavailable`); the UI shows honest "n/a", never a fabricated number.
 - **ADR-033 (ACCEPTED — Phase 13, SHIPPED)** — the **Chat copilot may operate runs** (start / read status / answer gates / cancel) at the **run-management layer only**, but (a) LangGraph still owns each workflow's control flow (ADR-001 intact — the copilot calls the same `RunManager` API a human clicks, it is NOT the workflow engine), (b) **every mutation is human-confirmed** (launch dialog for `start_run`; per-call confirm card for `respond_to_gate`/`cancel_run`, via the untrusted-tool → `session/request_permission` → SDK `permission_mode="ask"` bridge), (c) it can NEVER auto-approve/bypass a workflow's own HITL gate — only relay the human's decision, (d) NO config/secret/registry/workflow-definition/deploy tools, (e) read-only default + global kill-switch + per-session concurrency/rate/allow-deny limits (13-06, enforced app-side on `POST /api/runs` gated on the control token) + a `copilot_actions` audit trail. Refines ADR-031; preserves ADR-001. Delivered 13-01..13-06 (genesis v0.25.0 + sdk v0.5.0).
 - **ADR-034 (ACCEPTED — Phase 14, SHIPPED)** — **Skills are a first-class "standalone activity" concept beside Workflows, chat-invoked + filesystem-provisioned.** A **Skill** = a single standalone activity (draft a document, build a checklist, apply a body of knowledge like GAM) owned by the **Kiro agent** (its `SKILL.md`), no stages/run; a **Workflow** = a staged/orchestrated activity owned by **LangGraph** (ADR-001 preserved — a skill never starts a run). Skills are **filesystem-discovered** (NOT an ACP wire param like MCP): Genesis provisions them into a managed Kiro workspace **`~/.genesis/.kiro/skills/`** (= the chat `cwd`; **spike-proven** over ACP — auto-activation by `description` + explicit `/skill-name`). Two acquisition paths: install from a new `skills/` library in `genesis-workflows` (mirrors the workflow install/lockfile path) OR author in-flight (SKILL.md + scripts/references/assets). Catalog gains **Workflows | Skills** sub-tabs; Chat's `/` palette becomes a unified workflows+skills menu (skills also work in read-only chat). **Safety:** a skill may write documents **only** into a per-session **skill-output sandbox** `~/.genesis/skill-output/<session_id>/` (via a small additive SDK **`fs_write_root`** option — writes elsewhere rejected); executing bundled `scripts/` stays deferred. Refines ADR-031/033 (chat gains bounded sandboxed document output, no other write authority). Delivered 14-01..14-05 (kiro-agent-sdk v0.6.0 + genesis-workflows v0.6.0 + genesis v0.26.1).
@@ -542,7 +565,7 @@ genesis-workflows/
   skills library + install-from-repo → 14-03 Catalog Skills tab + in-flight authoring → 14-04 chat skills invocation →
   14-05 safety (skill-output sandbox) / lifecycle / release. **Release chain (shipped):** kiro-agent-sdk **v0.6.0**
   (`fs_write_root`) → genesis-workflows **v0.6.0** (skills library) → genesis **v0.26.1**; genesis-core **v0.8.2** (sdk-pin bump only).
-  **COMPLETE.** Remaining: manual live-acceptance vs. real kiro-cli (auto-activation + `/gam`, headless-undrivable).**
+  Remaining: manual live-acceptance vs. real kiro-cli (auto-activation + `/gam`, headless-undrivable).
 - **Backlog (`specs/backlog/`):** the **skill → workflow migration program** (the 45 solutions-copilot
   skills, waves A–D) — deferred; the methodology is intact and resumes when scheduled.
 - **Open follow-ups (may be assigned):** the Phase-12 **live run** against a real GAMS ticket/package
