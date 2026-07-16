@@ -151,11 +151,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
   (= the chat `cwd`); no SDK/protocol/core change. **Two acquisition paths:** install from a new `skills/` library in
   `genesis-workflows` (mirrors the workflow install/lockfile path), or **author in-flight** (SKILL.md body + scripts/
   references/assets uploads). **Catalog** gains **Workflows \| Skills** sub-tabs; **Chat** `/` palette becomes a unified
-  command menu (workflows + skills), skills available in read-only chat too. **v1 safety:** skills shape the chat
-  *output* (document-as-reply); executing bundled scripts / writing files is a later, explicit fs-policy decision.
+  command menu (workflows + skills), skills available in read-only chat too. **v1 safety (user-approved):** skills may
+  write documents **only** into a per-session **skill-output sandbox** (`~/.genesis/skill-output/<session_id>/`, via a
+  small additive SDK `fs_write_root` option — writes elsewhere rejected); executing bundled scripts stays deferred.
+  Seed library skill: **GAM** only.
   Umbrella `specs/phase-14-skills-in-chat.md` + **5 sub-phase docs** (14-01 foundation+chat-discovery → 14-02 library+
   install → 14-03 catalog Skills tab + authoring → 14-04 chat invocation → 14-05 safety/lifecycle+release) + **ADR-034
-  (proposed)**. Release chain: `genesis-workflows` (skills library) → `genesis`; genesis-core/sdk unchanged.
+  (proposed)**. Release chain: `kiro-agent-sdk` (small additive `fs_write_root` for the skill-output sandbox) →
+  `genesis-workflows` (skills library) → `genesis`; genesis-core unchanged.
   **Spec-only; spike-first done; awaiting approval to implement.**
 - **2026-07-15 (Run Detail UX — tabbed page + Documents master-detail + hide tool outputs — SHIPPED,
   genesis v0.25.0, frontend):** Documents are a primary run output, so Run Detail is now **tabbed

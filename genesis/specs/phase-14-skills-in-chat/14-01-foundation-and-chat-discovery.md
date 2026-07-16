@@ -26,6 +26,9 @@
   active, workspace-wins on conflict).
 - Each installed/authored skill is a directory `skills_dir/<id>/` with `SKILL.md` (required) + optional `scripts/`,
   `references/`, `assets/`.
+- Add `Settings.skill_output_dir` → **`state_dir / "skill-output"`** (per-session subdir `skill_output_dir/<session_id>/`
+  created lazily). This is the **write sandbox** a skill may produce documents into (wired to the SDK `fs_write_root`
+  in 14-05); defined here so the path contract is settled early. NOT the runs/artifacts folder.
 
 ### 2.2 Skill domain model (`genesis/skills/model.py`)
 - `SkillManifest` = parsed `SKILL.md` frontmatter: `name` (== dir, `^[a-z0-9-]{1,64}$`), `description` (≤1024),

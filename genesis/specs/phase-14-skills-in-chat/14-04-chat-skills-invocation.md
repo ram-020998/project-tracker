@@ -27,8 +27,12 @@
 - Selecting a **skill** → send the invocation as the turn:
   - **Primary:** send `/<skill-name> <trailing text>` as the prompt (kiro-cli maps `.kiro/skills` to `/skill` commands;
     trailing text is passed as context). Optionally let the user type context after selecting.
-  - This is a normal chat turn — no new backend endpoint needed; the agent applies the skill and replies (the
-    "document" is the reply, rendered/copyable/downloadable via the existing Chat + Documents UI).
+  - This is a normal chat turn — no new backend endpoint needed; the agent applies the skill and replies. The produced
+    **document** may be returned inline (Markdown, rendered/copyable) **and/or written to the per-session skill-output
+    sandbox** (`~/.genesis/skill-output/<session_id>/`, enabled in 14-05). Surface those outputs in Chat — a small
+    "Session outputs" affordance listing `skill-output/<session_id>/` files (preview/download) reusing the **Documents**
+    renderers (`DocumentViewer`/`DocumentPreview`). New read endpoints: `GET /api/chat/sessions/{id}/outputs` (+
+    `/{name}` content/download), mirroring the run-artifacts endpoints.
 - Keep **auto-activation** as the zero-effort path: a user who just describes the task triggers the matching skill by
   `description` with no `/` needed. Document this in the empty-composer hint ("type `/` for workflows & skills, or just
   describe what you need").
@@ -67,5 +71,6 @@
    `web/static` rebuilt.
 
 ## 5. Out of scope
-- Script execution / file output from a skill (14-05); node-scoped skills in workflows (later); reliable
-  activation-event detection if the protocol doesn't expose it.
+- **Executing** a skill's bundled scripts (14-05 keeps this deferred). *(Writing documents to the per-session
+  skill-output sandbox + surfacing them IS in scope — see §2.1 + 14-05.)*
+- Node-scoped skills in workflows (later); reliable activation-event detection if the protocol doesn't expose it.

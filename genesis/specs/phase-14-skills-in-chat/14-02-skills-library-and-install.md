@@ -33,7 +33,8 @@ skills-registry.json    # NEW — the skills catalog (separate file; see Q2 in t
 - **CI validation** (`ci/validate_skills.py`, or extend `validate_library.py`): each registry skill exists at `path`;
   `SKILL.md` present + valid frontmatter (name==dir, `^[a-z0-9-]{1,64}$`, description ≤1024); no path traversal; size
   caps; registry ↔ folder parity. Wire into the repo's CI as a publish gate (like the workflow 7-gate).
-- Seed with 1–2 real skills (e.g. a `release-checklist` and a `gam` skill) to exercise the path end-to-end.
+- Seed with **one real skill — `gam`** (Government Acquisition Management: the GAM body of knowledge + document
+  templates) — to exercise the pull→install→chat path end-to-end. *(User decision 2026-07-16: GAM only for v1.)*
 
 ### 2.2 Genesis installer (`dist/`)
 - `SkillCatalog.from_client(client, ref)` — read `skills-registry.json` from the library at a ref (mirror `Catalog`).

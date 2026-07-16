@@ -5,8 +5,9 @@
 > concept** alongside Workflows, and make them **installable, authorable, and invocable from the Chat component**.
 > **Priority:** the **Chat** experience is priority 1; workflow-node use of skills is explicitly a later follow-up.
 > **Repos:** primarily **genesis** (skills workspace, install/author backend, API, web) + **genesis-workflows** (a
-> `skills/` library + registry). **genesis-core** and **kiro-agent-sdk** are expected to need **no change** (skills
-> are filesystem-provisioned; the spike proved they work over ACP as-is).
+> `skills/` library + registry) + a **small additive kiro-agent-sdk** change (an `fs_write_root` option that sandboxes
+> a session's file writes, for per-session skill outputs). **genesis-core** is unchanged. Skills are
+> filesystem-provisioned; the spike proved they work over ACP as-is.
 > **Non-negotiable framing:** a **Skill** is a *standalone activity* owned by the Kiro agent (its `SKILL.md`); a
 > **Workflow** is a *staged/orchestrated activity* owned by LangGraph (ADR-001). See **ADR-034**.
 
@@ -34,8 +35,8 @@ Five pillars:
    references/assets uploads) (14-03).
 4. **Chat invocation** — the `/` command palette (today: workflows) becomes a unified menu that also lists installed
    skills; auto-activation also works; a "reload skills" affordance (14-04).
-5. **Safety, lifecycle & release** — validation, the script-execution/file-output safety posture, uninstall/update,
-   dedup, docs, ADR-034 finalize, release chain (14-05).
+5. **Safety, lifecycle & release** — validation, the **per-session skill-output sandbox** (scoped fs-write; script
+   execution deferred), uninstall/update, dedup, docs, ADR-034 finalize, release chain (14-05).
 
 ---
 
@@ -115,7 +116,7 @@ Key properties:
 | **14-02** | Skills library + install-from-repo | genesis-workflows + genesis | `skills/` folder + `skills-registry.json` in the library (+ a CI validation gate); `SkillInstaller`/catalog pulls `skills/<id>/**` at a ref → installs into the workspace; lockfile records installed skills; `/api/skills/available` + `/api/skills/install` + uninstall. |
 | **14-03** | Catalog "Skills" tab + in-flight authoring | genesis (web) | Catalog page → **Workflows \| Skills** sub-tabs (standard Tabs). Skills tab: installed + available skill cards, install/remove, and a **"New skill"** author flow (name + description + `SKILL.md` body + `scripts/`/`references/`/`assets/` uploads → create). |
 | **14-04** | Chat skills invocation | genesis (web) (+ minor backend) | The `/` composer palette becomes a unified command menu listing **workflows + skills**; picking a skill sends the invocation; auto-activation documented + surfaced; "reload skills" affordance; active-skill affordance. Reconciles the Phase 13-05 workflow palette. |
-| **14-05** | Safety, lifecycle & release | genesis (+ genesis-workflows) | `SKILL.md` schema + name/size validation; the script-exec/file-output safety posture (v1 = output-only); uninstall/update; dedup with global `~/.kiro/skills`; audit/telemetry; docs; ADR-034 → Accepted; release chain. |
+| **14-05** | Safety, lifecycle & release | genesis (+ genesis-workflows + kiro-agent-sdk) | `SKILL.md` schema + name/size validation; the **per-session skill-output sandbox** (SDK `fs_write_root` → `~/.genesis/skill-output/<session_id>/`; writes elsewhere rejected; script-exec deferred); uninstall/update; dedup with global `~/.kiro/skills`; audit/telemetry; docs; ADR-034 → Accepted; release chain. |
 
 **Sequencing rationale:** 14-01 is the load-bearing foundation (a workspace skill usable in chat) and de-risked by the
 spike; 14-02 gives a supply of skills; 14-03 is the primary authoring/management UX; 14-04 is the chat invocation that
@@ -126,10 +127,10 @@ realizes the user story; 14-05 hardens + ships. Each is independently valuable a
 ## 5. Release chain & versioning (ADR-019)
 
 `genesis-workflows` (14-02: `skills/` + skills-registry + CI gate — a library release) and `genesis` (14-01..14-05:
-workspace + install/author backend + API + web). **genesis-core and kiro-agent-sdk unchanged** (skills need no engine
-or SDK change). Every `web/src` change rebuilds + commits `web/static` (CI stale-bundle guard). Frontend-only genesis
-changes still ship a genesis release. Release order: `genesis-workflows` (so a library ref with skills exists) then
-`genesis`.
+workspace + install/author backend + API + web). **genesis-core unchanged; kiro-agent-sdk gains a small additive
+`fs_write_root` option** (14-05, for the per-session skill-output sandbox). Every `web/src` change rebuilds + commits
+`web/static` (CI stale-bundle guard). Frontend-only genesis changes still ship a genesis release. Release order:
+`kiro-agent-sdk` (fs_write_root) → `genesis-workflows` (so a library ref with skills exists) → `genesis`.
 
 ---
 
@@ -159,23 +160,25 @@ changes still ship a genesis release. Release order: `genesis-workflows` (so a l
 - **R2 — the `/` palette collision.** Phase 13-05's composer intercepts `/` for workflows. **Resolution (14-04):**
   make it a **unified command menu** (Workflows + Skills sections); a skill pick sends `/skill-name` (or an intent).
   Auto-activation remains available with no palette change.
-- **R3 — script execution & file output.** Skills may ship `scripts/` and be meant to "produce files". Chat is
-  `allow_fs_write=False` and tool-gated. **Resolution (14-05):** v1 skills shape the **chat output** (document-as-reply,
-  downloadable via the existing doc viewer); executing bundled scripts / writing files is a **later, explicit**
-  fs/tool-policy decision. Authored/imported scripts are treated as untrusted.
-- **R4 — where documents a skill "produces" land.** v1: as the assistant's reply content (Markdown/code), which the
-  Chat + Documents UI already render/copy/download. Persisting skill outputs as artifacts is a 14-05/later question.
+- **R3 — file output & script execution.** Skills may "produce files". **Resolution (14-05):** a skill may write
+  **documents** into a **per-session skill-output sandbox** (`~/.genesis/skill-output/<session_id>/`) — enabled by the
+  additive SDK `fs_write_root` (writes outside the sandbox are rejected). This refines ADR-031/033 (chat gains
+  *bounded, sandboxed* document output; it still cannot touch config/secrets/registry/workflows/arbitrary paths).
+  **Executing bundled `scripts/` stays deferred** (separate fs/exec-policy decision); imported scripts are untrusted.
+- **R4 — where skill outputs land.** A dedicated `skill-output/<session_id>/` folder (NOT the runs folder), surfaced
+  in Chat (list/preview/download) via the existing Documents renderers (14-04).
 - **R5 — validation & safety of authored/imported skills.** `SKILL.md` frontmatter schema (name matches folder,
   lowercase-hyphen ≤64, description ≤1024), size caps, path-traversal-safe writes, and a clear "imported content is
   untrusted" stance (14-01/05).
 - **Q1 — one managed workspace vs per-scope.** Recommend a single `~/.genesis/.kiro/skills/` (workspace scope for
   chat); the user's personal `~/.kiro/skills/` stays active (global), workspace wins on conflict.
-- **Q2 — library registry shape.** Extend `registry.json` with a `skills[]` array vs a separate `skills-registry.json`.
-  Recommend a **separate `skills-registry.json`** (clean separation, independent validation) — decided in 14-02.
+- **Q2 — library registry shape. RESOLVED (user, 2026-07-16):** a **separate `skills-registry.json`** (clean concept
+  separation + independent validation) — decided in 14-02.
 
 ## 8. Out of scope (this phase)
-- Skills executing bundled scripts / writing files to disk from Chat (deferred — needs an fs/tool-policy decision).
-- Skills inside **workflow nodes** (node-scoped skill injection) — a later follow-up (the mechanism is the same: write
-  into the run-workspace `cwd`).
+- Skills **executing bundled `scripts/`** from Chat (deferred — needs a separate fs/exec-policy decision). *(Writing
+  documents to the per-session skill-output sandbox IS in scope — see R3/14-05.)*
+- Skills inside **workflow nodes** (node-scoped skill injection) — a later follow-up (same mechanism: write into the
+  run-workspace `cwd`).
 - A marketplace / cross-user sharing beyond the `genesis-workflows` library + local authoring (ADR-026 single-user).
 - Editing the *user's personal* `~/.kiro/skills/` (Genesis manages only its own workspace).

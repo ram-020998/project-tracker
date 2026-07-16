@@ -602,12 +602,16 @@ them **in Chat**:
    ACP.
 5. **Catalog gets Workflows | Skills sub-tabs.** The Catalog page splits into two standard sub-tabs; Skills lists
    installed + library skills with install/remove and a **"New skill"** authoring entry.
-6. **Safety.** Skills are *instruction/context* packages — they carry no inherent authority; any tool a skill asks
-   the agent to use is still gated by the session's trust/permission model (ADR-031/033). In v1, skills shape the
-   agent's **chat output** (e.g. produce a formatted document as the reply); **executing bundled `scripts/` and
-   writing files to disk are deferred** behind an explicit fs/tool-policy decision (chat is `allow_fs_write=False`
-   today). Imported/authored skills are validated (`SKILL.md` schema, name rules, size caps); arbitrary imported
-   `scripts/` are treated as untrusted content.
+6. **Safety + a scoped output sandbox.** Skills are *instruction/context* packages — they carry no inherent
+   authority; any tool a skill asks the agent to use is still gated by the session's trust/permission model
+   (ADR-031/033). A skill **may produce documents**, but writes are confined to a **per-session skill-output
+   sandbox** at `~/.genesis/skill-output/<session_id>/` (never the runs folder, never arbitrary paths), enabled by a
+   small additive **kiro-agent-sdk `fs_write_root`** option: chat runs with `allow_fs_write=True` **only** against
+   that sandbox root — any `fs/write_text_file` outside it is rejected by the SDK. So chat still cannot write config,
+   secrets, the registry, workflow definitions, or anywhere else on disk. **Executing bundled `scripts/` remains
+   deferred** (a separate future fs/exec-policy decision); authored/imported skills are validated (`SKILL.md` schema,
+   name rules, size caps) and imported `scripts/` are treated as untrusted. Session skill-outputs are surfaced
+   (list/preview/download) reusing the Documents renderers.
 
 **Alternatives considered.** (a) Model every standalone activity as a trivial one-node workflow — rejected: heavy,
 and it wouldn't leverage Kiro's native progressive-disclosure skill activation. (b) Inject skill text as steering —
