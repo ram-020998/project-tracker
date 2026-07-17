@@ -141,6 +141,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-07-17 (More live-run fixes — genesis v0.27.2 + genesis-workflows v0.7.1):** **(a)** the
+  show/hide **tool-outputs toggle** had been mis-placed in Chat + the run-detail conversation node view
+  (as a "tool activity" transcript filter). Moved it to the **Documents tab** where it belongs: a
+  "Show tool outputs" switch (default OFF) that hides the raw tool-output-store files (`_toolcalls/*`,
+  `.DS_Store`) from the document list; removed `ToolActivityToggle` from chat/inspector (conversation
+  now simply doesn't show raw tool chips). `showToolActivity` pref → `showToolOutputs`. genesis v0.27.2
+  (frontend; bundle rebuilt + committed). **(b)** the R2 finding is now fixed (genesis-workflows v0.7.1):
+  `get_application_info` wraps JSON in a prose preamble (`Application Info:\n{...}`) AND some apps have an
+  **empty** `namingConvention` — added `_coerce_json` (strip preamble) across the design-doc JSON
+  readers/validators and relaxed `check_app_info` to require the `namingConvention` KEY (may be empty),
+  not a truthy value. **Verify:** design-doc **18** tests (+2 coercion) + ruff + `validate_library` green;
+  web **119** Vitest + `tsc` + bundle; both CIs green. Restart `genesis serve` to pick up v0.27.2.
+
 - **2026-07-17 (Bugfixes on the first design-doc live run — genesis v0.27.1):** two UI issues found on a
   real `design-doc` run (r-5c15c313c079, GAMS-9277). **(1) Documents wouldn't open:** the tool-output
   store writes files under a subdir (`_toolcalls/call_N.out`), but the artifact routes used `{name}`
