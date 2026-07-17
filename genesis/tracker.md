@@ -141,6 +141,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-07-17 (Bugfixes on the first design-doc live run — genesis v0.27.1):** two UI issues found on a
+  real `design-doc` run (r-5c15c313c079, GAMS-9277). **(1) Documents wouldn't open:** the tool-output
+  store writes files under a subdir (`_toolcalls/call_N.out`), but the artifact routes used `{name}`
+  which won't match a slash → 404. Fixed to `{name:path}` (content + download; download registered first
+  so the greedy converter doesn't swallow `/download`); traversal guard unchanged. **(2) UI showed a
+  stale state:** the run actually escalated and hit `run.final`, but after a server restart the
+  denormalized `RunRecord` stayed `running@v_plan` while the durable eventlog was correct. Added
+  `RunManager.reconcile_status` — a read-time, idempotent reconcile (only when no worker for the run is
+  tracked in this process): adopt the latest durable `run.final` status + last completed node as cursor;
+  wired into `GET /runs/{id}` and the runs list. **Bonus finding (workflow robustness, not fixed here):**
+  the run escalated because live jarvis `get_application_info` returned no top-level `namingConvention`
+  (R2 real-shape drift) → `fetch_app_info` retried to exhaustion; `check_app_info` should parse defensively
+  (Phase-12 lesson) — follow-up. **Verify:** genesis **230** pytest (+3: nested-artifact + 2 reconcile) +
+  ruff clean; backend-only (bundle untouched). Restart a running `genesis serve` to pick up the fix.
+
 - **2026-07-17 (Phase 15 — Design-Document Workflow ✅ SHIPPED, 15-01..15-05):** a new **`design-doc`**
   workflow ports the Jarvis design-doc process into a deterministic Genesis graph — JIRA ticket → Appian
   **design document (Markdown)** via **dual-source research** (live **Jarvis** + release-aware **Atlas**),
