@@ -141,6 +141,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-07-17 (Phase 15 follow-up issues documented — not yet fixed):** the first real `design-doc`
+  runs surfaced 5 issues, captured in `specs/phase-15-followup-fixes.md` for a later pass: **(1)** run-view
+  cursor/status goes stale for runs orphaned across a `serve` restart (v0.27.1 reconcile covers only the
+  terminal case, not still-running); **(2)** the design-doc jarvis read-only allowlist is *incomplete* —
+  the `jarvis_*` tools all exist, but `get_appian_object`/`get_object_dependencies`/`search_objects_by_name`
+  (and a few more) were omitted (full introspected tool list in the doc); **(3)** the chat copilot GateCard
+  feedback box doesn't dismiss after responding (needs `ack(n.id)` in ChatThread); **(4)** OPEN: verify the
+  per-node read-only allowlist is actually enforced at runtime (untrusted jarvis tools executed with no
+  permission event); **(5)** atlas MCP introspection returns empty. None block current use.
+
 - **2026-07-17 (More live-run fixes — genesis v0.27.2 + genesis-workflows v0.7.1):** **(a)** the
   show/hide **tool-outputs toggle** had been mis-placed in Chat + the run-detail conversation node view
   (as a "tool activity" transcript filter). Moved it to the **Documents tab** where it belongs: a
