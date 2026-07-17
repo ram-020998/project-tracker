@@ -11,17 +11,19 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-16 — genesis v0.26.1 +
-> genesis-core v0.8.2 + kiro-agent-sdk v0.6.0 + genesis-workflows v0.6.0** (Phases 9 Agent-Artifact-I/O,
-> 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator
-> all shipped). **Phase 14 — Skills in Chat — COMPLETE (14-01..14-05 shipped): Skills (Kiro's portable
-> `SKILL.md` packages) are now a second first-class capability beside Workflows — a *standalone activity*
-> (draft a doc, apply a body of knowledge like GAM), owned by the Kiro agent, no stages/run. Installed from a
-> `genesis-workflows` skills library OR authored in-flight, provisioned into a managed workspace
-> (`~/.genesis/.kiro/skills/`), invoked from the Chat `/` palette (or auto-activated), producing documents
-> into a per-session skill-output sandbox (SDK `fs_write_root`); ADR-034 Accepted. The only remaining item is
-> manual live-acceptance vs. real kiro-cli (can't be driven headlessly).** No phase is currently active — the
-> next task comes from the human (candidates in §9: the Phase-12/13/14 live runs, or the skill-migration backlog).
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-17 — genesis v0.27.0 +
+> genesis-core v0.8.2 + kiro-agent-sdk v0.6.0 + genesis-workflows v0.7.0** (Phases 9 Agent-Artifact-I/O,
+> 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
+> 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
+> a new **`design-doc`** workflow ports the Jarvis design-doc process into a deterministic Genesis graph —
+> a JIRA ticket → an Appian **design document (Markdown)** via **dual-source research** (live **Jarvis** +
+> release-aware **Atlas**), reconciled into one release-aware plan; conditional branches (KB-freshness gate,
+> mockup→i18n, open-questions) and one gated mutation (empty-package creation, `pre_mutation`). Plus a genesis
+> platform capability: **run-launch file attachments** (`format:"file"` inputs → `POST /api/runs/upload` →
+> blackboard provisioning; **ADR-035**). genesis-workflows **v0.7.0** + genesis **v0.27.0** (core + sdk
+> unchanged). Only remaining item is manual live-acceptance vs. real kiro-cli (can't be driven headlessly).
+> No phase is currently active — the next task comes from the human (candidates in §9: the Phase-12/13/14/15
+> live runs, or the skill-migration backlog).
 
 ---
 
@@ -95,7 +97,7 @@ and the release/versioning protocol.
 
 ---
 
-## 2. Current state (as of genesis v0.26.1)
+## 2. Current state (as of genesis v0.27.0)
 
 Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git`:
@@ -104,15 +106,15 @@ Four repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 |---|---|---|---|
 | `kiro-agent-sdk` | **v0.6.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)**; **`fs_write_root` sandbox for agent file writes (14-05)** |
 | `genesis-core` | **v0.8.2** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1` (v0.8.2 = sdk pin→v0.6.0, no code change) |
-| `genesis` | **v0.26.1** | master | runtime, dist, config, runs, **db (m0001–m0006)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills: managed workspace + `genesis/skills/` model/store/service + install-from-library + Catalog Skills tab + authoring + chat `/` palette + per-session skill-output sandbox (Phase 14-01..05 COMPLETE)** |
-| `genesis-workflows` | **v0.6.0** | master | registries (incl. `jarvis`+`jira` MCP), steering, `hello-appian` + `erd-generation` + `code-review`; **`skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02)** |
+| `genesis` | **v0.27.0** | master | runtime, dist, config, runs, **db (m0001–m0006)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments: `POST /api/runs/upload` + `RunManager._provision_files` (ADR-035, Phase 15-01)** |
+| `genesis-workflows` | **v0.7.0** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` MCP), steering, `hello-appian` + `erd-generation` + `code-review` + **`design-doc` (dual-source Jarvis+Atlas research → Markdown, Phase 15)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
 `genesis (v0.26.1) → genesis-core@v0.8.2 → kiro-agent-sdk@v0.6.0`;
 `genesis-workflows → genesis-core@v0.5.0 (runtime) + genesis (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) both genesis + genesis-core pin the SDK directly, so both bumped to v0.6.0 for the Phase-14 `fs_write_root` sandbox (genesis-core v0.8.2 = sdk-pin bump only, no code change).
 
-**Tests, all green at last release:** genesis **222** pytest · genesis-core **57** · kiro-agent-sdk
-**82** · genesis-workflows **~22** (incl. 13 code-review) + `ci/validate_skills.py` gate · web **119** Vitest
+**Tests, all green at last release:** genesis **227** pytest · genesis-core **57** · kiro-agent-sdk
+**82** · genesis-workflows **~38** (incl. 13 code-review + 16 design-doc) + `ci/validate_skills.py` gate · web **119** Vitest
 (incl. contract-fixture drift tests + jest-axe). ruff clean; eslint clean (0 errors); `tsc` strict clean. CI green on all code
 repos (genesis has a python `genesis` job + a `frontend` job with a stale-bundle guard; the SDK repo
 has no CI — validated transitively by core+genesis installing its tag).
@@ -373,6 +375,7 @@ genesis-workflows/
 - **ADR-032** — **credit usage is REAL metered data from Kiro ACP** (`_kiro.dev/metadata.meteringUsage`, verified per-turn not cumulative), NOT estimated — there is no pricing engine. SDK captures it → telemetry + `agent.result` + `run_events`/`chat_messages.usage`. Every figure carries `provenance` (`metered`/`partial`/`unavailable`); the UI shows honest "n/a", never a fabricated number.
 - **ADR-033 (ACCEPTED — Phase 13, SHIPPED)** — the **Chat copilot may operate runs** (start / read status / answer gates / cancel) at the **run-management layer only**, but (a) LangGraph still owns each workflow's control flow (ADR-001 intact — the copilot calls the same `RunManager` API a human clicks, it is NOT the workflow engine), (b) **every mutation is human-confirmed** (launch dialog for `start_run`; per-call confirm card for `respond_to_gate`/`cancel_run`, via the untrusted-tool → `session/request_permission` → SDK `permission_mode="ask"` bridge), (c) it can NEVER auto-approve/bypass a workflow's own HITL gate — only relay the human's decision, (d) NO config/secret/registry/workflow-definition/deploy tools, (e) read-only default + global kill-switch + per-session concurrency/rate/allow-deny limits (13-06, enforced app-side on `POST /api/runs` gated on the control token) + a `copilot_actions` audit trail. Refines ADR-031; preserves ADR-001. Delivered 13-01..13-06 (genesis v0.25.0 + sdk v0.5.0).
 - **ADR-034 (ACCEPTED — Phase 14, SHIPPED)** — **Skills are a first-class "standalone activity" concept beside Workflows, chat-invoked + filesystem-provisioned.** A **Skill** = a single standalone activity (draft a document, build a checklist, apply a body of knowledge like GAM) owned by the **Kiro agent** (its `SKILL.md`), no stages/run; a **Workflow** = a staged/orchestrated activity owned by **LangGraph** (ADR-001 preserved — a skill never starts a run). Skills are **filesystem-discovered** (NOT an ACP wire param like MCP): Genesis provisions them into a managed Kiro workspace **`~/.genesis/.kiro/skills/`** (= the chat `cwd`; **spike-proven** over ACP — auto-activation by `description` + explicit `/skill-name`). Two acquisition paths: install from a new `skills/` library in `genesis-workflows` (mirrors the workflow install/lockfile path) OR author in-flight (SKILL.md + scripts/references/assets). Catalog gains **Workflows | Skills** sub-tabs; Chat's `/` palette becomes a unified workflows+skills menu (skills also work in read-only chat). **Safety:** a skill may write documents **only** into a per-session **skill-output sandbox** `~/.genesis/skill-output/<session_id>/` (via a small additive SDK **`fs_write_root`** option — writes elsewhere rejected); executing bundled `scripts/` stays deferred. Refines ADR-031/033 (chat gains bounded sandboxed document output, no other write authority). Delivered 14-01..14-05 (kiro-agent-sdk v0.6.0 + genesis-workflows v0.6.0 + genesis v0.26.1).
+- **ADR-035 (ACCEPTED — Phase 15, SHIPPED)** — **Run input file attachments.** A workflow input may declare `format:"file"`. Such inputs are provisioned at launch, not passed inline: a new **multipart `POST /api/runs/upload`** (browser-only; the JSON `POST /api/runs` is unchanged for tokened/copilot starts) + **`RunManager.start(..., files=)` / `_provision_files`** writes each upload into the run **blackboard** under `uploads/<sanitized>` and rewrites the matching input to that blackboard-relative path **before** schema validation. Guards: 10 MB cap, extension allowlist (`.txt .md .html .htm .csv .png .jpg .jpeg`), filename sanitization (no traversal), target must be a declared `format:"file"` prop (`FileUploadError` → 400). The worker just reads a file already in its own workspace — **ADR-012 isolation intact**; uploads are **read-only inputs, never executed** (mirrors Phase-14 `scripts/` posture). Web: the 07-05 launch form renders a `FileDropList` for file inputs and submits multipart. Preserves ADR-010/018 (bulk → blackboard, never inline). Enables the Phase-15 mockup→i18n branch. Delivered 15-01 (genesis v0.27.0).
 
 **Key implementation contracts:**
 - Node fns are `async fn(state, config: RunnableConfig)`. LangGraph injects `config` only when the param is annotated `RunnableConfig`; nodes read ctx via `ctx_from_config(config)`.
@@ -501,7 +504,8 @@ genesis-workflows/
 - **Shipped:** Phases 1–6, the web revamp (7.1), the code-review fix program (01–06), Phase 8 (settings
   revamp), **Phase 9 (agent artifact I/O), Phase 10 (chat assistant), Phase 11 (credit tracking),
   Phase 12 (Appian code-review workflow), Phase 13 (Chat Copilot & Run Orchestrator — 13-01..13-06),
-  Phase 14 (Skills in Chat — 14-01..14-05)**.
+  Phase 14 (Skills in Chat — 14-01..14-05), Phase 15 (Design-Document Workflow — 15-01..15-05:
+  dual-source Jarvis+Atlas research → Markdown design doc + run-launch file attachments, ADR-035)**.
   See `tracker.md` §3/§6 and `reference/roadmap-and-sequencing.md`.
 - **Phase 13: Chat Copilot & Run Orchestrator — COMPLETE (13-01..13-06 shipped; ADR-033 Accepted).**
   Read `specs/phase-13-copilot-orchestrator.md` (umbrella) + `phase-13-copilot-orchestrator/13-01..13-06`

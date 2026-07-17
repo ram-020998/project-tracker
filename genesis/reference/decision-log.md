@@ -626,3 +626,45 @@ workflow control flow), refines ADR-031/033 (Chat/copilot gains a new *instructi
 mutation). New surface area: a managed skills workspace, a `genesis-workflows` skills library, a skills
 install/author backend + API, Catalog sub-tabs, and the chat command palette. Delivered per the Phase 14 sub-phase
 specs; this ADR flips to Accepted when Phase 14 ships.
+
+
+---
+
+## ADR-035 — Run input file attachments (bounded, sanitized, provisioned into the blackboard) (Phase 15)
+
+**Status:** Accepted (Phase 15, sub-phase 15-01).
+
+**Context.** The design-doc workflow (Phase 15) accepts an optional **mockup** the agent reads to
+extract i18n strings. Workflow inputs are JSON (validated against `META.inputs_schema`), but a mockup
+is a *file*. We need a way to attach a file at launch without Google Workspace, without letting a
+workflow read arbitrary host paths, and without changing the subprocess-worker isolation model
+(ADR-012).
+
+**Decision.** A workflow input property may declare **`format: "file"`**. Such inputs are provisioned
+at launch, not passed inline:
+1. **New multipart endpoint `POST /api/runs/upload`** (browser launch only — no copilot control token;
+   the JSON `POST /api/runs` is unchanged for tokened/copilot starts). Body = a JSON `payload` part
+   (`{workflow_id, inputs, environment}`) + file parts keyed by the input property name.
+2. **`RunManager.start(..., files=…)`** writes each uploaded file into the new run's **blackboard**
+   under `uploads/<sanitized-filename>` **before** the graph starts, then rewrites the matching input
+   to the **blackboard-relative path** (`uploads/<name>`). Schema validation runs *after* the rewrite,
+   so the input validates as the string path it becomes.
+3. **Guards:** size cap (10 MB), extension allowlist (`.txt .md .html .htm .csv .png .jpg .jpeg`),
+   filename sanitization (basename only, no path traversal), and target check (the field must be a
+   declared `format:"file"` property) — violations raise `FileUploadError` → HTTP 400 at launch.
+4. **The worker just reads a file already in its own workspace** — no new host-path access, ADR-012
+   isolation intact. Uploaded files are **read-only inputs, never executed** (mirrors the Phase-14
+   skill `scripts/` "stored, not run" posture).
+5. **Web:** the schema-driven launch form (07-05) renders a `FileDropList` control for `format:"file"`
+   inputs and submits via multipart when a file is attached (reusing the Phase-14 upload plumbing).
+
+**Alternatives considered.** (a) Base64-inline the file in the JSON inputs — rejected: bloats state,
+violates the "no bulk in state" rule (ADR-010/018), and breaks the editable-state model. (b) A generic
+"upload to a temp dir, pass the host path" — rejected: leaks host paths into workflow inputs and
+widens the worker's file access. (c) Keep Google Workspace ingestion — rejected per the Phase-15
+decision (no Google dependency).
+
+**Consequences.** Runs gain a bounded, auditable file-attachment channel that lands in the blackboard
+like any other artifact. Preserves ADR-012 (worker isolation) and ADR-010/018 (bulk → blackboard,
+never inline). Enables the Phase-15 mockup → i18n branch (15-05) and any future workflow that needs a
+document at launch. Delivered in 15-01 (genesis backend + launch-form control + tests).
