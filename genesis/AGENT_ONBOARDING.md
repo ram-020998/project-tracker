@@ -11,8 +11,8 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-04 — latest SHIPPED: genesis v0.28.0 +
-> genesis-workflows v0.7.1 + genesis-core v0.8.2 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-04 — latest SHIPPED: genesis v0.29.1 +
+> genesis-workflows v0.8.1 + genesis-core v0.8.2 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
 > a new **`design-doc`** workflow ports the Jarvis design-doc process into a deterministic Genesis graph —
@@ -28,9 +28,10 @@
 > calls routed through the managed native **Dev MCP / DevOps MCP** (Atlas & Jarvis retired as services). Full spec set
 > in `specs/phase-16-appian-knowledge-base.md` (+ `phase-16-appian-knowledge-base/16-01..16-08` +
 > `genesis-kb-tool-contracts.md`); **ADR-036/037/038** (Proposed). **Shipped so far: 16-01** = `genesis-appian-parser`
-> **v0.1.0** (new repo, CI green); **16-02** = genesis **v0.28.0** (m0007 `kb_*` + `KbStore`, CI green). **Next = 16-03**
-> (`sync-application` workflow). A new session should **read §9's Phase-16 block first** (it has a concrete, step-by-step
-> "▶ NEXT — 16-03" plan), then implement in the build order.
+> **v0.1.0** (new repo, CI green); **16-02** = genesis **v0.28.0** (m0007 `kb_*` + `KbStore`); **16-03** = the
+> **`sync-application`** workflow (genesis **v0.29.1** + genesis-workflows **v0.8.1**) — all CI green. **Next = 16-08**
+> (managed-native Dev/DevOps MCP install + the `is_dev` env toggle; prereq for 16-04/05). A new session should **read
+> §9's Phase-16 block first**, then implement in the build order.
 
 ---
 
@@ -110,7 +111,7 @@ and the release/versioning protocol.
 
 ---
 
-## 2. Current state (as of genesis v0.28.0)
+## 2. Current state (as of genesis v0.29.1)
 
 **Five repos** at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git` (the 5th, `genesis-appian-parser`, is new in Phase 16):
@@ -119,16 +120,16 @@ and the release/versioning protocol.
 |---|---|---|---|
 | `kiro-agent-sdk` | **v0.6.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)**; **`fs_write_root` sandbox for agent file writes (14-05)** |
 | `genesis-core` | **v0.8.2** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1` (v0.8.2 = sdk pin→v0.6.0, no code change) |
-| `genesis` | **v0.28.0** | master | runtime, dist, config, runs, **db (m0001–m0007)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (Phase 16-02)** |
-| `genesis-workflows` | **v0.7.1** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` MCP), steering, `hello-appian` + `erd-generation` + `code-review` + **`design-doc` (dual-source Jarvis+Atlas research → Markdown, Phase 15)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
+| `genesis` | **v0.29.1** | master | runtime, dist, config, runs, **db (m0001–m0007)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)** |
+| `genesis-workflows` | **v0.8.1** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` + **`appian-dev`/`appian-devops`** MCP), steering, `hello-appian` + `erd-generation` + `code-review` + `design-doc` + **`sync-application` (Appian KB baseline sync via Deployment REST → parser → KbStore, Phase 16-03)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
 | `genesis-appian-parser` | **v0.1.0** | main | **NEW (Phase 16-01).** Genesis-owned, stdlib-only Appian package parser (port of the Atlas front-half). `parse(zip\|bytes) -> KbParseResult` (objects + edges + bundles + **code-free** metadata; no files, no SAIL). Consumed by `genesis/kb` + the sync workflow; pinned into genesis by tag in 16-03. |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
 `genesis (v0.26.1) → genesis-core@v0.8.2 → kiro-agent-sdk@v0.6.0`;
-`genesis-workflows → genesis-core@v0.5.0 (runtime) + genesis (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) both genesis + genesis-core pin the SDK directly, so both bumped to v0.6.0 for the Phase-14 `fs_write_root` sandbox (genesis-core v0.8.2 = sdk-pin bump only, no code change). **`genesis-appian-parser@v0.1.0`** is a stdlib-only leaf (no Genesis deps); genesis will pin it by tag in **16-03** — for now it is **editable-installed in the genesis venv** for the KB real-e2e test.
+`genesis-workflows → genesis-core@v0.8.2 (runtime) + genesis@v0.29.1 (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) both genesis + genesis-core pin the SDK directly, so both bumped to v0.6.0 for the Phase-14 `fs_write_root` sandbox (genesis-core v0.8.2 = sdk-pin bump only, no code change). **`genesis-appian-parser@v0.1.0`** is a stdlib-only leaf (no Genesis deps); **genesis pins it by tag (16-03)**, so it installs transitively wherever genesis does (incl. genesis-workflows CI).
 
-**Tests, all green at last release:** genesis **239** pytest (incl. **10 KB-store tests**, Phase 16-02) · genesis-core **57** · kiro-agent-sdk
-**82** · genesis-appian-parser **13** (vs a real vendored package + a no-SAIL guard) · genesis-workflows **~38** (incl. 13 code-review + 16 design-doc) + `ci/validate_skills.py` gate · web **119** Vitest
+**Tests, all green at last release:** genesis **240** pytest (incl. **10 KB-store tests** + KbStore-injection wiring, Phase 16-02/03) · genesis-core **57** · kiro-agent-sdk
+**82** · genesis-appian-parser **13** (vs a real vendored package + a no-SAIL guard) · genesis-workflows **54** (incl. 13 code-review + 16 design-doc + 9 sync-application) + `ci/validate_skills.py` gate · web **119** Vitest
 (incl. contract-fixture drift tests + jest-axe). ruff clean (**`ruff==0.15.20` pinned in genesis — see §7**); eslint clean (0 errors); `tsc` strict clean. CI green on all code
 repos (genesis has a python `genesis` job + a `frontend` job with a stale-bundle guard; the SDK repo
 has no CI — validated transitively by core+genesis installing its tag).
@@ -362,9 +363,9 @@ genesis/genesis/
 
 genesis-workflows/
   registry.json (catalog + genesis_core_major=1), mcp-registry.json (REAL internal images:
-  appian-atlas [read-only], jarvis [read-write-deploy], appian-data-generator, lcp, jira),
+  appian-atlas [read-only], jarvis [read-write-deploy], appian-data-generator, **appian-dev [read-only] + appian-devops [export-only] — managed-native, ADR-038, resolved the old `lcp` placeholder**, jira),
   cli-registry.json, bundles.json, schemas/, steering/01-07, ci/validate_library.py (7-gate publish
-  runner), workflows/{_template, hello-appian, erd-generation, code-review, _fixtures/noncompliant}, MIGRATION.md.
+  runner), workflows/{_template, hello-appian, erd-generation, code-review, design-doc, sync-application, _fixtures/noncompliant}, MIGRATION.md.
   skills/{gam/SKILL.md + references/, _fixtures/noncompliant} + skills-registry.json + ci/validate_skills.py
   (self-contained pyyaml validator: registry+manifest+parity+fixture gate; a `skills-validate` CI job) — Phase 14-02.
 ```
@@ -506,6 +507,16 @@ genesis-workflows/
   passed, hiding it. Fix: **`ruff==0.15.20`** in dev deps so CI reproduces local exactly. When adopting a newer ruff,
   do it deliberately with a repo-wide fix (`ruff check --fix` the `Optional`→`X|None` churn) + bump the pin. (Tests
   aren't ruff-gated in CI — only the `genesis` package is — so test-file lint drift won't fail CI.)
+- **The LangGraph checkpointer shares `genesis.db` — its connection needs WAL + busy_timeout (Phase 16-03).** The
+  `AsyncSqliteSaver` connection (`runtime/checkpoint.py`) originally set no `journal_mode`/`busy_timeout`. That was fine
+  while nodes never wrote `genesis.db` synchronously — but Phase 16's `sync-application` node calls `KbStore` (a sync
+  `genesis.db.Database` connection) **in the same worker process** as the saver. In rollback-journal mode the saver
+  could hold the write lock and starve the KbStore write → `sqlite3.OperationalError: database is locked` (GREEN locally,
+  RED in CI — a timing/filesystem-dependent lock). Fix: `PRAGMA journal_mode=WAL` + `busy_timeout=30000` on the saver
+  connection so all writers on the shared db serialize gracefully (WAL = short write locks; busy_timeout = wait, don't
+  error). App-side `Database` connections already did this — any new sync writer sharing `genesis.db` must too. Note the
+  general trap: a same-process second SQLite connection to a WAL/shared db is fine **only** if every connection uses
+  WAL + a busy_timeout.
 
 ---
 
@@ -534,10 +545,12 @@ genesis-workflows/
 > **Handoff for the next session:** planning is complete AND implementation is under way. Read
 > `specs/phase-16-appian-knowledge-base.md` (umbrella) + `phase-16-appian-knowledge-base/16-01..16-08` +
 > `genesis-kb-tool-contracts.md`, ADR-036/037/038, and `progress/phase-16-01-native-parser.md` +
-> `progress/phase-16-02-kb-schema-and-store.md`. **Shipped so far:** **16-01** = `genesis-appian-parser` **v0.1.0**
-> (new repo `ramaswamy.u/genesis-appian-parser`, CI green) — `parse(zip|bytes) -> KbParseResult`, code-free, no files;
-> **16-02** = genesis **v0.28.0** (m0007 `kb_*` + `KbStore`, CI green). **Next: 16-03** (`sync-application` workflow;
-> adds the `genesis-appian-parser` tag pin to genesis). Keep extending `tracker.md` §6 as you go.
+> `progress/phase-16-02-kb-schema-and-store.md` + `progress/phase-16-03-sync-workflow.md`. **Shipped so far:**
+> **16-01** = `genesis-appian-parser` **v0.1.0** (`parse(zip|bytes) -> KbParseResult`, code-free); **16-02** = genesis
+> **v0.28.0** (m0007 `kb_*` + `KbStore`); **16-03** = the **`sync-application`** workflow (genesis **v0.29.1** +
+> genesis-workflows **v0.8.1**: deterministic Deployment-REST export → parser → `KbStore` baseline) — all CI green.
+> **Next: 16-08** (managed-native Dev/DevOps MCP install + the `is_dev` env toggle; prereq for 16-04/05). Keep
+> extending `tracker.md` §6 as you go.
 
 **Goal.** Move the Appian knowledge base *inside* Genesis and make Genesis an agentic Appian-development environment.
 Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-Appian KB) as services; reproduce their
@@ -581,40 +594,37 @@ Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-A
   against Appian throughout (Dev MCP read-only allowlist; DevOps export/status/download only).
 
 **Sub-phases (all in `phase-16-appian-knowledge-base/`; iteration-1 unless noted):** 16-01 parser (new repo) **✅ v0.1.0** ·
-16-02 schema+`KbStore` (m0007) **✅ genesis v0.28.0** · 16-03 sync workflow (baseline) **◀ NEXT** · **16-08 native MCP
+16-02 schema+`KbStore` (m0007) **✅ genesis v0.28.0** · 16-03 sync workflow (baseline) **✅ genesis v0.29.1 + genesis-workflows v0.8.1** · **16-08 native MCP
 integration & updatability** (prereq for 16-04/05) · 16-04 Applications surface · 16-05 `genesis-kb` MCP + cutover
 (headline) · 16-07 delta refresh (new Appian "changed-in-[start,end]" API — user owns it) · **16-06 versioning —
 BACKLOG**. Suggested build order: 16-01 → 16-02 → 16-03 → 16-08 → 16-04 → 16-05 → 16-07; 16-06 later. **Release chain:**
 `genesis-appian-parser` (new) → `genesis` (m0007 + KbStore + kb_server + native-MCP installer + applications api/web) →
 `genesis-workflows` (sync-application + managed-native registry entries). genesis-core likely unchanged.
 
-**▶ NEXT — 16-03 (`sync-application` workflow, baseline path).** Read `phase-16-appian-knowledge-base/16-03-sync-workflow.md`
-first. Repos: **genesis-workflows** (the workflow) + **genesis** (pin the parser + expose `KbStore` to the worker).
-Concrete steps:
-1. **Pin the parser in genesis** — add `genesis-appian-parser @ git+ssh://git@gitlab.appian-stratus.com/ramaswamy.u/genesis-appian-parser.git@v0.1.0`
-   to `genesis/pyproject.toml` deps (it's currently only editable-installed in the dev venv). Bump genesis + tag. This
-   also makes the KB **real-e2e test run in CI** (it `importorskip`s the parser today).
-2. **New workflow** `genesis-workflows/workflows/sync-application/{workflow.yaml, graph.py, README.md, tests/}` — a
-   **program-only** LangGraph graph (no agent nodes ⇒ no reliability trio, no credits; no `pre_mutation` — Appian access
-   is read-only): `resolve_inputs → export_package → v_export → parse_package → v_parse → detect_mode → write_kb →
-   v_kb → present`. `META` mirrors `workflow.yaml` (parity lint); self-contained `graph.py` (loaded standalone).
-3. **`export_package`** = deterministic **Appian Deployment REST API** call in a **program node** (ADR-001 — NOT the
-   DevOps MCP): export → poll → download zip → `RunWorkspace` blackboard at `uploads/package.zip`. Resolve the domain
-   from the **dev-tagged env** (`EnvironmentRegistry.dev_environment()`, 16-08 §2.0 — but 16-03's export only needs the
-   env URL + `APPIAN_API_KEY` from the SecretProvider, so it does not hard-depend on 16-08 landing first) + surface
-   401/403/404/409 with actionable messages. Bulk → blackboard (ADR-010/018); node timeout > 300s.
-4. **`parse_package`** = `genesis_appian_parser.parse(zip_bytes) -> KbParseResult` → serialize (no code) to
-   `result.json` in the blackboard; small counts/pointers to state.
-5. **`write_kb`** = `KbStore.begin_sync(app_uuid, kind='baseline', run_id=ctx.run_id)` → `apply(sid, result,
-   mode='baseline')` → `finish_sync(...)`. Wire `KbStore` to the subprocess worker (e.g. `KbStore(Database(settings.db_path))`
-   in the node — decide the wiring; `settings` is available in the worker). Reconcile counts in `v_kb`.
-6. **Register** `appian-dev` + `appian-devops` as **managed-native** MCP references (read/export-only allowlists;
-   full install/update mechanics are 16-08 — this sub-phase just adds the registry entries / resolves the `lcp`
-   `<lcp-image>` placeholder). Env as a **LIST** of `{name,value}`; secrets by key name.
-7. **Test** against a **stubbed export** (fake Deployment endpoint or a local zip fixture) → parse → `KbStore.apply` →
-   assert `kb_*` populated (reuse the 16-01 real-package fixture end-to-end); validator behaviors; `validate_library.py`
-   7-gate + parity + reliability green; a genesis-side `RunManager.start("sync-application", …, environment=<dev label>)`
-   worker-run test. Live acceptance (real export) recorded in `progress/`.
+**✅ 16-03 — DONE (`sync-application` workflow).** genesis **v0.29.1** + genesis-workflows **v0.8.1**, CI green. As built
+(see `progress/phase-16-03-sync-workflow.md`): a program-only graph `resolve_inputs → export_package → v_export →
+parse_package → v_parse → write_kb → v_kb → present`; **export = deterministic Appian Deployment REST** in a program
+node, all network/env/secret access isolated in the `_fetch_package_zip` seam (401/403/404 fail-fast; 409/timeout/5xx →
+retry); **parse → code-free `result.json`**; **write_kb → `KbStore` baseline**, store injected via
+`ctx.extras['kb_store']` (wiring resolved to ctx.extras — `build_context` provides it; `graph.py` never imports the
+platform); re-baseline rejected. genesis pins `genesis-appian-parser@v0.1.0`, adds `EnvironmentRegistry.active()`, and
+**hardened the checkpointer** (WAL + busy_timeout — see §7). `appian-dev`/`appian-devops` registered as managed-native
+refs (resolved the old `lcp` placeholder).
+
+**▶ NEXT — 16-08 (managed-native Dev/DevOps MCP install + the `is_dev` env toggle).** Read
+`phase-16-appian-knowledge-base/16-08-native-mcp-integration.md` (+ ADR-038). It is the **prereq for 16-04/16-05**.
+Two deliverables, **build §2.0 FIRST**:
+1. **`is_dev` env toggle (16-08 §2.0)** — a single-select boolean on the Environments registry (the registry may hold
+   many envs; exactly one is tagged **dev**). Add `EnvironmentRegistry.dev_environment()` + persistence + a
+   `POST .../environments/{label}/dev` (single-select) + web toggle; no dev env ⇒ fail fast + a "Test connection". The
+   dev env's URL + creds feed ALL Phase-16 auth (REST export already reads the *active* env via `resolve_var`; wire the
+   Applications page to launch the sync with `environment=<dev label>`).
+2. **Managed-native MCP install/update (ADR-038)** — install the Dev MCP (`lcp-mcp-server`) + DevOps MCP
+   (`appian-deployment-mcp`) as versioned local servers under `~/.genesis/mcp-servers/<id>/versions/<v>/` via `uv sync`,
+   launched from the per-server venv; **resolve the `<managed-native:…>` launch placeholders** in `mcp-registry.json`
+   (appian-dev/appian-devops are already registered with read/export-only allowlists — 16-03); updatable-without-forking
+   (Dev re-fetched from the site bundle servlet; DevOps drop-in), reversible + sha-verified. New prereq: `uv` at install
+   time; Basic auth is the headless default.
 
 **Key facts for any Phase-16 work:** the sample package the user provided is
 `/Users/ramaswamy.u/Documents/test/packages/AiDocumentCenterv4.3.1.zip` (also vendored in the parser repo's
@@ -623,9 +633,9 @@ Concrete steps:
 (Atlas standard), returned verbatim.
 
 **Open items to confirm with the human:** (1) the Appian **changed-objects** API contract (content vs ids; deletes;
-pagination) for 16-07; (2) the DevOps-MCP update source for 16-08 (internal mirror URL vs drop-in artifact); (3) the
-`KbStore`→worker wiring choice (ctx.extras vs direct construction) — pick during 16-03. *(Resolved: env accepts Basic
-auth; export is deterministic REST not the DevOps MCP; commit/push approved — 16-01 + 16-02 are pushed + CI-green.)*
+pagination) for 16-07; (2) the DevOps-MCP update source for 16-08 (internal mirror URL vs drop-in artifact). *(Resolved:
+env accepts Basic auth; export is deterministic REST not the DevOps MCP; the KbStore→worker wiring is `ctx.extras['kb_store']`
+via `build_context`; commit/push approved — 16-01/16-02/16-03 are pushed + CI-green.)*
 
 ---
 
