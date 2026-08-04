@@ -11,7 +11,7 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-04 — latest SHIPPED: genesis v0.27.2 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-04 — latest SHIPPED: genesis v0.28.0 +
 > genesis-workflows v0.7.1 + genesis-core v0.8.2 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
@@ -168,7 +168,7 @@ has no CI — validated transitively by core+genesis installing its tag).
   (MCP · CLI · GitLab · Environments · General). Left nav collapsed by default.
 - **Data plane:** durable SQLite (`~/.genesis/genesis.db`, WAL) via `genesis/db/` migrations
   (m0001 runs+events, m0002 chat, m0003 chat_usage, m0004 copilot [chat_sessions.mode +
-  chat_run_links + chat_permissions], m0005 supervision [chat_notifications], m0006 copilot_actions [audit]; `current_version=6`); runs + full conversation +
+  chat_run_links + chat_permissions], m0005 supervision [chat_notifications], m0006 copilot_actions [audit], **m0007 kb [the code-free temporal `kb_*` Appian KB — Phase 16-02]**; `current_version=7`); runs + full conversation +
   checkpoints + chat sessions/messages persist across restart; retention available.
 - **Credits (Phase 11):** every agent turn (workflow node OR chat message) reports real credits from
   Kiro's `_kiro.dev/metadata.meteringUsage`; aggregated per-run (`eventlog.aggregate_credits` via
@@ -260,7 +260,11 @@ genesis/genesis/
             + tx()); runner.py (Migration + migrate() + current_version/pending + contiguity guard);
             migrations/ (m0001_baseline adopts runs+run_events; m0002_chat adds chat_sessions+chat_messages;
             m0003_chat_usage adds chat_messages.usage; m0004_copilot adds chat_sessions.mode +
-            chat_run_links + chat_permissions; m0005_supervision adds chat_notifications; m0006_copilot_actions adds the copilot audit trail — current_version=6). Schema is owned HERE (spec 01).
+            chat_run_links + chat_permissions; m0005_supervision adds chat_notifications; m0006_copilot_actions adds the copilot audit trail; **m0007_kb adds the code-free temporal `kb_*` Appian KB tables (Phase 16-02)** — current_version=7). Schema is owned HERE (spec 01).
+  kb/       (Phase 16-02) store.py (KbStore over `kb_*`: app lifecycle incl. table-scoped untrack; begin/apply
+            [baseline+delta SCD-2]/finish syncs; recompute-on-sync bundles [flow_json verbatim]; tag_release/
+            list_releases + point-in-time helper; contract-shaped reads). No source code stored (ADR-037);
+            duck-types genesis-appian-parser's KbParseResult (pin lands in 16-03).
   runtime/  settings.py (Settings: state_dir ~/.genesis, artifacts_dir ~/Genesis/runs, db_path,
             library_dir, lockfile_path, secrets_path, environments_path, custom_mcp_path,
             custom_cli_path, **skills_dir=~/.genesis/.kiro/skills + skill_output_dir=~/.genesis/skill-output [Phase 14]**,
@@ -488,6 +492,13 @@ genesis-workflows/
   don't inject it over the wire. `--help` doesn't list skills (they're a convention, not a flag) — the binary's
   changelog strings + the spike are the evidence. Do NOT set `KIRO_HOME` to relocate skills (it also relocates the
   user's agents/sessions/settings/auth). See `spike/2026-07-16-kiro-skills-in-acp-and-chat.md` + ADR-034.
+- **Pin the linter — unpinned `ruff` drifts and breaks CI on pre-existing code (Phase 16-02).** genesis CI does
+  `pip install -e ".[dev]"` then `ruff check genesis`. With `ruff>=0.6` (floating), a newer ruff released a **changed
+  default rule set** (added `UP*`) that flagged ~170 pre-existing `Optional[...]` usages repo-wide — a green release
+  (v0.27.2) went red 18 days later with **zero code change**. Local `ruff check genesis` (older pinned venv ruff) still
+  passed, hiding it. Fix: **`ruff==0.15.20`** in dev deps so CI reproduces local exactly. When adopting a newer ruff,
+  do it deliberately with a repo-wide fix (`ruff check --fix` the `Optional`→`X|None` churn) + bump the pin. (Tests
+  aren't ruff-gated in CI — only the `genesis` package is — so test-file lint drift won't fail CI.)
 
 ---
 
@@ -513,11 +524,13 @@ genesis-workflows/
 
 ### ⭐ ACTIVE (IN PLANNING, spec-only, NOT pushed) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
 
-> **Handoff for the next session:** this is a *planning* effort — full spec set drafted, **no code written, nothing
-> committed/pushed**. Read `specs/phase-16-appian-knowledge-base.md` (umbrella) + `phase-16-appian-knowledge-base/16-01..16-08`
-> + `genesis-kb-tool-contracts.md`, and ADR-036/037/038 in `reference/decision-log.md`. Then continue planning or, when
-> the human approves, start implementing in the sub-phase order. Also update `tracker.md` §6 (there is a 2026-08-04
-> "Phase 16 spec" status entry to extend) when you make progress.
+> **Handoff for the next session:** planning is complete AND implementation is under way. Read
+> `specs/phase-16-appian-knowledge-base.md` (umbrella) + `phase-16-appian-knowledge-base/16-01..16-08` +
+> `genesis-kb-tool-contracts.md`, ADR-036/037/038, and `progress/phase-16-01-native-parser.md` +
+> `progress/phase-16-02-kb-schema-and-store.md`. **Shipped so far:** **16-01** = `genesis-appian-parser` **v0.1.0**
+> (new repo `ramaswamy.u/genesis-appian-parser`, CI green) — `parse(zip|bytes) -> KbParseResult`, code-free, no files;
+> **16-02** = genesis **v0.28.0** (m0007 `kb_*` + `KbStore`, CI green). **Next: 16-03** (`sync-application` workflow;
+> adds the `genesis-appian-parser` tag pin to genesis). Keep extending `tracker.md` §6 as you go.
 
 **Goal.** Move the Appian knowledge base *inside* Genesis and make Genesis an agentic Appian-development environment.
 Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-Appian KB) as services; reproduce their

@@ -142,6 +142,22 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-04 (Phase 16-02 — internalized KB schema + store SHIPPED ✅; genesis v0.28.0):** Added the code-free
+  temporal Appian KB to `genesis.db`. **Migration m0007** creates the `kb_*` tables (applications/syncs/objects/
+  dependencies/bundles[+flow_json,key_objects_json,entry_point_json,release_label]/bundle_members/releases + indexes;
+  SCD-2, additive; `current_version`→7, auto-applies at boot). **`KbStore`** (`genesis/kb/store.py`): app lifecycle
+  (register/archive/**untrack table-scoped**), sync (`begin`/`apply` baseline+delta SCD-2/`finish`), recompute-on-sync
+  bundles (**`flow_json` verbatim** = Atlas standard), `tag_release`/`list_releases` + point-in-time helper, and
+  contract-shaped reads (list_applications/get_app_overview[at_release]/search_objects[cross-app]/get_dependencies/
+  get_object/get_bundle/search_bundles/list_orphans). **No code stored** (ADR-037); duck-types `KbParseResult` (parser
+  pin lands in 16-03). **Verified vs the real package** (KbStore reads reconcile to 2620 objects / 5084 edges /
+  174 bundles / 804 orphans). **10 new tests** (incl. SCD-2 delta history, cross-app, table-scoped untrack,
+  point-in-time, no-SAIL guard, real end-to-end); updated migration-count assertions to 7; **fixed a pre-existing
+  time-bomb** in the retention test (inject `now`); **pinned `ruff==0.15.20`** (unpinned ruff drifted to a UP-enabled
+  default that failed CI on ~170 pre-existing `Optional[...]` usages — none in the new code). **Full suite 239 passed;
+  genesis package ruff-clean; CI green** (pipeline #6496454). Progress: `progress/phase-16-02-kb-schema-and-store.md`.
+  **Next:** 16-03 (`sync-application` workflow).
+
 - **2026-08-04 (Phase 16-01 — native parser IMPLEMENTED ✅ · local only):** Built
   **`genesis-appian-parser` v0.1.0** (new repo at `repo-gitlab/ramaswamy.u/genesis-appian-parser`,
   commit `822b683`, tagged `v0.1.0` — **local, not pushed**; remote creation likely needs the user per
