@@ -31,7 +31,7 @@ Personas: **SQL Forge** (data generation), **Product Owner** (read-only analysis
 | Branch | Base | Commit | Pushed to dev? | MR? | State |
 |--------|------|--------|----------------|-----|-------|
 | `feature/atlas-agent-revamp` | main | `1e220ab28e` | yes (force-pushed, squashed) | **!92** (prod, changes requested) | Original all-in-one (40 skills). Superseded by per-persona branches. Do not build on it further. |
-| `feature/atlas-sql-forge` | `origin/main` | `053c44c175` "Initial staging commit" | **yes** | not yet (later) | SQL Forge complete. |
+| `feature/atlas-sql-forge` | `origin/main` | `5def052c64` "Initial staging commit" | **yes** | not yet (later) | SQL Forge complete. |
 | `feature/atlas-product-owner` | main | `632b5c97b0` "Initial staging commit" | not yet | not yet | PO complete except E1. Current branch. |
 
 > MR !92 is at `appian/prod/solutions-os!92`, title "feat: Atlas agent — single agent with
@@ -92,7 +92,7 @@ Full per-comment analysis lives in `mr-92-review-responses.md` (same folder).
 
 ---
 
-## 5. SQL Forge branch — `feature/atlas-sql-forge` (COMPLETE, committed `053c44c175`, pushed to dev)
+## 5. SQL Forge branch — `feature/atlas-sql-forge` (COMPLETE, committed `5def052c64`, pushed to dev)
 
 ### Structure produced
 ```
@@ -259,7 +259,8 @@ User pointed to `~/Downloads/Using Kiro CLI Developer & Kiro at Appian (Amazon Q
   delegate to Dev MCP; needs Dev MCP capability confirmation), **C3** (merge html + sailwind
   prototypes). Largest files live here (general note #2).
 - **E1** (PO feature-spec template) — awaiting user.
-- **D** (DG MCP shared namespace) — user, manual, pre-merge for SQL Forge.
+- **D** (DG MCP shared namespace) — **IN PROGRESS**, see §12. Repo created (Phase 1 merged); code
+  seeded via MR (Phase 2, awaiting merge); image publish + atlas.json update still pending (Phase 3–4).
 - **C4** (ERD convergence) — needs @revathi.jayabalan / @saravana.manivasakam.
 - **MR creation** for SQL Forge and PO — deferred; remember the shared-file union note (§4.3) in
   each MR description.
@@ -274,3 +275,303 @@ User pointed to `~/Downloads/Using Kiro CLI Developer & Kiro at Appian (Amazon Q
 3. Start the **UX Designer** branch using the §9 recipe; get a decision on C2 (Dev MCP) and confirm C1/C3.
 4. When creating MRs: dev fork only; note the DG-namespace blocker (SQL Forge) and the shared
    agent-file union requirement in the descriptions.
+
+
+---
+
+## 12. DG MCP server migration (Theme D) — personal namespace → appian/prod
+
+**Goal:** move the Data Generator MCP server out of `ramaswamy.u/solutions-atlas-dg-mcp-server`
+into `appian/prod/solutions-atlas-dg-mcp-server`, then repoint the `atlas` agent at the shared image.
+Same dev→prod fork workflow throughout (branch on dev fork, MR to prod).
+
+### How repo creation works (research)
+- Projects under `appian/prod` are declared as code in **`appian/prod/gitlab-configuration`** —
+  one YAML per project at `configuration/projects/<name>.yml`, applied by Terraform. Schema:
+  `configuration/projects.schema`.
+- Precedent: **MR !3974** (ramaswamy.u, merged) created the other Atlas AI tool repos by adding
+  exactly 3 YAML files (kb, parser, mcp-server) — no `projects.tf` changes. (The `projects.tf`
+  `import` blocks with hardcoded IDs are one-time approval-rule state adoptions, not needed for new projects.)
+- **Note on MR creation:** the available agent/glab token returns **403 `insufficient_scope`** for
+  creating MRs (matches org policy: agents push to dev forks, humans click "create MR"). So every MR
+  in this migration is created via the GitLab UI link; the agent does branch + commit + push only.
+
+### Phase 1 — create the repo (DONE, merged)
+- Branch `feature/GAMS-0000-create-atlas-dg-mcp-server` off `origin/main` of `gitlab-configuration`.
+- Added `configuration/projects/solutions-atlas-dg-mcp-server.yml`, description + access groups
+  **mirroring `solutions-atlas-mcp-server.yml`** exactly (owner/developer/reporter squad groups).
+- Committed, pushed to **dev fork** (`appian/dev/gitlab-configuration`), MR to `appian/prod/gitlab-configuration`.
+- **Merged by user.** New repo live: `appian/prod/solutions-atlas-dg-mcp-server` (project id **14461**);
+  a dev fork also exists: `appian/dev/solutions-atlas-dg-mcp-server` (id **14462**).
+
+### Phase 2 — seed the code (DONE on dev fork, MR awaiting merge)
+- Prod repo initially had only a seeded `README.md` ("Initial commit" `069eac2`).
+- Source of truth = the personal repo's **`feature/f1-cdt-dse-tools`** branch (5 commits ahead of its
+  `main`; has the CDT/data-store, document, and CSV tools that `atlas-prompt.md` references).
+- In the local personal repo (`repo-gitlab/ramaswamy.u/solutions-data-generator-mcp`): added remotes
+  `devfork` + `prod`; created branch **`feature/GAMS-0000-seed-dg-mcp-server` off `devfork/main`**
+  (shared base with prod → clean MR); overlaid the full code via `git checkout feature/f1-cdt-dse-tools -- .`.
+- **Fixed `mcp.json`** (per user): replaced the local `python3 main.py` + personal `cwd` config with the
+  **docker** config pointing at the shared image:
+  ```json
+  { "command": "docker",
+    "args": ["run","--rm","-i","--env","APPIAN_ENV_URL","--env","APPIAN_API_KEY",
+             "registry.gitlab.appian-stratus.com/appian/prod/solutions-atlas-dg-mcp-server:latest"],
+    "env": { "APPIAN_ENV_URL": "${APPIAN_ENV_URL}", "APPIAN_API_KEY": "${APPIAN_API_KEY}" } }
+  ```
+- **Squashed to a single commit** (amended into the seed commit) and force-pushed to the dev fork.
+  Branch = base + **1 commit** `c64fb97 GAMS-0000 Seed Atlas Data Generator MCP server code`.
+- Secret check: `mcp.json` + `.env.example` are placeholders only; scan clean; no `__pycache__`/`.pyc`
+  tracked; `.gitignore` included.
+- **MR to create/merge** (prod id 14461, target `main`):
+  `https://gitlab.appian-stratus.com/appian/dev/solutions-atlas-dg-mcp-server/-/merge_requests/new?merge_request%5Bsource_branch%5D=feature%2FGAMS-0000-seed-dg-mcp-server&merge_request%5Btarget_project_id%5D=14461&merge_request%5Btarget_branch%5D=main`
+
+### Phase 3 — image publish (DONE)
+- On merge of MR **!1** (`appian/prod/solutions-atlas-dg-mcp-server`, merged by dineshkumar.k; prod main
+  merge commit `ef88316e`, our seed commit `c64fb974`), CI published to registry repo
+  `appian/prod/solutions-atlas-dg-mcp-server` with tags **`latest`** and **`ef88316e`**.
+  Full image ref: `registry.gitlab.appian-stratus.com/appian/prod/solutions-atlas-dg-mcp-server:latest`.
+
+### Phase 4 — repoint the agent (DONE, committed + pushed)
+- On `feature/atlas-sql-forge`, updated `atlas.json` `appian-data-generator` image from
+  `…/ramaswamy.u/solutions-atlas-dg-mcp-server:latest` → `registry.gitlab.appian-stratus.com/appian/prod/solutions-atlas-dg-mcp-server:latest`
+  (JSON valid; `kiro-cli agent validate` exit 0). Clears Theme D (`atlas.json:98`).
+- **Amended into the branch's single commit** (`5def052c64` → **`5def052c64`**) and force-pushed to the
+  dev fork — SQL Forge remains a single-commit MR. DG namespace blocker is now cleared.
+
+### Phase 5 — cleanup (PENDING)
+- Archive the personal `ramaswamy.u/solutions-atlas-dg-mcp-server` once the new repo + image are verified.
+
+### Reference commands / IDs
+- prod `gitlab-configuration` project id: **2**; prod DG repo id: **14461**; dev DG fork id: **14462**.
+- Personal source local path: `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/solutions-data-generator-mcp`
+  (remotes: `origin`=personal, `devfork`=dev fork, `prod`=prod).
+
+---
+
+## 13. Action-specific skills rebuild (the pivot) — ✅ IMPLEMENTED all 3 branches (2026-07-29)
+
+Pivoted from persona "hub" skills to **action-specific skills clustered by functionality**, matching the
+repo convention (`a11y-expert`, `appian-dev`, `dev-automated-testing`, `integration-*`). Full design in
+`design-action-specific-skills.md`. Each branch = a single commit pushed to the **dev** fork only; MRs
+pending human creation via the dev-fork UI links.
+
+**Convention applied everywhere:**
+- `<domain>-<action>` skills flat at `.kiro/skills/`; agent is the hub; shared docs in `.kiro/resources/<domain>/`.
+- **Prompt path = `file://../resources/<domain>/prompt.md`** (agent-dir-relative). Corrects an earlier wrong
+  "repo-root-relative" assumption — verified against `appian-dev.json`/`project-tracker.json`, which use the
+  same form. `kiro-cli agent validate` does NOT catch a wrong prompt path (it checks from repo-root CWD).
+- Each consolidated skill = a thin dispatcher `SKILL.md` (mode router) over **verbatim** action `references/`
+  (byte-identical to originals — fidelity-audited). Sibling cross-links in every `description`.
+- Per-skill workflow, no positional step naming (e.g. renamed `step-6-*` → `create-records.md` / `generate-sql.md`).
+- Validation gate per skill (`quick_validate.py`, description ≤512, kebab name==folder, frontmatter = name+description only).
+
+**Branch results:**
+
+| Branch | Domain / agent | Skills | Commit (dev) |
+|--------|----------------|--------|--------------|
+| `feature/atlas-sql-forge` | `data-generator` (appian-atlas + appian-data-generator on shared prod image) | 4: `data-gen`, `data-gen-bulk`, `data-gen-manage`, `data-gen-erd` | `6ab49a2ec0` |
+| `feature/atlas-product-owner` | `product-owner` (appian-atlas + appian-docs; docs tool wired into `tools`) | 4 (9→4): `app-explore`, `app-change`, `app-inventory`, `app-author` | `f09b582886` |
+| `feature/atlas-ux-designer` | `ux-designer` (appian-atlas only) | 3 (8→3): `ux-build`, `ux-review`, `ux-handoff` | `0d0e6ed39e` |
+
+**Fidelity audits:** data-gen — all moved bodies byte-identical (git R100 renames); PO — 8/9 identical, 1
+intended cross-ref fix; UX — all 8 identical to the stashed originals. Old `atlas-*` hubs + `atlas.json` +
+`atlas-prompt.md` removed on each branch; `a11y-expert` / `appian-dev` / `dev-automated-testing` untouched.
+
+**Notable fixes/flags surfaced during the rebuild:**
+- data-gen ERD skill depends on a **personal** GitHub tool (`ram-020998/erd-gen`, `curl|bash` install) + a
+  Lucid API token — same class as the DG-MCP personal-namespace issue; tied to C4. Flagged, not changed.
+- Corrected the ERD skill's output claim (draw.io → **Lucidchart**) and stale "Atlas SQL Forge" branding.
+- PO agent: added `@appian-docs` to `tools`/`allowedTools` (old config configured the MCP but never exposed it).
+- Both MCPs use `autoApprove: ["*"]` (pre-existing) — auto-approves writes/deletes; workflow docs add
+  human-confirm gates. Noted vs the read-only/human-in-the-loop philosophy.
+
+**Still open:** E1 (spec template — skeleton canonical for now); Theme A reviewer reconciliation; three MRs;
+DG Phase 5 (archive personal repo); credential rotation.
+
+---
+
+## 14. MR !101 review, sync-with-main, and branch split (2026-07-30 → 31)
+
+### MR !101 (data-gen) — opened, then BLOCKED
+- MR **!101** `appian/prod/solutions-os!101`, `feature/atlas-sql-forge` → `main`, author ramaswamy.u,
+  reviewer **walid.elsayed**. **20 comments; state: blocked.** (Read via `glab api projects/appian%2Fprod%2Fsolutions-os/merge_requests/101/discussions`.)
+- **Blocking summary (#20):** (1) two unrelated changes in one MR / only ~11 lines of code — split it;
+  (2) 22 commits behind main, missing the updated repo structure; (3) ERD skill references a personal
+  repo — not production-ready; (4) ~4,000 lines of MD, most is code-able / not needed → follow-up MR to
+  rebuild the skills more deterministically. Review detail files in a Google Drive folder ("MR 101 …").
+- **Comment map:** DG-MCP vs Dev-MCP #1/#2 (answered: DG has record/CDT handling Dev MCP lacks);
+  skill renames #3 (wants `data-generate-records/-sql`, `data-generator-manager`, `data-generate-erd`);
+  "exemplar" is vague → auto-analysis-flow #4; undefined codes F4/D15/D16 #5–#7; missing output paths
+  #8/#9; `tools/README.md` purpose #10; tool-reference as MCP steering #11/#12; "workflow" folder too
+  broad (it's the manual flow) #13; rename skills #14/#16; step-0 → Python (determinism) #15; step-0 is
+  common to both paths so shouldn't live under manual `workflow/` #17; analysis referenced from both skills
+  = DRY (livable) #18; no personal repos (ERD) #19.
+
+### Minor fixes done (committed)
+- Removed **stale design codes** `F4/D15/D16/D17/D18` (exemplar docs) + `D9` (step-1) — comments #5–#7.
+- Added **output-file paths** for `reference.md` / `footprint.md` (request folder) — comments #8/#9.
+- Committed on `feature/atlas-sql-forge` as `3afbad5a0f` (pushed), later cherry-picked to the new branch.
+
+### The branch had become SHARED (root of #20.1)
+Colleagues merged their features INTO `feature/atlas-sql-forge`: **Hanna Shapiro** (Performance agent +
+OpenSearch/Grafana scorecard), **Suganya B** (performance-executor agent + skill suite), **Raajiv
+Madivanane** (perf-profiler). 6 commits + merges on top of our data-gen commit — our work was intact
+(base), not overwritten.
+
+### Sync with main (safe merge, no history rewrite)
+- Branch was **27 behind `origin/main`** (incl. a "simplify repo structure" commit — but `.kiro/skills`
+  still exists at root on main, so **no skill relocation needed**; the "only agents under .kiro" is a future
+  direction hinted by `ai-framework/*/.kiro/skills/.gitkeep` placeholders).
+- Chose **merge over rebase** (shared branch): fast-forwarded local to the colleagues' commits, then
+  `git merge origin/main` (clean, 0 conflicts) → merge commit **`57e02151bd`**, **0 behind main**.
+  Pushed as a **fast-forward (no force)** — colleagues just `git pull`; nothing rewritten. Posted a group
+  heads-up. **Declined squash** (would rewrite the shared branch / erase colleagues' authorship).
+
+### Branch split — the clean data-gen branch (current)
+- Created **`feature/atlas-data-generator`** off `origin/main`; cherry-picked ONLY our two commits →
+  `6941d0f49f` (data-gen skills + agent + README) + `7095239373` (the #5–#9 fixes). **0 conflicts.**
+- Diff vs main = **exactly our 26 files** (no colleague/perf/opensearch files); **0 behind main**;
+  all 4 skills + agent validate. **Pushed to dev** (first push). `feature/atlas-sql-forge` left untouched
+  for the colleagues' performance work.
+- **This `feature/atlas-data-generator` branch is now the one to open the clean data-gen MR from.**
+
+### README
+- Added a **Data Generation Skill Suite** section to the repo `README.md` (styled like the a11y suite) —
+  carried on both `feature/atlas-sql-forge` and `feature/atlas-data-generator`.
+
+### Still open (data-gen)
+Renames #3/#4/#13/#14/#16; step-0 → Python + trim MD (determinism, #15/#20.4); step-0 placement
+restructure #17; tools docs purpose/steering #10–#12; **ERD personal repo #19** (migrate `erd-gen` to a
+shared namespace or drop `data-gen-erd`); open the new MR from `feature/atlas-data-generator` and
+close/retarget **!101**; Theme-A reviewer reconciliation.
+
+
+---
+
+## 15. Determinism rebuild — `dg` CLI (2026-08-03) — WIP, UNCOMMITTED (discovered this session)
+
+**Context:** A prior session on 2026-08-03 began the biggest MR !101 ask — **#15 / #20.4: convert the
+deterministic MD workflow to Python the agent parameterizes, and trim the ~4,000 MD lines**. This was
+left **entirely uncommitted** on `feature/atlas-data-generator` and was NOT recorded until now. The
+tracker previously said "tree clean" (as of 07-31) — that is stale.
+
+### What exists (uncommitted, verified this session)
+- **New `.kiro/resources/data-generator/scripts/`** — a `dg` CLI (`dg.py`) plus pure-function libs:
+  `scaffold.py`, `state.py`, `gate.py`, `fields.py`, `footprint.py`, `coverage.py`, `sql_emit.py`,
+  `validate.py`, `erd_input.py`. `dg.py` header: *"Pure functions over on-disk artifacts; never calls
+  MCP/network."* Supporting: `schemas/` (state, decisions, payload-file/-metadata/-spec JSON schemas),
+  `config/` (`thresholds.json`, `domains.example.json`), `ruff.toml`, `.gitignore`, and `tests/`
+  (10 test files + fixtures + conftest).
+- **New `.kiro/skills/data-gen-erd/references/generate-erd.md`** (untracked).
+- **16 tracked MD files trimmed** — diffstat **+283 / −3,997**. The workflow/exemplar docs + skill
+  `references/` are now **thin delegation docs** that invoke `dg <subcommand>` (e.g. `dg init`,
+  `dg gate --require 5 --then gen`, `dg verify-input`) instead of prose procedure. Confirmed on
+  `step-0-initialize.md` (453→~30 lines) and `data-gen/references/create-records.md`.
+
+### Verification run this session (all green)
+- **89 tests pass** — `python3.13 -m pytest -q` in the scripts dir (0.35s). (System `python3` is 3.14
+  with no pytest; **use `python3.13`**.)
+- **All 4 skills valid** — `quick_validate.py` on `data-gen`, `data-gen-bulk`, `data-gen-erd`,
+  `data-gen-manage` → "Skill is valid!".
+- **Agent validates** — `kiro-cli agent validate --path .kiro/agents/data-generator.json` → EXIT 0.
+- **ruff NOT run** — not installable here (PEP 668 externally-managed env; declined
+  `--break-system-packages`). Lint is a nice-to-have; the 89 passing tests are the functional signal.
+
+### NOT yet done (still open on this branch)
+- **Renames #3/#4/#13/#14/#16** — skill folders are still `data-gen` / `data-gen-bulk` / `data-gen-erd`
+  / `data-gen-manage` (reviewer wants clearer names).
+- **Step-0 placement #17** — not restructured into a common step-0 + auto-analysis/ + manual/ layout.
+- **ERD personal repo #19** — `erd-gen` still personal namespace.
+- **Not committed / not pushed.** Working tree dirty (16 modified + 2 untracked trees).
+
+### Immediate decisions needed before committing
+1. **`dg` invocation contract:** the trimmed MD calls a bare `dg` command. Confirm how the agent runs it
+   (PATH shim vs `python3 …/dg.py`) and that the seeding prompt tells it the interpreter — the host
+   default `python3` is 3.14 (no deps); the working interpreter here was `python3.13`. This must be
+   pinned in the prompt/docs or the agent will fail at runtime.
+2. **Commit strategy:** this is the reviewer's requested **follow-up MR** ("rebuild the skills more
+   deterministically"). Decide whether it lands on `feature/atlas-data-generator` (same MR) or a
+   dedicated follow-up branch/MR, since #20.1 was "don't mix unrelated changes."
+3. Do the renames (#17 restructure) BEFORE committing, or as a separate pass, to avoid churn.
+
+### Update 2026-08-03 (later) — invocation contract RESOLVED (edits only, not committed)
+Decision #1 above is done, matching the repo standard (a11y-* / data-model-* / integration / skill-creator
+all invoke scripts as `python3 <full-path>/script.py` — no PATH shim). Confirmed `dg` is **stdlib-only**
+(only non-obvious imports are `glob`/`tempfile`, both stdlib) → runs on any `python3` ≥ 3.9 **including the
+host default 3.14**; no venv/`setup.sh` needed (the a11y venv pattern is only for PyYAML deps).
+- **prompt.md** — added a "Deterministic CLI (`dg`)" section: canonical form
+  `python3 .kiro/resources/data-generator/scripts/dg.py <sub>` (run from repo root), stdlib-only note,
+  subcommand list, pointer to `tools/README.md`.
+- **15 runnable command lines** across 8 docs rewritten from bare `dg <sub>` →
+  `python3 .kiro/resources/data-generator/scripts/dg.py <sub>` (line-anchored `^    dg `; args/quotes/inline
+  comments preserved; backups taken + removed). Inline prose `` `dg <sub>` `` mentions left as the CLI's
+  short name (mirrors a11y prose using short script names).
+- **tools/README.md** (#10) — clarified purpose (MCP tools vs the `dg` CLI) + added a full `dg` command
+  reference table.
+- **Verified:** 4 skills `quick_validate` OK; `kiro-cli agent validate` EXIT 0; `dg --help` runs on default
+  `python3`; **89 pytest pass**; zero runnable bare-`dg` lines remain; 19 full `python3 …/dg.py` refs.
+- **Not committed** (per instruction). Still on `feature/atlas-data-generator`, HEAD `7095239373`.
+- Still-open decision #2 (same MR vs dedicated follow-up MR) and #3 (renames/#17 restructure) unchanged.
+
+### Update 2026-08-03 (later 2) — skill renames #3/#14/#16 DONE (edits only, not committed)
+Renamed all four skill folders to a consistent `data-generate-` prefix (matches repo `<domain>-<action>`):
+`data-gen`→`data-generate-records`, `data-gen-bulk`→`data-generate-sql`, `data-gen-manage`→`data-generate-manage`,
+`data-gen-erd`→`data-generate-erd` (chose `data-generate-manage` over the reviewer's literal
+`data-generator-manager` for prefix consistency). Done via `git mv` (renames staged, not committed).
+Updated: each SKILL.md `name`, all sibling cross-links in descriptions, agent `resources` (4 `skill://`),
+`prompt.md` router+prose, `tools/README.md`, `decisions.schema.json` description. Left untouched: semantic
+prose ("not created by data-gen", "in a data-gen session") + code docstrings + test fixtures.
+Verified: 0 stale refs; 4 skills `quick_validate` OK; agent validate EXIT 0; 89 pytest pass.
+Remaining MR!101 open items: #4 (rename "exemplar"), #13 (rename "workflow"), #17 (step-0 placement),
+#11/#12 (tool-reference as MCP steering), #19 (ERD external tool hosting).
+
+### Update 2026-08-03 (later 3) — #4/#13/#17 folder restructure + mode rename DONE (Scope 2, edits only, not committed)
+Chose reviewer **option B** layout + full **Scope 2** (rename the internal mode enum too).
+- **Layout** (`git mv`): `resources/data-generator/workflow/{ step-0-initialize.md (common), manual/ (step-1..5,4b), auto-analysis/ (auto-1..4, was exemplar-1..4) }`. Old `exemplar/` folder removed.
+- **Mode enum** `exemplar` → **`auto-analysis`** everywhere it's a functional value: `dg.py` (`--mode {manual,auto-analysis}`, `mode==` check), `scaffold.py` (mode chains + `if mode==` + error msgs), `footprint.py` glob, and the JSON **schema enums** (decisions/payload-metadata/state). Request subdir `raw/exemplar/` → **`raw/auto-analysis/`**. Fixture dir `sourceselection-exemplar/` → `sourceselection-auto-analysis/` (+ its `mode` values). Tests: fixture paths, `mode=` args, `raw/…` assertions, and `test_exemplar_*` names → `auto-analysis`.
+- **Docs/prose**: repointed both skill dispatchers' Path A/B (`workflow/manual/…`, `workflow/auto-analysis/…`), relabeled "Example-Based/Exemplar-Based/exemplar mode" → **Auto-Analysis** in prompt, skills, workflow docs, tool-reference, help strings, schema descriptions, fixtures README.
+- **KEPT (different concept — manual step 2):** `step-2-exemplar-discovery.md`, the `exemplar.md` artifact, "exemplar value patterns", "Step 2 exemplar", and the manual-chain listing. Flagged that "exemplar" still names the manual sampling step (legitimately distinct from the auto-analysis flow).
+- **Verified:** 89 pytest pass; `dg init --help` shows `{manual,auto-analysis}`; 4 skills `quick_validate` OK; agent validate EXIT 0; 0 stale folder-path refs. Renames staged via git mv, **not committed**.
+- **MR !101 remaining after this:** #11/#12 (tool-reference as MCP steering), #19 (ERD external tool hosting), #1/#2 & #18 (discussion/no-action). #3/#4/#13/#14/#15/#16/#17/#5-10/#20.1/#20.2/#20.4 done.
+
+### Update 2026-08-03 (later 4) — #11/#12 MCP steering DONE (edits only, not committed)
+Added a "How to use this MCP (steering)" section to the top of both `tools/tool-reference-atlas.md`
+(when to use / canonical call order: record_type_map → field_map → reference_data → schema → write-graph;
+resolve UUIDs via the map not search_objects) and `tools/tool-reference-data-generator.md` (execution/verify
+phase, gated behind analysis + human confirm; get_record_properties → create in insertion order capturing PKs
+for @alias FKs → verify_write_coverage/query_records → get_session before rollback; bulk = CSV→SQL). Kept the
+per-tool arg/return detail below as reference. `tools/README.md` reframed to note the steering+reference split.
+Verified agent validate EXIT 0. MR!101 remaining: #19 (ERD external tool hosting); #1/#2 & #18 (no-action).
+
+### Update 2026-08-03 (later 5) — live agent test (session 474c96b1), fixes + audit (edits only, not committed)
+User ran the `data-generator` agent live (SourceSelection, auto-analysis clone of reference `code26R0907`).
+**Outcome: succeeded end-to-end** — 30 records / 14 tables created live, `verify_write_coverage` PASS 14/14,
+rollback offered. Renamed skills, `workflow/manual` + `workflow/auto-analysis` paths, `--mode auto-analysis`,
+and `python3 …/dg.py` invocation all worked in the live env.
+
+**Two friction points found + FIXED (docs):**
+1. `dg plan-footprint` returned empty because nothing told the agent to first save `get_schema_relationships`
+   → `raw/schema_relationships.json`. Added a "## 1. Save the schema graph (required input)" step to
+   `workflow/auto-analysis/auto-2-footprint-discovery.md`.
+2. Agent fumbled `gate`/`state` invocation (guessed `--request-dir`/`--pass`/`--dir`). Root cause: CLI
+   inconsistency — `gate`/`state` use the global `--state` flag (default `state.json`/`$DG_STATE`) while all
+   other subcommands use `--dir`. Added a "## 4. Running dg against THIS request folder" note to
+   `step-0-initialize.md` (use `export DG_STATE=<folder>/state.json`, shows `state set` + `gate` forms) and
+   fixed the gate example in `create-records.md`. (DG_STATE honored at dg.py:200.)
+
+**Audit of the run:**
+- **Tools: ✅ only correct tools** — Atlas (read) + DG (write/query) MCP + read/write/shell. Hard rule
+  respected (schema from MCP, not local files).
+- **Steering: structure followed (right skill, auto-analysis path, gates in order) BUT the agent bypassed the
+  deterministic `dg` validators** — only ran init/gate/plan-footprint/state; **hand-wrote `footprint.md` and
+  `validation-report.md` and set gates PASS manually** (the reviewer's #15/#20.4 anti-pattern).
+- **Documents: partial** — produced decisions/state/reference/footprint/data-architecture/validation-report/
+  execution-log. **Missing `payloads/` and `raw/`** (records created from an in-context plan; raw captures
+  never saved — the plan-footprint failure's direct cause).
+
+**Hardening added (addresses the drift):** a **HARD RULE** in `prompt.md` (dg section) + both skill
+dispatchers — MUST persist MCP outputs to `raw/`, materialize `payloads/` and execute from them, generate
+gate reports via `dg build-footprint`/`validate`/`check-fields`/`coverage-gate` (never hand-write them or set
+a gate PASS to skip a check), and re-run a failed `dg` step after fixing its input rather than routing around.
+Verified: 2 skills quick_validate OK, agent validate EXIT 0. (89 dg pytest unaffected — no code changed.)
