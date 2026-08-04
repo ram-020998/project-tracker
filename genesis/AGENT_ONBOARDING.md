@@ -11,8 +11,8 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-07-17 — genesis v0.27.0 +
-> genesis-core v0.8.2 + kiro-agent-sdk v0.6.0 + genesis-workflows v0.7.0** (Phases 9 Agent-Artifact-I/O,
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-04 — latest SHIPPED: genesis v0.27.2 +
+> genesis-workflows v0.7.1 + genesis-core v0.8.2 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
 > a new **`design-doc`** workflow ports the Jarvis design-doc process into a deterministic Genesis graph —
@@ -22,8 +22,13 @@
 > platform capability: **run-launch file attachments** (`format:"file"` inputs → `POST /api/runs/upload` →
 > blackboard provisioning; **ADR-035**). genesis-workflows **v0.7.0** + genesis **v0.27.0** (core + sdk
 > unchanged). Only remaining item is manual live-acceptance vs. real kiro-cli (can't be driven headlessly).
-> No phase is currently active — the next task comes from the human (candidates in §9: the Phase-12/13/14/15
-> live runs, or the skill-migration backlog).
+> **ACTIVE EFFORT — Phase 16 (Appian Knowledge Base / "Atlas-into-Genesis") is IN PLANNING (spec-only, not yet
+> implemented, not yet pushed).** Bring the Appian KB *inside* Genesis: a Genesis-native parser + a code-free temporal
+> KB in `genesis.db` + an Applications page + a sync workflow + a read-only `genesis-kb` MCP, with all *environment*
+> calls routed through the managed native **Dev MCP / DevOps MCP** (Atlas & Jarvis retired as services). Full spec set
+> in `specs/phase-16-appian-knowledge-base.md` (+ `phase-16-appian-knowledge-base/16-01..16-08` +
+> `genesis-kb-tool-contracts.md`); **ADR-036/037/038** (Proposed). A new session should **read §9's Phase-16 block
+> first**, then continue the planning. No code has changed — latest shipped tags stand as above.
 
 ---
 
@@ -74,9 +79,11 @@ the Chat `/` palette (or auto-activated by description).
    `phase-07-code-review-fixes/` program (01–06), `phase-08-settings-revamp.md`, **`phase-09-agent-artifact-io.md`,
    `phase-10-chat-assistant.md` (+ `phase-10-.../10-01..07`), `phase-11-credit-usage-tracking.md`,
    `phase-12-code-review-workflow.md`, `phase-13-copilot-orchestrator.md` (+ `phase-13-.../13-01..06`),
-   `phase-14-skills-in-chat.md` (+ `phase-14-skills-in-chat/14-01..14-05`)** are all **shipped**. No phase is
-   currently active — the next task comes from the human. `specs/backlog/` holds deferred work (the
-   skill-migration program).
+   `phase-14-skills-in-chat.md` (+ `phase-14-skills-in-chat/14-01..14-05`)**, and **`phase-15-design-doc-workflow.md`
+   (15-01..15-05)** are all **shipped**. **`phase-16-appian-knowledge-base.md` (+ `phase-16-appian-knowledge-base/
+   16-01..16-08` + `genesis-kb-tool-contracts.md`) is the ACTIVE, spec-only PLANNING effort — read it (and §9's Phase-16
+   block) before touching this area.** `specs/backlog/` holds deferred work (the skill-migration program +
+   `phase-15-followup-fixes.md`).
 8. `progress/` — the as-built record, one file per phase/item (`phase-01..14-*`). Read the one(s)
    relevant to the area you're touching; they cite commits, tags, CI pipelines, and decisions.
 9. `spike/` — time-boxed feasibility probes (throwaway code, durable findings). Read the relevant one before
@@ -376,6 +383,9 @@ genesis-workflows/
 - **ADR-033 (ACCEPTED — Phase 13, SHIPPED)** — the **Chat copilot may operate runs** (start / read status / answer gates / cancel) at the **run-management layer only**, but (a) LangGraph still owns each workflow's control flow (ADR-001 intact — the copilot calls the same `RunManager` API a human clicks, it is NOT the workflow engine), (b) **every mutation is human-confirmed** (launch dialog for `start_run`; per-call confirm card for `respond_to_gate`/`cancel_run`, via the untrusted-tool → `session/request_permission` → SDK `permission_mode="ask"` bridge), (c) it can NEVER auto-approve/bypass a workflow's own HITL gate — only relay the human's decision, (d) NO config/secret/registry/workflow-definition/deploy tools, (e) read-only default + global kill-switch + per-session concurrency/rate/allow-deny limits (13-06, enforced app-side on `POST /api/runs` gated on the control token) + a `copilot_actions` audit trail. Refines ADR-031; preserves ADR-001. Delivered 13-01..13-06 (genesis v0.25.0 + sdk v0.5.0).
 - **ADR-034 (ACCEPTED — Phase 14, SHIPPED)** — **Skills are a first-class "standalone activity" concept beside Workflows, chat-invoked + filesystem-provisioned.** A **Skill** = a single standalone activity (draft a document, build a checklist, apply a body of knowledge like GAM) owned by the **Kiro agent** (its `SKILL.md`), no stages/run; a **Workflow** = a staged/orchestrated activity owned by **LangGraph** (ADR-001 preserved — a skill never starts a run). Skills are **filesystem-discovered** (NOT an ACP wire param like MCP): Genesis provisions them into a managed Kiro workspace **`~/.genesis/.kiro/skills/`** (= the chat `cwd`; **spike-proven** over ACP — auto-activation by `description` + explicit `/skill-name`). Two acquisition paths: install from a new `skills/` library in `genesis-workflows` (mirrors the workflow install/lockfile path) OR author in-flight (SKILL.md + scripts/references/assets). Catalog gains **Workflows | Skills** sub-tabs; Chat's `/` palette becomes a unified workflows+skills menu (skills also work in read-only chat). **Safety:** a skill may write documents **only** into a per-session **skill-output sandbox** `~/.genesis/skill-output/<session_id>/` (via a small additive SDK **`fs_write_root`** option — writes elsewhere rejected); executing bundled `scripts/` stays deferred. Refines ADR-031/033 (chat gains bounded sandboxed document output, no other write authority). Delivered 14-01..14-05 (kiro-agent-sdk v0.6.0 + genesis-workflows v0.6.0 + genesis v0.26.1).
 - **ADR-035 (ACCEPTED — Phase 15, SHIPPED)** — **Run input file attachments.** A workflow input may declare `format:"file"`. Such inputs are provisioned at launch, not passed inline: a new **multipart `POST /api/runs/upload`** (browser-only; the JSON `POST /api/runs` is unchanged for tokened/copilot starts) + **`RunManager.start(..., files=)` / `_provision_files`** writes each upload into the run **blackboard** under `uploads/<sanitized>` and rewrites the matching input to that blackboard-relative path **before** schema validation. Guards: 10 MB cap, extension allowlist (`.txt .md .html .htm .csv .png .jpg .jpeg`), filename sanitization (no traversal), target must be a declared `format:"file"` prop (`FileUploadError` → 400). The worker just reads a file already in its own workspace — **ADR-012 isolation intact**; uploads are **read-only inputs, never executed** (mirrors Phase-14 `scripts/` posture). Web: the 07-05 launch form renders a `FileDropList` for file inputs and submits multipart. Preserves ADR-010/018 (bulk → blackboard, never inline). Enables the Phase-15 mockup→i18n branch. Delivered 15-01 (genesis v0.27.0).
+- **ADR-036 (PROPOSED — Phase 16, planning)** — **Internalized Appian Knowledge Base.** Genesis owns the Appian KB: a Genesis-native parser + a local KB in `genesis.db`, fed by the **single dev-tagged environment** (the Environments registry may hold many; a single-select **`is_dev` toggle** designates the one Phase 16 authenticates against — URL + creds for REST export + Dev/DevOps MCP; Deployment-REST export + Dev MCP). External **Atlas MCP** (GitLab-served) and **Jarvis** are **retired as the KB source** (Atlas = inspiration + interim source until the 16-05 cutover). Sync is a **deterministic LangGraph workflow** (program-node REST export, no agent → ADR-001 preserved). Aligns with local single-user / one-env / own-data-plane (ADR-023/026/030).
+- **ADR-037 (PROPOSED — Phase 16, planning)** — **Code-free temporal KB + live code via the Dev MCP.** The KB stores **only** metadata/structure/dependency-graph/bundles — **never** SAIL source. All code (current + historical) is fetched **live** via the **Dev MCP** (version-parameterized). Object history = a **temporal SCD-2** model keyed to syncs; **user-tagged releases** (`kb_releases`) name points in time; `env_version_ref` bridges a release to the env version. Refines ADR-030 (SQLite `kb_*`; semantic search over parsed content = future pgvector trigger) + ADR-010/018 (export zip + parser output → blackboard; only metadata → `kb_*`). Historical-code slice depends on Dev MCP **AP-62096** (26.8 GA).
+- **ADR-038 (PROPOSED — Phase 16, planning)** — **Managed native Appian MCP servers (vendored, versioned, updatable-from-source, not forked).** The **Dev MCP** (`lcp-mcp-server`) + **DevOps MCP** (`appian-deployment-mcp`) are installed as managed, versioned local servers (`~/.genesis/mcp-servers/<id>/versions/<v>/` via `uv sync`; launched from the per-server venv; **read-only allowlists**; registered as a **managed reference**, not a static image → resolves the old `lcp` `<lcp-image>` placeholder). **Updatable without forking:** Dev = re-fetch from the connected site's bundle servlet (tracks the plugin version); DevOps = configured/drop-in versioned artifact; both reversible + sha-verified; the bundle is never modified. New prereq: `uv` at install time; Dev-MCP Basic auth is the headless default (browser/SSO = opt-in).
 
 **Key implementation contracts:**
 - Node fns are `async fn(state, config: RunnableConfig)`. LangGraph injects `config` only when the param is annotated `RunnableConfig`; nodes read ctx via `ctx_from_config(config)`.
@@ -501,6 +511,71 @@ genesis-workflows/
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
+### ⭐ ACTIVE (IN PLANNING, spec-only, NOT pushed) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
+
+> **Handoff for the next session:** this is a *planning* effort — full spec set drafted, **no code written, nothing
+> committed/pushed**. Read `specs/phase-16-appian-knowledge-base.md` (umbrella) + `phase-16-appian-knowledge-base/16-01..16-08`
+> + `genesis-kb-tool-contracts.md`, and ADR-036/037/038 in `reference/decision-log.md`. Then continue planning or, when
+> the human approves, start implementing in the sub-phase order. Also update `tracker.md` §6 (there is a 2026-08-04
+> "Phase 16 spec" status entry to extend) when you make progress.
+
+**Goal.** Move the Appian knowledge base *inside* Genesis and make Genesis an agentic Appian-development environment.
+Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-Appian KB) as services; reproduce their
+*knowledge* surface locally and route every *environment* call through the native **Dev MCP / DevOps MCP**.
+
+**Architecture (decided):**
+- **`genesis-appian-parser`** — a NEW pinned repo: port the Atlas parser's front-half (unzip → type-detect → 15 object
+  parsers → UUID/URN resolution → dep-graph → entry-point **bundles** → diff-hash) into a Genesis-owned, stdlib-only
+  package that emits an **in-memory `KbParseResult`** — **no source code persisted**, no file output. (Atlas parser repo
+  `appian/prod/solutions-atlas-parser`; KB repo `appian/prod/solutions-atlas-kb` with `sync_packages.py`; Atlas MCP
+  `appian/prod/solutions-atlas-mcp-server` — all read via `glab`.)
+- **KB in `genesis.db`** — migration **m0007**, `kb_*` tables, a **temporal SCD-2** model (objects/edges validity-ranged
+  by sync) + `kb_bundles`(+`flow_json`) + `kb_releases`; **cross-app queryable**; **NO code**.
+- **`sync-application` LangGraph workflow** — deterministic **REST export** (Appian Deployment API in a program node — no
+  agent, no credits) → parse → SCD-2 merge → recompute bundles → record sync.
+- **Applications page** (`kb_applications`, `/api/applications*`) — tag one env as **dev** (`is_dev` toggle, single-select,
+  in the existing Environments registry — supplies URL + creds for all Phase-16 auth; 16-08 §2.0) → list its apps via Dev
+  MCP → **Add** an app → baseline sync → status/releases.
+- **`genesis-kb` MCP** — Genesis-owned read-only stdio server (like `introspection_server`), serving the KB; **cuts
+  chat / erd-generation / design-doc off the external `appian-atlas`** onto it (the "KB swapped, functionality
+  preserved" milestone). `get_object_code` fetches SAIL **live via the Dev MCP**.
+- **Native MCP integration (16-08)** — the Dev MCP (`lcp-mcp-server`) + DevOps MCP (`appian-deployment-mcp`) installed as
+  **managed, versioned, updatable** local servers (bundles the user placed at `artifacts/mcp-servers/`); **updatable
+  without forking** (Dev re-fetched from the connected site's bundle servlet; DevOps from a configured/drop-in artifact).
+  **Connectivity foundation (16-08 §2.0, build FIRST):** a single-select **`is_dev` toggle** on the Environments
+  registry — the registry may hold many envs, exactly one is tagged **dev**, and that env's URL + credentials feed all
+  Phase-16 auth (REST export, Dev MCP, DevOps MCP, changed-objects API); no dev env ⇒ fail fast + a "Test connection".
+
+**Scope decisions (2026-08-04, from a full Atlas(34-tool)+Jarvis(50-tool) audit — see `genesis-kb-tool-contracts.md`):**
+- **Iteration 1 = 16 read-only KB tools** (Section A / Tier-1): `list_applications`, `get_app_overview`,
+  `search_objects`, `get_dependencies`, `get_object_detail`, `get_entry_points_for_object`,
+  `get_dependents_batch`/`get_precedents_batch`, `get_shared_objects`, `search_bundles`, `get_bundle`, `list_orphans`,
+  `get_orphan`, `get_dependency_path`, `get_transitive_dependencies`, `get_hub_objects`, `get_object_code` (live).
+  Return shapes **mirror the Atlas MCP** for a lossless cutover.
+- **Versioning (6 Version tools + release tagging + point-in-time) = BACKLOG (16-06)** — gated on Dev MCP **AP-62096**
+  ("Object version viewing/comparison", Code Review, **26.8 GA / 2026-08-28**; underlying version-UUID plumbing AP-51279
+  is Done). Schema kept version-ready (additive) so it lands code-only later.
+- **Schema/DDL/data-gen (7+2 tools) = DEFERRED (Section C).** **Write/deploy (Section E) = OUT.** **Documents/git-content/
+  pipeline-refresh (Section F) = OUT.** **Live-env reads (Section D) = via Dev/DevOps MCP only.**
+- **Governing principle:** *knowledge fetch → internal `genesis-kb`; any environment call → Dev/DevOps MCP.* Read-only
+  against Appian throughout (Dev MCP read-only allowlist; DevOps export/status/download only).
+
+**Sub-phases (all in `phase-16-appian-knowledge-base/`; iteration-1 unless noted):** 16-01 parser (new repo) · 16-02
+schema+`KbStore` (m0007) · 16-03 sync workflow (baseline) · **16-08 native MCP integration & updatability** (prereq for
+16-04/05) · 16-04 Applications surface · 16-05 `genesis-kb` MCP + cutover (headline) · 16-07 delta refresh (new Appian
+"changed-in-[start,end]" API — user owns it) · **16-06 versioning — BACKLOG**. Suggested build order: 16-01 → 16-02 →
+16-03 → 16-08 → 16-04 → 16-05 → 16-07; 16-06 later. **Release chain:** `genesis-appian-parser` (new) → `genesis`
+(m0007 + KbStore + kb_server + native-MCP installer + applications api/web) → `genesis-workflows` (sync-application +
+managed-native registry entries). genesis-core likely unchanged.
+
+**Open items to confirm with the human (next session):** (1) the Appian **changed-objects** API contract (content vs
+ids; deletes; pagination) for 16-07; (2) whether the connected env is **SSO-only** (would require the Dev MCP
+browser/playwright auth — an opt-in manual step; Basic auth is the headless default); (3) the DevOps-MCP update source
+(internal mirror URL vs drop-in artifact); (4) approval to start implementing + to **commit/push** the Phase-16 specs
+(currently local only).
+
+---
+
 - **Shipped:** Phases 1–6, the web revamp (7.1), the code-review fix program (01–06), Phase 8 (settings
   revamp), **Phase 9 (agent artifact I/O), Phase 10 (chat assistant), Phase 11 (credit tracking),
   Phase 12 (Appian code-review workflow), Phase 13 (Chat Copilot & Run Orchestrator — 13-01..13-06),
@@ -579,7 +654,8 @@ genesis-workflows/
   secrets); **rotate the shared `GITLAB_PUSH_TOKEN`** + refresh the expired Artifactory npm token; the
   `lcp` MCP image placeholder (`<lcp-image>`) in `mcp-registry.json`.
 
-**Do not start backlog or a new phase unless explicitly asked.**
+**Do not start backlog or a new phase unless explicitly asked.** (Phase 16 is in **planning** — the specs are drafted
+and local-only; do not begin implementing or push them until the human approves.)
 
 ---
 

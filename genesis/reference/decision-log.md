@@ -668,3 +668,143 @@ decision (no Google dependency).
 like any other artifact. Preserves ADR-012 (worker isolation) and ADR-010/018 (bulk → blackboard,
 never inline). Enables the Phase-15 mockup → i18n branch (15-05) and any future workflow that needs a
 document at launch. Delivered in 15-01 (genesis backend + launch-form control + tests).
+
+---
+
+## ADR-036 — Internalized Appian Knowledge Base (Genesis owns the parser + KB, fed by the single dev-tagged environment) (Phase 16)
+
+**Status:** Proposed (Phase 16).
+
+**Context.** Today Genesis reaches an **external** knowledge base for Appian application intelligence:
+the **Atlas** MCP (a GitLab-served, pre-parsed KB produced by a standalone daily pipeline — Appian API
+→ `sync_packages.py` → the Atlas parser → a GitLab KB repo → an MCP that reads GitLab over the API) and
+**Jarvis** (an in-Appian KB queried live). The external chain has four moving parts, a **daily**
+freshness ceiling (Atlas parses once/day), and a network round-trip for every query; it is also not
+shaped for Genesis's needs (it stores object source code, has no cross-app query surface tuned to
+Genesis, and lives outside Genesis's own SQLite data plane). Genesis is evolving into an agentic Appian
+development environment, and the KB is its foundation.
+
+**Decision.** Genesis **owns** the Appian KB. Phase 16 internalizes the whole loop:
+1. A **Genesis-native parser** (`genesis-appian-parser`, a new pinned repo) — the Atlas parser's
+   front-half (unzip → type-detect → 15 object parsers → UUID/URN reference resolution → dependency
+   graph → entry-point bundles → content diff-hash) ported into a Genesis-owned, stdlib-only package
+   that emits an **in-memory structured result**, not files.
+2. A **local KB in `genesis.db`** (migration m0007, `kb_*` tables) — cross-app queryable.
+3. An **`Applications` container model + page** — the user selects apps from the **dev-tagged
+   environment** and adds the ones a team works on, on demand. The Environments registry may hold
+   **many** environments; a single **`is_dev` toggle** (single-select — at most one env tagged dev)
+   designates the Appian environment Phase 16 authenticates against, and that env supplies the URL +
+   credentials for **all** Phase-16 connectivity (REST export, Dev MCP, DevOps MCP, changed-objects API).
+   See 16-08 §2.0.
+4. A **`sync-application` LangGraph workflow** that **exports the package via the Appian Deployment
+   REST API deterministically** (a program node, no agent, no credits — ADR-001), parses it, and
+   applies it to the KB. Run-tracked, retryable, error-surfacing.
+5. A read-only **`genesis-kb` MCP server** (the internal counterpart of the Atlas MCP) that serves the
+   KB to agents, with **chat / erd-generation / design-doc cut over** from the external `appian-atlas`.
+The native Appian **Dev MCP** (read-only here) and **DevOps/Deployment MCP** (export) become curated,
+first-class environment connectors.
+
+**Alternatives considered.** (a) Keep calling the external Atlas MCP — rejected: external moving parts,
+daily-freshness ceiling, network round-trip, not Genesis-shaped. (b) Adopt Jarvis's in-Appian KB —
+rejected: no release history and couples the KB store to Appian. (c) A separate `kb.db` file — rejected
+in favor of `genesis.db` (one `Database` + migration runner; ADR-030 alignment; `kb_*` namespaced +
+table-scoped rebuild). (d) An agent-driven export (DevOps MCP tool calls inside the sync) — rejected
+for the pipeline: exporting is a mechanical deterministic sequence; an LLM turn burns credits and is
+non-deterministic (ADR-001). The DevOps MCP is still **registered** for interactive/agent use.
+
+**Consequences.** Genesis gains direct local KB access (no GitLab round-trip), on-demand + delta
+freshness under its control, and a KB tuned to its needs (code-free, temporal, cross-app) — matching
+the local single-user, one-environment, own-data-plane posture (ADR-023/026/030). External Atlas/Jarvis
+are **retired as the KB source** (Atlas remains the design inspiration + the interim source until the
+16-05 cutover). Requires a properly configured environment (External Deployments enabled, a
+service-account API key, the Dev MCP plug-in, and the new changed-objects API for delta) — accepted as
+a Genesis operating prerequisite. Preserves ADR-001 (sync is a deterministic workflow, not an
+orchestrating agent). Pairs with **ADR-037** (code-free temporal KB). Read/deploy authoring stays out
+of scope this phase (Dev MCP used read-only).
+
+---
+
+## ADR-037 — Code-free temporal KB + live code via the Dev MCP (Phase 16)
+
+**Status:** Proposed (Phase 16).
+
+**Context.** An Appian application has 4,000–6,000+ objects across many releases. Storing every
+object's SAIL source across every version (as Atlas does) is heavy and redundant when the environment
+already retains object versions — and the connected environment is the source of truth for code. We
+want a **lightweight but intelligent** KB and always-accurate code.
+
+**Decision.** The KB stores **only** metadata / structure / dependency graph / bundles — **never**
+object source code. The parser still reads SAIL to extract dependency references and descriptions, but
+the SAIL string is **never persisted**. All code — **current and historical** — is fetched **live**
+from the connected environment through the **Appian Dev MCP** (version-parameterized:
+`get_object_code(object_uuid, version?)`). Object history is a **temporal (SCD-2) model** in `genesis.db`
+(`kb_objects`/`kb_dependencies` rows carry `valid_from_sync`/`valid_to_sync`; a change closes the old
+row and opens a new one), so any point in time is reconstructable. **Releases are user-tagged in
+Genesis** ("Mark released → v1.0") and recorded in `kb_releases` as a named pointer to a sync
+(`sync_id`) plus an `env_version_ref` — the handle the Dev MCP uses to fetch code at that release.
+Bundles are recomputed in full per sync (global BFS is seconds at 6k objects) and snapshotted per
+release. Deletions (from the delta API) close SCD-2 rows. `kb_*` is namespaced and pruned/rebuilt
+**table-scoped** (never touching runs/chat tables).
+
+**Alternatives considered.** (a) Store code + history in the KB (Atlas's model) — rejected: redundant
+with the environment, heavy, and the env is the source of truth. (b) Store code deltas only for history
+— rejected: unnecessary once the Dev MCP exposes versioned reads (planned + imminent). (c) Per-version
+full snapshots of the metadata graph — rejected in favor of continuous SCD-2 validity ranges (any point
+reconstructable, far less storage). (d) A separate `kb.db` — see ADR-036 (folded into `genesis.db`).
+
+**Consequences.** The KB stays lightweight (~5–8 MB/app, ~50–150 MB for ~10 apps × ~10 releases; well
+within SQLite) and always-fresh for code. Code reads couple to environment availability / latency /
+auth — accepted as a known mechanism; `genesis-kb` degrades honestly ("code unavailable", never
+fabricated). **Point-in-time code** depends on the Dev MCP's version support (planned + imminent);
+metadata history + current code do not depend on it, so phases 16-01…16-05 are unblocked and only
+16-06's historical-code view waits on it. Refines ADR-030 (SQLite `kb_*` tables; semantic/RAG search
+over parsed content would be a future pgvector trigger + its own ADR) and ADR-010/018 (the export zip +
+parser intermediate live in the run blackboard; only compact metadata reaches `kb_*`, only pointers
+reach LangGraph state). Pairs with ADR-036.
+
+---
+
+## ADR-038 — Managed native Appian MCP servers (vendored, versioned, updatable-from-source, not forked) (Phase 16)
+
+**Status:** Proposed (Phase 16, sub-phase 16-08).
+
+**Context.** Genesis internalizes the Appian *knowledge base* (ADR-036/037) but must still make *environment* calls —
+read live object SAIL, evaluate SAIL, query SQL, read env info, list applications, and export packages. Per the Phase-16
+scope decision (2026-08-04), these go through the **out-of-the-box Appian Dev MCP (`lcp-mcp-server`)** and **DevOps MCP
+(`appian-deployment-mcp`)**, retiring Atlas/Jarvis as services. Both are local `uv`-managed Python MCP servers (the Dev
+MCP bundles vendored `lib/`+`sdk/` packages and pulls playwright; the DevOps MCP is a PyPI-only, `uv.lock`-ed package).
+They are third-party artifacts Appian releases on its own cadence, so Genesis must run them **and** be able to **take a
+newer Appian release and apply it** — without diverging from upstream.
+
+**Decision.** Treat the native MCP servers as **managed, versioned, opaque, replaceable artifacts** — a third MCP tier
+beside curated (ADR-005/029) and user-custom:
+1. **Install** each into `~/.genesis/mcp-servers/<id>/versions/<version>/` (unpacked bundle + a per-server `.venv` from
+   `uv sync`); a lockfile records `{active_version, versions:[{version,source,sha256,installed_at,entry}]}`; the
+   previous version is retained for **rollback**.
+2. **Launch** from the per-server venv (`.venv/bin/appian-deployment`; `.venv/bin/python -m lcp_mcp_server`) — so `uv` is
+   only needed at install time — with env `${VAR}` resolved via the existing SecretProvider → EnvironmentRegistry →
+   os.environ chain (Dev MCP Basic auth as the headless default; browser/SSO is an opt-in manual step).
+3. **Register** as a **managed reference**: a curated `mcp-registry.json` entry supplies identity + a **read-only
+   `tool_allowlist`** (governance preserved; write/deploy excluded, Section E), but the launch spec is resolved at
+   runtime from the active install (`McpRegistry.acp_servers` → `NativeMcpInstaller.active_launch_spec`). Updating the
+   binary needs **no registry edit**.
+4. **Update sources:** the **Dev MCP** is re-fetched from **the connected environment** itself
+   (`{LCP_URL}/suite/plugins/servlet/stateless/lcp-mcp-bundle`), so it always matches the site's plugin version (drift
+   resolved); the **DevOps MCP** is installed from a **configured/drop-in versioned artifact** (App-Market tarball).
+   Updates are versioned + reversible + sha-verified.
+5. **Never modify the bundle source** — modification would break updatability. All Genesis glue (launch spec, env,
+   allowlist, lockfile) lives outside the bundle.
+
+**Alternatives considered.** (a) Fork the servers into Genesis — rejected: forking forfeits upstream updates (the exact
+thing the user requires). (b) Static curated `mcp-registry.json` image lines — rejected: these are local, per-machine,
+version-varying installs, not fixed images (the old `lcp` `<lcp-image>` placeholder was never a real image). (c) Docker
+images — rejected: the official bundles are `uv`-run local Python, not containers; adding Docker adds a heavy prereq.
+(d) `pip install` from an index — rejected: the Dev MCP ships vendored editable path deps (`lib/`/`sdk/`) and is
+distributed as a site-served bundle, not a PyPI package.
+
+**Consequences.** Genesis runs the official Dev/DevOps MCP unmodified and can pull+apply Appian's updates (Dev = from the
+connected site, DevOps = from a configured artifact), versioned and reversible. New prerequisite: **`uv`** on PATH at
+install time (run time uses the created venv); the Dev MCP install is sizeable and needs Python 3.13 (matches ADR-024);
+playwright/browser auth stays an opt-in manual step for SSO-only sites. Read-only posture preserved via the allowlist
+cap (ADR-029); write/deploy remain out of scope (Section E) until a later phase gates them behind `pre_mutation`
+(ADR-021/033). Pairs with ADR-036/037 (KB internalized; environment access via these managed native MCPs).
