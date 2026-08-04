@@ -12,7 +12,7 @@
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
 > §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-04 — latest SHIPPED: genesis v0.29.1 +
-> genesis-workflows v0.8.1 + genesis-core v0.8.2 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
+> genesis-workflows v0.8.2 + genesis-core v0.8.2 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
 > a new **`design-doc`** workflow ports the Jarvis design-doc process into a deterministic Genesis graph —
@@ -29,7 +29,7 @@
 > in `specs/phase-16-appian-knowledge-base.md` (+ `phase-16-appian-knowledge-base/16-01..16-08` +
 > `genesis-kb-tool-contracts.md`); **ADR-036/037/038** (Proposed). **Shipped so far: 16-01** = `genesis-appian-parser`
 > **v0.1.0** (new repo, CI green); **16-02** = genesis **v0.28.0** (m0007 `kb_*` + `KbStore`); **16-03** = the
-> **`sync-application`** workflow (genesis **v0.29.1** + genesis-workflows **v0.8.1**) — all CI green. **Next = 16-08**
+> **`sync-application`** workflow (genesis **v0.29.1** + genesis-workflows **v0.8.2**) — all CI green. **Next = 16-08**
 > (managed-native Dev/DevOps MCP install + the `is_dev` env toggle; prereq for 16-04/05). A new session should **read
 > §9's Phase-16 block first**, then implement in the build order.
 
@@ -121,7 +121,7 @@ and the release/versioning protocol.
 | `kiro-agent-sdk` | **v0.6.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)**; **`fs_write_root` sandbox for agent file writes (14-05)** |
 | `genesis-core` | **v0.8.2** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1` (v0.8.2 = sdk pin→v0.6.0, no code change) |
 | `genesis` | **v0.29.1** | master | runtime, dist, config, runs, **db (m0001–m0007)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)** |
-| `genesis-workflows` | **v0.8.1** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` + **`appian-dev`/`appian-devops`** MCP), steering, `hello-appian` + `erd-generation` + `code-review` + `design-doc` + **`sync-application` (Appian KB baseline sync via Deployment REST → parser → KbStore, Phase 16-03)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
+| `genesis-workflows` | **v0.8.2** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` + **`appian-dev`/`appian-devops`** MCP), steering, `hello-appian` + `erd-generation` + `code-review` + `design-doc` + **`sync-application` (Appian KB baseline sync via Deployment REST → parser → KbStore, Phase 16-03)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
 | `genesis-appian-parser` | **v0.1.0** | main | **NEW (Phase 16-01).** Genesis-owned, stdlib-only Appian package parser (port of the Atlas front-half). `parse(zip\|bytes) -> KbParseResult` (objects + edges + bundles + **code-free** metadata; no files, no SAIL). Consumed by `genesis/kb` + the sync workflow; pinned into genesis by tag in 16-03. |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
@@ -507,16 +507,22 @@ genesis-workflows/
   passed, hiding it. Fix: **`ruff==0.15.20`** in dev deps so CI reproduces local exactly. When adopting a newer ruff,
   do it deliberately with a repo-wide fix (`ruff check --fix` the `Optional`→`X|None` churn) + bump the pin. (Tests
   aren't ruff-gated in CI — only the `genesis` package is — so test-file lint drift won't fail CI.)
-- **The LangGraph checkpointer shares `genesis.db` — its connection needs WAL + busy_timeout (Phase 16-03).** The
-  `AsyncSqliteSaver` connection (`runtime/checkpoint.py`) originally set no `journal_mode`/`busy_timeout`. That was fine
-  while nodes never wrote `genesis.db` synchronously — but Phase 16's `sync-application` node calls `KbStore` (a sync
-  `genesis.db.Database` connection) **in the same worker process** as the saver. In rollback-journal mode the saver
-  could hold the write lock and starve the KbStore write → `sqlite3.OperationalError: database is locked` (GREEN locally,
-  RED in CI — a timing/filesystem-dependent lock). Fix: `PRAGMA journal_mode=WAL` + `busy_timeout=30000` on the saver
-  connection so all writers on the shared db serialize gracefully (WAL = short write locks; busy_timeout = wait, don't
-  error). App-side `Database` connections already did this — any new sync writer sharing `genesis.db` must too. Note the
-  general trap: a same-process second SQLite connection to a WAL/shared db is fine **only** if every connection uses
-  WAL + a busy_timeout.
+- **A blocking DB write inside an async node deadlocks the LangGraph checkpointer — do blocking `genesis.db`
+  writes OFF the event loop (Phase 16-03).** `genesis.db` is shared: the async `AsyncSqliteSaver` (aiosqlite) and
+  any sync `genesis.db.Database` writer coexist. When a program node does a **synchronous, blocking** KB write
+  (`KbStore`) *inside the async worker*, that call holds the single-threaded event loop while it waits on the
+  sqlite write lock — but the checkpointer's own `aput`/`aput_writes` do `execute` then `await commit()`, so if a
+  checkpoint write is in-flight (lock held, commit pending) the commit can never run to release the lock →
+  **deadlock** until busy_timeout expires → flaky `sqlite3.OperationalError: database is locked` (green locally,
+  red under CI timing; it can pass on one pipeline and fail on the tag pipeline for the *same commit*). **Root
+  cause = sync-blocking-write-in-async-node, NOT a PRAGMA.** **Deterministic fix:** run the blocking write via
+  `await asyncio.to_thread(...)` so the loop stays free for the checkpointer to commit/release (the `sync-application`
+  `write_kb` is a raw async node for exactly this; `program_node` is sync-only). Reproduced in isolation: a sync
+  write on the loop FAILS in ~5s, `to_thread` SUCCEEDS in ~0.25s. **Complementary (necessary, not sufficient):**
+  WAL + a `busy_timeout` on *both* the checkpointer connection (`runtime/checkpoint.py`) and every `Database`
+  connection so writers serialize with bounded waiting rather than erroring. WAL/busy_timeout alone did NOT fix it
+  (only reduced the flake) — the loop-starvation deadlock is the real issue. Reads (WAL) don't take the write lock,
+  so validator/read nodes can stay sync.
 
 ---
 
@@ -548,7 +554,7 @@ genesis-workflows/
 > `progress/phase-16-02-kb-schema-and-store.md` + `progress/phase-16-03-sync-workflow.md`. **Shipped so far:**
 > **16-01** = `genesis-appian-parser` **v0.1.0** (`parse(zip|bytes) -> KbParseResult`, code-free); **16-02** = genesis
 > **v0.28.0** (m0007 `kb_*` + `KbStore`); **16-03** = the **`sync-application`** workflow (genesis **v0.29.1** +
-> genesis-workflows **v0.8.1**: deterministic Deployment-REST export → parser → `KbStore` baseline) — all CI green.
+> genesis-workflows **v0.8.2**: deterministic Deployment-REST export → parser → `KbStore` baseline) — all CI green.
 > **Next: 16-08** (managed-native Dev/DevOps MCP install + the `is_dev` env toggle; prereq for 16-04/05). Keep
 > extending `tracker.md` §6 as you go.
 
@@ -594,21 +600,23 @@ Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-A
   against Appian throughout (Dev MCP read-only allowlist; DevOps export/status/download only).
 
 **Sub-phases (all in `phase-16-appian-knowledge-base/`; iteration-1 unless noted):** 16-01 parser (new repo) **✅ v0.1.0** ·
-16-02 schema+`KbStore` (m0007) **✅ genesis v0.28.0** · 16-03 sync workflow (baseline) **✅ genesis v0.29.1 + genesis-workflows v0.8.1** · **16-08 native MCP
+16-02 schema+`KbStore` (m0007) **✅ genesis v0.28.0** · 16-03 sync workflow (baseline) **✅ genesis v0.29.1 + genesis-workflows v0.8.2** · **16-08 native MCP
 integration & updatability** (prereq for 16-04/05) · 16-04 Applications surface · 16-05 `genesis-kb` MCP + cutover
 (headline) · 16-07 delta refresh (new Appian "changed-in-[start,end]" API — user owns it) · **16-06 versioning —
 BACKLOG**. Suggested build order: 16-01 → 16-02 → 16-03 → 16-08 → 16-04 → 16-05 → 16-07; 16-06 later. **Release chain:**
 `genesis-appian-parser` (new) → `genesis` (m0007 + KbStore + kb_server + native-MCP installer + applications api/web) →
 `genesis-workflows` (sync-application + managed-native registry entries). genesis-core likely unchanged.
 
-**✅ 16-03 — DONE (`sync-application` workflow).** genesis **v0.29.1** + genesis-workflows **v0.8.1**, CI green. As built
+**✅ 16-03 — DONE (`sync-application` workflow).** genesis **v0.29.1** + genesis-workflows **v0.8.2**, CI green. As built
 (see `progress/phase-16-03-sync-workflow.md`): a program-only graph `resolve_inputs → export_package → v_export →
 parse_package → v_parse → write_kb → v_kb → present`; **export = deterministic Appian Deployment REST** in a program
 node, all network/env/secret access isolated in the `_fetch_package_zip` seam (401/403/404 fail-fast; 409/timeout/5xx →
 retry); **parse → code-free `result.json`**; **write_kb → `KbStore` baseline**, store injected via
 `ctx.extras['kb_store']` (wiring resolved to ctx.extras — `build_context` provides it; `graph.py` never imports the
 platform); re-baseline rejected. genesis pins `genesis-appian-parser@v0.1.0`, adds `EnvironmentRegistry.active()`, and
-**hardened the checkpointer** (WAL + busy_timeout — see §7). `appian-dev`/`appian-devops` registered as managed-native
+hardened the checkpointer connection (WAL + busy_timeout). **`write_kb` is a raw async node that runs the blocking
+`KbStore` write via `asyncio.to_thread`** — the deterministic fix for a flaky CI `database is locked` (a sync write on
+the event loop deadlocks the aiosqlite checkpointer; see §7). `appian-dev`/`appian-devops` registered as managed-native
 refs (resolved the old `lcp` placeholder).
 
 **▶ NEXT — 16-08 (managed-native Dev/DevOps MCP install + the `is_dev` env toggle).** Read

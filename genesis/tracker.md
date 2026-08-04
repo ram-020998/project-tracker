@@ -150,13 +150,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
   409/timeout/5xx → retry). **parse_package** → code-free `result.json` (ADR-037). **write_kb** → `KbStore` baseline
   (register/begin_sync/apply/finish_sync), store provided via `ctx.extras['kb_store']` so `graph.py` never imports the
   platform; **re-baseline is rejected** (delta = 16-07). genesis (v0.29.1): pin `genesis-appian-parser@v0.1.0`;
-  `build_context` injects the KbStore; `EnvironmentRegistry.active()`; **checkpointer connection now WAL + busy_timeout**
-  (fixed a real 'database is locked' where the saver starved the in-worker KbStore write — green locally, red in CI).
-  genesis-workflows (v0.8.1): the workflow + `registry.json` entry + `mcp-registry.json` **appian-dev (read-only) +
+  `build_context` injects the KbStore; `EnvironmentRegistry.active()`; checkpointer connection WAL + busy_timeout.
+  genesis-workflows (v0.8.2): the workflow + `registry.json` entry + `mcp-registry.json` **appian-dev (read-only) +
   appian-devops (export-only)** managed-native refs (ADR-038, resolves the old `lcp` `<lcp-image>` placeholder); dev-pin
-  genesis v0.17.0→v0.29.1 + genesis-core v0.6.0→v0.8.2. **Verified:** validate_library PASSED (5 workflows); workflow
-  suite 54 passed; genesis suite 240 passed; ruff clean; **CI green both** (genesis #6496959, genesis-workflows #6496967).
-  Progress: `progress/phase-16-03-sync-workflow.md`. **Next: 16-08** (managed-native MCP install + `is_dev` toggle).
+  genesis v0.17.0→v0.29.1 + genesis-core v0.6.0→v0.8.2. **Concurrency fix (v0.8.2):** `write_kb` runs the blocking
+  `KbStore` write via **`asyncio.to_thread`** — a sync write on the async event loop deadlocked the aiosqlite
+  checkpointer (flaky 'database is locked': green on master, red on the tag pipeline for the same commit #6496968);
+  offloading keeps the loop free so the checkpointer commits/releases (repro: blocking FAILS ~5s, to_thread SUCCEEDS
+  ~0.25s). **Verified:** validate_library PASSED (5 workflows); workflow suite 54 passed; genesis suite 240 passed; ruff
+  clean; **CI green** (genesis #6496959; genesis-workflows master #6497156 + tag #6497157 — two independent runs of the
+  previously-flaky path). Progress: `progress/phase-16-03-sync-workflow.md`. **Next: 16-08** (managed-native MCP install
+  + `is_dev` toggle).
 
 - **2026-08-04 (Phase 16-02 — internalized KB schema + store SHIPPED ✅; genesis v0.28.0):** Added the code-free
   temporal Appian KB to `genesis.db`. **Migration m0007** creates the `kb_*` tables (applications/syncs/objects/

@@ -1,8 +1,9 @@
 # Phase 16-03 — `sync-application` workflow (KB baseline) — AS BUILT
 
 > **Status:** ✅ Implemented + tested + shipped · **Date:** 2026-08-04
-> **Releases:** genesis **v0.29.1** (`4bbb63f`) · genesis-workflows **v0.8.1** (`1015244`) — both CI green
-> (genesis #6496959; genesis-workflows #6496967, incl. the `workflow-tests` job).
+> **Releases:** genesis **v0.29.1** (`4bbb63f`) · genesis-workflows **v0.8.2** (`6728e82`) — CI green on both master
+> and the tag pipeline (genesis #6496959; genesis-workflows master #6497156 + tag #6497157, incl. the `workflow-tests`
+> job). *(v0.8.1 was superseded by v0.8.2 — see the concurrency lesson below.)*
 > **Spec:** `specs/phase-16-appian-knowledge-base/16-03-sync-workflow.md`
 
 ## What was built
@@ -67,13 +68,17 @@ resolve_inputs → export_package → v_export → parse_package → v_parse →
 
 ## Hard-won lesson (added to the bible §7)
 
-**The LangGraph checkpointer shares `genesis.db` — give its connection WAL + busy_timeout.** The
-`AsyncSqliteSaver` connection set no `journal_mode`/`busy_timeout`. When a program node writes `genesis.db`
-synchronously **in the same worker process** (the new `KbStore` write), the saver could hold the write lock in
-rollback-journal mode and starve the KbStore write → `sqlite3.OperationalError: database is locked` (green
-locally, red in CI on the `sync-application` run). Fix: `PRAGMA journal_mode=WAL` + `busy_timeout=30000` on the
-saver connection so all writers on the shared db serialize gracefully (WAL = short write locks; busy_timeout =
-wait, don't error). App-side `Database` connections already did this.
+**A blocking DB write inside an async node deadlocks the LangGraph checkpointer.** `write_kb` did a **synchronous,
+blocking** `KbStore` write on `genesis.db` *inside the async worker*. The `AsyncSqliteSaver` (aiosqlite) shares that
+db and does `execute` then `await commit()`; when a checkpoint write is in-flight (write lock held, commit pending)
+and the node's sync write seizes the single-threaded event loop waiting for that same lock, the checkpointer's commit
+can never run to release it → **deadlock** → `sqlite3.OperationalError: database is locked` after the busy_timeout.
+It's timing-dependent: it passed locally and on the master pipeline but failed on the **tag** pipeline for the *same
+commit* (#6496968). WAL + busy_timeout on the saver connection (genesis v0.29.1) only *reduced* the flake — the
+loop-starvation deadlock is the real cause. **Deterministic fix (v0.8.2):** `write_kb` is a **raw async node** that runs
+the blocking `KbStore` write via **`asyncio.to_thread`**, keeping the loop free so the checkpointer can commit/release.
+Reproduced in isolation: a sync write on the loop FAILS in ~5s, `to_thread` SUCCEEDS in ~0.25s. Reads (WAL) don't take
+the write lock, so the validator/read nodes stay sync.
 
 ## Deviations from the spec (deliberate, documented)
 
