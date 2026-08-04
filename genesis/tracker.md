@@ -155,9 +155,11 @@ Detailed, evidence-backed records of what was actually built each phase live in
   orphans / 0 errors**, ~1.9 s; the newer `aiAgent` type is skipped gracefully. **13 pytest tests green**
   (structure/resolution/bundles/entry-points/orphans/determinism/`bytes==path` + two **no-SAIL** guards
   incl. a proof that real source SAIL is absent from the result); **ruff clean**; CI = ruff+pytest on py3.13.
-  Progress: `progress/phase-16-01-native-parser.md`. **Open:** `KbBundle.flow` is a `dict|None` (Atlas shape),
-  not the string list the tool-contracts §2.10 assumed — reconcile in 16-02/16-05. **Next:** 16-02 (m0007
-  `kb_*` + `KbStore`).
+  Progress: `progress/phase-16-01-native-parser.md`. **`KbBundle.flow` resolved** ("follow the standard solution"): it
+  is the **Atlas-standard structured dict** `{process_model,subprocesses}` (verified against the Atlas MCP + parser MCP,
+  which return it verbatim) — KB stores it verbatim as `flow_json`, `get_bundle` returns it verbatim; the tool-contracts
+  §2.10 + umbrella DDL + 16-01 field type were corrected (the earlier "textual list" assumption was wrong). **Next:**
+  16-02 (m0007 `kb_*` + `KbStore`).
 
 - **2026-08-04 (Phase 16 spec — refinements after tool audit + review 📋):** Extended the initial Phase-16 draft
   (below) into the final planning set — still **spec-only, awaiting approval to implement**. Changes:

@@ -53,10 +53,13 @@ Tested with the genesis venv Python 3.13 against the **real** vendored package
 
 ## Decisions / notes
 
-- **`KbBundle.flow` is a `dict | None`** (the Atlas structure-builder shape:
-  process-model graph + subprocesses), **NOT** the textual string list the
-  tool-contracts doc §2.10 assumed. **Reconcile in 16-02/16-05** (either store the
-  dict and format in the MCP layer, or synthesize a textual flow).
+- **`KbBundle.flow` is a `dict | None`** (the Atlas structure: `{process_model:<graph>, subprocesses:[…]}`).
+  **Resolved (2026-08-04, "follow the standard solution"):** this **is** the Atlas standard — verified against the
+  Atlas MCP (`atlas_mcp/tools/write_set.py` consumes `flow["process_model"]`) and the parser's own MCP
+  (`mcp_server/server.py` returns `structure.get("flow")` verbatim). The KB stores it verbatim in
+  `kb_bundles.flow_json` and `get_bundle` returns it verbatim. The tool-contracts doc §2.10 (which wrongly assumed a
+  textual string list), the umbrella §5 DDL comment, and 16-01's field type were corrected. No parser code change (it
+  already emits the dict); the code comment was clarified (`6760d54`).
 - Application identity = the single `Application` object's `name`+`uuid`; falls back to
   the zip stem if absent.
 - Fixture is **vendored** for reproducible tests (Atlas does the same); overridable via

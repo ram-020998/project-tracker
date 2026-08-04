@@ -282,7 +282,7 @@ CREATE TABLE kb_bundles (
   parent_name         TEXT,
   object_count        INTEGER NOT NULL DEFAULT 0,
   key_objects_json    TEXT,                      -- JSON array of key-object names (overview/search cards)
-  flow_json           TEXT,                      -- JSON array of the textual traversal ("Action: … → …") — get_bundle returns verbatim
+  flow_json           TEXT,                      -- the Atlas-standard structured flow dict {process_model,subprocesses} verbatim from the parser — get_bundle returns verbatim
   snapshot_sync       INTEGER NOT NULL,          -- the sync this bundle set belongs to (current) ...
   release_label       TEXT,                      -- ... or a release snapshot (NULL = current set)
   UNIQUE(app_uuid, bundle_id, snapshot_sync)

@@ -175,7 +175,9 @@ Each tool: **Replaces** (Atlas/Jarvis equivalents) · **Params** · **Returns** 
   ```json
   {"_metadata":{"bundle_id":"…","bundle_type":"action","root_uuid":"_a-…","root_name":"…","parent_name":"…","object_count":282},
    "entry_point":{"uuid":"_a-…","name":"…","type":"Record Type Action","description":"…"},
-   "flow":["Action: …","  → Process Model: …","    → Interface: …"],
+   "flow":{"process_model":{"name":"…","complexity_score":12,"total_nodes":18,
+             "nodes":[{"name":"…","type":"USER_TASK","next":["… (Approved)"],"writes":[…],"interface":"…"}]},
+           "subprocesses":[{"name":"…","nodes":[…]}]},
    "members":[{"uuid":"_a-…","name":"…","type":"Process Model"}],
    "key_objects":["…"],
    "member_summary":{"total":282,"returned":50,"by_type":{"Interface":120,"Expression Rule":90}}}
@@ -183,11 +185,15 @@ Each tool: **Replaces** (Atlas/Jarvis equivalents) · **Params** · **Returns** 
 - **Backing query:** resolve `bundle_id` (direct id, else match `root_name`/`id` in `kb_bundles`); `_metadata` +
   `entry_point` from `kb_bundles` (root_uuid→`kb_objects` for the entry point + description); `members` =
   `kb_bundle_members` join `kb_objects` (filter `type`, `LIMIT`); `by_type` computed over **all** members before the
-  limit; `flow` from the stored bundle flow (see note).
-- **Parser source:** bundle (`root_uuid/name/parent/type/object_count`, `flow`), members (role/flow_order), object metadata.
-- **Note (parser + schema):** the textual `flow` list is a KB output — 16-01 must include `flow` on `KbBundle` and
-  16-02 must persist it (a `flow_json` column on `kb_bundles`, or reconstruct from `kb_bundle_members.flow_order` +
-  types). Prefer storing `flow_json` verbatim to match Atlas exactly.
+  limit; `flow` = `kb_bundles.flow_json` returned **verbatim**.
+- **Parser source:** bundle (`root_uuid/name/parent/type/object_count`, `flow`), members, object metadata.
+- **Note (parser + schema) — `flow` is a structured dict, NOT a string list (verified 2026-08-04 against Atlas):**
+  the Atlas MCP `get_bundle` returns `structure.get("flow")` **verbatim** — a dict
+  `{"process_model": <graph>, "subprocesses": [<graph>, …]}` where each `<graph>` =
+  `{name, complexity_score, total_nodes, nodes:[{name, type, next?, writes?, gateway_conditions?, subprocess?, interface?}]}`
+  (`None` for bundles without a process model). 16-01's `KbBundle.flow` already emits exactly this; 16-02 stores it
+  verbatim in `kb_bundles.flow_json` and `get_bundle` returns it verbatim. **The earlier "textual traversal" shape was
+  incorrect.**
 
 ### 2.11 `list_orphans`
 - **Replaces:** Atlas `list_orphans`; Jarvis `jarvis_get_dead_code`.

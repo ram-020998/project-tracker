@@ -90,8 +90,8 @@ class KbBundle:
     name: str
     parent_name: str | None
     key_objects: list[str]        # names of the key objects (for the overview/search cards)
-    flow: list[str]               # the textual traversal ("Action: … → Process Model: … → Interface: …") — get_bundle returns this verbatim (see genesis-kb-tool-contracts.md §2.10)
-    members: list[KbBundleMember] # object_uuid + role(entry_point|member) + flow_order
+    flow: dict | None             # Atlas-standard structured flow: {process_model:<graph>, subprocesses:[<graph>...]} or None; get_bundle returns it verbatim (see genesis-kb-tool-contracts.md §2.10)
+    members: list[KbBundleMember] # object_uuid + name + type
 
 @dataclass(frozen=True)
 class KbParseResult:
