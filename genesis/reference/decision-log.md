@@ -764,7 +764,7 @@ reach LangGraph state). Pairs with ADR-036.
 
 ---
 
-## ADR-038 — Managed native Appian MCP servers (vendored, versioned, updatable-from-source, not forked) (Phase 16)
+## ADR-038 — Managed native Appian MCP servers (vendored, versioned, replaceable via manual drop-in, not forked) (Phase 16)
 
 **Status:** Proposed (Phase 16, sub-phase 16-08).
 
@@ -788,10 +788,10 @@ beside curated (ADR-005/029) and user-custom:
    `tool_allowlist`** (governance preserved; write/deploy excluded, Section E), but the launch spec is resolved at
    runtime from the active install (`McpRegistry.acp_servers` → `NativeMcpInstaller.active_launch_spec`). Updating the
    binary needs **no registry edit**.
-4. **Update sources:** the **Dev MCP** is re-fetched from **the connected environment** itself
-   (`{LCP_URL}/suite/plugins/servlet/stateless/lcp-mcp-bundle`), so it always matches the site's plugin version (drift
-   resolved); the **DevOps MCP** is installed from a **configured/drop-in versioned artifact** (App-Market tarball).
-   Updates are versioned + reversible + sha-verified.
+4. **Updates = manual drop-in (2026-08-05 decision), no auto-fetch source.** New Dev/DevOps MCP releases are integrated
+   by the operator placing a new bundle and re-installing it (`install(id, bundle_path)`); Genesis versions it, records
+   the sha256, atomic-switches `current`, and keeps the prior version for `rollback`. (The earlier auto-fetch idea — Dev
+   from the connected-site `lcp-mcp-bundle` servlet, DevOps from a configured mirror — was dropped by the user.)
 5. **Never modify the bundle source** — modification would break updatability. All Genesis glue (launch spec, env,
    allowlist, lockfile) lives outside the bundle.
 
@@ -802,8 +802,9 @@ images — rejected: the official bundles are `uv`-run local Python, not contain
 (d) `pip install` from an index — rejected: the Dev MCP ships vendored editable path deps (`lib/`/`sdk/`) and is
 distributed as a site-served bundle, not a PyPI package.
 
-**Consequences.** Genesis runs the official Dev/DevOps MCP unmodified and can pull+apply Appian's updates (Dev = from the
-connected site, DevOps = from a configured artifact), versioned and reversible. New prerequisite: **`uv`** on PATH at
+**Consequences.** Genesis runs the official Dev/DevOps MCP unmodified and can apply Appian's updates by **manual drop-in**
+(the operator installs a new bundle → Genesis versions it + swaps `current`; prior kept for rollback), versioned and
+reversible; there is **no auto-fetch update source**. New prerequisite: **`uv`** on PATH at
 install time (run time uses the created venv); the Dev MCP install is sizeable and needs Python 3.13 (matches ADR-024);
 playwright/browser auth stays an opt-in manual step for SSO-only sites. Read-only posture preserved via the allowlist
 cap (ADR-029); write/deploy remain out of scope (Section E) until a later phase gates them behind `pre_mutation`

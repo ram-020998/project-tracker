@@ -266,8 +266,8 @@ out of scope).
 | Package contents from a URL | `appian-devops` | export/download path |
 
 **Action for the implementation agent:** the Dev/DevOps MCP servers are **installed + kept updatable** by **16-08**
-(managed, versioned, `uv`-installed under `~/.genesis/mcp-servers/`, launched from the per-server venv, updatable from
-source — Dev from the connected site's bundle servlet, DevOps from a configured/drop-in artifact; never forked). At
+(managed, versioned, `uv`-installed under `~/.genesis/mcp-servers/`, launched from the per-server venv; **new versions
+integrated manually (drop-in), no auto-fetch source**; never forked). At
 implementation time, **introspect the installed Dev MCP** (`POST /api/config/mcp-servers/appian-dev/tools`) to capture
 exact read-tool names, then set the read-only `tool_allowlist`. Registration is a **managed reference** (ADR-038), not a
 static image — this resolves the old `lcp` `<lcp-image>` placeholder. **No write/deploy tools in either allowlist**

@@ -142,7 +142,31 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
-- **2026-08-04 (Phase 16-03 — `sync-application` workflow SHIPPED ✅; genesis v0.29.1 + genesis-workflows v0.8.1):**
+- **2026-08-05 (Phase 16-08 §2.0 — dev-environment toggle SHIPPED ✅; genesis v0.30.0):** The **connectivity
+  foundation** (the "build FIRST" half of 16-08). The Environments registry gains an **`is_dev` flag** — exactly one env
+  is the dev-tagged Appian target that ALL Phase-16 auth resolves against (REST export, Dev/DevOps MCP, changed-objects).
+  Backend: `Environment.is_dev` + single-select invariant in `EnvironmentRegistry.upsert` (tagging one clears the others
+  in one write) + `set_dev_environment()`/`dev_environment()`/`dev_environment_label()`; `ConfigService` passthroughs +
+  `dev_connection_check()` readiness (dev env tagged + native-MCP secret keys present, by key name); API `is_dev` on
+  upsert + `POST /config/environments/{label}/dev` + `GET /config/environments/dev/check`. Web: Environments section dev
+  toggle (single-select `Switch`) + **dev** badge + per-row **Set as dev** + **Test connection**. Tests:
+  `test_config.py::test_dev_environment_single_select`, `test_api.py::test_api_dev_environment_toggle`, a settings
+  vitest; **242 python + 120 web passed; CI green #6502611** (genesis + frontend jobs; stale-bundle guard passed).
+  Progress: `progress/phase-16-08-native-mcp.md`.
+  - **SCOPE DECISION (2026-08-05, from the user) — no auto-update source for the native MCPs.** Stage B drops the
+    connected-site bundle-servlet fetch (Dev) and the configured-mirror fetch (DevOps). New Appian releases are
+    integrated **manually**: the user drops the new bundle in and Genesis **installs it as a new version** (prior kept
+    for **rollback**; `current` pointer swap). The installer is thus **install-from-local-bundle + version/rollback
+    only** (no network fetch). "Updatable without forking" still holds via the manual drop-in; the bundle is never modified.
+  - **Stage B remaining (tasks 5–9, next session):** `Settings.mcp_servers_dir` + `genesis/mcp/native/{installer,lockfile}.py`
+    (`uv sync` install under `~/.genesis/mcp-servers/<id>/versions/<v>/`, launch from the per-server venv, version/current/
+    rollback, `active_launch_spec`); genesis-core `McpRegistry.acp_servers` **managed-reference** resolution
+    (`"managed": id → active_launch_spec`) resolving the `<managed-native:appian-dev|appian-devops>` placeholders with
+    read/export-only allowlists; `api/native_mcp.py` (status/install/rollback — no `update`) + a Settings→Integrations
+    panel + a `genesis mcp install-native` CLI; release chain genesis-core → genesis → genesis-workflows. See
+    AGENT_ONBOARDING.md §9 "▶ NEXT — 16-08 Stage B" for the step-by-step start.
+
+- **2026-08-04 (Phase 16-03 — `sync-application` workflow SHIPPED ✅; genesis v0.29.1 + genesis-workflows v0.8.2):**
   A deterministic, **program-only** LangGraph workflow that populates the KB from a live app:
   `resolve_inputs → export_package → v_export → parse_package → v_parse → write_kb → v_kb → present`. **export_package**
   = Appian **Deployment REST** (export/poll/download) in a program node (ADR-001; no agent/credits; no pre_mutation —
@@ -207,12 +231,13 @@ Detailed, evidence-backed records of what was actually built each phase live in
     reads via Dev/DevOps MCP only (Section D); write/deploy (E) + documents/git/pipeline (F) **out**.
   - **New sub-phase 16-08 "Native MCP integration & updatability"** + **ADR-038**: the two Appian MCP bundles the user
     placed at `artifacts/mcp-servers/` (**Dev MCP** `lcp-mcp-server`, **DevOps MCP** `appian-deployment-mcp`) are
-    integrated as **managed, versioned, opaque, updatable** local servers (installed under `~/.genesis/mcp-servers/` via
+    integrated as **managed, versioned, opaque, replaceable** local servers (installed under `~/.genesis/mcp-servers/` via
     `uv sync`, launched from the per-server venv, registered as a **managed reference** with read-only allowlists).
-    **Updatable without forking:** Dev = re-fetch from the connected site's bundle servlet (tracks the plugin version);
-    DevOps = configured/drop-in versioned artifact; both reversible + sha-verified; bundle never modified. New prereq
-    `uv`; Dev-MCP **Basic auth** is the headless default (browser/SSO opt-in). Resolves the old `lcp` `<lcp-image>`
-    placeholder.
+    **Updatable without forking (manual drop-in):** new Appian releases are integrated by the user dropping the new
+    bundle in → Genesis installs it as a new version + swaps `current`; prior kept for rollback; sha-verified; bundle
+    never modified. *(2026-08-05: the earlier auto-fetch sources — Dev site bundle-servlet, DevOps configured mirror —
+    were dropped by the user; updates are manual.)* New prereq `uv`; Dev-MCP **Basic auth** is the headless default
+    (browser/SSO opt-in). Resolves the old `lcp` `<lcp-image>` placeholder.
   - **Connectivity model decided (supersedes "one connected environment"):** the Environments registry may hold **many**
     envs; a single-select **`is_dev` toggle** designates the one Phase-16 authenticates against — its URL + credentials
     feed **all** Phase-16 auth (REST export, Dev MCP, DevOps MCP, changed-objects API); no dev env ⇒ fail fast + a

@@ -1,6 +1,10 @@
 # Phase 16-08 — Native Appian MCP server integration & updatability
 
-> **Status:** DRAFT (planning) · **Iteration:** 1 (prerequisite for 16-04/16-05) · **Repos:** genesis (+ genesis-workflows registry)
+> **Status:** §2.0 (dev-environment toggle) **SHIPPED** (genesis v0.30.0, CI green) · Stage B (managed-native installer)
+> **NOT STARTED** · **Iteration:** 1 (prerequisite for 16-04/16-05) · **Repos:** genesis (+ genesis-core + genesis-workflows registry)
+> **Update model (2026-08-05 decision):** **no auto-fetch update source** — new Dev/DevOps MCP releases are integrated
+> **manually** (operator drops in a new bundle → Genesis installs it as a new version + swaps `current`; prior kept for
+> rollback). §2.4 below is revised accordingly.
 > **Depends on:** 16-04 uses it (list apps via Dev MCP), 16-05 uses it (`get_object_code` via Dev MCP); the sync
 > pipeline (16-03) also uses the DevOps MCP for agent-facing deploy-ops (its own export path is deterministic REST).
 > **Goal:** Establish the Appian **connectivity foundation** for Phase 16 and integrate the two **native Appian MCP
@@ -26,7 +30,7 @@ The user placed both bundles at `project-tracker/genesis/artifacts/mcp-servers/`
 | Install | `uv sync` (resolves at install; no root `uv.lock`) | `uv sync` (locked) or pip venv; `setup.sh` |
 | Launch (stdio) | `python -m lcp_mcp_server` (also `sse_server.py`) | console script `appian-deployment` / `python -m appian_deployment_mcp` |
 | Config (env) | `LCP_URL`, `LCP_API_PATH` (default `/suite/rest/a/lcp-api/latest`), **`LCP_AUTH_METHOD` = `basic` (default)** or `browser`; basic → `LCP_USERNAME`/`LCP_PASSWORD`; browser → playwright + `LCP_SIGNIN_PATH`/cookie/profile | `APPIAN_DOMAIN` + `APPIAN_API_KEY` (or `APPIAN_OAUTH_TOKEN`); multi-env `APPIAN_<ENV>_*`; keychain source option |
-| **Update source** | **the connected site**: `GET {LCP_URL}/suite/plugins/servlet/stateless/lcp-mcp-bundle` → `lcp-mcp-server-bundle.tar.gz` (matches the site plugin version) | **App-Market versioned tarball** (e.g. `appian-deployment-mcp-1.0.0.gz`); no per-site servlet |
+| **Update source** | **manual drop-in** — operator places a newer `lcp-mcp-server` bundle; Genesis re-installs + versions it (no auto-fetch) | **manual drop-in** — operator places a newer `appian-deployment-mcp-<v>.gz`; Genesis re-installs + versions it (no auto-fetch) |
 | Tools | read+write design objects, list apps, eval SAIL, SQL, env info (+ write/deploy) | export/inspect/deploy/download + pipelines |
 
 **Headless feasibility:** Dev MCP **Basic auth is the default** (username/password) → runnable headlessly by Genesis;
@@ -80,15 +84,16 @@ downstream (available-apps enumeration, sync, KB) can reach the environment with
   `versions/<version>/` → `uv sync` (in that dir) → assert the entry point exists (`.venv/bin/appian-deployment` or
   `python -m lcp_mcp_server` importable) → optional stdio smoke (`initialize`+`tools/list`) → record lockfile → set
   `current`. `version` from the bundle (`pyproject`/artifact name; lcp = site plugin version).
-- `update(id) -> UpdateResult` — fetch the latest bundle from the server's **source**; if the version/sha differs,
-  `install` it alongside, then **atomic switch** `current` (rename/symlink swap) and keep the prior version. Idempotent
-  (no-op if already current). Returns `{from, to, changed}`.
+- **No network `update`** (2026-08-05 decision). New releases are a **manual drop-in**: the operator places a newer
+  bundle and calls `install(id, bundle_path)` again — it versions the new bundle alongside, **atomic-switches** `current`
+  (rename/symlink swap), and keeps the prior version for rollback. Genesis never fetches from a source; idempotent
+  (installing the same version/sha is a no-op).
 - `rollback(id)` — flip `current` back to the previous version (reversibility requirement).
 - `active_launch_spec(id) -> {command,args,env}` — **launch via the venv, not `uv`** (so `uv` isn't needed at run time):
   - Dev: `command=<dir>/.venv/bin/python`, `args=["-m","lcp_mcp_server"]`.
   - DevOps: `command=<dir>/.venv/bin/appian-deployment`, `args=[]`.
   - `env` = the server's `${VAR}` set resolved from Secrets/Env (§2.5).
-- `status(id)` — active version, available version (a cheap source check), last update, health.
+- `status(id)` — active version, installed versions, last install, health.
 - **Never edits bundle files** — the bundle is opaque; Genesis glue is only the launch spec + env + lockfile.
 
 ### 2.3 Registration — a "managed native" MCP tier (ADR-029 reconciliation, ADR-038)
@@ -99,17 +104,15 @@ tier nor the user-custom tier. Model them as a **managed-native tier**: a curate
 `NativeMcpInstaller.active_launch_spec(id)` (command/args from the active install; env `${VAR}` resolved as usual).
 Updating the binary = a new install version + `current` swap; **no registry edit**, so it stays updatable.
 
-### 2.4 Update sources (the core requirement)
-- **`appian-dev` (Dev MCP): from the connected environment.** `update("appian-dev")` downloads the bundle from
-  `{LCP_URL}/suite/plugins/servlet/stateless/lcp-mcp-bundle` (authenticated with the same Basic creds), so the Dev MCP
-  **always tracks the connected site's plugin version** (resolves drift). Version check = compare the site's bundle
-  hash/version to the installed one.
-- **`appian-devops` (DevOps MCP): from a configured bundle source.** A settings-configurable source — an internal
-  mirror/URL or a **drop-in artifact** — with the versioned tarball (`appian-deployment-mcp-<v>.gz`). `update` pulls the
-  configured source; **bootstrap** (first install) seeds from the artifact under
-  `artifacts/mcp-servers/` (or a configured path).
-- Both record `source` + `source_ref` + `sha256`; both are **reversible** (keep prior version). Neither modifies the
-  bundle.
+### 2.4 Versioning & manual updates (no auto-fetch — 2026-08-05 decision)
+- **No update source.** Genesis does **not** fetch bundles from anywhere (no connected-site `lcp-mcp-bundle` servlet, no
+  configured DevOps mirror). When Appian ships a new Dev/DevOps MCP release, the **operator integrates it manually**:
+  place the new bundle (under `artifacts/mcp-servers/` or any chosen path) and run `install(id, bundle_path)` (API/CLI).
+- **Versioned + reversible.** `install` unpacks + `uv sync`s into a new `versions/<v>/`, records `{version, source_path,
+  sha256, installed_at, entry}` in the lockfile, and atomic-switches `current`; the prior version is retained so
+  `rollback(id)` restores it. "Updatable without forking" is preserved via this drop-in path; the bundle is never modified.
+- **Bootstrap (first install)** seeds from the artifact under `artifacts/mcp-servers/` (or a configured path); the
+  lockfile `source` is the local bundle path the operator supplied.
 
 ### 2.5 Secrets / env wiring (uses the existing registry, §umbrella 12)
 - `appian-dev`: `LCP_URL` ← `EnvironmentRegistry.dev_environment()` url (§2.0); `LCP_USERNAME`/`LCP_PASSWORD` ←
@@ -126,11 +129,11 @@ Updating the binary = a new install version + `current` swap; **no registry edit
   `node.tools ∩ allowlist` (ADR-029) — a hard cap independent of the bundle.
 
 ### 2.7 Genesis surface (Settings → Integrations)
-- API (`genesis/api/…`, under `/api`): `GET /api/config/native-mcp` (per-server status: active/available version, source,
-  last update, health); `POST /api/config/native-mcp/{id}/install|update|rollback`.
-- Web: a **"Appian MCP servers"** panel in Settings → Integrations — per server: installed version, source, **Update**
-  (Dev = re-fetch from env; DevOps = fetch configured source), **Rollback**, health/test. Reuses the ResourceManager/
-  confirm patterns.
+- API (`genesis/api/…`, under `/api`): `GET /api/config/native-mcp` (per-server status: active version, installed
+  versions, last install, health); `POST /api/config/native-mcp/{id}/install|rollback` (install takes the drop-in bundle
+  path; **no `update`** endpoint).
+- Web: a **"Appian MCP servers"** panel in Settings → Integrations — per server: installed version, **Install/replace**
+  (from a drop-in bundle), **Rollback**, health/test. Reuses the ResourceManager/confirm patterns.
 - Bootstrap: on first setup (or a CLI `genesis mcp install-native`), install both from the seeded artifacts.
 
 ## 3. Files & tests
@@ -139,17 +142,17 @@ Updating the binary = a new install version + `current` swap; **no registry edit
   toggle + dev badge + "Test connection"** in `web/src/features/settings/EnvironmentsSection` (§2.0); `Settings.mcp_servers_dir`; `genesis/mcp/native/{__init__,installer,lockfile}.py` (`NativeMcpInstaller`);
   managed-reference resolution in `genesis-core McpRegistry.acp_servers` (+ genesis wiring); curated `appian-dev` /
   `appian-devops` entries (managed refs + read-only allowlists) resolving the `lcp` `<lcp-image>` placeholder;
-  `api/native_mcp.py` + web panel; a CLI `genesis mcp install-native|update-native`.
+  `api/native_mcp.py` + web panel; a CLI `genesis mcp install-native`.
 - Tests: **dev-env tagging** — `set_dev_environment` clears any prior dev env (single-select invariant); `dev_environment()`
   returns the tagged one / `None`; the Dev/DevOps launch spec + REST export resolve URL from it; a no-dev-env sync/enumeration
   fails fast with the actionable error; web test for the toggle single-select + dev badge + "Test connection". installer unit tests (unpack + `uv sync` against a **fixture bundle**; version/sha recorded; `current` switch;
-  rollback; idempotent update) — mock the network fetch; `active_launch_spec` shape; managed-reference resolution in the
-  registry; allowlist introspection (stub `tools/list`); API tests (status/install/update/rollback via TestClient);
+  rollback; idempotent re-install) — install from a local fixture bundle (no network); `active_launch_spec` shape; managed-reference resolution in the
+  registry; allowlist introspection (stub `tools/list`); API tests (status/install/rollback via TestClient);
   web (Vitest+MSW) for the panel. `uv`-dependent steps guarded/skipped where `uv` absent in CI (document the manual
   live install).
 - **Live acceptance (manual, recorded):** install both from the artifacts; a chat/`get_object_code` call reads live SAIL
-  via `@appian-dev`; a sync export path reaches the env via the Deployment API; `update("appian-dev")` re-fetches from
-  the connected site and swaps versions.
+  via `@appian-dev`; a sync export path reaches the env via the Deployment API; installing a newer drop-in bundle
+  versions it + swaps `current`, and `rollback` restores the prior.
 
 ## 4. Acceptance criteria
 1. **Dev-environment tagging works and is the single connectivity source (§2.0):** an `is_dev` toggle exists on the
@@ -158,14 +161,14 @@ Updating the binary = a new install version + `current` swap; **no registry edit
    an actionable message; a "Test connection" verifies the dev env + both MCPs.
 2. Both native MCP servers **install into `~/.genesis/mcp-servers/<id>/versions/<v>/`** via `uv sync`, launch from the
    per-server venv, and are injectable as `@appian-dev/*` / `@appian-devops/*` with **read-only allowlists**.
-3. **Updatable without forking:** `update("appian-dev")` re-fetches from the connected site's bundle servlet;
-   `update("appian-devops")` installs a newer configured/drop-in artifact; both are **versioned + reversible** (rollback
-   works); the bundle source is never modified.
+3. **Updatable without forking (manual drop-in):** there is **no auto-fetch update source** — the operator installs a
+   newer bundle via `install(id, bundle_path)` (API/CLI), which versions it + atomic-switches `current`; `rollback`
+   restores the prior version; the bundle source is never modified.
 4. Env/secrets resolved via the existing registry (Dev = Basic auth default, headless; browser/SSO documented as an
    opt-in manual step); secrets referenced by key name only.
 5. Registration is a **managed reference** — updating the binary needs no registry edit.
-6. Settings surface shows version/source/last-update + Update/Rollback; genesis + web suites green (uv-dependent steps
-   guarded); live acceptance recorded.
+6. Settings surface shows installed version + Install/replace (drop-in) + Rollback; genesis + web suites green
+   (uv-dependent steps guarded); live acceptance recorded.
 
 ## 5. Out of scope
 - **Modifying / forking** either bundle (breaks updatability).
