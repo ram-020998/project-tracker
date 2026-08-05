@@ -1,7 +1,8 @@
 # Phase 16-08 — Native Appian MCP server integration & updatability
 
-> **Status:** §2.0 (dev-environment toggle) **SHIPPED** (genesis v0.30.0, CI green) · Stage B (managed-native installer)
-> **NOT STARTED** · **Iteration:** 1 (prerequisite for 16-04/16-05) · **Repos:** genesis (+ genesis-core + genesis-workflows registry)
+> **Status:** §2.0 (dev-environment toggle) **SHIPPED** (genesis v0.30.0) · Stage B (managed-native installer) **SHIPPED**
+> (genesis-core v0.9.1 + genesis v0.31.1 + genesis-workflows v0.8.4) — **Phase 16-08 COMPLETE**. See
+> `progress/phase-16-08-native-mcp.md` for the as-built. · **Iteration:** 1 (prerequisite for 16-04/16-05) · **Repos:** genesis (+ genesis-core + genesis-workflows registry)
 > **Update model (2026-08-05 decision):** **no auto-fetch update source** — new Dev/DevOps MCP releases are integrated
 > **manually** (operator drops in a new bundle → Genesis installs it as a new version + swaps `current`; prior kept for
 > rollback). §2.4 below is revised accordingly.

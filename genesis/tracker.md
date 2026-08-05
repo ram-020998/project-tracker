@@ -142,6 +142,40 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-05 (Phase 16-08 Stage B — managed-native Dev/DevOps MCP installer SHIPPED ✅; genesis-core v0.9.1 + genesis
+  v0.31.1 + genesis-workflows v0.8.4):** The second half of 16-08 — **Phase 16-08 is now COMPLETE**. Built to the
+  no-auto-update-source decision: **install-from-local-bundle + versioning + rollback only**.
+  - **genesis-core v0.9.1** — `McpRegistry` gains a `launch_provider` kwarg: an entry marked `"managed": "<id>"` resolves
+    its **command/args** from `launch_provider(id)` at launch (env `${VAR}` list stays on the entry, resolved as usual);
+    `is_managed()` accessor; fail-fast when a managed server isn't installed. Additive — **`CORE_MAJOR` unchanged (=1)**.
+    Also raised `introspect.list_tools` StreamReader limit to 8 MiB (the Dev MCP returns a single 145-tool `tools/list`
+    line that blew past asyncio's 64 KiB default). Pinned `ruff==0.15.20` (unpinned `ruff>=0.6` had drifted → 44
+    pre-existing UP037 findings; the Phase-16-02 lesson, never applied to genesis-core).
+  - **genesis v0.31.1** — `Settings.mcp_servers_dir`; `genesis/mcp/native/{lockfile,installer}.py`: `NativeMcpInstaller`
+    (`install(id,bundle_path)` → sha/idempotent → safe extract → find project root → `uv sync` [guarded] → verify entry
+    → lockfile row → set `current`; `rollback`; `active_launch_spec` launches from the per-server venv, NOT `uv`;
+    `status`; **no network `update`**) + `NativeMcpLockfile` (own atomic JSON store at `mcp-servers/lockfile.json`).
+    Wired `native.launch_spec_for` into `ConfigService.merged_mcp_registry` + `worker._load_registries` + introspect;
+    `environments.resolve_var` maps `LCP_URL`/`APPIAN_DOMAIN` from the dev env (§2.5); `dev_connection_check` reports
+    native install status. `api/native_mcp.py` (GET status + POST install|rollback); `genesis mcp
+    install-native|status|rollback-native` CLI; Settings→MCP **"Appian MCP servers"** web panel.
+  - **genesis-workflows v0.8.4** — `appian-dev`/`appian-devops` are **managed refs** (`"managed": "<id>"`, docker
+    placeholder dropped) with correct per-bundle env (Dev: `LCP_URL`/`LCP_AUTH_METHOD=basic`/`LCP_API_PATH`/`LCP_USERNAME`/
+    `LCP_PASSWORD`; DevOps: `APPIAN_DOMAIN`/`APPIAN_API_KEY`) and **read-only allowlists set from the REAL installed
+    `tools/list`** (both bundles installed + introspected): Dev **67**/145 (get*/list*/test/validate; all write excluded),
+    DevOps **13**/26 (export/inspect/status/download; deploy/pipeline-mutation excluded).
+  - **Design decision:** `active_launch_spec` returns the binary location only; the `${VAR}` env template stays on the
+    registry entry and is resolved by `McpRegistry` — the installer never touches secrets (DRY + defense in depth).
+  - **Verified:** genesis **266** pytest (+24 native; 3 uv-guarded integration tests run a real `uv sync` install of both
+    ids locally, skip where uv absent), genesis-core **61** (+4), web **121** (+1 panel); ruff/eslint/tsc clean.
+    **Live acceptance (manual):** installed both real bundles + introspected (Dev 145 tools, DevOps 26) — `uv sync` +
+    venv launch + `active_launch_spec` + `tools/list` all work end-to-end. **CI:** genesis-core v0.9.1 ✅, genesis
+    v0.31.1 (`genesis` job) ✅, genesis-workflows v0.8.4 (all 3 jobs) ✅. **Caveat:** the genesis **`frontend`** job
+    (stale-bundle guard) did **not** run in CI this release — it's gated on `changes: [web/**/*]`; the web changes were in
+    v0.31.0 whose frontend job died on a **transient Gitaly HTTP-500** at git-fetch, and v0.31.1 touched no web →
+    skipped; `glab` can't retry (read-only token). `web/static` was rebuilt + committed + locally verified; a v0.31.2
+    web-touch push is the way to re-trigger the guard. Progress: `progress/phase-16-08-native-mcp.md`.
+
 - **2026-08-05 (Phase 16-08 §2.0 — dev-environment toggle SHIPPED ✅; genesis v0.30.0):** The **connectivity
   foundation** (the "build FIRST" half of 16-08). The Environments registry gains an **`is_dev` flag** — exactly one env
   is the dev-tagged Appian target that ALL Phase-16 auth resolves against (REST export, Dev/DevOps MCP, changed-objects).
