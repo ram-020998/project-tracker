@@ -7,29 +7,41 @@ agent runtime. Workflows are pulled from a shared GitLab library and run on the
 user's machine with their own credentials. Genesis **replaces** solutions-copilot
 and realizes its deferred (doc-19) orchestration vision.
 
-> All planning/design documentation lives here in `project-tracker/genesis/`.
-> Code repos (`genesis`, `genesis-workflows`) are not yet scaffolded.
+> All planning/design + as-built documentation lives here in `project-tracker/genesis/`. The code lives in five built +
+> shipped repos: `genesis`, `genesis-core`, `genesis-workflows`, `kiro-agent-sdk`, and `genesis-appian-parser`.
+> **New here? Read [`AGENT_ONBOARDING.md`](AGENT_ONBOARDING.md) first — the single task-agnostic onboarding doc ("the bible").**
 
 ---
 
 ## How to navigate
 
 **Start here**
-- [`tracker.md`](tracker.md) — master tracker: status, the Q1–Q14 locked decisions, phase index, reuse map, open items.
+- [`AGENT_ONBOARDING.md`](AGENT_ONBOARDING.md) — **the bible**: the single task-agnostic onboarding doc (architecture, current state + tags, ADRs, hard-won lessons, roadmap). Read this first.
+- [`tracker.md`](tracker.md) — master tracker: the **§6 status log** (running history), the Q1–Q14 locked decisions, phase index, reuse map, open items.
 - [`specs/00-architecture-overview.md`](specs/00-architecture-overview.md) — the layered architecture, domain model, node taxonomy, state/blackboard rule. **Read before any phase spec.**
 - [`progress/`](progress/) — as-built implementation records per phase (evidence, decisions, deviations). Start with [`progress/phase-01-implementation.md`](progress/phase-01-implementation.md).
 
-**Phase specs (the build plans)** — `specs/`
-| Phase | Spec | Title |
-|---|---|---|
-| 1 | [phase-01](specs/phase-01-core-platform-foundation.md) | Core Platform Foundation |
-| 2 | [phase-02](specs/phase-02-workflow-contract-and-library.md) | Workflow Contract & Library System |
-| 3 | [phase-03](specs/phase-03-distribution-install-lockfile.md) | Distribution: GitLab Pull, Selective Install, Lockfile |
-| 4 | [phase-04](specs/phase-04-configuration-and-secrets.md) | Configuration & Secrets |
-| 5 | [phase-05](specs/phase-05-run-orchestration-and-hitl.md) | Run Orchestration & HITL |
-| 6 | [phase-06](specs/phase-06-erd-reference-workflow.md) | ERD Reference Workflow |
-| 7 | [phase-07](specs/phase-07-custom-web-workbench.md) | Custom Web Workbench UI |
-| 8 | [phase-08](specs/phase-08-skill-migration-program.md) | Skill → Workflow Migration Program |
+**Phase specs (the build plans)** — `specs/` · *authoritative status = `AGENT_ONBOARDING.md` §9 + `tracker.md` §6*
+| Phase | Spec | Title | Status |
+|---|---|---|---|
+| 1 | [phase-01](specs/phase-01-core-platform-foundation.md) | Core Platform Foundation | ✅ shipped |
+| 2 | [phase-02](specs/phase-02-workflow-contract-and-library.md) | Workflow Contract & Library System | ✅ shipped |
+| 3 | [phase-03](specs/phase-03-distribution-install-lockfile.md) | Distribution: GitLab Pull, Selective Install, Lockfile | ✅ shipped |
+| 4 | [phase-04](specs/phase-04-configuration-and-secrets.md) | Configuration & Secrets | ✅ shipped |
+| 5 | [phase-05](specs/phase-05-run-orchestration-and-hitl.md) | Run Orchestration & HITL | ✅ shipped |
+| 6 | [phase-06](specs/phase-06-erd-reference-workflow.md) | ERD Reference Workflow | ✅ shipped |
+| 7 | [phase-07](specs/phase-07-01-web-revamp-program-overview.md) | Web Workbench (React+TS revamp) | ✅ shipped |
+| 8 | [phase-08](specs/phase-08-settings-revamp.md) | Settings & Integrations Revamp | ✅ shipped |
+| 9 | [phase-09](specs/phase-09-agent-artifact-io.md) | Agent Artifact I/O | ✅ shipped |
+| 10 | [phase-10](specs/phase-10-chat-assistant.md) | Chat Assistant | ✅ shipped |
+| 11 | [phase-11](specs/phase-11-credit-usage-tracking.md) | Credit & Usage Tracking | ✅ shipped |
+| 12 | [phase-12](specs/phase-12-code-review-workflow.md) | Appian Code-Review Workflow | ✅ shipped |
+| 13 | [phase-13](specs/phase-13-copilot-orchestrator.md) | Chat Copilot & Run Orchestrator | ✅ shipped |
+| 14 | [phase-14](specs/phase-14-skills-in-chat.md) | Skills in Chat | ✅ shipped |
+| 15 | [phase-15](specs/phase-15-design-doc-workflow.md) | Design-Document Workflow | ✅ shipped |
+| 16 | [phase-16](specs/phase-16-appian-knowledge-base.md) | Appian Knowledge Base ("Atlas-into-Genesis") | ▶ in progress — 16-01/02/03/04/08 shipped; 16-05 next |
+
+> The **skill → workflow migration program** (the original "Phase 8") is deferred in [`specs/backlog/`](specs/backlog/).
 
 **Reference docs (the stable, cross-cutting truth)** — `reference/`
 | Doc | Purpose |

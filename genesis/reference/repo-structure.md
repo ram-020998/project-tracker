@@ -1,7 +1,8 @@
 # Genesis — Repository Structure
 
-Two code repos + one shared package. (Not yet scaffolded — this is the target
-layout referenced by the phase specs.)
+The Genesis repos + shared packages, all **built + shipped**: `genesis` (platform) + `genesis-workflows` (library) +
+`genesis-core` (engine/SDK) + `kiro-agent-sdk` (ACP adapter) + `genesis-appian-parser` (Appian parser, Phase 16).
+This is the layout the phase specs reference.
 
 ---
 

@@ -1,6 +1,6 @@
 # Phase 12 — Appian Code-Review Workflow (Jarvis → Genesis port)
 
-> **Status:** DRAFT (implementation spec) · **Author:** Genesis agent · **Date:** 2026-07-14
+> **Status:** ✅ SHIPPED (genesis v0.20.2 + genesis-workflows v0.5.3) · **Author:** Genesis agent · **Date:** 2026-07-14
 > **Goal:** Port the Jarvis "Code Review Workflow" (an LLM-orchestrated Kiro steering doc) into a
 > **deterministic Genesis workflow** where LangGraph owns control flow and Kiro agents are narrow,
 > validated steps. **Google Docs export is OUT of scope** (per request).

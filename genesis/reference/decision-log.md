@@ -673,7 +673,8 @@ document at launch. Delivered in 15-01 (genesis backend + launch-form control + 
 
 ## ADR-036 — Internalized Appian Knowledge Base (Genesis owns the parser + KB, fed by the single dev-tagged environment) (Phase 16)
 
-**Status:** Proposed (Phase 16).
+**Status:** Accepted (Phase 16) — implemented: the code-free KB (`KbStore` / m0007, 16-02) + the deterministic
+`sync-application` baseline (16-03) + the Applications surface (16-04); the external-Atlas cutover completes in 16-05.
 
 **Context.** Today Genesis reaches an **external** knowledge base for Appian application intelligence:
 the **Atlas** MCP (a GitLab-served, pre-parsed KB produced by a standalone daily pipeline — Appian API
@@ -726,7 +727,9 @@ of scope this phase (Dev MCP used read-only).
 
 ## ADR-037 — Code-free temporal KB + live code via the Dev MCP (Phase 16)
 
-**Status:** Proposed (Phase 16).
+**Status:** Accepted (Phase 16) — implemented: the code-free temporal `kb_*` SCD-2 store (16-02) + the baseline sync
+(16-03); live code via the Dev MCP wires in 16-05; the version-comparison tools stay 16-06 backlog (gated on Dev-MCP
+AP-62096, 26.8 GA).
 
 **Context.** An Appian application has 4,000–6,000+ objects across many releases. Storing every
 object's SAIL source across every version (as Atlas does) is heavy and redundant when the environment
@@ -766,7 +769,9 @@ reach LangGraph state). Pairs with ADR-036.
 
 ## ADR-038 — Managed native Appian MCP servers (vendored, versioned, replaceable via manual drop-in, not forked) (Phase 16)
 
-**Status:** Proposed (Phase 16, sub-phase 16-08).
+**Status:** Accepted (Phase 16, sub-phase 16-08) — SHIPPED: the managed-native installer + `McpRegistry`
+managed-reference resolution + the `appian-dev`/`appian-devops` registry entries (genesis-core v0.9.1 + genesis
+v0.31.1 + genesis-workflows v0.8.4).
 
 **Context.** Genesis internalizes the Appian *knowledge base* (ADR-036/037) but must still make *environment* calls —
 read live object SAIL, evaluate SAIL, query SQL, read env info, list applications, and export packages. Per the Phase-16

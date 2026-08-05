@@ -1,6 +1,6 @@
 # Phase 15 — Appian Design-Document Workflow (Jarvis → Genesis port, dual-source research)
 
-> **Status:** DRAFT (implementation spec) · **Author:** Genesis agent · **Date:** 2026-07-17
+> **Status:** ✅ SHIPPED (genesis-workflows v0.7.0 + genesis v0.27.0; 15-01..05; ADR-035 Accepted) · **Author:** Genesis agent · **Date:** 2026-07-17
 > **Goal:** Port the Jarvis **"Design Document Creation Workflow"** (an LLM-orchestrated Kiro steering
 > doc) into a **deterministic Genesis workflow** where LangGraph owns control flow and Kiro agents are
 > narrow, validated steps. The workflow turns a **JIRA ticket** into an **Appian implementation design

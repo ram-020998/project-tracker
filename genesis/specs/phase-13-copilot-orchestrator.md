@@ -1,6 +1,6 @@
 # Phase 13 — Chat Copilot & Run Orchestrator (umbrella)
 
-> **Status:** DRAFT (planning only — do NOT implement until approved) · **Author:** Genesis agent · **Date:** 2026-07-15
+> **Status:** ✅ SHIPPED (genesis v0.25.0 + kiro-agent-sdk v0.5.0; 13-01..06; ADR-033 Accepted) · **Author:** Genesis agent · **Date:** 2026-07-15
 > **Goal:** Evolve the read-only Chat (Phase 10) into a **copilot / run-operator**: from a chat session the
 > user can trigger any installed workflow via a **slash-command** + schema-driven inputs, the **Kiro agent
 > starts the run**, and then **supervises it on the user's behalf** — sensing HITL gates, surfacing the

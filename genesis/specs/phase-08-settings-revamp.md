@@ -1,6 +1,6 @@
 # Phase 8 — Settings & Integrations Revamp
 
-**Status:** 📋 Planned (spec drafted 2026-07-13) · **Layer:** `web` (frontend-only; backend/API
+**Status:** ✅ SHIPPED (genesis v0.16.0) · **Layer:** `web` (frontend-only; backend/API
 already provide everything needed — see §2). · **Depends on:** 07-04 (settings), spec 03
 (Integrations Studio two-tier registry), spec 04 (retention). · **Supersedes** the ad-hoc settings
 layout shipped across 07-04 + spec 03.

@@ -1,6 +1,8 @@
 # Phase 16 — Appian Knowledge Base (Atlas-into-Genesis) (umbrella)
 
-> **Status:** DRAFT (planning only — do NOT implement until approved) · **Author:** Genesis agent · **Date:** 2026-08-04
+> **Status:** IN PROGRESS — **16-01/16-02/16-03/16-04 + 16-08 SHIPPED**; **16-05 next** (`genesis-kb` MCP + cutover, the
+> headline); 16-07 after; 16-06 (versioning) BACKLOG. See `tracker.md` §6 + the per-sub-phase `progress/phase-16-*` docs
+> for the as-built. · **Author:** Genesis agent · **Date:** 2026-08-04 (updated 2026-08-05)
 > **Goal:** Bring the Appian **knowledge base** *inside* Genesis. Today Genesis reaches an **external** Atlas MCP
 > (GitLab-served, pre-parsed) and Jarvis (in-Appian) for Appian application intelligence. Phase 16 makes Genesis own
 > the whole loop: a **Genesis-native Appian parser**, a **local knowledge base in `genesis.db`** (metadata / structure
@@ -541,14 +543,14 @@ entries). `genesis-core` likely unchanged (unless we add a reusable HTTP/program
 
 ## 15. ADR proposals (to add to `reference/decision-log.md`)
 
-- **ADR-036 — Internalized Appian Knowledge Base (Proposed).** Genesis owns the Appian KB: a Genesis-native parser, a
+- **ADR-036 — Internalized Appian Knowledge Base (Accepted — shipped 16-02/03/04; Atlas cutover 16-05).** Genesis owns the Appian KB: a Genesis-native parser, a
   local KB in `genesis.db`, fed by the **one connected environment** (Deployment REST export + Dev MCP). The external
   Atlas MCP (GitLab-served) and Jarvis-as-KB are **retired as the KB source** (Atlas remains only the design
   inspiration + the interim source until 16-05 cutover). Rationale: remove external moving parts + the daily-freshness
   ceiling + the network round-trip; put freshness/shape under Genesis's control; align with the local single-user,
   one-environment, own-data-plane posture (ADR-023/026/030). Preserves ADR-001 (sync is a deterministic workflow, not
   an agent orchestrator).
-- **ADR-037 — Code-free temporal KB + live code via Dev MCP (Proposed).** The KB stores **only** metadata / structure /
+- **ADR-037 — Code-free temporal KB + live code via Dev MCP (Accepted — shipped 16-02/03; live code 16-05; versioning 16-06 backlog).** The KB stores **only** metadata / structure /
   dependency graph / bundles — **never** object source code. All code (current + historical) is fetched **live** from
   the environment through the **Appian Dev MCP** (version-parameterized). Object history is a **temporal SCD-2** model
   keyed to syncs; **user-tagged releases** name points in time; `env_version_ref` bridges a release to the env's version
@@ -560,7 +562,7 @@ entries). `genesis-core` likely unchanged (unless we add a reusable HTTP/program
 - **ADR-021 note:** the sync pipeline touches Appian **read-only** (export + Dev MCP read); the only write is the
   **local** KB, so **no `pre_mutation` gate** is required. Authoring/deploy (Dev MCP write, DevOps deploy) stays out of
   scope and, when added later, must sit behind `pre_mutation` + copilot confirmation (ADR-021/033).
-- **ADR-038 — Managed native Appian MCP servers (Proposed).** The Dev MCP (`lcp-mcp-server`) + DevOps MCP
+- **ADR-038 — Managed native Appian MCP servers (Accepted — SHIPPED 16-08).** The Dev MCP (`lcp-mcp-server`) + DevOps MCP
   (`appian-deployment-mcp`) are integrated as **managed, versioned, opaque, updatable** local servers (installed under
   `~/.genesis/mcp-servers/` via `uv sync`, launched from the per-server venv, registered as a **managed reference** with
   read-only allowlists). **Updatable without forking (manual drop-in):** new releases are integrated by the operator

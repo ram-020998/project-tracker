@@ -1,6 +1,6 @@
 # Phase 16-03 — Sync workflow (`sync-application`, baseline path)
 
-> **Status:** DRAFT (planning) · **Repos:** genesis-workflows (+ genesis) · **Depends on:** 16-01 (parser), 16-02 (KbStore)
+> **Status:** ✅ **SHIPPED** (genesis v0.29.1 + genesis-workflows v0.8.2) · **Repos:** genesis-workflows (+ genesis) · **Depends on:** 16-01 (parser), 16-02 (KbStore)
 > **Goal:** A **LangGraph workflow** that exports an application package from the **dev-tagged** environment (16-08 §2.0)
 > via the Appian
 > **Deployment REST API** (deterministic program node — no agent, no credits), parses it with `genesis-appian-parser`,

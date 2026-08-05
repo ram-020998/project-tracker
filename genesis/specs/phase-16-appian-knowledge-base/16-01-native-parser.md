@@ -1,6 +1,6 @@
 # Phase 16-01 — Native Appian parser (`genesis-appian-parser`)
 
-> **Status:** DRAFT (planning) · **Repo:** `genesis-appian-parser` (NEW, pinned) · **Depends on:** nothing (env-free)
+> **Status:** ✅ **SHIPPED** (`genesis-appian-parser` v0.1.0) · **Repo:** `genesis-appian-parser` (NEW, pinned) · **Depends on:** nothing (env-free)
 > **Goal:** Stand up a Genesis-owned, stdlib-only Python package that parses an Appian application export ZIP into an
 > **in-memory structured result** (objects + dependency edges + bundles + content hashes) — **with no source-code
 > persistence and no file output**. This is the port of the proven Atlas parser's front-half into a package Genesis

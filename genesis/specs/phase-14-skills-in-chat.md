@@ -1,6 +1,6 @@
 # Phase 14 — Skills in Chat (umbrella)
 
-> **Status:** DRAFT (planning only — do NOT implement until approved) · **Author:** Genesis agent · **Date:** 2026-07-16
+> **Status:** ✅ SHIPPED (kiro-agent-sdk v0.6.0 + genesis-workflows v0.6.0 + genesis v0.26.1; 14-01..05; ADR-034 Accepted) · **Author:** Genesis agent · **Date:** 2026-07-16
 > **Goal:** Add **Skills** — Kiro's portable, on-demand instruction packages — as a **second first-class capability
 > concept** alongside Workflows, and make them **installable, authorable, and invocable from the Chat component**.
 > **Priority:** the **Chat** experience is priority 1; workflow-node use of skills is explicitly a later follow-up.

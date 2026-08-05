@@ -1,6 +1,6 @@
 # Phase 16-02 — KB schema (m0007) + `KbStore`
 
-> **Status:** DRAFT (planning) · **Repo:** genesis · **Depends on:** 16-01 (`KbParseResult` shape)
+> **Status:** ✅ **SHIPPED** (genesis v0.28.0 — m0007 `kb_*` + `KbStore`) · **Repo:** genesis · **Depends on:** 16-01 (`KbParseResult` shape)
 > **Goal:** Add the `kb_*` tables to `genesis.db` via migration **m0007** and a `KbStore` repository that applies a
 > `KbParseResult` into the **temporal (SCD-2) model**, answers **current + point-in-time + cross-app** queries,
 > maintains **current bundles** (recompute-on-sync) + **release-snapshot bundles**, and supports a **table-scoped**

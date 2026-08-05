@@ -1,6 +1,6 @@
 # Phase 11 — Credit & Usage Tracking
 
-> **Status:** DRAFT (spec / analysis — not started)
+> **Status:** ✅ SHIPPED (kiro-agent-sdk v0.4.0 · genesis-core v0.8.0 · genesis v0.20.0; ADR-032)
 > **Author:** Genesis agent · **Date:** 2026-07-14 · **Spike-verified:** 2026-07-14 (kiro-cli 2.12.1)
 > **Scope:** Surface **real, metered credit usage** to the user everywhere it is meaningful — per
 > agent invocation, per complete run, on the Overview dashboard (replacing the Tool-Calls KPI),
