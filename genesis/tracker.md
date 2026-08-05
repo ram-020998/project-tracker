@@ -142,6 +142,26 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-05 (Phase 16-04 — Applications surface SHIPPED ✅; genesis v0.32.0):** The user-facing surface over the
+  internal Appian KB — the first consumer of the managed-native Dev MCP (16-08). **Backend** `genesis/api/applications.py`
+  (`register_applications_routes` over `KbStore` + `RunManager`): `GET /applications` (tracked, from `list_applications`),
+  `GET /applications/available` (apps in the **dev-tagged** env not yet tracked, enumerated via the Dev MCP), `POST
+  /applications` (resolve `dev_environment()` [400 if none] → `register_application` → start a **baseline
+  `sync-application` run**), `GET /applications/{uuid}` (overview+releases+syncs), `POST /{uuid}/sync` (baseline; delta→400,
+  16-07), `GET /{uuid}/sync-status` (latest sync run status + kb_syncs counts), `GET /{uuid}/objects|objects/{uuid}|
+  bundles|bundles/{id}`, `DELETE /{uuid}` (table-scoped untrack). New `genesis/kb/dev_mcp.py` (direct-stdio
+  `tools/call listApplications`, reusing the merged-registry managed launch+secret resolution; best-effort + defensive
+  parse; manual-UUID fallback). `KbStore` + `list_syncs`/`latest_sync`. `create_app` wires the router + `KbStore` on
+  `app.state`; FastAPI `0.32.0`. **Web** `features/applications/` — Applications page (tracked-app cards + Add), the Add
+  dialog (Dev-MCP available list + manual UUID), the detail (Tabs Overview|Objects|Bundles|Syncs|Releases + live
+  SyncStatus + Sync-now + untrack), `lib/api/applications.ts`, `types/applications.ts`, hooks (poll while syncing),
+  Sidebar **Applications** under Library (`AppWindow`), router entries. **Verified:** `tests/test_applications_api.py`
+  (8) + `applications.test.tsx` (4); genesis **274** pytest + web **125** vitest; ruff/eslint/tsc clean; `web/static`
+  rebuilt. **CI green #6504611** (`genesis` + `frontend`). Because this release changed `web/**`, the `frontend`
+  **stale-bundle guard ran green — this also CLOSES the 16-08 Stage-B gap** (that guard hadn't run: v0.31.0's frontend
+  job died on a transient Gitaly 500 and v0.31.1 touched no web). Progress: `progress/phase-16-04-applications-surface.md`.
+  **Next: 16-05** (`genesis-kb` MCP + cutover — the headline).
+
 - **2026-08-05 (Phase 16-08 Stage B — managed-native Dev/DevOps MCP installer SHIPPED ✅; genesis-core v0.9.1 + genesis
   v0.31.1 + genesis-workflows v0.8.4):** The second half of 16-08 — **Phase 16-08 is now COMPLETE**. Built to the
   no-auto-update-source decision: **install-from-local-bundle + versioning + rollback only**.

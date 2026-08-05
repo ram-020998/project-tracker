@@ -1,6 +1,7 @@
 # Phase 16-04 — Applications surface (API + page + container model)
 
-> **Status:** DRAFT (planning) · **Repos:** genesis (+ web) · **Depends on:** 16-08 §2.0 (dev-env toggle), 16-02 (KbStore), 16-03 (sync workflow)
+> **Status:** ✅ **SHIPPED** (genesis v0.32.0, CI green #6504611) — see `progress/phase-16-04-applications-surface.md` ·
+> **Repos:** genesis (+ web) · **Depends on:** 16-08 §2.0 (dev-env toggle), 16-02 (KbStore), 16-03 (sync workflow)
 > **Goal:** The user-facing surface: an **Applications** page where the user sees the apps in the **dev-tagged**
 > environment (16-08 §2.0),
 > **adds** the one(s) their team works on (triggering a baseline sync), and tracks each app's KB — overview, objects,
