@@ -43,3 +43,20 @@ fast path (export only what changed) slots into the existing `_fetch_package_zip
   `POST /applications/{id}/sync {mode:"delta"}`).
 - **§1.5** — the **per-release changelog** (needs 16-06); per-sync deltas are already available from `kb_syncs` + SCD-2.
 - **Live acceptance (manual):** re-sync a real app after an env change and confirm the SCD-2 delta + window.
+
+## Post-release live fixes (2026-08-06)
+
+First real sync against the dev env exposed two bugs the synthetic tests missed (both fixed + regression-tested;
+verified end-to-end on a live **2516-object** app):
+
+1. **Export 405 (genesis-workflows v0.8.6).** `_fetch_package_zip` was hand-rolled to `POST …/deployments/export`
+   with a JSON body → **405**. Corrected to the **real** Appian Deployment REST contract, read from the installed
+   DevOps MCP (`appian-deployment-mcp`): **multipart `POST /suite/deployment-management/v2/deployments`** with an
+   `Action-Type: export` header + a `json` part `{uuids, exportType, name}`; poll `GET /deployments/{uuid}` to
+   `COMPLETED`; download the poll response's **`packageZip`** URL; auth header `appian-api-key`. +2 request-shape tests.
+2. **Duplicate object UUIDs (genesis v0.34.0 + genesis-workflows v0.8.7).** The real package listed the same
+   `object_uuid` more than once → baseline `KbStore.apply` hit `UNIQUE(app_uuid,object_uuid,valid_from_sync)`.
+   `apply` now de-dupes objects by UUID (edges by `(source,target,dep_type)` triple), and the baseline `check_kb`
+   reconciliation is `0 < written ≤ parsed` (distinct ≤ raw). +regression tests (KbStore + workflow).
+
+Both are recorded as hard-won lessons in `AGENT_ONBOARDING.md` §7.

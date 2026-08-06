@@ -142,6 +142,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-06 (Live-run fixes + UI polish SHIPPED ✅; genesis v0.34.0 + genesis-workflows v0.8.6→v0.8.7):** First
+  live sync of a real app surfaced two bugs, both fixed + regression-tested (verified against a live **2516-object**
+  app): **(1) export 405** — `sync-application`'s Deployment REST export was hand-rolled wrong; corrected to the real
+  contract from the installed DevOps MCP (**multipart `POST /deployments`** + `Action-Type: export` + `{uuids,
+  exportType, name}`; poll; download the `packageZip` URL; `appian-api-key` auth) — **genesis-workflows v0.8.6**.
+  **(2) UNIQUE-constraint crash** — real exports repeat object UUIDs; `KbStore.apply` now de-dupes by UUID (edges by
+  triple) and baseline `check_kb` reconciliation is `distinct ≤ parsed` — **genesis v0.34.0** + **genesis-workflows
+  v0.8.7** (workflow v0.2.2, pin → genesis v0.34.0). **UI/UX:** managed-native (Dev/DevOps) bundle install/rollback
+  moved out of the top Settings→MCP box **into each server's detail page** (new `NativeMcpSection`; removed
+  `NativeMcpPanel`) + fixed right-pane horizontal overflow; **Applications** cards + detail Overview redesigned
+  (icon/mono-uuid/stat-tiles/sync-footer; MetricCard KPIs + object-type bars + top bundles; row hover). Added
+  **`scripts/genesisctl.sh`** (start/stop/status/logs/open). CI green (genesis #6514160 genesis+frontend; workflows
+  #6514162). 288 pytest · 57 workflow · 126 web · ruff/eslint/tsc clean.
+
 - **2026-08-06 (Phase 16-07 — delta refresh, Option A SHIPPED ✅; genesis-workflows v0.8.5):** `sync-application` v0.2.0
   gains a **delta** mode without the (not-yet-built) Appian changed-objects API: a **full re-export + SCD-2
   delta-merge** (`KbStore.apply(mode='delta')` diffs the re-parse by `diff_hash` — opens new/modified, **closes removed
