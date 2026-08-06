@@ -1,6 +1,6 @@
 # Phase 13-02 — Genesis Control MCP Server (+ ADR-033)
 
-> **Status:** DRAFT (planning) · **Repo:** genesis · **Depends on:** 13-01 (for confirmed mutations)
+> **Status:** ✅ SHIPPED (Phase 13 complete — 13-01..06; see `progress/phase-13-copilot-orchestrator.md`) · **Repo:** genesis · **Depends on:** 13-01 (for confirmed mutations)
 > **Goal:** A write-capable stdio MCP server — the sibling of the read-only introspection server (10-02) —
 > that exposes **run-management** as tools by **proxying the existing `/api` surface**, so `RunManager`
 > remains the single source of truth. Plus **ADR-033**, which records the copilot boundary.

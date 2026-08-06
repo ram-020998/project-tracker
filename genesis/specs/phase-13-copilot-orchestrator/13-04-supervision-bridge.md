@@ -1,6 +1,6 @@
 # Phase 13-04 — Run-Supervision Bridge (async gate/terminal → chat)
 
-> **Status:** DRAFT (planning) · **Repo:** genesis · **Depends on:** 13-03 (copilot mode + run↔session link)
+> **Status:** ✅ SHIPPED (Phase 13 complete — 13-01..06; see `progress/phase-13-copilot-orchestrator.md`) · **Repo:** genesis · **Depends on:** 13-03 (copilot mode + run↔session link)
 > **Goal:** Make the copilot **sense** what happens to a run it started, without staying alive. A
 > `ChatRunSupervisor` watches `RunManager` events for session-linked runs and, on a gate or terminal event,
 > notifies the session and injects a proactive **nudge** turn so the copilot surfaces the gate + options to

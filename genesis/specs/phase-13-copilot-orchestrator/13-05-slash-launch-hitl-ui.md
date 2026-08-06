@@ -1,6 +1,6 @@
 # Phase 13-05 — Slash-Command Launch & In-Chat HITL/Confirm UI
 
-> **Status:** DRAFT (planning) · **Repo:** genesis (web) · **Depends on:** 13-02/13-03/13-04
+> **Status:** ✅ SHIPPED (Phase 13 complete — 13-01..06; see `progress/phase-13-copilot-orchestrator.md`) · **Repo:** genesis (web) · **Depends on:** 13-02/13-03/13-04
 > **Goal:** The copilot UX — type `/` to pick a workflow, fill a schema-driven launch dialog, hand the agent
 > the instruction to start it, then render the permission-confirm cards, gate cards, and terminal
 > notifications inline so the whole launch→supervise→decide loop happens in the conversation.

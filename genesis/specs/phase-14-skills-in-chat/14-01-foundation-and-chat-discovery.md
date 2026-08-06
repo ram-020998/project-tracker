@@ -1,6 +1,6 @@
 # Phase 14-01 — Skills foundation & chat discovery
 
-> **Status:** DRAFT (planning) · **Repo:** genesis · **Depends on:** the skills-in-ACP spike (proven)
+> **Status:** ✅ SHIPPED (Phase 14 complete — 14-01..05; see `progress/phase-14-skills-in-chat.md`) · **Repo:** genesis · **Depends on:** the skills-in-ACP spike (proven)
 > **Goal:** Establish the managed skills workspace, the skill domain model + local store/service, the read/create/
 > remove API, and the wiring that makes an installed skill **usable in a Chat session** — plus a "reload skills"
 > affordance. This is the load-bearing foundation: after 14-01, dropping a `SKILL.md` into the workspace (by any means)

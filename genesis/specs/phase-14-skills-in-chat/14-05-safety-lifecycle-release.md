@@ -1,6 +1,6 @@
 # Phase 14-05 — Skills safety, lifecycle & release
 
-> **Status:** DRAFT (planning) · **Repos:** genesis (+ genesis-workflows) · **Depends on:** 14-01..14-04
+> **Status:** ✅ SHIPPED (Phase 14 complete — 14-01..05; see `progress/phase-14-skills-in-chat.md`) · **Repos:** genesis (+ genesis-workflows) · **Depends on:** 14-01..14-04
 > **Goal:** Harden skills for real use — validation, a clear script-execution/file-output safety posture,
 > update/uninstall/dedup lifecycle, telemetry/audit — then integration + acceptance, ADR-034 finalization, and the
 > release chain.

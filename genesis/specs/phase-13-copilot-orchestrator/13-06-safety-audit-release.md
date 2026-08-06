@@ -1,6 +1,6 @@
 # Phase 13-06 — Safety, Audit, Advanced-Gate Patterns & Release
 
-> **Status:** DRAFT (planning) · **Repo:** genesis · **Depends on:** 13-01..13-05
+> **Status:** ✅ SHIPPED (Phase 13 complete — 13-01..06; see `progress/phase-13-copilot-orchestrator.md`) · **Repo:** genesis · **Depends on:** 13-01..13-05
 > **Goal:** Harden the copilot for real use — an audit trail of agent-initiated actions, scope/rate limits,
 > a kill-switch, the researched advanced-gate patterns (conditional/batch/timeout), then end-to-end + live
 > acceptance, ADR-033 finalization, and the release.

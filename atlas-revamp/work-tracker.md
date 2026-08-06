@@ -575,3 +575,152 @@ dispatchers — MUST persist MCP outputs to `raw/`, materialize `payloads/` and 
 gate reports via `dg build-footprint`/`validate`/`check-fields`/`coverage-gate` (never hand-write them or set
 a gate PASS to skip a check), and re-run a failed `dg` step after fixing its input rather than routing around.
 Verified: 2 skills quick_validate OK, agent validate EXIT 0. (89 dg pytest unaffected — no code changed.)
+
+### Update 2026-08-05 — removed `data-generate-manage` skill + rollback (per owner intent; edits only, not committed)
+Owner clarified explore-schema/query-validate were never meant as user-facing skills — they're generation-
+workflow mechanics that got split out during reorg — and rollback is not wanted for now.
+- **Deleted the `data-generate-manage` skill** (SKILL.md + explore-schema/query-validate/rollback references).
+  Its explore/query content already lives in the common reference `resources/data-generator/tools/
+  tool-reference-atlas.md` (schema tools + steering) and `tool-reference-data-generator.md` (query/verify),
+  so nothing was lost — just de-duplicated.
+- **Removed rollback everywhere** it was an offered capability: the create-records "Offer rollback" step
+  (→ plain "Finish: set gen PASS + report"), records SKILL.md line-52 offer, prompt DG-MCP description +
+  `get_session`/`rollback_session` tool line, and the `tool-reference-data-generator.md` steering step,
+  `get_session`+`rollback_session` catalog entries, efficiency rule, pk_field note + README list.
+- **Rewired:** agent `resources` 4→3 (records/sql/erd); agent description scrubbed of inspect/manage/schema/
+  query/rollback triggers; prompt router row removed + menu "four"→"three"; removed dead **D14** (manage-
+  routing) decision from `decisions.schema.json` and updated the 2 D14-dependent tests in `test_validate.py`.
+- **Verified:** 0 orphaned `data-generate-manage`/rollback refs; agent + decisions.schema JSON valid; 3 skills
+  quick_validate OK; agent validate EXIT 0; **89 pytest pass**.
+- Suite is now **3 skills**: `data-generate-records`, `data-generate-sql`, `data-generate-erd` (erd still
+  pending the #19 hosting decision).
+
+### Update 2026-08-05 (later) — ERD renderer ported Go→Python, vendored in scripts/ (closes #19; edits only, not committed)
+Owner asked to strip the Go and vendor the renderer as Python scripts. Done — faithful from-scratch port of
+`github.com/ram-020998/erd-gen` (Go, stdlib-only) into **stdlib-only Python** under
+`.kiro/resources/data-generator/scripts/`:
+- `erd_layout.py` (← layout.go — domain grouping/ordering + grid placement), `erd_router.py` (← router.go —
+  orthogonal obstacle-avoiding routing), `erd_render.py` (← render.go — Lucid Standard Import doc, matching
+  field order + omitempty), `erd_api.py` (← api.go — Lucid REST via `urllib`; the ONLY networked part),
+  `erd_gen.py` (← main.go + cmd_*.go — CLI: generate/update/export/share; `.lucid` = ZIP of document.json).
+- **Offline by default**: `erd_gen.py generate --input <app>-erd.json --output <app>.lucid` builds the diagram
+  file with no token/network; `--upload` (and update/export/share) opt-in via `LUCID_API_TOKEN`.
+- **Fidelity verified**: built the original Go binary (go1.26) and compared — the emitted `document.json` is
+  **semantically equal** to the Go tool's for the same input; the Python port is also **byte-deterministic**
+  across runs (Go was not — it iterates a map in random order). 11 new unit tests in `tests/test_erd_gen.py`.
+- Repointed `data-generate-erd` SKILL.md + `references/generate-erd.md` + `tools/README.md` + `erd_input.py`
+  docstring to the bundled renderer; **removed all "external erd-gen CLI / personal repo / #19 / DEC-3 / curl|bash"
+  references.** This **closes MR!101 #19 / #20.3** (no personal repos; renderer is now in-repo, deterministic,
+  tested).
+- **Verified**: erd skill quick_validate OK; agent validate EXIT 0; **full suite 100 pytest pass** (89 dg + 11 erd);
+  no lingering external-erd-gen refs.
+
+**MR!101 now**: every actionable comment implemented (incl. #19); #1/#2 & #18 remain discussion/no-action.
+Still not committed/pushed; fresh MR from `feature/atlas-data-generator` + close/retarget !101 still pending.
+
+### Update 2026-08-05 (later 2) — scripts reorganized by functionality (edits only, not committed)
+Owner: "scripts are scattered." Regrouped the 15 flat modules into two functional packages, keeping the
+documented `dg.py` invocation UNCHANGED (zero workflow-doc churn):
+```
+scripts/
+  dg.py                     # entry — path unchanged
+  dglib/                    # workflow engine: state, gate, scaffold, footprint, fields,
+                            #   coverage, validate, sql_emit, erd_input + config/ + schemas/
+  erd/                      # ERD renderer: erd_gen (entry), erd_layout, erd_render, erd_router, erd_api
+  tests/  ruff.toml  .gitignore
+```
+Mechanics (no module-logic edits, no test-file edits, no `_HERE` edits):
+- `config/` + `schemas/` moved INTO `dglib/` so `_HERE`-relative loads (fields/validate/erd_input) still resolve.
+- `dg.py` prepends `dglib/` to `sys.path` (3-line bootstrap) → its bare imports work; `erd/erd_gen.py`'s own
+  dir is `sys.path[0]` when run, so its bare imports work.
+- `conftest.py` now adds `dglib/` + `erd/` to `sys.path` → all tests keep bare imports unchanged.
+- Doc path updates: `scripts/erd_gen.py` → `scripts/erd/erd_gen.py` (erd SKILL.md, generate-erd.md, README);
+  `config/*.json` → `dglib/config/*.json` (erd docs, step-0 thresholds ref, `.gitignore`).
+- **Verified:** 100 pytest pass; `dg.py` + `erd/erd_gen.py` run and build a valid `.lucid`; 3 skills
+  quick_validate OK; agent validate EXIT 0.
+
+## 16. ERD→MCP migration, gate/doc fixes, and clean MR-ready branch (2026-08-05)
+
+This section supersedes the "vendored ERD renderer" approach in §15 (later-1/later-2): the ERD renderer was
+moved OUT of solutions-os and INTO the Data Generator MCP server, and the branch was cleaned + rebased and is
+now MR-ready.
+
+### 16.1 ERD generation folded into the DG MCP server (`solutions-atlas-dg-mcp-server`)
+Owner decision: expose the full ERD lifecycle as MCP tools so the agent uses tools (not shell scripts) and the
+Lucid key is configured in the agent's MCP config.
+- Worked on the **dev fork** `appian/dev/solutions-atlas-dg-mcp-server`, branch **`feature/erd-tools`**.
+- Ported the Go `erd-gen` (already Python from §15) into `data_generator/erd/` (`layout`, `router`, `render`,
+  `packaging`, `input_builder`, `lucid_api` using `requests`). Added `data_generator/tools/erd.py` exposing
+  **5 MCP tools**: `build_erd_input`, `generate_erd` (upload; `dry_run` returns the doc offline), `update_erd`,
+  `export_erd`, `share_erd`. Registered in `server.py` (21 tools total) + schemas in `models.py`.
+- Config: `LUCID_API_TOKEN` optional in `config.py`; wired into the repo's `mcp.json` env (later changed to
+  fill-in `<your-lucid-api-key>` placeholders so users input the key directly). `.env.example`/README/docs updated.
+- **CI fix:** `requirements.txt` pinned **`mcp<2.0.0`** — the unpinned `mcp` had resolved to the new 2.0.0
+  which removed `Server.list_tools()`/`Tool.inputSchema` and broke the Test stage (pipeline 6505858).
+- **Lucid 401 hardening:** verified via Lucid docs that the `/v1` base path already supplies the required
+  `Lucid-Api-Version` (so NOT a missing-header bug); a 401 = invalid/expired/malformed token or a container
+  started before the token was set. Added token `.strip()` + an actionable 401 message.
+- Verified in clean venv: **85 pytest pass**, flake8 clean (CI parity). Commits `005f079`→`94d7f33`→`26e50af`
+  →`0c5f54d`; pipelines green.
+- **STATUS: MERGED to prod + image built** (per owner) — the ERD MCP tools are live in
+  `registry.gitlab.appian-stratus.com/appian/prod/solutions-atlas-dg-mcp-server:latest`.
+
+### 16.2 solutions-os ERD skill rewired to the MCP tools; vendored renderer removed
+- `data-generate-erd` SKILL.md + `references/generate-erd.md` rewritten to drive the flow via the
+  `@appian-data-generator` MCP tools (Atlas schema → `build_erd_input` → `generate_erd` [dry_run to skip
+  upload] → update/export/share). No local scripts, no request-folder artifacts.
+- Removed from solutions-os: the vendored `scripts/erd/` package, `scripts/tests/test_erd_gen.py`, the
+  `dg erd-input` subcommand (`dglib/erd_input.py` + dg.py wiring + `test_erd_input.py`), and
+  `dglib/config/domains.example.json`. Updated prompt (dg subcommand list + added ERD tools to the DG MCP
+  catalog), `tools/README.md`, `step-0`, `conftest.py`, `.gitignore`.
+
+### 16.3 Footprint completeness gate (fixes missed tables — session 3f0d3db6)
+Live test cloned an evaluation but the agent queried only ~8 of the 33 planned tables and declared the
+footprint complete (criteria-assignments etc. missed); `build_footprint` had no plan-vs-capture reconcile.
+- Added `reconcile_plan()` to `dglib/footprint.py`; `dg build-footprint` now **hard-fails (exit 1) listing any
+  planned table with no `raw/auto-analysis/<table>.json` capture**, with a cited `--exclude TABLE="reason"`
+  escape hatch (mirrors the manual coverage-gate). Report gains a "Completeness gate: PASS/FAIL" section.
+- Steering: HARD RULE in `auto-2-footprint-discovery.md` — query every planned table (even if expected empty).
+- 5 new tests; suite green.
+
+### 16.4 Document-library (D12) handling on the auto-analysis path (fixes unused document library)
+The clone path never used the DG MCP document library — its "preserve reference FK verbatim" rule swept
+Document-type fields (`appianDocId`) into copy-as-is. Added **D12** to `auto-3-clone-scale-plan.md`: resolve
+every Document-type field via `find_document`/`list_documents` (record `{documentId,name,why}`; never copy the
+reference's id or invent one), and carved Document fields out of "preserve verbatim." Aligns with the existing
+`decisions.schema.json` D12 (already scoped to "E3 rule 3").
+
+### 16.5 Readiness cross-check → secret/artifact/history cleanup → clean rebase (MR-ready)
+Cross-verification found the branch was NOT MR-ready: the committed "Intermediate commit" (`ff31ca0155`) held
+**real secrets** (GITLAB/GITHUB/APPIAN/LUCID) and **test-run artifacts** (`d1.json`, `data-requests/`, 18 files;
+124 files / 8138 insertions vs main).
+- Owner removed secrets from the working file. Rebuilt the branch clean: mixed-reset to main, dropped artifacts,
+  gitignored `data-requests/`, staged only the intended set (agent + `resources/data-generator/**` + 3
+  `data-generate-*` skills + README), gated for secrets/artifacts, committed as **one clean commit**.
+- Branch was **16 behind** the real main (built off a stale local `origin/main`). **Rebased** the single commit
+  onto latest `origin/main` (`9c4dbc758f`); one `.gitignore` conflict resolved by union (`test-artifacts/` +
+  `data-requests/`). Now **0 behind, 1 ahead** = `b1cce65823`.
+- Re-validated on the new base: 3 skills `quick_validate` OK, `kiro-cli agent validate` EXIT 0, **89 dg pytest
+  pass**, working tree clean, secret/artifact gates PASS.
+- **Force-pushed-with-lease** to the dev fork (non-shared branch): `feature/atlas-data-generator` = `b1cce65823`
+  (remote == local). Backup of the old tip at local branch `backup/pre-clean-ff31ca0155`.
+
+### 16.6 MR !101 — FINAL coverage (re-fetched 2026-08-05, still 20 comments, none new)
+ALL comments covered:
+- Code/doc: #3/#14/#16 (renames), #4/#13/#17 (auto-analysis/manual restructure + mode rename), #5–7 (codes),
+  #8/#9 (paths), #10 (README), #11/#12 (MCP steering), #15/#20.4 (deterministic `dg` + trim),
+  **#19/#20.3 (ERD personal repo) — FULLY RESOLVED via the merged DG MCP ERD tools**, #20.1 (split), #20.2 (0 behind).
+- No-code (correct outcome): #1/#2 (DG-vs-Dev-MCP — answered in thread), #18 (DRY — reviewer "can live with it").
+
+### 16.7 CURRENT STATE / NEXT STEPS (handoff)
+- **solutions-os**: dev fork branch `feature/atlas-data-generator` = clean single commit `b1cce65823`, 0 behind
+  main, validated, no secrets/artifacts. **MR-ready.**
+- **DG MCP**: merged to prod + image built; ERD tools live.
+- **PENDING (human):**
+  1. **Create the solutions-os MR** dev→`appian/prod/solutions-os` `main` via the UI link (agent token 403s on
+     MR create). Draft title/description prepared. **Close/retarget MR !101** to it (note #19 resolved via DG MCP).
+  2. **ROTATE the 4 exposed tokens** (GitLab PAT, GitHub PAT, Appian API key, Lucid key) — they persist in the
+     old, now-unreferenced commit object on the remote until GC.
+  3. PO & UX MRs (`feature/atlas-product-owner`, `feature/atlas-ux-designer`) still pending (unchanged).
+  4. DG MCP Phase 5 — archive personal `ramaswamy.u/solutions-atlas-dg-mcp-server` + personal `erd-gen` repo.
+- **Delete** local `backup/pre-clean-ff31ca0155` once the MR looks correct.

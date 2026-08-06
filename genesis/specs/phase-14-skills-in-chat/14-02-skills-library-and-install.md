@@ -1,6 +1,6 @@
 # Phase 14-02 — Skills library & install-from-repo
 
-> **Status:** DRAFT (planning) · **Repos:** genesis-workflows + genesis · **Depends on:** 14-01
+> **Status:** ✅ SHIPPED (Phase 14 complete — 14-01..05; see `progress/phase-14-skills-in-chat.md`) · **Repos:** genesis-workflows + genesis · **Depends on:** 14-01
 > **Goal:** Give Genesis a **supply of installable skills**: a `skills/` library in the `genesis-workflows` repo with a
 > skills registry + CI validation, and a Genesis-side installer that pulls a selected skill from the library at a
 > pinned ref and installs it into the managed skills workspace (`~/.genesis/.kiro/skills/`) — mirroring the existing

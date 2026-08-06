@@ -1,6 +1,6 @@
 # Phase 14-04 — Chat skills invocation
 
-> **Status:** DRAFT (planning) · **Repo:** genesis (web) + minor backend · **Depends on:** 14-01 (+ 14-03 for a supply)
+> **Status:** ✅ SHIPPED (Phase 14 complete — 14-01..05; see `progress/phase-14-skills-in-chat.md`) · **Repo:** genesis (web) + minor backend · **Depends on:** 14-01 (+ 14-03 for a supply)
 > **Goal:** Make skills usable from Chat — the priority-1 experience. Turn the existing `/` composer palette (which
 > lists workflows) into a **unified command menu** that also lists installed **skills**; selecting a skill invokes it.
 > Auto-activation (by description) also works with no UI. Add a "reload skills" affordance.

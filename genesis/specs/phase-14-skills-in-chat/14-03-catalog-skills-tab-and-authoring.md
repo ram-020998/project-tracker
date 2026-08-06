@@ -1,6 +1,6 @@
 # Phase 14-03 — Catalog "Skills" tab & in-flight authoring
 
-> **Status:** DRAFT (planning) · **Repo:** genesis (web) · **Depends on:** 14-01, 14-02
+> **Status:** ✅ SHIPPED (Phase 14 complete — 14-01..05; see `progress/phase-14-skills-in-chat.md`) · **Repo:** genesis (web) · **Depends on:** 14-01, 14-02
 > **Goal:** Split the Catalog page into **Workflows | Skills** sub-tabs (standard pattern), and in the Skills tab let
 > the user **browse/install/remove** library skills **and author a new skill in-flight** (name + description +
 > `SKILL.md` body + optional `scripts/`/`references/`/`assets/` uploads). Consistency with existing UX is paramount.

@@ -1,6 +1,6 @@
 # Phase 13-03 — Copilot Chat Mode & Run↔Session Link
 
-> **Status:** DRAFT (planning) · **Repo:** genesis · **Depends on:** 13-01 (permission bridge), 13-02 (control server)
+> **Status:** ✅ SHIPPED (Phase 13 complete — 13-01..06; see `progress/phase-13-copilot-orchestrator.md`) · **Repo:** genesis · **Depends on:** 13-01 (permission bridge), 13-02 (control server)
 > **Goal:** Turn a chat session into a **copilot** — wire the control MCP server with read tools trusted and
 > mutating tools untrusted (routed through the 13-01 permission-ask bridge to a chat confirm card), add
 > orchestration steering, persist a per-session **mode**, and link runs started from a session to that

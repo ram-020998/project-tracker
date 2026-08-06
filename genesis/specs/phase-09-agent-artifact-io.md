@@ -1,7 +1,7 @@
 # Phase 9 — Agent Artifact I/O: Session Tool-Output Store & Save-by-Reference
 
-**Status:** 📋 Planned — **design validated by spike** (2026-07-13). Spec-only; no production code
-until approved.
+**Status:** ✅ SHIPPED (kiro-agent-sdk v0.2.0 + genesis-core v0.6.0 + genesis v0.17.0 + genesis-workflows v0.4.0).
+Design validated by spike (2026-07-13).
 **Layers:** `kiro-agent-sdk` (additive minor) + `genesis-core` (additive minor, `CORE_MAJOR` stays 1)
 + `genesis-workflows` (erd-generation adoption + docs). No required `genesis` platform change.
 **Supersedes:** the earlier "capture tap on `ToolCallUpdate.content`" / "argument-matched capture" /

@@ -1,6 +1,6 @@
 # Phase 13-01 — SDK Interactive Permission Bridge
 
-> **Status:** DRAFT (planning) · **Repo:** kiro-agent-sdk · **Depends on:** none (lands first)
+> **Status:** ✅ SHIPPED (Phase 13 complete — 13-01..06; see `progress/phase-13-copilot-orchestrator.md`) · **Repo:** kiro-agent-sdk · **Depends on:** none (lands first)
 > **Goal:** Add a third permission policy — `permission_mode="ask"` — that forwards each ACP
 > `session/request_permission` request to an **async callback** supplied by the embedding app, and returns
 > the caller's decision to kiro-cli. This is the load-bearing primitive that lets the Phase-13 copilot get
