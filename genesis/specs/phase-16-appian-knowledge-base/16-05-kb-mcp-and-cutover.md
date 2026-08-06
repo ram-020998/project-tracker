@@ -1,6 +1,9 @@
 # Phase 16-05 — `genesis-kb` MCP server + cutover (the headline milestone)
 
-> **Status:** DRAFT (planning) · **Repos:** genesis (+ genesis-workflows) · **Depends on:** 16-02 (KbStore), 16-04 (apps)
+> **Status:** ✅ **SHIPPED (server + CHAT cutover)** — genesis **v0.33.0** (see `progress/phase-16-05-kb-mcp-and-cutover.md`).
+> The `erd-generation` + `design-doc` cutover is **deferred to follow-up 16-05b** (they depend on Section-C schema +
+> 16-06 versioning + a Jarvis→Dev-MCP retirement — `appian-atlas` is RETAINED for them; see the umbrella spec's
+> "Phased-cutover decision"). · **Repos:** genesis (+ genesis-workflows for 16-05b) · **Depends on:** 16-02 (KbStore), 16-04 (apps)
 > **Goal:** Expose the local KB to agents via a Genesis-owned, **read-only** `genesis-kb` stdio MCP server (the
 > internal counterpart of the external Atlas MCP), with **live code fetch via the Dev MCP**, and **cut chat /
 > `erd-generation` / `design-doc` off the external `appian-atlas` onto `genesis-kb`** — preserving functionality. This

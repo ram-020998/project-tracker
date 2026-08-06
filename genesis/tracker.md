@@ -142,6 +142,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-06 (Phase 16-05 — `genesis-kb` MCP server + CHAT cutover SHIPPED ✅; genesis v0.33.0):** The internal,
+  read-only Appian knowledge-base MCP. **`genesis/mcp/kb_server.py`** (NEW) — a stdio JSON-RPC 2.0 server modeled on
+  `introspection_server.py` (read-only `mode=ro` genesis.db, 32 KB cap, `-m genesis.mcp.kb_server --db <db>`), exposing
+  the **17 Tier-1 tools** over `KbStore` with **Atlas-mirrored shapes**. **`KbStore`** gained the 7 remaining reads
+  (entry-points, dependents/precedents batch, shared, hub, dependency-path BFS, transitive-deps BFS; current-state only).
+  **Live code** via `genesis/kb/dev_mcp.py` `object_code` (type→Dev-MCP getter map + defensive parse; graceful
+  `code_status:"unavailable"`, never fabricated — ADR-037/032). **Chat cut over** (`chat/mcp.py`): wires `genesis-kb`
+  (always) + best-effort `@appian-dev` for live code; **`appian-atlas` dropped from chat**. **288 pytest green**
+  (+14), ruff clean; CI green (pipeline 6513536, `frontend` correctly skipped — no web change).
+  **⚠️ Phased-cutover decision (2026-08-06):** `erd-generation` + `design-doc` **STAY on `appian-atlas`** (and Jarvis)
+  until the KB reaches parity — they depend on the **Section-C schema tools (deferred)** + the **16-06 versioning tools
+  (backlog, AP-62096)**, which `genesis-kb` iteration-1 omits. `appian-atlas` remains registered; both workflows'
+  `required_mcp` unchanged; genesis-workflows not re-released. Full workflow cutover tracked as **16-05b**. Documented
+  in the phase-16 umbrella spec. See `progress/phase-16-05-kb-mcp-and-cutover.md`.
+
 - **2026-08-05 (Phase 16-04 — Applications surface SHIPPED ✅; genesis v0.32.0):** The user-facing surface over the
   internal Appian KB — the first consumer of the managed-native Dev MCP (16-08). **Backend** `genesis/api/applications.py`
   (`register_applications_routes` over `KbStore` + `RunManager`): `GET /applications` (tracked, from `list_applications`),

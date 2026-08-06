@@ -11,7 +11,7 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-05 — latest SHIPPED: genesis v0.32.0 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-06 — latest SHIPPED: genesis v0.33.0 +
 > genesis-workflows v0.8.4 + genesis-core v0.9.1 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
@@ -32,8 +32,10 @@
 > **`sync-application`** workflow (genesis **v0.29.1** + genesis-workflows **v0.8.2**); **16-08 COMPLETE** — the
 > dev-environment `is_dev` toggle (§2.0, genesis **v0.30.0**) + the **managed-native Dev/DevOps MCP installer** (Stage B:
 > genesis-core **v0.9.1** + genesis **v0.31.1** + genesis-workflows **v0.8.4**); **16-04 Applications surface** shipped
-> (genesis **v0.32.0**). **Next = 16-05** (`genesis-kb` MCP + cutover — the headline). A new session should **read §9's
-> Phase-16 block first**, then implement in the build order.
+> (genesis **v0.32.0**); **16-05** = the **`genesis-kb` MCP server + CHAT cutover** (genesis **v0.33.0**; chat now runs on
+> the internal KB, `appian-atlas` dropped from chat). **Next = 16-05b** (cut `erd-generation`/`design-doc` off
+> `appian-atlas` — deferred until Section-C schema + 16-06 versioning; `appian-atlas` retained meanwhile) **+ 16-07**.
+> A new session should **read §9's Phase-16 block first**, then implement in the build order.
 
 ---
 
@@ -113,7 +115,7 @@ and the release/versioning protocol.
 
 ---
 
-## 2. Current state (as of genesis v0.32.0)
+## 2. Current state (as of genesis v0.33.0)
 
 **Five repos** at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git` (the 5th, `genesis-appian-parser`, is new in Phase 16):
@@ -130,7 +132,7 @@ and the release/versioning protocol.
 `genesis → genesis-core@v0.9.1 → kiro-agent-sdk@v0.6.0`;
 `genesis-workflows → genesis-core@v0.9.1 (runtime) + genesis@v0.31.1 (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) both genesis + genesis-core pin the SDK directly, so both bumped to v0.6.0 for the Phase-14 `fs_write_root` sandbox (genesis-core **v0.9.1** adds the managed-native `launch_provider` + the introspect stream-limit fix — additive, `CORE_MAJOR` still 1). **`genesis-appian-parser@v0.1.0`** is a stdlib-only leaf (no Genesis deps); **genesis pins it by tag (16-03)**, so it installs transitively wherever genesis does (incl. genesis-workflows CI).
 
-**Tests, all green at last release:** genesis **274** pytest (incl. **10 KB-store tests** + dev-env toggle + **24 native-MCP installer tests** [3 uv-guarded integration tests run a real `uv sync` install locally, skip where `uv` is absent] + **8 applications-API tests**, Phase 16-02/03/04/08) · genesis-core **61** (incl. managed-native launch resolution) · kiro-agent-sdk
+**Tests, all green at last release:** genesis **288** pytest (incl. **10 KB-store tests** + **new KB-read + kb_server tests (16-05)** + dev-env toggle + **24 native-MCP installer tests** [3 uv-guarded integration tests run a real `uv sync` install locally, skip where `uv` is absent] + **8 applications-API tests**, Phase 16-02/03/04/05/08) · genesis-core **61** (incl. managed-native launch resolution) · kiro-agent-sdk
 **82** · genesis-appian-parser **13** (vs a real vendored package + a no-SAIL guard) · genesis-workflows **54** (incl. 13 code-review + 16 design-doc + 9 sync-application) + `ci/validate_skills.py` gate · web **125** Vitest
 (incl. contract-fixture drift tests + jest-axe). ruff clean (**`ruff==0.15.20` pinned in genesis AND genesis-core — see §7**); eslint clean (0 errors); `tsc` strict clean. CI green on all code
 repos (genesis has a python `genesis` job + a `frontend` job with a stale-bundle guard **that runs only on `web/**` changes**; the SDK repo
@@ -312,6 +314,10 @@ genesis/genesis/
   mcp/      introspection_server.py (read-only Genesis-introspection MCP server: list_runs/get_run/steps/
             events/list_failures/list_workflows/get_workflow/integration_health/platform_stats over a
             read-only genesis.db connection — Phase 10-02);
+            **kb_server.py (Phase 16-05) — read-only genesis-kb MCP: the 17 Tier-1 KB tools over a `mode=ro`
+            KbStore with Atlas-mirrored shapes; get_object_code/get_orphan fetch live SAIL via the Dev MCP
+            (kb/dev_mcp.object_code), graceful code_status:unavailable. Launched `-m genesis.mcp.kb_server --db <db>`;
+            wired into chat (chat/mcp.py) in place of appian-atlas**;
             **native/ (Phase 16-08, ADR-038) — installer.py (NativeMcpInstaller: install(id,bundle_path)→uv sync under
             settings.mcp_servers_dir/<id>/versions/<v>/ → verify entry → sha+lockfile → set current; rollback;
             active_launch_spec [launch from the per-server venv, not uv]; status; NO network update) + lockfile.py
@@ -574,7 +580,7 @@ genesis-workflows/
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### ⭐ ACTIVE (IN PROGRESS — planning complete + pushed; 16-01/16-02/16-03/16-04/16-08 shipped, 16-05 next) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
+### ⭐ ACTIVE (IN PROGRESS — planning complete + pushed; 16-01/16-02/16-03/16-04/16-08 + **16-05 (server + chat)** shipped, **16-05b (workflow cutover) + 16-07 next**) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
 
 > **Handoff for the next session:** planning is complete AND implementation is under way. Read
 > `specs/phase-16-appian-knowledge-base.md` (umbrella) + `phase-16-appian-knowledge-base/16-01..16-08` +
@@ -584,8 +590,10 @@ genesis-workflows/
 > **v0.28.0** (m0007 `kb_*` + `KbStore`); **16-03** = the **`sync-application`** workflow (genesis **v0.29.1** +
 > genesis-workflows **v0.8.2**); **16-08** = the dev-env `is_dev` toggle (§2.0, genesis **v0.30.0**) + the
 > **managed-native Dev/DevOps MCP installer** (Stage B: genesis-core **v0.9.1** + genesis **v0.31.1** +
-> genesis-workflows **v0.8.4**); **16-04** = the **Applications surface** (genesis **v0.32.0**) — all CI green.
-> **Next: 16-05** (`genesis-kb` MCP + cutover — the headline). Keep extending `tracker.md` §6 as you go.
+> genesis-workflows **v0.8.4**); **16-04** = the **Applications surface** (genesis **v0.32.0**); **16-05** = the
+> **`genesis-kb` MCP server + CHAT cutover** (genesis **v0.33.0**) — all CI green.
+> **Next: 16-05b** (cut `erd-generation` + `design-doc` off `appian-atlas` → `genesis-kb`; blocked on Section-C schema +
+> 16-06 versioning + Jarvis→Dev-MCP — `appian-atlas` RETAINED for them meanwhile) **+ 16-07** (delta refresh). Keep extending `tracker.md` §6 as you go.
 
 **Goal.** Move the Appian knowledge base *inside* Genesis and make Genesis an agentic Appian-development environment.
 Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-Appian KB) as services; reproduce their
@@ -630,9 +638,10 @@ Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-A
   against Appian throughout (Dev MCP read-only allowlist; DevOps export/status/download only).
 
 **Sub-phases (all in `phase-16-appian-knowledge-base/`; iteration-1 unless noted):** 16-01 parser (new repo) **✅ v0.1.0** ·
-16-02 schema+`KbStore` (m0007) **✅ genesis v0.28.0** · 16-03 sync workflow (baseline) **✅ genesis v0.29.1 + genesis-workflows v0.8.2** · 16-08 native MCP integration (§2.0 dev-env toggle **✅ genesis v0.30.0**; **Stage B installer ✅ genesis-core v0.9.1 + genesis v0.31.1 + genesis-workflows v0.8.4** — 16-08 COMPLETE) · 16-04 Applications surface **✅ genesis v0.32.0** · **16-05 `genesis-kb` MCP + cutover ◀ NEXT (headline)**
+16-02 schema+`KbStore` (m0007) **✅ genesis v0.28.0** · 16-03 sync workflow (baseline) **✅ genesis v0.29.1 + genesis-workflows v0.8.2** · 16-08 native MCP integration (§2.0 dev-env toggle **✅ genesis v0.30.0**; **Stage B installer ✅ genesis-core v0.9.1 + genesis v0.31.1 + genesis-workflows v0.8.4** — 16-08 COMPLETE) · 16-04 Applications surface **✅ genesis v0.32.0** · **16-05 `genesis-kb` MCP server + CHAT cutover ✅ genesis v0.33.0**
+(workflow cutover split to **16-05b ◀ NEXT** — `appian-atlas` retained for erd/design-doc until Section-C schema + 16-06)
 · 16-07 delta refresh (new Appian "changed-in-[start,end]" API — user owns it) · **16-06 versioning —
-BACKLOG**. Suggested build order: 16-01 → 16-02 → 16-03 → 16-08 → 16-04 → 16-05 → 16-07; 16-06 later. **Release chain:**
+BACKLOG**. Suggested build order: 16-01 → 16-02 → 16-03 → 16-08 → 16-04 → 16-05 → 16-05b/16-07; 16-06 later. **Release chain:**
 `genesis-appian-parser` (new) → `genesis` (m0007 + KbStore + kb_server + native-MCP installer + applications api/web) →
 `genesis-workflows` (sync-application + managed-native registry entries). genesis-core likely unchanged.
 
@@ -676,13 +685,29 @@ detail / sync-status / objects / bundles / table-scoped untrack); `KbStore.list_
 + a Sidebar entry. First consumer of the managed-native Dev MCP. (The `frontend` stale-bundle guard ran green here —
 also closing the 16-08 Stage-B gap where it hadn't executed.)
 
-**▶ NEXT — 16-05 (`genesis-kb` MCP + cutover) — the headline.** Read `phase-16-appian-knowledge-base/16-05-*` +
-`genesis-kb-tool-contracts.md` (the 16 Tier-1 tools) + ADR-037. Build a Genesis-owned **read-only `genesis-kb` stdio MCP
-server** (like `mcp/introspection_server.py`) over `genesis.db`/`KbStore` exposing the 16 tools with **Atlas-mirrored
-return shapes**; wire **`get_object_code` to fetch live SAIL via the Dev MCP** (`@appian-dev` get*/getDocumentText —
-installed in 16-08); then **cut chat / erd-generation / design-doc off the external `appian-atlas` onto `genesis-kb`** (+
-Dev/DevOps for env calls) — the "KB swapped, functionality preserved" milestone. Then 16-07 (delta refresh); 16-06
-(versioning) stays BACKLOG (gated on Dev-MCP AP-62096, 26.8 GA).
+**✅ 16-05 — DONE (`genesis-kb` MCP server + CHAT cutover).** genesis **v0.33.0**, CI green (pipeline 6513536; `frontend`
+skipped — no web change). As built (see `progress/phase-16-05-kb-mcp-and-cutover.md`): **`genesis/mcp/kb_server.py`** —
+a read-only stdio JSON-RPC MCP modeled on `introspection_server.py` (`mode=ro` genesis.db, 32 KB cap, `-m
+genesis.mcp.kb_server --db <db>`) exposing the **17 Tier-1 tools** over `KbStore` with **Atlas-mirrored shapes**;
+`get_object_code`/`get_orphan` fetch live SAIL via the Dev MCP (`genesis/kb/dev_mcp.py` `object_code`, type→getter map +
+defensive parse; graceful `code_status:"unavailable"`, never fabricated). `KbStore` gained the 7 remaining reads
+(entry-points, dependents/precedents batch, shared, hub, dependency-path BFS, transitive-deps BFS; current-state only).
+**Chat cut over** (`chat/mcp.py`): `genesis-kb` always wired (+ best-effort `@appian-dev` for live code); **`appian-atlas`
+dropped from chat**. 288 pytest green, ruff clean.
+
+**⚠️ Phased-cutover decision (2026-08-06) — `appian-atlas` RETAINED for the workflows.** A lossless `erd-generation` +
+`design-doc` cutover is **not** possible in iteration 1: `genesis-kb` deliberately omits the **schema/DDL tools
+(Section C, deferred)** and the **release/version tools (16-06 backlog, AP-62096)** — exactly what those workflows use
+(`get_app_schema`/`get_schema_relationships`; `list_releases`/`get_object_at_release`/`get_changelog`/`compare_releases`/
+`get_release_impact`), and `design-doc` also still uses **Jarvis**. **Per the user's decision, both workflows STAY on
+`appian-atlas`** (their `required_mcp` unchanged; genesis-workflows not re-released) until parity lands. Only **chat**
+cut over (it used Atlas *structural* reads that `genesis-kb` mirrors). Documented in the phase-16 umbrella spec.
+
+**▶ NEXT — 16-05b (workflow cutover) + 16-07 (delta refresh).** **16-05b** = cut `erd-generation` + `design-doc` off
+`appian-atlas` → `genesis-kb` (+ Dev MCP for live/schema), unblocked by (a) a Section-C schema decision (build the
+schema tools OR repoint their schema/data-model research to live Dev-MCP record-type tools) and (b) **16-06 versioning**
+(AP-62096) for `design-doc`'s release-history, plus retiring Jarvis→Dev MCP there. Then **16-07** (delta refresh).
+**16-06** (versioning) stays BACKLOG (gated on Dev-MCP AP-62096, 26.8 GA).
 
 **Key facts for any Phase-16 work:** the sample package the user provided is
 `/Users/ramaswamy.u/Documents/test/packages/AiDocumentCenterv4.3.1.zip` (also vendored in the parser repo's

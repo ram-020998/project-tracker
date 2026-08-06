@@ -21,6 +21,22 @@
 > chat / `erd-generation` / `design-doc` use today with the internal `genesis-kb`, **preserving existing
 > functionality**. Write/deploy authoring is explicitly **out of scope** (Dev MCP is used **read-only**).
 
+> **⚠️ Phased-cutover decision (2026-08-06) — `appian-atlas` is RETAINED until the KB reaches parity.** During 16-05 we
+> discovered the cutover cannot be *lossless* in iteration 1: `genesis-kb`'s iteration-1 surface deliberately omits the
+> **schema/DDL tools (Section C, deferred)** and the **release/version tools (Section B → 16-06 backlog, gated on Dev
+> MCP AP-62096)** — which are exactly what `erd-generation` (`get_app_schema`/`get_schema_relationships`) and
+> `design-doc`'s `research_atlas` node (`get_app_schema`/`get_field_map` + `list_releases`/`get_object_at_release`/
+> `get_changelog`/`compare_releases`/`get_release_impact`) rely on. `design-doc`'s sibling `research_jarvis` node also
+> still uses **Jarvis** (retiring Jarvis→Dev MCP is a design change, not a repoint). **Therefore:**
+> - **16-05 delivers the `genesis-kb` server + the CHAT cutover only** (chat used Atlas *structural* read tools, which
+>   `genesis-kb` mirrors 1:1 — so chat is cut over losslessly and `appian-atlas` is dropped from the chat wiring).
+> - **`erd-generation` + `design-doc` STAY on external `appian-atlas`** (and `design-doc` on Jarvis) **until** (a) the
+>   Section-C **schema tools** are built (or their schema/data-model research is repointed to live Dev-MCP record-type
+>   tools) and (b) **16-06 versioning** lands (AP-62096) for the release-history research. `appian-atlas` therefore
+>   **remains a registered curated MCP** (`mcp-registry.json`) and both workflows' `required_mcp` are **unchanged**.
+> - The full workflow cutover is tracked as a **follow-up (16-05b)**, unblocked by 16-06 + a Section-C decision +
+>   the Jarvis→Dev-MCP retirement. This keeps both workflows fully functional today with zero regression.
+
 ---
 
 ## 0. TL;DR
