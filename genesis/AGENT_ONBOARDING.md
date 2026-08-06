@@ -12,7 +12,7 @@
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
 > §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-06 — latest SHIPPED: genesis v0.33.0 +
-> genesis-workflows v0.8.4 + genesis-core v0.9.1 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
+> genesis-workflows v0.8.5 + genesis-core v0.9.1 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
 > a new **`design-doc`** workflow ports the Jarvis design-doc process into a deterministic Genesis graph —
@@ -591,9 +591,12 @@ genesis-workflows/
 > genesis-workflows **v0.8.2**); **16-08** = the dev-env `is_dev` toggle (§2.0, genesis **v0.30.0**) + the
 > **managed-native Dev/DevOps MCP installer** (Stage B: genesis-core **v0.9.1** + genesis **v0.31.1** +
 > genesis-workflows **v0.8.4**); **16-04** = the **Applications surface** (genesis **v0.32.0**); **16-05** = the
-> **`genesis-kb` MCP server + CHAT cutover** (genesis **v0.33.0**) — all CI green.
+> **`genesis-kb` MCP server + CHAT cutover** (genesis **v0.33.0**); **16-07 Option A** = the **`sync-application` delta
+> path** (re-export + SCD-2 delta-merge, genesis-workflows **v0.8.5**) — all CI green.
 > **Next: 16-05b** (cut `erd-generation` + `design-doc` off `appian-atlas` → `genesis-kb`; blocked on Section-C schema +
-> 16-06 versioning + Jarvis→Dev-MCP — `appian-atlas` RETAINED for them meanwhile) **+ 16-07** (delta refresh). Keep extending `tracker.md` §6 as you go.
+> 16-06 versioning + Jarvis→Dev-MCP — `appian-atlas` RETAINED for them meanwhile) **+ the 16-07 remainder** (true
+> incremental delta via a new Appian changed-objects API [the Dev MCP can't back it], scheduler, per-release changelog).
+> **📋 See `specs/backlog/phase-16-deferred.md` for the full deferred register.** Keep extending `tracker.md` §6 as you go.
 
 **Goal.** Move the Appian knowledge base *inside* Genesis and make Genesis an agentic Appian-development environment.
 Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-Appian KB) as services; reproduce their
@@ -640,7 +643,8 @@ Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-A
 **Sub-phases (all in `phase-16-appian-knowledge-base/`; iteration-1 unless noted):** 16-01 parser (new repo) **✅ v0.1.0** ·
 16-02 schema+`KbStore` (m0007) **✅ genesis v0.28.0** · 16-03 sync workflow (baseline) **✅ genesis v0.29.1 + genesis-workflows v0.8.2** · 16-08 native MCP integration (§2.0 dev-env toggle **✅ genesis v0.30.0**; **Stage B installer ✅ genesis-core v0.9.1 + genesis v0.31.1 + genesis-workflows v0.8.4** — 16-08 COMPLETE) · 16-04 Applications surface **✅ genesis v0.32.0** · **16-05 `genesis-kb` MCP server + CHAT cutover ✅ genesis v0.33.0**
 (workflow cutover split to **16-05b ◀ NEXT** — `appian-atlas` retained for erd/design-doc until Section-C schema + 16-06)
-· 16-07 delta refresh (new Appian "changed-in-[start,end]" API — user owns it) · **16-06 versioning —
+· 16-07 delta refresh **✅ Option A (re-export + delta-merge) genesis-workflows v0.8.5** (true incremental delta via a
+new Appian "changed-in-[start,end]" API + scheduler + per-release changelog = deferred, backlog §1.3–§1.5) · **16-06 versioning —
 BACKLOG**. Suggested build order: 16-01 → 16-02 → 16-03 → 16-08 → 16-04 → 16-05 → 16-05b/16-07; 16-06 later. **Release chain:**
 `genesis-appian-parser` (new) → `genesis` (m0007 + KbStore + kb_server + native-MCP installer + applications api/web) →
 `genesis-workflows` (sync-application + managed-native registry entries). genesis-core likely unchanged.
@@ -703,13 +707,22 @@ dropped from chat**. 288 pytest green, ruff clean.
 `appian-atlas`** (their `required_mcp` unchanged; genesis-workflows not re-released) until parity lands. Only **chat**
 cut over (it used Atlas *structural* reads that `genesis-kb` mirrors). Documented in the phase-16 umbrella spec.
 
-**▶ NEXT — 16-05b (workflow cutover) + 16-07 (delta refresh).** **16-05b** = cut `erd-generation` + `design-doc` off
+**▶ NEXT — 16-05b (workflow cutover) + 16-07 remainder.** **16-05b** = cut `erd-generation` + `design-doc` off
 `appian-atlas` → `genesis-kb` (+ Dev MCP for live/schema), unblocked by (a) a Section-C schema decision (build the
 schema tools OR repoint their schema/data-model research to live Dev-MCP record-type tools) and (b) **16-06 versioning**
-(AP-62096) for `design-doc`'s release-history, plus retiring Jarvis→Dev MCP there. Then **16-07** (delta refresh).
-**16-06** (versioning) stays BACKLOG (gated on Dev-MCP AP-62096, 26.8 GA). **📋 The full deferred register (every
-postponed Phase-16 item + why + what unblocks it) is `specs/backlog/phase-16-deferred.md` — read it before picking up
-any Phase-16 follow-up.**
+(AP-62096) for `design-doc`'s release-history, plus retiring Jarvis→Dev MCP there. **16-07 remainder** = the true
+incremental delta (Appian changed-objects API — the Dev MCP can't back it), the scheduler, and the per-release
+changelog. **16-06** (versioning) stays BACKLOG (gated on Dev-MCP AP-62096, 26.8 GA). **📋 The full deferred register
+(every postponed Phase-16 item + why + what unblocks it) is `specs/backlog/phase-16-deferred.md` — read it before
+picking up any Phase-16 follow-up.**
+
+**✅ 16-07 — Option A DONE (delta refresh via re-export + SCD-2 delta-merge).** genesis-workflows **v0.8.5**, CI green
+(pipeline 6513690). `sync-application` v0.2.0 `mode=delta`: full re-export + `KbStore.apply(mode='delta')` (diffs by
+`diff_hash`; opens new/modified, closes removed [inferred], recomputes bundles, records the window). `resolve_inputs`
+requires an existing baseline for delta; `check_kb` mode-aware. **The true incremental delta (Appian changed-objects
+API) is deferred — the Dev MCP cannot fetch objects by modified date/time (confirmed 2026-08-06: no modified-since tool;
+objects carry no modified timestamp).** Scheduler + per-release changelog also deferred. See
+`progress/phase-16-07-delta-refresh.md` + backlog §1.3–§1.5.
 
 **Key facts for any Phase-16 work:** the sample package the user provided is
 `/Users/ramaswamy.u/Documents/test/packages/AiDocumentCenterv4.3.1.zip` (also vendored in the parser repo's

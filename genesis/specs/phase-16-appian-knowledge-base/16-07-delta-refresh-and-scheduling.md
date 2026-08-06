@@ -1,6 +1,9 @@
 # Phase 16-07 — Delta refresh + scheduling
 
-> **Status:** DRAFT (planning) · **Repos:** genesis (+ genesis-workflows + Appian-side API) · **Depends on:** 16-03 (sync workflow baseline), 16-02 (SCD-2 store)
+> **Status:** ✅ **SHIPPED (Option A — re-export + delta-merge)** — genesis-workflows **v0.8.5** (see
+> `progress/phase-16-07-delta-refresh.md`). The **true incremental** delta (Appian changed-objects API), the
+> **scheduler**, and the **per-release changelog** are **deferred** — see `specs/backlog/phase-16-deferred.md` §1.3–§1.5.
+> (Confirmed 2026-08-06: the Dev MCP cannot back a changed-in-window query.) · **Repos:** genesis-workflows (+ Appian-side API, future) · **Depends on:** 16-03 (sync workflow baseline), 16-02 (SCD-2 store)
 > **Goal:** Keep each tracked app's KB current **incrementally**. A **new Appian API** (owned by the Appian side)
 > returns *objects modified in `[start,end]`*; the `sync-application` workflow gains a **delta path** that exports only
 > the changed objects, delta-merges into the SCD-2 store (archiving history), and records the window. Add **manual +

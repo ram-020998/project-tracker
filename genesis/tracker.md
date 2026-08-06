@@ -142,6 +142,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-06 (Phase 16-07 — delta refresh, Option A SHIPPED ✅; genesis-workflows v0.8.5):** `sync-application` v0.2.0
+  gains a **delta** mode without the (not-yet-built) Appian changed-objects API: a **full re-export + SCD-2
+  delta-merge** (`KbStore.apply(mode='delta')` diffs the re-parse by `diff_hash` — opens new/modified, **closes removed
+  [inferred]**, recomputes bundles, records the `[last-sync,now]` window). `resolve_inputs` requires an existing
+  baseline for delta; `check_kb` is mode-aware; the report carries `mode`+`window`. **Confirmed the Dev MCP cannot back
+  a changed-in-window query** (no modified-since tool; objects carry no modified timestamp) → the true incremental
+  delta needs a new Appian API and stays deferred (backlog §1.3), along with the scheduler (§1.4) + per-release
+  changelog (§1.5). 55 workflow tests + `validate_library` green; CI green (pipeline 6513690). genesis dev pin →
+  v0.33.0. See `progress/phase-16-07-delta-refresh.md`.
+
 - **2026-08-06 (Phase 16-05 — `genesis-kb` MCP server + CHAT cutover SHIPPED ✅; genesis v0.33.0):** The internal,
   read-only Appian knowledge-base MCP. **`genesis/mcp/kb_server.py`** (NEW) — a stdio JSON-RPC 2.0 server modeled on
   `introspection_server.py` (read-only `mode=ro` genesis.db, 32 KB cap, `-m genesis.mcp.kb_server --db <db>`), exposing
