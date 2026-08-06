@@ -707,7 +707,9 @@ cut over (it used Atlas *structural* reads that `genesis-kb` mirrors). Documente
 `appian-atlas` → `genesis-kb` (+ Dev MCP for live/schema), unblocked by (a) a Section-C schema decision (build the
 schema tools OR repoint their schema/data-model research to live Dev-MCP record-type tools) and (b) **16-06 versioning**
 (AP-62096) for `design-doc`'s release-history, plus retiring Jarvis→Dev MCP there. Then **16-07** (delta refresh).
-**16-06** (versioning) stays BACKLOG (gated on Dev-MCP AP-62096, 26.8 GA).
+**16-06** (versioning) stays BACKLOG (gated on Dev-MCP AP-62096, 26.8 GA). **📋 The full deferred register (every
+postponed Phase-16 item + why + what unblocks it) is `specs/backlog/phase-16-deferred.md` — read it before picking up
+any Phase-16 follow-up.**
 
 **Key facts for any Phase-16 work:** the sample package the user provided is
 `/Users/ramaswamy.u/Documents/test/packages/AiDocumentCenterv4.3.1.zip` (also vendored in the parser repo's

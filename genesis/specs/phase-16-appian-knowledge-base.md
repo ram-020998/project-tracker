@@ -36,6 +36,10 @@
 >   **remains a registered curated MCP** (`mcp-registry.json`) and both workflows' `required_mcp` are **unchanged**.
 > - The full workflow cutover is tracked as a **follow-up (16-05b)**, unblocked by 16-06 + a Section-C decision +
 >   the Jarvis→Dev-MCP retirement. This keeps both workflows fully functional today with zero regression.
+>
+> **📋 Everything deferred in Phase 16 is catalogued in [`specs/backlog/phase-16-deferred.md`](backlog/phase-16-deferred.md)**
+> (16-06 versioning, 16-05b workflow cutover, the 16-07 changed-objects API + scheduler + changelog, tool-contract
+> Sections B/C/E/F, retention, FTS5, `get_object_code` hardening, and the manual live-acceptance checklist).
 
 ---
 
