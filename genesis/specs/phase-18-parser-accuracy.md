@@ -1,10 +1,10 @@
 # Phase 18 — Appian Parser Accuracy Overhaul
 
-> **Status:** ✅ IMPLEMENTED + live-validated (18-01..18-05 on `genesis-appian-parser` main; **release/tag = 18-06,
-> pending**). On the 2,620-object fixture and the user's **real app** (validated 2026-08-07): edge recall **0.978**,
-> precision **0.999**, referenced-object recall **1.0**, **orphans 804 → 0** (false-orphan rate 0.311 → 0.0), 12
-> integration points classified. See `progress/phase-18-parser-accuracy.md`. · **Repo:** `genesis-appian-parser`
-> (+ repin `genesis` + `sync-application`). · **Author:** Genesis agent · **Date:** 2026-08-07
+> **Status:** ✅ SHIPPED (COMPLETE, 18-01..18-06) + live-validated. Released **genesis-appian-parser v0.2.0 → genesis
+> v0.40.0 → genesis-workflows v0.9.2** (all CI green). On the 2,620-object fixture and the user's **real app** (validated
+> 2026-08-07): edge recall **0.978**, precision **0.999**, referenced-object recall **1.0**, **orphans 804 → 0**
+> (false-orphan rate 0.311 → 0.0), 12 integration points. See `progress/phase-18-parser-accuracy.md`. · **Repo:**
+> `genesis-appian-parser` (+ genesis + sync-application repins). · **Author:** Genesis agent · **Date:** 2026-08-07
 >
 > **One line.** The Appian package parser under-links dependencies so badly that **30.7% of objects are reported as
 > orphans and 803/804 of those are provably false** — objects that ARE referenced by other objects. This phase

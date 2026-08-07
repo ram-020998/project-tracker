@@ -25,7 +25,7 @@ and drove accuracy **>95%**, verified by a committed raw-XML reference oracle.
 
 Parser test suite 13 → **25** green; ruff clean; code-free (ADR-037) no-SAIL guards intact.
 
-## Sub-phases (all on `genesis-appian-parser` main; **release/tag = 18-06, pending**)
+## Sub-phases (all on `genesis-appian-parser` main; **released as v0.2.0 in 18-06**)
 
 | Sub-phase | What | Commit |
 |---|---|---|
@@ -56,7 +56,7 @@ orphan definition. Full decision matrix in the spec §9.
   **filename stem** (universal), not the in-XML `<uuid>` (which varies by type).
 
 ## Remaining
-- **18-06** (pending): release `genesis-appian-parser` v0.2.0 → repin `genesis` + `sync-application` → docs finalize.
+- **18-06 SHIPPED** ✅ — released `genesis-appian-parser` **v0.2.0** (05d0fea) → repin `genesis` **v0.40.0** (8477945) → `genesis-workflows` **v0.9.2** (79edb75); all CI green. **PHASE 18 COMPLETE.**
 - Deferred (need a package containing those types to build/validate): a **Tempo Report** parser + a **generic-haul
   fallback** (Jarvis has both); richer per-type golden fixtures; Jarvis `orphanCluster` + `TagDetector` behavioral tags
   (a Business-Map capability signal).

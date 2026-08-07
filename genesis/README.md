@@ -41,7 +41,7 @@ and realizes its deferred (doc-19) orchestration vision.
 | 15 | [phase-15](specs/phase-15-design-doc-workflow.md) | Design-Document Workflow | ✅ shipped |
 | 16 | [phase-16](specs/phase-16-appian-knowledge-base.md) | Appian Knowledge Base ("Atlas-into-Genesis") | ▶ in progress — 16-01/02/03/04/08 shipped; 16-05 next |
 | 17 | [phase-17](specs/phase-17-business-application-map.md) | Business Application Map (agent-synthesized business flow) | ✅ shipped — 17-01..17-06 (genesis v0.39.0 + genesis-workflows v0.9.1); live-accepted |
-| 18 | [phase-18](specs/phase-18-parser-accuracy.md) | Appian parser accuracy overhaul (dependency/orphan/integration-point extraction) | ✅ implemented + live-validated — 18-01..18-05 (orphans 804→0, edge recall 0.32→0.98); release (v0.2.0 repin) = 18-06 pending |
+| 18 | [phase-18](specs/phase-18-parser-accuracy.md) | Appian parser accuracy overhaul (dependency/orphan/integration-point extraction) | ✅ shipped — 18-01..18-06 (genesis-appian-parser v0.2.0 + genesis v0.40.0 + genesis-workflows v0.9.2); orphans 804→0, edge recall 0.32→0.98; live-validated |
 
 > The **skill → workflow migration program** (the original "Phase 8") is deferred in [`specs/backlog/`](specs/backlog/).
 
