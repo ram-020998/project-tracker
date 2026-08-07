@@ -11,7 +11,7 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-07 — latest SHIPPED: genesis v0.35.0 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-07 — latest SHIPPED: genesis v0.36.0 +
 > genesis-workflows v0.9.0 + genesis-core v0.9.1 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
@@ -124,7 +124,7 @@ and the release/versioning protocol.
 |---|---|---|---|
 | `kiro-agent-sdk` | **v0.6.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)**; **`fs_write_root` sandbox for agent file writes (14-05)** |
 | `genesis-core` | **v0.9.1** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1`; **`McpRegistry` managed-native `launch_provider` — a `"managed":"<id>"` entry resolves command/args from a local install; introspect 8 MiB stream limit (16-08)** |
-| `genesis` | **v0.35.0** | master | runtime, dist, config, runs, **db (m0001–m0008)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **read-only `genesis-kb` MCP server (`genesis/mcp/kb_server.py`) + chat cutover off `appian-atlas` (16-05); `KbStore` UUID-dedupe (16-07); native-MCP bundle controls moved into the MCP detail page + Applications UI polish + `scripts/genesisctl.sh` (v0.34.0)**; **Phase-17 Business Map backend: m0008 `kb_business_maps` + `KbStore.build_evidence_pack` (code-free KB→business evidence pack) + Business Map API (v0.35.0)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)**; **dev-environment `is_dev` toggle + `dev_environment()` (16-08 §2.0)**; **managed-native MCP installer `genesis/mcp/native/` + `api/native_mcp.py` + `genesis mcp` CLI + Settings→MCP panel (16-08 Stage B)**; **Applications surface: `api/applications.py` + `kb/dev_mcp.py` (Dev-MCP `listApplications`) + `web/features/applications` (16-04)** |
+| `genesis` | **v0.36.0** | master | runtime, dist, config, runs, **db (m0001–m0008)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **read-only `genesis-kb` MCP server (`genesis/mcp/kb_server.py`) + chat cutover off `appian-atlas` (16-05); `KbStore` UUID-dedupe (16-07); native-MCP bundle controls moved into the MCP detail page + Applications UI polish + `scripts/genesisctl.sh` (v0.34.0)**; **Phase-17 Business Map backend: m0008 `kb_business_maps` + `KbStore.build_evidence_pack` (code-free KB→business evidence pack) + Business Map API (v0.35.0) + Business Map web view (React Flow A value-stream + B capability-constellation, first tab, 17-05, v0.36.0)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)**; **dev-environment `is_dev` toggle + `dev_environment()` (16-08 §2.0)**; **managed-native MCP installer `genesis/mcp/native/` + `api/native_mcp.py` + `genesis mcp` CLI + Settings→MCP panel (16-08 Stage B)**; **Applications surface: `api/applications.py` + `kb/dev_mcp.py` (Dev-MCP `listApplications`) + `web/features/applications` (16-04)** |
 | `genesis-workflows` | **v0.9.0** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` + **`appian-dev`/`appian-devops`** now **managed-native refs** with read/export-only allowlists set from the real installed `tools/list` — 16-08 Stage B), steering, `hello-appian` + `erd-generation` + `code-review` + `design-doc` + **`sync-application` (Appian KB baseline sync via Deployment REST → parser → KbStore, Phase 16-03)** + **`generate-business-map` (Phase-17 agent-synthesized Business Map from the code-free KB, v0.9.0)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
 | `genesis-appian-parser` | **v0.1.0** | main | **NEW (Phase 16-01).** Genesis-owned, stdlib-only Appian package parser (port of the Atlas front-half). `parse(zip\|bytes) -> KbParseResult` (objects + edges + bundles + **code-free** metadata; no files, no SAIL). Consumed by `genesis/kb` + the sync workflow; pinned into genesis by tag in 16-03. |
 
@@ -133,7 +133,7 @@ and the release/versioning protocol.
 `genesis-workflows → genesis-core@v0.9.1 (runtime) + genesis@v0.31.1 (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) both genesis + genesis-core pin the SDK directly, so both bumped to v0.6.0 for the Phase-14 `fs_write_root` sandbox (genesis-core **v0.9.1** adds the managed-native `launch_provider` + the introspect stream-limit fix — additive, `CORE_MAJOR` still 1). **`genesis-appian-parser@v0.1.0`** is a stdlib-only leaf (no Genesis deps); **genesis pins it by tag (16-03)**, so it installs transitively wherever genesis does (incl. genesis-workflows CI).
 
 **Tests, all green at last release:** genesis **301** pytest (incl. **10 KB-store tests** + **KB-read/kb_server tests (16-05)** + **UUID-dedupe (16-07)** + **Business Map backend: m0008 + evidence-pack + API (17-01/02/04)** + dev-env toggle + **24 native-MCP installer tests** [3 uv-guarded integration tests run a real `uv sync` install locally, skip where `uv` is absent] + **8 applications-API tests**, Phase 16-02/03/04/05/07/08) · genesis-core **61** (incl. managed-native launch resolution) · kiro-agent-sdk
-**82** · genesis-appian-parser **13** (vs a real vendored package + a no-SAIL guard) · genesis-workflows **68** (incl. 13 code-review + 16 design-doc + 12 sync-application + 11 generate-business-map) + `ci/validate_skills.py` gate · web **126** Vitest
+**82** · genesis-appian-parser **13** (vs a real vendored package + a no-SAIL guard) · genesis-workflows **68** (incl. 13 code-review + 16 design-doc + 12 sync-application + 11 generate-business-map) + `ci/validate_skills.py` gate · web **131** Vitest
 (incl. contract-fixture drift tests + jest-axe). ruff clean (**`ruff==0.15.20` pinned in genesis AND genesis-core — see §7**); eslint clean (0 errors); `tsc` strict clean. CI green on all code
 repos (genesis has a python `genesis` job + a `frontend` job with a stale-bundle guard **that runs only on `web/**` changes**; the SDK repo
 has no CI — validated transitively by core+genesis installing its tag).
@@ -592,7 +592,7 @@ genesis-workflows/
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 🛠️ IN PROGRESS — Phase 17: Business Application Map (backend 17-01/02/04 + 17-03 workflow SHIPPED; 17-05 web NEXT)
+### 🛠️ IN PROGRESS — Phase 17: Business Application Map (17-01/02/03/04/05 SHIPPED; 17-06 acceptance NEXT)
 
 > **Agent-synthesized, business-language map of what an application does end-to-end** — **(A)** value stream(s) + **(B)**
 > capability constellation — explicitly **NOT** a technical/object/bundle view (the user's hard steer: no objects, bundles,
@@ -608,8 +608,9 @@ genesis-workflows/
 > genesis-core likely unchanged. **Backend (17-01 persistence/m0008 + 17-02 evidence pack + 17-04 API) SHIPPED in
 > genesis v0.35.0; the deterministic `generate-business-map` workflow (17-03) SHIPPED in genesis-workflows v0.9.0
 > (2 Kiro agent nodes + reliability trio + evidence-grounding/coverage/business-language validators + escalate/review
-> gates). NEXT = 17-05 web Business Map view (React Flow A value stream + B capability constellation) → 17-06
-> quality/acceptance against the real app.**
+> gates). The web **Business Map view** (17-05 — React Flow **A** value stream + **B** capability constellation,
+> first tab, focus+context linking) SHIPPED in **genesis v0.36.0**. NEXT = **17-06** (validation/quality hardening +
+> the manual live-acceptance against a real synced app — eyeball business fidelity, confirm no technical vocab leaks).**
 
 ### ⭐ ACTIVE (IN PROGRESS — planning complete + pushed; 16-01/16-02/16-03/16-04/16-08 + **16-05 (server + chat)** shipped, **16-05b (workflow cutover) + 16-07 next**) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
 

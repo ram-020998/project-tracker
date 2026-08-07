@@ -143,6 +143,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-07 (Phase 17-05 — Business Map web view SHIPPED ✅ genesis v0.36.0):** The user-facing payoff — a
+  **business-language** view as the **primary/first tab** on the Applications detail page. States
+  (absent → *Generate* / generating → live / ready / **stale** banner / failed); a header strip (domain · summary ·
+  coverage % · credits · "based on sync #N" · **Regenerate**); a segmented **A | B** toggle; and two coordinated
+  **React Flow** canvases — **(A)** the end-to-end **value stream** (left→right dagre; start/activity/decision/end
+  stages + branch labels + actor/entity chips) and **(B)** the **capability constellation** (domain → capabilities →
+  entities + hand-offs) — linked by a shared capability **focus + context**. Business-styled node components (reuse
+  `@xyflow/react` + `@dagrejs/dagre`; **not** the technical `NodeCard`). Types + api client + hooks
+  (`useBusinessMap`/`useBusinessMapStatus`[poll]/`useGenerateBusinessMap`). genesis **v0.36.0** (commit f330875, CI
+  green pipeline 6523164 — **frontend + genesis** both green); **131 web vitest** + tsc + eslint green; web/static
+  rebuilt. **Next:** 17-06 (validation/quality + manual live-acceptance against the real synced app) — the last
+  Phase-17 sub-phase.
+
 - **2026-08-07 (Phase 17-03 — `generate-business-map` workflow SHIPPED ✅ genesis-workflows v0.9.0):** The core of
   the Business Application Map — a **deterministic LangGraph workflow** that synthesizes the business model from the
   code-free KB. Topology: `resolve_inputs → extract_evidence → v_evidence → [synthesize_capabilities → v_capabilities]
