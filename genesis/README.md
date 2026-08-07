@@ -40,6 +40,7 @@ and realizes its deferred (doc-19) orchestration vision.
 | 14 | [phase-14](specs/phase-14-skills-in-chat.md) | Skills in Chat | ✅ shipped |
 | 15 | [phase-15](specs/phase-15-design-doc-workflow.md) | Design-Document Workflow | ✅ shipped |
 | 16 | [phase-16](specs/phase-16-appian-knowledge-base.md) | Appian Knowledge Base ("Atlas-into-Genesis") | ▶ in progress — 16-01/02/03/04/08 shipped; 16-05 next |
+| 17 | [phase-17](specs/phase-17-business-application-map.md) | Business Application Map (agent-synthesized business flow) | 📋 draft — spec only |
 
 > The **skill → workflow migration program** (the original "Phase 8") is deferred in [`specs/backlog/`](specs/backlog/).
 

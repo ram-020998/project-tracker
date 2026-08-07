@@ -814,3 +814,57 @@ install time (run time uses the created venv); the Dev MCP install is sizeable a
 playwright/browser auth stays an opt-in manual step for SSO-only sites. Read-only posture preserved via the allowlist
 cap (ADR-029); write/deploy remain out of scope (Section E) until a later phase gates them behind `pre_mutation`
 (ADR-021/033). Pairs with ADR-036/037 (KB internalized; environment access via these managed native MCPs).
+
+---
+
+## ADR-039 — Business understanding is an agent-synthesized, evidence-grounded artifact (the Business Application Map) (Phase 17)
+
+**Status:** Proposed (Phase 17) — spec only (`specs/phase-17-business-application-map.md` + `business-model-contract.md` +
+sub-phases 17-01..17-06); awaiting approval to implement.
+
+**Context.** Phase 16 internalized a **technical, code-free** Appian knowledge base (objects, dependencies, entry-point
+bundles with process flows). That is what agents and MCP tools need, but it does not answer a human's question: *"what does
+this application do for the business, end to end?"* A business-level picture is required — a clean, high-level, business-
+language map (an end-to-end **value stream** + a **capability constellation**) with **no** objects/bundles/pages/properties
+vocabulary. Critically, "business meaning" is **not a field in the KB**: turning record types into business entities,
+entry-point processes/actions into business activities, and the dependency graph into an end-to-end journey is an act of
+**interpretation**, not a mechanical projection. The risk of any agent-authored diagram is a confident but wrong story.
+
+**Decision.** Model business understanding as a **derived, agent-synthesized, evidence-grounded artifact** produced by a
+**deterministic workflow**, persisted, and rendered — never a hand-render of the parse, never stored in Appian:
+1. **Agent synthesizes, program grounds.** A new deterministic LangGraph workflow `generate-business-map` reads the **local
+   KB only** (via the read-only `genesis-kb` MCP + `KbStore`); **narrow agent nodes interpret** the technical evidence into
+   business concepts (ADR-001 preserved — LangGraph owns control flow, agents never orchestrate), and **every agent node is
+   wrapped by the reliability trio** (validator + retry + escalation, ADR-011).
+2. **Evidence-grounding is mandatory (anti-hallucination).** Every business element (entity, capability, actor, value-stream
+   stage) cites the **real KB object UUIDs** it was inferred from; a program validator rejects any element referencing an
+   object not in the KB, enforces a minimum **coverage** of the app's significant objects, and enforces a **business-language
+   guard** (banned technical tokens). Exhausted retries escalate to a **human review gate** (ADR-021).
+3. **A versioned contract.** The artifact is `BusinessModel v1` (`business-model-contract.md`) — summary, domain, entities,
+   capabilities (+ relations), actors, and value streams (ordered stages with branches) — the single source of truth for
+   producer (workflow), storage, and consumer (web).
+4. **Persisted + point-in-time.** The model is generated from a specific sync (`source_sync_id`) and stored in `genesis.db`
+   (migration **m0008** `kb_business_maps`), so it is instant to view and honestly labeled ("based on sync #N · {credits}
+   credits · {coverage}% covered"); a newer sync marks it **stale**; regeneration is on demand and costs **real metered
+   credits** (ADR-032). Release snapshots are schema-ready for later.
+5. **Business-only, code-free, read-only.** Output is business language exclusively; it stores **no** SAIL (ADR-037); it reads
+   only the local KB (no environment round-trip, no writes to Appian). A *technical* visualization is a separate, later
+   effort — explicitly out of scope.
+
+**Alternatives considered.** (a) **Direct/heuristic render of the KB** (cluster objects by name/dependency, show
+sites→pages→objects) — rejected: it reproduces the technical environment in a UI (exactly what the user does not want) and
+cannot produce a coherent *business* narrative. (b) **A one-shot chat/skill that draws a diagram** — rejected: not
+deterministic, not persisted, no reliability trio, no evidence guarantees, hard to trust or regenerate reproducibly.
+(c) **Store business meaning in the parser/KB** — rejected: the parser is deterministic and business-agnostic; baking
+interpretation into it couples a stable technical layer to a subjective one. (d) **Store the map in Appian** — rejected for
+the same reasons as ADR-036 (query shape, read-only posture, keep it Genesis-owned). (e) **No persistence (generate on every
+view)** — rejected: agent generation costs credits and time; the map is naturally point-in-time (tied to a sync), so persist +
+stale-mark + regenerate-on-demand.
+
+**Consequences.** Genesis gains a trustworthy, business-facing explanation of an application, produced by the same
+deterministic-workflow machinery as everything else and grounded so it can't fabricate. Cost: a new workflow, a migration
+(m0008), a business-model contract to maintain, and agent credits per generation. The map is only as current as its source
+sync (mitigated by the stale hook). Quality is bounded by KB richness + naming (mitigated by the coverage gate, the human
+review gate, and 17-06 acceptance against the real app). Preserves ADR-001 (control flow), ADR-011 (reliability trio),
+ADR-037 (code-free), ADR-030/032 (SQLite persistence + real credits), ADR-026 (local single-user). Pairs with ADR-036/037
+(the KB it interprets).

@@ -11,7 +11,7 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-06 — latest SHIPPED: genesis v0.34.0 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-07 — latest SHIPPED: genesis v0.34.0 +
 > genesis-workflows v0.8.7 + genesis-core v0.9.1 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
@@ -591,6 +591,21 @@ genesis-workflows/
 ---
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
+
+### 📋 PLANNED (SPEC DRAFTED 2026-08-07 — awaiting the human's go-ahead to implement) — Phase 17: Business Application Map
+
+> **Agent-synthesized, business-language map of what an application does end-to-end** — **(A)** value stream(s) + **(B)**
+> capability constellation — explicitly **NOT** a technical/object/bundle view (the user's hard steer: no objects, bundles,
+> pages, or properties; those terms are **banned** from the output). Business meaning is *derived*, not parsed, so it is
+> produced by a new **deterministic `generate-business-map` LangGraph workflow** with narrow **agent** nodes (ADR-001)
+> wrapped by the reliability trio (ADR-011); **evidence-grounding + coverage + business-language** validators make it
+> un-hallucinated (every business element cites real KB object UUIDs) + a HITL review gate. Reads the **code-free KB only**
+> (via `genesis-kb`/`KbStore` — no env round-trip), emits a versioned **`BusinessModel v1`** persisted in **m0008
+> `kb_business_maps`** (code-free, point-in-time, stale-on-sync); the web renders A+B on the existing **@xyflow/react +
+> dagre** stack with focus+context linking. **Specs:** `specs/phase-17-business-application-map.md` (umbrella) +
+> `phase-17-business-application-map/business-model-contract.md` + `17-01..17-06`; **ADR-039** (Proposed). **Release chain
+> when built:** genesis (m0008 + KbStore + evidence extractor + API + web) → genesis-workflows (workflow + catalog);
+> genesis-core likely unchanged. **DRAFT — do NOT implement until the human gives the go-ahead.**
 
 ### ⭐ ACTIVE (IN PROGRESS — planning complete + pushed; 16-01/16-02/16-03/16-04/16-08 + **16-05 (server + chat)** shipped, **16-05b (workflow cutover) + 16-07 next**) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
 
