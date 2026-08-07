@@ -143,6 +143,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-07 (Phase 17 — first live map generated + readability/detail iterations, genesis v0.37.0 → v0.38.0):**
+  The **first real business-map generation** ran against the 2,763-object **"AS GSS Full Application"** and produced a
+  genuinely rich, high-quality model — domain *"Procurement source selection and proposal evaluation"*, **10
+  capabilities, 10 entities, 5 actors, a 14-stage value stream** with two real decision branches (review→accepted/
+  returned; signatures?) — 6.07 credits, coverage **0.355** (< the 0.6 gate → correctly routed to the **review** gate,
+  approved). The model was excellent; the **rendering** wasn't, so two follow-ups shipped: **genesis v0.37.0** — readable
+  zoom floor + MiniMap + taller canvas + richer stage cards; the capability view redesigned as a clean **radial
+  constellation** (entities as chips, no crisscross). **genesis v0.38.0** — **click any node → full detail popup**
+  (untruncated stage/capability info + "leads to" branches + connections + "highlight its stages"); value-stream edges →
+  orthogonal **smoothstep** routing + arrowheads + wider spacing so paths stop overlapping. Live findings for **17-06**:
+  (a) a newly-released library workflow must be `genesis install`-ed before it runs — an uninstalled workflow currently
+  **500s** on generate (add a friendly error); (b) **recalibrate coverage** (0.355 for a good map suggests the
+  denominator over-counts). 131 web vitest + 301 pytest + CI (frontend+genesis) green across both releases. See
+  `progress/phase-17-business-application-map.md`.
+
 - **2026-08-07 (Phase 17-05 — Business Map web view SHIPPED ✅ genesis v0.36.0):** The user-facing payoff — a
   **business-language** view as the **primary/first tab** on the Applications detail page. States
   (absent → *Generate* / generating → live / ready / **stale** banner / failed); a header strip (domain · summary ·

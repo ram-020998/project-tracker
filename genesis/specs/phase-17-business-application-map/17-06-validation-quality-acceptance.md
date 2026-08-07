@@ -7,6 +7,26 @@
 
 ---
 
+## 0. Live findings (2026-08-07 — first real generation)
+
+The first live generation (against the 2,763-object **"AS GSS Full Application"**) **passed the acceptance intent**:
+the agent produced a coherent, business-language model (domain *"Procurement source selection and proposal
+evaluation"*; **10 capabilities, 10 entities, 5 actors, a 14-stage value stream** with two real decision branches;
+6.07 credits) with **no technical vocabulary**. It surfaced concrete hardening work for this sub-phase:
+
+1. **Friendly "workflow not installed" error.** `POST …/business-map/generate` returned a raw **500** when the
+   `generate-business-map` workflow wasn't yet in the local library (it must be `genesis install`-ed after release).
+   Fix: the endpoint catches the loader failure and returns a **409/400** with actionable guidance ("install the
+   workflow library"), not a 500.
+2. **Recalibrate coverage.** The (genuinely good) map scored coverage **0.355** vs the `COVERAGE_MIN = 0.6` gate, so it
+   correctly routed to the **review** gate (approved). But 0.355-for-a-good-map means the metric likely **over-counts**
+   the denominator (`significant = entities ∪ activities`, capped) relative to what a *readable* map should reference.
+   Re-tune: either lower the default threshold, or narrow the denominator to truly central objects, or count a stage's
+   capability/entity coverage rather than raw object uuids. Keep the human review gate as the backstop.
+3. **Rendering acceptance = separate from data acceptance.** The model was rich but the first render (v0.36.0) was
+   unreadable; readability shipped in **v0.37.0/v0.38.0** (see `progress/phase-17-business-application-map.md` + the two
+   §7 lessons in `AGENT_ONBOARDING.md`). Acceptance must check *both* the model quality and the rendered readability.
+
 ## 1. Current state (grounded)
 - 17-03 ships the workflow with the `v_*` validators and a `review` gate; 17-05 ships the view. The contract's validation
   rules live in `business-model-contract.md` §4. A real synced app (`AiDocumentCenter`) is available for acceptance. Live

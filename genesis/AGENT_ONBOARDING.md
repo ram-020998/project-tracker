@@ -11,7 +11,7 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-07 — latest SHIPPED: genesis v0.36.0 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-07 — latest SHIPPED: genesis v0.38.0 +
 > genesis-workflows v0.9.0 + genesis-core v0.9.1 + kiro-agent-sdk v0.6.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
@@ -124,7 +124,7 @@ and the release/versioning protocol.
 |---|---|---|---|
 | `kiro-agent-sdk` | **v0.6.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)**; **`fs_write_root` sandbox for agent file writes (14-05)** |
 | `genesis-core` | **v0.9.1** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1`; **`McpRegistry` managed-native `launch_provider` — a `"managed":"<id>"` entry resolves command/args from a local install; introspect 8 MiB stream limit (16-08)** |
-| `genesis` | **v0.36.0** | master | runtime, dist, config, runs, **db (m0001–m0008)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **read-only `genesis-kb` MCP server (`genesis/mcp/kb_server.py`) + chat cutover off `appian-atlas` (16-05); `KbStore` UUID-dedupe (16-07); native-MCP bundle controls moved into the MCP detail page + Applications UI polish + `scripts/genesisctl.sh` (v0.34.0)**; **Phase-17 Business Map backend: m0008 `kb_business_maps` + `KbStore.build_evidence_pack` (code-free KB→business evidence pack) + Business Map API (v0.35.0) + Business Map web view (React Flow A value-stream + B capability-constellation, first tab, 17-05, v0.36.0)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)**; **dev-environment `is_dev` toggle + `dev_environment()` (16-08 §2.0)**; **managed-native MCP installer `genesis/mcp/native/` + `api/native_mcp.py` + `genesis mcp` CLI + Settings→MCP panel (16-08 Stage B)**; **Applications surface: `api/applications.py` + `kb/dev_mcp.py` (Dev-MCP `listApplications`) + `web/features/applications` (16-04)** |
+| `genesis` | **v0.38.0** | master | runtime, dist, config, runs, **db (m0001–m0008)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **read-only `genesis-kb` MCP server (`genesis/mcp/kb_server.py`) + chat cutover off `appian-atlas` (16-05); `KbStore` UUID-dedupe (16-07); native-MCP bundle controls moved into the MCP detail page + Applications UI polish + `scripts/genesisctl.sh` (v0.34.0)**; **Phase-17 Business Map backend: m0008 `kb_business_maps` + `KbStore.build_evidence_pack` (code-free KB→business evidence pack) + Business Map API (v0.35.0) + Business Map web view (React Flow A value-stream + B capability-constellation, first tab, 17-05, v0.36.0) + readability + click-for-detail popups + radial capability constellation + smoothstep edges (v0.37.0/v0.38.0)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)**; **dev-environment `is_dev` toggle + `dev_environment()` (16-08 §2.0)**; **managed-native MCP installer `genesis/mcp/native/` + `api/native_mcp.py` + `genesis mcp` CLI + Settings→MCP panel (16-08 Stage B)**; **Applications surface: `api/applications.py` + `kb/dev_mcp.py` (Dev-MCP `listApplications`) + `web/features/applications` (16-04)** |
 | `genesis-workflows` | **v0.9.0** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` + **`appian-dev`/`appian-devops`** now **managed-native refs** with read/export-only allowlists set from the real installed `tools/list` — 16-08 Stage B), steering, `hello-appian` + `erd-generation` + `code-review` + `design-doc` + **`sync-application` (Appian KB baseline sync via Deployment REST → parser → KbStore, Phase 16-03)** + **`generate-business-map` (Phase-17 agent-synthesized Business Map from the code-free KB, v0.9.0)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
 | `genesis-appian-parser` | **v0.1.0** | main | **NEW (Phase 16-01).** Genesis-owned, stdlib-only Appian package parser (port of the Atlas front-half). `parse(zip\|bytes) -> KbParseResult` (objects + edges + bundles + **code-free** metadata; no files, no SAIL). Consumed by `genesis/kb` + the sync workflow; pinned into genesis by tag in 16-03. |
 
@@ -569,6 +569,22 @@ genesis-workflows/
   `apply` de-dupes objects by UUID (edges by their `(source,target,dep_type)` triple), keeping the first; and the
   workflow's baseline `check_kb` reconciliation is **`0 < written ≤ parsed`** (distinct ≤ raw), not `==`. Synthetic
   fixtures had unique UUIDs and hid this — validate against a real package (verified on a live 2516-object app).
+- **A newly-released library workflow must be `genesis install`-ed before it can run — and a missing workflow must not
+  500 (Phase 17-05 live).** `run_manager.start(workflow_id, …)` raises if the workflow isn't in the local library
+  (`~/.genesis/library`); the `business-map/generate` endpoint surfaced that as a bare **500 "Internal Server Error"**.
+  After releasing a workflow in genesis-workflows, run `genesis install --from ../genesis-workflows` (the running
+  `genesis serve` picks up the new workflow at run-start — no restart needed; only a *server-code* change needs a
+  restart). The endpoint should catch the load failure and return a friendly 409/400 ("install the workflow library")
+  — tracked in 17-06.
+- **Rendering a real graph needs level-of-detail, not `fitView`-to-fit (Phase 17-05 live).** `fitView` crammed a
+  14-node value stream into a short pane → unreadably tiny nodes with most off-screen and no cue to pan ("the data
+  looks minimal"). What made it usable: a **readable zoom floor** (`fitViewOptions.minZoom ≈ 0.4–0.55`) + a **MiniMap**
+  + pan + wider dagre spacing; **click-for-detail popups** so node cards stay compact instead of truncating text; a
+  **manual radial** layout (not dagre) for a domain→capabilities *constellation* to avoid a shared-entity crisscross,
+  with entities shown as **chips inside** the capability card rather than separate crisscrossing nodes; and
+  **`smoothstep`** edges + arrowheads so branch/loop paths don't overlap. Note: React Flow renders a custom node only
+  when `node.type` matches a `nodeTypes` key — a default node renders `data.label` (which business nodes don't set →
+  blank), so a `nodeTypes` mismatch looks like "empty nodes".
 
 ---
 
@@ -609,8 +625,15 @@ genesis-workflows/
 > genesis v0.35.0; the deterministic `generate-business-map` workflow (17-03) SHIPPED in genesis-workflows v0.9.0
 > (2 Kiro agent nodes + reliability trio + evidence-grounding/coverage/business-language validators + escalate/review
 > gates). The web **Business Map view** (17-05 — React Flow **A** value stream + **B** capability constellation,
-> first tab, focus+context linking) SHIPPED in **genesis v0.36.0**. NEXT = **17-06** (validation/quality hardening +
-> the manual live-acceptance against a real synced app — eyeball business fidelity, confirm no technical vocab leaks).**
+> first tab, click-for-detail popups, focus+context linking) SHIPPED and was **exercised live**: the first real
+> generation against the 2,763-object "AS GSS Full Application" produced a rich, high-quality model (10 capabilities /
+> 10 entities / 14-stage value stream, 2 decision branches) — readability iterations followed in **genesis v0.37.0**
+> (readable zoom + MiniMap + radial constellation) and **v0.38.0** (detail popups + smoothstep edge routing). NEXT =
+> **17-06** hardening: (a) a **friendly "workflow not installed" error** on generate instead of a 500 (a newly-released
+> library workflow must be `genesis install`-ed first); (b) **recalibrate the coverage metric/threshold** (a genuinely
+> good map scored 0.355 vs the 0.6 gate → it correctly routed to human review, but the denominator likely over-counts);
+> (c) validator hardening + golden fixtures. Live-acceptance is effectively PASSING — the map reads as a coherent
+> business story with no technical vocabulary.**
 
 ### ⭐ ACTIVE (IN PROGRESS — planning complete + pushed; 16-01/16-02/16-03/16-04/16-08 + **16-05 (server + chat)** shipped, **16-05b (workflow cutover) + 16-07 next**) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
 

@@ -1,6 +1,6 @@
 # Phase 17-05 — Web Business Map view
 
-> **Status:** ✅ SHIPPED (genesis v0.36.0) · **Repos:** genesis (web) · **Depends on:** 17-04 (API)
+> **Status:** ✅ SHIPPED (genesis v0.36.0; readability + click-for-detail follow-ups in v0.37.0 / v0.38.0) · **Repos:** genesis (web) · **Depends on:** 17-04 (API)
 > **Goal:** The user-facing payoff: a clean, business-language **Business Map** view on the application detail page — two
 > coordinated canvases (**A** value stream + **B** capability constellation) rendered from the `BusinessModel`, with
 > generate/regenerate/stale/coverage/credits UX. Reuses the existing React Flow + dagre stack; **no** technical vocabulary.
