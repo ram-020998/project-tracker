@@ -1,6 +1,6 @@
 # Phase 17-01 — Business Model contract + persistence (m0008 + KbStore)
 
-> **Status:** DRAFT · **Repos:** genesis · **Depends on:** Phase 16-02 (`KbStore` + `kb_*` schema)
+> **Status:** ✅ SHIPPED (genesis v0.35.0) · **Repos:** genesis · **Depends on:** Phase 16-02 (`KbStore` + `kb_*` schema)
 > **Goal:** Lay the foundation for the Business Application Map: freeze the **`BusinessModel v1`** contract, add the
 > `genesis.db` migration **m0008** (`kb_business_maps`), and give `KbStore` the read/write + stale-marking surface the
 > workflow (17-03) and API (17-04) build on. No agent, no UI here — just the durable spine.

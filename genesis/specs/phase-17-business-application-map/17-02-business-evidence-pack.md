@@ -1,6 +1,6 @@
 # Phase 17-02 — Business Evidence Pack extractor
 
-> **Status:** DRAFT · **Repos:** genesis · **Depends on:** 16-02 (`KbStore` reads)
+> **Status:** ✅ SHIPPED (genesis v0.35.0) · **Repos:** genesis · **Depends on:** 16-02 (`KbStore` reads)
 > **Goal:** Build the deterministic, pure, **capped** function that turns the (potentially multi-thousand-object) KB into a
 > compact **Business Evidence Pack** — the *only* input the agent nodes (17-03) see. This is what keeps generation grounded,
 > cheap, and inside the context window. No agent here — pure data shaping + tests against the real synced app.

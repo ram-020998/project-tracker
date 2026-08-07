@@ -143,6 +143,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-07 (Phase 17 backend — SHIPPED ✅ genesis v0.35.0):** The Business Application Map backend
+  foundation (no UI yet). **17-01** migration **m0008 `kb_business_maps`** (code-free `BusinessModel`
+  store; one current map per app; stale-on-sync) + `KbStore` upsert/get/status; **17-02**
+  `KbStore.build_evidence_pack` — deterministic, capped, code-free KB→business evidence pack
+  (entities/activities/surfaces/capability-signals/actors/structure), verified against the real
+  2,763-object app (significant_total=198); **17-04** Business Map API (`GET business-map`, `POST
+  business-map/generate` [KB-only, 409 until a completed baseline], `GET business-map/status`). genesis
+  **v0.35.0** (commit f59aea6, CI green pipeline 6523081; frontend job skipped — no web change); **301
+  pytest** + ruff green. **Next:** 17-03 (the `generate-business-map` workflow in genesis-workflows,
+  pins genesis v0.35.0) → 17-05 web view → 17-06 quality/acceptance.
+
 - **2026-08-07 (Phase 17 — Business Application Map — SPEC DRAFTED 📋; docs only, awaiting approval to implement):** New
   phase specced end-to-end. Goal: an **agent-synthesized, business-language** map of what an application does for the
   business, end to end — **(A)** value stream(s) + **(B)** capability constellation — deliberately **NOT** a technical

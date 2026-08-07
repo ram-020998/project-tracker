@@ -1,6 +1,6 @@
 # Phase 17-04 — Business Map API
 
-> **Status:** DRAFT · **Repos:** genesis · **Depends on:** 17-01 (persistence), 17-03 (the workflow)
+> **Status:** ✅ SHIPPED (genesis v0.35.0) · **Repos:** genesis · **Depends on:** 17-01 (persistence), 17-03 (the workflow)
 > **Goal:** The thin HTTP surface the web uses to read, generate, and poll an application's business map — mirroring the
 > existing sync surface, all under `/api` (ADR-028).
 
