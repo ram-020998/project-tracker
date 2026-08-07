@@ -143,6 +143,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-07 (Phase 18 — Parser Accuracy Overhaul — IMPLEMENTED + LIVE-VALIDATED; release pending):** Fixed a
+  catastrophic dependency under-linking bug in `genesis-appian-parser` — a real 2,620-object app reported **804 orphans
+  (30.7%), 803 provably false**. Root cause: field-path-scoped reference extraction (no Constants/AI-Skills/Decisions/
+  Translation-Strings/Documents) + "orphan" defined as "not bundled" rather than "unreferenced". Reverified against real
+  XML + the original **Atlas** parser + the **Jarvis** plugin (best-of-both) and drove accuracy **>95%**, verified by a
+  committed raw-XML reference oracle: **edge recall 0.324 → 0.978, precision → 0.999, referenced-object recall 0.869 →
+  1.0, orphans 804 → 0, false-orphan rate 0.311 → 0.0, edges 5,084 → 10,617, 12 cross-app integration points**. Also
+  added the user's **APPREF/ENTRYPOINT** cross-app integration-point classification (by-name `rulereferencebyname`,
+  ENTRYPOINT/APPREF naming + 10-category taxonomy, orphan-exempt). Delivered 18-01..18-05 on `genesis-appian-parser` main
+  (afcb66d/31567fa/a357db6/c86b20c/44472c4), parser suite 13 → 25 green, ruff clean, ≥95% CI gate. **Live-validated on
+  the user's real app** (delete + re-add baseline sync via the editable install). Spec
+  `specs/phase-18-parser-accuracy.md`, progress `progress/phase-18-parser-accuracy.md`. **Remaining: 18-06** = release
+  `genesis-appian-parser` v0.2.0 + repin `genesis`/`sync-application` (+ deferred Tempo Report / generic-haul parsers).
+
 - **2026-08-07 (Phase 17-06 SHIPPED ✅ — PHASE 17 COMPLETE):** Hardening from the live run. **genesis v0.39.0** —
   `business-map/generate` now returns a friendly **409** ("install the workflow library") when `generate-business-map`
   isn't installed, instead of a raw 500 (pre-checks `run_manager.loader.installed()`; +1 API test → 14). **genesis-

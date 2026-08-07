@@ -35,7 +35,10 @@
 > (genesis **v0.32.0**); **16-05** = the **`genesis-kb` MCP server + CHAT cutover** (genesis **v0.33.0**; chat now runs on
 > the internal KB, `appian-atlas` dropped from chat). **Next = 16-05b** (cut `erd-generation`/`design-doc` off
 > `appian-atlas` — deferred until Section-C schema + 16-06 versioning; `appian-atlas` retained meanwhile) **+ 16-07**.
-> A new session should **read §9's Phase-16 block first**, then implement in the build order.
+> A new session should **read §9's Phase-16 block first**, then implement in the build order. **Newest work: Phase 18 —
+> Appian Parser Accuracy Overhaul (`genesis-appian-parser`) — IMPLEMENTED + live-validated (18-01..18-05 on main; orphans
+> 804 → 0, edge recall 0.32 → 0.98); the only remaining step is the 18-06 release wave (tag parser v0.2.0 + repin genesis
+> / sync-application). See §9's Phase-18 block.**
 
 ---
 
@@ -126,14 +129,14 @@ and the release/versioning protocol.
 | `genesis-core` | **v0.9.1** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1`; **`McpRegistry` managed-native `launch_provider` — a `"managed":"<id>"` entry resolves command/args from a local install; introspect 8 MiB stream limit (16-08)** |
 | `genesis` | **v0.39.0** | master | runtime, dist, config, runs, **db (m0001–m0008)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **read-only `genesis-kb` MCP server (`genesis/mcp/kb_server.py`) + chat cutover off `appian-atlas` (16-05); `KbStore` UUID-dedupe (16-07); native-MCP bundle controls moved into the MCP detail page + Applications UI polish + `scripts/genesisctl.sh` (v0.34.0)**; **Phase-17 Business Map backend: m0008 `kb_business_maps` + `KbStore.build_evidence_pack` (code-free KB→business evidence pack) + Business Map API (v0.35.0) + Business Map web view (React Flow A value-stream + B capability-constellation, first tab, 17-05, v0.36.0) + readability + click-for-detail popups + radial capability constellation + smoothstep edges (v0.37.0/v0.38.0)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)**; **dev-environment `is_dev` toggle + `dev_environment()` (16-08 §2.0)**; **managed-native MCP installer `genesis/mcp/native/` + `api/native_mcp.py` + `genesis mcp` CLI + Settings→MCP panel (16-08 Stage B)**; **Applications surface: `api/applications.py` + `kb/dev_mcp.py` (Dev-MCP `listApplications`) + `web/features/applications` (16-04)** |
 | `genesis-workflows` | **v0.9.1** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` + **`appian-dev`/`appian-devops`** now **managed-native refs** with read/export-only allowlists set from the real installed `tools/list` — 16-08 Stage B), steering, `hello-appian` + `erd-generation` + `code-review` + `design-doc` + **`sync-application` (Appian KB baseline sync via Deployment REST → parser → KbStore, Phase 16-03)** + **`generate-business-map` (Phase-17 agent-synthesized Business Map from the code-free KB, v0.9.0)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
-| `genesis-appian-parser` | **v0.1.0** | main | **NEW (Phase 16-01).** Genesis-owned, stdlib-only Appian package parser (port of the Atlas front-half). `parse(zip\|bytes) -> KbParseResult` (objects + edges + bundles + **code-free** metadata; no files, no SAIL). Consumed by `genesis/kb` + the sync workflow; pinned into genesis by tag in 16-03. |
+| `genesis-appian-parser` | **v0.1.0** (tag); **main = Phase-18 accuracy overhaul (unreleased)** | main | **NEW (Phase 16-01).** Genesis-owned, stdlib-only Appian package parser (port of the Atlas front-half). `parse(zip\|bytes) -> KbParseResult` (objects + edges + bundles + **code-free** metadata; no files, no SAIL). Consumed by `genesis/kb` + the sync workflow; pinned into genesis by tag in 16-03. **Phase 18 (on main, release pending): dependency-extraction accuracy overhaul — universal known-UUID + raw-XML reference scan, `is_orphan`=disconnected (not unbundled), CDT-QName + translation/document/record-action + `rulereferencebyname` by-name edges, APPREF/ENTRYPOINT cross-app integration-point classification. Measured edge recall 0.32→0.98, precision 0.999, orphans 804→0 on a real app; ≥95% CI gate; suite 25 tests.** |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
 `genesis → genesis-core@v0.9.1 → kiro-agent-sdk@v0.6.0`;
 `genesis-workflows → genesis-core@v0.9.1 (runtime) + genesis@v0.31.1 (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) both genesis + genesis-core pin the SDK directly, so both bumped to v0.6.0 for the Phase-14 `fs_write_root` sandbox (genesis-core **v0.9.1** adds the managed-native `launch_provider` + the introspect stream-limit fix — additive, `CORE_MAJOR` still 1). **`genesis-appian-parser@v0.1.0`** is a stdlib-only leaf (no Genesis deps); **genesis pins it by tag (16-03)**, so it installs transitively wherever genesis does (incl. genesis-workflows CI).
 
 **Tests, all green at last release:** genesis **302** pytest (incl. **10 KB-store tests** + **KB-read/kb_server tests (16-05)** + **UUID-dedupe (16-07)** + **Business Map backend: m0008 + evidence-pack + API (17-01/02/04)** + dev-env toggle + **24 native-MCP installer tests** [3 uv-guarded integration tests run a real `uv sync` install locally, skip where `uv` is absent] + **8 applications-API tests**, Phase 16-02/03/04/05/07/08) · genesis-core **61** (incl. managed-native launch resolution) · kiro-agent-sdk
-**82** · genesis-appian-parser **13** (vs a real vendored package + a no-SAIL guard) · genesis-workflows **68** (incl. 13 code-review + 16 design-doc + 12 sync-application + 11 generate-business-map) + `ci/validate_skills.py` gate · web **131** Vitest
+**82** · genesis-appian-parser **25** (vs a real vendored package + a no-SAIL guard + a raw-XML accuracy oracle with a ≥95% gate) · genesis-workflows **68** (incl. 13 code-review + 16 design-doc + 12 sync-application + 11 generate-business-map) + `ci/validate_skills.py` gate · web **131** Vitest
 (incl. contract-fixture drift tests + jest-axe). ruff clean (**`ruff==0.15.20` pinned in genesis AND genesis-core — see §7**); eslint clean (0 errors); `tsc` strict clean. CI green on all code
 repos (genesis has a python `genesis` job + a `frontend` job with a stale-bundle guard **that runs only on `web/**` changes**; the SDK repo
 has no CI — validated transitively by core+genesis installing its tag).
@@ -585,6 +588,35 @@ genesis-workflows/
   **`smoothstep`** edges + arrowheads so branch/loop paths don't overlap. Note: React Flow renders a custom node only
   when `node.type` matches a `nodeTypes` key — a default node renders `data.label` (which business nodes don't set →
   blank), so a `nodeTypes` mismatch looks like "empty nodes".
+- **Parser dependency extraction must scan EVERYTHING, and "orphan" ≠ "unbundled" (Phase 18).** `genesis-appian-parser`
+  (ported faithfully from Atlas) reported **804 orphans / 30.7%** on a real app, **803 provably false**. Two root causes,
+  both inherited: (1) reference extraction was **field-path-scoped** (`SAIL_CODE_FIELDS`/`STRUCTURAL_FIELDS` had **no
+  entries** for Constant/AI-Skill/Decision/Translation-String/Document → those types emitted **zero** edges); (2)
+  `is_orphan` meant *"not reachable from an entry-point bundle"*, which mislabels used-but-unbundled objects. Fixes that
+  took edge recall 0.32→**0.98** / orphans 804→**0**: run dep analysis on **RAW** data (before the resolver rewrites
+  `#"_a-uuid"`→`rule!Name`); a **universal known-UUID scan over every string + the raw XML** (transient, still code-free
+  per ADR-037) so no reference form/field/type is missed; add record-action + translation-string URNs, CDT **QName**
+  (`{urn:…}Type`) refs, and `rulereferencebyname("X")` by-name refs; and **redefine `is_orphan` = disconnected (no
+  incoming AND no outgoing edges)**. Keep the scan **known-UUID-gated** for precision (0.999).
+- **An Appian prefixed id `_a-<base>_<suffix>` shares its base with folder-siblings — base is a GROUP id, not an object
+  id (Phase 18).** Resolving a reference by base UUID alone over-links to an arbitrary sibling (precision cratered
+  0.999→0.80 when tried). Match on the **full or canonical (`_a-<base>_<numericSuffix>`)** id; only use base when it is
+  **unique** across the package. The accuracy **oracle** has the same trap — and must attribute each file to its object
+  by **filename stem** (universal: every object file is `<uuid>.xml`), NOT the in-XML `<uuid>` (a child for content
+  objects, a root `uuid="…"` attribute for the rest — 1,386 files were mis-mapped, which falsely showed precision 0.41).
+- **APPREF/ENTRYPOINT is a by-name cross-app integration mechanism (Phase 18, user-taught).** Apps soft-integrate across
+  environments via `rulereferencebyname(ruleName:"AS_GSS_ENTRYPOINT_…")` — a **name string**, not a UUID, with the peer
+  usually in a *different* package (so the object has no in-package incoming edge and looks orphaned). Classify these via
+  the ENTRYPOINT/APPREF naming convention (+ the 10-value category taxonomy GETDATA/DISPLAY/STARTPROCESS/RECORDACTION/
+  LOGIC/URL/SAVE/APPVERSION/REF/AI, adopted from Jarvis) + behavioral (`rulereferencebyname` caller); **exempt them from
+  orphan reporting** and surface them as cross-app integration points (`integration_role`/`integration_peer`/
+  `integration_category` in `KbObject.metadata`, + a `stats.cross_app` app-level map ported from Atlas
+  `app_cross_app_builder`).
+- **When porting a parser front-half, you may silently drop whole layers — diff against the source (Phase 18).** Our port
+  dropped Atlas's `output/app_cross_app_builder.py` (cross-app), `output/graph_builder.py` (inbound/outbound + is_hub),
+  and the entire `enrichment/` package. A concept-by-concept inventory of BOTH reference implementations (Atlas on disk +
+  indexed; the Jarvis plugin decompiled with `javap` — macOS `strings` misreads Java `0xCAFEBABE` as a Mach-O fat
+  binary, so use `javap`/a constant-pool reader) is the way to get "best of both". Matrix in `specs/phase-18-*.md` §9.
 
 ---
 
@@ -607,6 +639,27 @@ genesis-workflows/
 ---
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
+
+### 🟢 IMPLEMENTED + LIVE-VALIDATED (release pending) — Phase 18: Appian Parser Accuracy Overhaul
+
+> **Fixed a catastrophic dependency under-linking bug in `genesis-appian-parser`.** A real 2,620-object app reported
+> **804 orphans (30.7%), 803 provably false** — objects genuinely referenced by expression rules / interfaces /
+> constants. Root cause (inherited from the Atlas port): field-path-scoped reference extraction (no Constants / AI Skills
+> / Decisions / Translation Strings / Documents) + `is_orphan` = "not bundled" rather than "unreferenced". Reverified
+> against real XML + the original **Atlas** parser + the **Jarvis** plugin (best-of-both; §9 decision matrix in the spec)
+> and drove accuracy **>95%**, verified by a committed **raw-XML reference oracle** + a **≥95% CI gate**: edge recall
+> **0.324 → 0.978**, precision **0.999**, referenced-object recall **0.869 → 1.0**, **orphans 804 → 0**, false-orphan
+> rate **0.311 → 0.0**, edges 5,084 → 10,617, **12 cross-app integration points**. Also delivered the user's
+> **APPREF/ENTRYPOINT** cross-app integration-point model (by-name `rulereferencebyname`, ENTRYPOINT/APPREF naming +
+> 10-category taxonomy, orphan-exempt, `integration_*` metadata + `stats.cross_app`). **Live-validated on the user's real
+> app** (delete + re-add baseline sync; the venv's editable parser install picks up main without a `genesis serve`
+> restart — parsing runs in a fresh subprocess worker). Delivered **18-01..18-05** on `genesis-appian-parser` main
+> (afcb66d/31567fa/a357db6/c86b20c/44472c4); suite 13 → **25** green, ruff clean. **REMAINING = 18-06:** release
+> `genesis-appian-parser` **v0.2.0** → repin `genesis` + `sync-application` → finalize docs; deferred: a **Tempo Report**
+> parser + **generic-haul fallback** (need a package containing those types), richer per-type golden fixtures, Jarvis
+> `orphanCluster` + `TagDetector` behavioral tags (a future Business-Map capability signal). Specs:
+> `specs/phase-18-parser-accuracy.md`; as-built: `progress/phase-18-parser-accuracy.md`. **A new session picking this up
+> does the 18-06 release wave first.**
 
 ### ✅ SHIPPED (COMPLETE) — Phase 17: Business Application Map (17-01..17-06; genesis v0.39.0 + genesis-workflows v0.9.1)
 
