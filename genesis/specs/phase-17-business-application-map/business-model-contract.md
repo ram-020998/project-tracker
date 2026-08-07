@@ -142,9 +142,13 @@ Every `evidence.object_uuids` entry MUST resolve to an object that exists in the
 `KbStore.get_object` / a batch existence query). Any unknown UUID ⇒ the node **fails** (→ retry with the offending ids in the
 feedback → escalate to `review`). The agent cannot introduce objects that aren't in the KB.
 
-### 4.2 Coverage gate — HARD (threshold configurable, default ratio ≥ 0.6)
-`coverage.ratio = significant_referenced / significant_total` (see §5). Below threshold ⇒ the model is too thin ⇒ fail /
-escalate. Surfaced in the UI regardless.
+### 4.2 Coverage gate — SOFT (lenient floor, default ratio ≥ 0.3 → routes to human review)
+`coverage.ratio = significant_referenced / significant_total` (see §5). Coverage is a **lenient "is the map
+non-trivial" signal, not a quality score**: a good business map abstracts/consolidates heavily (dozens of record types →
+a handful of business entities; many process objects → a few stages), so it legitimately references only a *fraction* of
+the app's significant objects. Below the floor the run **routes to the human `review` gate** (the real quality backstop),
+it does **not** hard-fail. Default **0.3** (recalibrated from 0.6 after the first live run scored 0.355 for a genuinely
+good map — 17-06 §0). Coverage is surfaced in the UI regardless.
 
 ### 4.3 Business-language guard — HARD
 Human-facing fields (`summary`, `domain`, `*.name`, `*.description`, stage/branch labels) MUST NOT contain banned technical

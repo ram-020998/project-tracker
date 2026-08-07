@@ -18,7 +18,9 @@ rendered in the web. Shipped end-to-end and exercised live against a real 2,763-
 | 17-05 | Web Business Map view (React Flow A+B, first tab, states, focus+context) | genesis **v0.36.0** | 6523164 ✅ |
 | 17-05 rw | Readability: readable zoom floor + MiniMap + taller canvas + richer stage cards; **radial** capability constellation (entities as chips) | genesis **v0.37.0** | 6523296 ✅ |
 | 17-05 rw | Click-for-detail popups (untruncated) + **smoothstep** edge routing + arrowheads | genesis **v0.38.0** | 6523323 ✅ |
-| 17-06 | Validation/quality hardening + live-acceptance | ⏳ pending (see spec §0) | — |
+| 17-06 | Validation/quality hardening (friendly 409 + coverage floor 0.6→0.3) + live-acceptance | genesis **v0.39.0** + genesis-workflows **v0.9.1** | ✅ |
+
+**PHASE 17 COMPLETE (2026-08-07)** — 17-01..17-06 shipped and live-accepted against the real 2,763-object app.
 
 ## First live generation (2026-08-07)
 

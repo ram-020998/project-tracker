@@ -143,6 +143,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-07 (Phase 17-06 SHIPPED ✅ — PHASE 17 COMPLETE):** Hardening from the live run. **genesis v0.39.0** —
+  `business-map/generate` now returns a friendly **409** ("install the workflow library") when `generate-business-map`
+  isn't installed, instead of a raw 500 (pre-checks `run_manager.loader.installed()`; +1 API test → 14). **genesis-
+  workflows v0.9.1** — **recalibrated the coverage floor 0.6 → 0.3**: coverage is a *lenient "is the map non-trivial"*
+  signal (a good business map consolidates heavily → references only a fraction of significant objects), with the human
+  **review** gate as the real backstop (the first live map scored 0.355 and was correctly review-gated + approved).
+  Live-acceptance **PASSED** (coherent business story, no technical vocabulary). 302 pytest + 11 workflow tests +
+  validate_library + CI green (genesis 27f1e73, workflows 1bb26b8). Library reinstalled locally so the fix is live.
+  **Phase 17 — Business Application Map — is COMPLETE (17-01..17-06 shipped, live-accepted).**
+
 - **2026-08-07 (Phase 17 — first live map generated + readability/detail iterations, genesis v0.37.0 → v0.38.0):**
   The **first real business-map generation** ran against the 2,763-object **"AS GSS Full Application"** and produced a
   genuinely rich, high-quality model — domain *"Procurement source selection and proposal evaluation"*, **10

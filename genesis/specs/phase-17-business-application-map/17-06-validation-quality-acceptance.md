@@ -1,6 +1,6 @@
 # Phase 17-06 — Validation, quality & acceptance
 
-> **Status:** DRAFT · **Repos:** genesis-workflows (+ genesis) · **Depends on:** 17-03 (workflow), 17-05 (web)
+> **Status:** ✅ SHIPPED — friendly 409 (genesis v0.39.0) + coverage recalibration 0.6→0.3 (genesis-workflows v0.9.1); live-accepted. · **Repos:** genesis-workflows (+ genesis) · **Depends on:** 17-03 (workflow), 17-05 (web)
 > **Goal:** Make the Business Map **trustworthy and good**. Harden the evidence-grounding / coverage / business-language
 > validators, lock quality with golden fixtures + guardrails, wire the human review gate, and run the manual live-acceptance
 > against the real synced application. This is the "does it actually explain the business, and can we trust it?" phase.
