@@ -1,6 +1,6 @@
 # Phase 17-03 — `generate-business-map` workflow (the core)
 
-> **Status:** DRAFT · **Repos:** genesis-workflows (pins the genesis tag carrying 17-01/17-02/17-04) · **Depends on:**
+> **Status:** ✅ SHIPPED (genesis-workflows v0.9.0) · **Repos:** genesis-workflows (pins the genesis tag carrying 17-01/17-02/17-04) · **Depends on:**
 > 17-01 (persistence), 17-02 (evidence pack), 16-05 (`genesis-kb` MCP)
 > **Goal:** The heart of Phase 17 — a **deterministic LangGraph workflow** that reads the KB, has narrow **agent** nodes
 > synthesize the business model (B then A), enforces **evidence-grounding + coverage + business-language** guards, takes a

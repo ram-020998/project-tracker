@@ -143,6 +143,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-07 (Phase 17-03 — `generate-business-map` workflow SHIPPED ✅ genesis-workflows v0.9.0):** The core of
+  the Business Application Map — a **deterministic LangGraph workflow** that synthesizes the business model from the
+  code-free KB. Topology: `resolve_inputs → extract_evidence → v_evidence → [synthesize_capabilities → v_capabilities]
+  → [synthesize_value_streams → v_value_streams] → compose_model → v_model → (persist | review | escalate)`. **Two
+  narrow Kiro agent nodes** (B capabilities, then A value streams) each wrapped by the **reliability trio** (ADR-011);
+  the **evidence pack** (`KbStore.build_evidence_pack`) is the complete, self-contained agent input (**no MCP** — a
+  scoped 17-03 decision: stronger anti-hallucination + no genesis-kb-in-workflow-registry wiring needed). Grounding
+  guards: **evidence integrity** (every cited uuid ⊆ the pack), **business-language guard** (banned technical words +
+  SAIL markers like `rule!`/`SYNCEDRECORD`), **value-stream DAG** well-formedness, and a **coverage gate**
+  (`COVERAGE_MIN=0.6`) that routes a thin model to the **review** gate; validator exhaustion → the **escalate** gate.
+  `persist_map` writes via `asyncio.to_thread(upsert_business_map)` (16-03 loop-deadlock lesson). genesis-workflows
+  **v0.9.0** (commit 4caf9a9, pins genesis v0.35.0; CI green pipeline 6523136 — workflow-tests + library-validate +
+  skills-validate); **11 workflow tests + full suite 68 + validate_library(6) + ruff** green. **Next:** 17-05 (web
+  Business Map view — React Flow A+B) → 17-06 (validation/quality/acceptance against the real app).
+
 - **2026-08-07 (Phase 17 backend — SHIPPED ✅ genesis v0.35.0):** The Business Application Map backend
   foundation (no UI yet). **17-01** migration **m0008 `kb_business_maps`** (code-free `BusinessModel`
   store; one current map per app; stale-on-sync) + `KbStore` upsert/get/status; **17-02**
