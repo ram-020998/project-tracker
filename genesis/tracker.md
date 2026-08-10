@@ -143,6 +143,8 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-10 (Remove the top bar + relocate theme toggle — genesis v0.43.0):** The `Topbar` (which held only the theme toggle after breadcrumbs were removed) is gone entirely; `AppShell` = Sidebar + content (+ optional right rail). The dark/light **theme toggle** moved to **Settings → General** as a new `AppearanceSection` (Switch). `ChatPage` now fills full height (no topbar to subtract); deleted the unused `Topbar.tsx`. Frontend-only release; web suite 132 green, typecheck clean, 0 eslint errors, CI green (genesis + frontend).
+
 - **2026-08-10 (Remove top breadcrumb navigation — genesis v0.42.0):** Per user request, dropped the `Topbar`
   breadcrumb `<nav>` from all pages (kept the theme + right-panel toggles, header now right-aligns them) and cleaned up
   the `crumbs`/`Crumb` plumbing through `AppShell` + `RootLayout` (removed `crumbsFor`/`LABELS`/`useLocation`).
