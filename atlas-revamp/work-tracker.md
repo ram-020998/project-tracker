@@ -724,3 +724,67 @@ ALL comments covered:
   3. PO & UX MRs (`feature/atlas-product-owner`, `feature/atlas-ux-designer`) still pending (unchanged).
   4. DG MCP Phase 5 — archive personal `ramaswamy.u/solutions-atlas-dg-mcp-server` + personal `erd-gen` repo.
 - **Delete** local `backup/pre-clean-ff31ca0155` once the MR looks correct.
+
+## 17. MR !111 opened, reviewed, and review round addressed (2026-08-06 → 08-10)
+
+The clean data-gen branch was opened as **MR !111** (`appian/prod/solutions-os!111`,
+`feature/atlas-data-generator` → `main`, author ramaswamy.u). Reviewer **walid.elsayed** left 4 inline
+threads + a praise comment linking a **Kiro-generated review doc** (auth-gated Google Doc; user saved it to
+`atlas-revamp/MR !111 — mr-111-...review.md`). Verdict: request changes. All 16 findings (2 P0, 9 P1, 5 P2)
+were addressed and force-pushed.
+
+### Delivery
+- Committed as **`6260d091dd`** on top of `b1cce65823`, rebased both onto latest `origin/main`
+  (clean, 0 behind / 2 ahead), force-pushed-with-lease to dev: **`b1cce65823...9b573fadaa`** → MR !111 updated.
+- Backup of the pre-review tip at local branch `backup/pre-mr111-review`.
+- Verified: **98 pytest pass**, `ruff check .` clean (E/F/I/W, E402 ignored), 3 skills `quick_validate` OK,
+  `kiro-cli agent validate` exit 0, working tree clean.
+
+### P0 (blocking)
+- **P0-1 README ghost skills** — README listed 4 non-existent skills (`data-gen`/`-bulk`/`-manage`/`-erd`);
+  rewrote the table to the 3 real skills (`data-generate-records`/`-sql`/`-erd`), dropped manage/rollback,
+  fixed "Example-Based"→"Auto-Analysis".
+- **P0-2 jsonschema silent SKIP** — `check_schema`/`check_decisions` returned SKIP without `jsonschema`
+  (hiding failed validation). Added `_require_jsonschema()` → hard-fail with install hint; new
+  `scripts/requirements.txt` (`jsonschema>=4.0`); corrected the "no third-party deps" wording in prompt.md +
+  tools/README.md.
+
+### P1 (recommended)
+- **P1-1 prompt URI (Thread 1)** — `file://../resources/...` → **`file://.kiro/resources/data-generator/prompt.md`**.
+  Confirmed correct: `kiro-cli agent validate` errors on this form identically for the team's working
+  `TEA.json`/`dev-automated-testing.json`, so its file:// check is NOT authoritative (corrects the old
+  "prompt-path rule" in the handoff/design docs).
+- **P1-2 workflow docs outside skill folder (Threads 2 & 3)** — fully qualified all `workflow/…` paths to
+  `.kiro/resources/data-generator/workflow/…` + added an explicit "Runtime files" note to both SKILL.md
+  (not auto-loaded; requires `read`/shell at runtime).
+- **P1-3 CDT in sql_emit** — `emit_sql` now raises `ValueError` on `mechanism=="CDT"`; added `test_cdt_spec_rejected`.
+- **P1-4 check_users excluded** — wiring it in exposed real false positives (`groupAssignee:31` is a GROUP id;
+  scoped clone `users.json` misses demo users). Fixed `_is_user_field` to exclude `group*` fields; redesigned
+  `run_validate(strict_users=False)`: user membership is **advisory (WARN → INCOMPLETE, exit 0)** by default,
+  **hard FAIL under `dg validate --with-users`**. Added WARN level + INCOMPLETE banner + `--with-users` flag +
+  `test_auto_analysis_strict_users_hard_fails`.
+- **P1-5 sparse CLI tests (Thread 4)** — added CLI smoke tests (init, state set/get, gate block→open, gen-sql,
+  validate, coverage-gate hard-block, verify-input) on tmp fixture copies.
+- **P1-6 dglib not a package** — added `dglib/__init__.py`; `dg.py` → `from dglib import … as …lib` +
+  `from dglib.state import VALID_STATUSES, State, StateError` (fixed a hidden dynamic `__import__("state")`);
+  relative imports in gate.py/scaffold.py; conftest adds only the scripts dir; all 8 test files migrated.
+  Eliminates `import coverage`/`state` shadowing.
+- **P1-7 ruff/CI** — import order clean after P1-6; created `.kiro/resources/data-generator/.gitlab-ci-data-generator.yml`
+  (`dg-tests` job: ruff + pytest + jsonschema, scoped `rules: changes`) and `include`d it in root `.gitlab-ci.yml`
+  (mirrors the a11y-rules pattern).
+- **P1-8 fixture MCP version** — added `raw/_capture.json` (image tags + captured_at) to all 3 fixtures +
+  documented it in fixtures/README.md.
+- **P1-9 duplicated CRITICAL RULES** — canonical 12-item `## CRITICAL RULES` now in prompt.md; both SKILL.md
+  reference it with a brief summary; removed a stale "roll back a session" mention.
+
+### P2 (polish)
+- **P2-1** naming audit clean (no `data-gen-*`; 22 `data-generate-*`; no exemplar/example-based leftovers).
+- **P2-2** split the 700-char README paragraph; MCP env as a bullet list.
+- **P2-3** removed the dead `@@FK:` branch in `sql_literal`.
+- **P2-4/P2-5** added determinism notes (seed = `(seed, field, row index)`; `cycle` index-arithmetic vs
+  `pick` seeded-RNG) to `payload-spec.schema.json`.
+
+### Still open
+- **Rotate the 4 exposed tokens** (GitLab/GitHub/Appian/Lucid) — user action, unchanged.
+- Re-review of !111 by walid; then merge (MCP image already live).
+- PO & UX domain MRs; DG MCP Phase 5 (archive personal repos); delete `backup/*` safety branches once merged.

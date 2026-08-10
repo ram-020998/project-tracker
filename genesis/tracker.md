@@ -143,6 +143,12 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-10 (Applications detail UI polish — genesis v0.41.0):** Per user feedback on the Application page: the
+  live **sync status bar** (below the app name/uuid) now shows **only while a sync is in progress** (running/pending) —
+  older syncs remain in the **Syncs** tab; and the **Objects** and **Bundles** tabs are **removed** (detail tabs =
+  Business Map | Overview | Syncs | Releases). Removed the unused ObjectsTab/BundlesTab/SearchBox + imports. Frontend-only
+  release (web/static rebuilt + committed); web suite 132 green, typecheck+eslint clean, CI green (genesis + frontend).
+
 - **2026-08-07 (Phase 18 — Parser Accuracy Overhaul — ✅ SHIPPED + LIVE-VALIDATED; PHASE 18 COMPLETE):** Fixed a
   catastrophic dependency under-linking bug in `genesis-appian-parser` — a real 2,620-object app reported **804 orphans
   (30.7%), 803 provably false**. Root cause: field-path-scoped reference extraction (no Constants/AI-Skills/Decisions/
