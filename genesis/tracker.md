@@ -143,6 +143,11 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-10 (Remove top breadcrumb navigation — genesis v0.42.0):** Per user request, dropped the `Topbar`
+  breadcrumb `<nav>` from all pages (kept the theme + right-panel toggles, header now right-aligns them) and cleaned up
+  the `crumbs`/`Crumb` plumbing through `AppShell` + `RootLayout` (removed `crumbsFor`/`LABELS`/`useLocation`).
+  Frontend-only release; web suite 132 green, typecheck+eslint clean, CI green (genesis + frontend).
+
 - **2026-08-10 (Applications detail UI polish — genesis v0.41.0):** Per user feedback on the Application page: the
   live **sync status bar** (below the app name/uuid) now shows **only while a sync is in progress** (running/pending) —
   older syncs remain in the **Syncs** tab; and the **Objects** and **Bundles** tabs are **removed** (detail tabs =
