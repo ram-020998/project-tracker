@@ -153,6 +153,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-11 (Phase 20 — Features & Spec Authoring — ✅ SHIPPED + COMPLETE; 20-01..20-06):** Released **genesis v0.45.0**
+  (single-repo; genesis-core/genesis-workflows unchanged), CI green; **ADR-042 + ADR-043 Accepted**. Per-app **Features**
+  (m0010 `kb_features`/`kb_feature_specs`/`kb_feature_spec_revisions`, schema v10; `FeatureStore`; untrack cascades features —
+  intrinsic-to-app) + a conversationally-authored, annotatable **Spec**: a reused Chat in the new additive **`feature_spec`**
+  mode (genesis-kb auto-wired; cwd=sandbox + trust `fs_read`/`fs_write` so the agent authors `spec.html`, still confined by
+  `fs_write_root`) seeded with the app/feature identity; **Add context** writes the app's linked business artifacts as
+  `./context/` files the agent reads on demand (token-efficient, no transcript dump); **milestone** snapshots + **status**
+  draft→in-progress→in-review→completed. Web: **Features** tab + **feature page** + **`SpecWorkspace`** = the reused
+  `ChatThread` beside a sandboxed review **iframe** (the **vendored MIT Lavish annotation SDK**, Genesis-themed, served
+  same-origin) + a postMessage **annotation→chat bridge** + Save-milestone + Export-`.md` (`markdownify==1.2.3`). **Live-accepted**
+  (author → annotate → comment reaches the chat → revise). Two live fixes folded in: the `feature_spec` cwd = sandbox, and
+  trusting `fs_read`/`fs_write` (the write was denied by `auto_deny` on kiro-cli's built-in fs tool). **genesis 397 pytest + 145
+  Vitest green; ruff/eslint/tsc clean.** **PHASE 20 COMPLETE.** As-built: `progress/phase-20-features-and-spec-authoring.md`.
+
 - **2026-08-11 (Phase 20-05 — embedded review surface + annotation→chat bridge — ✅ CODE-COMPLETE, uncommitted):** The visible
   heart (ADR-043). Vendored the themed Lavish SDK (MIT) into `genesis/api/assets/lavish/` (esbuild-built `sdk.js`); `api/features.py`
   serves the artifact (Genesis theme + SDK injected, sandboxed same-origin), `sdk.js`, and Markdown **export** (`markdownify==1.2.3`,

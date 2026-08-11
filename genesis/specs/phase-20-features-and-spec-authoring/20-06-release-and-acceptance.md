@@ -1,7 +1,9 @@
 # 20-06 — Release + acceptance
 
-> **Status:** 📋 DRAFT. **Repo:** genesis (single-repo release; genesis-core/genesis-workflows unchanged unless a follow-on
-> skill is added). **Depends on:** 20-02..20-05 all green.
+> **Status:** ✅ **SHIPPED.** genesis **v0.45.0** (single-repo release; genesis-core/genesis-workflows unchanged) committed +
+> tagged + pushed (`d58c7c2`); CI green. **ADR-042/043 → Accepted.** m0010 ships (schema v10). Live-accepted: create feature →
+> spec chat authors `spec.html` → annotate in the embedded review → the comment flows into the chat. Tests: genesis 397 pytest
+> + web 145 Vitest; ruff/eslint/tsc clean. **PHASE 20 COMPLETE.**
 
 ## Goal
 Ship Phase 20 as a genesis release, flip ADR-042/043 to Accepted, verify live, and refresh the docs + the bible.

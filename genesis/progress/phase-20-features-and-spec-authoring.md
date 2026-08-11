@@ -1,10 +1,9 @@
 # Progress — Phase 20: Features & Spec Authoring
 
-> **Status (2026-08-11):** 🚧 IN PROGRESS. **20-01 ✅** · **20-02 ✅** · **20-03 ✅** · **20-04 ✅** · **20-05 ✅ (embedded
-> review surface + annotation→chat bridge + MD export)**. Next: **20-06** (release + live acceptance + bible refresh) — the
-> only remaining sub-phase. Genesis code for 20-02+ is in the working tree, **uncommitted — commits + the single genesis
-> release land at 20-06** (Phase-19 rhythm). Spec: `specs/phase-20-features-and-spec-authoring.md` (+ `20-01..20-06`);
-> **ADR-042/043** (Proposed).
+> **Status (2026-08-11):** ✅ **SHIPPED — PHASE 20 COMPLETE (20-01..20-06).** Released **genesis v0.45.0** (single-repo;
+> genesis-core/genesis-workflows unchanged), CI green; **ADR-042/043 Accepted**. m0010 (schema v10). Live-accepted (feature →
+> spec chat authors `spec.html` → annotate in the embedded review → comment flows into the chat). Spec:
+> `specs/phase-20-features-and-spec-authoring.md` (+ `20-01..20-06`).
 
 ## 20-01 — Embedded annotation spike ✅ (PASS + user-confirmed)
 Proved Path B (embed the Lavish annotation SDK) before building. Findings: `spike/2026-08-11-lavish-embed.md`.

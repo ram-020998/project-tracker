@@ -11,7 +11,7 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-11 — latest SHIPPED: genesis v0.44.0 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-11 — latest SHIPPED: genesis v0.45.0 +
 > genesis-workflows v0.9.3 + genesis-core v0.9.2 + kiro-agent-sdk v0.6.0 + genesis-appian-parser v0.2.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
@@ -46,6 +46,15 @@
 > openpyxl (pinned) → canonical Markdown + per-tab JSON; `sync-documents` workflow; `genesis-kb` doc tools + evidence-pack
 > integration; web Document Library page + full-screen viewer + per-app Business Artifacts tab + Settings→CLI connector card.
 > ADR-040/041 Accepted. See §9's Phase-19 block + `progress/phase-19-document-library.md`.**
+> **⭐ SHIPPED — Phase 20 — Features & Spec Authoring — COMPLETE (20-01..20-06): genesis v0.45.0, CI green; ADR-042/043
+> Accepted.** An Appian application gains first-class **Features** (m0010 `kb_features`/`kb_feature_specs`/
+> `kb_feature_spec_revisions`) and, inside a feature, a conversationally-authored, annotatable **Spec**. Spec authoring is a
+> reused **Chat** in a new additive **`feature_spec`** mode (no LangGraph — ADR-001 intact): `genesis-kb` auto-wired, the agent
+> authors **HTML** (`spec.html`) into its per-session fs sandbox (cwd=sandbox + trusted `fs_read`/`fs_write`), **Add context**
+> drops the app's linked business artifacts as `./context/` files the agent reads on demand, and the HTML is reviewed in an
+> **embedded, annotatable iframe** (the **vendored MIT Lavish SDK**, Genesis-themed) whose highlight-and-comment flows back into
+> the chat (postMessage bridge). Status draft→in-progress→in-review→completed + milestone snapshots + Markdown export
+> (`markdownify`). genesis-core/genesis-workflows unchanged. See §9's Phase-20 block + `progress/phase-20-features-and-spec-authoring.md`.**
 
 ---
 
@@ -125,7 +134,7 @@ and the release/versioning protocol.
 
 ---
 
-## 2. Current state (as of genesis v0.44.0)
+## 2. Current state (as of genesis v0.45.0)
 
 **Five repos** at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git` (the 5th, `genesis-appian-parser`, is new in Phase 16):
@@ -134,7 +143,7 @@ and the release/versioning protocol.
 |---|---|---|---|
 | `kiro-agent-sdk` | **v0.6.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)**; **`fs_write_root` sandbox for agent file writes (14-05)** |
 | `genesis-core` | **v0.9.2** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1`; **`McpRegistry` managed-native `launch_provider` — a `"managed":"<id>"` entry resolves command/args from a local install; introspect 8 MiB stream limit (16-08)**; **`CliRegistry` managed-native launch resolution — the CLI analog, injected `launch_provider` (Phase 19, ADR-040)** |
-| `genesis` | **v0.44.0** | master | runtime, dist, config, runs, **db (m0001–m0009)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **read-only `genesis-kb` MCP server (`genesis/mcp/kb_server.py`) + chat cutover off `appian-atlas` (16-05); `KbStore` UUID-dedupe (16-07); native-MCP bundle controls moved into the MCP detail page + Applications UI polish + `scripts/genesisctl.sh` (v0.34.0)**; **Phase-17 Business Map backend: m0008 `kb_business_maps` + `KbStore.build_evidence_pack` (code-free KB→business evidence pack) + Business Map API (v0.35.0) + Business Map web view (React Flow A value-stream + B capability-constellation, first tab, 17-05, v0.36.0) + readability + click-for-detail popups + radial capability constellation + smoothstep edges (v0.37.0/v0.38.0)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)**; **dev-environment `is_dev` toggle + `dev_environment()` (16-08 §2.0)**; **managed-native MCP installer `genesis/mcp/native/` + `api/native_mcp.py` + `genesis mcp` CLI + Settings→MCP panel (16-08 Stage B)**; **Applications surface: `api/applications.py` + `kb/dev_mcp.py` (Dev-MCP `listApplications`) + `web/features/applications` (16-04)**; **Document Library (Phase 19, ADR-040/041, v0.44.0): m0009 (`kb_documents`/`_links`/`_sections`) + `DocumentStore` + `kb/doc_parsing` (pypdf/python-docx/openpyxl, pinned) + `DocumentSyncEngine` + managed-native `gws` connector (`integrations/gws/`, `cli_tools/native/`, `api/native_cli.py`) + `api/documents.py` + `genesis-kb` doc tools + `build_evidence_pack` docs + `web/features/library` (Document Library page + full-screen viewer + per-app Business Artifacts tab + Settings→CLI connector card)** |
+| `genesis` | **v0.45.0** | master | runtime, dist, config, runs, **db (m0001–m0010)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **read-only `genesis-kb` MCP server (`genesis/mcp/kb_server.py`) + chat cutover off `appian-atlas` (16-05); `KbStore` UUID-dedupe (16-07); native-MCP bundle controls moved into the MCP detail page + Applications UI polish + `scripts/genesisctl.sh` (v0.34.0)**; **Phase-17 Business Map backend: m0008 `kb_business_maps` + `KbStore.build_evidence_pack` (code-free KB→business evidence pack) + Business Map API (v0.35.0) + Business Map web view (React Flow A value-stream + B capability-constellation, first tab, 17-05, v0.36.0) + readability + click-for-detail popups + radial capability constellation + smoothstep edges (v0.37.0/v0.38.0)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)**; **dev-environment `is_dev` toggle + `dev_environment()` (16-08 §2.0)**; **managed-native MCP installer `genesis/mcp/native/` + `api/native_mcp.py` + `genesis mcp` CLI + Settings→MCP panel (16-08 Stage B)**; **Applications surface: `api/applications.py` + `kb/dev_mcp.py` (Dev-MCP `listApplications`) + `web/features/applications` (16-04)**; **Document Library (Phase 19, ADR-040/041, v0.44.0): m0009 (`kb_documents`/`_links`/`_sections`) + `DocumentStore` + `kb/doc_parsing` (pypdf/python-docx/openpyxl, pinned) + `DocumentSyncEngine` + managed-native `gws` connector (`integrations/gws/`, `cli_tools/native/`, `api/native_cli.py`) + `api/documents.py` + `genesis-kb` doc tools + `build_evidence_pack` docs + `web/features/library` (Document Library page + full-screen viewer + per-app Business Artifacts tab + Settings→CLI connector card)**; **Features & Spec authoring (Phase 20, ADR-042/043, v0.45.0): m0010 (`kb_features`/`kb_feature_specs`/`kb_feature_spec_revisions`) + `FeatureStore` + `api/features.py` (feature CRUD + spec create/context/milestone/status + artifact/sdk.js/export.md) + Chat `feature_spec` mode + vendored MIT Lavish annotation SDK (`api/assets/lavish/`, Genesis-themed) + `markdownify` HTML→MD + `web/features/features` (Features tab + feature page + `SpecWorkspace`)** |
 | `genesis-workflows` | **v0.9.3** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` + **`appian-dev`/`appian-devops`** now **managed-native refs** with read/export-only allowlists set from the real installed `tools/list` — 16-08 Stage B; **+ `gws` managed-native read-only CLI entry, Phase 19**), steering, `hello-appian` + `erd-generation` + `code-review` + `design-doc` + **`sync-application` (Appian KB baseline sync via Deployment REST → parser → KbStore, Phase 16-03)** + **`generate-business-map` (Phase-17 agent-synthesized Business Map from the code-free KB, v0.9.0)** + **`sync-documents` (Phase-19 Google-Drive→Document-Library pull/parse/store via the read-only gws connector, program-only)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
 | `genesis-appian-parser` | **v0.2.0** | main | **NEW (Phase 16-01).** Genesis-owned, stdlib-only Appian package parser (port of the Atlas front-half). `parse(zip\|bytes) -> KbParseResult` (objects + edges + bundles + **code-free** metadata; no files, no SAIL). Consumed by `genesis/kb` + the sync workflow; pinned into genesis by tag (**v0.2.0**, 16-03/18-06). **Phase 18 (v0.2.0): dependency-extraction accuracy overhaul — universal known-UUID + raw-XML reference scan, `is_orphan`=disconnected (not unbundled), CDT-QName + translation/document/record-action + `rulereferencebyname` by-name edges, APPREF/ENTRYPOINT cross-app integration-point classification. Measured edge recall 0.32→0.98, precision 0.999, orphans 804→0 on a real app; ≥95% CI gate; 25 tests.** |
 
@@ -142,8 +151,8 @@ and the release/versioning protocol.
 `genesis → genesis-core@v0.9.2 → kiro-agent-sdk@v0.6.0`;
 `genesis-workflows → genesis-core@v0.9.2 (runtime) + genesis@v0.44.0 (dev pin)`. (`code-review` needs genesis ≥ v0.20.2 at runtime for the loop.) both genesis + genesis-core pin the SDK directly (v0.6.0, Phase-14 `fs_write_root` sandbox). **genesis-core `v0.9.2`** = the managed-native `launch_provider` for **both** MCP (16-08) and CLI (Phase 19, ADR-040) + the introspect stream-limit fix — all additive, `CORE_MAJOR` still 1. **`genesis-appian-parser@v0.2.0`** is a stdlib-only leaf (no Genesis deps); **genesis pins it by tag (16-03)**, so it installs transitively wherever genesis does (incl. genesis-workflows CI). **Phase-19 doc-parsing deps (pinned in genesis):** `pypdf==6.15.0`, `python-docx==1.2.0`, `openpyxl==3.1.5`.
 
-**Tests, all green at last release (Phase 19, v0.44.0):** genesis **375** pytest (adds Phase-19 **doc-parsing** [11] + **DocumentStore/m0009** [9] + **DocumentSyncEngine** [10] + **documents API** [6] + **genesis-kb doc tools + evidence-pack docs** on top of the KB/Business-Map/native-MCP/applications suites) · genesis-core **65** (incl. managed-native MCP **and** CLI launch resolution) · kiro-agent-sdk
-**82** · genesis-appian-parser **25** (vs a real vendored package + a no-SAIL guard + a raw-XML accuracy oracle with a ≥95% gate) · genesis-workflows **75** (incl. 13 code-review + 16 design-doc + 12 sync-application + 11 generate-business-map + **7 sync-documents**) + `ci/validate_skills.py` + `ci/validate_library.py` (7 workflows) · web **138** Vitest
+**Tests, all green at last release (Phase 20, v0.45.0):** genesis **397** pytest (adds Phase-20 **FeatureStore/m0010** [9] + **features API** [12: CRUD + feature_spec chat + `./context/` inject + milestone + status + artifact/sdk.js/export.md] + the `feature_spec` chat-mode/cwd/fs-trust regression, on top of the KB/Business-Map/Documents suites) · genesis-core **65** (incl. managed-native MCP **and** CLI launch resolution) · kiro-agent-sdk
+**82** · genesis-appian-parser **25** (vs a real vendored package + a no-SAIL guard + a raw-XML accuracy oracle with a ≥95% gate) · genesis-workflows **75** (incl. 13 code-review + 16 design-doc + 12 sync-application + 11 generate-business-map + **7 sync-documents**) + `ci/validate_skills.py` + `ci/validate_library.py` (7 workflows) · web **145** Vitest
 (incl. contract-fixture drift + jest-axe a11y + the Phase-19 library/connector tests). ruff clean (**`ruff==0.15.20` pinned in genesis AND genesis-core — see §7**); eslint clean (0 errors); `tsc` strict clean. CI green on all code
 repos (genesis has a python `genesis` job + a `frontend` job with a stale-bundle guard **that runs only on `web/**` changes**; the SDK repo
 has no CI — validated transitively by core+genesis installing its tag).
@@ -189,11 +198,11 @@ has no CI — validated transitively by core+genesis installing its tag).
   HITL + documents drawer + **per-node & run-total credits**); Catalog (browse/detail/launch, clickable
   cards); **Chat** (read-only assistant, persisted sessions, per-message credit footer); **Settings**
   (MCP · CLI · GitLab · Environments · General — General holds Appearance/**theme toggle**, Storage, Copilot);
-  **Applications** (KB apps — detail tabs Business Map · Overview · Syncs · Releases · **Business Artifacts** [linked documents, Phase 19]); **Documents** (the global **Document Library** — list/search/filter, add via upload or Google-Drive link, link/sync/remove, full-screen viewer at `/documents/:id` — Phase 19). Settings→CLI has the **Google Workspace (`gws`) connector card**. Left nav collapsed by default;
+  **Applications** (KB apps — detail tabs Business Map · Overview · Syncs · Releases · **Business Artifacts** [linked documents, Phase 19] · **Features** [Phase 20]); the **feature page** (`/applications/:uuid/features/:featureId`) — a conversational, annotatable **Spec** workspace (reused Chat + an embedded HTML review iframe); **Documents** (the global **Document Library** — list/search/filter, add via upload or Google-Drive link, link/sync/remove, full-screen viewer at `/documents/:id` — Phase 19). Settings→CLI has the **Google Workspace (`gws`) connector card**. Left nav collapsed by default;
   **no top bar / no breadcrumbs** (removed v0.42.0/v0.43.0).
 - **Data plane:** durable SQLite (`~/.genesis/genesis.db`, WAL) via `genesis/db/` migrations
   (m0001 runs+events, m0002 chat, m0003 chat_usage, m0004 copilot [chat_sessions.mode +
-  chat_run_links + chat_permissions], m0005 supervision [chat_notifications], m0006 copilot_actions [audit], **m0007 kb [the code-free temporal `kb_*` Appian KB — Phase 16-02]**, m0008 business_map [`kb_business_maps` — Phase 17-01], **m0009 documents [`kb_documents`/`kb_document_links`/`kb_document_sections` — the global Document Library, Phase 19]**; `current_version=9`); runs + full conversation +
+  chat_run_links + chat_permissions], m0005 supervision [chat_notifications], m0006 copilot_actions [audit], **m0007 kb [the code-free temporal `kb_*` Appian KB — Phase 16-02]**, m0008 business_map [`kb_business_maps` — Phase 17-01], **m0009 documents [`kb_documents`/`kb_document_links`/`kb_document_sections` — the global Document Library, Phase 19]**, m0010 features [`kb_features`/`kb_feature_specs`/`kb_feature_spec_revisions` — per-app Features & Specs, Phase 20]; `current_version=10`); runs + full conversation +
   checkpoints + chat sessions/messages persist across restart; retention available.
 - **Credits (Phase 11):** every agent turn (workflow node OR chat message) reports real credits from
   Kiro's `_kiro.dev/metadata.meteringUsage`; aggregated per-run (`eventlog.aggregate_credits` via
@@ -296,6 +305,10 @@ genesis/genesis/
             heading sections + content_hash; google_export_target convergence; store_parsed); doc_sync.py (DocumentSyncEngine
             — injected via ctx.extras['document_sync']: resolve/fetch[gws]/parse/write + add_upload/add_gdrive + remove);
             build_evidence_pack extended with a `documents` key (bounded excerpts).**
+            **Phase 20 (Features & Specs): features.py (FeatureStore over `kb_features`/`kb_feature_specs`/
+            `kb_feature_spec_revisions` — feature CRUD; single spec per feature with a validated status
+            draft→in-progress→in-review→completed; milestone revisions; untrack cascades features [ADR-042
+            intrinsic-to-app]). `KbStore.untrack_application` also deletes `kb_features` (cascades specs+revisions).**
   integrations/gws/ (Phase 19, ADR-040) client.py (GwsClient — read-only Drive/Docs/Sheets/Slides allowlist, exit-code map,
             reuse vs isolated mode, list/get/export/download_file); login.py (GwsLogin — spawn `gws auth login`, capture the
             sign-in URL from stderr, track idle/pending/connected/failed); factory.py (build_gws_client/build_gws_login,
@@ -305,7 +318,7 @@ genesis/genesis/
   runtime/  settings.py (Settings: state_dir ~/.genesis, artifacts_dir ~/Genesis/runs, db_path,
             library_dir, lockfile_path, secrets_path, environments_path, custom_mcp_path,
             custom_cli_path, **skills_dir=~/.genesis/.kiro/skills + skill_output_dir=~/.genesis/skill-output [Phase 14]**,
-            **mcp_servers_dir=~/.genesis/mcp-servers [16-08]; cli_tools_dir=~/.genesis/cli-tools + isolated gws_config_dir + gws_client_secret_path (dotfiles ~/.config/gws/client_secret.json) + kb_documents_dir=~/.genesis/kb-documents [Phase 19]**,
+            **mcp_servers_dir=~/.genesis/mcp-servers [16-08]; cli_tools_dir=~/.genesis/cli-tools + isolated gws_config_dir + gws_client_secret_path (dotfiles ~/.config/gws/client_secret.json) + kb_documents_dir=~/.genesis/kb-documents [Phase 19]; feature_specs_dir=~/.genesis/feature-specs [Phase 20 — spec.html + revisions/<n>.html]**,
             retention_keep_last/max_age_days, retention_on_start); checkpoint.py
             (AsyncSqliteSaver); context.py (build_context); engine.py (async run/resume/get_state/stream).
   dist/     gitlab.py, local.py, catalog.py, lockfile.py (**+InstalledSkill / Lockfile.skills — Phase 14, additive/back-compat**),
@@ -358,7 +371,7 @@ genesis/genesis/
             ALL routes on an APIRouter at prefix="/api" (ADR-028) + a catch-all SPA fallback. Routes:
             catalog(+available), library install|update|DELETE; workflows/{id}(+/graph); config/health,
             gitlab-token, mcp-cards, cli-cards, mcp-cards/{server}/test, secrets, environments;
-            config/mcp-servers CRUD(+tools+allowlist+test), config/clis CRUD; **config/environments(+/{label}/dev + /dev/check, 16-08 §2.0); config/native-mcp (GET status) + config/native-mcp/{id}/install|rollback (POST, 16-08 Stage B)**; **applications(+/available) + applications/{uuid}(+/sync +/sync-status +/objects(+/{uuid}) +/bundles(+/{id})) + DELETE (16-04)**; **config/native-cli (GET status) + config/native-cli/{id}/install|rollback + config/gws/auth (GET) + config/gws/auth/login(+/state) + config/gws/auth/logout (Phase 19); documents/upload + documents/gdrive + documents/{id}/link (POST/DELETE) + documents/{id}/sync + documents/sync + applications/{uuid}/documents/sync + GET documents(+?app_uuid) + documents/search + documents/{id} + DELETE documents/{id} (Phase 19)**; config/retention/{plan,apply};
+            config/mcp-servers CRUD(+tools+allowlist+test), config/clis CRUD; **config/environments(+/{label}/dev + /dev/check, 16-08 §2.0); config/native-mcp (GET status) + config/native-mcp/{id}/install|rollback (POST, 16-08 Stage B)**; **applications(+/available) + applications/{uuid}(+/sync +/sync-status +/objects(+/{uuid}) +/bundles(+/{id})) + DELETE (16-04)**; **config/native-cli (GET status) + config/native-cli/{id}/install|rollback + config/gws/auth (GET) + config/gws/auth/login(+/state) + config/gws/auth/logout (Phase 19); documents/upload + documents/gdrive + documents/{id}/link (POST/DELETE) + documents/{id}/sync + documents/sync + applications/{uuid}/documents/sync + GET documents(+?app_uuid) + documents/search + documents/{id} + DELETE documents/{id} (Phase 19)**; **applications/{uuid}/features + features/{id}(+PATCH/DELETE) + features/{id}/spec (POST create-opens-a-feature_spec-chat / GET) + features/{id}/spec/context (GET candidates / POST inject-as-./context/-files) + features/{id}/spec/milestone + features/{id}/spec/status + features/{id}/spec/{artifact,sdk.js,export.md} (Phase 20)**; config/retention/{plan,apply};
             artifacts/usage; home (metrics incl. **total_credits + credits_provenance**); runs (POST/GET),
             runs/{id}(+gate), runs/{id}/state (GET/PATCH), pause|resume|cancel|respond|fork,
             runs/{id}/artifacts(+/{name}(?mode)+/download), runs/{id}/events(?after,kinds,node)+/steps,
@@ -380,7 +393,11 @@ genesis/genesis/
             Sidebar/SplitPane/Page — **no top bar (removed v0.43.0); no breadcrumbs (removed v0.42.0); the theme
             toggle lives in Settings → General (`AppearanceSection`)**); src/shared/feedback/** (Empty/Error/Loading); src/app/**
             (providers, router, RootLayout, routes); src/features/{overview,settings,catalog,runs,
-            run-detail,documents,chat,applications,library}/**; src/test/fixtures (golden contract fixtures); src/dev/KitchenSink.
+            run-detail,documents,chat,applications,library,features}/**; src/test/fixtures (golden contract fixtures); src/dev/KitchenSink.
+            **features/features (Phase 20): FeaturesTab + CreateFeatureDialog + FeaturePage + SpecWorkspace (reused ChatThread
+            + a sandboxed review `<iframe sandbox="allow-scripts">` served by the API + a postMessage annotation→chat bridge via
+            an optional `registerSend` prop on ChatThread + status/milestone/Export-.md/Add-context). api/assets/lavish/ holds
+            the vendored MIT Lavish SDK (artifact-sdk.js + mermaid-node.js, Genesis-themed) + the esbuild-built `sdk.js`.**
             **static/ = the COMMITTED, built app** served by `genesis serve`.
             Settings (Phase 8): SettingsPage = Tabs shell (/settings/:tab?/:id?); components/manager/**
             (ResourceManager, ResourceFormDialog, SpecForm, ConfirmDialog — the standardized pattern);
@@ -439,6 +456,8 @@ genesis-workflows/
 - **ADR-038 (ACCEPTED — Phase 16, SHIPPED)** — **Managed native Appian MCP servers (vendored, versioned, replaceable, not forked).** The **Dev MCP** (`lcp-mcp-server`) + **DevOps MCP** (`appian-deployment-mcp`) are installed as managed, versioned local servers (`~/.genesis/mcp-servers/<id>/versions/<v>/` via `uv sync`; launched from the per-server venv; **read-only allowlists**; registered as a **managed reference**, not a static image → resolves the old `lcp` `<lcp-image>` placeholder). **Updatable without forking = MANUAL drop-in (2026-08-05 decision):** a new Appian release is integrated by the operator dropping the new bundle in → Genesis installs it as a new version + swaps `current` (prior kept for **rollback**; sha-verified; bundle never modified). **No auto-fetch update source** — the earlier connected-site bundle-servlet (Dev) and configured-mirror (DevOps) fetch were dropped. New prereq: `uv` at install time; Dev-MCP Basic auth is the headless default (browser/SSO = opt-in). **§2.0 (dev-env `is_dev` toggle) shipped (genesis v0.30.0); Stage B (the managed-native installer + managed-ref resolution + registry entries + API/CLI/web panel) SHIPPED — genesis-core v0.9.1 + genesis v0.31.1 + genesis-workflows v0.8.4; 16-08 COMPLETE.**
 - **ADR-040 (ACCEPTED — Phase 19, SHIPPED)** — **Managed-native CLI connector (`gws`).** The Google Workspace CLI is installed as a managed, versioned local **binary** (`~/.genesis/cli-tools/gws/versions/<v>/`; the CLI analog of ADR-038's native MCP — a `genesis-core` `CliRegistry` `"managed":"<id>"` entry resolves via an injected `launch_provider`). Genesis owns an **isolated** config dir (`~/.genesis/cli-tools/gws/config`, file keyring, its own `gws auth login`) and **reads the OAuth client** from the dotfiles-provisioned `~/.config/gws/client_secret.json` — **ships no token**; dotfiles setup is a documented prerequisite. **Read-only** Drive/Docs/Sheets/Slides scopes only (allowlist enforced before spawn). Never point Genesis at the user's real `~/.config/gws` (a forced-keyring probe once invalidated their creds). genesis-core **v0.9.2** + genesis **v0.44.0** + genesis-workflows **v0.9.3**.
 - **ADR-041 (ACCEPTED — Phase 19, SHIPPED)** — **Documents are a global first-class store linked into applications.** One row per **unique** document (dedup by `gdrive:<fileId>` / `upload:<sha256>`), stored **once** on disk (**latest version only** — sync overwrites), **linked** into ≥1 app via `kb_document_links`. **Untracking an app removes its links, never the shared document** (FK `ON DELETE CASCADE` covers links). Code-free metadata + pointers + a change-detection fingerprint in `genesis.db` (m0009); bulk parsed Markdown/JSON on disk (ADR-010/018). Refines ADR-030 (semantic/pgvector doc search = a future trigger). genesis **v0.44.0** (+ the `sync-documents` workflow in genesis-workflows **v0.9.3**).
+- **ADR-042 (ACCEPTED — Phase 20, SHIPPED)** — **Features & Specs are first-class sub-entities of an application; a spec is authored conversationally (Chat, not a workflow), HTML-authoritative.** m0010 (`kb_features` FK→`kb_applications ON DELETE CASCADE`, so untracking an app cascade-deletes its features → specs → revisions — **intrinsic to the app**, unlike Phase-19 documents). A spec's authoring surface is a **reused Chat session** (ADR-031/034 lineage) — **LangGraph is not involved, ADR-001 intact**; `genesis-kb` (16-05) gives the agent the app's KB. The **HTML artifact is authoritative** (Markdown is a derived export); the agent writes `spec.html` into its per-session `fs_write_root` sandbox (Phase 14, no new write authority). Lifecycle `draft → in-progress → in-review → completed` (user-set; agent may suggest) + milestone snapshots. **One spec per feature** in v1. genesis **v0.45.0**.
+- **ADR-043 (ACCEPTED — Phase 20, SHIPPED)** — **Embed the Lavish annotation SDK (vendored, MIT) for in-app HTML review.** Vendor the browser SDK of `kunchenguid/lavish-axi` (`artifact-sdk.js` + `mermaid-node.js` @ `899747a`) into `genesis/api/assets/lavish/`, Genesis-theme it (its `:host` palette → `--lavish-*` overrides fed from design tokens), and host the spec artifact in a **same-origin sandboxed `<iframe>`** whose host is our React chrome listening on `postMessage`. Genesis does **not** run Lavish's server/CLI/poll/export/ht-ml.app sharing. Rationale: the SDK makes **no** server calls (`parent.postMessage` only), fits the single-SPA UX + in-process ChatManager, and avoids a second window / unauthenticated `:4387` server / Node-≥22 runtime. Upstream tracked manually (pinned commit + a documented `:host` theming patch); attribution in `THIRD-PARTY-NOTICES`. Mermaid-whiteboard deferred. genesis **v0.45.0**.
 
 **Key implementation contracts:**
 - Node fns are `async fn(state, config: RunnableConfig)`. LangGraph injects `config` only when the param is annotated `RunnableConfig`; nodes read ctx via `ctx_from_config(config)`.
@@ -656,6 +675,30 @@ genesis-workflows/
   a Drive add only registers the file, so the add endpoint **auto-starts a single-doc `sync-documents` run** (best-effort — the
   content otherwise wouldn't appear until a manual sync). The document viewer must be **full-width with `overflow-x-auto`** (a
   wide spreadsheet's Markdown table overflows a fixed-width card).
+- **An agent that must AUTHOR files needs BOTH cwd=sandbox AND the fs tool trusted — and know that fs writes vs tool
+  permissions are separate gates (Phase 20, two live fixes).** Reusing the read-only chat setup for the spec-authoring
+  `feature_spec` session broke agent file writes twice. (1) **cwd mismatch:** cwd was `state_dir` but `fs_write_root` was the
+  per-session sandbox, so the agent's relative `spec.html` resolved outside the sandbox → the SDK's `fs/write_text_file`
+  handler refused it. Fix: set **cwd = the sandbox** for `feature_spec` (so a relative write lands in-sandbox, where the
+  milestone save also reads it). (2) **permission vs capability:** in the SDK, `fs/write_text_file` is gated ONLY by
+  `allow_fs_write`+`fs_write_root` (NOT `permission_mode`), while `session/request_permission` (untrusted **tools**) is what
+  `auto_deny` rejects. kiro-cli asks permission for its built-in **`fs_write` tool** before writing, so `auto_deny` denied it
+  upstream of the sandbox. Fix: **trust `fs_read`/`fs_write`** for `feature_spec` (the write is still confined by
+  `fs_write_root`; every other tool — shell, MCP mutations — stays untrusted → denied). Ground truth came from the SDK's
+  `client.py` + `test_permission_policy.py`, not the agent's self-diagnosis (it mislabeled a sandbox refusal as "prompt
+  declined"). Lesson: read the SDK's actual permission model; the two gates are independent.
+- **Give a CLI agent bulk context as FILES in its workspace, not as chat content (Phase 20).** "Add context" first dumped each
+  document's full Markdown into the transcript (as a system message) — token-heavy every turn and it cluttered the chat. Better:
+  write the docs as files under the session's `./context/<id>-slug.md` (the agent's cwd/sandbox) and post only a short note
+  naming them; the Kiro agent reads them **on demand with its file tools**. There is no ACP "attach documents" wire param for a
+  chat session (unlike `mcpServers`), so files-in-cwd is the idiomatic, efficient mechanism — and it composes with the
+  cwd=sandbox fix above.
+- **Embedding a 3rd-party browser SDK: prefer `postMessage`-host reuse over running its server (Phase 20, ADR-043).** Lavish's
+  injected `artifact-sdk.js` talks only via `parent.postMessage` (no server calls), so we vendor two source files, bundle them
+  with our own esbuild, serve the artifact + SDK **same-origin** from the API, host it in a **sandboxed iframe** (`allow-scripts`,
+  no `allow-same-origin`), and let our React chrome be the host — no second window, no `:4387` server, no Node-≥22. Theme it via
+  the vars it already exposes on its shadow `:host` (a one-line patch → `var(--lavish-*, fallback)`), fed from Genesis tokens.
+  Keep a golden `postMessage`-schema fixture so an upstream bump can't silently change the contract.
 
 ---
 
@@ -678,6 +721,34 @@ genesis-workflows/
 ---
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
+
+### ✅ SHIPPED (COMPLETE) — Phase 20: Features & Spec Authoring (genesis v0.45.0)
+
+> **As-built: `progress/phase-20-features-and-spec-authoring.md`.** An Appian application gains first-class **Features** (the
+> unit of work an engineer develops), and inside a feature a conversationally-authored, annotatable **Spec** — the first of
+> what will grow into design docs / user stories on the **feature page**. **ADR-042** (Features & Specs as first-class app
+> sub-entities; Chat-authored — ADR-001 intact; HTML-authoritative; draft→in-progress→in-review→completed) + **ADR-043** (embed
+> the vendored MIT **Lavish** annotation SDK). **genesis-only release; genesis-core/genesis-workflows unchanged.**
+>
+> **Shipped (all CI green; ADR-042/043 Accepted):**
+> - **20-01 embed spike** — `spike/2026-08-11-lavish-embed.md`; proved the Lavish SDK embeds (postMessage-only, esbuild-bundled,
+>   user-confirmed round-trip) + captured the theming seam.
+> - **20-02 data model** — **m0010** (`kb_features`/`kb_feature_specs`/`kb_feature_spec_revisions`, schema v10) + `FeatureStore`
+>   (untrack cascades features — intrinsic-to-app).
+> - **20-03 features surface** — `api/features.py` (feature CRUD + spec create) + **Features** tab + **feature page**
+>   (`/applications/:uuid/features/:featureId`) + Create-spec empty state.
+> - **20-04 spec chat** — a bound **`feature_spec`** Chat session (additive mode; `genesis-kb` auto-wired) seeded with the
+>   app/feature identity; **Add context** (the app's linked business artifacts); milestone snapshots + status.
+> - **20-05 embedded review** — vendored Lavish SDK (`api/assets/lavish/`, Genesis-themed) served same-origin; `SpecWorkspace` =
+>   reused `ChatThread` + sandboxed review iframe + the postMessage **annotation→chat bridge** + Export-`.md` (`markdownify`).
+> - **20-06 release** — genesis **v0.45.0**, CI green; ADR-042/043 Accepted.
+>
+> **Live-accepted** (create feature → the spec chat authors `spec.html` → annotate a passage in the embedded review → the
+> comment flows into the chat → the agent revises). **Two live fixes** folded in (see §7): the `feature_spec` **cwd = the fs
+> sandbox**, and **trusting `fs_read`/`fs_write`** (kiro-cli's built-in `fs_write` tool was being auto-denied). Context is
+> delivered as **`./context/` files** the agent reads on demand (not dumped into the transcript). **PHASE 20 COMPLETE.**
+> (Optional future polish: multiple specs per feature + templates; design-docs / user-stories tabs; the Mermaid-as-Excalidraw
+> whiteboard; a durable per-session identity preamble so it survives long-conversation cold-starts.)
 
 ### ✅ SHIPPED (COMPLETE) — Phase 19: Genesis Document Library (genesis-core v0.9.2 + genesis v0.44.0 + genesis-workflows v0.9.3)
 

@@ -976,8 +976,9 @@ ADR-030 (SQLite; pgvector deferred), ADR-037 spirit (we store parsed/derived con
 
 ## ADR-042 — Features & Specs are first-class sub-entities of an application (Chat-authored, HTML-authoritative) (Phase 20)
 
-**Status:** **PROPOSED (Phase 20 — spec DRAFT)** → Accepted at 20-06. Target: genesis (m0010 `kb_features`/`kb_feature_specs`/
-`kb_feature_spec_revisions` + `FeatureStore` + `api/features.py` + a Chat extension + the web Features surface).
+**Status:** **ACCEPTED (Phase 20 — SHIPPED)** — genesis **v0.45.0**: m0010 `kb_features`/`kb_feature_specs`/
+`kb_feature_spec_revisions` + `FeatureStore` + `api/features.py` (feature CRUD + spec create/context/milestone/status) +
+the Chat `feature_spec` mode + the web Features surface.
 
 - **Decision:** An Appian application gains a first-class **Feature** (the unit of work an engineer develops), and a Feature
   owns authored **artifacts** — the first being a **Spec**. Specifically:
@@ -1014,8 +1015,10 @@ ADR-030 (SQLite; pgvector deferred), ADR-037 spirit (we store parsed/derived con
 
 ## ADR-043 — Embed the Lavish annotation SDK (vendored, MIT) for in-app HTML review (Phase 20)
 
-**Status:** **PROPOSED (Phase 20 — spec DRAFT)** → Accepted at 20-06. Target: genesis web (vendored `artifact-sdk.js` +
-`mermaid-node.js` served as `/sdk.js`, a same-origin sandboxed iframe host, the annotation → chat bridge).
+**Status:** **ACCEPTED (Phase 20 — SHIPPED)** — genesis **v0.45.0**: the vendored Lavish SDK (`artifact-sdk.js` +
+`mermaid-node.js`, MIT @ `899747a`, Genesis-themed) lives in `genesis/api/assets/lavish/` (esbuild-built `sdk.js`), served
+same-origin with the artifact via `api/features.py`; `SpecWorkspace` hosts the sandboxed iframe + the postMessage
+annotation→chat bridge.
 
 - **Decision:** Provide the annotate-the-HTML-and-feed-the-agent experience by **vendoring the browser SDK** of
   **`kunchenguid/lavish-axi` (MIT)** — `artifact-sdk.js` (+ its `mermaid-node.js` helper) and the `injectLavishSdk` transform —

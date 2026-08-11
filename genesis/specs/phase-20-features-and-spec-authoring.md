@@ -1,6 +1,6 @@
 # Phase 20 — Features & Spec Authoring (umbrella)
 
-> **Status:** 📋 **DRAFT — spec only** (umbrella + sub-phases 20-01..20-06); awaiting approval to implement. · **Author:**
+> **Status:** ✅ **SHIPPED — COMPLETE (20-01..20-06)** — genesis **v0.45.0**, CI green; ADR-042/043 Accepted. · **Author:**
 > Genesis agent · **Date:** 2026-08-11
 > **Goal:** Give an Appian application a first-class notion of a **Feature** (the unit of work an engineer develops), and make
 > the **feature page** the workspace where a feature's artifacts are authored. This phase delivers the **first** such artifact:
