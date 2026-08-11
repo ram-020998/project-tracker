@@ -1,6 +1,10 @@
 # 19-06 — Consumption: `genesis-kb` document tools + evidence-pack integration
 
-> **Status:** DRAFT — spec only. **Repo:** genesis. **Depends on:** 19-03 (store). Makes documents usable *alongside the KB*.
+> **Status:** ✅ **CODE-COMPLETE — UNCOMMITTED** (commit at 19-08 per the user). `genesis-kb` MCP gains
+> `list_documents`/`get_document`/`search_documents` (read-only `DocumentStore`, auto-trusted in chat via `_KB_TOOLS`) +
+> `KbStore.build_evidence_pack` now includes an app's linked docs as bounded code-free excerpts (`documents` key). +3 tests
+> (genesis 375 green), ruff clean. See `progress/phase-19-document-library.md`. **Repo:** genesis. **Depends on:** 19-03 (store).
+> Makes documents usable *alongside the KB*.
 
 ## Goal
 Expose the library to the two consumers that matter — **chat** (via the read-only `genesis-kb` MCP) and the **workflows** that

@@ -1,11 +1,11 @@
 # Phase 19 — Genesis Document Library — progress (as-built)
 
 > **Status (2026-08-11):** IN PROGRESS. **19-01 ✅ (live-verified) · 19-02 ✅ code-complete + CLI + live smoke test · 19-03 ✅
-> code-complete · 19-04 ✅ (parsing pipeline) · 19-05 ✅ (sync-documents workflow + api/documents.py).** Next: 19-06 → 19-08.
-> **⚠️ IMPORTANT — the 19-02/19-03/19-04/19-05 code is UNCOMMITTED** in the working trees of `genesis`, `genesis-core`,
-> `genesis-workflows` (per the user's instruction to *commit at phase completion*). A new session must NOT re-create these
-> files — they already exist locally. Spec: `specs/phase-19-document-library.md` (+ `19-01..19-08`); ADR-040 (managed-native
-> CLI) + ADR-041 (global document library) — both **Proposed** (flip to Accepted at release, 19-08).
+> code-complete · 19-04 ✅ (parsing pipeline) · 19-05 ✅ (sync-documents workflow + api/documents.py) · 19-06 ✅ (genesis-kb doc
+> tools + evidence-pack).** Next: 19-07 → 19-08. **⚠️ IMPORTANT — the 19-02..19-06 code is UNCOMMITTED** in the working trees
+> of `genesis`, `genesis-core`, `genesis-workflows` (per the user's instruction to *commit at phase completion*). A new session
+> must NOT re-create these files — they already exist locally. Spec: `specs/phase-19-document-library.md` (+ `19-01..19-08`);
+> ADR-040 (managed-native CLI) + ADR-041 (global document library) — both **Proposed** (flip to Accepted at release, 19-08).
 
 ## Decisions locked (from the design discussion)
 - **Documents = global first-class store + app-link table** (ADR-041). Dedup by Drive file-id (`gdrive:<id>`) / upload
@@ -97,20 +97,35 @@ fingerprint fields (`id,name,mimeType,modifiedTime,version,md5Checksum`) + expor
   search/delete, sync→409, gdrive→409); `workflows/sync-documents/tests/test_workflow.py` (+7 — baseline pull→parse→store,
   unchanged-skip, source_missing, auth-fail-fast, validator/summary, with a fake gws via the harness).
 
+## 19-06 — Consumption: genesis-kb document tools + evidence-pack ✅ (code, UNCOMMITTED)
+- **`genesis/mcp/kb_server.py`** (M) — three read-only document tools added to the Tier-1 surface (now 20 tools):
+  `list_documents(app_uuid?)`, `get_document(document_id)` (metadata + Markdown body + JSON tables), `search_documents(query,
+  app_uuid?)` (LIKE over title + section text). `KbAccessor` refactored to share one read-only `Database` (`_ro_db`) across a
+  `KbStore` + a `DocumentStore` (`_docs`). Auto-trusted in chat: `chat/mcp.py` builds the trust set from `_KB_TOOLS`, so
+  `@genesis-kb/{list,get,search}_documents` are trusted with no chat change.
+- **`genesis/kb/store.py`** (M) — `build_evidence_pack` now includes a **`documents`** key: an app's linked, parsed docs
+  (`kb_document_links` JOIN `kb_documents WHERE status='parsed'`) as **bounded, code-free excerpts** (new caps
+  `documents`=12, `document_chars`=4000; `_evidence_documents` helper reads the on-disk Markdown, truncates, flags
+  `excerpt_truncated`). Read-only (docs never mutated); protects the context window (Phase-9 spirit). `design-doc` /
+  `generate-business-map` get document-aware grounding for free.
+- Tests: `tests/test_kb_server.py` (+2 — doc-tool shapes + app-scoping + not-found + trust-surface membership);
+  `tests/test_kb_store.py` (+1 evidence-pack-with-linked-documents [size budget respected] + a `documents == []` assert on the
+  no-docs pack).
+
 ## Test status (uncommitted working tree)
-- genesis **372 pass**, ruff clean · genesis-core **65 pass**, ruff clean · genesis-workflows **75 workflow tests** +
+- genesis **375 pass**, ruff clean · genesis-core **65 pass**, ruff clean · genesis-workflows **75 workflow tests** +
   `validate_library.py` green (7 workflows).
 
 ## Resume here (next session)
-1. **19-06 — consumption**: `genesis-kb` MCP `list/get/search_documents` (over `DocumentStore`, Atlas-style shapes) +
-   `KbStore.build_evidence_pack` extended to include an app's linked documents (sections). Chat/spec/design flows then use docs
-   alongside the KB.
-2. **19-07 — web**: global Document Library page (upload/add-Drive/link/sync/search) + per-app **Business Artifacts** tab +
-   Settings→CLI **gws connector card** (status/connect/disconnect from the 19-02 `api/native_cli.py` gws-auth routes).
-3. **19-08 — release**: bump chain (genesis-core → genesis → genesis-workflows), **commit the whole phase**, CI green, live
-   acceptance, flip ADR-040/041 → Accepted, refresh the bible §2 tag table + test counts.
+1. **19-07 — web** (genesis `web/`): a global **Document Library** page (list/upload/add-Drive/link/sync/search over
+   `/api/documents/**`) + a per-app **Business Artifacts** tab (its linked docs, `?app_uuid=`) + a Settings→CLI **gws connector
+   card** (status/connect/disconnect via the 19-02 `api/native_cli.py` gws-auth routes: `GET /config/gws/auth`, `POST
+   /config/gws/auth/login` → sign-in URL, login-state poll, logout). After web changes: `npm run build` + commit `web/static/`.
+2. **19-08 — release**: bump chain (genesis-core → genesis → genesis-workflows), **commit the whole phase**, CI green, live
+   acceptance (real gws login + a real Drive doc synced + shown in chat/evidence), flip ADR-040/041 → Accepted, refresh the
+   bible §2 tag table + test counts.
 
-**Handoff note:** everything above (19-02/19-03/19-04/19-05) is in the working trees, tested green, but NOT committed. Do not
+**Handoff note:** everything above (19-02..19-06) is in the working trees, tested green, but NOT committed. Do not
 regenerate; `git status` in each repo shows the new/modified files. Commit at phase completion (19-08) per the user's
 instruction. **New runtime deps** (`pypdf`/`python-docx`/`openpyxl`) are already `pip install`-ed in the `.venv` and declared
 in `pyproject.toml`.
