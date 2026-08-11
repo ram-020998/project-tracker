@@ -137,3 +137,14 @@ relative `spec.html` lands inside `fs_write_root` and where milestone reads it (
 `cwd=state_dir` for skill discovery). Regression test: `test_feature_spec_cwd_is_the_writable_sandbox`
 (asserts `cwd == fs_write_root` for a feature_spec session). Requires a `genesis serve` **restart** to
 take effect (in-process server code). genesis 397 pytest green (was 396; +1 regression test).
+
+### Live refinements (20-05) — context UX + efficient injection
+Two more fixes from live testing: (1) **"Add context" moved into the chat column** (a chat action, not a
+review-pane one) — a header bar above the reused `ChatThread`; removed from the review toolbar. (2) **File-based
+context instead of transcript dumps:** `inject_context` now writes each selected document's Markdown as a
+**file under the session's `./context/<id>-slug.md`** (the agent's cwd, now the sandbox) and appends only a
+short system note listing the filenames — so the full content no longer clutters the chat AND it's
+token-efficient (the Kiro agent reads the files on demand with its file tools rather than carrying all
+content in every turn's context). `_STEERING_SPEC` now tells the agent its reference documents live under
+`./context/`. Test updated to assert the context file is written (with content) while the transcript note
+carries only the filename. genesis 397 pytest green, ruff clean; web tsc/eslint/build clean.
