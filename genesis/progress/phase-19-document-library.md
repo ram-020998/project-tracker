@@ -1,11 +1,12 @@
 # Phase 19 — Genesis Document Library — progress (as-built)
 
-> **Status (2026-08-11):** IN PROGRESS. **19-01 ✅ (live-verified) · 19-02 ✅ code-complete + CLI + live smoke test · 19-03 ✅
-> code-complete · 19-04 ✅ (parsing pipeline) · 19-05 ✅ (sync-documents workflow + api/documents.py) · 19-06 ✅ (genesis-kb doc
-> tools + evidence-pack).** Next: 19-07 → 19-08. **⚠️ IMPORTANT — the 19-02..19-06 code is UNCOMMITTED** in the working trees
-> of `genesis`, `genesis-core`, `genesis-workflows` (per the user's instruction to *commit at phase completion*). A new session
-> must NOT re-create these files — they already exist locally. Spec: `specs/phase-19-document-library.md` (+ `19-01..19-08`);
-> ADR-040 (managed-native CLI) + ADR-041 (global document library) — both **Proposed** (flip to Accepted at release, 19-08).
+> **Status (2026-08-11):** IN PROGRESS. **19-01 ✅ · 19-02 ✅ (+ live smoke test) · 19-03 ✅ · 19-04 ✅ (parsing) · 19-05 ✅
+> (sync-documents workflow + api/documents.py) · 19-06 ✅ (genesis-kb doc tools + evidence-pack) · 19-07 ✅ (web: Library page +
+> Business Artifacts tab + gws connector card).** Next: **19-08 (release)** — the only remaining sub-phase. **⚠️ IMPORTANT —
+> the 19-02..19-07 code is UNCOMMITTED** in the working trees of `genesis`, `genesis-core`, `genesis-workflows` (per the user's
+> instruction to *commit at phase completion*) — including the rebuilt `web/static/` bundle. A new session must NOT re-create
+> these files. Spec: `specs/phase-19-document-library.md` (+ `19-01..19-08`); ADR-040 (managed-native CLI) + ADR-041 (global
+> document library) — both **Proposed** (flip to Accepted at release, 19-08).
 
 ## Decisions locked (from the design discussion)
 - **Documents = global first-class store + app-link table** (ADR-041). Dedup by Drive file-id (`gdrive:<id>`) / upload
@@ -112,20 +113,35 @@ fingerprint fields (`id,name,mimeType,modifiedTime,version,md5Checksum`) + expor
   `tests/test_kb_store.py` (+1 evidence-pack-with-linked-documents [size budget respected] + a `documents == []` assert on the
   no-docs pack).
 
+## 19-07 — Web: Document Library page + Business Artifacts tab + gws connector card ✅ (code, UNCOMMITTED)
+- **Client:** `types/documents.ts` + gws types in `types/config.ts`; `lib/api/documents.ts` (list/get/search/upload[multipart]/
+  addGdrive/link/unlink/sync[single|app|library]/remove) + `configApi` gws methods (`gwsAuth`/`gwsLoginBegin`/`gwsLogout`) +
+  api-index export; query keys `documents.*` + `config.gwsAuth`.
+- **`features/library/`** (NEW — note: `features/documents/` was already taken by the 07-09 `DocumentPreview`/renderers, which
+  this REUSES): `hooks.ts` (TanStack query/mutations), `DocumentTable.tsx` (+`docTone`), `AddDocumentDialog.tsx` (Upload /
+  Google-Drive-link / Pick-from-library tabs), `DocumentDetailDrawer.tsx` (metadata + `MarkdownView` body), `LibraryPage.tsx`
+  (global page: search + source/status filters + Sync-all + Add + remove-confirm + detail drawer via `/documents/:id`).
+- **Per-app tab:** `BusinessArtifactsTab.tsx` (linked docs; Add [upload/drive/pick] + per-row Sync + Unlink) wired into
+  `features/applications/ApplicationDetail.tsx` as the 5th tab (**Business Map · Overview · Syncs · Releases · Business
+  Artifacts**).
+- **Settings → CLI:** `components/cli/GwsConnectorCard.tsx` (install/connection state + Connect/Reconnect [opens the sign-in URL
+  from `POST /config/gws/auth/login`] / Disconnect; read-only-scopes note) mounted atop `CliTab`; gws hooks in `settings/hooks.ts`.
+- **Nav/routes:** Sidebar “Documents” entry (`FileText`); routes `/documents` + `/documents/:id`.
+- Tests: `features/library/library.test.tsx` (+6 — list, add-upload, sync, **jest-axe a11y**, connector connect-flow [mocked
+  auth URL] + connected/disconnect). **`web/static/` rebuilt** (`npm run build`) — uncommitted with the rest.
+
 ## Test status (uncommitted working tree)
-- genesis **375 pass**, ruff clean · genesis-core **65 pass**, ruff clean · genesis-workflows **75 workflow tests** +
-  `validate_library.py` green (7 workflows).
+- genesis **375 pass**, ruff clean · genesis-core **65 pass** · genesis-workflows **75 workflow tests** + `validate_library`
+  (7 workflows) · **web: tsc clean, eslint 0 errors, 138 Vitest pass (17 files), `npm run build` OK.**
 
 ## Resume here (next session)
-1. **19-07 — web** (genesis `web/`): a global **Document Library** page (list/upload/add-Drive/link/sync/search over
-   `/api/documents/**`) + a per-app **Business Artifacts** tab (its linked docs, `?app_uuid=`) + a Settings→CLI **gws connector
-   card** (status/connect/disconnect via the 19-02 `api/native_cli.py` gws-auth routes: `GET /config/gws/auth`, `POST
-   /config/gws/auth/login` → sign-in URL, login-state poll, logout). After web changes: `npm run build` + commit `web/static/`.
-2. **19-08 — release**: bump chain (genesis-core → genesis → genesis-workflows), **commit the whole phase**, CI green, live
-   acceptance (real gws login + a real Drive doc synced + shown in chat/evidence), flip ADR-040/041 → Accepted, refresh the
-   bible §2 tag table + test counts.
+1. **19-08 — release (the only remaining sub-phase)**: bump chain **genesis-core → genesis → genesis-workflows** (tags + pins),
+   **commit the whole Phase-19 working tree** (all repos; rebuild + commit `web/static/`), push, CI green (pin `ruff==0.15.20`
+   is already in genesis+core — verify workflows CI too), **live acceptance** (real `gws auth login` + add a real Drive doc +
+   `sync-documents` run → parsed + visible in the Library, the app’s Business Artifacts tab, chat `@genesis-kb/get_document`,
+   and an evidence pack), **flip ADR-040/041 → Accepted**, refresh the bible §2 tag table + test counts + README/tracker.
 
-**Handoff note:** everything above (19-02..19-06) is in the working trees, tested green, but NOT committed. Do not
+**Handoff note:** everything above (19-02..19-07) is in the working trees, tested green, but NOT committed. Do not
 regenerate; `git status` in each repo shows the new/modified files. Commit at phase completion (19-08) per the user's
 instruction. **New runtime deps** (`pypdf`/`python-docx`/`openpyxl`) are already `pip install`-ed in the `.venv` and declared
 in `pyproject.toml`.

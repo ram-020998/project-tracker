@@ -44,9 +44,9 @@
 > store linked into apps (ADR-041), reached via a managed-native `gws` CLI connector (ADR-040, isolated config + read-only
 > OAuth, client read from the dotfiles `~/.config/gws/client_secret.json`, no shipped token). 19-01 spike live-verified; 19-02
 > connector code-complete + live smoke test; 19-03 m0009 + DocumentStore; 19-04 parsing pipeline (pypdf/python-docx/openpyxl,
-> pinned); 19-05 sync-documents workflow + api/documents.py; 19-06 genesis-kb doc tools + evidence-pack. genesis 375 / core 65
-> green (working tree). Next = 19-07 web → 19-08 release. See §9's Phase-19 block +
-> `progress/phase-19-document-library.md`.**
+> pinned); 19-05 sync-documents workflow + api/documents.py; 19-06 genesis-kb doc tools + evidence-pack; 19-07 web (Library page
+> + Business Artifacts tab + gws connector card). genesis 375 / core 65 / web 138 green (working tree). Next = 19-08 release
+> (only sub-phase left). See §9's Phase-19 block + `progress/phase-19-document-library.md`.**
 
 ---
 
@@ -652,7 +652,7 @@ genesis-workflows/
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### ⭐ ACTIVE (IN PROGRESS — spec + 19-01..19-06 done; **code UNCOMMITTED**, commit at 19-08) — Phase 19: Genesis Document Library
+### ⭐ ACTIVE (IN PROGRESS — spec + 19-01..19-07 done; only 19-08 release left; **code UNCOMMITTED**, commit at 19-08) — Phase 19: Genesis Document Library
 
 > **Handoff for the next session — READ `progress/phase-19-document-library.md` FIRST.** Attach the business documents that
 > describe an application (the PDFs/Word/Excel/Google Docs in Google Drive) to Genesis, parse them to LLM-consumable Markdown
@@ -688,13 +688,18 @@ genesis-workflows/
 > - **19-06 consumption ✅** — `genesis-kb` MCP gains read-only `list_documents`/`get_document`/`search_documents` (auto-trusted
 >   in chat) + `KbStore.build_evidence_pack` now carries an app's linked docs as bounded code-free excerpts (`documents` key) so
 >   `design-doc`/`generate-business-map` are document-aware.
-> - **Tests (working tree):** genesis **375**, genesis-core **65** green; genesis-workflows **75 workflow tests** +
->   `validate_library` green (7 workflows); ruff clean.
+> - **19-07 web ✅** — global **Document Library** page (`features/library/`: list/search/filter/upload/add-Drive/link/sync/
+>   remove + detail drawer via `/documents/:id`), a per-app **Business Artifacts** tab (5th app-detail tab: linked docs + add
+>   [upload/drive/**pick-from-library**] + unlink/sync), a **Settings→CLI Google Workspace connector card** (Connect/Reconnect
+>   via the sign-in URL / Disconnect). Reuses the 07-09 `DocumentPreview`/`MarkdownView`.
+> - **Tests (working tree):** genesis **375**, genesis-core **65** green; genesis-workflows **75** + `validate_library` (7);
+>   **web tsc clean, eslint 0 errors, 138 Vitest (17 files) incl. jest-axe a11y, `npm run build` OK**; ruff clean.
 >
-> **Next (resume here):** **19-07** web — global **Document Library** page + per-app **Business Artifacts** tab + Settings→CLI
-> **gws connector card** (over `/api/documents/**` + the 19-02 gws-auth routes; `npm run build` + commit `web/static/` after) →
-> **19-08** release chain (core → genesis → genesis-workflows), **commit the whole phase**, CI green, live acceptance, **flip
-> ADR-040/041 → Accepted**, refresh §2 tag table + test counts. Specs: `specs/phase-19-document-library.md` (+ `19-01..19-08`).
+> **Next (resume here — the ONLY remaining sub-phase): 19-08 release** — bump chain genesis-core → genesis → genesis-workflows
+> (tags + pins), **commit the whole Phase-19 working tree across all repos** (rebuild + commit `web/static/`), push, CI green,
+> **live acceptance** (real gws login + a real Drive doc synced → visible in the Library, the app’s Business Artifacts tab, chat
+> `@genesis-kb/get_document`, and an evidence pack), **flip ADR-040/041 → Accepted**, refresh §2 tag table + test counts.
+> Specs: `specs/phase-19-document-library.md` (+ `19-01..19-08`).
 
 
 ### ✅ SHIPPED (COMPLETE) — Phase 18: Appian Parser Accuracy Overhaul (genesis-appian-parser v0.2.0 + genesis v0.40.0 + genesis-workflows v0.9.2)

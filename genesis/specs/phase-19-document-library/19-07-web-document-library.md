@@ -1,7 +1,11 @@
 # 19-07 — Web: global Document Library page + per-app Business Artifacts tab
 
-> **Status:** DRAFT — spec only. **Repo:** genesis (`web/`). **Depends on:** 19-05 (API), 19-02 (connector UI). Frontend-only
-> changes still ship a genesis release (committed `web/static/`).
+> **Status:** ✅ **CODE-COMPLETE — UNCOMMITTED** (commit at 19-08 per the user). Global **Document Library** page
+> (`features/library/`), a per-app **Business Artifacts** tab, and a **Settings→CLI Google Workspace connector card**;
+> `lib/api/documents.ts` + `configApi` gws methods + query keys; Sidebar entry + `/documents` routes; reuses the 07-09
+> `DocumentPreview`/`MarkdownView`. Verified: **tsc clean, eslint 0 errors, 138 Vitest (17 files) incl. jest-axe a11y,
+> `npm run build` OK** (`web/static/` rebuilt, uncommitted). See `progress/phase-19-document-library.md`. **Repo:** genesis
+> (`web/`). **Depends on:** 19-05 (API), 19-02 (connector auth routes). Frontend-only changes still ship a genesis release.
 
 ## Goal
 Two surfaces for the library + the connector control, reusing existing primitives/tokens (ADR-027) and the 07-09
