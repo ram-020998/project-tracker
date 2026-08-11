@@ -868,3 +868,97 @@ sync (mitigated by the stale hook). Quality is bounded by KB richness + naming (
 review gate, and 17-06 acceptance against the real app). Preserves ADR-001 (control flow), ADR-011 (reliability trio),
 ADR-037 (code-free), ADR-030/032 (SQLite persistence + real credits), ADR-026 (local single-user). Pairs with ADR-036/037
 (the KB it interprets).
+
+---
+
+## ADR-040 — Managed-native CLI connector (`gws` installed/versioned/authenticated inside Genesis, standard OAuth) (Phase 19)
+
+**Status:** Proposed (Phase 19, sub-phases 19-01/19-02) — spec only (`specs/phase-19-document-library.md` +
+`phase-19-document-library/19-01..19-02`); awaiting approval to implement.
+
+**Context.** Phase 19 (the Document Library) must read business documents out of **Google Drive**. The organization's standard
+tool for talking to Google is the **Google Workspace CLI (`gws`)** — a single self-contained binary that builds its surface
+from Google's Discovery API and emits structured JSON. The user's requirement: `gws` should be **integrated natively inside
+Genesis** (like the managed native Appian Dev/DevOps MCP servers, ADR-038) — installed and configured from Genesis, **not** a
+per-user terminal install — and authenticated with `gws`'s **standard OAuth** (the same auth approach the org's `dotfiles`
+setup uses: a shared OAuth client + browser login), not a bespoke scheme. Today `CliRegistry` is **PATH-only**
+(`ensure()` = `shutil.which`), so there is no managed-CLI concept to hang this on.
+
+**Decision.** Introduce a **managed-native CLI tier** parallel to ADR-038, plus point `gws` at a Genesis-owned config for its
+standard OAuth:
+1. **`NativeCliInstaller`** — a lighter cousin of `NativeMcpInstaller`. Because `gws` is a **single static binary** there is no
+   `uv`/venv: install a drop-in binary under `~/.genesis/cli-tools/<id>/versions/<version>/`, `chmod +x`, sha256 + an atomic
+   `NativeCliLockfile`, atomic-switch `current`, keep the prior for **rollback**; **no auto-fetch** (manual drop-in, per
+   ADR-038's rule). `active_launch_spec(id)` returns the binary path.
+2. **`CliRegistry` managed resolution** (genesis-core, additive, `CORE_MAJOR` stays 1) — a `cli-registry.json` entry may carry
+   `{"managed":"<id>"}`; `ensure()`/`run()` resolve the binary via an injected `launch_provider`, falling back to `shutil.which`
+   for unmanaged CLIs. Env `${VAR}` still resolves via SecretProvider → EnvironmentRegistry → os.environ (the installer never
+   touches secrets — same launch-vs-env boundary as ADR-038).
+3. **Standard OAuth, Genesis-hosted config.** Genesis drives `gws`'s own `gws auth login` (browser OAuth) with
+   `GOOGLE_WORKSPACE_CLI_CONFIG_DIR=~/.genesis/cli-tools/gws/config` + `KEYRING_BACKEND=file`, and the **shared org OAuth
+   client id/secret** from Genesis's SecretProvider (so `gws auth setup`/`gcloud` are skipped). The user approves a captured
+   sign-in URL surfaced in Settings → CLI; the localhost callback completes on the same machine. **The user's Google tokens
+   live in `gws`'s encrypted config dir; Genesis stores only the client id/secret and never logs tokens.** A load-bearing
+   spike (19-01) confirms the browser-OAuth completes under a spawned subprocess before the UI is built (fallback:
+   `gws auth export` → `GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE`).
+4. **Read-only by construction.** Request only read-only Drive/Docs/Sheets/Slides OAuth scopes, and enforce a
+   read-only, drive/docs/sheets/slides-only **allowlist at a single `gws` access seam** (`gws_client`) — no Gmail/Calendar/
+   Admin/write (defense in depth, mirrors ADR-031/037 + the ADR-038 read-only allowlist).
+
+**Alternatives considered.** (a) **Register `gws` in the existing PATH-based CLI registry with an install hint** — rejected:
+requires a per-user terminal install (exactly what the user doesn't want) and gives Genesis no version/rollback control.
+(b) **Wrap Google Drive via a custom MCP server** — rejected: `gws` is the org standard and already agent/JSON-friendly;
+re-implementing Drive access is wasteful and diverges from the org. (c) **Bespoke OAuth in Genesis** — rejected: the user
+wants the *standard* `gws`/dotfiles auth, and re-implementing OAuth + token storage duplicates what `gws` already does
+securely. (d) **Service account** — rejected: can't read a user's personal Drive without domain-wide delegation; per-user
+OAuth is required.
+
+**Consequences.** Genesis gains a managed, versioned, rollback-able **CLI** tier (generalizes the native-connector idea beyond
+MCP servers) and a first non-Appian native integration. New prerequisite: the shared org OAuth client (Desktop-app type,
+localhost redirect) provisioned into Genesis secrets; a small install bundle for the `gws` binary (manual drop-in, no
+auto-update). The browser-OAuth-under-subprocess mechanism is the one load-bearing risk, de-risked by the 19-01 spike with a
+documented `auth export` fallback. Preserves ADR-005/029 (registry governance; read-only allowlist cap), ADR-026 (local
+single-user — one gws identity per instance). Pairs with ADR-041 (the document library this connector feeds).
+
+---
+
+## ADR-041 — Documents are a global first-class store linked into applications (dedup; untrack unlinks, never deletes) (Phase 19)
+
+**Status:** Proposed (Phase 19, sub-phase 19-03) — spec only; awaiting approval to implement.
+
+**Context.** Users want to attach business documents (PDF/Word/Excel/Google Docs) to an application and keep them in Genesis
+for spec generation / design discussion. But the **same document is often relevant to multiple applications**, and the user
+explicitly does **not** want to maintain the same document separately per app. Meanwhile the existing `kb_*` store is strictly
+**per-application**: every `kb_*` table is app-scoped and **untrack is table-scoped by `app_uuid`** (untracking an app deletes
+its rows). A shared document store breaks that invariant.
+
+**Decision.** Model documents as a **global, first-class store** with an **app-link table**, stored **once** and **linked**:
+1. **`kb_documents` is app-independent** — one row per **unique** document (dedup identity = Drive **file-id** for `gdrive`
+   docs, **content-hash** for uploads), with its parsed content kept as a **single latest-version** Markdown artifact on disk
+   (+ JSON tables for spreadsheets), pointers/hash/sync-fingerprint in `genesis.db` (m0009).
+2. **`kb_document_links(document_id, app_uuid)`** associates a document with one or more apps. **Adding = upsert into the
+   library (dedup) + create a link;** picking an existing library document = just a link. Sync runs **once per document**, not
+   per app.
+3. **Untrack an app unlinks, never deletes.** Untracking an application removes its `kb_document_links` rows (FK cascade) but
+   **never deletes a shared document**; a document with zero links remains a first-class library citizen. This is a
+   **deliberate departure** from the per-app table-scoped untrack model (ADR-036/16-02) and is scoped to the document tables.
+4. **Latest-version-only.** Sync **overwrites** the single on-disk artifact; no historical content is retained (only the
+   change-detection fingerprint). Upstream-deleted Drive files are flagged `source_missing` (last content kept), never dropped
+   silently.
+5. **Read-only user content, consumed alongside the KB.** Documents are grounding context surfaced via the `genesis-kb` MCP
+   (`list/get/search_documents`) and `KbStore.build_evidence_pack`; workflows read but never mutate them. Semantic/pgvector
+   search over `kb_document_sections` is a future ADR-030 trigger, not this phase.
+
+**Alternatives considered.** (a) **Per-app document tables (app-scoped, duplicated)** — rejected: the user explicitly rejected
+maintaining the same doc per app; wastes storage and forces N syncs of one Drive file. (b) **Documents as `kb_*` rows under
+each app with a shared-content pointer** — rejected: still couples lifecycle to a single app's untrack; the link table is
+cleaner. (c) **Store documents inside the business map / evidence pack only** — rejected: documents must be independently
+listed, synced, and reused across apps and consumers. (d) **Keep full version history on disk** — rejected: the user wants
+latest-only; history adds storage + complexity for no stated need.
+
+**Consequences.** Genesis gets a reusable, deduplicated document library that multiple apps (and multiple consumers) share,
+with single-source sync. Cost: a new cross-app concern that intentionally sits outside the per-app untrack sweep — untrack
+logic and any "rebuild app" flow must be **link-aware** (drop links, keep documents), and an optional cleanup path handles
+truly orphaned (zero-link) documents by user action, not automatically. Preserves ADR-010/018 (bulk → files, pointers → db),
+ADR-030 (SQLite; pgvector deferred), ADR-037 spirit (we store parsed/derived content; the *original* is retained because it is
+**user content**, unlike Appian SAIL). Pairs with ADR-040 (the `gws` connector that pulls/syncs the Drive-sourced documents).
