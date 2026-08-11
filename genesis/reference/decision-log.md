@@ -894,13 +894,18 @@ standard OAuth:
    `{"managed":"<id>"}`; `ensure()`/`run()` resolve the binary via an injected `launch_provider`, falling back to `shutil.which`
    for unmanaged CLIs. Env `${VAR}` still resolves via SecretProvider → EnvironmentRegistry → os.environ (the installer never
    touches secrets — same launch-vs-env boundary as ADR-038).
-3. **Standard OAuth, Genesis-hosted config.** Genesis drives `gws`'s own `gws auth login` (browser OAuth) with
-   `GOOGLE_WORKSPACE_CLI_CONFIG_DIR=~/.genesis/cli-tools/gws/config` + `KEYRING_BACKEND=file`, and the **shared org OAuth
-   client id/secret** from Genesis's SecretProvider (so `gws auth setup`/`gcloud` are skipped). The user approves a captured
-   sign-in URL surfaced in Settings → CLI; the localhost callback completes on the same machine. **The user's Google tokens
-   live in `gws`'s encrypted config dir; Genesis stores only the client id/secret and never logs tokens.** A load-bearing
-   spike (19-01) confirms the browser-OAuth completes under a spawned subprocess before the UI is built (fallback:
-   `gws auth export` → `GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE`).
+3. **Standard OAuth, Genesis-hosted config, client read from dotfiles output.** Genesis drives `gws`'s own `gws auth login`
+   (browser OAuth) with `GOOGLE_WORKSPACE_CLI_CONFIG_DIR=~/.genesis/cli-tools/gws/config` + `KEYRING_BACKEND=file`. **Genesis
+   ships no OAuth client/token.** The org **`dotfiles` setup is a documented prerequisite** — it provisions the shared OAuth
+   client (from Secret Manager in `peng-os`, via gcloud/ADC — dotfiles owns that) to **`~/.config/gws/client_secret.json`**
+   (a Desktop-app client with an `http://localhost` loopback redirect). Genesis **reads** `client_id`/`client_secret` from
+   that file (path overridable) and injects them as `GOOGLE_WORKSPACE_CLI_CLIENT_ID`/`CLIENT_SECRET` for its `gws` calls; it
+   never runs gcloud itself, never ships a token, and fails clearly if the file is absent ("complete the dotfiles setup
+   first"). The user then approves a captured sign-in URL surfaced in Settings → CLI; the localhost callback completes on the
+   same machine. **The user's Google tokens live in `gws`'s encrypted config dir; Genesis stores only nothing persistent of
+   its own and never logs tokens.** Verified end-to-end on a real machine (2026-08-11): client file present, standard OAuth
+   login, read-only `gws drive files list` returning the sync fingerprint. Spike (19-01) confirmed the browser-OAuth completes
+   under a spawned subprocess (fallback: `gws auth export` → `GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE`).
 4. **Read-only by construction.** Request only read-only Drive/Docs/Sheets/Slides OAuth scopes, and enforce a
    read-only, drive/docs/sheets/slides-only **allowlist at a single `gws` access seam** (`gws_client`) — no Gmail/Calendar/
    Admin/write (defense in depth, mirrors ADR-031/037 + the ADR-038 read-only allowlist).

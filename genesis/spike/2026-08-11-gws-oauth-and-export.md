@@ -60,3 +60,13 @@ are downloaded via `drive files get` (alt=media) and parsed server-side (19-04).
 ## Conclusion
 Proceed with **19-02 as specced** — the primary browser-OAuth-under-subprocess mechanism works; the `auth export` handoff
 stays documented as a fallback but is **not** the primary path. No spec changes required.
+
+## Live end-to-end verification (2026-08-11, after dotfiles setup on the real machine)
+The manual-acceptance items are now **confirmed on real infrastructure**:
+- `dotfiles` provisioned **`~/.config/gws/client_secret.json`** (mode 0600) — a Desktop-app `installed` client (`client_id`
+  ending `apps.googleusercontent.com`, `client_secret` present, `redirect_uris:["http://localhost"]`); `gws auth status`
+  reports `client_config_exists:true`, `credential_source:"client_secret.json"`. **Q3/Q4 = confirmed.**
+- After `gws auth login`, **`gws drive files list` returned exit 0** with real files carrying `modifiedTime` + `version` (the
+  19-05 sync fingerprint) — read-only Drive access proven against live data.
+- **Decision (locked):** Genesis reads the OAuth client from `~/.config/gws/client_secret.json` (dotfiles = documented
+  prerequisite), ships **no** token, and drives `gws auth login` under its own config dir. See ADR-040 + 19-02.
