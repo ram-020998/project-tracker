@@ -11,7 +11,7 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-07 — latest SHIPPED: genesis v0.43.0 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-11 — latest SHIPPED: genesis v0.43.0 +
 > genesis-workflows v0.9.2 + genesis-core v0.9.1 + kiro-agent-sdk v0.6.0 + genesis-appian-parser v0.2.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
@@ -156,7 +156,8 @@ has no CI — validated transitively by core+genesis installing its tag).
   m0002 migration): a read-only conversational Chat page — talk to Kiro (Atlas read MCP) + query all
   Genesis state via a read-only introspection MCP server (`genesis/mcp/introspection_server.py`).
   Follow-ups: Atlas read `tool_allowlist` (workflows v0.4.2), CRLF SSE streaming fix (v0.19.1), a UI
-  polish batch (v0.19.2: breadcrumbs, list-view, collapsed nav, clickable catalog cards).
+  polish batch (v0.19.2: breadcrumbs, list-view, collapsed nav, clickable catalog cards). **(The top bar + breadcrumbs
+  were later removed — v0.42.0/v0.43.0 — and the theme toggle moved to Settings → General.)**
 - **Phase 11 — Credit & Usage Tracking — SHIPPED** (sdk v0.4.0, core v0.8.0, genesis v0.20.0; ADR-032;
   m0003 migration): REAL metered per-turn Kiro credits surfaced everywhere — per agent node + run-total
   (Run Detail), Overview KPI (**Credits Used** replaced Tool-Calls), per chat message + session total.
@@ -180,7 +181,9 @@ has no CI — validated transitively by core+genesis installing its tag).
   health); Runs list; Run Detail (React Flow graph + inspector + turn-grouped Kiro conversation + all-3
   HITL + documents drawer + **per-node & run-total credits**); Catalog (browse/detail/launch, clickable
   cards); **Chat** (read-only assistant, persisted sessions, per-message credit footer); **Settings**
-  (MCP · CLI · GitLab · Environments · General). Left nav collapsed by default.
+  (MCP · CLI · GitLab · Environments · General — General holds Appearance/**theme toggle**, Storage, Copilot);
+  **Applications** (KB apps — detail tabs Business Map · Overview · Syncs · Releases). Left nav collapsed by default;
+  **no top bar / no breadcrumbs** (removed v0.42.0/v0.43.0).
 - **Data plane:** durable SQLite (`~/.genesis/genesis.db`, WAL) via `genesis/db/` migrations
   (m0001 runs+events, m0002 chat, m0003 chat_usage, m0004 copilot [chat_sessions.mode +
   chat_run_links + chat_permissions], m0005 supervision [chat_notifications], m0006 copilot_actions [audit], **m0007 kb [the code-free temporal `kb_*` Appian KB — Phase 16-02]**; `current_version=7`); runs + full conversation +
@@ -354,7 +357,8 @@ genesis/genesis/
             ApiError; resource modules], query/** [keys + client]}; src/stores/**; src/shared/ui/**
             (primitives: Button/Card/Badge/Chip/Dialog+Drawer/Tabs/SegmentedControl/Switch/Input+Field+
             Textarea/HealthDot/MetricCard/TrendChart/format/icons); src/shared/layout/** (AppShell/
-            Sidebar/Topbar/SplitPane/Page); src/shared/feedback/** (Empty/Error/Loading); src/app/**
+            Sidebar/SplitPane/Page — **no top bar (removed v0.43.0); no breadcrumbs (removed v0.42.0); the theme
+            toggle lives in Settings → General (`AppearanceSection`)**); src/shared/feedback/** (Empty/Error/Loading); src/app/**
             (providers, router, RootLayout, routes); src/features/{overview,settings,catalog,runs,
             run-detail,documents,chat,applications}/**; src/test/fixtures (golden contract fixtures); src/dev/KitchenSink.
             **static/ = the COMMITTED, built app** served by `genesis serve`.
@@ -795,7 +799,7 @@ See `progress/phase-16-08-native-mcp.md`.
 (see `progress/phase-16-04-applications-surface.md`): `api/applications.py` over `KbStore` + `RunManager` (list /
 available [Dev-MCP `listApplications` via `kb/dev_mcp.py`, best-effort + manual-UUID fallback] / add→baseline sync /
 detail / sync-status / objects / bundles / table-scoped untrack); `KbStore.list_syncs`+`latest_sync`;
-`web/features/applications` (page + Add dialog + detail tabs Overview|Objects|Bundles|Syncs|Releases + live SyncStatus)
+`web/features/applications` (page + Add dialog + detail tabs **Business Map | Overview | Syncs | Releases** [Objects + Bundles tabs removed v0.41.0] + live SyncStatus **shown only while a sync is running**)
 + a Sidebar entry. First consumer of the managed-native Dev MCP. (The `frontend` stale-bundle guard ran green here —
 also closing the 16-08 Stage-B gap where it hadn't executed.)
 
