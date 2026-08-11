@@ -43,8 +43,9 @@
 > 19-08): attach/parse/sync the business documents (Google Drive + uploads) that describe an application, as a GLOBAL dedup'd
 > store linked into apps (ADR-041), reached via a managed-native `gws` CLI connector (ADR-040, isolated config + read-only
 > OAuth, client read from the dotfiles `~/.config/gws/client_secret.json`, no shipped token). 19-01 spike live-verified; 19-02
-> connector code-complete + live smoke test; 19-03 m0009 + DocumentStore. genesis 343 / core 65 green (working tree). Next =
-> 19-04 parsing → 19-05 sync-documents → 19-06 consumption → 19-07 web → 19-08 release. See §9's Phase-19 block +
+> connector code-complete + live smoke test; 19-03 m0009 + DocumentStore; 19-04 parsing pipeline (pypdf/python-docx/openpyxl,
+> pinned). genesis 356 / core 65 green (working tree). Next =
+> 19-05 sync-documents → 19-06 consumption → 19-07 web → 19-08 release. See §9's Phase-19 block +
 > `progress/phase-19-document-library.md`.**
 
 ---
@@ -651,7 +652,7 @@ genesis-workflows/
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### ⭐ ACTIVE (IN PROGRESS — spec + 19-01/19-02/19-03 done; **code UNCOMMITTED**, commit at 19-08) — Phase 19: Genesis Document Library
+### ⭐ ACTIVE (IN PROGRESS — spec + 19-01/19-02/19-03/19-04 done; **code UNCOMMITTED**, commit at 19-08) — Phase 19: Genesis Document Library
 
 > **Handoff for the next session — READ `progress/phase-19-document-library.md` FIRST.** Attach the business documents that
 > describe an application (the PDFs/Word/Excel/Google Docs in Google Drive) to Genesis, parse them to LLM-consumable Markdown
@@ -674,14 +675,19 @@ genesis-workflows/
 >   read). Remaining: the Settings→CLI connector **card** (19-07).
 > - **19-03 data model ✅** — migration **m0009** (`kb_documents`/`kb_document_links`/`kb_document_sections`, schema **v9**) +
 >   `DocumentStore` (`kb/documents.py`); `untrack_application` unlinks-not-deletes.
-> - **Tests (working tree):** genesis **343**, genesis-core **65** green; genesis-workflows `validate_library` green; ruff clean.
+> - **19-04 parsing pipeline ✅** — `kb/doc_parsing.py` (`ParsedDocument` + `parse_document`/`parse_bytes` + per-type parsers
+>   [PDF→pypdf, DOCX→python-docx, XLSX/Sheets→openpyxl per-tab JSON, CSV/MD/TXT stdlib] + heading `sections` + `store_parsed`);
+>   gws `export_file`/`download_file` + Google-native→binary/text **convergence** (`google_export_target`); **deps PINNED
+>   à-la-carte `pypdf==6.15.0`/`python-docx==1.2.0`/`openpyxl==3.1.5`** (over MarkItDown — pure-Python, auditable). Bulk →
+>   `settings.kb_documents_dir` (`~/.genesis/kb-documents/<id>/latest.md`); DB gets pointers + `content_hash`.
+> - **Tests (working tree):** genesis **356**, genesis-core **65** green; genesis-workflows `validate_library` green; ruff clean.
 >
-> **Next (resume here):** **19-04** parsing pipeline (gws export + binary→MD/JSON; **PIN the dependency** — MarkItDown vs
-> pypdf/python-docx/openpyxl) → **19-05** deterministic `sync-documents` workflow + `api/documents.py` (add/link/sync; blocking
-> writes via `asyncio.to_thread`; not-installed → 409) → **19-06** `genesis-kb` document tools + evidence-pack → **19-07** web
-> (global Document Library page + per-app **Business Artifacts** tab + gws connector card) → **19-08** release chain
-> (core → genesis → genesis-workflows), **commit the whole phase**, CI green, live acceptance, **flip ADR-040/041 → Accepted**,
-> refresh §2 tag table + test counts. Specs: `specs/phase-19-document-library.md` (+ `phase-19-document-library/19-01..19-08`).
+> **Next (resume here):** **19-05** deterministic `sync-documents` workflow + `api/documents.py` (add/link/sync; parse via
+> `kb/doc_parsing`; change-detect via `get/set_fingerprint`; blocking writes via `asyncio.to_thread`; gws not-installed/
+> not-connected → 409) → **19-06** `genesis-kb` document tools + evidence-pack → **19-07** web (global Document Library page +
+> per-app **Business Artifacts** tab + gws connector card) → **19-08** release chain (core → genesis → genesis-workflows),
+> **commit the whole phase**, CI green, live acceptance, **flip ADR-040/041 → Accepted**, refresh §2 tag table + test counts.
+> Specs: `specs/phase-19-document-library.md` (+ `phase-19-document-library/19-01..19-08`).
 
 
 ### ✅ SHIPPED (COMPLETE) — Phase 18: Appian Parser Accuracy Overhaul (genesis-appian-parser v0.2.0 + genesis v0.40.0 + genesis-workflows v0.9.2)

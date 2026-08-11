@@ -1,10 +1,11 @@
 # Phase 19 — Genesis Document Library — progress (as-built)
 
 > **Status (2026-08-11):** IN PROGRESS. **19-01 ✅ (live-verified) · 19-02 ✅ code-complete + CLI + live smoke test · 19-03 ✅
-> code-complete.** Next: 19-04 → 19-08. **⚠️ IMPORTANT — the 19-02/19-03 code is UNCOMMITTED** in the working trees of
-> `genesis`, `genesis-core`, `genesis-workflows` (per the user's instruction to *commit at phase completion*). A new session
-> must NOT re-create these files — they already exist locally. Spec: `specs/phase-19-document-library.md` (+ `19-01..19-08`);
-> ADR-040 (managed-native CLI) + ADR-041 (global document library) — both **Proposed** (flip to Accepted at release, 19-08).
+> code-complete · 19-04 ✅ code-complete (parsing pipeline).** Next: 19-05 → 19-08. **⚠️ IMPORTANT — the 19-02/19-03/19-04 code
+> is UNCOMMITTED** in the working trees of `genesis`, `genesis-core`, `genesis-workflows` (per the user's instruction to
+> *commit at phase completion*). A new session must NOT re-create these files — they already exist locally. Spec:
+> `specs/phase-19-document-library.md` (+ `19-01..19-08`); ADR-040 (managed-native CLI) + ADR-041 (global document library) —
+> both **Proposed** (flip to Accepted at release, 19-08).
 
 ## Decisions locked (from the design discussion)
 - **Documents = global first-class store + app-link table** (ADR-041). Dedup by Drive file-id (`gdrive:<id>`) / upload
@@ -52,21 +53,42 @@ fingerprint fields (`id,name,mimeType,modifiedTime,version,md5Checksum`) + expor
 - Tests: `tests/test_document_store.py` (+9); migration-count/version assertions updated in `tests/test_db.py`,
   `tests/test_chat_store.py`, `tests/test_kb_store.py` (8→9; synthetic next-migration test → v10).
 
+## 19-04 — Parsing pipeline (documents → structured, LLM-ready content) ✅ (code, UNCOMMITTED)
+- **Dependency decision (PINNED):** à-la-carte **`pypdf==6.15.0` + `python-docx==1.2.0` + `openpyxl==3.1.5`** over MarkItDown
+  — pure-Python, narrow/auditable dependency trees (supply-chain caution), and openpyxl yields clean per-sheet JSON directly.
+  Added to `pyproject.toml` `[project.dependencies]`. MD/TXT/CSV need no dependency.
+- **`kb/doc_parsing.py`** (NEW) — `ParsedDocument` (content_md, content_hash [sha256 of the body], title, mime_type, byte_size,
+  tables, sections) + `parse_document(path)` / `parse_bytes(data, filename=…)`. Per-type parsers: MD/TXT passthrough; CSV→
+  one table + MD table; PDF→pypdf page text (`## Page N`); DOCX→python-docx (Title/Heading styles→ATX headings, tables→JSON+MD);
+  XLSX→openpyxl **per-sheet** `{sheet, rows}` JSON + MD tables. `_sections_from_markdown` splits the body into heading-scoped
+  sections (retrieval granularity). Errors → `DocumentParseError` (never a fabricated body).
+- **Google-native convergence:** `is_google_native` + `google_export_target(mime)` → Docs=`text/markdown`, Sheets=`.xlsx`
+  (so openpyxl gives per-tab structure, not a flattened first sheet), Slides=`text/plain`. The connector exports to that target
+  then feeds the file through the SAME `parse_document` — no separate Google parser.
+- **`integrations/gws/client.py`** (M) — `export_file(file_id, mime, out)` (`gws drive files export -o`) + `download_file`
+  (binary Drive files via `get` `alt=media -o`); both pass the read-only allowlist.
+- **`kb/doc_parsing.store_parsed(store, docs_dir, id, parsed)`** — writes `latest.md` (+ `tables.json`) under
+  `kb_documents_dir/<id>/` (**latest-version-only**, overwrite) and calls `DocumentStore.set_content`/`set_sections`.
+  `runtime/settings.py` (M) adds `kb_documents_dir` (`~/.genesis/kb-documents`).
+- Tests: `tests/test_doc_parsing.py` (+11 — real docx/xlsx/csv/md/txt fixtures + a hand-built PDF + the Sheet→xlsx convergence
+  + unsupported/corrupt → error + `store_parsed` round-trip); `tests/test_gws_client.py` (+2 — export writes+parses, download).
+- Runs OFF the event loop (upload path `asyncio.to_thread`; Drive path in the 19-05 worker subprocess).
+
 ## Test status (uncommitted working tree)
-- genesis **343 pass**, ruff clean · genesis-core **65 pass**, ruff clean · genesis-workflows `validate_library.py` green.
+- genesis **356 pass**, ruff clean · genesis-core **65 pass**, ruff clean · genesis-workflows `validate_library.py` green.
 
 ## Resume here (next session)
-1. **19-04 — parsing pipeline** (`genesis`): gws `export` for Google-native (Docs→MD, Sheets→CSV/JSON, Slides→text) via the
-   `gws_client` seam; binary uploads (PDF/DOCX/XLSX)→Markdown (+ JSON tables) — **decide + PIN the dependency** (MarkItDown vs
-   pypdf/python-docx/openpyxl). Output = `latest.md` (+ `tables.json` + sections) + `content_hash`; bulk → `~/.genesis/kb-documents/<id>/`.
-2. **19-05 — `sync-documents` workflow** (genesis-workflows + genesis): program-only graph `resolve → fetch/export(gws) →
-   parse → write(DocumentStore) → validate → present`; change detection via the fingerprint; `write` node uses
-   `asyncio.to_thread` (§7). `api/documents.py`: add (upload multipart / Drive link) + link/unlink + sync (single/app/library);
-   not-installed → 409.
-3. **19-06 — consumption**: `genesis-kb` MCP `list/get/search_documents` + `KbStore.build_evidence_pack` includes linked docs.
-4. **19-07 — web**: global Document Library page + per-app **Business Artifacts** tab + Settings→CLI **gws connector card**.
-5. **19-08 — release**: bump chain (genesis-core → genesis → genesis-workflows), **commit the whole phase**, CI green, live
+1. **19-05 — `sync-documents` workflow** (genesis-workflows + genesis): program-only graph `resolve → fetch/export(gws) →
+   parse (`kb/doc_parsing`) → write (`store_parsed`/DocumentStore) → validate → present`; change detection via the
+   `get_fingerprint`/`set_fingerprint` (modifiedTime/version/md5); `write` node uses `asyncio.to_thread` (§7 deadlock lesson).
+   `api/documents.py`: add (upload multipart / Drive link) + link/unlink + sync (single/app/library); gws-not-installed /
+   not-connected → 409. Reuse `google_export_target` to pick the export mime; binary Drive files via `download_file`.
+2. **19-06 — consumption**: `genesis-kb` MCP `list/get/search_documents` + `KbStore.build_evidence_pack` includes linked docs.
+3. **19-07 — web**: global Document Library page + per-app **Business Artifacts** tab + Settings→CLI **gws connector card**.
+4. **19-08 — release**: bump chain (genesis-core → genesis → genesis-workflows), **commit the whole phase**, CI green, live
    acceptance, flip ADR-040/041 → Accepted, refresh the bible §2 tag table + test counts.
 
-**Handoff note:** everything above (19-02/19-03) is in the working trees, tested green, but NOT committed. Do not regenerate;
-`git status` in each repo shows the new/modified files. Commit at phase completion (19-08) per the user's instruction.
+**Handoff note:** everything above (19-02/19-03/19-04) is in the working trees, tested green, but NOT committed. Do not
+regenerate; `git status` in each repo shows the new/modified files. Commit at phase completion (19-08) per the user's
+instruction. **New runtime deps** (`pypdf`/`python-docx`/`openpyxl`) are already `pip install`-ed in the `.venv` and declared
+in `pyproject.toml`.

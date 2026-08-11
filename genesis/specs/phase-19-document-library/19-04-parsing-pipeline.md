@@ -1,7 +1,10 @@
 # 19-04 — Parsing pipeline (documents → structured, LLM-ready content)
 
-> **Status:** DRAFT — spec only. **Repo:** genesis. Can proceed in parallel with 19-02 after the spike (uses the `gws_client`
-> seam once available; binary parsing is independent).
+> **Status:** ✅ **CODE-COMPLETE — UNCOMMITTED** (commit at 19-08 per the user). `kb/doc_parsing.py` (ParsedDocument +
+> parse_document/parse_bytes + per-type parsers + sections + store_parsed) + gws `export_file`/`download_file` + Google-native
+> convergence; **dependency PINNED — à-la-carte `pypdf==6.15.0`/`python-docx==1.2.0`/`openpyxl==3.1.5`** (rationale below +
+> in `progress/phase-19-document-library.md`). +13 tests (genesis 356 green, ruff clean). **Repo:** genesis. Can proceed in
+> parallel with 19-02 after the spike (uses the `gws_client` seam once available; binary parsing is independent).
 
 ## Goal
 Convert every ingested document into a **canonical Markdown body** (+ **JSON tables** for spreadsheets, + optional
