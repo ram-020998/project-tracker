@@ -126,3 +126,14 @@ status/milestone.
 status change PATCH) → **web 145 Vitest (18 files) green**; tsc + eslint (0 errors) + `npm run build` clean (`web/static/`
 rebuilt, uncommitted with the rest until 20-06). Live annotate→revise→reload loop is validated at 20-06 (needs a real browser +
 agent).
+
+### Live fix (20-05 testing) — spec.html write was denied (cwd/fs_write_root mismatch)
+During live testing the spec-authoring agent's write to `spec.html` was **denied**. Root cause: the
+`feature_spec` session reused the read-only client setup with `cwd=state_dir` but `fs_write_root=
+skill-output/<session_id>`, so the agent's relative `spec.html` resolved to `~/.genesis/spec.html`
+(outside the sandbox → SDK refuses it), and milestone-save reads from the sandbox anyway. **Fix:** for
+`feature_spec` sessions set **`cwd = skill_out`** (the sandbox) in `ChatManager._ensure_started`, so a
+relative `spec.html` lands inside `fs_write_root` and where milestone reads it (read_only chat keeps
+`cwd=state_dir` for skill discovery). Regression test: `test_feature_spec_cwd_is_the_writable_sandbox`
+(asserts `cwd == fs_write_root` for a feature_spec session). Requires a `genesis serve` **restart** to
+take effect (in-process server code). genesis 397 pytest green (was 396; +1 regression test).
