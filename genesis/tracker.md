@@ -153,6 +153,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-11 (Phase 20-04 — spec chat backend — ✅ CODE-COMPLETE, uncommitted):** Spec authoring is now a real **Chat**
+  (reuse of Phase 10; ADR-001 intact — no workflow). Added an additive **`feature_spec`** session mode (`ChatStore.set_mode`
+  + `_STEERING_SPEC`, reusing the read-only client path so `genesis-kb` + the Phase-14 fs sandbox are available — the agent
+  authors `spec.html` there). `api/features.py` rewritten: `create_spec` opens the bound session + **seeds** the app/feature
+  identity (`enqueue_system_turn`) + stores `chat_session_id`; `GET/POST /features/{id}/spec/context` (Add-context = inject
+  the app's linked business artifacts' bounded Markdown, app-linkage validated); `POST …/spec/milestone` (copy the sandbox
+  `spec.html` → store + `revisions/<n>.html` + sha256 + revision; 409 when nothing authored yet); `PATCH …/spec/status`
+  (validated). **Deviation:** context is conversational (GET-available + POST-inject; dropped the draft's injected-set +
+  DELETE). **genesis 393 pytest green, ruff clean**; no web change (chat UI + review = 20-05). Genesis code uncommitted until
+  the 20-06 release. Next: **20-05** (embedded review surface + annotation→chat bridge + Export MD). As-built:
+  `progress/phase-20-features-and-spec-authoring.md`.
+
 - **2026-08-11 (Phase 20-03 — Features surface + feature page — ✅ CODE-COMPLETE, uncommitted):** `api/features.py` (feature
   CRUD + `POST/GET /features/{id}/spec` with a v1 one-spec-per-feature 409 guard; app/feature validated → 404; delete cleans
   the on-disk spec dirs) wired into `create_app`. Web `features/features/`: types + `featuresApi` + `qk.features` + hooks +

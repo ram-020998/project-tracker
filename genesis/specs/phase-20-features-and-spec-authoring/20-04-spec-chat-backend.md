@@ -1,6 +1,17 @@
 # 20-04 — Spec chat backend (feature-bound session, context injection, milestones)
 
-> **Status:** 📋 DRAFT. **Repo:** genesis. **Depends on:** 20-02 (`FeatureStore`), 20-03 (spec create). **Reuses:** Chat
+> **Status:** ✅ **CODE-COMPLETE — UNCOMMITTED** (commit at 20-06). Create-spec now opens a bound
+> **`feature_spec`** chat session (new additive mode + `_STEERING_SPEC`; `genesis-kb` auto-wired, 16-05)
+> seeded with the app/feature identity; **Add context** injects the app's linked business artifacts;
+> **milestone** snapshots the agent-authored `spec.html` from the session sandbox; **status** transitions
+> validated. genesis **393** pytest green, ruff clean. See `progress/phase-20-features-and-spec-authoring.md`.
+> **As-built note:** context is a **conversational** act — shipped `GET …/spec/context` (the app's linked
+> docs = the picker source) + `POST …/spec/context` (inject selected docs' bounded Markdown as a system
+> message); the draft's "list currently-injected / DELETE one" was dropped (removing content from an
+> LLM's context isn't meaningful once sent). The app/feature seed rides the transcript (`enqueue_system_turn`)
+> + the static `_STEERING_SPEC`; note the cold-start preamble is bounded (identity may age out of a very
+> long conversation — a durable-preamble refinement is deferred).
+> **Repo:** genesis. **Depends on:** 20-02 (`FeatureStore`), 20-03 (spec create). **Reuses:** Chat
 > (Phase 10, ADR-031), the fs-write sandbox (Phase 14, ADR-034), `genesis-kb` MCP (16-05), `DocumentStore` +
 > `build_evidence_pack` docs (Phase 19). **No new orchestration (ADR-001).**
 

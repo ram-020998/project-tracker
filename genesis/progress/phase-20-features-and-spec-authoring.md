@@ -1,10 +1,10 @@
 # Progress — Phase 20: Features & Spec Authoring
 
-> **Status (2026-08-11):** 🚧 IN PROGRESS. **20-01 ✅ (embed spike, PASS + user-confirmed round-trip)** · **20-02 ✅
-> (m0010 + `FeatureStore`, code-complete, tests green)** · **20-03 ✅ (Features tab + feature page + `api/features.py`,
-> code-complete)**. Next: **20-04** (spec chat backend — bind the session + `genesis-kb` + add-context + milestones).
-> Genesis code for 20-02+ is in the working tree, **uncommitted — commits + the single genesis release land at 20-06**
-> (Phase-19 rhythm). Spec: `specs/phase-20-features-and-spec-authoring.md` (+ `20-01..20-06`); **ADR-042/043** (Proposed).
+> **Status (2026-08-11):** 🚧 IN PROGRESS. **20-01 ✅ (embed spike)** · **20-02 ✅ (m0010 + `FeatureStore`)** · **20-03 ✅
+> (Features tab + feature page + `api/features.py`)** · **20-04 ✅ (spec chat backend — bound `feature_spec` session, add
+> context, milestones, status)**. Next: **20-05** (embedded review surface + annotation→chat bridge + MD export). Genesis
+> code for 20-02+ is in the working tree, **uncommitted — commits + the single genesis release land at 20-06** (Phase-19
+> rhythm). Spec: `specs/phase-20-features-and-spec-authoring.md` (+ `20-01..20-06`); **ADR-042/043** (Proposed).
 
 ## 20-01 — Embedded annotation spike ✅ (PASS + user-confirmed)
 Proved Path B (embed the Lavish annotation SDK) before building. Findings: `spike/2026-08-11-lavish-embed.md`.
@@ -66,3 +66,34 @@ route `applications/:appUuid/features/:featureId` into `router.tsx`.
 404s) → **genesis 390 pytest green, ruff clean**. `web/src/features/features/features.test.tsx` (4 — lists cards, create +
 navigate, jest-axe, feature-page create-spec) → **web 142 Vitest (18 files) green**; tsc + eslint (0 errors) + `npm run build`
 clean (`web/static/` rebuilt, uncommitted with the rest until 20-06).
+
+## 20-04 — Spec chat backend ✅ (code-complete, uncommitted)
+Makes the spec's authoring a real **Chat** (reuse of Phase 10), no new orchestration (ADR-001 intact).
+
+**Chat core (additive):** a new **`feature_spec`** session mode — `ChatStore.set_mode` accepts it;
+`ChatManager` adds `_STEERING_SPEC` (selected on a fresh client for that mode) and a `create_session(title,
+mode=...)` param. `feature_spec` reuses the **read-only client path** (so `genesis-kb` + introspection are
+wired and the Phase-14 `fs_write_root` sandbox lets the agent write `spec.html`); only the steering differs.
+`read_only`/`copilot` paths are untouched.
+
+**`api/features.py` (rewritten):** `register_features_routes(api, settings, kb_store, chat)`. `create_spec`
+now opens a `feature_spec` session, **seeds** the app/feature identity + KB-scoping via
+`chat.enqueue_system_turn` (the existing deterministic transcript seam), and stores `chat_session_id` on the
+spec. New endpoints: `GET /features/{id}/spec/context` (the app's linked business artifacts = the picker
+source) + `POST …/spec/context` (validate each doc is linked to this app → inject its parsed Markdown,
+capped at 8000 chars, as a system message); `POST …/spec/milestone` (copy `skill_output_dir/<session>/spec.html`
+→ `feature_specs_dir/<spec_id>/spec.html` + `revisions/<n>.html`, set the pointer + sha256 hash + a revision;
+friendly **409** when nothing authored yet); `PATCH …/spec/status` (validated transition). Wired `chat` into
+`create_app`'s features registration.
+
+**Decisions / deviations from the draft:** (a) context injection is **conversational** — GET-available +
+POST-inject only (dropped the draft's tracked injected-set + DELETE; removing content from an LLM's context
+once sent isn't meaningful). (b) Identity is seeded into the transcript + carried by the static
+`_STEERING_SPEC`; the cold-start replay preamble is **bounded** (last ~10 msgs / 4000 chars), so in a very
+long conversation the seeded identity could age out on a client cold-start — a durable per-session preamble
+is a noted future refinement (not load-bearing for v1; live behaviour is validated at 20-06).
+
+**Tests:** `tests/test_features_api.py` (9 — CRUD + seeded `feature_spec` session + add-context inject &
+app-linkage rejection + milestone 409→snapshot→increment + status validation + 404s), asserting chat state
+via `app.state.chat`. **genesis 393 pytest green, ruff clean.** No web changes (the chat UI + review surface
+are 20-05).
