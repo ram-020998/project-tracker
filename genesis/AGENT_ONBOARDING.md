@@ -11,8 +11,8 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-11 — latest SHIPPED: genesis v0.43.0 +
-> genesis-workflows v0.9.2 + genesis-core v0.9.1 + kiro-agent-sdk v0.6.0 + genesis-appian-parser v0.2.0** (Phases 9 Agent-Artifact-I/O,
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-11 — latest SHIPPED: genesis v0.44.0 +
+> genesis-workflows v0.9.3 + genesis-core v0.9.2 + kiro-agent-sdk v0.6.0 + genesis-appian-parser v0.2.0** (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
 > a new **`design-doc`** workflow ports the Jarvis design-doc process into a deterministic Genesis graph —
@@ -39,14 +39,13 @@
 > Appian Parser Accuracy Overhaul — ✅ SHIPPED + live-validated (18-01..18-06): `genesis-appian-parser` v0.2.0 → genesis
 > v0.40.0 → genesis-workflows v0.9.2, all CI green. Orphans 804 → 0, edge recall 0.32 → 0.98, precision 0.999, + APPREF/
 > ENTRYPOINT cross-app integration points. See §9's Phase-18 block.**
-> **⭐ ACTIVE — Phase 19 — Genesis Document Library — IN PROGRESS (spec + 19-01/19-02/19-03 done; code UNCOMMITTED, commit at
-> 19-08): attach/parse/sync the business documents (Google Drive + uploads) that describe an application, as a GLOBAL dedup'd
+> **⭐ SHIPPED — Phase 19 — Genesis Document Library — COMPLETE (19-01..19-08): genesis-core v0.9.2 + genesis v0.44.0 +
+> genesis-workflows v0.9.3, all CI green.** Attach/parse/sync business documents (Google Drive + uploads) as a GLOBAL dedup'd
 > store linked into apps (ADR-041), reached via a managed-native `gws` CLI connector (ADR-040, isolated config + read-only
-> OAuth, client read from the dotfiles `~/.config/gws/client_secret.json`, no shipped token). 19-01 spike live-verified; 19-02
-> connector code-complete + live smoke test; 19-03 m0009 + DocumentStore; 19-04 parsing pipeline (pypdf/python-docx/openpyxl,
-> pinned); 19-05 sync-documents workflow + api/documents.py; 19-06 genesis-kb doc tools + evidence-pack; 19-07 web (Library page
-> + Business Artifacts tab + gws connector card). genesis 375 / core 65 / web 138 green (working tree). Next = 19-08 release
-> (only sub-phase left). See §9's Phase-19 block + `progress/phase-19-document-library.md`.**
+> OAuth, client read from the dotfiles `~/.config/gws/client_secret.json`, no shipped token). Parsing = pypdf/python-docx/
+> openpyxl (pinned) → canonical Markdown + per-tab JSON; `sync-documents` workflow; `genesis-kb` doc tools + evidence-pack
+> integration; web Document Library page + full-screen viewer + per-app Business Artifacts tab + Settings→CLI connector card.
+> ADR-040/041 Accepted. See §9's Phase-19 block + `progress/phase-19-document-library.md`.**
 
 ---
 
@@ -134,9 +133,9 @@ and the release/versioning protocol.
 | Repo | Tag | Branch | Role |
 |---|---|---|---|
 | `kiro-agent-sdk` | **v0.6.0** | main | ACP adapter; `collect`/`collect_streaming`; `permission_mode`(`auto_approve`/`auto_deny`/**`ask`**)+`allow_fs_write`; **per-turn credit metering (11-01)**; **interactive permission bridge `permission_mode="ask"`+`on_permission` callback (13-01)**; **`fs_write_root` sandbox for agent file writes (14-05)** |
-| `genesis-core` | **v0.9.1** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1`; **`McpRegistry` managed-native `launch_provider` — a `"managed":"<id>"` entry resolves command/args from a local install; introspect 8 MiB stream limit (16-08)** |
-| `genesis` | **v0.43.0** | master | runtime, dist, config, runs, **db (m0001–m0008)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **read-only `genesis-kb` MCP server (`genesis/mcp/kb_server.py`) + chat cutover off `appian-atlas` (16-05); `KbStore` UUID-dedupe (16-07); native-MCP bundle controls moved into the MCP detail page + Applications UI polish + `scripts/genesisctl.sh` (v0.34.0)**; **Phase-17 Business Map backend: m0008 `kb_business_maps` + `KbStore.build_evidence_pack` (code-free KB→business evidence pack) + Business Map API (v0.35.0) + Business Map web view (React Flow A value-stream + B capability-constellation, first tab, 17-05, v0.36.0) + readability + click-for-detail popups + radial capability constellation + smoothstep edges (v0.37.0/v0.38.0)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)**; **dev-environment `is_dev` toggle + `dev_environment()` (16-08 §2.0)**; **managed-native MCP installer `genesis/mcp/native/` + `api/native_mcp.py` + `genesis mcp` CLI + Settings→MCP panel (16-08 Stage B)**; **Applications surface: `api/applications.py` + `kb/dev_mcp.py` (Dev-MCP `listApplications`) + `web/features/applications` (16-04)** |
-| `genesis-workflows` | **v0.9.2** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` + **`appian-dev`/`appian-devops`** now **managed-native refs** with read/export-only allowlists set from the real installed `tools/list` — 16-08 Stage B), steering, `hello-appian` + `erd-generation` + `code-review` + `design-doc` + **`sync-application` (Appian KB baseline sync via Deployment REST → parser → KbStore, Phase 16-03)** + **`generate-business-map` (Phase-17 agent-synthesized Business Map from the code-free KB, v0.9.0)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
+| `genesis-core` | **v0.9.2** | master | nodes/state/registries/validators; two-tier MCP/CLI registry + introspection (ADR-029); session tool-output store (Phase 9); telemetry carries **metered credits** (Phase 11); `CORE_MAJOR=1`; **`McpRegistry` managed-native `launch_provider` — a `"managed":"<id>"` entry resolves command/args from a local install; introspect 8 MiB stream limit (16-08)**; **`CliRegistry` managed-native launch resolution — the CLI analog, injected `launch_provider` (Phase 19, ADR-040)** |
+| `genesis` | **v0.44.0** | master | runtime, dist, config, runs, **db (m0001–m0009)**, api (`/api`+SPA), cli, web SPA; **Chat** (Phase 10); **credit tracking** (Phase 11); worker loop `recursion_limit` (12-01); **Copilot (Phase 13-01..06)**; **Skills (Phase 14-01..05)**; **run-launch file attachments (ADR-035, Phase 15-01)**; **internalized Appian KB: m0007 `kb_*` + `genesis/kb/KbStore` (16-02)**; **read-only `genesis-kb` MCP server (`genesis/mcp/kb_server.py`) + chat cutover off `appian-atlas` (16-05); `KbStore` UUID-dedupe (16-07); native-MCP bundle controls moved into the MCP detail page + Applications UI polish + `scripts/genesisctl.sh` (v0.34.0)**; **Phase-17 Business Map backend: m0008 `kb_business_maps` + `KbStore.build_evidence_pack` (code-free KB→business evidence pack) + Business Map API (v0.35.0) + Business Map web view (React Flow A value-stream + B capability-constellation, first tab, 17-05, v0.36.0) + readability + click-for-detail popups + radial capability constellation + smoothstep edges (v0.37.0/v0.38.0)**; **pins `genesis-appian-parser`; `build_context` injects `ctx.extras['kb_store']`; checkpointer WAL+busy_timeout (16-03)**; **dev-environment `is_dev` toggle + `dev_environment()` (16-08 §2.0)**; **managed-native MCP installer `genesis/mcp/native/` + `api/native_mcp.py` + `genesis mcp` CLI + Settings→MCP panel (16-08 Stage B)**; **Applications surface: `api/applications.py` + `kb/dev_mcp.py` (Dev-MCP `listApplications`) + `web/features/applications` (16-04)**; **Document Library (Phase 19, ADR-040/041, v0.44.0): m0009 (`kb_documents`/`_links`/`_sections`) + `DocumentStore` + `kb/doc_parsing` (pypdf/python-docx/openpyxl, pinned) + `DocumentSyncEngine` + managed-native `gws` connector (`integrations/gws/`, `cli_tools/native/`, `api/native_cli.py`) + `api/documents.py` + `genesis-kb` doc tools + `build_evidence_pack` docs + `web/features/library` (Document Library page + full-screen viewer + per-app Business Artifacts tab + Settings→CLI connector card)** |
+| `genesis-workflows` | **v0.9.3** | master | registries (incl. `jarvis`+`jira`+`appian-atlas` + **`appian-dev`/`appian-devops`** now **managed-native refs** with read/export-only allowlists set from the real installed `tools/list` — 16-08 Stage B; **+ `gws` managed-native read-only CLI entry, Phase 19**), steering, `hello-appian` + `erd-generation` + `code-review` + `design-doc` + **`sync-application` (Appian KB baseline sync via Deployment REST → parser → KbStore, Phase 16-03)** + **`generate-business-map` (Phase-17 agent-synthesized Business Map from the code-free KB, v0.9.0)** + **`sync-documents` (Phase-19 Google-Drive→Document-Library pull/parse/store via the read-only gws connector, program-only)**; `skills/` library + `skills-registry.json` + `ci/validate_skills.py` gate; seed `gam` skill (Phase 14-02) |
 | `genesis-appian-parser` | **v0.2.0** | main | **NEW (Phase 16-01).** Genesis-owned, stdlib-only Appian package parser (port of the Atlas front-half). `parse(zip\|bytes) -> KbParseResult` (objects + edges + bundles + **code-free** metadata; no files, no SAIL). Consumed by `genesis/kb` + the sync workflow; pinned into genesis by tag (**v0.2.0**, 16-03/18-06). **Phase 18 (v0.2.0): dependency-extraction accuracy overhaul — universal known-UUID + raw-XML reference scan, `is_orphan`=disconnected (not unbundled), CDT-QName + translation/document/record-action + `rulereferencebyname` by-name edges, APPREF/ENTRYPOINT cross-app integration-point classification. Measured edge recall 0.32→0.98, precision 0.999, orphans 804→0 on a real app; ≥95% CI gate; 25 tests.** |
 
 **Dependency chain** (git-pinned by tag; CI rewrites ssh→https):
@@ -652,9 +651,9 @@ genesis-workflows/
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### ⭐ ACTIVE (IN PROGRESS — spec + 19-01..19-07 done; only 19-08 release left; **code UNCOMMITTED**, commit at 19-08) — Phase 19: Genesis Document Library
+### ✅ SHIPPED (COMPLETE) — Phase 19: Genesis Document Library (genesis-core v0.9.2 + genesis v0.44.0 + genesis-workflows v0.9.3)
 
-> **Handoff for the next session — READ `progress/phase-19-document-library.md` FIRST.** Attach the business documents that
+> **Handoff — as-built: `progress/phase-19-document-library.md`.** Attach the business documents that
 > describe an application (the PDFs/Word/Excel/Google Docs in Google Drive) to Genesis, parse them to LLM-consumable Markdown
 > (+ JSON for tabular), and use them **alongside the Appian KB** for spec generation / design discussion. Documents are a
 > **global first-class store** (`kb_documents`, one row per unique doc, dedup by Drive file-id / upload hash) **linked into apps**
@@ -664,42 +663,26 @@ genesis-workflows/
 > `gws auth login`) and **reads the OAuth client** from the dotfiles-provisioned `~/.config/gws/client_secret.json` — **ships no
 > token**; the dotfiles setup is a documented prerequisite. Read-only Drive/Docs/Sheets/Slides scopes only.
 >
-> **Done so far (⚠️ code is UNCOMMITTED in the genesis/genesis-core/genesis-workflows working trees — `git status` shows the
-> files; do NOT regenerate):**
-> - **19-01 spike ✅** — `spike/2026-08-11-gws-oauth-and-export.md`; live-verified (URL capture under a spawned subprocess,
->   localhost callback, read-only scopes, exit-2 reconnect, Drive fingerprint + export).
-> - **19-02 managed-native `gws` connector ✅** — genesis-core `CliRegistry` managed resolution (+4); genesis
->   `NativeCliInstaller`+lockfile (`cli_tools/native/`), the `gws` seam (`integrations/gws/` — read-only allowlist + client +
->   login URL-capture + factory), `ConfigService` wiring, `api/native_cli.py` (status/install/rollback + gws auth), `genesis cli`
->   subcommands; genesis-workflows `cli-registry.json` `gws` entry. **Live smoke test PASSED** (managed install + isolated login +
->   read). Remaining: the Settings→CLI connector **card** (19-07).
-> - **19-03 data model ✅** — migration **m0009** (`kb_documents`/`kb_document_links`/`kb_document_sections`, schema **v9**) +
->   `DocumentStore` (`kb/documents.py`); `untrack_application` unlinks-not-deletes.
-> - **19-04 parsing pipeline ✅** — `kb/doc_parsing.py` (`ParsedDocument` + `parse_document`/`parse_bytes` + per-type parsers
->   [PDF→pypdf, DOCX→python-docx, XLSX/Sheets→openpyxl per-tab JSON, CSV/MD/TXT stdlib] + heading `sections` + `store_parsed`);
->   gws `export_file`/`download_file` + Google-native→binary/text **convergence** (`google_export_target`); **deps PINNED
->   à-la-carte `pypdf==6.15.0`/`python-docx==1.2.0`/`openpyxl==3.1.5`** (over MarkItDown — pure-Python, auditable). Bulk →
->   `settings.kb_documents_dir` (`~/.genesis/kb-documents/<id>/latest.md`); DB gets pointers + `content_hash`.
-> - **19-05 sync-documents workflow + API ✅** — `DocumentSyncEngine` (`kb/doc_sync.py`, injected via
->   `ctx.extras['document_sync']`); the deterministic **`sync-documents`** workflow (genesis-workflows: `resolve_targets →
->   fetch_or_export → parse → write_documents[async to_thread] → v_write → present`; fingerprint change-detection; auth
->   fail-fast / 404→source_missing); `api/documents.py` (upload multipart / gdrive add / link-unlink / sync single|app|library
->   with **friendly 409** when the workflow's not installed or gws not connected / list|search|get|delete).
-> - **19-06 consumption ✅** — `genesis-kb` MCP gains read-only `list_documents`/`get_document`/`search_documents` (auto-trusted
->   in chat) + `KbStore.build_evidence_pack` now carries an app's linked docs as bounded code-free excerpts (`documents` key) so
->   `design-doc`/`generate-business-map` are document-aware.
-> - **19-07 web ✅** — global **Document Library** page (`features/library/`: list/search/filter/upload/add-Drive/link/sync/
->   remove + detail drawer via `/documents/:id`), a per-app **Business Artifacts** tab (5th app-detail tab: linked docs + add
->   [upload/drive/**pick-from-library**] + unlink/sync), a **Settings→CLI Google Workspace connector card** (Connect/Reconnect
->   via the sign-in URL / Disconnect). Reuses the 07-09 `DocumentPreview`/`MarkdownView`.
-> - **Tests (working tree):** genesis **375**, genesis-core **65** green; genesis-workflows **75** + `validate_library` (7);
->   **web tsc clean, eslint 0 errors, 138 Vitest (17 files) incl. jest-axe a11y, `npm run build` OK**; ruff clean.
+> **Shipped (all CI green; ADR-040/041 Accepted):**
+> - **19-01 spike** — `spike/2026-08-11-gws-oauth-and-export.md` (live-verified).
+> - **19-02 managed-native `gws` connector** (genesis-core v0.9.2 `CliRegistry` resolution + genesis `NativeCliInstaller`/`gws`
+>   seam/login/`api/native_cli.py`/`genesis cli` + genesis-workflows `cli-registry.json`); live isolated-login smoke test passed.
+> - **19-03 data model** — m0009 (`kb_documents`/`_links`/`_sections`, schema v9) + `DocumentStore` (untrack unlinks-not-deletes).
+> - **19-04 parsing** — `kb/doc_parsing.py` (PDF/DOCX/XLSX/CSV/MD/TXT → Markdown + per-tab JSON + sections); deps pinned
+>   `pypdf==6.15.0`/`python-docx==1.2.0`/`openpyxl==3.1.5`; Google-native export→binary/text convergence.
+> - **19-05 sync** — `DocumentSyncEngine` (`ctx.extras['document_sync']`) + the deterministic **`sync-documents`** workflow
+>   (async `to_thread` write) + `api/documents.py` (upload/gdrive add [auto-syncs Drive docs], link/unlink, sync single|app|
+>   library with friendly 409, list/search/get/delete).
+> - **19-06 consumption** — `genesis-kb` MCP `list/get/search_documents` (auto-trusted in chat) + `build_evidence_pack` includes
+>   linked docs as bounded excerpts (document-aware `design-doc`/`generate-business-map`).
+> - **19-07 web** — Document Library page + **full-screen document viewer** (`/documents/:id`, full-width + overflow scroll) +
+>   per-app **Business Artifacts** tab (add upload/drive/**multi-pick**, unlink/sync) + Settings→CLI **gws connector card**.
+> - **19-08 release** — genesis-core **v0.9.2** → genesis **v0.44.0** → genesis-workflows **v0.9.3**, all CI green; ADR-040/041
+>   flipped to **Accepted**. **Tests:** genesis 375 pytest + 138 Vitest · genesis-core 65 · genesis-workflows 75 + validate_library.
 >
-> **Next (resume here — the ONLY remaining sub-phase): 19-08 release** — bump chain genesis-core → genesis → genesis-workflows
-> (tags + pins), **commit the whole Phase-19 working tree across all repos** (rebuild + commit `web/static/`), push, CI green,
-> **live acceptance** (real gws login + a real Drive doc synced → visible in the Library, the app’s Business Artifacts tab, chat
-> `@genesis-kb/get_document`, and an evidence pack), **flip ADR-040/041 → Accepted**, refresh §2 tag table + test counts.
-> Specs: `specs/phase-19-document-library.md` (+ `19-01..19-08`).
+> **Live-accepted:** a real Google Drive doc (incl. an .xlsx) added → auto-synced via `gws` export → parsed → viewed in the
+> full-screen viewer. **PHASE 19 COMPLETE.** (Optional future polish: a spreadsheet-grid view from `tables.json`; a scheduler
+> for periodic document sync; semantic/pgvector document search — an ADR-030 trigger.)
 
 
 ### ✅ SHIPPED (COMPLETE) — Phase 18: Appian Parser Accuracy Overhaul (genesis-appian-parser v0.2.0 + genesis v0.40.0 + genesis-workflows v0.9.2)

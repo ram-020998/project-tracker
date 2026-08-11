@@ -873,8 +873,11 @@ ADR-037 (code-free), ADR-030/032 (SQLite persistence + real credits), ADR-026 (l
 
 ## ADR-040 — Managed-native CLI connector (`gws` installed/versioned/authenticated inside Genesis, standard OAuth) (Phase 19)
 
-**Status:** Proposed (Phase 19, sub-phases 19-01/19-02) — spec only (`specs/phase-19-document-library.md` +
-`phase-19-document-library/19-01..19-02`); awaiting approval to implement.
+**Status:** **ACCEPTED (Phase 19 — SHIPPED)** — genesis-core **v0.9.2** (managed-native `CliRegistry` launch resolution) +
+genesis **v0.44.0** (native-CLI installer/lockfile + `gws` seam + login URL-capture + `api/native_cli.py` + `genesis cli`
+subcommands + Settings→CLI connector card) + genesis-workflows **v0.9.3** (`gws` managed-native `cli-registry.json` entry);
+spec `specs/phase-19-document-library.md` + `phase-19-document-library/19-01..19-02`; 19-01 spike + a live isolated-mode
+`gws auth login` + read-only Drive read verified end-to-end.
 
 **Context.** Phase 19 (the Document Library) must read business documents out of **Google Drive**. The organization's standard
 tool for talking to Google is the **Google Workspace CLI (`gws`)** — a single self-contained binary that builds its surface
@@ -929,7 +932,10 @@ single-user — one gws identity per instance). Pairs with ADR-041 (the document
 
 ## ADR-041 — Documents are a global first-class store linked into applications (dedup; untrack unlinks, never deletes) (Phase 19)
 
-**Status:** Proposed (Phase 19, sub-phase 19-03) — spec only; awaiting approval to implement.
+**Status:** **ACCEPTED (Phase 19 — SHIPPED)** — genesis **v0.44.0**: m0009 (`kb_documents`/`kb_document_links`/
+`kb_document_sections`) + `DocumentStore` (global dedup store; untrack unlinks, never deletes) + the parsing pipeline +
+`DocumentSyncEngine` + `api/documents.py` + `genesis-kb` document tools + `build_evidence_pack` extension + the web surface;
+the `sync-documents` workflow ships in genesis-workflows **v0.9.3**.
 
 **Context.** Users want to attach business documents (PDF/Word/Excel/Google Docs) to an application and keep them in Genesis
 for spec generation / design discussion. But the **same document is often relevant to multiple applications**, and the user

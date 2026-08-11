@@ -1,12 +1,8 @@
 # Phase 19 — Genesis Document Library — progress (as-built)
 
-> **Status (2026-08-11):** IN PROGRESS. **19-01 ✅ · 19-02 ✅ (+ live smoke test) · 19-03 ✅ · 19-04 ✅ (parsing) · 19-05 ✅
-> (sync-documents workflow + api/documents.py) · 19-06 ✅ (genesis-kb doc tools + evidence-pack) · 19-07 ✅ (web: Library page +
-> Business Artifacts tab + gws connector card).** Next: **19-08 (release)** — the only remaining sub-phase. **⚠️ IMPORTANT —
-> the 19-02..19-07 code is UNCOMMITTED** in the working trees of `genesis`, `genesis-core`, `genesis-workflows` (per the user's
-> instruction to *commit at phase completion*) — including the rebuilt `web/static/` bundle. A new session must NOT re-create
-> these files. Spec: `specs/phase-19-document-library.md` (+ `19-01..19-08`); ADR-040 (managed-native CLI) + ADR-041 (global
-> document library) — both **Proposed** (flip to Accepted at release, 19-08).
+> **Status (2026-08-11):** ✅ **SHIPPED — PHASE 19 COMPLETE (19-01..19-08).** Released **genesis-core v0.9.2 → genesis v0.44.0
+> → genesis-workflows v0.9.3**, all CI green; **ADR-040/041 Accepted**. Live-accepted (a real Drive .xlsx added → auto-synced via
+> `gws` → parsed → viewed full-screen). Spec: `specs/phase-19-document-library.md` (+ `19-01..19-08`).
 
 ## Decisions locked (from the design discussion)
 - **Documents = global first-class store + app-link table** (ADR-041). Dedup by Drive file-id (`gdrive:<id>`) / upload
@@ -119,8 +115,9 @@ fingerprint fields (`id,name,mimeType,modifiedTime,version,md5Checksum`) + expor
   api-index export; query keys `documents.*` + `config.gwsAuth`.
 - **`features/library/`** (NEW — note: `features/documents/` was already taken by the 07-09 `DocumentPreview`/renderers, which
   this REUSES): `hooks.ts` (TanStack query/mutations), `DocumentTable.tsx` (+`docTone`), `AddDocumentDialog.tsx` (Upload /
-  Google-Drive-link / Pick-from-library tabs), `DocumentDetailDrawer.tsx` (metadata + `MarkdownView` body), `LibraryPage.tsx`
-  (global page: search + source/status filters + Sync-all + Add + remove-confirm + detail drawer via `/documents/:id`).
+  Google-Drive-link / **multi-select** Pick-from-library tabs), `DocumentDetailPage.tsx` (full-screen `/documents/:id` viewer —
+  full-width + horizontal scroll, Back nav, metadata + `MarkdownView` body), `LibraryPage.tsx`
+  (global page: search + source/status filters + Sync-all + Add + remove-confirm).
 - **Per-app tab:** `BusinessArtifactsTab.tsx` (linked docs; Add [upload/drive/pick] + per-row Sync + Unlink) wired into
   `features/applications/ApplicationDetail.tsx` as the 5th tab (**Business Map · Overview · Syncs · Releases · Business
   Artifacts**).
@@ -130,18 +127,23 @@ fingerprint fields (`id,name,mimeType,modifiedTime,version,md5Checksum`) + expor
 - Tests: `features/library/library.test.tsx` (+6 — list, add-upload, sync, **jest-axe a11y**, connector connect-flow [mocked
   auth URL] + connected/disconnect). **`web/static/` rebuilt** (`npm run build`) — uncommitted with the rest.
 
-## Test status (uncommitted working tree)
-- genesis **375 pass**, ruff clean · genesis-core **65 pass** · genesis-workflows **75 workflow tests** + `validate_library`
-  (7 workflows) · **web: tsc clean, eslint 0 errors, 138 Vitest pass (17 files), `npm run build` OK.**
+## Test status (as released)
+- genesis **375 pytest**, ruff clean · genesis-core **65 pytest**, ruff clean · genesis-workflows **75 workflow tests** +
+  `validate_library` (7 workflows) · **web: tsc clean, eslint 0 errors, 138 Vitest (17 files), `npm run build` OK.**
 
-## Resume here (next session)
-1. **19-08 — release (the only remaining sub-phase)**: bump chain **genesis-core → genesis → genesis-workflows** (tags + pins),
-   **commit the whole Phase-19 working tree** (all repos; rebuild + commit `web/static/`), push, CI green (pin `ruff==0.15.20`
-   is already in genesis+core — verify workflows CI too), **live acceptance** (real `gws auth login` + add a real Drive doc +
-   `sync-documents` run → parsed + visible in the Library, the app’s Business Artifacts tab, chat `@genesis-kb/get_document`,
-   and an evidence pack), **flip ADR-040/041 → Accepted**, refresh the bible §2 tag table + test counts + README/tracker.
+## 19-08 — Release ✅ (SHIPPED)
+- Release chain (tags + pins, dependency order): **genesis-core v0.9.2** (`831f7dd`) → **genesis v0.44.0** (`ff94753`,
+  repins core v0.9.2 + declares pypdf/python-docx/openpyxl) → **genesis-workflows v0.9.3** (`b1c6685`, repins core v0.9.2 +
+  genesis v0.44.0). All three **CI pipelines green** (core #39, genesis #147, workflows #61 — incl. the genesis `frontend`
+  stale-bundle guard on the rebuilt `web/static/`). `ruff==0.15.20` pinned in genesis + genesis-core.
+- **ADR-040 + ADR-041 → Accepted** in `reference/decision-log.md`.
+- **Post-release fixes folded in before the tag** (surfaced by live click-through): `DocumentStore.list_documents` now
+  populates `linked_apps` (a missing field had crashed the web list); the Drive **add** path auto-starts a single-doc
+  `sync-documents` run (parse immediately, not only on manual Sync); the document viewer is a **full-screen page**
+  (`/documents/:id`, full-width + horizontal scroll for wide sheets) with Back nav (replaced the narrow drawer); the
+  Business-Artifacts "Pick from library" supports **multi-select**.
+- **Live acceptance PASSED:** a real Google Drive document (including an `.xlsx`) was added → auto-synced via the read-only
+  `gws` export → parsed → rendered in the full-screen viewer. **PHASE 19 COMPLETE.**
 
-**Handoff note:** everything above (19-02..19-07) is in the working trees, tested green, but NOT committed. Do not
-regenerate; `git status` in each repo shows the new/modified files. Commit at phase completion (19-08) per the user's
-instruction. **New runtime deps** (`pypdf`/`python-docx`/`openpyxl`) are already `pip install`-ed in the `.venv` and declared
-in `pyproject.toml`.
+**Optional future polish:** a spreadsheet-grid view rendered from `tables.json`; a scheduler for periodic document sync;
+semantic/pgvector document search (an ADR-030 trigger).

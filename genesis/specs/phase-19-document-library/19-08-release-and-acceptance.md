@@ -1,6 +1,9 @@
 # 19-08 — Release + acceptance
 
-> **Status:** DRAFT — spec only. **Repos:** genesis-core → genesis → genesis-workflows.
+> **Status:** ✅ **SHIPPED.** genesis-core **v0.9.2** → genesis **v0.44.0** → genesis-workflows **v0.9.3**, committed + tagged +
+> pushed in dependency order; all three CI pipelines green (incl. the genesis `frontend` stale-bundle guard). ADR-040/041 →
+> Accepted. Live acceptance passed (a real Drive `.xlsx` added → auto-synced via `gws` → parsed → viewed full-screen). See
+> `progress/phase-19-document-library.md`. **Repos:** genesis-core → genesis → genesis-workflows.
 
 ## Goal
 Ship Phase 19 as a coherent release, verify end-to-end against a real Drive document, and update all docs.

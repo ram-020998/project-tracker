@@ -142,7 +142,7 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
-- **2026-08-11 (Phase 19 — Genesis Document Library — 🚧 IN PROGRESS; 19-01/19-02/19-03 done, code UNCOMMITTED):** Building the
+- **2026-08-11 (Phase 19 — Genesis Document Library — ✅ SHIPPED + COMPLETE; 19-01..19-08, all CI green):** Built the
   feature. **19-01 spike ✅** (live-verified gws OAuth + export; `spike/2026-08-11-gws-oauth-and-export.md`). **19-02 managed-native
   `gws` connector ✅ code-complete + `genesis cli` subcommands + a LIVE isolated-mode smoke test PASSED** (installed the real gws
   into `~/.genesis/cli-tools/gws/`, drove Genesis's own read-only `gws auth login`, verified `connected` + a Drive `list_files`
@@ -163,11 +163,11 @@ Detailed, evidence-backed records of what was actually built each phase live in
   with an **isolated** config dir reading the OAuth client from the dotfiles `~/.config/gws/client_secret.json` (**no shipped
   token**, dotfiles = prerequisite), read-only scopes. **Tests green (working tree):** genesis **375**, genesis-core **65**,
   genesis-workflows **75** + `validate_library` (7), **web 138 Vitest (tsc clean, eslint 0 errors, `npm run build` OK)** — ruff
-  clean. **⚠️ The 19-02..19-07 code is UNCOMMITTED across genesis/genesis-core/genesis-workflows** (incl. the rebuilt
-  `web/static/`; committing at phase completion per the user); `git status` shows the files — a new session must NOT regenerate
-  them. **Next: 19-08** (release + commit whole phase + CI + live acceptance + ADR-040/041 Accepted) — the only sub-phase left.
-  **Full as-built + resume steps: `progress/phase-19-document-library.md`.** Specs: `specs/phase-19-document-library.md`
-  (+ `19-01..19-08`); ADR-040/041 (Proposed).
+  clean. **19-08 release ✅** — **genesis-core v0.9.2 → genesis v0.44.0 → genesis-workflows v0.9.3**, committed + tagged + pushed,
+  **all CI green**; ADR-040/041 flipped to **Accepted**. **Live-accepted:** a real Google Drive doc (incl. an .xlsx) added →
+  auto-synced via the `gws` export → parsed → viewed full-screen. **PHASE 19 COMPLETE.**
+  **Full as-built: `progress/phase-19-document-library.md`.** Specs: `specs/phase-19-document-library.md`
+  (+ `19-01..19-08`); ADR-040/041 (Accepted).
 
 - **2026-08-11 (Phase 19-01 — `gws` OAuth spike — ✅ DONE, PASS):** Ran the load-bearing feasibility spike against the real
   Google Workspace CLI (`gws 0.22.5`, `brew install googleworkspace-cli`, macOS arm64). **All locally-verifiable questions

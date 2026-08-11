@@ -1,6 +1,7 @@
 # Phase 19 — Genesis Document Library (umbrella)
 
-> **Status:** 📋 **DRAFT — spec only** (umbrella + sub-phases 19-01..19-08); awaiting approval to implement. · **Author:**
+> **Status:** ✅ **SHIPPED — COMPLETE (19-01..19-08)** — genesis-core v0.9.2 + genesis v0.44.0 + genesis-workflows v0.9.3, all
+> CI green; ADR-040/041 Accepted. · **Author:**
 > Genesis agent · **Date:** 2026-08-11
 > **Goal:** Let users attach the **business documents that describe an application** — the PDFs / Word docs / Excel sheets /
 > Google Docs that today live in Google Drive — to Genesis, parse them into a durable, LLM-consumable form, and make that
