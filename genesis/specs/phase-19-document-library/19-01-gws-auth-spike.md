@@ -1,6 +1,10 @@
 # 19-01 — `gws` OAuth spike (load-bearing feasibility)
 
-> **Status:** DRAFT — spec only. **Type:** time-boxed spike (throwaway code, durable findings — write up under `spike/`).
+> **Status:** ✅ **DONE — PASS** (2026-08-11). Findings: `spike/2026-08-11-gws-oauth-and-export.md`. The primary
+> browser-OAuth-under-subprocess mechanism is viable (URL printed to stderr, gws runs a localhost callback listener with no
+> TTY, read-only scoping native, exit-2 on missing creds, Drive fingerprint fields + export all present); the `auth export`
+> handoff remains a documented fallback but is **not** needed as primary. **No spec change required — proceed with 19-02.**
+> **Type:** time-boxed spike (throwaway code, durable findings — write up under `spike/`).
 > **Gates:** 19-02 (the whole auth approach). Do this FIRST.
 
 ## Why a spike

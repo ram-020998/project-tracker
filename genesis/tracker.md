@@ -142,6 +142,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-11 (Phase 19-01 — `gws` OAuth spike — ✅ DONE, PASS):** Ran the load-bearing feasibility spike against the real
+  Google Workspace CLI (`gws 0.22.5`, `brew install googleworkspace-cli`, macOS arm64). **All locally-verifiable questions
+  passed:** (Q1) `GOOGLE_WORKSPACE_CLI_CONFIG_DIR` + `KEYRING_BACKEND=file` fully isolate creds under our dir (no `~/.config/gws`
+  created); (Q2/Q3) under a **non-interactive subprocess** (stdin closed, no TTY) `gws auth login` prints a **parseable OAuth
+  URL to stderr** and blocks on a `localhost:<ephemeral>` callback listener — so Genesis can spawn it, scrape the URL, and the
+  browser callback hits gws's own listener (no proxy); (Q5) a no-auth API call returns `{code:401,reason:authError}` + **exit
+  2** (reconnect signal); (Q6) `--readonly -s drive,docs,sheets,slides` yields exactly the read-only scope set; export + the
+  Drive sync fingerprint fields (`id,name,mimeType,modifiedTime,version,md5Checksum`) both confirmed via `gws schema` /
+  `gws drive files export`. **Primary browser-OAuth-under-subprocess design is viable — `auth export` fallback documented but
+  not needed as primary; no spec change.** Full login completion + real Drive/Docs/Sheets calls remain a **manual acceptance**
+  step (needs the shared org OAuth client id/secret + a human browser approval — the one dependency to obtain). Findings:
+  `spike/2026-08-11-gws-oauth-and-export.md`; 19-01 marked DONE. **Ready to start 19-02** once the shared OAuth client is
+  provisioned.
+
 - **2026-08-11 (Phase 19 — Genesis Document Library — 📋 SPEC DRAFTED; awaiting approval to implement):** New feature spec set
   written after a design discussion with the user. **Goal:** attach the business documents that describe an application (the
   PDFs/Word/Excel/Google Docs in Google Drive) to Genesis, parse them into LLM-consumable Markdown (+ JSON for tabular), and
