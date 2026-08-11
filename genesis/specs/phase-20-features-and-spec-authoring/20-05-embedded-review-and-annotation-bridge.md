@@ -1,7 +1,13 @@
 # 20-05 — Embedded review surface + annotation → chat bridge (web)
 
-> **Status:** 📋 DRAFT. **Repo:** genesis. **This is ADR-043** (embed the vendored Lavish SDK). **Depends on:** 20-01 (proven
-> embed contract + message schema), 20-04 (spec chat + authoring seam). The visible heart of the phase.
+> **Status:** ✅ **CODE-COMPLETE — UNCOMMITTED** (commit at 20-06). Vendored the Lavish SDK (themed, MIT) into
+> `genesis/api/assets/lavish/` (built `sdk.js` via our esbuild); `api/features.py` serves the artifact (theme + SDK injected,
+> sandboxed same-origin), the `sdk.js`, and Markdown **export** (`markdownify==1.2.3`). Web `SpecWorkspace` = the reused
+> `ChatThread` + the sandboxed review **iframe** + the **annotation→chat bridge** (postMessage → one composed turn via a
+> `registerSend` hook on ChatThread) + status control + **Save milestone** + **Export .md** + **Add context** dialog; the
+> iframe reloads on each new assistant turn. genesis **396** pytest + web **145** Vitest green; tsc + eslint(0) + build clean.
+> See `progress/phase-20-features-and-spec-authoring.md`.
+> **This is ADR-043** (embed the vendored Lavish SDK). **Depends on:** 20-01, 20-04. The visible heart of the phase.
 
 ## Goal
 Render the spec **HTML** in an **embedded, annotatable** surface inside the feature page, beside the reused chat, and pipe the

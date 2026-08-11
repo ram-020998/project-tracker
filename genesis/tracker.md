@@ -153,6 +153,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-11 (Phase 20-05 — embedded review surface + annotation→chat bridge — ✅ CODE-COMPLETE, uncommitted):** The visible
+  heart (ADR-043). Vendored the themed Lavish SDK (MIT) into `genesis/api/assets/lavish/` (esbuild-built `sdk.js`); `api/features.py`
+  serves the artifact (Genesis theme + SDK injected, sandboxed same-origin), `sdk.js`, and Markdown **export** (`markdownify==1.2.3`,
+  pinned). Web **`SpecWorkspace`** = the reused `ChatThread` beside the sandboxed review **iframe** + the **annotation→chat bridge**
+  (postMessage `queuePrompt`/`sendQueuedPrompts` → one composed turn via a new optional `registerSend` prop on ChatThread) + status
+  `<select>` + **Save milestone** + **Export .md** + **Add context** dialog; iframe reloads on each new assistant turn. **genesis 396
+  pytest green, ruff clean; web 145 Vitest (18 files), tsc + eslint (0 errors) + build clean.** Genesis code uncommitted until 20-06.
+  Next: **20-06** (release + live acceptance + bible refresh) — the only sub-phase left. As-built: `progress/phase-20-features-and-spec-authoring.md`.
+
 - **2026-08-11 (Phase 20-04 — spec chat backend — ✅ CODE-COMPLETE, uncommitted):** Spec authoring is now a real **Chat**
   (reuse of Phase 10; ADR-001 intact — no workflow). Added an additive **`feature_spec`** session mode (`ChatStore.set_mode`
   + `_STEERING_SPEC`, reusing the read-only client path so `genesis-kb` + the Phase-14 fs sandbox are available — the agent

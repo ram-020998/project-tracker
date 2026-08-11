@@ -1,10 +1,10 @@
 # Progress — Phase 20: Features & Spec Authoring
 
-> **Status (2026-08-11):** 🚧 IN PROGRESS. **20-01 ✅ (embed spike)** · **20-02 ✅ (m0010 + `FeatureStore`)** · **20-03 ✅
-> (Features tab + feature page + `api/features.py`)** · **20-04 ✅ (spec chat backend — bound `feature_spec` session, add
-> context, milestones, status)**. Next: **20-05** (embedded review surface + annotation→chat bridge + MD export). Genesis
-> code for 20-02+ is in the working tree, **uncommitted — commits + the single genesis release land at 20-06** (Phase-19
-> rhythm). Spec: `specs/phase-20-features-and-spec-authoring.md` (+ `20-01..20-06`); **ADR-042/043** (Proposed).
+> **Status (2026-08-11):** 🚧 IN PROGRESS. **20-01 ✅** · **20-02 ✅** · **20-03 ✅** · **20-04 ✅** · **20-05 ✅ (embedded
+> review surface + annotation→chat bridge + MD export)**. Next: **20-06** (release + live acceptance + bible refresh) — the
+> only remaining sub-phase. Genesis code for 20-02+ is in the working tree, **uncommitted — commits + the single genesis
+> release land at 20-06** (Phase-19 rhythm). Spec: `specs/phase-20-features-and-spec-authoring.md` (+ `20-01..20-06`);
+> **ADR-042/043** (Proposed).
 
 ## 20-01 — Embedded annotation spike ✅ (PASS + user-confirmed)
 Proved Path B (embed the Lavish annotation SDK) before building. Findings: `spike/2026-08-11-lavish-embed.md`.
@@ -97,3 +97,32 @@ is a noted future refinement (not load-bearing for v1; live behaviour is validat
 app-linkage rejection + milestone 409→snapshot→increment + status validation + 404s), asserting chat state
 via `app.state.chat`. **genesis 393 pytest green, ruff clean.** No web changes (the chat UI + review surface
 are 20-05).
+
+## 20-05 — Embedded review surface + annotation→chat bridge ✅ (code-complete, uncommitted)
+The visible heart: annotate the spec HTML in-app and have it flow into the chat (ADR-043).
+
+**Vendored SDK (ADR-043):** the themed Lavish SDK source (`artifact-sdk.js` + `mermaid-node.js`, MIT @ `899747a`, with the
+20-01 `--lavish-*` theming patch) + an `entry.js` live in `genesis/genesis/api/assets/lavish/`; `sdk.js` is the esbuild-built
+IIFE (72.5 kb, browser). **No `lavish-axi` npm dep, no server/CLI/poll.** (Rebuild: `esbuild entry.js --bundle --format=iife
+--platform=browser --outfile=sdk.js`.)
+
+**Backend (`api/features.py`):** `GET /features/{id}/spec/sdk.js` (serves the bundle), `GET …/spec/artifact?theme=` (serves
+the freshest spec HTML — session sandbox else the last milestone — with the Genesis theme `<style>` [dark/light token map] +
+the SDK `<script>` injected before `</body>`; themed placeholder when nothing authored), `GET …/spec/export.md` (HTML→Markdown
+via **`markdownify==1.2.3`**, pinned; persists `export.md` + `md_export_path`; 409 when empty).
+
+**Web (`features/features/SpecWorkspace.tsx`):** a split view — the **reused `ChatThread`** (bound to the spec's session) beside
+the **sandboxed review iframe** (`sandbox="allow-scripts"`, src = the artifact route, theme from the active `.theme-*` class, a
+`bust` cache-buster). The **annotation→chat bridge**: a `window` `message` listener collects `lavish:queuePrompt` items and, on
+`lavish:sendQueuedPrompts`, composes ONE chat turn (`> "<selected text>"` + comment per annotation) and pushes it via a new
+optional **`registerSend`** prop on `ChatThread` (exposes its `useChatTurn` `send`; read-only/copilot unaffected). The iframe
+**reloads** whenever a new assistant message appears (shared `useSession`). Toolbar: **status** `<select>` (draft→…→completed),
+**Save milestone**, **Export .md** (anchor to the export route), **Add context** (a dialog listing the app's linked business
+artifacts → `POST …/spec/context`). `featuresApi` + hooks extended accordingly; `qk.features.detail` invalidated on
+status/milestone.
+
+**Tests:** backend `tests/test_features_api.py` (+3 — artifact placeholder→injected+themed, sdk.js served, export→Markdown +
+`md_export_path`) → **genesis 396 pytest green, ruff clean**. Web `features.test.tsx` (+3 — iframe src + sandbox, export link,
+status change PATCH) → **web 145 Vitest (18 files) green**; tsc + eslint (0 errors) + `npm run build` clean (`web/static/`
+rebuilt, uncommitted with the rest until 20-06). Live annotate→revise→reload loop is validated at 20-06 (needs a real browser +
+agent).
