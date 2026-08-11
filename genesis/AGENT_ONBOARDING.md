@@ -44,8 +44,8 @@
 > store linked into apps (ADR-041), reached via a managed-native `gws` CLI connector (ADR-040, isolated config + read-only
 > OAuth, client read from the dotfiles `~/.config/gws/client_secret.json`, no shipped token). 19-01 spike live-verified; 19-02
 > connector code-complete + live smoke test; 19-03 m0009 + DocumentStore; 19-04 parsing pipeline (pypdf/python-docx/openpyxl,
-> pinned). genesis 356 / core 65 green (working tree). Next =
-> 19-05 sync-documents → 19-06 consumption → 19-07 web → 19-08 release. See §9's Phase-19 block +
+> pinned); 19-05 sync-documents workflow + api/documents.py. genesis 372 / core 65 green (working tree). Next =
+> 19-06 consumption → 19-07 web → 19-08 release. See §9's Phase-19 block +
 > `progress/phase-19-document-library.md`.**
 
 ---
@@ -652,7 +652,7 @@ genesis-workflows/
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### ⭐ ACTIVE (IN PROGRESS — spec + 19-01/19-02/19-03/19-04 done; **code UNCOMMITTED**, commit at 19-08) — Phase 19: Genesis Document Library
+### ⭐ ACTIVE (IN PROGRESS — spec + 19-01/19-02/19-03/19-04/19-05 done; **code UNCOMMITTED**, commit at 19-08) — Phase 19: Genesis Document Library
 
 > **Handoff for the next session — READ `progress/phase-19-document-library.md` FIRST.** Attach the business documents that
 > describe an application (the PDFs/Word/Excel/Google Docs in Google Drive) to Genesis, parse them to LLM-consumable Markdown
@@ -680,14 +680,19 @@ genesis-workflows/
 >   gws `export_file`/`download_file` + Google-native→binary/text **convergence** (`google_export_target`); **deps PINNED
 >   à-la-carte `pypdf==6.15.0`/`python-docx==1.2.0`/`openpyxl==3.1.5`** (over MarkItDown — pure-Python, auditable). Bulk →
 >   `settings.kb_documents_dir` (`~/.genesis/kb-documents/<id>/latest.md`); DB gets pointers + `content_hash`.
-> - **Tests (working tree):** genesis **356**, genesis-core **65** green; genesis-workflows `validate_library` green; ruff clean.
+> - **19-05 sync-documents workflow + API ✅** — `DocumentSyncEngine` (`kb/doc_sync.py`, injected via
+>   `ctx.extras['document_sync']`); the deterministic **`sync-documents`** workflow (genesis-workflows: `resolve_targets →
+>   fetch_or_export → parse → write_documents[async to_thread] → v_write → present`; fingerprint change-detection; auth
+>   fail-fast / 404→source_missing); `api/documents.py` (upload multipart / gdrive add / link-unlink / sync single|app|library
+>   with **friendly 409** when the workflow's not installed or gws not connected / list|search|get|delete).
+> - **Tests (working tree):** genesis **372**, genesis-core **65** green; genesis-workflows **75 workflow tests** +
+>   `validate_library` green (7 workflows); ruff clean.
 >
-> **Next (resume here):** **19-05** deterministic `sync-documents` workflow + `api/documents.py` (add/link/sync; parse via
-> `kb/doc_parsing`; change-detect via `get/set_fingerprint`; blocking writes via `asyncio.to_thread`; gws not-installed/
-> not-connected → 409) → **19-06** `genesis-kb` document tools + evidence-pack → **19-07** web (global Document Library page +
-> per-app **Business Artifacts** tab + gws connector card) → **19-08** release chain (core → genesis → genesis-workflows),
-> **commit the whole phase**, CI green, live acceptance, **flip ADR-040/041 → Accepted**, refresh §2 tag table + test counts.
-> Specs: `specs/phase-19-document-library.md` (+ `phase-19-document-library/19-01..19-08`).
+> **Next (resume here):** **19-06** consumption — `genesis-kb` MCP `list/get/search_documents` (over `DocumentStore`) +
+> `KbStore.build_evidence_pack` extended to include an app's linked documents → **19-07** web (global Document Library page +
+> per-app **Business Artifacts** tab + Settings→CLI gws connector card) → **19-08** release chain
+> (core → genesis → genesis-workflows), **commit the whole phase**, CI green, live acceptance, **flip ADR-040/041 → Accepted**,
+> refresh §2 tag table + test counts. Specs: `specs/phase-19-document-library.md` (+ `phase-19-document-library/19-01..19-08`).
 
 
 ### ✅ SHIPPED (COMPLETE) — Phase 18: Appian Parser Accuracy Overhaul (genesis-appian-parser v0.2.0 + genesis v0.40.0 + genesis-workflows v0.9.2)

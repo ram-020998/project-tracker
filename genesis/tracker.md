@@ -151,14 +151,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
   ADR-041). **19-04 parsing pipeline ✅** — `kb/doc_parsing.py` (per-type PDF/DOCX/XLSX/CSV/MD/TXT → canonical Markdown + per-tab
   JSON tables + heading sections + `content_hash`; **deps pinned à-la-carte `pypdf`/`python-docx`/`openpyxl`**) + gws
   `export_file`/`download_file` + Google-native→binary/text convergence + `store_parsed` to `~/.genesis/kb-documents/<id>/`.
-  **Decisions locked:** global first-class document store + app-link table (ADR-041); `gws` as a managed-native CLI
-  (ADR-040) with an **isolated** config dir reading the OAuth client from the dotfiles `~/.config/gws/client_secret.json`
-  (**no shipped token**, dotfiles = prerequisite), read-only scopes. **Tests green (working tree):** genesis **356**, genesis-core
-  **65**, genesis-workflows `validate_library` — ruff clean. **⚠️ The 19-02/19-03/19-04 code is UNCOMMITTED across genesis/
-  genesis-core/genesis-workflows** (committing at phase completion per the user); `git status` in each repo shows the new/modified
-  files — a new session must NOT regenerate them. **Next: 19-05** (`sync-documents` workflow + `api/documents.py`) → 19-06
-  (consumption) → 19-07 (web) → 19-08 (release + commit + ADR-040/041 Accepted). **Full as-built + resume steps:
-  `progress/phase-19-document-library.md`.** Specs: `specs/phase-19-document-library.md` (+ `19-01..19-08`); ADR-040/041 (Proposed).
+  **19-05 sync-documents ✅** — `DocumentSyncEngine` (`kb/doc_sync.py`, injected via `ctx.extras['document_sync']`) + the
+  deterministic **`sync-documents`** workflow (genesis-workflows; program-only, async `to_thread` write, fingerprint
+  change-detection) + `api/documents.py` (upload/gdrive add, link/unlink, sync single|app|library with friendly 409, list/
+  search/get/delete). **Decisions locked:** global first-class document store + app-link table (ADR-041); `gws` as a
+  managed-native CLI (ADR-040) with an **isolated** config dir reading the OAuth client from the dotfiles
+  `~/.config/gws/client_secret.json` (**no shipped token**, dotfiles = prerequisite), read-only scopes. **Tests green (working
+  tree):** genesis **372**, genesis-core **65**, genesis-workflows **75 workflow tests** + `validate_library` (7 workflows) —
+  ruff clean. **⚠️ The 19-02..19-05 code is UNCOMMITTED across genesis/genesis-core/genesis-workflows** (committing at phase
+  completion per the user); `git status` in each repo shows the new/modified files — a new session must NOT regenerate them.
+  **Next: 19-06** (consumption — `genesis-kb` doc tools + evidence-pack) → 19-07 (web) → 19-08 (release + commit + ADR-040/041
+  Accepted). **Full as-built + resume steps: `progress/phase-19-document-library.md`.** Specs:
+  `specs/phase-19-document-library.md` (+ `19-01..19-08`); ADR-040/041 (Proposed).
 
 - **2026-08-11 (Phase 19-01 — `gws` OAuth spike — ✅ DONE, PASS):** Ran the load-bearing feasibility spike against the real
   Google Workspace CLI (`gws 0.22.5`, `brew install googleworkspace-cli`, macOS arm64). **All locally-verifiable questions

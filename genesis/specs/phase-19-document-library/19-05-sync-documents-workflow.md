@@ -1,7 +1,11 @@
 # 19-05 — `sync-documents` workflow (add / pull / parse / write + change detection)
 
-> **Status:** DRAFT — spec only. **Repos:** genesis-workflows (the workflow) + genesis (the `DocumentStore` wiring +
-> `api/documents.py` add/link/sync endpoints). **Depends on:** 19-02 (gws_client), 19-03 (store), 19-04 (parser).
+> **Status:** ✅ **CODE-COMPLETE — UNCOMMITTED** (commit at 19-08 per the user). `DocumentSyncEngine` (`genesis/kb/doc_sync.py`,
+> injected via `ctx.extras['document_sync']`) + the deterministic **`sync-documents`** workflow (genesis-workflows) + the
+> `api/documents.py` add/link/sync/browse routes (friendly 409 when the workflow's not installed or gws not connected). +23
+> tests (genesis 372 green; genesis-workflows 75 + validate_library 7 workflows), ruff clean. See
+> `progress/phase-19-document-library.md`. **Repos:** genesis-workflows (the workflow) + genesis (`DocumentStore` wiring +
+> `api/documents.py`). **Depends on:** 19-02 (gws_client), 19-03 (store), 19-04 (parser).
 
 ## Goal
 A **deterministic, program-only** LangGraph workflow (no agent, no credits — ADR-001) that ingests and refreshes documents,

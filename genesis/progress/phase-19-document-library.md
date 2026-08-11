@@ -1,11 +1,11 @@
 # Phase 19 — Genesis Document Library — progress (as-built)
 
 > **Status (2026-08-11):** IN PROGRESS. **19-01 ✅ (live-verified) · 19-02 ✅ code-complete + CLI + live smoke test · 19-03 ✅
-> code-complete · 19-04 ✅ code-complete (parsing pipeline).** Next: 19-05 → 19-08. **⚠️ IMPORTANT — the 19-02/19-03/19-04 code
-> is UNCOMMITTED** in the working trees of `genesis`, `genesis-core`, `genesis-workflows` (per the user's instruction to
-> *commit at phase completion*). A new session must NOT re-create these files — they already exist locally. Spec:
-> `specs/phase-19-document-library.md` (+ `19-01..19-08`); ADR-040 (managed-native CLI) + ADR-041 (global document library) —
-> both **Proposed** (flip to Accepted at release, 19-08).
+> code-complete · 19-04 ✅ (parsing pipeline) · 19-05 ✅ (sync-documents workflow + api/documents.py).** Next: 19-06 → 19-08.
+> **⚠️ IMPORTANT — the 19-02/19-03/19-04/19-05 code is UNCOMMITTED** in the working trees of `genesis`, `genesis-core`,
+> `genesis-workflows` (per the user's instruction to *commit at phase completion*). A new session must NOT re-create these
+> files — they already exist locally. Spec: `specs/phase-19-document-library.md` (+ `19-01..19-08`); ADR-040 (managed-native
+> CLI) + ADR-041 (global document library) — both **Proposed** (flip to Accepted at release, 19-08).
 
 ## Decisions locked (from the design discussion)
 - **Documents = global first-class store + app-link table** (ADR-041). Dedup by Drive file-id (`gdrive:<id>`) / upload
@@ -74,21 +74,43 @@ fingerprint fields (`id,name,mimeType,modifiedTime,version,md5Checksum`) + expor
   + unsupported/corrupt → error + `store_parsed` round-trip); `tests/test_gws_client.py` (+2 — export writes+parses, download).
 - Runs OFF the event loop (upload path `asyncio.to_thread`; Drive path in the 19-05 worker subprocess).
 
+## 19-05 — `sync-documents` workflow + Document Library API ✅ (code, UNCOMMITTED)
+- **`genesis/kb/doc_sync.py`** (NEW) — `DocumentSyncEngine`, the injected seam (bundles the read-only `gws` client + global
+  `DocumentStore` + 19-04 parser). Methods: `resolve_targets(scope=document|app|library)` (uploads skipped — no Drive source),
+  `fetch(target, dest)` (fingerprint change-detect → export/download; **fails fast on auth**; 404→source_missing),
+  `parse(path)` (returns `{ok, parsed|error}` — no exception crosses the workflow boundary), `write(id, parsed, fingerprint)`
+  (BLOCKING → `store_parsed` + `set_fingerprint`), `write_error`/`write_source_missing`, `add_upload`/`add_gdrive`, `remove`
+  (row+links+sections+on-disk). Helpers `parse_gdrive_url`/`sha256_hex`.
+- **`genesis/runtime/context.py`** (M) — injects `ctx.extras['document_sync']` (lazy `_gws_provider` = `build_gws_client` +
+  `NativeCliInstaller`), mirroring `kb_store`.
+- **genesis-workflows `workflows/sync-documents/`** (NEW) — program-only graph `resolve_targets → fetch_or_export → parse →
+  write_documents → v_write → present` (+ `surface_error`). `write_documents` is a **raw async node** running the blocking
+  writes via `asyncio.to_thread` (§7 deadlock lesson). `graph.py` never imports the platform (uses `ctx.extras['document_sync']`
+  + `ctx.workspace`). Registered in `registry.json`. `validate_library` passes (**7 workflows**).
+- **`genesis/api/documents.py`** (NEW, registered in `app.py`) — `POST /documents/upload` (multipart; ADR-035 guards: 10 MB,
+  ext allowlist, sanitized name; parse+store off-thread), `POST /documents/gdrive` (`{url, app_uuid?}`; 409 if not connected),
+  `POST/DELETE /documents/{id}/link`, `POST /documents/{id}/sync` / `POST /applications/{uuid}/documents/sync` /
+  `POST /documents/sync` (**friendly 409 if the workflow isn't installed OR gws not connected** — the 17-06 lesson, never a
+  500), `GET /documents`(+`?app_uuid=`), `GET /documents/search`, `GET /documents/{id}` (+ rendered content), `DELETE`.
+- Tests: `tests/test_doc_sync.py` (+10 — engine resolve/fetch[unchanged/fetched/source_missing/auth]/parse/write/add-upload-
+  dedup/add-gdrive/remove, with a fake gws), `tests/test_documents_api.py` (+6 — upload+dedup, bad-ext, link/unlink, list/get/
+  search/delete, sync→409, gdrive→409); `workflows/sync-documents/tests/test_workflow.py` (+7 — baseline pull→parse→store,
+  unchanged-skip, source_missing, auth-fail-fast, validator/summary, with a fake gws via the harness).
+
 ## Test status (uncommitted working tree)
-- genesis **356 pass**, ruff clean · genesis-core **65 pass**, ruff clean · genesis-workflows `validate_library.py` green.
+- genesis **372 pass**, ruff clean · genesis-core **65 pass**, ruff clean · genesis-workflows **75 workflow tests** +
+  `validate_library.py` green (7 workflows).
 
 ## Resume here (next session)
-1. **19-05 — `sync-documents` workflow** (genesis-workflows + genesis): program-only graph `resolve → fetch/export(gws) →
-   parse (`kb/doc_parsing`) → write (`store_parsed`/DocumentStore) → validate → present`; change detection via the
-   `get_fingerprint`/`set_fingerprint` (modifiedTime/version/md5); `write` node uses `asyncio.to_thread` (§7 deadlock lesson).
-   `api/documents.py`: add (upload multipart / Drive link) + link/unlink + sync (single/app/library); gws-not-installed /
-   not-connected → 409. Reuse `google_export_target` to pick the export mime; binary Drive files via `download_file`.
-2. **19-06 — consumption**: `genesis-kb` MCP `list/get/search_documents` + `KbStore.build_evidence_pack` includes linked docs.
-3. **19-07 — web**: global Document Library page + per-app **Business Artifacts** tab + Settings→CLI **gws connector card**.
-4. **19-08 — release**: bump chain (genesis-core → genesis → genesis-workflows), **commit the whole phase**, CI green, live
+1. **19-06 — consumption**: `genesis-kb` MCP `list/get/search_documents` (over `DocumentStore`, Atlas-style shapes) +
+   `KbStore.build_evidence_pack` extended to include an app's linked documents (sections). Chat/spec/design flows then use docs
+   alongside the KB.
+2. **19-07 — web**: global Document Library page (upload/add-Drive/link/sync/search) + per-app **Business Artifacts** tab +
+   Settings→CLI **gws connector card** (status/connect/disconnect from the 19-02 `api/native_cli.py` gws-auth routes).
+3. **19-08 — release**: bump chain (genesis-core → genesis → genesis-workflows), **commit the whole phase**, CI green, live
    acceptance, flip ADR-040/041 → Accepted, refresh the bible §2 tag table + test counts.
 
-**Handoff note:** everything above (19-02/19-03/19-04) is in the working trees, tested green, but NOT committed. Do not
+**Handoff note:** everything above (19-02/19-03/19-04/19-05) is in the working trees, tested green, but NOT committed. Do not
 regenerate; `git status` in each repo shows the new/modified files. Commit at phase completion (19-08) per the user's
 instruction. **New runtime deps** (`pypdf`/`python-docx`/`openpyxl`) are already `pip install`-ed in the `.venv` and declared
 in `pyproject.toml`.
