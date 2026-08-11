@@ -153,6 +153,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-11 (Phase 20-01 — Lavish embed spike — ✅ PASS, load-bearing mechanics verified):** Proved Path B is sound before
+  building. Pinned `kunchenguid/lavish-axi` @ `899747a` (npm 0.1.50, MIT). The injected browser SDK (`artifact-sdk.js` +
+  `mermaid-node.js`) is plain ESM, makes **0** network calls, and talks only via `parent.postMessage`. Our **esbuild (0.21.5,
+  Node 20.20)** bundled a 2-line entry (`import {createArtifactSdk, deriveLavishQueueKey}` → call it) into a **70.5 kb**
+  self-contained browser IIFE — **no `lavish-axi` npm dep, no Express/CLI/poll, no Node ≥22**; esbuild resolves `mermaid-node.js`
+  automatically (cleaner than Lavish's own `.toString()` serialize trick in `createSdkJs`). Captured the exact bridge schema:
+  `lavish:queuePrompt {prompt:{uid,selector,tag,text,prompt,target?:{type:"text-range",text,start/end anchors},_lavishQueueKey}}`
+  + `lavish:sendQueuedPrompts` (→ host composes one chat turn). A runnable harness (`/tmp/lavish-embed-spike/`: sample
+  `spec.html` + a sandboxed-iframe `host.html` logging postMessage) is ready for the user's in-browser click/select round-trip
+  + `sandbox="allow-scripts"` confirmation (the one item not headlessly verifiable — same posture as 19-01's live OAuth step).
+  Findings: `spike/2026-08-11-lavish-embed.md`. **No production code; no spec change — proceed to 20-02 (m0010 + `FeatureStore`).**
+
 - **2026-08-11 (Phase 20 — Features & Spec Authoring — 📋 SPEC DRAFTED; awaiting approval to implement):** New feature spec set
   written after a code-grounded evaluation of the **Lavish** annotation tool (`kunchenguid/lavish-axi`, MIT). Decided **Path B
   (embed)**: the injected browser SDK makes **no server calls** and talks only via `parent.postMessage` (`lavish:queuePrompt`

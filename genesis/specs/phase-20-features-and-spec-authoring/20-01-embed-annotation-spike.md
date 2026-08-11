@@ -1,7 +1,13 @@
 # 20-01 — Embedded annotation spike (load-bearing feasibility)
 
-> **Status:** 📋 DRAFT. **Type:** time-boxed spike (throwaway code, durable findings under `spike/`). **Gates:** 20-05 (the
-> whole embedded review surface). Do this FIRST. **Repo:** genesis (scratch only — no production code).
+> **Status:** ✅ **PASS (load-bearing mechanics verified) — pending the user's in-browser round-trip confirm.** Findings:
+> `spike/2026-08-11-lavish-embed.md`. The vendored SDK (`kunchenguid/lavish-axi` @ `899747a`, MIT) bundles via our esbuild
+> (Node 20) into a **70.5 kb** IIFE with **0** network calls; it talks only via `parent.postMessage`; the exact annotation
+> **message schema** (`lavish:queuePrompt {prompt: item}` / `lavish:sendQueuedPrompts`) + the serve/inject/host contract are
+> recorded for 20-05. A runnable harness (`/tmp/lavish-embed-spike/`) is ready for the click/select/text-range + sandbox
+> confirmation. **No spec change required — proceed with 20-02.**
+> **Type:** time-boxed spike (throwaway code, durable findings under `spike/`). **Gates:** 20-05 (the whole embedded review
+> surface). Do this FIRST. **Repo:** genesis (scratch only — no production code).
 
 ## Why a spike
 The whole review surface (20-05) rests on one assumption verified only by reading Lavish's source: that the injected
