@@ -1,7 +1,8 @@
 # Progress — Phase 20: Features & Spec Authoring
 
 > **Status (2026-08-11):** 🚧 IN PROGRESS. **20-01 ✅ (embed spike, PASS + user-confirmed round-trip)** · **20-02 ✅
-> (m0010 + `FeatureStore`, code-complete, tests green)**. Next: **20-03** (Features tab + feature page + `api/features.py`).
+> (m0010 + `FeatureStore`, code-complete, tests green)** · **20-03 ✅ (Features tab + feature page + `api/features.py`,
+> code-complete)**. Next: **20-04** (spec chat backend — bind the session + `genesis-kb` + add-context + milestones).
 > Genesis code for 20-02+ is in the working tree, **uncommitted — commits + the single genesis release land at 20-06**
 > (Phase-19 rhythm). Spec: `specs/phase-20-features-and-spec-authoring.md` (+ `20-01..20-06`); **ADR-042/043** (Proposed).
 
@@ -46,3 +47,22 @@ spec create/lookup, validated status transitions (reject unknown), html/md point
 bumped to v10 (applied list, `schema_migrations` rows incl. `features`, current_version/pending; the synthetic
 next-migration test moved 10→11 since m0010 is now real). Version assertions in `test_document_store`/`test_chat_store`/
 `test_kb_store` bumped 9→10. **Full suite: genesis 384 pytest green; `ruff check genesis` clean.**
+
+## 20-03 — Features surface + feature page shell ✅ (code-complete, uncommitted)
+**Backend** `genesis/api/features.py` (`register_features_routes(api, settings, kb_store)`, wired in `create_app` after the
+documents routes): `GET/POST /applications/{uuid}/features` (create validates the app via `KbStore` + a non-blank name),
+`GET/PATCH/DELETE /features/{id}` (delete also `shutil.rmtree`s each cascaded spec's `feature_specs_dir/<spec_id>/`), and
+`POST/GET /features/{id}/spec` (v1 **one-spec-per-feature** guard → 409; default title `Spec: <feature>`; the spec's
+`chat_session_id` is bound in 20-04). Unknown app/feature → 404.
+
+**Web** `web/src/features/features/`: `types/features.ts` + `lib/api/features.ts` (`featuresApi`) + `qk.features` +
+`hooks.ts` (TanStack: `useFeatures`/`useFeature`/`useCreateFeature`/`useUpdateFeature`/`useDeleteFeature`/`useCreateSpec`) +
+`status.ts` (spec-status label/tone) + `CreateFeatureDialog.tsx` (name + description) + `FeaturesTab.tsx` (feature cards +
+Create → navigate to the feature page) + `FeaturePage.tsx` (full page: header + back-to-app + the **Create spec** empty state,
+and a spec-workspace **shell** that 20-04/20-05 fill in). Wired the **Features** tab into `ApplicationDetail` (6th tab) and the
+route `applications/:appUuid/features/:featureId` into `router.tsx`.
+
+**Tests:** `tests/test_features_api.py` (6 — CRUD, name/app validation, create-spec + one-per-feature guard, default title,
+404s) → **genesis 390 pytest green, ruff clean**. `web/src/features/features/features.test.tsx` (4 — lists cards, create +
+navigate, jest-axe, feature-page create-spec) → **web 142 Vitest (18 files) green**; tsc + eslint (0 errors) + `npm run build`
+clean (`web/static/` rebuilt, uncommitted with the rest until 20-06).

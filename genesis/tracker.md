@@ -153,6 +153,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-11 (Phase 20-03 — Features surface + feature page — ✅ CODE-COMPLETE, uncommitted):** `api/features.py` (feature
+  CRUD + `POST/GET /features/{id}/spec` with a v1 one-spec-per-feature 409 guard; app/feature validated → 404; delete cleans
+  the on-disk spec dirs) wired into `create_app`. Web `features/features/`: types + `featuresApi` + `qk.features` + hooks +
+  `CreateFeatureDialog` + **Features** tab (cards + create→navigate) on `ApplicationDetail` (6th tab) + the **feature page**
+  (`/applications/:appUuid/features/:featureId`) with the **Create spec** empty state + a spec-workspace shell (filled in
+  20-04/20-05). **genesis 390 pytest green, ruff clean; web 142 Vitest (18 files, +4 features + jest-axe), tsc + eslint (0
+  errors) + `npm run build` clean.** Genesis code still uncommitted until the 20-06 release. Next: **20-04** (bind the spec's
+  chat session + `genesis-kb` seeding + add-context + milestones). As-built: `progress/phase-20-features-and-spec-authoring.md`.
+
 - **2026-08-11 (Phase 20-02 — data model + `FeatureStore` — ✅ CODE-COMPLETE, uncommitted):** Added migration **m0010**
   (`kb_features`/`kb_feature_specs`/`kb_feature_spec_revisions`, schema **v10**, `kb_*` idiom) + **`FeatureStore`**
   (`genesis/kb/features.py`, mirrors `DocumentStore`) — feature CRUD, single-spec lifecycle with a validated

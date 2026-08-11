@@ -1,6 +1,11 @@
 # 20-03 — Features surface + feature page shell (API + web)
 
-> **Status:** 📋 DRAFT. **Repo:** genesis. **Depends on:** 20-02 (`FeatureStore`). Delivers the navigation + CRUD shell that
+> **Status:** ✅ **CODE-COMPLETE — UNCOMMITTED** (commit at 20-06). `api/features.py` (feature CRUD + spec create/get) + the
+> web **Features** tab + **Create feature** dialog + the **feature page** (`/applications/:appUuid/features/:featureId`) +
+> the **Create spec** empty state. Backend **390** pytest green; web **142** Vitest (18 files, +4 features tests, jest-axe),
+> tsc + eslint(0 errors) + `npm run build` clean. Chat binding deferred to 20-04 (the spec is created with no session yet).
+> See `progress/phase-20-features-and-spec-authoring.md`.
+> **Repo:** genesis. **Depends on:** 20-02 (`FeatureStore`). Delivers the navigation + CRUD shell that
 > 20-04/20-05 fill in.
 
 ## Goal
