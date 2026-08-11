@@ -94,6 +94,38 @@ python3 -m http.server 8099
 #   Enter to queue, Ctrl/Cmd+Enter to queue+send → watch queuePrompt / sendQueuedPrompts in the host log.
 ```
 
+## Theming — make the annotation UI use Genesis tokens (ADR-027), not Lavish yellow
+**User-confirmed** the round-trip in-browser (element + text-range annotations arrive with anchors), and flagged the default
+**yellow** comment box. Root: the SDK builds its whole palette as CSS custom properties on the shadow-root **`:host`**
+(`--accent:#f4c95d`, `--brass-*`, `--bg`/`--bg-panel`/`--fg`/`--border`, `color-scheme:dark`) — defined *inside* the shadow
+style, so an outer document can't override them without a seam.
+
+**Seam (applied in the harness; the plan for 20-05):** since we vendor the SDK, expose a theming API by making the `:host`
+palette + the highlight rules **consume `--lavish-*` overrides with the original values as fallbacks** — a single, localized
+patch to the one `:host` style string (custom properties still inherit through `:host{all:initial}`, and fallbacks mean it
+degrades to stock Lavish if unset). Then **inject Genesis design tokens** into the artifact document (our `injectLavishSdk`
+adds a `<style>` alongside the `<script>`). Map (Genesis **dark** default shown; inject the `.theme-light` set when the user's
+Genesis theme is light):
+
+| `--lavish-*` override | Genesis token (dark) | value |
+|---|---|---|
+| `--lavish-accent` | `--primary` | `#6d8bff` |
+| `--lavish-accent-hover` | `--accent` | `#b892ff` |
+| `--lavish-accent-ink` | `--primary-fg` | `#0b0c0e` |
+| `--lavish-bg` (textarea) | `--surface-1` | `#141619` |
+| `--lavish-bg-panel` (card) | `--surface-2` | `#1b1e22` |
+| `--lavish-bg-elevated` | `--surface-3` | `#22262b` |
+| `--lavish-fg` | `--fg` | `#f2f4f7` |
+| `--lavish-fg-faint` | `--fg-muted` | `#9ba3ae` |
+| `--lavish-border` | `--border` | `#232629` |
+| `--lavish-annotate-outline` | (from `--primary`) | `2px solid #6d8bff` |
+| `--lavish-highlight-bg` / `-ring` / `-soft` | (from `--primary`) | `rgb(109 139 255 / .24 / .5 / .22)` |
+
+Patched regions in `artifact-sdk.js` (the `:host` block: `--bg`/`--bg-panel`/`--bg-elevated`/`--fg`/`--fg-faint`/`--border`/
+`--brass-ink`/`--accent`/`--accent-hover`; `.lavish-text-highlight`; `.lavish-reveal-marker`) — **record this diff in
+`THIRD-PARTY-NOTICES.md` / a patch note so a future upstream bump re-applies it**; `color-scheme` stays `dark` for v1 (switch to
+the active theme in 20-05). Verified: the rebuilt bundle carries `var(--lavish-accent,#f4c95d)` etc. (override + fallback).
+
 ## Exit
 All programmatically-verifiable questions PASS (1,2,7 + the full schema for 4/5). The browser round-trip (3,4,5,6) is ready to
 confirm via the harness. **No production code written; no spec change required — proceed to 20-02 (m0010 + `FeatureStore`) and

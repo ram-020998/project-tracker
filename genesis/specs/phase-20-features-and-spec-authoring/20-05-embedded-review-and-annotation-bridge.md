@@ -13,6 +13,13 @@ SPA, no second window.
   recorded in the 20-01 spike) into `web/src/features/features/lavish/` (or a shared `web/src/shared/lavish/`). Attribution in
   `THIRD-PARTY-NOTICES.md`. Bundle to a single **`/sdk.js`** via our existing Vite/esbuild (Node 20). **No `lavish-axi` npm
   dependency; no Lavish server/CLI/poll/export/share.**
+- **Theming (Genesis tokens, ADR-027 — no Lavish yellow).** Apply the **one localized patch** from the 20-01 spike: make the
+  SDK's `:host` palette + highlight rules **consume `--lavish-*` overrides with the stock values as fallbacks**
+  (`--lavish-accent`/`-accent-hover`/`-accent-ink`/`-bg`/`-bg-panel`/`-bg-elevated`/`-fg`/`-fg-faint`/`-border`/
+  `-annotate-outline`/`-highlight-bg`/`-ring`/`-soft`), and **inject those vars from Genesis design tokens** in the artifact via
+  `injectLavishSdk` — using the **active theme's** token set (dark `--primary #6d8bff`/`--surface-*`/`--fg`/`--border`; the
+  `.theme-light` set when light), and set the artifact `color-scheme` to match. **Record the vendored-SDK patch diff in
+  `THIRD-PARTY-NOTICES.md`** so an upstream bump re-applies it. (The full var→token map is in `spike/2026-08-11-lavish-embed.md`.)
 
 ## Serving the artifact (backend, same-origin)
 - A scoped route serves the spec HTML with the SDK injected + the bundled SDK script:
