@@ -148,3 +148,16 @@ token-efficient (the Kiro agent reads the files on demand with its file tools ra
 content in every turn's context). `_STEERING_SPEC` now tells the agent its reference documents live under
 `./context/`. Test updated to assert the context file is written (with content) while the transcript note
 carries only the filename. genesis 397 pytest green, ruff clean; web tsc/eslint/build clean.
+
+### Live fix #2 (20-05) — spec.html write STILL denied after the cwd fix: trust the fs tools
+After the cwd fix the target was correct (`skill-output/<sid>/spec.html`) but the write was still
+denied. Ground truth from the SDK (`kiro-agent-sdk` `client.py` + `test_permission_policy.py`): the
+`fs/write_text_file` capability is gated ONLY by `allow_fs_write`+`fs_write_root` (NOT `permission_mode`),
+while `session/request_permission` (untrusted **tools**) is what `auto_deny` rejects. So kiro-cli was
+requesting permission for its built-in **`fs_write` tool** — untrusted in the read-only-derived
+feature_spec session → `auto_deny` rejected it before the sandbox-enforcing capability ran. **Fix:** for
+`feature_spec` sessions, add `fs_read`/`fs_write` to `trust_tools` (so no permission is requested); the
+write is still confined to `fs_write_root`, and all other tools (shell, MCP mutations) stay untrusted →
+denied. Regression test extended to assert `fs_write`/`fs_read` trusted + `auto_deny` retained. Needs a
+`genesis serve` restart. (Note: `fs_write`/`fs_read` are kiro-cli's built-in tool names; if a future
+kiro-cli renames them, re-confirm via `KIRO_ACP_DEBUG=1`.)
