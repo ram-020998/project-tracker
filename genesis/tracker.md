@@ -153,6 +153,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-11 (Phase 20-02 — data model + `FeatureStore` — ✅ CODE-COMPLETE, uncommitted):** Added migration **m0010**
+  (`kb_features`/`kb_feature_specs`/`kb_feature_spec_revisions`, schema **v10**, `kb_*` idiom) + **`FeatureStore`**
+  (`genesis/kb/features.py`, mirrors `DocumentStore`) — feature CRUD, single-spec lifecycle with a validated
+  `draft→in-progress→in-review→completed` status, milestone revisions (auto-increment + `UNIQUE`), on-disk pointer store
+  (`settings.feature_specs_dir`). `KbStore.untrack_application` now explicitly deletes `kb_features` (cascades specs+revisions
+  via FK) — the **ADR-042 intrinsic-to-app** rule (contrast: Phase-19 documents only unlink). Exported from `genesis/kb`.
+  Tests: `tests/test_feature_store.py` (9) + `test_db.py` bumped to v10 (synthetic next-migration moved 10→11) +
+  document/chat/kb-store version assertions 9→10. **genesis 384 pytest green, ruff clean.** Genesis code stays **uncommitted
+  until the 20-06 release** (Phase-19 rhythm). Next: **20-03** (Features tab + feature page + `api/features.py`). As-built:
+  `progress/phase-20-features-and-spec-authoring.md`.
+
 - **2026-08-11 (Phase 20-01 — Lavish embed spike — ✅ PASS, load-bearing mechanics verified):** Proved Path B is sound before
   building. Pinned `kunchenguid/lavish-axi` @ `899747a` (npm 0.1.50, MIT). The injected browser SDK (`artifact-sdk.js` +
   `mermaid-node.js`) is plain ESM, makes **0** network calls, and talks only via `parent.postMessage`. Our **esbuild (0.21.5,

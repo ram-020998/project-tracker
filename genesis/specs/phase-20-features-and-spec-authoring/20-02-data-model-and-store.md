@@ -1,6 +1,9 @@
 # 20-02 — Data model + `FeatureStore` (migration m0010)
 
-> **Status:** 📋 DRAFT. **Repo:** genesis. **This is ADR-042** (Features & Specs model). Can proceed in parallel with 20-01
+> **Status:** ✅ **CODE-COMPLETE — UNCOMMITTED** (commit at 20-06 release, matching the Phase-19 rhythm). m0010 (schema v10)
+> + `FeatureStore` + `settings.feature_specs_dir` + the `untrack_application` cascade line; **9 new tests** (genesis **384**
+> pytest green, ruff clean). See `progress/phase-20-features-and-spec-authoring.md`.
+> **Repo:** genesis. **This is ADR-042** (Features & Specs model). Can proceed in parallel with 20-01
 > after the spike is under way (no dependency on the SDK).
 
 ## Goal
