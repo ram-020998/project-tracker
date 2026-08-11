@@ -96,6 +96,17 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
 | 16 | `specs/phase-16-appian-knowledge-base.md` (+ `phase-16-appian-knowledge-base/16-01..16-08` + `genesis-kb-tool-contracts.md`) | Appian Knowledge Base (Atlas-into-Genesis) 📋 | Bring the Appian **knowledge base** *inside* Genesis: a **Genesis-native parser** (`genesis-appian-parser`, ported from the Atlas parser front-half), a **code-free temporal KB** in `genesis.db` (m0007 `kb_*` SCD-2 tables — metadata/structure/deps/bundles only, **no source code**), an **Applications** page (add apps from the **dev-tagged** env → baseline sync), a deterministic **`sync-application` LangGraph workflow** (Deployment-REST export → parse → SCD-2 merge → bundles), a read-only **`genesis-kb` MCP** (16 iteration-1 tools) that serves the KB + fetches **live code via the Dev MCP**, and **managed, updatable native Dev/DevOps MCP** servers (16-08) resolved against a single-select **`is_dev`** environment. Cuts chat/erd/design-doc off the external `appian-atlas`. User-tagged **releases** + point-in-time = **backlog** (16-06, gated on Dev MCP **AP-62096**, 26.8 GA); **delta refresh** (16-07) via a new Appian "changed-in-window" API. Read-only against Appian. **ADR-036** (internalized KB) + **ADR-037** (code-free temporal KB) + **ADR-038** (managed native MCP servers). **DRAFT — spec only (umbrella + 8 sub-phases + tool-contracts doc); awaiting approval to implement.** |
 | — | `specs/backlog/skill-migration-program.md` | ⏸️ Backlog — Skill → Workflow Migration (was Phase 8) | Deferred; methodology + backlog to migrate 45 skills — resumes after the upcoming polish phases |
 
+> **Note:** Phases 17 (Business Map), 18 (Parser accuracy), 19 (Document Library), 20 (Features & Spec authoring) are tracked
+> authoritatively in **§6 (status log)** + **`AGENT_ONBOARDING.md` §9** + **`README.md`** — this index table was not back-filled
+> for them.
+
+- **Phase 20** — `specs/phase-20-features-and-spec-authoring.md` (+ `phase-20-features-and-spec-authoring/20-01..20-06`) —
+  **Features & Spec Authoring** 📋 SPEC DRAFT. Per-app **Features** (m0010 `kb_features`) + a conversationally-authored
+  **Spec**: a reused Chat (genesis-kb + injected business-artifact context) authors an **HTML-authoritative** spec in the
+  fs-write sandbox, reviewed in an **embedded, annotatable** surface (the **vendored Lavish annotation SDK**, MIT → an
+  annotation-to-chat bridge), with status draft→in-progress→in-review→completed + milestone revisions + Markdown export.
+  Mostly **genesis**. **ADR-042** (Features & Specs model) + **ADR-043** (embed Lavish SDK) — Proposed.
+
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
 
 ---
@@ -141,6 +152,22 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-11 (Phase 20 — Features & Spec Authoring — 📋 SPEC DRAFTED; awaiting approval to implement):** New feature spec set
+  written after a code-grounded evaluation of the **Lavish** annotation tool (`kunchenguid/lavish-axi`, MIT). Decided **Path B
+  (embed)**: the injected browser SDK makes **no server calls** and talks only via `parent.postMessage` (`lavish:queuePrompt`
+  / `sendQueuedPrompts`, durable text-range anchors), so we **vendor** `artifact-sdk.js`(+`mermaid-node.js`), host the spec in
+  a **same-origin sandboxed iframe** inside the feature page, and bridge annotations into a **reused Chat** — no Lavish server/
+  CLI/poll/export/ht-ml.app, no Node ≥22 runtime, no second window. **Feature** = first-class app sub-entity (**m0010**
+  `kb_features`/`kb_feature_specs`/`kb_feature_spec_revisions`, cascade-with-app); **Spec** = a Chat-authored (**ADR-001
+  preserved** — no workflow) **HTML-authoritative** artifact written to the Phase-14 fs sandbox, KB-aware via `genesis-kb`, with
+  **"Add context"** injecting the app's Phase-19 business artifacts (reuse `build_evidence_pack` docs); status
+  **draft→in-progress→in-review→completed** + milestone revisions + **Markdown export**. Scope v1 = features + the spec only
+  (design docs / user stories later). Mostly a **genesis**-only release. Specs: `specs/phase-20-features-and-spec-authoring.md`
+  (+ `phase-20-features-and-spec-authoring/20-01..20-06`); **ADR-042** (Features & Specs model) + **ADR-043** (embed the Lavish
+  SDK) — both **Proposed**. Suggested build order 20-01 (embed spike) → 20-02 (m0010 + `FeatureStore`) → 20-03 (Features tab +
+  feature page) → 20-04 (spec chat backend) → 20-05 (embedded review + annotation bridge) → 20-06 (release). **DRAFT — no code
+  yet.**
 
 - **2026-08-11 (Phase 19 — Genesis Document Library — ✅ SHIPPED + COMPLETE; 19-01..19-08, all CI green):** Built the
   feature. **19-01 spike ✅** (live-verified gws OAuth + export; `spike/2026-08-11-gws-oauth-and-export.md`). **19-02 managed-native

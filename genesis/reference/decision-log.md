@@ -973,3 +973,75 @@ logic and any "rebuild app" flow must be **link-aware** (drop links, keep docume
 truly orphaned (zero-link) documents by user action, not automatically. Preserves ADR-010/018 (bulk → files, pointers → db),
 ADR-030 (SQLite; pgvector deferred), ADR-037 spirit (we store parsed/derived content; the *original* is retained because it is
 **user content**, unlike Appian SAIL). Pairs with ADR-040 (the `gws` connector that pulls/syncs the Drive-sourced documents).
+
+## ADR-042 — Features & Specs are first-class sub-entities of an application (Chat-authored, HTML-authoritative) (Phase 20)
+
+**Status:** **PROPOSED (Phase 20 — spec DRAFT)** → Accepted at 20-06. Target: genesis (m0010 `kb_features`/`kb_feature_specs`/
+`kb_feature_spec_revisions` + `FeatureStore` + `api/features.py` + a Chat extension + the web Features surface).
+
+- **Decision:** An Appian application gains a first-class **Feature** (the unit of work an engineer develops), and a Feature
+  owns authored **artifacts** — the first being a **Spec**. Specifically:
+  1. **Features** (`kb_features`, FK → `kb_applications ON DELETE CASCADE`) are **intrinsic to their app** — untracking the app
+     cascade-deletes its features and their specs (unlike Phase-19 shared documents, which unlink-not-delete). Surfaced as a
+     **Features** tab on the app + a full-page **feature page** (`/applications/:uuid/features/:featureId`).
+  2. **A spec is authored conversationally, not orchestrated.** The spec's authoring surface is a **Chat session** (reuse of
+     Phase 10, ADR-031/034 lineage) bound to the feature — **LangGraph is not involved (ADR-001 preserved)**; there is no new
+     workflow, gate, or engine capability. The `genesis-kb` MCP (already in chat, 16-05) gives the agent the app's KB, and the
+     app's **linked business artifacts** (Phase-19 `kb_document_links`) can be injected as context via the existing
+     `build_evidence_pack` document mechanism.
+  3. **The HTML artifact is authoritative;** Markdown is a **derived export** produced on demand. The agent authors the spec
+     HTML into its per-session **`fs_write_root` sandbox** (Phase 14 — no new write authority). Bulk HTML + milestone snapshots
+     live on disk (ADR-010/018); pointers/status/hash in `genesis.db` (ADR-030).
+  4. **Lifecycle:** a spec carries a status **draft → in-progress → in-review → completed** (user-set; the agent may suggest a
+     transition but does not set it), and is snapshotted at explicit **milestones** (`kb_feature_spec_revisions`) — the user
+     asks to save; the agent is instructed to remind + never snapshots silently. **One spec per feature** in v1 (the FK model
+     already allows many for later phases).
+- **Context.** Phases 16/17/19 gave Genesis knowledge *about* an application (technical KB, business map, human documents).
+  There was no place to *produce new work* on top of that knowledge. Engineers work feature-by-feature and begin with a spec;
+  the spec is a discussion, and the user wants to review it visually (annotate an HTML rendering) rather than describe edits in
+  prose.
+- **Alternatives considered.** (a) **Spec authoring as a LangGraph workflow** (auto-research → draft → review gate) — rejected
+  for v1: the user described an open-ended *conversation* where the spec forms in parallel, which is Chat, not a staged graph;
+  a staged pipeline can be added later as its own workflow + ADR without disturbing this. (b) **Markdown as the authoritative
+  artifact** — rejected: the user wants a rich, visually-reviewable HTML surface while editing (annotate-in-place), with MD as
+  an export. (c) **Features as a generic tag/label on runs or documents** — rejected: a feature is a durable first-class
+  workspace that will own multiple artifacts (design docs, user stories) over later phases. (d) **A brand-new chat stack for
+  specs** — rejected: reuse the Phase-10 Chat (sessions/messages/usage/genesis-kb/fs-sandbox) and just type the session.
+- **Consequences.** A small additive data model (m0010) + one new page + wiring; no engine/core change; ADR-001/023/026 intact.
+  The feature page is built to grow (design docs / user stories are later phases). The spec's conversation *is* a
+  `chat_sessions` row (a new `mode`/type), so chat capabilities (credits, persistence, KB) come for free. Pairs with ADR-043
+  (the embedded annotation surface) and reuses ADR-041 (documents as injectable context).
+
+## ADR-043 — Embed the Lavish annotation SDK (vendored, MIT) for in-app HTML review (Phase 20)
+
+**Status:** **PROPOSED (Phase 20 — spec DRAFT)** → Accepted at 20-06. Target: genesis web (vendored `artifact-sdk.js` +
+`mermaid-node.js` served as `/sdk.js`, a same-origin sandboxed iframe host, the annotation → chat bridge).
+
+- **Decision:** Provide the annotate-the-HTML-and-feed-the-agent experience by **vendoring the browser SDK** of
+  **`kunchenguid/lavish-axi` (MIT)** — `artifact-sdk.js` (+ its `mermaid-node.js` helper) and the `injectLavishSdk` transform —
+  and hosting the spec artifact in a **same-origin, sandboxed `<iframe>`** whose **host is our own React chrome** listening on
+  `window` `message` events. Genesis does **not** run Lavish's Express **server**, its **CLI**, its **long-poll** transport,
+  its **export**, or its **ht-ml.app sharing**. The SDK emits `lavish:queuePrompt` / `lavish:sendQueuedPrompts` / `reviewState`
+  / … over `parent.postMessage`; our host formats each queued annotation (anchored text/element + comment) into a single chat
+  message sent into the spec's session. Upstream is **tracked manually** (pinned commit); attribution lives in genesis
+  `THIRD-PARTY-NOTICES.md`.
+- **Context.** The user explicitly does not want to reinvent an annotation editor and pointed at Lavish. Investigation
+  (spec 20-01 + source reading) established the load-bearing facts: the injected SDK makes **no** server calls
+  (no fetch/XHR/WebSocket) and communicates **only** via `parent.postMessage`; it does precise **text-range anchoring**
+  (`getRangeAt` + durable `rangeBoundary`); it is **plain browser ESM (MIT)** bundlable by our existing Vite on Node 20. So the
+  SDK is **host-agnostic** — Lavish's own `chrome-client.js` is just one host.
+- **Alternatives considered.** (a) **Adopt Lavish whole as a managed-native CLI tool** (the ADR-040 `gws` pattern): the agent
+  runs `lavish-axi <file>` + `lavish-axi poll`, the user reviews in **Lavish's own browser window** on `:4387` — rejected for
+  v1 because it fights the user's "inside the feature page" UX (a second window), needs a CLI-poll bridge that mismatches
+  Genesis's **in-process** ChatManager (not a terminal agent), adds a **Node ≥22** runtime + an unauthenticated local server,
+  and pulls in export/ht-ml.app surface we don't want. (b) **Greenfield annotation layer** — rejected: range-anchoring is
+  precisely the hard, already-solved part; the user asked not to rebuild. (c) **Depend on the `lavish-axi` npm package at
+  runtime** — rejected: we only need the browser SDK; vendoring the two source files avoids a runtime Node/npm dependency and
+  the whole server/CLI surface, at the cost of manual upstream tracking (acceptable, and recorded).
+- **Consequences.** The annotation experience lives **inside the Genesis SPA** (single pane, reuses the in-process chat), with
+  no second window, no `:4387` server, no Node-22 runtime, no external sharing — resolving the security + Node concerns raised
+  during evaluation. The spec HTML is **agent-generated and executes scripts**, so it is served **same-origin from a scoped
+  route** and rendered in a **sandboxed iframe** (`allow-scripts` **without** `allow-same-origin`/top-navigation); local
+  single-user (ADR-026) bounds the blast radius. We own upstream drift (a golden `postMessage`-schema fixture fails a test if
+  the vendored SDK changes shape — the "stub hid the contract" lesson). The Mermaid-as-Excalidraw whiteboard (Lavish's heavier,
+  `@excalidraw/*` feature) is **deferred** — text/element annotation ships first. Pairs with ADR-042.
