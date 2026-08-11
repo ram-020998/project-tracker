@@ -1,6 +1,8 @@
 # 19-03 — Document Library data model + `DocumentStore` (migration m0009)
 
-> **Status:** DRAFT — spec only. **Repo:** genesis. **This is ADR-041** (global document library + app-link model;
+> **Status:** ✅ **CODE-COMPLETE — UNCOMMITTED** (commit at 19-08 per the user). m0009 (schema v9) + `DocumentStore` + 9 tests
+> (genesis 343 green, ruff clean); `untrack_application` unlinks-not-deletes (ADR-041). See `progress/phase-19-document-library.md`.
+> **Repo:** genesis. **This is ADR-041** (global document library + app-link model;
 > unlink-not-delete). Can proceed in parallel with 19-02 after the spike.
 
 ## Goal

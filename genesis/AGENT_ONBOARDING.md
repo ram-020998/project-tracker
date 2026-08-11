@@ -39,6 +39,13 @@
 > Appian Parser Accuracy Overhaul — ✅ SHIPPED + live-validated (18-01..18-06): `genesis-appian-parser` v0.2.0 → genesis
 > v0.40.0 → genesis-workflows v0.9.2, all CI green. Orphans 804 → 0, edge recall 0.32 → 0.98, precision 0.999, + APPREF/
 > ENTRYPOINT cross-app integration points. See §9's Phase-18 block.**
+> **⭐ ACTIVE — Phase 19 — Genesis Document Library — IN PROGRESS (spec + 19-01/19-02/19-03 done; code UNCOMMITTED, commit at
+> 19-08): attach/parse/sync the business documents (Google Drive + uploads) that describe an application, as a GLOBAL dedup'd
+> store linked into apps (ADR-041), reached via a managed-native `gws` CLI connector (ADR-040, isolated config + read-only
+> OAuth, client read from the dotfiles `~/.config/gws/client_secret.json`, no shipped token). 19-01 spike live-verified; 19-02
+> connector code-complete + live smoke test; 19-03 m0009 + DocumentStore. genesis 343 / core 65 green (working tree). Next =
+> 19-04 parsing → 19-05 sync-documents → 19-06 consumption → 19-07 web → 19-08 release. See §9's Phase-19 block +
+> `progress/phase-19-document-library.md`.**
 
 ---
 
@@ -643,6 +650,39 @@ genesis-workflows/
 ---
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
+
+### ⭐ ACTIVE (IN PROGRESS — spec + 19-01/19-02/19-03 done; **code UNCOMMITTED**, commit at 19-08) — Phase 19: Genesis Document Library
+
+> **Handoff for the next session — READ `progress/phase-19-document-library.md` FIRST.** Attach the business documents that
+> describe an application (the PDFs/Word/Excel/Google Docs in Google Drive) to Genesis, parse them to LLM-consumable Markdown
+> (+ JSON for tabular), and use them **alongside the Appian KB** for spec generation / design discussion. Documents are a
+> **global first-class store** (`kb_documents`, one row per unique doc, dedup by Drive file-id / upload hash) **linked into apps**
+> (`kb_document_links`); **untrack unlinks, never deletes** (**ADR-041**). Google Drive is reached via the **Google Workspace CLI
+> (`gws`)** integrated as a **managed-native CLI connector** (**ADR-040**, the CLI analog of the native Appian MCP — single
+> static binary, no `uv`): Genesis owns an **isolated** config dir (`~/.genesis/cli-tools/gws/config`, file keyring, its own
+> `gws auth login`) and **reads the OAuth client** from the dotfiles-provisioned `~/.config/gws/client_secret.json` — **ships no
+> token**; the dotfiles setup is a documented prerequisite. Read-only Drive/Docs/Sheets/Slides scopes only.
+>
+> **Done so far (⚠️ code is UNCOMMITTED in the genesis/genesis-core/genesis-workflows working trees — `git status` shows the
+> files; do NOT regenerate):**
+> - **19-01 spike ✅** — `spike/2026-08-11-gws-oauth-and-export.md`; live-verified (URL capture under a spawned subprocess,
+>   localhost callback, read-only scopes, exit-2 reconnect, Drive fingerprint + export).
+> - **19-02 managed-native `gws` connector ✅** — genesis-core `CliRegistry` managed resolution (+4); genesis
+>   `NativeCliInstaller`+lockfile (`cli_tools/native/`), the `gws` seam (`integrations/gws/` — read-only allowlist + client +
+>   login URL-capture + factory), `ConfigService` wiring, `api/native_cli.py` (status/install/rollback + gws auth), `genesis cli`
+>   subcommands; genesis-workflows `cli-registry.json` `gws` entry. **Live smoke test PASSED** (managed install + isolated login +
+>   read). Remaining: the Settings→CLI connector **card** (19-07).
+> - **19-03 data model ✅** — migration **m0009** (`kb_documents`/`kb_document_links`/`kb_document_sections`, schema **v9**) +
+>   `DocumentStore` (`kb/documents.py`); `untrack_application` unlinks-not-deletes.
+> - **Tests (working tree):** genesis **343**, genesis-core **65** green; genesis-workflows `validate_library` green; ruff clean.
+>
+> **Next (resume here):** **19-04** parsing pipeline (gws export + binary→MD/JSON; **PIN the dependency** — MarkItDown vs
+> pypdf/python-docx/openpyxl) → **19-05** deterministic `sync-documents` workflow + `api/documents.py` (add/link/sync; blocking
+> writes via `asyncio.to_thread`; not-installed → 409) → **19-06** `genesis-kb` document tools + evidence-pack → **19-07** web
+> (global Document Library page + per-app **Business Artifacts** tab + gws connector card) → **19-08** release chain
+> (core → genesis → genesis-workflows), **commit the whole phase**, CI green, live acceptance, **flip ADR-040/041 → Accepted**,
+> refresh §2 tag table + test counts. Specs: `specs/phase-19-document-library.md` (+ `phase-19-document-library/19-01..19-08`).
+
 
 ### ✅ SHIPPED (COMPLETE) — Phase 18: Appian Parser Accuracy Overhaul (genesis-appian-parser v0.2.0 + genesis v0.40.0 + genesis-workflows v0.9.2)
 

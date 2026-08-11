@@ -1,6 +1,10 @@
 # 19-02 — Managed-native `gws` CLI connector + standard OAuth
 
-> **Status:** DRAFT — spec only. **Depends on:** 19-01 (spike — ✅ DONE + **live-verified** end-to-end on a real machine:
+> **Status:** ✅ **CODE-COMPLETE + LIVE SMOKE TEST PASSED (2026-08-11) — UNCOMMITTED** (commit at 19-08 per the user). The
+> installer → `CliRegistry` resolution → isolated `gws auth login` → read-only Drive read chain was verified end-to-end on a
+> real machine (managed gws at `~/.genesis/cli-tools/gws/`, isolated file-keyring auth, read-only scopes). 32 new tests (genesis
+> 343 / core 65 green). Remaining: the Settings→CLI connector **card** (19-07). See `progress/phase-19-document-library.md`.
+> **Depends on:** 19-01 (spike — ✅ DONE + **live-verified** end-to-end on a real machine:
 > client read from `~/.config/gws/client_secret.json`, standard OAuth login, read-only `gws drive files list` returning the
 > `modifiedTime`/`version` fingerprint). **Repos:** genesis-core (CliRegistry managed resolution) + genesis (NativeCliInstaller,
 > gws connector, api, Settings→CLI UI) + genesis-workflows (`gws` `cli-registry.json` entry).

@@ -142,6 +142,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-11 (Phase 19 — Genesis Document Library — 🚧 IN PROGRESS; 19-01/19-02/19-03 done, code UNCOMMITTED):** Building the
+  feature. **19-01 spike ✅** (live-verified gws OAuth + export; `spike/2026-08-11-gws-oauth-and-export.md`). **19-02 managed-native
+  `gws` connector ✅ code-complete + `genesis cli` subcommands + a LIVE isolated-mode smoke test PASSED** (installed the real gws
+  into `~/.genesis/cli-tools/gws/`, drove Genesis's own read-only `gws auth login`, verified `connected` + a Drive `list_files`
+  read; the user's `~/.config/gws` untouched). **19-03 data model ✅** — migration **m0009** (`kb_documents`/`kb_document_links`/
+  `kb_document_sections`, schema v9) + `DocumentStore` (global dedup store + app links; **untrack unlinks, never deletes** —
+  ADR-041). **Decisions locked:** global first-class document store + app-link table (ADR-041); `gws` as a managed-native CLI
+  (ADR-040) with an **isolated** config dir reading the OAuth client from the dotfiles `~/.config/gws/client_secret.json`
+  (**no shipped token**, dotfiles = prerequisite), read-only scopes. **Tests green (working tree):** genesis **343**, genesis-core
+  **65**, genesis-workflows `validate_library` — ruff clean. **⚠️ The 19-02/19-03 code is UNCOMMITTED across genesis/genesis-core/
+  genesis-workflows** (committing at phase completion per the user); `git status` in each repo shows the new/modified files — a new
+  session must NOT regenerate them. **Next: 19-04** (parsing pipeline + dependency pin) → 19-05 (`sync-documents` workflow) → 19-06
+  (consumption) → 19-07 (web) → 19-08 (release + commit + ADR-040/041 Accepted). **Full as-built + resume steps:
+  `progress/phase-19-document-library.md`.** Specs: `specs/phase-19-document-library.md` (+ `19-01..19-08`); ADR-040/041 (Proposed).
+
 - **2026-08-11 (Phase 19-01 — `gws` OAuth spike — ✅ DONE, PASS):** Ran the load-bearing feasibility spike against the real
   Google Workspace CLI (`gws 0.22.5`, `brew install googleworkspace-cli`, macOS arm64). **All locally-verifiable questions
   passed:** (Q1) `GOOGLE_WORKSPACE_CLI_CONFIG_DIR` + `KEYRING_BACKEND=file` fully isolate creds under our dir (no `~/.config/gws`
