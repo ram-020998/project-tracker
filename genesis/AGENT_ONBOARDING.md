@@ -342,6 +342,10 @@ genesis/genesis/
             **mcp_servers_dir=~/.genesis/mcp-servers [16-08]; cli_tools_dir=~/.genesis/cli-tools + isolated gws_config_dir + gws_client_secret_path (dotfiles ~/.config/gws/client_secret.json) + kb_documents_dir=~/.genesis/kb-documents [Phase 19]; feature_specs_dir=~/.genesis/feature-specs [Phase 20 — spec.html + revisions/<n>.html]**,
             retention_keep_last/max_age_days, retention_on_start); checkpoint.py
             (AsyncSqliteSaver); context.py (build_context); engine.py (async run/resume/get_state/stream).
+            **Distribution (Phase 22): launcher.py (`genesis up/down/status/logs` — background serve + health-wait + open
+            browser; PID/log under ~/.genesis/run); updater.py (dist config ~/.genesis/dist.json + semver tag compare +
+            `apply` = checkout tag → pip install . → db upgrade → detached restart); kiro_auth.py (kiro-cli whoami status /
+            pty device-flow login / logout); preflight.py (first-run `{items, ready}` readiness).**
   dist/     gitlab.py, local.py, catalog.py, lockfile.py (**+InstalledSkill / Lockfile.skills — Phase 14, additive/back-compat**),
             install.py, loader.py (check_compat gate, meta_of [yaml, no import], graph_of, installed, load_build);
             **skill_catalog.py (reads skills-registry.json) + skill_install.py (SkillInstaller: pull skills/<id>/** at a
@@ -401,7 +405,8 @@ genesis/genesis/
             + chat/actions + resolve-permission (Phase 13 copilot); skills (GET/POST author/DELETE) +
             skills/available + skills/install + skills/update + chat/sessions/{id}/reload +
             chat/sessions/{id}/outputs(+/{name}(?mode)+/download) (Phase 14 skills)**. studio.py.
-  cli/      main.py (genesis serve|install|list|create-workflow|test-workflow|db upgrade|db status|**mcp install-native|mcp status|mcp rollback-native** …).
+  cli/      main.py (genesis serve|install|list|create-workflow|test-workflow|db upgrade|db status|**mcp install-native|mcp status|mcp rollback-native**|**up|down|status|logs|update [Phase 22]** …).
+  (scripts/  **install.sh — Phase-22 bootstrap; genesisctl.sh — thin wrapper over `genesis up/down/…`**.)
   lint/     contract.py (workflow.yaml↔META parity; YAML_ONLY_KEYS exempts UI-only keys like `graph:`),
             reliability.py (trio enforcement).
   web/      React + TS + Vite (ADR-026/027): Tailwind + Radix/shadcn-style + Zustand + React Router +
