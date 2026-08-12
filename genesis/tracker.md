@@ -116,6 +116,19 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   extensions (`session/set_model`, `_kiro.dev/commands/*`, compaction/clear status, image prompts). **ADR-044** (feature =
   artifact-stage workspace) + **ADR-045** (chat mirrors the CLI/ACP surface; revises ADR-031 — introspection free,
   write-actions human-confirmed) — **Accepted**. Released **genesis v0.46.0 + genesis-core v0.9.3 + kiro-agent-sdk v0.7.0**, CI green.
+  Follow-up patch **v0.46.1** (chat parity hotfixes: slash commands via the prompt path, export float-total + thought coalescing).
+
+- **Phase 22** — `specs/phase-22-distribution-and-shipping.md` (+ `phase-22-distribution-and-shipping/22-01..22-07`) —
+  **Distribution & Browser-Based Shipping (clone + git-tag)** 📝 SPEC DRAFTED (awaiting approval to build; genesis-only, no
+  schema). A **standard, working way to ship Genesis to internal users** as a **local, browser-based** app — modeled on
+  `appian/prod/friday`'s clone + venv + git-tag self-update installer, but **browser-based** (no Mac `.app`), leveraging
+  Genesis's single-port `genesis serve`. **Install** (`scripts/install.sh`: prereq + SSH-access preflight → clone `genesis`
+  [one clone; the 3 internal deps resolve via their `git+ssh` tag pins] → venv → `pip install .` → `genesis db upgrade`) →
+  **launch** (`genesis up` backgrounds serve + opens the default browser at `127.0.0.1:8760`) → **update in place** from release
+  tags (one-click banner + `genesis update`: checkout tag → `pip install .` → `db upgrade` → detached restart) → **in-app Kiro
+  login** + a **first-run preflight** + a **CI clean-install verify**. New runtime code is a tiny read-only `api/system` surface
+  + a web update banner/panels + installer/updater shell scripts + `genesis up/down/status/update` CLI. **ADR-046** (clone+tag
+  distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
 
@@ -162,6 +175,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-12 (Phase 22 — Distribution & Browser-Based Shipping (clone + git-tag) — 📝 SPEC DRAFTED; awaiting approval to
+  build):** How to **ship Genesis to internal users** as a **local, browser-based** app. Modeled on `appian/prod/friday`'s
+  clone + venv + git-tag self-update installer, adapted to Genesis's single-port `genesis serve` and dropping the native
+  Mac `.app` in favor of "open the browser." **Install** `scripts/install.sh` (prereq + **SSH-access preflight** → clone
+  `genesis` only [the 3 internal deps auto-resolve via their `git+ssh` tag pins; workflows pulled at runtime] → venv →
+  `pip install .` → `genesis db upgrade`); **launch** `genesis up` (background serve + open default browser); **update** from
+  release tags (one-click in-app banner + `genesis update`: fetch → on-`main` guard → checkout tag → `pip install .` →
+  `db upgrade` → **detached restart**); plus **in-app Kiro login**, a **first-run preflight**, and a **CI clean-install
+  verify**. New runtime code = a tiny read-only **`api/system`** surface (update-check, kiro status/login, preflight) + a web
+  update banner/panels + installer/updater shell scripts + `genesis up/down/status/update` CLI. **genesis-only, no schema.**
+  Decisions locked: server-side one-click update; `genesis up` as both a CLI subcommand + script; **v0.47.0**; install guide in
+  the genesis repo (`README` + `docs/INSTALL.md`). **ADR-046** (clone+tag distribution; wheel+index deferred; Docker/native-app
+  out). Specs: `specs/phase-22-distribution-and-shipping.md` (+ `phase-22-distribution-and-shipping/22-01..22-07`).
 
 - **2026-08-12 (genesis v0.46.1 — chat parity hotfixes; CI green #6556691):** post-Phase-21 live-feedback bug fixes (backend
   only, `genesis/chat/`). (1) **Slash commands hung** — 21-05 dispatched them via `_kiro.dev/commands/execute`, which times out
