@@ -119,8 +119,8 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   Follow-up patch **v0.46.1** (chat parity hotfixes: slash commands via the prompt path, export float-total + thought coalescing).
 
 - **Phase 22** — `specs/phase-22-distribution-and-shipping.md` (+ `phase-22-distribution-and-shipping/22-01..22-07`) —
-  **Distribution & Browser-Based Shipping (clone + git-tag)** 📝 SPEC DRAFTED (awaiting approval to build; genesis-only, no
-  schema). A **standard, working way to ship Genesis to internal users** as a **local, browser-based** app — modeled on
+  **Distribution & Browser-Based Shipping (clone + git-tag)** ✅ SHIPPED (genesis **v0.47.0**, CI green [genesis + frontend +
+  the new clean-install]; genesis-only, no schema). A **standard, working way to ship Genesis to internal users** as a **local, browser-based** app — modeled on
   `appian/prod/friday`'s clone + venv + git-tag self-update installer, but **browser-based** (no Mac `.app`), leveraging
   Genesis's single-port `genesis serve`. **Install** (`scripts/install.sh`: prereq + SSH-access preflight → clone `genesis`
   [one clone; the 3 internal deps resolve via their `git+ssh` tag pins] → venv → `pip install .` → `genesis db upgrade`) →
@@ -175,6 +175,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-12 (Phase 22 — Distribution & Browser-Based Shipping (clone + git-tag) — ✅ SHIPPED + COMPLETE; 22-01..22-07):**
+  Released **genesis v0.47.0** (`3f542c5`), CI green (pipeline #6558223: **genesis** + **frontend** + the new
+  **clean-install**); **ADR-046 Accepted**. genesis-only, no schema. Ship Genesis to internal users as a **local,
+  browser-based** app, modeled on `appian/prod/friday`'s clone + git-tag self-update (no Mac `.app`). **22-01** `scripts/
+  install.sh` (prereq + SSH-access preflight → clone [one clone; deps via git+ssh tag pins] → venv → `pip install .` →
+  `db upgrade` → `~/.genesis/dist.json`); **22-02** `runtime/launcher.py` = `genesis up/down/status/logs` (background serve +
+  health-wait + open browser; `genesisctl.sh` → thin wrapper); **22-03** `runtime/updater.py` + `api/system` update GET/POST +
+  `genesis update` + **UpdateBanner** (one-click: tag vs deployed → on-branch guard → checkout → `pip install .` → `db upgrade`
+  → detached restart; tracked branch **master**); **22-04** `runtime/kiro_auth.py` (whoami/pty-device-login/logout) + Settings
+  **Kiro sign-in** (real-CLI whoami parse fix); **22-05** `runtime/preflight.py` + **PreflightChecklist** modal; **22-06** a
+  **clean-install** CI job + the v0.47.0 release; **22-07** README quickstart + `docs/INSTALL.md` + bible refresh + ADR-046.
+  **Gate:** backend **437** pytest + ruff; web **160** Vitest + eslint + tsc + build; shellcheck — green. genesis-core /
+  kiro-agent-sdk / genesis-appian-parser / genesis-workflows unchanged. Live acceptance (device-flow login + detached restart)
+  is user-driven. **PHASE 22 COMPLETE.** As-built: `progress/phase-22-distribution-and-shipping.md`.
 
 - **2026-08-12 (genesis v0.46.2 — spec-builder full-bleed layout; CI green #6557901):** live-feedback UI fix. The spec builder
   is now **full-height + full-width** with **wider messages**: `SpecBuilderPage` drops the width-capping `Page` wrapper for a

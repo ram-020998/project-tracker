@@ -1091,3 +1091,27 @@ indicator, clear/compact, and image attachments — in **both** the main chat an
 - **Consequences.** Bounded by **local single-user** (ADR-026). The SDK extensions are additive/backward-compatible
   (kiro-agent-sdk v0.7.0). A `chat_sessions.model` column (`m0011`) persists the choice. Applies uniformly to the main chat and
   the spec builder (the shared `ChatThread`/`Composer`). Refines ADR-031 (and ADR-033/034 lineage).
+
+## ADR-046 — Genesis ships as a local, browser-based app via clone + git-tag self-update (Phase 22)
+
+- **Status.** ACCEPTED — SHIPPED (Phase 22, genesis v0.47.0).
+- **Context.** Genesis had only a *developer* setup (editable sibling installs) + a release protocol (tag + push) + CI that
+  only tests — no way to ship to internal users. The requirement: a standard, working, **browser-based** install (no Mac app),
+  local single-user.
+- **Decision.** Ship as a **clone of the `genesis` repo + venv + `pip install .`** (the three internal deps resolve from their
+  `git+ssh` tag pins → the user clones only `genesis`; `genesis-workflows` is pulled at runtime), launched by **`genesis up`**
+  (backgrounds `genesis serve`, waits for health, opens the default browser at `http://127.0.0.1:8760`), and **updated in place
+  from release tags** (`git fetch --tags` → on-tracked-branch guard → checkout `vX.Y.Z` → `pip install .` → `genesis db upgrade`
+  → detached restart), surfaced as a one-click in-app banner. Modeled on `appian/prod/friday`'s clone+tag installer, **minus the
+  native `.app`** (browser-only) since Genesis serves the SPA+API on one port. Add **in-app Kiro sign-in** (`kiro-cli` is the
+  engine) and a **first-run preflight** checklist. Reuse existing pieces (`genesisctl.sh` → thin wrapper, `genesis db upgrade`,
+  committed `web/static`, `/api/config/health`) and the SSH access users already have — **no package index / per-user token**.
+- **Alternatives.** **Wheel + package-index** (GitLab/Artifactory) — "more standard packaging" but ~2.5–4 days one-time (4
+  wheels incl. bundling `web/static`, convert git+ssh pins → version specifiers, publish CI, per-user index auth); **deferred**
+  as a phase-2 transport (the launcher/updater/preflight/Kiro-login are transport-agnostic). **Docker** — poor fit (drives the
+  host's kiro-cli + native-MCP `uv` + `gws` creds); out. **Native desktop app** — out (browser-only, per the requirement).
+- **Consequences.** genesis-only, no schema. New surface: `scripts/install.sh`, `runtime/{launcher,updater,kiro_auth,preflight}
+  .py`, `api/system.py`, web `features/system` + Settings Kiro sign-in, a `clean-install` CI job, `docs/INSTALL.md`. Tracked
+  branch = **`master`**. Preserves ADR-026 (local single-user, localhost-only, no auth — must not be network-exposed) and
+  ADR-031/045 (the `api/system` surface is local introspection + **local** process/install control only). Live acceptance
+  (device-flow login + detached restart) is manual — headless-undrivable.

@@ -1,6 +1,9 @@
 # 22-07 — Docs + ship
 
-> **Status:** 📝 DRAFT · **Phase:** 22 · **Repo:** genesis (+ project-tracker) · **Depends on:** 22-01..22-06
+> **Status:** ✅ SHIPPED (2026-08-12) — README quickstart + `docs/INSTALL.md` shipped in **genesis v0.47.0**; bible
+> (`AGENT_ONBOARDING.md`) refreshed (§2 tag + Phase-22 note, §4 map, **ADR-046**, §7 lessons, §9 Phase-22 block, header ⭐);
+> `reference/decision-log.md` ADR-046 appended; tracker §3 → SHIPPED + §6 entry; umbrella/sub-specs flipped. · **Phase:** 22 ·
+> **Repo:** genesis (+ project-tracker) · **Depends on:** 22-01..22-06
 
 ## Goal
 A user-facing "Install & Run Genesis" guide that lives **with the code** (§10.4), plus the release + bible refresh.

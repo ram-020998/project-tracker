@@ -1,6 +1,7 @@
 # Phase 22 — Distribution & Browser-Based Shipping (clone + git-tag) (umbrella)
 
-> **Status:** 📝 **DRAFT — planning (awaiting approval to build).** · **Author:** Genesis agent · **Date:** 2026-08-12
+> **Status:** ✅ **SHIPPED — COMPLETE (22-01..22-07)** — genesis **v0.47.0** (`3f542c5`), CI green (genesis + frontend +
+> clean-install); ADR-046 Accepted. genesis-only, no schema. · **Author:** Genesis agent · **Date:** 2026-08-12
 > **Goal:** Give Genesis a **working, standard way to ship to internal users** as a **local, browser-based** app — install
 > once, launch with one command that opens the workbench in the user's default browser, and **update in place from release
 > tags**. Explicitly **not** a native desktop (Mac `.app`) build, **not** Docker, **not** a hosted service. Modeled on
