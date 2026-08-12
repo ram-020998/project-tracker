@@ -1,6 +1,19 @@
 # 22-03 — Update check + one-click apply
 
-> **Status:** 📝 DRAFT · **Phase:** 22 · **Repo:** genesis · **Depends on:** 22-02
+> **Status:** ✅ CODE-COMPLETE (2026-08-12; genesis code **held for the v0.47.0 release** at 22-06/07) · **Phase:** 22 ·
+> **Repo:** genesis · **Depends on:** 22-02
+>
+> **As built:** `genesis/runtime/updater.py` — dist config (`~/.genesis/dist.json`: repo_dir/branch/remote; `install.sh`
+> writes it), `deployed_version` (state file → package version → 0.0.0), numeric semver `highest_tag`, `check()` →
+> `{current, latest, update_available, on_tracked_branch, scope, repo_available}`, `apply()` (fetch → on-branch guard →
+> checkout tag → `pip install .` → `db upgrade` → write deployed_version → **detached restart** via `bash -c "… down; up"`).
+> `api/system.py` `register_system_routes` — `GET /api/system/update` (read-only) + `POST /api/system/update` (streams
+> progress). CLI `genesis update [--check-only]`. Web: `lib/api/system.ts` + `features/system/UpdateBanner` (hidden /
+> available→button / on-wrong-branch→blocked) mounted at the top of the content area in `AppShell` (poll every 5 min; apply →
+> poll health → reload). **Corrected default tracked branch to `master`** (genesis's actual default branch, not `main`) — in
+> both `updater` and `install.sh`. **Verified:** 8 updater/api tests + 4 banner tests (incl. jest-axe); `genesis update
+> --check-only` works against the real remote (on master = tracked, update available); full backend **425** + web **154** green;
+> ruff/eslint/tsc/shellcheck clean; `web/static` rebuilt. The detached restart is manual-verify (documented).
 
 ## Goal
 In-app awareness of newer releases and a one-click, server-side update (§10.1), from git release tags — Friday's model.
