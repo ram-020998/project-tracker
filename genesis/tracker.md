@@ -106,6 +106,16 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   fs-write sandbox, reviewed in an **embedded, annotatable** surface (the **vendored Lavish annotation SDK**, MIT → an
   annotation-to-chat bridge), with status draft→in-progress→in-review→completed + milestone revisions + Markdown export.
   Mostly **genesis**. **ADR-042** (Features & Specs model) + **ADR-043** (embed Lavish SDK) — Proposed.
+- **Phase 21** — `specs/phase-21-feature-workspace-and-chat-parity.md` (+ `phase-21-feature-workspace-and-chat-parity/21-01..21-07`) —
+  **Feature Workspace, Spec-Builder UX & Chat Parity** 📝 SPEC DRAFT (Phase-20 live-feedback pass). **(A)** the feature page
+  becomes an **artifact-pipeline** landing (Spec card functional + Design/Breakdown disabled placeholders; feature card drops
+  spec status); **(B)** the spec builder becomes a **full-width chat** with an on-demand **full-screen annotatable Preview**
+  (our own comment-queue + Send-all), `feature_spec` sessions **isolated** from the main chat, copilot banner removed there;
+  **(C)** the reused chat reaches **Kiro CLI/ACP parity** (model @ creation, slash commands + autocomplete, context/compaction
+  meter, clear/compact, image attach) + **Markdown transcript export** — both places. Requires **kiro-agent-sdk** ACP
+  extensions (`session/set_model`, `_kiro.dev/commands/*`, compaction/clear status, image prompts). **ADR-044** (feature =
+  artifact-stage workspace) + **ADR-045** (chat mirrors the CLI/ACP surface; revises ADR-031 — introspection free,
+  write-actions human-confirmed) — Proposed. Build order 21-01 (spike) → 21-02..21-06 → 21-07; single release at the end.
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
 
