@@ -1,6 +1,15 @@
 # 22-02 — Launch + open browser (`genesis up`)
 
-> **Status:** 📝 DRAFT · **Phase:** 22 · **Repo:** genesis · **Depends on:** 22-01
+> **Status:** ✅ CODE-COMPLETE (2026-08-12; genesis code **held for the v0.47.0 release** at 22-06/07) · **Phase:** 22 ·
+> **Repo:** genesis · **Depends on:** 22-01
+>
+> **As built:** `genesis/runtime/launcher.py` is the single source of truth (`up`/`down`/`status`/`logs` + health-wait +
+> browser-open + PID/log under `~/.genesis/run`, loopback-mapped for 0.0.0.0/::). CLI `up [--host --port --no-open]` / `down` /
+> `status` / `logs [-f]` added to `cli/main.py` (delegate to the module). `scripts/genesisctl.sh` **rewritten as a thin wrapper**
+> (start→up, stop→down, restart, status, logs, open→up) so there's one implementation. `install.sh` next-steps updated to
+> `genesis up`. **Verified:** ruff + shellcheck clean; **isolated end-to-end run** (temp state dir + port 8799, no browser):
+> stopped → up (health passed) → running+healthy → down → stopped; **6 launcher unit tests** (pid/alive/loopback/healthy/
+> status/down, mocked — no spawn); full backend suite **417** green.
 
 ## Goal
 One command that boots the server in the background and opens the workbench in the user's default browser — the "run Genesis"
