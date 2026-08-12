@@ -1048,3 +1048,46 @@ annotation→chat bridge.
   single-user (ADR-026) bounds the blast radius. We own upstream drift (a golden `postMessage`-schema fixture fails a test if
   the vendored SDK changes shape — the "stub hid the contract" lesson). The Mermaid-as-Excalidraw whiteboard (Lavish's heavier,
   `@excalidraw/*` feature) is **deferred** — text/element annotation ships first. Pairs with ADR-042.
+
+## ADR-044 — A Feature is a workspace of sequential artifact stages (Phase 21)
+
+**Status:** **ACCEPTED (Phase 21 — SHIPPED)** — genesis **v0.46.0**: the feature page (`FeaturePage`) is an **artifact
+pipeline** (`ArtifactPipeline`) — Spec functional, Design/Breakdown disabled placeholders; the Spec card opens the builder
+(Edit) or a read-only preview (View, `artifact?annotate=0`); the Features tab's feature card no longer shows spec status.
+
+- **Decision.** A **Feature** is a workspace whose content is a **sequence of artifact stages** (Spec → Design → Breakdown →
+  …), each artifact carrying **its own** status. The **feature itself has no status derived from any single artifact**
+  (feature-level status is a separate, later concept). Artifacts open in two modes: **Edit** (author — e.g. the spec builder at
+  `…/features/:id/spec`) and **View** (read-only preview). Landing on a feature shows the pipeline, not the builder.
+- **Context.** Phase-20 dropped the user straight into the spec builder and showed the *spec's* status on the *feature* card —
+  the user's feedback: a spec's status is not the feature's, and a feature should be a workspace of stages (spec, design,
+  breakdown) with the later ones gated. **Sequential unlock-on-completion is part of the model but deferred** until ≥2
+  artifacts exist (Design/Breakdown ship as disabled "coming soon" placeholders now).
+- **Consequences.** The feature page is built to grow (each future artifact is a card + a route). The read-only preview reuses
+  the spec artifact route with the annotation SDK omitted (`annotate=0`). No schema change (placeholders carry no data).
+
+## ADR-045 — The reused chat mirrors the Kiro CLI/ACP surface; refines ADR-031 (Phase 21)
+
+**Status:** **ACCEPTED (Phase 21 — SHIPPED)** — genesis **v0.46.0** + **kiro-agent-sdk v0.7.0** + genesis-core **v0.9.3**
+(SDK pin): model selection at creation, a slash-command palette + client-side autocomplete, a context-usage + compaction
+indicator, clear/compact, and image attachments — in **both** the main chat and the spec builder.
+
+- **Decision.** Genesis adopts the ACP extension surface (`session/set_model` + the models advertised on `session/new`,
+  `_kiro.dev/commands/{available,options,execute}`, `_kiro.dev/{compaction,clear}/status`, image prompt content) so the in-app
+  chat offers the Kiro CLI's model/commands/context capabilities. This **refines ADR-031's "Chat is read-only"**: the chat
+  surface is **no longer categorically read-only**, but **write-capable actions remain human-confirmed** via the existing
+  `permission_mode="ask"` + `on_permission` bridge (ADR-033) — **not** blanket-denied; **safe introspection** commands
+  (`/context`, `/usage`, `/tools`, `/help`) run freely. Model choice is **at creation** (persisted in `m0011
+  chat_sessions.model`); mid-conversation switch is deferred.
+- **Context.** After Phase-20 the user noted the hand-built chat had lost the native CLI features (model switching, slash
+  commands, context views). The 21-01 spike verified the surface against kiro-cli 2.16.2: models + agents come free on
+  `session/new`; the command catalog arrives as a notification (autocomplete is client-side — the per-command `optionsMethod`
+  isn't wired in 2.16.2); `execute` streams (panel commands may not return a terminal result headlessly → the prompt-path is
+  the fallback); `contextUsagePercentage` + `promptCapabilities.image` are present.
+- **Alternatives considered.** (a) Keep chat strictly read-only and expose nothing — rejected: the user explicitly wants the
+  full CLI surface in both places. (b) Blanket-trust all tools when exposing commands — rejected: it would erase the Phase-13
+  human-confirm guarantee; instead the permission bridge stays the backstop. (c) Multipart image upload — rejected for v1:
+  base64 in the existing JSON SSE body is simpler and the SDK gates images on capability.
+- **Consequences.** Bounded by **local single-user** (ADR-026). The SDK extensions are additive/backward-compatible
+  (kiro-agent-sdk v0.7.0). A `chat_sessions.model` column (`m0011`) persists the choice. Applies uniformly to the main chat and
+  the spec builder (the shared `ChatThread`/`Composer`). Refines ADR-031 (and ADR-033/034 lineage).

@@ -1,6 +1,7 @@
 # Phase 21 — Feature Workspace, Spec-Builder UX & Chat Parity (umbrella)
 
-> **Status:** 📝 **DRAFT — planning (not yet approved to build).** · **Author:** Genesis agent · **Date:** 2026-08-12
+> **Status:** ✅ **SHIPPED — COMPLETE (21-01..21-07)** — genesis **v0.46.0** + genesis-core **v0.9.3** + kiro-agent-sdk
+> **v0.7.0**, CI green; ADR-044/045 Accepted (045 refines ADR-031). · **Author:** Genesis agent · **Date:** 2026-08-12
 > **Goal:** Act on the user's live-use feedback after Phase 20 shipped. Three things: **(A)** turn the feature page into a real
 > **feature workspace** — a landing of **artifact cards** (Spec functional now; Design/Breakdown as disabled placeholders),
 > not an immediate drop into the spec builder; **(B)** overhaul the **spec-builder UX** — a full-width chat with an on-demand

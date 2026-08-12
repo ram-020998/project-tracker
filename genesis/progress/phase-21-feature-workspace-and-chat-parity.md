@@ -1,10 +1,8 @@
 # Progress — Phase 21: Feature Workspace, Spec-Builder UX & Chat Parity
 
-> **Status (2026-08-12):** 🚧 IN PROGRESS. **21-01 ✅** · **21-02 ✅** · **21-03 ✅** · **21-04 ✅** · **21-05 ✅** ·
-> **21-06 ✅ (chat MD export, uncommitted)**. Next: **21-07** (release chain + bible refresh) — the last sub-phase. Per the
-> user, **all repo commits (kiro-agent-sdk + genesis-core + genesis) are held for a single release chain at 21-07** — only
-> project-tracker is committed as we go. Spec: `specs/phase-21-feature-workspace-and-chat-parity.md` (+ `21-01..21-07`).
-> **ADR-044/045** (Proposed).
+> **Status (2026-08-12):** ✅ **SHIPPED — PHASE 21 COMPLETE (21-01..21-07).** Released **genesis v0.46.0 + genesis-core
+> v0.9.3 (SDK pin) + kiro-agent-sdk v0.7.0**, CI green; **ADR-044/045 Accepted** (045 refines ADR-031). Spec:
+> `specs/phase-21-feature-workspace-and-chat-parity.md` (+ `21-01..21-07`).
 
 ## 21-01 — ACP parity spike ✅ (committed to project-tracker)
 
@@ -150,3 +148,19 @@ spec builder.
   `test_slash_command_message_routes_to_execute` (the fake client gained a catalog + `execute_command`); web parity test
   asserts the Export link href. **PDF is deferred** (browser print-to-PDF only, per the resolved decision — not shipped).
 - **Gate:** backend **409** pytest + ruff clean; web typecheck + eslint clean, **150** Vitest, build OK.
+
+## 21-07 — Release, acceptance & bible refresh ✅
+
+Released the full chain (single release, per the user's "commit all repos at the end"):
+- **kiro-agent-sdk v0.7.0** (`cda1f44`) — the ACP extensions (21-04).
+- **genesis-core v0.9.3** (`439edbd`) — SDK pin → v0.7.0 (pin-only; `CORE_MAJOR` unchanged). CI green (#6556301).
+- **genesis v0.46.0** (`569f7fe`) — pins genesis-core v0.9.3 + kiro-agent-sdk v0.7.0; `pyproject`/`api/app.py` version; the
+  whole Phase-21 tree (21-02/03/05/06) + rebuilt `web/static` (97 files). CI: v0.46.0 pipeline.
+
+**ADRs:** ADR-044 (feature = artifact-stage workspace) + ADR-045 (chat mirrors the CLI/ACP surface; refines ADR-031) →
+**Accepted** in `reference/decision-log.md`. **Docs:** README Phase-21 row, tracker §3 (SHIPPED) + §6 status-log entry, the
+bible (`AGENT_ONBOARDING.md`) refreshed, and all sub-spec/umbrella statuses flipped. **Gate at release:** genesis **409**
+pytest + **150** Vitest; genesis-core **65**; kiro-agent-sdk **93**; ruff/eslint/tsc clean; `web/static` rebuilt + committed.
+
+**Live acceptance** (browser) is user-driven (the running `genesis serve` needs a restart to load the new server code + the
+v0.7.0 SDK); the headless gate + CI cover everything else. **PHASE 21 COMPLETE.**

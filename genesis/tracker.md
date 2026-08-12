@@ -107,7 +107,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   annotation-to-chat bridge), with status draft→in-progress→in-review→completed + milestone revisions + Markdown export.
   Mostly **genesis**. **ADR-042** (Features & Specs model) + **ADR-043** (embed Lavish SDK) — Proposed.
 - **Phase 21** — `specs/phase-21-feature-workspace-and-chat-parity.md` (+ `phase-21-feature-workspace-and-chat-parity/21-01..21-07`) —
-  **Feature Workspace, Spec-Builder UX & Chat Parity** 📝 SPEC DRAFT (Phase-20 live-feedback pass). **(A)** the feature page
+  **Feature Workspace, Spec-Builder UX & Chat Parity** ✅ SHIPPED (v0.46.0; 21-01..21-07; Phase-20 live-feedback pass). **(A)** the feature page
   becomes an **artifact-pipeline** landing (Spec card functional + Design/Breakdown disabled placeholders; feature card drops
   spec status); **(B)** the spec builder becomes a **full-width chat** with an on-demand **full-screen annotatable Preview**
   (our own comment-queue + Send-all), `feature_spec` sessions **isolated** from the main chat, copilot banner removed there;
@@ -115,7 +115,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   meter, clear/compact, image attach) + **Markdown transcript export** — both places. Requires **kiro-agent-sdk** ACP
   extensions (`session/set_model`, `_kiro.dev/commands/*`, compaction/clear status, image prompts). **ADR-044** (feature =
   artifact-stage workspace) + **ADR-045** (chat mirrors the CLI/ACP surface; revises ADR-031 — introspection free,
-  write-actions human-confirmed) — Proposed. Build order 21-01 (spike) → 21-02..21-06 → 21-07; single release at the end.
+  write-actions human-confirmed) — **Accepted**. Released **genesis v0.46.0 + genesis-core v0.9.3 + kiro-agent-sdk v0.7.0**, CI green.
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
 
@@ -162,6 +162,22 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-12 (Phase 21 — Feature Workspace, Spec-Builder UX & Chat Parity — ✅ SHIPPED + COMPLETE; 21-01..21-07):**
+  Released **genesis v0.46.0 + genesis-core v0.9.3 (SDK pin) + kiro-agent-sdk v0.7.0**, CI green; **ADR-044 + ADR-045 Accepted**
+  (045 refines ADR-031). A Phase-20 live-feedback pass. **(A) Feature workspace** — the feature page is now an **artifact
+  pipeline** (Spec card **Edit**→builder / **View**→read-only preview via `artifact?annotate=0`, or **Create spec**;
+  Design/Breakdown are disabled "coming soon" placeholders; sequential unlock deferred), and the Features-tab card **no longer
+  shows the spec's status**. **(B) Spec builder** — a **full-width chat** (reused `ChatThread`, `chrome="spec"` → no copilot
+  banner) + an on-demand **full-screen annotatable Preview** popup (the document + **our own comment-queue rail** + a single
+  **Send-all**); `feature_spec` sessions are **isolated** from the main Chat list. **(C) Kiro CLI/ACP parity** in **both** chats
+  (shared `Composer`): **model selection at creation** (m0011 `chat_sessions.model`; models advertised on `session/new`),
+  **slash commands + client-side autocomplete** (execute routing via the SDK), a **context-usage + compaction meter**,
+  **clear/compact**, and **image attachments** — plus **Markdown transcript export** (tools + thinking). Needed
+  **kiro-agent-sdk v0.7.0** ACP extensions (`session/set_model`, `_kiro.dev/commands/*`, compaction/clear status, images —
+  additive; verified vs kiro-cli 2.16.2 in the 21-01 spike). ADR-045 keeps write-capable actions **human-confirmed** (Phase-13
+  bridge), introspection commands free. **genesis 409 pytest + 150 Vitest green; core 65; sdk 93; ruff/eslint/tsc clean.**
+  **PHASE 21 COMPLETE.** As-built: `progress/phase-21-feature-workspace-and-chat-parity.md`.
 
 - **2026-08-11 (Phase 20 — Features & Spec Authoring — ✅ SHIPPED + COMPLETE; 20-01..20-06):** Released **genesis v0.45.0**
   (single-repo; genesis-core/genesis-workflows unchanged), CI green; **ADR-042 + ADR-043 Accepted**. Per-app **Features**

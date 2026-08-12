@@ -1,6 +1,8 @@
 # 21-07 — Release, acceptance & bible refresh
 
-> **Status:** 📝 DRAFT · **Phase:** 21 · **Repo:** all touched · **Depends on:** 21-02..21-06
+> **Status:** ✅ SHIPPED (2026-08-12) — released **kiro-agent-sdk v0.7.0** → **genesis-core v0.9.3** (SDK pin) → **genesis
+> v0.46.0**; CI green (genesis-core #6556301; genesis v0.46.0). ADR-044/045 → Accepted; README/tracker/bible refreshed. ·
+> **Phase:** 21 · **Repo:** all touched · **Depends on:** 21-02..21-06
 
 ## Goal
 
