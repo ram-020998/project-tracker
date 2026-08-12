@@ -176,6 +176,12 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-12 (genesis v0.46.2 — spec-builder full-bleed layout; CI green #6557901):** live-feedback UI fix. The spec builder
+  is now **full-height + full-width** with **wider messages**: `SpecBuilderPage` drops the width-capping `Page` wrapper for a
+  full-height layout (slim header + the workspace fills the area); `SpecWorkspace` fills `h-full` and **removes the border box**
+  around the chat; `ChatThread` widens the message column to `max-w-5xl` for `chrome="spec"` (main chat unchanged at
+  `max-w-3xl`). Frontend-only; `web/static` rebuilt. typecheck/eslint/vitest(150)/build green; ruff clean.
+
 - **2026-08-12 (Phase 22 — Distribution & Browser-Based Shipping (clone + git-tag) — 📝 SPEC DRAFTED; awaiting approval to
   build):** How to **ship Genesis to internal users** as a **local, browser-based** app. Modeled on `appian/prod/friday`'s
   clone + venv + git-tag self-update installer, adapted to Genesis's single-port `genesis serve` and dropping the native
