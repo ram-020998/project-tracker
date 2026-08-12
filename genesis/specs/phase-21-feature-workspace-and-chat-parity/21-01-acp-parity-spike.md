@@ -1,6 +1,10 @@
 # 21-01 — ACP parity spike (load-bearing)
 
-> **Status:** 📝 DRAFT · **Phase:** 21 · **Repo:** genesis (throwaway harness) → findings under `spike/`
+> **Status:** ✅ DONE (2026-08-12) — findings: `spike/2026-08-12-acp-parity.md`. **GO.** Verified against `kiro-cli 2.16.2`:
+> model list + agents come free on `session/new` (`.models`/`.modes`); `set_model`/`set_mode` are plain requests; the full
+> slash-command catalog + tools arrive via the `_kiro.dev/commands/available` notification (autocomplete done client-side —
+> `optionsMethod` not wired in 2.16.2); `execute` streams (verify terminal signal in 21-04); `contextUsagePercentage` +
+> `promptCapabilities.image` present. · **Phase:** 21 · **Repo:** genesis (throwaway harness) → findings under `spike/`
 > **Depends on:** nothing · **Blocks:** 21-04 (SDK surface), 21-05 (parity wiring)
 
 ## Goal
