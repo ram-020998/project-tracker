@@ -1,6 +1,16 @@
 # 22-06 — CI clean-install verify + release
 
-> **Status:** 📝 DRAFT · **Phase:** 22 · **Repo:** genesis · **Depends on:** 22-01..22-05
+> **Status:** ✅ SHIPPED (2026-08-12) — **genesis v0.47.0** (`3f542c5`), CI green (pipeline #6558223: **genesis** +
+> **frontend** + the new **clean-install** all success). · **Phase:** 22 · **Repo:** genesis · **Depends on:** 22-01..22-05
+>
+> **As built:** a `clean-install` CI job (`.gitlab-ci.yml`) — on changes to the distribution surface (scripts, pyproject,
+> `api/system.py`, the `runtime/{launcher,updater,kiro_auth,preflight}.py`, migrations, CI) it does a **fresh non-editable
+> `pip install .`** (git+ssh deps via the ssh→https rewrite), `genesis db upgrade` into a throwaway `GENESIS_STATE_DIR`, boots
+> via **`genesis up --no-open`** (waits for health, exits non-zero if unhealthy), `status`, `down`, then `shellcheck scripts/*.sh`
+> + `install.sh --help`. **Released** the whole Phase-22 tree as **v0.47.0** (bumped `pyproject` + `api/app.py`; committed
+> installer/launcher/updater/kiro-auth/preflight + `api/system` + web banner/panels + rebuilt `web/static` + the CI job + docs).
+> **Pre-release gate:** backend **437** pytest + ruff; web **160** vitest + eslint + tsc + build; shellcheck — all green.
+> genesis-core / kiro-agent-sdk / genesis-appian-parser / genesis-workflows unchanged (no coordinated release).
 
 ## Goal
 Guarantee that "a fresh clone installs, migrates, and boots" — the real integration gate for shipping — and make a tag the
