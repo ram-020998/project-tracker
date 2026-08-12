@@ -1,6 +1,8 @@
 # 21-06 — Chat transcript export (Markdown-first)
 
-> **Status:** 📝 DRAFT · **Phase:** 21 · **Repo:** genesis · **Depends on:** — · Applies to **both** the main chat + builder
+> **Status:** ✅ CODE-COMPLETE (2026-08-12) — genesis working tree (uncommitted; ships in the Phase-21 release). Backend
+> **409** pytest + ruff clean; web typecheck + eslint clean, **150** Vitest, build OK. · **Phase:** 21 · **Repo:** genesis ·
+> Applies to **both** the main chat + spec builder
 
 ## Goal
 

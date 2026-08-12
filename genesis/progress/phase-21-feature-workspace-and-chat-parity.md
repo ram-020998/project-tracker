@@ -1,8 +1,8 @@
 # Progress — Phase 21: Feature Workspace, Spec-Builder UX & Chat Parity
 
-> **Status (2026-08-12):** 🚧 IN PROGRESS. **21-01 ✅** · **21-02 ✅** · **21-03 ✅** · **21-04 ✅ (SDK, uncommitted)** ·
-> **21-05 ✅ (chat parity, uncommitted)**. Next: **21-06** (chat transcript MD export) → **21-07** (release). Per the user,
-> **all repo commits (kiro-agent-sdk + genesis-core + genesis) are held for a single release chain at 21-07** — only
+> **Status (2026-08-12):** 🚧 IN PROGRESS. **21-01 ✅** · **21-02 ✅** · **21-03 ✅** · **21-04 ✅** · **21-05 ✅** ·
+> **21-06 ✅ (chat MD export, uncommitted)**. Next: **21-07** (release chain + bible refresh) — the last sub-phase. Per the
+> user, **all repo commits (kiro-agent-sdk + genesis-core + genesis) are held for a single release chain at 21-07** — only
 > project-tracker is committed as we go. Spec: `specs/phase-21-feature-workspace-and-chat-parity.md` (+ `21-01..21-07`).
 > **ADR-044/045** (Proposed).
 
@@ -133,3 +133,20 @@ actions stay human-confirmed via the existing permission bridge.
 **Gate:** backend **405** pytest + ruff clean; web typecheck + eslint clean, **150** Vitest (18 files), build OK.
 
 **Release:** the genesis + genesis-core (SDK pin) + kiro-agent-sdk changes all ship together in the **21-07** chain.
+
+## 21-06 — Chat transcript export (Markdown) ✅ (code-complete; uncommitted)
+
+Export the full conversation as **Markdown** (server-side, **includes tool calls + thinking**), in both the main chat and the
+spec builder.
+
+- **Backend:** `genesis/chat/export.py` `session_to_markdown(session, messages, usage_total)` — header (title/session/mode/
+  model/total credits) + per-turn rendering: assistant turns render the folded `events` (💭 thinking, 🔧 tool calls + `↳`
+  updates with previews) then the answer + a per-turn credit line; user/system turns rendered plainly. Pure string building
+  (no dependency — the MD-first decision). Route `GET /api/chat/sessions/{id}/export.md` (PlainTextResponse, `text/markdown`,
+  attachment filename from the title slug).
+- **Frontend:** `chatApi.exportMdHref(id)`; the shared `Composer` parity toolbar gains an **Export** download link (wired from
+  `ChatThread` → both chat surfaces get it).
+- **Tests:** backend `test_export_markdown` + `test_create_with_model_and_catalog_endpoints` + `test_set_model_clear_compact` +
+  `test_slash_command_message_routes_to_execute` (the fake client gained a catalog + `execute_command`); web parity test
+  asserts the Export link href. **PDF is deferred** (browser print-to-PDF only, per the resolved decision — not shipped).
+- **Gate:** backend **409** pytest + ruff clean; web typecheck + eslint clean, **150** Vitest, build OK.
