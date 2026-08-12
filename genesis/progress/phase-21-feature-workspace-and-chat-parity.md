@@ -1,7 +1,7 @@
 # Progress — Phase 21: Feature Workspace, Spec-Builder UX & Chat Parity
 
-> **Status (2026-08-12):** 🚧 IN PROGRESS. **21-01 ✅ (spike, committed)** · **21-02 ✅** · **21-03 ✅** · **21-04 ✅ (SDK
-> code-complete, uncommitted)**. Next: **21-05** (chat parity — genesis backend + web, against the editable SDK). Per the user,
+> **Status (2026-08-12):** 🚧 IN PROGRESS. **21-01 ✅** · **21-02 ✅** · **21-03 ✅** · **21-04 ✅ (SDK, uncommitted)** ·
+> **21-05 ✅ (chat parity, uncommitted)**. Next: **21-06** (chat transcript MD export) → **21-07** (release). Per the user,
 > **all repo commits (kiro-agent-sdk + genesis-core + genesis) are held for a single release chain at 21-07** — only
 > project-tracker is committed as we go. Spec: `specs/phase-21-feature-workspace-and-chat-parity.md` (+ `21-01..21-07`).
 > **ADR-044/045** (Proposed).
@@ -100,3 +100,36 @@ left untouched (out of scope; the SDK repo has no ruff CI).
 
 **Release:** version bump + tag + push are **deferred to the 21-07 chain** (kiro-agent-sdk → genesis-core pin → genesis). 21-05
 develops against the editable SDK install in the genesis `.venv`.
+
+## 21-05 — Chat parity (model · slash commands · context/compaction · clear · images) ✅ (code-complete; uncommitted)
+
+Brought the reused chat to Kiro CLI/ACP parity, in **both** the main chat and the spec builder (the shared `ChatThread`/
+`Composer`), consuming the 21-04 SDK. **ADR-045** relaxes ADR-031: safe introspection commands run freely; write-capable
+actions stay human-confirmed via the existing permission bridge.
+
+**Backend (genesis):**
+- **m0011** `chat_sessions.model` (nullable) — per-session LLM; `current_version` → 11 (all suite version assertions updated).
+- `ChatStore`: `model` on the record + `create()` persists it + `set_model()`.
+- `ChatManager`: `create_session(model=)`; `_ensure_started` applies `rec.model or chat_model` to `KiroAgentOptions.model` +
+  wires `on_session_status`; caches the agent catalog on first start; `ensure_agent_catalog()` (cache or a one-off throwaway
+  client) → `available_models()` / `available_commands()`; `set_session_model()`; `run_slash_command()` (bounded, for
+  clear/compact); `stream_turn(text, images=)` routes a leading-`/` message through the SDK `execute_command` (raw, no
+  steering) else `prompt(images=)`; a `session.status` event is streamed for compaction/clear.
+- `api/chat.py`: `GET /chat/models`, `GET /chat/commands`, `POST /chat/sessions/{id}/{model,clear,compact}`;
+  `CreateSession.model`; `SendMessage.images` (base64 JSON — reuses the SSE endpoint; the SDK gates on
+  `promptCapabilities.image`); `model` on the session dict.
+- Tests: 6 new manager tests; fake clients across 5 test files updated for the new `prompt(images=)` signature.
+
+**Frontend (web):**
+- `types/chat.ts` (+`ChatModel`/`SlashCommand`/`ChatImage`, `ChatSession.model`, `ChatEvent.method/params`); `lib/api/chat.ts`
+  (+`models`/`commands`/`setModel`/`clear`/`compact`, `createSession(model)`, `sendMessage(images)`); `hooks.ts`
+  (+`useChatModels`/`useChatCommands`/`useSetModel`/`useClearSession`/`useCompactSession`; `send(text, images?)`).
+- `Composer` rewritten: a parity toolbar (**model select** + **context-usage meter** + **Clear/Compact**), a **Commands**
+  palette section (client-side autocomplete off `/chat/commands`; picking a command sends `/name` → `execute_command`), and
+  **image attachments** (file → base64 chips). `ChatThread` wires it all and computes the context % from the freshest
+  `agent.result`/assistant `usage.context_pct`. Both chrome variants get it (spec omits the workflow launcher).
+- Fixes: file-input `aria-label` (a11y); the context-% memo depends on `data?.messages` (exhaustive-deps).
+
+**Gate:** backend **405** pytest + ruff clean; web typecheck + eslint clean, **150** Vitest (18 files), build OK.
+
+**Release:** the genesis + genesis-core (SDK pin) + kiro-agent-sdk changes all ship together in the **21-07** chain.

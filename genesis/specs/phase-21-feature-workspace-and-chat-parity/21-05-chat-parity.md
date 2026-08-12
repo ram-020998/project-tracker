@@ -1,7 +1,9 @@
 # 21-05 — Chat parity (model, slash commands, context/compaction, clear, images)
 
-> **Status:** 📝 DRAFT · **Phase:** 21 · **Repo:** genesis (+ genesis-core SDK pin) · **ADR:** ADR-045 (revises ADR-031)
-> **Depends on:** 21-04 (SDK) · Applies to **both** the main chat and the spec builder (shared `Composer`/`ChatThread`)
+> **Status:** ✅ CODE-COMPLETE (2026-08-12) — genesis working tree (uncommitted; ships in the Phase-21 end-of-phase release,
+> incl. the genesis-core SDK pin bump). Backend **405** pytest + ruff clean; web typecheck + eslint clean, **150** Vitest / 18
+> files, build OK. Develops against the editable 21-04 SDK. · **Phase:** 21 · **Repo:** genesis (+ genesis-core SDK pin) ·
+> **ADR:** ADR-045 (revises ADR-031) · **Depends on:** 21-04 (SDK) · Applies to **both** the main chat and the spec builder
 
 ## Goal
 
