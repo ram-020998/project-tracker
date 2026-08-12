@@ -1,7 +1,9 @@
 # 21-02 — Feature workspace landing + artifact cards
 
-> **Status:** 📝 DRAFT · **Phase:** 21 · **Repo:** genesis (web + minor api) · **ADR:** ADR-044
-> **Depends on:** Phase 20 (features) · **Blocks:** 21-03 (builder route split)
+> **Status:** ✅ CODE-COMPLETE (2026-08-12) — genesis working tree (uncommitted; ships in the Phase-21 end-of-phase release).
+> Full web gate green (typecheck + eslint clean, **147** Vitest / 18 files, build OK); backend **13** features-API tests + ruff
+> clean. · **Phase:** 21 · **Repo:** genesis (web + minor api) · **ADR:** ADR-044
+> **Depends on:** Phase 20 (features) · **Blocks:** 21-03 (builder route split — done here)
 
 ## Goal
 
