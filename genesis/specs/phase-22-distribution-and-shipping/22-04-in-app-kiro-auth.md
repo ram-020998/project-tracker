@@ -1,6 +1,19 @@
 # 22-04 — In-app Kiro authentication
 
-> **Status:** 📝 DRAFT · **Phase:** 22 · **Repo:** genesis · **Depends on:** 22-02
+> **Status:** ✅ CODE-COMPLETE (2026-08-12; genesis code **held for the v0.47.0 release** at 22-06/07) · **Phase:** 22 ·
+> **Repo:** genesis · **Depends on:** 22-02 (uses 22-04 for the Kiro row)
+>
+> **As built:** `genesis/runtime/kiro_auth.py` — `status()` (parse `kiro-cli whoami --format json`),
+> `logout()` (`kiro-cli logout`), and a device-flow `start_login()` driven over a **stdlib `pty`** (no `expect` dep) in a
+> background thread + a pollable `login_status()` state machine (pending→connected/failed; scrapes the `Code:` + URL). Routes on
+> `api/system`: `GET /system/kiro`, `POST /system/kiro/login`, `GET /system/kiro/login`, `POST /system/kiro/logout`. Web:
+> `lib/api/system.ts` kiro fns + a **Settings → General "Kiro sign-in" section** (`KiroSection`: status + Start-URL/Region
+> sign-in form surfacing the device code + verification link + Sign out). **Real-CLI finding:** this kiro-cli's logged-in
+> `whoami` JSON has **no `account` key** (it has `accountType`/`email`/`startUrl`) and trailing non-JSON `Profile:` lines — the
+> parser now reads the first JSON line and detects identity claims (a naive `account is None` check falsely reported logged-out;
+> caught against the real binary). **Verified:** 8 kiro_auth tests + 4 KiroSection tests (mocked/jest-axe); real `status()` on
+> this machine → authenticated + email; full backend **433** + web **158** green; ruff/eslint/tsc clean. Device-flow round-trip
+> is manual-verify (headless-undrivable). Tokens never leave the server.
 
 ## Goal
 Let a fresh user authenticate `kiro-cli` from inside the browser app — it is the execution engine, so "logged into Kiro" is a
