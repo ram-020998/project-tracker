@@ -305,7 +305,7 @@ genesis/genesis/
             + tx()); runner.py (Migration + migrate() + current_version/pending + contiguity guard);
             migrations/ (m0001_baseline adopts runs+run_events; m0002_chat adds chat_sessions+chat_messages;
             m0003_chat_usage adds chat_messages.usage; m0004_copilot adds chat_sessions.mode +
-            chat_run_links + chat_permissions; m0005_supervision adds chat_notifications; m0006_copilot_actions adds the copilot audit trail; **m0007_kb adds the code-free temporal `kb_*` Appian KB tables (Phase 16-02); m0008_business_map adds `kb_business_maps` (17-01); m0009_documents adds `kb_documents`/`kb_document_links`/`kb_document_sections` (Phase 19)** — current_version=9). Schema is owned HERE (spec 01).
+            chat_run_links + chat_permissions; m0005_supervision adds chat_notifications; m0006_copilot_actions adds the copilot audit trail; **m0007_kb adds the code-free temporal `kb_*` Appian KB tables (Phase 16-02); m0008_business_map adds `kb_business_maps` (17-01); m0009_documents adds `kb_documents`/`kb_document_links`/`kb_document_sections` (Phase 19); m0010_features adds `kb_features`/`kb_feature_specs`/`kb_feature_spec_revisions` (Phase 20); m0011_chat_model adds `chat_sessions.model` (Phase 21)** — current_version=11). Schema is owned HERE (spec 01).
   kb/       (Phase 16-02) store.py (KbStore over `kb_*`: app lifecycle incl. table-scoped untrack; begin/apply
             [baseline+delta SCD-2]/finish syncs; recompute-on-sync bundles [flow_json verbatim]; tag_release/
             list_releases + point-in-time helper; contract-shaped reads; **+ list_syncs/latest_sync (16-04)**). **dev_mcp.py — Dev-MCP `listApplications` via a direct-stdio `tools/call` (16-04).** No source code stored (ADR-037);
@@ -378,7 +378,7 @@ genesis/genesis/
             service.py (facade + reload hook). dist/skill_catalog.py + dist/skill_install.py pull a library
             skill into the workspace + record Lockfile.skills. Chat auto-discovers the workspace (cwd/.kiro/skills)
             + writes documents to the per-session skill-output sandbox (SDK fs_write_root).
-  api/      app.py (create_app FastAPI; version 0.32.0; instantiates ChatManager + ChatRunSupervisor + SkillService; registers chat/copilot/skills + **native-mcp** + **applications** routes + per-session skill-output endpoints).
+  api/      app.py (create_app FastAPI; version 0.46.0; instantiates ChatManager + ChatRunSupervisor + SkillService; registers chat/copilot/skills + **native-mcp** + **applications** + **documents** + **features** routes + per-session skill-output endpoints).
             ALL routes on an APIRouter at prefix="/api" (ADR-028) + a catch-all SPA fallback. Routes:
             catalog(+available), library install|update|DELETE; workflows/{id}(+/graph); config/health,
             gitlab-token, mcp-cards, cli-cards, mcp-cards/{server}/test, secrets, environments;
