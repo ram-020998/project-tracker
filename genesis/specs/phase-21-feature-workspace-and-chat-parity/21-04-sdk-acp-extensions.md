@@ -1,6 +1,9 @@
 # 21-04 — `kiro-agent-sdk` ACP extensions
 
-> **Status:** 📝 DRAFT · **Phase:** 21 · **Repo:** kiro-agent-sdk · **Depends on:** 21-01 (spike findings) · **Blocks:** 21-05
+> **Status:** ✅ CODE-COMPLETE (2026-08-12) — kiro-agent-sdk working tree (uncommitted). **93** SDK unit tests pass (82 +
+> 11 new), ruff clean (src + the new test). **Release held:** the version bump + tag + the genesis-core/genesis pin bumps land
+> together in the **21-07** chain (per the user's "one release at phase end"); 21-05 develops against the **editable** SDK
+> install in the genesis `.venv`. · **Phase:** 21 · **Repo:** kiro-agent-sdk · **Depends on:** 21-01 · **Blocks:** 21-05
 
 ## Goal
 

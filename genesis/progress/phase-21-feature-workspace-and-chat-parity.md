@@ -1,9 +1,9 @@
 # Progress — Phase 21: Feature Workspace, Spec-Builder UX & Chat Parity
 
-> **Status (2026-08-12):** 🚧 IN PROGRESS. **21-01 ✅ (spike, committed)** · **21-02 ✅ (code-complete, uncommitted)** ·
-> **21-03 ✅ (code-complete, uncommitted)**. Next: **21-04** (kiro-agent-sdk — its own repo/release). Per the user, **all
-> genesis-repo code changes for 21-02..21-07 are held for a single release at the end of Phase 21** — only project-tracker
-> (specs/progress/spike) is committed as we go. Spec: `specs/phase-21-feature-workspace-and-chat-parity.md` (+ `21-01..21-07`).
+> **Status (2026-08-12):** 🚧 IN PROGRESS. **21-01 ✅ (spike, committed)** · **21-02 ✅** · **21-03 ✅** · **21-04 ✅ (SDK
+> code-complete, uncommitted)**. Next: **21-05** (chat parity — genesis backend + web, against the editable SDK). Per the user,
+> **all repo commits (kiro-agent-sdk + genesis-core + genesis) are held for a single release chain at 21-07** — only
+> project-tracker is committed as we go. Spec: `specs/phase-21-feature-workspace-and-chat-parity.md` (+ `21-01..21-07`).
 > **ADR-044/045** (Proposed).
 
 ## 21-01 — ACP parity spike ✅ (committed to project-tracker)
@@ -70,3 +70,33 @@ The spec builder is now **chat-first** with an on-demand full-screen review, and
 
 **Note:** the Composer's small hint line still reads "Read-only assistant · type / for skills" (a visible span, not the banner) —
 left as-is; the Composer is revamped in **21-05** (chat parity).
+
+## 21-04 — `kiro-agent-sdk` ACP extensions ✅ (code-complete; uncommitted, release held for 21-07)
+
+Added the ACP-extension surface the chat-parity work needs, **additive + backward-compatible**, guided by the 21-01 spike and
+verified against kiro-cli 2.16.2.
+
+**`KiroACPClient` (client.py):**
+- **`start()`** now captures the LLM catalog (`session/new` result `.models`) + agent personas (`.modes`) onto `self.models`/
+  `self.modes`, briefly waits for the `_kiro.dev/commands/available` notification, and returns them on **`SystemInit`**
+  (new fields `models`, `modes`, `commands`, `prompts`, `tools` — all default empty for older CLIs). `self.capabilities` is
+  stored from `initialize`.
+- **`_dispatch`** intercepts the extension notifications independently of any turn: `_kiro.dev/commands/available` → updates the
+  command catalog + fires the optional `on_commands` callback; `_kiro.dev/{compaction,clear}/status` → `on_session_status`
+  callback. (Metadata still flows to the turn loop for metering.)
+- **`set_model(model_id)`** → `session/set_model`; **`set_mode(mode_id)`** → `session/set_mode`.
+- **`execute_command(text)`** → streams `_kiro.dev/commands/execute` through the shared turn loop (prompt() was refactored to a
+  private `_turn(method, params, timeout)`; `execute_command` reuses it with `command_timeout`). Documented caveat from the
+  spike: panel commands may not return a terminal result headlessly → ends on timeout; 21-05 falls back to the prompt path.
+- **`prompt(text, images=None)`** — optional image content parts, gated on `promptCapabilities.image` (dropped gracefully if not
+  advertised). Text-only behavior unchanged.
+- Accessors: `available_models` / `current_model_id` / `available_commands` / `available_tools`.
+- `KiroAgentOptions` gained `on_commands`, `on_session_status`, `command_timeout` (all optional/defaulted).
+
+**Tests:** `tests/test_acp_extensions.py` (11 new) — content building + image gating, command-catalog capture + callbacks,
+session-status callback, model accessors, set_model/set_mode frames, not-started guard, execute_command uses the extension
+method. **93 SDK tests pass** (82 prior + 11), ruff clean (src + the new test). Pre-existing `E401` in `test_erd_workflow.py`
+left untouched (out of scope; the SDK repo has no ruff CI).
+
+**Release:** version bump + tag + push are **deferred to the 21-07 chain** (kiro-agent-sdk → genesis-core pin → genesis). 21-05
+develops against the editable SDK install in the genesis `.venv`.
