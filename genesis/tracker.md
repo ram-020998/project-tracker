@@ -163,6 +163,13 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-12 (genesis v0.46.1 — chat parity hotfixes; CI green #6556691):** post-Phase-21 live-feedback bug fixes (backend
+  only, `genesis/chat/`). (1) **Slash commands hung** — 21-05 dispatched them via `_kiro.dev/commands/execute`, which times out
+  headlessly for every command (verified vs kiro-cli 2.17.0); rerouted through the normal `prompt()` path (`stream_turn` + the
+  Clear/Compact `run_slash_command`) so `/effort`/`/model`/`/clear`/`/compact` return instantly. (2) **`export.md` 500** —
+  `session_to_markdown` now accepts the float `session_usage_total` returns (was assuming a dict). (3) **export thinking** —
+  coalesce streaming `agent.thought` deltas into one blockquote. Tests 409→**411**; ruff clean; web/static unchanged.
+
 - **2026-08-12 (Phase 21 — Feature Workspace, Spec-Builder UX & Chat Parity — ✅ SHIPPED + COMPLETE; 21-01..21-07):**
   Released **genesis v0.46.0 + genesis-core v0.9.3 (SDK pin) + kiro-agent-sdk v0.7.0**, CI green; **ADR-044 + ADR-045 Accepted**
   (045 refines ADR-031). A Phase-20 live-feedback pass. **(A) Feature workspace** — the feature page is now an **artifact
