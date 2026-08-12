@@ -1,9 +1,10 @@
 # Progress — Phase 21: Feature Workspace, Spec-Builder UX & Chat Parity
 
-> **Status (2026-08-12):** 🚧 IN PROGRESS. **21-01 ✅ (spike, committed)** · **21-02 ✅ (code-complete, uncommitted)**. Next:
-> **21-03**. Per the user, **all genesis-repo code changes for 21-02..21-07 are held for a single release at the end of
-> Phase 21** — only project-tracker (specs/progress/spike) is committed as we go. Spec: `specs/phase-21-feature-workspace-and-chat-parity.md`
-> (+ `21-01..21-07`). **ADR-044/045** (Proposed).
+> **Status (2026-08-12):** 🚧 IN PROGRESS. **21-01 ✅ (spike, committed)** · **21-02 ✅ (code-complete, uncommitted)** ·
+> **21-03 ✅ (code-complete, uncommitted)**. Next: **21-04** (kiro-agent-sdk — its own repo/release). Per the user, **all
+> genesis-repo code changes for 21-02..21-07 are held for a single release at the end of Phase 21** — only project-tracker
+> (specs/progress/spike) is committed as we go. Spec: `specs/phase-21-feature-workspace-and-chat-parity.md` (+ `21-01..21-07`).
+> **ADR-044/045** (Proposed).
 
 ## 21-01 — ACP parity spike ✅ (committed to project-tracker)
 
@@ -45,3 +46,27 @@ surface). Test `test_artifact_readonly_mode_omits_sdk` added — **13** features
 **Note for 21-03:** `SpecBuilderPage` currently renders the OLD 2-column `SpecWorkspace` — 21-03 replaces that with the
 full-width chat + full-screen annotatable Preview (our comment-queue + Send-all), the `ChatThread` `chrome="spec"` variant, and
 `feature_spec` session isolation from the main chat list.
+
+## 21-03 — Spec-builder re-layout, comment queue & session isolation ✅ (code-complete; uncommitted)
+
+The spec builder is now **chat-first** with an on-demand full-screen review, and its sessions are isolated from the main chat.
+
+**Backend:**
+- `ChatStore.list(exclude_modes=())` → `WHERE mode NOT IN (…)`; `ChatManager.list_sessions(exclude_modes=())`; the **main** chat
+  list endpoint (`api/chat.py`) now passes `exclude_modes=("feature_spec",)`. `get()`/unfiltered list still return them (the
+  feature page loads its session by id). Test `test_list_sessions_excludes_feature_spec`.
+
+**Frontend:**
+- **`ChatThread`** gained `chrome?: "full" | "spec"` (default `"full"`). In `"spec"` the **mode banner + Enable-copilot toggle**
+  are hidden (item 6); the supervised-runs strip + copilot cards were already gated by copilot mode. The main chat is unchanged.
+- **`SpecWorkspace`** rewritten: a **full-width** `ChatThread(chrome="spec")` under a top action bar (Add context · status ·
+  Export .md · Save milestone · **Preview**). The always-on right iframe is gone. **Preview** opens a **full-screen `Dialog`**
+  (`h-[92vh] w-[94vw]`): the annotatable spec iframe (left) + **our own comment-queue rail** (right). Every `lavish:queuePrompt`
+  lands in React state and renders as a removable row (quoted anchor + comment); a single **Send all to agent** composes one
+  chat turn (`composeFeedback` → the thread's `send`) and clears the queue. The queue persists across open/close; the iframe
+  live-reloads on each new assistant message. (Added the `Send` icon.)
+
+**Gate:** backend **399** pytest + ruff clean; web typecheck + eslint clean, **149** Vitest (18 files), build OK.
+
+**Note:** the Composer's small hint line still reads "Read-only assistant · type / for skills" (a visible span, not the banner) —
+left as-is; the Composer is revamped in **21-05** (chat parity).

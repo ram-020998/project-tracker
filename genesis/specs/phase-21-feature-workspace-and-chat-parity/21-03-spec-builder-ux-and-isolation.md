@@ -1,6 +1,8 @@
 # 21-03 — Spec-builder re-layout, comment queue & session isolation
 
-> **Status:** 📝 DRAFT · **Phase:** 21 · **Repo:** genesis (web + chat api/store) · **Depends on:** 21-02 (route split)
+> **Status:** ✅ CODE-COMPLETE (2026-08-12) — genesis working tree (uncommitted; ships in the Phase-21 end-of-phase release).
+> Backend **399** pytest + ruff clean; web typecheck + eslint clean, **149** Vitest / 18 files, build OK. · **Phase:** 21 ·
+> **Repo:** genesis (web + chat api/store) · **Depends on:** 21-02 (route split)
 
 ## Goal
 
