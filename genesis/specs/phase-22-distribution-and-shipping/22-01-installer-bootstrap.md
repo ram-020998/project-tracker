@@ -1,6 +1,14 @@
 # 22-01 — Installer / bootstrap (`scripts/install.sh`)
 
-> **Status:** 📝 DRAFT · **Phase:** 22 · **Repo:** genesis · **Depends on:** — (first sub-phase)
+> **Status:** ✅ CODE-COMPLETE (2026-08-12; genesis code **held for the v0.47.0 release** at 22-06/07) · **Phase:** 22 ·
+> **Repo:** genesis · **Depends on:** — (first sub-phase)
+>
+> **As built:** `scripts/install.sh` — args `--dir/--branch/--no-migrate/--help`; 7 steps: prereqs (python3.13 resolver, git,
+> kiro-cli [warns if absent]) → **SSH-access preflight** (`git ls-remote` per repo, clear per-repo error) → locate-or-clone
+> (detects a genesis clone via `pyproject name="genesis"`) → venv → `pip install .` → `genesis db upgrade` (skippable) →
+> scaffold `~/.genesis/run` → print next steps. Colorized, TTY-aware, idempotent, `set -uo pipefail`, `die` on controlled
+> errors. **Verified:** `bash -n` + **shellcheck clean**; `--help` works; the real SSH-preflight command passes against all
+> four remotes. Full clean-machine run is the 22-06 CI gate (shell unit tests deferred there — no bats framework in-repo).
 
 ## Goal
 A single, idempotent, re-runnable bootstrap that takes a machine with the prerequisites installed to a working Genesis clone
