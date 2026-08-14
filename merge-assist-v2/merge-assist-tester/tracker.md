@@ -6,9 +6,10 @@
 > a testing framework, exactly what was built (objects, UUIDs, endpoints, code), every finding and
 > gotcha, how to run it, what works, and what remains. Nothing is assumed.
 >
-> **Last updated:** 2026-07-05
-> **Status:** Testing framework is **fully working end-to-end** (export → convert → compare, verified
-> live). See §9 for the exact current state.
+> **Last updated:** 2026-08-14
+> **Status:** Framework working end-to-end on the **dev env**. Export axis now has TWO paths (built-in
+> IX plugin for content/site/group; **Appian Deployment MCP** for everything incl. webapi/pm/recordtype).
+> 7 types clean (0 real gaps); recordtype in progress (1 real gap). See §13 for the current session.
 
 ---
 
@@ -27,8 +28,9 @@
 | **Project trackers** | `/Users/ramaswamy.u/repo/project-tracker/merge-assist-appian/tracker.md`, `…/merge-assist-v2/tracker.md` |
 | **This tracker** | `/Users/ramaswamy.u/repo/project-tracker/merge-assist-v2/merge-assist-tester/tracker.md` |
 
-**Live environment:** `https://merge-assist.appianpreview.com` (Appian preview site).
-Web APIs are at `{base}/suite/webapi/<urlAlias>`.
+**Live environment:** `https://merge-assist-dev.appianpreview.com` (dev; old `merge-assist.appianpreview.com`
+retired). Web APIs at `{base}/suite/webapi/<urlAlias>`. **Numeric local ids are NOT portable — re-resolve
+in dev; trust only UUIDs.**
 
 ---
 
@@ -416,3 +418,80 @@ LFS, and amending the (unpushed) root commit — so the pushed history contains 
 (auth: `Appian-API-Key`).
 
 **Verified example object:** `MA_util_ensureArray`, uuid `_a-0000efa6-747f-8000-9ba4-011c48011c48_33621`, local id `6538`.
+
+
+---
+
+## 13. Session 2026-08-14 — dev env, Deployment MCP export bridge, compare type-key fix, converter progress
+
+### 13.1 Environment & clients
+- Migrated to dev env `https://merge-assist-dev.appianpreview.com`. Old-env local ids/doc ids discarded;
+  everything re-resolved. UUIDs are the only portable ids.
+- MAT progress rows re-baselined in dev (`MAT_REC_ConverterTest` `373dfe3c-a483-4c30-b072-89aaf3993aae`).
+
+### 13.2 THE export problem, solved with the Appian Deployment MCP
+- The built-in `object-export-plugin` (`exportObjectV2`) reliably exports **content objects, site,
+  group**, but returns **HTTP 504** for `webApi`, `processModel`, `recordType` (IX `ExportFacade` fails).
+  Verified engine-healthy (site exports succeeded interleaved).
+- Installed the **Appian Deployment MCP** (community App Market utility wrapping the Deployment REST API)
+  at `~/appian-deployment-mcp`, wired into `~/.kiro/settings/mcp.json` (server `appian-deployment`,
+  env `default` = dev). Prereq: Admin Console → **Outgoing External Deployments** enabled + API key's
+  service account set as **Authenticate As** (else `POST /deployments` → 403 `APNX-1-4552-001`).
+- **Export bridge (works for every type):** `export_package(application, [appUuid])` →
+  `poll_deployment_status` → `download_exported_package` → unzip → `<type>/<uuid>.xml` (identical IX
+  `*Haul` format) → `upload_xml.py <file> <name> <MAT ObjectExports folder> <MAT app> xml` →
+  `getcontentdetailsbyuuid` for docId → `mat_client.py convert/compare --doc-id`.
+- **New client tool:** `merge-assist-tester-client/upload_xml.py` (local XML → env document via LCP
+  `POST /documents`, basic auth). Uploaded docs MUST land in the **MAT Object Exports** folder
+  `_a-0000efee-f112-8000-9bea-011c48011c48_75077` (only folder the convert/compare Web-API user can read;
+  elsewhere → HTTP 500).
+
+### 13.3 CRITICAL — compare type key ≠ converter shortType
+- `compareObjectV2`'s env half keys on the **DOD type-map key** (`a!dod_config_getTypeMap`), authoritative
+  list from rule **`MA_getValidObjectTypes`** `_a-0000efa7-bf84-8000-9ba6-011c48011c48_34170`.
+- **Record types use `record`, NOT `recordtype`.** Passing `recordtype` → HTTP 500 (looked like "no env
+  oracle"); `record` → HTTP 200 with full data. Client fixed: added `COMPARE_TYPE_MAP`
+  (`recordtype`→`record`); `compare_object` sends the DOD key. Other types match across both vocabularies.
+- Lesson: **always confirm the compare key via `MA_getValidObjectTypes` before declaring a type blocked.**
+
+### 13.4 New platform gotchas (this session)
+- `a!dod_displayName_contentByUuid` is **unavailable** in dev → build content display maps from
+  `getcontentdetailsbyuuid` text parsing.
+- MCP `createExpressionRule` rejects `fn!try`/`a!util_convertUuidToId`/`fn!lambda_appian_internal` and
+  `ri!` lambda params; `updateExpressionRule` tolerates them but rejects **unused local variables**.
+  ⇒ edit converters via `update`, inline logic, no lambdas, remove unused locals.
+- `fn!reverse()` does NOT reverse strings (lists only).
+- `a!util_convertUuidToId(uuid, ContentFreeformRule)` returns `""` for interfaces/integrations.
+
+### 13.5 Shared helper change
+- **`MA_util_convertRoleMap_V2`** now orders entries by role priority (none→administrator→editor→viewer→deny)
+  so all callers get env-matching order (promoted from a per-converter fix; re-verified group/interface/
+  constant/connectedsystem — no regressions). NOTE: some types' env roleMap has **no `inherit`** key
+  (site, record) — strip it in those converters.
+
+### 13.6 Converter results this session
+| Type | Result | Notes |
+|---|---|---|
+| site | 🟡 CLEAN (4 env-only) | Rewrote: inline branding hex, favicon defaultImage resolve, page contentName via getcontentdetails, `ContentFreeformRule`→`Interface(260)`, roleMap default-only. Env-only: id, pages[0].id, siteUrl, versionIdentifier. |
+| connectedsystem | 🟡 CLEAN (3 env-only) | Created temp `MA_TEST_CS_HTTP`. V2 roleMap+reorder, integrationType/uuid, blank sharedParameters.baseUrl, enableRtdShortcut null, vaultFieldMetadata {}. Env-only: id, version, latestVersionNumber. |
+| recordtype | 🔴 GAPS 62→15 (1 real) | Compare key `record`. Fixed V2 roleMap (no inherit), field displayName/type (short top-level / full sourceCfg), versionUuid→"", nameExpr `a!` normalize, sourceCfg empty defaults, supportsIncrementalSync, craFlags, detailViewCfg/views split. 14 env-only DB ids + **1 real: `enabledFeatures` (bitmask 2047 → decoded feature-name list)**. |
+| webapi / processmodel | ⛔ BLOCKED | export 504 (deployment MCP can export) AND compareObjectV2 500 (no env oracle). |
+| application / knowledgecenter | ⛔ BLOCKED | export OK + converter runs, but compareObjectV2 500 with correct key + valid doc → genuine env-oracle gap. |
+
+### 13.7 Two-axis constraint (mental model)
+A type is testable only if BOTH: (1) **export** works (built-in for content/site/group; Deployment MCP
+bridge for the rest — solved), AND (2) the **compare oracle** (`MAT_getEnvObjectData`, Designer-only)
+serves it. Oracle confirmed for the 7 core types **+ record**; returns 500 for application/webapi/
+processmodel/knowledgecenter. Extending the oracle to more types is a **Designer task** (LCP can't
+read/edit `MAT_getEnvObjectData` — reaches the DOD framework).
+
+### 13.8 Temp artifacts to delete at cleanup
+- Rules: all `MA_TMP_*` (incl. `MA_TMP_dumpSite` `_a-0000f03b-67ee-8000-9bde-011c48011c48_26522`).
+- Fixtures: `MA_TEST_CS_HTTP` `_a-…26693`, `MA_TEST_APP` `_a-…26866` (+ auto KC `_a-…26879`), uploaded
+  `dep_*` XML docs in MAT Object Exports.
+
+### 13.9 Next steps
+1. recordtype: decode `enabledFeatures` bitmask→name list (last real gap).
+2. datatype/datastore/grouptype/translation*: fetch XML via the bridge, compare with the correct DOD key
+   (`MA_getValidObjectTypes`) — untested; may or may not have an oracle.
+3. Designer task: extend `MAT_getEnvObjectData` to serve application/webapi/processmodel/knowledgecenter.
