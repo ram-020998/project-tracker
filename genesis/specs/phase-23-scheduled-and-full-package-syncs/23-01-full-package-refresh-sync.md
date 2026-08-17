@@ -1,7 +1,17 @@
 # 23-01 — Full-package ("Refresh") application sync
 
-> **Status:** 📝 DRAFT · **Phase:** 23 · **Repo:** genesis (+ project-tracker) · **Depends on:** — (the `sync-application`
-> delta mode already ships in genesis-workflows v0.2.2)
+> **Status:** ✅ CODE-COMPLETE (2026-08-17; genesis code **held for the v0.48.0 release** at 23-03) · **Phase:** 23 ·
+> **Repo:** genesis (+ project-tracker) · **Depends on:** — (the `sync-application` delta mode already ships in
+> genesis-workflows v0.2.2)
+>
+> **As-built:** `api/applications.py` — `_start_sync` now resolves the mode (`_resolve_mode`: none/""/"auto" → baseline if
+> no `baseline_sync_id` else delta; `refresh`→`delta`; baseline/delta pass through; unknown → 400) and rejects a second sync
+> while one is non-terminal (`_sync_running` via `run_manager.list`+`reconcile_status` → **409**). `SyncBody.mode` is now
+> `str | None = None` (omitted → auto-pick). Web: the app-detail action is relabeled **"Refresh"**, disabled while a sync
+> runs, and posts **no mode** (auto-pick) — `applicationsApi.sync` omits `mode` when unset; `useSyncApplication` passes an
+> optional mode. **Tests:** backend +4 (delta/refresh unblock, unknown-mode 400, auto-pick baseline↔delta, 409 guard) →
+> **441** green; web +1 (Refresh → mode-less POST) → **161** green; ruff/eslint/tsc clean; `web/static` rebuilt. No
+> genesis-workflows/schema change.
 
 ## Goal
 
