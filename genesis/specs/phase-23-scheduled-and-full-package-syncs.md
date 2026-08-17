@@ -1,6 +1,7 @@
 # Phase 23 — Scheduled & Full-Package Syncs (umbrella)
 
-> **Status:** 📝 **DRAFT — planning (awaiting approval to build).** · **Author:** Genesis agent · **Date:** 2026-08-17
+> **Status:** ✅ **SHIPPED — COMPLETE (23-01..23-03)** — genesis **v0.48.0** (`3fb8f08`), CI green (pipeline #6588951:
+> genesis + frontend + clean-install); ADR-047 Accepted; adds **m0012**. · **Author:** Genesis agent · **Date:** 2026-08-17
 > **Goal:** Keep the local Appian KB and Document Library **fresh automatically** without a human clicking sync. Two
 > capabilities: **(1)** make the application sync **re-runnable as a full-package refresh** (re-export the whole app → parse →
 > diff against the DB → write only the changes) — exposing the already-built delta-merge that today is blocked at the API; and

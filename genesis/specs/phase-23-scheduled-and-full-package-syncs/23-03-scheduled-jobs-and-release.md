@@ -1,6 +1,8 @@
 # 23-03 — Scheduled jobs (app-sync + document-library) + preflight + release
 
-> **Status:** 📝 DRAFT · **Phase:** 23 · **Repo:** genesis (+ project-tracker) · **Depends on:** 23-01, 23-02
+> **Status:** ✅ SHIPPED (2026-08-17) — released **genesis v0.48.0** (`3fb8f08`, tag `v0.48.0`), CI green (pipeline
+> **#6588951**: genesis + frontend + clean-install). · **Phase:** 23 · **Repo:** genesis (+ project-tracker) ·
+> **Depends on:** 23-01, 23-02
 
 ## Goal
 

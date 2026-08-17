@@ -1115,3 +1115,39 @@ indicator, clear/compact, and image attachments — in **both** the main chat an
   branch = **`master`**. Preserves ADR-026 (local single-user, localhost-only, no auth — must not be network-exposed) and
   ADR-031/045 (the `api/system` surface is local introspection + **local** process/install control only). Live acceptance
   (device-flow login + detached restart) is manual — headless-undrivable.
+
+## ADR-047 — Genesis runs fixed, backend-defined scheduled maintenance syncs (Phase 23)
+
+- **Status.** ACCEPTED — SHIPPED (Phase 23, genesis v0.48.0, CI green #6588951; migration m0012).
+- **Context.** The Appian application sync was **not re-runnable** (the API rejected any non-baseline mode; re-running
+  baseline errored), and a **true incremental delta** needs an Appian changed-objects API Genesis doesn't have — yet the KB +
+  Document Library must stay fresh **daily**. Two needs: (1) a re-runnable **full-package refresh** of an application; (2)
+  **scheduled** application syncs (all apps, each morning) + document-library syncs (every 4h during daytime), maintained in
+  the backend now, user-configurable later.
+- **Decision.** (1) **Expose the already-built full-package refresh** — the shipped `sync-application` `mode=delta` (16-07
+  Option A) *is* a **full re-export → parse → diff the DB by `diff_hash` → write only the changes** (open new / close+reopen
+  modified / close removed / diff edges / recompute bundles); unblock it at the API (`_resolve_mode`: auto-pick baseline↔delta;
+  `refresh` alias), add a **per-app already-running 409** guard (the Appian Deployment export is serialized → HTTP 409), and a
+  web **Refresh** action. It is **not** an environment delta-patch (that remains deferred, and is unnecessary for daily
+  freshness). (2) A **lightweight in-process asyncio scheduler** (`runtime/scheduler.py`, started with `genesis serve`) ticks
+  each minute and fires due jobs as their own tasks. Two jobs seeded in a DB table (**m0012 `scheduled_jobs`**, the seam for
+  later user config): **`application-sync`** (all tracked apps, weekday **07:00 IST**, **serialized** — one export at a time,
+  per-app mode-pick, skip an app already syncing, skip the job if no dev env / workflow uninstalled) and
+  **`document-library-sync`** (weekday **08:00/12:00/16:00/20:00 IST**, one `sync-documents` `scope=library` run, skip if `gws`
+  not connected / workflow uninstalled). Scheduling is **TZ-aware (IST), weekdays only, daytime slots**, and **restart-safe**
+  (a persisted `last_fired_slot` embedding the local date → within-day catch-up, no cross-day re-fire; the slot is marked
+  before the work so a long job can't double-fire). A read-only `GET /api/system/schedules` exposes state; **no write/config
+  surface this phase**.
+- **Alternatives.** *True incremental delta* (export only changed objects) — deferred (no Appian changed-objects API; backlog
+  §1.3). *APScheduler / cron* — unnecessary now; a minute-tick + `daily_times` needs no new dependency (APScheduler is the
+  documented fallback if cron strings are wanted). *A JSON marker for last-run* — rejected in favor of a **DB table** so the
+  schedule is inspectable + user-configurable later. *Firing app syncs in parallel* — rejected: the Appian export is
+  one-at-a-time (409), so the morning job runs apps **serially**.
+- **Consequences.** genesis-only + **m0012** (`current_version` 11→12). New: `api/applications.py` mode-resolution + 409
+  guard, `runtime/{scheduler,schedule_store,sync_jobs}.py`, `api/schedules.py`, `db/migrations/m0012_scheduled_jobs.py`, and a
+  web Refresh action. Scheduled jobs are **read-only against Appian** (Deployment REST export) + local KB/document writes,
+  **`auto_approve`, no HITL gates**, calling the same `RunManager.start` a human clicks — preserving **ADR-001** (LangGraph
+  owns each sync's control flow) and extending the **ADR-033** "operator at the run-management layer" posture to a
+  **non-interactive** actor; bounded by local single-user (ADR-026), no network exposure. Sync writes are SCD-2 (reversible
+  history), not destructive. Live acceptance of the real morning/4-hourly firing is observed over time (fake-clock unit tests +
+  a forced-slot manual run are the pre-release evidence).

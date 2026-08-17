@@ -129,7 +129,8 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   login** + a **first-run preflight** + a **CI clean-install verify**. New runtime code is a tiny read-only `api/system` surface
   + a web update banner/panels + installer/updater shell scripts + `genesis up/down/status/update` CLI. **ADR-046** (clone+tag
 - **Phase 23** — `specs/phase-23-scheduled-and-full-package-syncs.md` (+ `phase-23-scheduled-and-full-package-syncs/23-01..23-03`)
-  — **Scheduled & Full-Package Syncs** 📝 SPEC DRAFTED (awaiting approval to build; genesis-only + **m0012**). Keep the local
+  — **Scheduled & Full-Package Syncs** ✅ SHIPPED (genesis **v0.48.0**, CI green #6588951 [genesis + frontend + clean-install];
+  genesis-only + **m0012**). Keep the local
   Appian KB + Document Library fresh **automatically**. **(1)** Make the application sync **re-runnable as a full-package
   refresh** — exposing the already-built `sync-application` **`mode=delta`** (full re-export → parse → diff the DB by
   `diff_hash` → write only the changes) that today is **blocked at the API** (`_start_sync` rejects non-baseline). It is a full
@@ -186,6 +187,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-17 (Phase 23 — Scheduled & Full-Package Syncs — ✅ SHIPPED + COMPLETE; 23-01..23-03):** Released **genesis
+  v0.48.0** (`3fb8f08`, tag `v0.48.0`), CI green (pipeline **#6588951**: genesis + frontend + clean-install); **ADR-047
+  Accepted**; adds **m0012 `scheduled_jobs`**. **(1) Full-package refresh:** `api/applications.py` unblocks `sync-application`
+  `mode=delta` (a full re-export → parse → diff the DB by `diff_hash` → write only the changes — **not** an env delta-patch;
+  `_resolve_mode` auto-picks baseline↔delta, `refresh` alias) + a per-app already-running **409** guard + a web **Refresh**
+  action. **(2) Backend scheduler:** `runtime/scheduler.py` (60s asyncio tick + pure `due_slot`; jobs as background tasks;
+  mark-before-work; restart-safe within-day) + `runtime/schedule_store.py` (over m0012) + `runtime/sync_jobs.py` +
+  `api/schedules.py` (read-only `GET /api/system/schedules`). Jobs: **`application-sync`** (all tracked apps, 07:00 IST
+  weekdays, **serialized** — Appian export is one-at-a-time/409; per-app mode-pick; preflight/running skips) +
+  **`document-library-sync`** (`scope=library`, 08/12/16/20 IST weekdays; gws/workflow skips). Backend-fixed now,
+  user-configurable later. **Gate:** backend **464** pytest + ruff; web **161** Vitest + eslint + tsc + build. genesis-core /
+  kiro-agent-sdk / genesis-appian-parser / genesis-workflows unchanged. As-built:
+  `progress/phase-23-scheduled-and-full-package-syncs.md`. **PHASE 23 COMPLETE.**
 
 - **2026-08-17 (Phase 23 — Scheduled & Full-Package Syncs — 📝 SPEC DRAFTED, awaiting approval to build):** Umbrella
   `specs/phase-23-scheduled-and-full-package-syncs.md` + `23-01..23-03` + this row. genesis-only + **m0012**. **(1)** Make the
