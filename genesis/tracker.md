@@ -128,6 +128,17 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   tags (one-click banner + `genesis update`: checkout tag → `pip install .` → `db upgrade` → detached restart) → **in-app Kiro
   login** + a **first-run preflight** + a **CI clean-install verify**. New runtime code is a tiny read-only `api/system` surface
   + a web update banner/panels + installer/updater shell scripts + `genesis up/down/status/update` CLI. **ADR-046** (clone+tag
+- **Phase 23** — `specs/phase-23-scheduled-and-full-package-syncs.md` (+ `phase-23-scheduled-and-full-package-syncs/23-01..23-03`)
+  — **Scheduled & Full-Package Syncs** 📝 SPEC DRAFTED (awaiting approval to build; genesis-only + **m0012**). Keep the local
+  Appian KB + Document Library fresh **automatically**. **(1)** Make the application sync **re-runnable as a full-package
+  refresh** — exposing the already-built `sync-application` **`mode=delta`** (full re-export → parse → diff the DB by
+  `diff_hash` → write only the changes) that today is **blocked at the API** (`_start_sync` rejects non-baseline). It is a full
+  re-export + **local** diff, **not** an environment delta-patch (which stays deferred — needs the Appian changed-objects API).
+  **(2)** A **backend scheduler** (`runtime/scheduler.py`, an asyncio minute-tick, TZ-aware IST, weekdays only) running
+  **`application-sync`** (all tracked apps, **07:00 IST**, **serialized** — the Appian export is one-at-a-time / HTTP 409) and
+  **`document-library-sync`** (`scope=library`, **08/12/16/20 IST**), with preflight skips (no dev env / no `gws`). Schedule +
+  last-run held in **m0012 `scheduled_jobs`** (backend-fixed now; the seam for later user config). **ADR-047** (PROPOSED).
+  genesis-only release → **v0.48.0** (+ m0012).
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
@@ -175,6 +186,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-17 (Phase 23 — Scheduled & Full-Package Syncs — 📝 SPEC DRAFTED, awaiting approval to build):** Umbrella
+  `specs/phase-23-scheduled-and-full-package-syncs.md` + `23-01..23-03` + this row. genesis-only + **m0012**. **(1)** Make the
+  app sync **re-runnable as a full-package refresh** by unblocking the already-built `sync-application` `mode=delta` (full
+  re-export → parse → diff by `diff_hash` → write changes) — blocked today by `api/applications.py._start_sync`; it is a
+  full re-export + **local** diff, **not** an environment delta-patch (that stays deferred). **(2)** A backend scheduler
+  (`runtime/scheduler.py`, asyncio minute-tick, IST, weekdays): **`application-sync`** (all apps, 07:00, **serialized** — Appian
+  export is one-at-a-time/409) + **`document-library-sync`** (`scope=library`, 08/12/16/20), with preflight skips (no dev env /
+  no gws). Schedule + last-run in **m0012 `scheduled_jobs`** (backend-fixed; user-config later). Decisions resolved: IST 07:00 /
+  08-12-16-20; a DB table (not a JSON marker); preflight skips; skip weekends. **ADR-047 (PROPOSED).** Target release genesis
+  **v0.48.0**.
 
 - **2026-08-12 (Phase 22 — Distribution & Browser-Based Shipping (clone + git-tag) — ✅ SHIPPED + COMPLETE; 22-01..22-07):**
   Released **genesis v0.47.0** (`3f542c5`), CI green (pipeline #6558223: **genesis** + **frontend** + the new
