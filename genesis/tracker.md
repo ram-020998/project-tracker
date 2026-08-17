@@ -188,6 +188,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-17 (genesis v0.48.2 + v0.48.3 & genesis-workflows v0.9.4 — real-install Dev-MCP + packaging fixes; CI green):**
+  From deploying to fresh machines. **v0.48.2:** (a) **SPA packaging** — the wheel didn't ship `web/static` (repo sibling, not
+  in `packages`) so `/` 404'd on a real install; fixed via `force-include web/static → genesis/web_static` +
+  `api/app._resolve_web_static` (packaged-first, repo fallback) + a clean-install CI assertion that `/` serves the SPA. (b)
+  **Dev-MCP enumeration** — `kb/dev_mcp` surfaces `isError` (HTTP 401) as a real reason (was a silent empty list) + paginates
+  `listApplications` (was capped at 50); `LCP_API_PATH` now a per-dev-env persisted field (defaulted). **genesis-workflows
+  v0.9.4:** the `appian-dev` registry injects `USERNAME`/`PASSWORD` from the same `LCP_*` secrets (current lcp-mcp-server builds
+  read the bare names — the real 401 root cause) + templated `${LCP_API_PATH}`, dropped `LCP_AUTH_METHOD`. **v0.48.3:** the
+  `application-sync` scheduled job ships **disabled by default** (on-demand refresh unaffected; re-enable later). Backend **473**
+  pytest + ruff green. Note: the baseline sync's DevOps export needs a valid `APPIAN_API_KEY` + "External Deployments" enabled
+  (a separate 403). Deferred (not built): shipping the MCP bundles with the app (auto-install on first run) — a future ADR-038
+  amendment.
+
 - **2026-08-17 (genesis v0.48.1 — updater dev-guard patch; CI green #6589165):** The Phase-22 updater's `repo_dir()` fallback
   also matched a developer's **editable checkout**, so it showed a false "update available" and wired a one-click Update that
   runs `pip install .` — **clobbering the editable sibling installs**. Fix (`runtime/updater.py`): `is_managed_install` keyed on
