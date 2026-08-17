@@ -188,6 +188,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-17 (genesis v0.48.1 — updater dev-guard patch; CI green #6589165):** The Phase-22 updater's `repo_dir()` fallback
+  also matched a developer's **editable checkout**, so it showed a false "update available" and wired a one-click Update that
+  runs `pip install .` — **clobbering the editable sibling installs**. Fix (`runtime/updater.py`): `is_managed_install` keyed on
+  `~/.genesis/dist.json`; in a dev/editable checkout `check()` returns `managed=False`+`update_available=False` (banner hidden)
+  and `apply()` refuses. Shipped clone-installs unaffected. `UpdateStatus` gains `managed`. Backend **466** pytest + ruff green
+  (frontend job skipped — no web change). Surfaced live after the button was clicked in the dev tree; recovery was
+  `git checkout master` + re-`pip install -e` the four repos `--no-deps`.
+
 - **2026-08-17 (Phase 23 — Scheduled & Full-Package Syncs — ✅ SHIPPED + COMPLETE; 23-01..23-03):** Released **genesis
   v0.48.0** (`3fb8f08`, tag `v0.48.0`), CI green (pipeline **#6588951**: genesis + frontend + clean-install); **ADR-047
   Accepted**; adds **m0012 `scheduled_jobs`**. **(1) Full-package refresh:** `api/applications.py` unblocks `sync-application`
