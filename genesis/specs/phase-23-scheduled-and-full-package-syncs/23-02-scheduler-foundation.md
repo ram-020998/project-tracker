@@ -1,7 +1,23 @@
 # 23-02 — Scheduler foundation + schedule table (m0012)
 
-> **Status:** 📝 DRAFT · **Phase:** 23 · **Repo:** genesis (+ project-tracker) · **Depends on:** 23-01 (the refresh path the
-> app-sync job will call)
+> **Status:** ✅ CODE-COMPLETE (2026-08-17; genesis code **held for the v0.48.0 release** at 23-03) · **Phase:** 23 ·
+> **Repo:** genesis (+ project-tracker) · **Depends on:** 23-01 (the refresh path the app-sync job will call)
+>
+> **As-built:** **m0012** `genesis/db/migrations/m0012_scheduled_jobs.py` (`scheduled_jobs` table; `current_version` 11→12;
+> registered in `migrations/__init__.py`). `genesis/runtime/schedule_store.py` — `ScheduleStore` (`list_jobs`/`get`/
+> `ensure_defaults` [seeds/refreshes definitions, never clobbers `enabled`/last-run]/`mark_fired`/`set_enabled`/
+> `update_schedule`) + `ScheduledJob` dataclass. `genesis/runtime/scheduler.py` — the pure `due_slot(schedule, now_local,
+> last_fired_slot)` (daily_times, weekdays-only, latest-passed-slot, within-day catch-up, no cross-day re-fire) + `Scheduler`
+> (60s tick loop; handler-gated **skip-without-marking** when no handler; **mark-before-work** overlap guard; async-or-sync
+> handlers; error captured to `last_run_*`; `start()` defensive against a missing/locked table). `genesis/runtime/sync_jobs.py`
+> — `DEFAULT_JOBS` (application-sync 07:00 IST weekdays; document-library-sync 08/12/16/20 IST weekdays). Wired in
+> `api/app.py` create_app: `ScheduleStore`+`Scheduler(defaults=DEFAULT_JOBS)` on `app.state`; started in a `startup` event,
+> stopped in `shutdown`. **No jobs fire yet** — 23-03 registers the handlers. **Tests:** `tests/test_scheduler.py` (13:
+> due_slot matrix incl. weekend/before-first/catch-up/no-cross-day/multi-time; `ScheduleStore` round-trip + `ensure_defaults`
+> idempotency preserving enabled/last-run; Scheduler fires-once/skip-no-handler/skip-disabled/error-capture/async-handler) →
+> backend **454** green; ruff clean (genesis + new files). The v11→v12 schema bump updated the hardcoded version assertions in
+> `test_db`/`test_chat_store`/`test_document_store`/`test_feature_store`/`test_kb_store` (+ a `scheduled_jobs` row assertion;
+> the synthetic "next migration" test bumped to v13). Boot-smoke verified: scheduler task runs, both jobs seeded, clean stop.
 
 ## Goal
 
