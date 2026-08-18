@@ -195,6 +195,10 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-18 (genesis v0.48.7 — env-dialog viewport fix; CI green):** the environment Add/Edit dialog overflowed the
+  viewport after the Phase 24-01 credential fields — `DialogContent` is now `max-h-[90vh]` flex-col with the fields scrolling
+  (`overflow-y-auto`) and the title + Save/Cancel footer pinned. Frontend-only; web build committed.
+
 - **2026-08-18 (Phase 24-02 — navigation & IA revamp — ✅ SHIPPED; Phase 24 COMPLETE):** genesis **v0.48.6** (`f98bc04`,
   frontend-only, CI green). Applications-first IA (ADR-049): primary nav = **Applications · Chat · Runs · Documents**
   (Applications is the landing; `/` redirects to `/applications`); **Overview + Catalog moved into Settings** as the first two
