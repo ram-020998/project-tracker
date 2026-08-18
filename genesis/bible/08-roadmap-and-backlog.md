@@ -8,18 +8,22 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### ⭐ IN PROGRESS — Phase 24: UX revamp + environment-scoped credentials (24-01 ✅ SHIPPED; 24-02 next)
+### ✅ SHIPPED (COMPLETE) — Phase 24: UX revamp + environment-scoped credentials (24-01 genesis v0.48.5; 24-02 genesis v0.48.6)
 
-> **Specs:** `specs/phase-24-ux-revamp-and-environment-credentials.md` (umbrella) + `phase-24-…/24-01` (credentials) + `24-02`
-> (nav/IA). **ADR-048 (Accepted) + ADR-049 (Proposed).** **(24-01) ✅ SHIPPED — genesis v0.48.5 + genesis-workflows v0.9.5, CI
-> green:** the two core Appian MCPs (`appian-dev`/`appian-devops`) take their creds from the **environment** — entered on the env
-> form, stored per-env in the SecretProvider (`env-<hash(label)>` scope, never in environments.json), resolved ONLY from the
-> dev-tagged env via `EnvironmentRegistry.resolve_var` (secrets injected at worker/chat/cards); `LCP_API_PATH` → public env field;
-> `LCP_URL`/`APPIAN_DOMAIN` auto-derived + hidden; the two servers no longer render an MCP card (`fields.ENV_MANAGED_SERVERS`) +
-> a detail pointer to Settings → Environments; one-time non-destructive migration relocates legacy server-scoped creds. Backend
-> **482** pytest + **8** new (`tests/test_env_credentials.py`); web **162** vitest. See `progress/phase-24-01-environment-credentials.md`.
-> **(24-02) ◀ NEXT (frontend, not started):** Applications-first IA — primary nav = Applications · Chat · Runs · Documents;
-> Overview + Catalog move into Settings tabs (default Overview).
+> **Specs:** `specs/phase-24-ux-revamp-and-environment-credentials.md` (umbrella) + `phase-24-…/24-01` + `24-02`.
+> **ADR-048 + ADR-049 (Accepted).** Both sub-phases shipped, CI green.
+> **(24-01) ✅ genesis v0.48.5 + genesis-workflows v0.9.5:** the two core Appian MCPs (`appian-dev`/`appian-devops`) take their
+> creds from the **environment** — entered on the env form, stored per-env in the SecretProvider (`env-<hash(label)>` scope,
+> never in environments.json), resolved ONLY from the dev-tagged env via `EnvironmentRegistry.resolve_var` (secrets injected at
+> worker/chat/cards); `LCP_API_PATH` → public env field; `LCP_URL`/`APPIAN_DOMAIN` auto-derived + hidden; the two servers no
+> longer render an MCP card + a detail pointer to Settings → Environments; one-time non-destructive migration relocates legacy
+> server-scoped creds. See `progress/phase-24-01-environment-credentials.md`.
+> **(24-02) ✅ genesis v0.48.6 (frontend-only):** Applications-first IA — primary nav = Applications · Chat · Runs · Documents
+> (`/` redirects to `/applications`); Overview (metrics) + Catalog (Workflows|Skills) moved into Settings as the first two tabs
+> (default Overview) via extracted `OverviewSection`/`CatalogSection`; standalone `/catalog[/:id/launch]` + `OverviewPage`
+> retained for deep links. web **163** vitest. See `progress/phase-24-02-nav-and-ia-revamp.md`.
+> **PHASE 24 COMPLETE.** (Optional future polish: rename the Settings container to "Manage"/"System" — ADR-049 Option B — if
+> users still hunt for Overview under the gear.)
 
 ### ✅ SHIPPED (COMPLETE) — Phase 23: Scheduled & Full-Package Syncs (genesis v0.48.0)
 

@@ -1172,7 +1172,7 @@ SecretProvider adapter (in `ConfigService`) maps these two servers' lookups to `
 
 ## ADR-049 — Applications-first IA: primary nav is Applications · Chat · Runs · Documents; Overview + Catalog live under Settings
 
-**Status:** Proposed (2026-08-18). **Context:** user feedback that the 6-destination primary nav (Overview, Chat, Runs,
+**Status:** Accepted (2026-08-18; shipped — genesis v0.48.6, CI green). **Context:** user feedback that the 6-destination primary nav (Overview, Chat, Runs,
 Applications, Documents, Catalog) is too broad and the landing should be work-focused. **Decision:** **Applications** is the
 landing page (index route) and first primary tab; the primary sidebar is reduced to **Applications · Chat · Runs ·
 Documents**. **Overview** (metrics) and **Catalog** (Workflows | Skills browse/launch) move into the **Settings** workspace as

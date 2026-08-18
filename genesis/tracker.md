@@ -141,7 +141,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   last-run held in **m0012 `scheduled_jobs`** (backend-fixed now; the seam for later user config). **ADR-047** (PROPOSED).
   genesis-only release → **v0.48.0** (+ m0012).
 - **Phase 24** — `specs/phase-24-ux-revamp-and-environment-credentials.md` (+ `phase-24-ux-revamp-and-environment-credentials/24-01..24-02`)
-  — **UX revamp + environment-scoped credentials** ⭐ IN PROGRESS (24-01 ✅ SHIPPED genesis v0.48.5 + genesis-workflows v0.9.5; 24-02 next). **(1, 24-01)** the two core
+  — **UX revamp + environment-scoped credentials** ✅ SHIPPED + COMPLETE (24-01 genesis v0.48.5 + genesis-workflows v0.9.5; 24-02 genesis v0.48.6). **(1, 24-01)** the two core
   Appian MCPs (`appian-dev`/`appian-devops`) take their creds from the **environment** (entered on the env form, stored per-env
   in the SecretProvider `env:<label>` scope, resolved ONLY from the dev env; `LCP_API_PATH` → public env field; `LCP_URL`/
   `APPIAN_DOMAIN` auto-derived + hidden; non-destructive migration of legacy server-scoped creds). **(2, 24-02)**
@@ -194,6 +194,13 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 24-02 — navigation & IA revamp — ✅ SHIPPED; Phase 24 COMPLETE):** genesis **v0.48.6** (`f98bc04`,
+  frontend-only, CI green). Applications-first IA (ADR-049): primary nav = **Applications · Chat · Runs · Documents**
+  (Applications is the landing; `/` redirects to `/applications`); **Overview + Catalog moved into Settings** as the first two
+  tabs (default Overview) via extracted `OverviewSection`/`CatalogSection`; standalone `/catalog[/:id/launch]` + `OverviewPage`
+  retained for deep links. web **163** vitest + lint + typecheck + build. **ADR-049 Accepted.** As-built:
+  `progress/phase-24-02-nav-and-ia-revamp.md`. **Phase 24 (24-01 + 24-02) COMPLETE.**
 
 - **2026-08-18 (Phase 24-01 — environment-scoped credentials — ✅ SHIPPED; CI green):** genesis **v0.48.5** (`0d8c3c9`) +
   genesis-workflows **v0.9.5** (`ebcce93`). The two core Appian MCPs (`appian-dev`/`appian-devops`) take creds from the
