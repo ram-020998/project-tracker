@@ -163,6 +163,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   committed locally (`d70bd20`+`0b90392`), version held at 0.48.7 (ships via 25-14).
   **▸ 25-02 ✅ BUILT (2026-08-18, unreleased):** structured logging + correlation IDs (`genesis/runtime/logging.py`; zero-dep stdlib configure + contextvars run_id/request_id + JSON/console + redaction), wired into create_app/worker/CLI; commit `c8ec7d6`; backend 521 pytest green.
   **▸ 25-03 ✅ BUILT (2026-08-18, unreleased):** atomic+serialized JSON writes (`genesis_core/util/atomic_json.py`) across custom MCP/CLI stores + environments/secrets/dist; core `bc06930` + genesis `105c538`; core 71 / genesis 522 pytest green.
+  **▸ 25-04 ✅ BUILT (2026-08-18, unreleased):** network-exposure guardrail — `genesis serve/up` refuse a non-loopback bind without `--i-understand-no-auth`/env override (logs a warning); commit `0a8f13f`; backend 535 pytest green.
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -212,6 +213,13 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 25-04 — Network-exposure guardrail — ✅ BUILT; NOT released):** `runtime/launcher.py`
+  `is_loopback`/`bind_guard_error`/`bind_warning`; `genesis serve`/`up` refuse a non-loopback bind (e.g. `--host 0.0.0.0`)
+  unless `--i-understand-no-auth` / `GENESIS_ALLOW_NON_LOOPBACK=1` (override logs a prominent warning). Enforced in the serve +
+  up CLI handlers; `docs/INSTALL.md` Security note updated. Honors ADR-026 (local, no-auth) — the actual security control, not
+  auth itself. Commit `0a8f13f`; backend **535** pytest (+13) + ruff green; version held 0.48.7. Preflight posture chip deferred
+  to 25-14. **Phase 25: 25-01/02/03/04 built.** Next: 25-05 (AgentProvider interface).
 
 - **2026-08-18 (Phase 25-03 — Atomic JSON-store hardening — ✅ BUILT; NOT released):** shared
   `genesis_core/util/atomic_json.py` (`path_lock` + `atomic_write_json` + `read_modify_write_json`); migrated the custom

@@ -1,6 +1,7 @@
 # 25-04 — Network-Exposure Guardrail (localhost-bind / no-auth intent)
 
-- **Status:** 📝 DRAFTED · **Review items:** D-2 · **Roadmap:** Phase 0 · **Repos:** genesis · **Depends on:** nothing
+- **Status:** ✅ BUILT (2026-08-18) — implemented + tested + committed locally; **NOT released** (ships via 25-14). · **Review items:** D-2 · **Roadmap:** Phase 0 · **Repos:** genesis · **Depends on:** nothing
+- **As built:** `runtime/launcher.py` `is_loopback`/`bind_guard_error`/`bind_warning`; `genesis serve`/`up` **refuse** a non-loopback bind unless `--i-understand-no-auth` / `GENESIS_ALLOW_NON_LOOPBACK=1` (override logs a warning). Enforced in the serve + up CLI handlers; `docs/INSTALL.md` Security note updated. Commit `0a8f13f`. Backend **535** pytest (+13) + ruff green. **Deferred to 25-14:** the in-app preflight posture chip (needs bind-host plumbing — low value). Version held 0.48.7.
 
 ## 1. Goal
 Make the **"local, single-user, no-auth" decision (ADR-026) explicit and enforced at the boundary**, so Genesis cannot be *accidentally* served on a non-loopback interface without a conscious, logged override. This is a **safety guardrail, not an auth implementation** — real AuthN/Z stays deferred (a separate track that re-opens ADR-026).
