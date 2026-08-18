@@ -165,7 +165,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **▸ 25-03 ✅ BUILT (2026-08-18, unreleased):** atomic+serialized JSON writes (`genesis_core/util/atomic_json.py`) across custom MCP/CLI stores + environments/secrets/dist; core `bc06930` + genesis `105c538`; core 71 / genesis 522 pytest green.
   **▸ 25-04 ✅ BUILT (2026-08-18, unreleased):** network-exposure guardrail — `genesis serve/up` refuse a non-loopback bind without `--i-understand-no-auth`/env override (logs a warning); commit `0a8f13f`; backend 535 pytest green.
   **▸ 25-05 ✅ BUILT (2026-08-18, unreleased):** `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`); `set_collect_impl` preserved; commit `a2a0ee1`; core 76 pytest green. Chat session-provider deferred.
-  **▸ 25-06 ✅ BUILT:** C-5 `ApplicationSyncService` de-dup (`e143c5e`) + C-3 KbStore 1373→652 (4 read mixins) + api/app.py 841→189 pure composition root (`715fb1b`/`73c34ea`/`d1f66d1`/`85f6ae9` + `api/_shared.py`); DoD <250 met; 543 pytest green. Deviations: KbStore via mixins (not facade), FeatureService skipped. **▸ 25-07 ⏳ IN PROGRESS:** ChatModeProfile (C-4).
+  **▸ 25-07 ✅ BUILT:** ChatModeProfile (C-4, `4cfb3fe`) — read_only/copilot/feature_spec behavior composed into one per-session profile; branch-free session methods (guard: no self.mode ==); posture ported verbatim + pinned; chat/manager.py 716→639; 551 pytest (+8). **▸ 25-08 ⏳ IN PROGRESS:** concurrency & optimistic locking (D-1/§17, m0014).
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -215,6 +215,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 25-07 — ChatModeProfile — ✅ BUILT `4cfb3fe`; NOT released):** replaced the scattered
+  `if self.mode == "copilot"/"feature_spec"` branches in `ChatSession` (cwd, fs sandbox, trust set, MCP wiring,
+  permission policy, control-token minting, steering) with ONE `ChatModeProfile` resolved per session
+  (`genesis/chat/mode_profile.py`: frozen dataclass + `PROFILES{read_only,copilot,feature_spec}` +
+  `resolve_profile`). `_ensure_started` builds a single `Options(**kwargs)` from profile fields; the 3-way
+  steering pick → `self.profile.steering`; the copilot kill-switch fallback → `resolve_profile`. Security posture
+  ported VERBATIM (ADR-031 read-only auto_deny / ADR-033 copilot ask+control-token / ADR-034 feature_spec
+  fs_read+fs_write sandbox cwd) and pinned by `tests/test_chat_mode_profile.py` (+ a guard asserting no
+  `self.mode ==` remains). `build_chat_mcp` kept intact (minor deviation from the spec's mcp_servers-callable —
+  lower risk). `chat/manager.py` 716→639. Backend **551** pytest (+8) + ruff green; existing copilot/feature_spec/
+  read-only suites unchanged. Committed locally, version held (0.48.7 / core 0.9.3) — ships via 25-14. **Phase 25:
+  25-01..25-07 built; 25-08 (concurrency/optimistic-locking, m0014) starting.**
 
 - **2026-08-18 (Phase 25-06 — God-module decomposition + service layer — ✅ BUILT; NOT released):** completed.
   **C-5:** `ApplicationSyncService` (`genesis/services/`) de-duplicated the app-sync orchestration shared by

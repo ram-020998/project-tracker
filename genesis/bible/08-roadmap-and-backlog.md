@@ -33,8 +33,12 @@
 >   (`d1f66d1`), and `api/_shared.py` (`85f6ae9`, models/formatters out + kills the create_app↔route import cycle).
 >   DoD met (<250). Deviations (flagged): KbStore via mixins not facade; `FeatureService` skipped (25-01 already
 >   holds the LifecycleService authority).
-> - **25-07 ⏳ in progress** — `ChatModeProfile` (C-4): compose `read_only`/`copilot`/`feature_spec` chat behavior.
-> - **25-08..25-10, 25-12, 25-13** — not started. **25-14** — release/closeout capstone (flips ADRs to Accepted, one coordinated release).
+> - **25-07 ✅ built** — `ChatModeProfile` (C-4, `4cfb3fe`): `read_only`/`copilot`/`feature_spec` behavior (cwd/fs
+>   sandbox/trust/mcp/permission/token/steering) composed into one profile resolved per session; branch-free session
+>   methods (guard: no `self.mode ==`); posture ported verbatim + pinned. `chat/manager.py` 716→639.
+> - **25-08 ⏳ in progress** — concurrency & optimistic locking (D-1/§17): row-version CAS + `StaleWriteError`→409 +
+>   run-start idempotency; adds **m0014**. Precedes 25-11.
+> - **25-09, 25-10, 25-12, 25-13** — not started. **25-14** — release/closeout capstone (flips ADRs to Accepted, one coordinated release).
 > - **Backlog:** 25-11 per-story execution (gated on Breakdown→Stories + per-stage workflows).
 >
 > New modules (for the eventual `bible/03` update at 25-14): `genesis/domain/`, `genesis/services/`, `genesis/runtime/logging.py`,

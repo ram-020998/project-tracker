@@ -1,6 +1,13 @@
 # 25-07 — ChatModeProfile (compose chat modes)
 
-- **Status:** 📝 DRAFTED · **Review items:** C-4 · **Roadmap:** Phase 2 · **Repos:** genesis · **Depends on:** nothing (pairs naturally with 25-06)
+- **Status:** ✅ BUILT (2026-08-18, commit `4cfb3fe`) — `ChatModeProfile` drives all per-mode behavior; branch-free session methods; posture regression + no-`self.mode==` guard green. **NOT released** (ships via 25-14). · **Review items:** C-4 · **Roadmap:** Phase 2 · **Repos:** genesis · **Depends on:** nothing (pairs naturally with 25-06)
+
+## As built (commit `4cfb3fe`; 551 pytest [+8] + ruff green)
+- **`genesis/chat/mode_profile.py` (NEW):** frozen `ChatModeProfile` (`name`, `mcp_mode`, `permission_mode`, `uses_control_token`, `cwd_sandbox`, `extra_trust`, `steering`, `requires_copilot_enabled`) + `PROFILES{read_only,copilot,feature_spec}` + `resolve_profile(mode, mgr)` (unknown → read_only; copilot with kill-switch off → read_only). The three steering constants relocated here (no test referenced them).
+- **`chat/manager.py`:** `_ensure_started` resolves the profile once and builds a **single** `Options(**kwargs)` from its fields (the two divergent `Options(...)` blocks + the cwd/trust/kill-switch branches removed); the 3-way steering pick is now `self.profile.steering`. 716 → 639 LOC.
+- **Design note (minor deviation):** `build_chat_mcp` kept intact (well-tested, called directly elsewhere) — the profile supplies its `mode` arg rather than folding the wiring into a `profile.mcp_servers` callable. Lower risk, same outcome.
+- **Security posture ported verbatim** and pinned by `tests/test_chat_mode_profile.py` (read_only=auto_deny/no-control; copilot=ask+token+control-read-trusted; feature_spec=fs_read/fs_write+sandbox cwd) + a guard asserting **no `self.mode ==`** remains in manager.py. Existing `test_copilot_mode`/`safety`/`e2e`/`features_api`/`chat_api` unchanged.
+- **DoD:** met except genesis release CI + progress doc → deferred to the **25-14** capstone (unreleased; version held 0.48.7).
 
 ## 1. Goal
 Replace the string-`mode` branching scattered through `ChatSession`/`ChatManager` with a **`ChatModeProfile`** resolved once per session — composition over conditionals — so adding a chat mode is one profile definition, not edits across seven methods.
