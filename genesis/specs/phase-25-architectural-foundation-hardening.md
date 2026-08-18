@@ -38,7 +38,7 @@ Every action item from the review (§C findings, §D critical, §E high-priority
 
 | Sub-phase | Title | Review items | Roadmap phase | Repos |
 |---|---|---|---|---|
-| **25-01** | Typed SDLC Domain Model & Lifecycle State Machine | C-1, C-2, §H | Phase 1 (keystone) | genesis (+ m0013) |
+| **25-01** ✅ BUILT | Typed SDLC Domain Model & Lifecycle State Machine | C-1, C-2, §H | Phase 1 (keystone) | genesis (+ m0013) |
 | **25-02** | Structured Logging & Correlation IDs | E-2 | Phase 0 | genesis, genesis-core |
 | **25-03** | Atomic JSON-Store Hardening | E-5, D-1 (files) | Phase 0 | genesis, genesis-core |
 | **25-04** | Network-Exposure Guardrail (localhost-bind / no-auth intent) | D-2 | Phase 0 | genesis |

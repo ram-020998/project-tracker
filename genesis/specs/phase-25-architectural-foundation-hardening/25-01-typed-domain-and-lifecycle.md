@@ -1,7 +1,8 @@
 # 25-01 — Typed SDLC Domain Model & Lifecycle State Machine (keystone)
 
-- **Status:** 📝 DRAFTED · **Review items:** C-1, C-2, §H, E-1 · **Roadmap:** Phase 1 · **Proposed ADR:** ADR-050
+- **Status:** ✅ BUILT (2026-08-18) — implemented + tested + committed locally; **NOT released** (ships with the Phase-25 rollup via 25-14). · **Review items:** C-1, C-2, §H, E-1 · **Roadmap:** Phase 1 · **Proposed ADR:** ADR-050
 - **Repos:** genesis (+ migration **m0013**) · **Depends on:** nothing · **Unblocks:** 25-06 (services), 25-08 (locking), 25-11 (stories), 25-13 (lifecycle audit)
+- **As built:** `genesis/domain/` (enums/entities/transitions/lifecycle/events/errors) + `LifecycleService` (single authority); m0013 `lifecycle_transitions` + `LifecycleAuditStore`; `POST /features/{id}/spec/actions/{action}` (+ `GET /spec/allowed`), illegal→409 `{current,action,allowed}` / precondition→409 `{reason}`; legacy `PATCH /spec/status` deprecated (header); `FeatureStore.set_status` demoted; web allowed-action buttons replace the any-status select. Commits `d70bd20` (domain core) + `0b90392` (audit/API/web). Backend **509** pytest + ruff green; web **163** vitest + lint + tsc + build green. Version unchanged (0.48.7 — no release).
 
 ## 1. Goal
 

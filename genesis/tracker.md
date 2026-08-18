@@ -158,6 +158,9 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **25-14** phase release & closeout (tag/ship/document — ADRs→Accepted, pin alignment, bible refresh, review-delta). **Proposed
   ADR-050/051/052.** Sequencing: Phase-0 guardrails (02/03/04) ∥ keystone 25-01 → seams (05/06/07/09/10) → concurrency 08 →
   observability 13 / cost 12 → **capstone 25-14**. **Completability (2026-08-18): all 13 completable with today's app state.**
+  **▸ 25-01 ✅ BUILT (2026-08-18, unreleased):** typed `genesis/domain/` + single-authority `LifecycleService` + m0013 audit + spec
+  action endpoints (409 on illegal/precondition) + web allowed-action buttons; backend 509 pytest, web 163 vitest, all green;
+  committed locally (`d70bd20`+`0b90392`), version held at 0.48.7 (ships via 25-14).
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -207,6 +210,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 25-01 — Typed SDLC domain + LifecycleService — ✅ BUILT; NOT released):** Implemented the keystone
+  behind tests, committed locally to genesis master (`d70bd20` domain core + `0b90392` audit/API/web) with **version held at
+  0.48.7** — Phase 25 ships as one release via 25-14, per instruction. As built: `genesis/domain/` (enums/entities/declarative
+  transition tables/LifecycleService/events/errors — the single authority; illegal (state,action) impossible by construction),
+  **m0013** `lifecycle_transitions` + `LifecycleAuditStore` (emit sink), `POST /features/{id}/spec/actions/{action}` +
+  `GET /spec/allowed` (illegal→409 `{current,action,allowed}`, precondition→409 `{reason}`), legacy `PATCH /spec/status`
+  deprecated (header), `FeatureStore.set_status` demoted, and web **allowed-action buttons** replacing the any-status select.
+  Gates: backend **509** pytest + ruff; web **163** vitest + lint + tsc + build — all green. ADR-050 stays Proposed until the
+  25-14 rollup flips it Accepted. Next available: the Phase-0 batch (25-02/03/04) + seams (25-05/09/10), all parallelizable.
 
 - **2026-08-18 (Phase 25 — added 25-14 release & closeout capstone):** Added a final sub-phase
   `phase-25-architectural-foundation-hardening/25-14-phase-release-and-closeout.md` — the capstone that tags/ships + documents
