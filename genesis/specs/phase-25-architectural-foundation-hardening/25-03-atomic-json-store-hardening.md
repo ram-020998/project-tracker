@@ -1,6 +1,7 @@
 # 25-03 — Atomic JSON-Store Hardening
 
-- **Status:** 📝 DRAFTED · **Review items:** E-5, D-1 (files) · **Roadmap:** Phase 0 · **Repos:** genesis, genesis-core · **Depends on:** nothing (parallelizable)
+- **Status:** ✅ BUILT (2026-08-18) — implemented + tested + committed locally; **NOT released** (ships via 25-14). · **Review items:** E-5, D-1 (files) · **Roadmap:** Phase 0 · **Repos:** genesis, genesis-core · **Depends on:** nothing (parallelizable)
+- **As built:** `genesis_core/util/atomic_json.py` (`path_lock` + `atomic_write_json` [unique-temp + `os.replace`] + `read_modify_write_json` [serialized RMW]). Migrated: genesis-core custom **MCP + CLI** stores (fixed a shared-`.tmp` collision + added a per-path lock), `environments.py` (`_save` atomic + upsert/remove/set_dev locked — the main D-1 offender), `secrets.py` (refactored onto the shared helper, one lock registry), and the updater `dist.json` write. Native MCP/CLI lockfiles were already atomic+locked (verified, left as-is). Commits genesis-core `bc06930` + genesis `105c538`. genesis-core **71** pytest (+6: concurrent-RMW no-lost-update, crash-safety, round-trip), genesis **522** (+1: 30 parallel env upserts); ruff green. Versions/`CORE_MAJOR` unchanged.
 
 ## 1. Goal
 Make **every** JSON-file store use the same atomic, serialized write pattern already proven for `secrets.json`, so concurrent writers (FastAPI runs sync handlers in a threadpool) can't corrupt a store.

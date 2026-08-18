@@ -162,6 +162,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   action endpoints (409 on illegal/precondition) + web allowed-action buttons; backend 509 pytest, web 163 vitest, all green;
   committed locally (`d70bd20`+`0b90392`), version held at 0.48.7 (ships via 25-14).
   **▸ 25-02 ✅ BUILT (2026-08-18, unreleased):** structured logging + correlation IDs (`genesis/runtime/logging.py`; zero-dep stdlib configure + contextvars run_id/request_id + JSON/console + redaction), wired into create_app/worker/CLI; commit `c8ec7d6`; backend 521 pytest green.
+  **▸ 25-03 ✅ BUILT (2026-08-18, unreleased):** atomic+serialized JSON writes (`genesis_core/util/atomic_json.py`) across custom MCP/CLI stores + environments/secrets/dist; core `bc06930` + genesis `105c538`; core 71 / genesis 522 pytest green.
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -211,6 +212,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 25-03 — Atomic JSON-store hardening — ✅ BUILT; NOT released):** shared
+  `genesis_core/util/atomic_json.py` (`path_lock` + `atomic_write_json` + `read_modify_write_json`); migrated the custom
+  MCP+CLI stores (fixed a shared-`.tmp` collision + added a per-path lock), `environments.py` (atomic `_save` + locked
+  upsert/remove/set_dev — the main D-1 offender), `secrets.py` (onto the shared helper), and the updater `dist.json` write.
+  Native MCP/CLI lockfiles were already atomic+locked (left as-is). Commits genesis-core `bc06930` + genesis `105c538`;
+  genesis-core **71** pytest (+6), genesis **522** (+1), ruff green; versions/`CORE_MAJOR` unchanged (ships via 25-14).
+  **Phase 25: 25-01/02/03 built.** Next: 25-04 (network-exposure guardrail).
 
 - **2026-08-18 (Phase 25-02 — Structured logging + correlation IDs — ✅ BUILT; NOT released):** `genesis/runtime/logging.py`
   — zero-dependency stdlib `configure_logging()` (console / JSON via `GENESIS_LOG_JSON`), a `contextvars` correlation bag
