@@ -1,6 +1,23 @@
 # 25-06 — God-Module Decomposition & Application/Service Layer
 
-- **Status:** 📝 DRAFTED · **Review items:** C-3, C-5, E-4 · **Roadmap:** Phase 2/3 · **Repos:** genesis · **Depends on:** 25-01 (for the feature/kb service seams) — the `api/app.py` + `KbStore` splits can start independently
+- **Status:** ⏳ IN PROGRESS (2026-08-18) — service layer + KbStore fully decomposed + app.py config routes extracted; **runs-routes extraction remaining**. **NOT released** (ships via 25-14). · **Review items:** C-3, C-5, E-4 · **Roadmap:** Phase 2/3 · **Repos:** genesis · **Depends on:** 25-01 (done)
+
+## Progress (as built so far — all committed locally, unreleased; 543 pytest + ruff green after each slice)
+
+| Commit | Slice | Effect |
+|---|---|---|
+| `e143c5e` | **`ApplicationSyncService`** (C-5) | de-duplicated the app-sync orchestration shared by `api/applications.py` + `runtime/sync_jobs.py` (is-running / resolve baseline↔delta / start → `SyncBusyError`); +8 unit tests. **C-5 DONE.** |
+| `57f0704` | `KbGraphReadsMixin` | KbStore split (graph-traversal reads) |
+| `07a12f2` | `KbRelationshipReadsMixin` | KbStore split (entry-points/batches/shared/hub) |
+| `579317b` | `KbEvidenceMixin` | KbStore split (Business Evidence Pack) |
+| `8a80398` | `KbObjectReadsMixin` | KbStore split (object/dep/bundle/orphan reads) |
+| `715fb1b` | `register_config_routes` (`api/config_routes.py`) | app.py split (24 `/config/*` routes) |
+
+**Results:** `KbStore` **1373 → 652 LOC** (four read mixins; the SCD-2 **write/sync path deliberately kept** in `store.py` — the `to_thread` deadlock-sensitive code, bible §7). `api/app.py` **841 → 672 LOC** (config/integrations routes → `register_config_routes(api, config, settings, manager)`; shared request models + card formatters imported from `app.py` via a deferred import). Every extraction is a verbatim move; the composed class/router behaves identically (KbStore inherits the mixins — MRO keeps all `self.` calls identical).
+
+## Remaining
+- **Runs-routes extraction** (`api/app.py`, 17 routes → `register_run_routes`). **Highest-risk piece** — it touches the ADR-033 copilot blast-radius enforcement (`_enforce_copilot_start`) + SSE streaming, and the routes are interspersed with the artifacts routes (not a clean contiguous block). To be done as a careful dedicated step with the copilot/SSE logic preserved verbatim.
+- **`FeatureService` — recommended SKIP** (honest pushback): 25-01 already established the single-authority `LifecycleService` in `api/features.py`; a wrapper adds churn without benefit. Marked not-needed unless requested.
 
 ## 1. Goal
 Break the three god modules along seams they already imply, and introduce a **thin Application/Service layer** so multi-store orchestration lives in one place (reachable from API, scheduler, and copilot) instead of being duplicated in route closures.

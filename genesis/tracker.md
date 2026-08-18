@@ -165,6 +165,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **▸ 25-03 ✅ BUILT (2026-08-18, unreleased):** atomic+serialized JSON writes (`genesis_core/util/atomic_json.py`) across custom MCP/CLI stores + environments/secrets/dist; core `bc06930` + genesis `105c538`; core 71 / genesis 522 pytest green.
   **▸ 25-04 ✅ BUILT (2026-08-18, unreleased):** network-exposure guardrail — `genesis serve/up` refuse a non-loopback bind without `--i-understand-no-auth`/env override (logs a warning); commit `0a8f13f`; backend 535 pytest green.
   **▸ 25-05 ✅ BUILT (2026-08-18, unreleased):** `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`); `set_collect_impl` preserved; commit `a2a0ee1`; core 76 pytest green. Chat session-provider deferred.
+  **▸ 25-06 ⏳ IN PROGRESS:** C-5 `ApplicationSyncService` de-dup done (`e143c5e`); C-3 KbStore 1373→652 via 4 read mixins (`57f0704`,`07a12f2`,`579317b`,`8a80398`) + api/app.py 841→672 via `register_config_routes` (`715fb1b`); 543 pytest green each. Remaining: runs-routes extraction (copilot/SSE); FeatureService recommended-skip.
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -214,6 +215,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 25-06 — God-module decomposition + service layer — ⏳ IN PROGRESS; NOT released):** **C-5 done** —
+  `ApplicationSyncService` (`genesis/services/`) de-duplicated the app-sync orchestration shared by `api/applications.py` +
+  `runtime/sync_jobs.py` (`e143c5e`, +8 tests). **C-3 substantial** — `KbStore` **1373 → 652 LOC** via four verbatim read
+  mixins (`KbGraphReadsMixin` `57f0704`, `KbRelationshipReadsMixin` `07a12f2`, `KbEvidenceMixin` `579317b`, `KbObjectReadsMixin`
+  `8a80398`; the SCD-2 **write path deliberately kept** in store.py), and `api/app.py` **841 → 672 LOC** via
+  `register_config_routes` (`api/config_routes.py`, 24 `/config/*` routes, `715fb1b`). Each slice: full **543** pytest + ruff
+  green; committed locally, version held (genesis 0.48.7 / core 0.9.3) — ships via 25-14. **Remaining:** runs-routes extraction
+  (17 routes — highest-risk: ADR-033 copilot enforcement + SSE, interspersed with artifacts routes); `FeatureService`
+  recommended-skip (25-01 already put the LifecycleService authority in features.py). **Phase 25: 25-01..25-05 built; 25-06 in
+  progress.**
 
 - **2026-08-18 (Phase 25-05 — AgentProvider interface — ✅ BUILT; NOT released):** `genesis_core/agents/` — an
   `AgentProvider` Protocol (options_cls/supports_streaming/collect/collect_streaming) + `KiroAcpProvider` wrapping the existing
