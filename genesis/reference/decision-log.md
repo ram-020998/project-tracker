@@ -1155,7 +1155,7 @@ indicator, clear/compact, and image attachments — in **both** the main chat an
 
 ## ADR-048 — Core Appian-MCP credentials are environment-scoped (entered on the environment, resolved from the dev env only)
 
-**Status:** Proposed (2026-08-18). **Context:** the `appian-dev`/`appian-devops` creds (`LCP_USERNAME`/`LCP_PASSWORD`/
+**Status:** Accepted (2026-08-18; 24-01 shipped — genesis v0.48.5 + genesis-workflows v0.9.5, CI green). **Context:** the `appian-dev`/`appian-devops` creds (`LCP_USERNAME`/`LCP_PASSWORD`/
 `LCP_API_PATH`, `APPIAN_API_KEY`) were entered on each MCP card and stored server-scoped in the SecretProvider
 (`appian-dev/…`), split from the Environments tab that holds the same target's URL/dev-tag. **Decision:** for the two
 **core** Appian MCPs ONLY, credentials are entered on the **environment** form and stored per-environment in the

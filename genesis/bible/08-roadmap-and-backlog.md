@@ -8,16 +8,18 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 📝 PLANNED (SPECS DRAFTED — awaiting approval to build) — Phase 24: UX revamp + environment-scoped credentials
+### ⭐ IN PROGRESS — Phase 24: UX revamp + environment-scoped credentials (24-01 ✅ SHIPPED; 24-02 next)
 
 > **Specs:** `specs/phase-24-ux-revamp-and-environment-credentials.md` (umbrella) + `phase-24-…/24-01` (credentials) + `24-02`
-> (nav/IA). **ADR-048 + ADR-049** (PROPOSED). Two user-feedback changes: **(24-01)** the two core Appian MCPs
-> (`appian-dev`/`appian-devops`) take their creds from the **environment** — entered on the env form, stored per-env in the
-> SecretProvider `env:<label>` scope, resolved ONLY from the dev env; `LCP_API_PATH` → public env field;
-> `LCP_URL`/`APPIAN_DOMAIN` auto-derived + hidden; one-time non-destructive migration of legacy server-scoped creds; other MCPs
-> unchanged. **(24-02)** Applications-first IA — primary nav = Applications · Chat · Runs · Documents; Overview + Catalog move
-> into Settings tabs (default Overview). Delivery order: 24-01 (backend: genesis-workflows `mcp-registry.json` + genesis) then
-> 24-02 (frontend). **Not yet implemented.**
+> (nav/IA). **ADR-048 (Accepted) + ADR-049 (Proposed).** **(24-01) ✅ SHIPPED — genesis v0.48.5 + genesis-workflows v0.9.5, CI
+> green:** the two core Appian MCPs (`appian-dev`/`appian-devops`) take their creds from the **environment** — entered on the env
+> form, stored per-env in the SecretProvider (`env-<hash(label)>` scope, never in environments.json), resolved ONLY from the
+> dev-tagged env via `EnvironmentRegistry.resolve_var` (secrets injected at worker/chat/cards); `LCP_API_PATH` → public env field;
+> `LCP_URL`/`APPIAN_DOMAIN` auto-derived + hidden; the two servers no longer render an MCP card (`fields.ENV_MANAGED_SERVERS`) +
+> a detail pointer to Settings → Environments; one-time non-destructive migration relocates legacy server-scoped creds. Backend
+> **482** pytest + **8** new (`tests/test_env_credentials.py`); web **162** vitest. See `progress/phase-24-01-environment-credentials.md`.
+> **(24-02) ◀ NEXT (frontend, not started):** Applications-first IA — primary nav = Applications · Chat · Runs · Documents;
+> Overview + Catalog move into Settings tabs (default Overview).
 
 ### ✅ SHIPPED (COMPLETE) — Phase 23: Scheduled & Full-Package Syncs (genesis v0.48.0)
 

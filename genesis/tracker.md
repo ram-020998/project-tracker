@@ -141,7 +141,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   last-run held in **m0012 `scheduled_jobs`** (backend-fixed now; the seam for later user config). **ADR-047** (PROPOSED).
   genesis-only release → **v0.48.0** (+ m0012).
 - **Phase 24** — `specs/phase-24-ux-revamp-and-environment-credentials.md` (+ `phase-24-ux-revamp-and-environment-credentials/24-01..24-02`)
-  — **UX revamp + environment-scoped credentials** 📝 SPECS DRAFTED (awaiting approval to build). **(1, 24-01)** the two core
+  — **UX revamp + environment-scoped credentials** ⭐ IN PROGRESS (24-01 ✅ SHIPPED genesis v0.48.5 + genesis-workflows v0.9.5; 24-02 next). **(1, 24-01)** the two core
   Appian MCPs (`appian-dev`/`appian-devops`) take their creds from the **environment** (entered on the env form, stored per-env
   in the SecretProvider `env:<label>` scope, resolved ONLY from the dev env; `LCP_API_PATH` → public env field; `LCP_URL`/
   `APPIAN_DOMAIN` auto-derived + hidden; non-destructive migration of legacy server-scoped creds). **(2, 24-02)**
@@ -194,6 +194,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 24-01 — environment-scoped credentials — ✅ SHIPPED; CI green):** genesis **v0.48.5** (`0d8c3c9`) +
+  genesis-workflows **v0.9.5** (`ebcce93`). The two core Appian MCPs (`appian-dev`/`appian-devops`) take creds from the
+  **environment** — entered on the env form, stored per-env in the SecretProvider (`env-<hash(label)>` scope, never in
+  environments.json), resolved ONLY from the dev-tagged env via `EnvironmentRegistry.resolve_var` (secrets injected at
+  worker/chat/cards). `LCP_API_PATH` → public env field; `LCP_URL`/`APPIAN_DOMAIN` auto-derived + hidden; the two servers no
+  longer render an MCP card + a detail pointer to Settings → Environments; one-time non-destructive migration relocates legacy
+  server-scoped creds (existing users re-enter nothing). **ADR-048 Accepted.** Backend **482** pytest (+8) + ruff; web **162**
+  vitest + build. As-built: `progress/phase-24-01-environment-credentials.md`. **NEXT = 24-02** (nav/IA, frontend).
 
 - **2026-08-18 (Phase 24 — UX revamp + environment-scoped credentials — 📝 SPECS DRAFTED; awaiting approval to build):** Two user-feedback
   changes specced under `specs/phase-24-ux-revamp-and-environment-credentials/` (00 umbrella + 01 creds + 02 nav). **ADR-048**:
