@@ -8,42 +8,39 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### ⭐ IN PROGRESS (built, UNRELEASED — ships as one release via 25-14) — Phase 25: Architectural Foundation Hardening (code-review remediation)
+### ⭐ IN PROGRESS (25-01..25-08 SHIPPED as genesis v0.49.0 + genesis-core v0.9.4; 25-09..25-14 remain) — Phase 25: Architectural Foundation Hardening (code-review remediation)
 
 > **Specs:** `specs/phase-25-architectural-foundation-hardening.md` (umbrella) + `phase-25-…/25-01..25-14` (25-11 → backlog).
-> **Proposed ADR-050/051/052.** Remediates the production-readiness review (`code-review/genesis-production-readiness-review-2026-08-18.md`).
-> **Release model (user directive): NOTHING is released until the whole phase is done — everything is committed locally with the
-> version held at genesis v0.48.7 / genesis-core v0.9.3, and shipped together via the 25-14 capstone.** Built so far (each: full
-> suite green + ruff, committed locally):
+> **ADR-050 + ADR-051 → Accepted (shipped); ADR-052 (DocumentProvider) still Proposed (25-09 pending).** Remediates the production-readiness review (`code-review/genesis-production-readiness-review-2026-08-18.md`).
+> **Release model:** built incrementally with the version held, then **25-01..25-08 shipped together as a partial release — genesis
+> v0.49.0 + genesis-core v0.9.4 (2026-08-18, CI green: core #6600462, genesis #6600502)**; the remainder (25-09..25-13 + the 25-14
+> closeout) ships in a later release. Gate: genesis **561** pytest + ruff · core **76** + ruff · web **163** vitest + eslint(0)/tsc/build
+> + stale-bundle guard — all green. Sub-phases:
 >
-> - **25-01 ✅ built** — typed SDLC domain (`genesis/domain/`) + single-authority `LifecycleService` + m0013 audit + spec action
+> - **25-01 ✅ SHIPPED** — typed SDLC domain (`genesis/domain/`) + single-authority `LifecycleService` + m0013 audit + spec action
 >   endpoints (illegal/precondition → 409) + web allowed-action buttons (`d70bd20`+`0b90392`). ADR-050 (Proposed→Accepted at 25-14).
-> - **25-02 ✅ built** — structured logging + correlation IDs (`genesis/runtime/logging.py`; zero-dep stdlib, JSON/console, redaction),
+> - **25-02 ✅ SHIPPED** — structured logging + correlation IDs (`genesis/runtime/logging.py`; zero-dep stdlib, JSON/console, redaction),
 >   wired into create_app/worker/CLI (`c8ec7d6`).
-> - **25-03 ✅ built** — shared `genesis_core/util/atomic_json.py`; hardened custom MCP/CLI stores + environments/secrets/dist writes
+> - **25-03 ✅ SHIPPED** — shared `genesis_core/util/atomic_json.py`; hardened custom MCP/CLI stores + environments/secrets/dist writes
 >   (atomic + per-path lock) (`bc06930`+`105c538`).
-> - **25-04 ✅ built** — network-exposure guardrail: `genesis serve/up` refuse a non-loopback bind without `--i-understand-no-auth`
+> - **25-04 ✅ SHIPPED** — network-exposure guardrail: `genesis serve/up` refuse a non-loopback bind without `--i-understand-no-auth`
 >   (`0a8f13f`).
-> - **25-05 ✅ built** — `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`);
+> - **25-05 ✅ SHIPPED** — `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`);
 >   `set_collect_impl` preserved (`a2a0ee1`). ADR-051. (chat session-provider deferred.)
-> - **25-06 ✅ built** — **C-5:** `ApplicationSyncService` de-dupes API vs scheduler (`e143c5e`). **C-3:**
+> - **25-06 ✅ SHIPPED** — **C-5:** `ApplicationSyncService` de-dupes API vs scheduler (`e143c5e`). **C-3:**
 >   `KbStore` **1373 → 652 LOC** via four read mixins (`57f0704`,`07a12f2`,`579317b`,`8a80398`; SCD-2 write path
 >   kept); `api/app.py` **841 → 189 LOC** — a pure composition root, via `register_config_routes` (`715fb1b`),
 >   `register_run_routes` (`73c34ea`, incl. ADR-033 copilot enforcement + SSE, verbatim), `register_catalog_routes`
 >   (`d1f66d1`), and `api/_shared.py` (`85f6ae9`, models/formatters out + kills the create_app↔route import cycle).
 >   DoD met (<250). Deviations (flagged): KbStore via mixins not facade; `FeatureService` skipped (25-01 already
 >   holds the LifecycleService authority).
-> - **25-07 ✅ built** — `ChatModeProfile` (C-4, `4cfb3fe`): `read_only`/`copilot`/`feature_spec` behavior (cwd/fs
+> - **25-07 ✅ SHIPPED** — `ChatModeProfile` (C-4, `4cfb3fe`): `read_only`/`copilot`/`feature_spec` behavior (cwd/fs
 >   sandbox/trust/mcp/permission/token/steering) composed into one profile resolved per session; branch-free session
 >   methods (guard: no `self.mode ==`); posture ported verbatim + pinned. `chat/manager.py` 716→639.
-> - **25-08 ⏳ in progress** — concurrency & optimistic locking (D-1/§17): row-version CAS + `StaleWriteError`→409 +
->   run-start idempotency; adds **m0014**. Precedes 25-11.
+> - **25-08 ✅ SHIPPED** — optimistic concurrency (D-1/§17, `09826e7`): **m0014** row_version CAS on features/specs + `StaleWriteError`→409 + LifecycleService state-CAS + run-start idempotency key; +test_optimistic_locking/test_run_idempotency. Precedes 25-11.
 > - **25-09, 25-10, 25-12, 25-13** — not started. **25-14** — release/closeout capstone (flips ADRs to Accepted, one coordinated release).
 > - **Backlog:** 25-11 per-story execution (gated on Breakdown→Stories + per-stage workflows).
->
-> New modules (for the eventual `bible/03` update at 25-14): `genesis/domain/`, `genesis/services/`, `genesis/runtime/logging.py`,
-> `genesis-core/util/atomic_json.py`, `genesis-core/agents/`, `genesis/kb/_{graph_reads,relationship_reads,evidence,object_reads}_mixin.py`,
-> `genesis/api/{config_routes,run_routes,catalog_routes,_shared}.py` (app.py 841→189 composition root), migration **m0013** `lifecycle_transitions`.
+> (bible/03 codebase-map + bible/04 ADR-050/051 updated with the shipped modules.)
 
 ### ✅ SHIPPED (COMPLETE) — Phase 24: UX revamp + environment-scoped credentials (24-01 genesis v0.48.5; 24-02 genesis v0.48.6)
 

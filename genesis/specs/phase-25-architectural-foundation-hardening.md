@@ -38,14 +38,14 @@ Every action item from the review (§C findings, §D critical, §E high-priority
 
 | Sub-phase | Title | Review items | Roadmap phase | Repos |
 |---|---|---|---|---|
-| **25-01** ✅ BUILT | Typed SDLC Domain Model & Lifecycle State Machine | C-1, C-2, §H | Phase 1 (keystone) | genesis (+ m0013) |
-| **25-02** ✅ BUILT | Structured Logging & Correlation IDs | E-2 | Phase 0 | genesis, genesis-core |
-| **25-03** ✅ BUILT | Atomic JSON-Store Hardening | E-5, D-1 (files) | Phase 0 | genesis, genesis-core |
-| **25-04** ✅ BUILT | Network-Exposure Guardrail (localhost-bind / no-auth intent) | D-2 | Phase 0 | genesis |
-| **25-05** ✅ BUILT | AgentProvider Interface | E-3 | Phase 2 | genesis-core, genesis |
-| **25-06** ✅ BUILT | God-Module Decomposition & Application/Service Layer | C-3, C-5 | Phase 2/3 | genesis |
-| **25-07** ✅ BUILT | ChatModeProfile — compose chat modes | C-4 | Phase 2 | genesis |
-| **25-08** | Concurrency & Optimistic Locking | D-1 | Phase 3 | genesis |
+| **25-01** ✅ SHIPPED | Typed SDLC Domain Model & Lifecycle State Machine | C-1, C-2, §H | Phase 1 (keystone) | genesis (+ m0013) |
+| **25-02** ✅ SHIPPED | Structured Logging & Correlation IDs | E-2 | Phase 0 | genesis, genesis-core |
+| **25-03** ✅ SHIPPED | Atomic JSON-Store Hardening | E-5, D-1 (files) | Phase 0 | genesis, genesis-core |
+| **25-04** ✅ SHIPPED | Network-Exposure Guardrail (localhost-bind / no-auth intent) | D-2 | Phase 0 | genesis |
+| **25-05** ✅ SHIPPED | AgentProvider Interface | E-3 | Phase 2 | genesis-core, genesis |
+| **25-06** ✅ SHIPPED | God-Module Decomposition & Application/Service Layer | C-3, C-5 | Phase 2/3 | genesis |
+| **25-07** ✅ SHIPPED | ChatModeProfile — compose chat modes | C-4 | Phase 2 | genesis |
+| **25-08** ✅ SHIPPED | Concurrency & Optimistic Locking | D-1 | Phase 3 | genesis |
 | **25-09** | DocumentProvider Interface | F (doc-provider), §19/§20 | Phase 2 | genesis |
 | **25-10** | `reliable_agent_step()` Workflow Helper | §F (agent-step), §28 | Phase 2 | genesis-core, genesis-workflows |
 | **25-12** | AI Cost & Performance Pass | §31, §32 | Phase 5 | genesis-workflows, genesis |

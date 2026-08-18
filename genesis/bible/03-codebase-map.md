@@ -179,6 +179,38 @@ genesis-workflows/
   runner), workflows/{_template, hello-appian, erd-generation, code-review, design-doc, sync-application, _fixtures/noncompliant}, MIGRATION.md.
   skills/{gam/SKILL.md + references/, _fixtures/noncompliant} + skills-registry.json + ci/validate_skills.py
   (self-contained pyyaml validator: registry+manifest+parity+fixture gate; a `skills-validate` CI job) — Phase 14-02.
+
+# ── Phase 25 — Architectural Foundation Hardening (genesis v0.49.0 + genesis-core v0.9.4) ──
+genesis-core/genesis_core/
+  util/atomic_json.py   (25-03) path_lock / atomic_write_json (temp+os.replace) / read_modify_write_json —
+                        the shared atomic-write primitive the custom MCP/CLI stores + genesis config use.
+  agents/               (25-05, ADR-051) AgentProvider Protocol + KiroAcpProvider (wraps nodes/agent._load_real)
+                        + get/set_agent_provider; nodes/agent._run drives turns through the provider.
+genesis/genesis/
+  domain/               (25-01, ADR-050) enums.py (EntityKind/LifecycleState/ArtifactKind), entities.py
+                        (Feature/Spec/Story/Stage), transitions.py (declarative SPEC/STORY_STAGE tables +
+                        preconditions + allowed_actions), lifecycle.py (LifecycleService — the single
+                        transition authority; EntityLifecycle; build_spec_lifecycle/build_default_lifecycle;
+                        state-CAS write, 25-08), events.py (LifecycleEvent), errors.py (Domain/Illegal/
+                        Precondition/UnknownEntity/UnknownEntityKind/**StaleWriteError**). Import-clean, no FastAPI.
+  services/             (25-06, C-5) ApplicationSyncService — the one add-app→baseline / refresh orchestration
+                        used by BOTH api/applications.py + runtime/sync_jobs.py (SyncBusyError).
+  runtime/logging.py    (25-02) zero-dep structured logging + contextvars correlation IDs + JSON/console
+                        formatters + secret redaction; configure_logging wired into create_app (request_id
+                        middleware) + worker (run_id) + CLI.
+  kb/_{graph_reads,relationship_reads,evidence,object_reads}_mixin.py  (25-06, C-3) KbStore split into four
+                        behavior-preserving read mixins via MRO (KbStore 1373→652); the SCD-2 write/sync path
+                        stays in store.py (the to_thread deadlock lesson, §7). features.py adds row_version CAS
+                        (_cas_update) + StaleWriteError (25-08, m0014).
+  api/{config_routes,run_routes,catalog_routes}.py + api/_shared.py  (25-06, C-3) the core routes extracted
+                        from create_app into register_config/run/catalog_routes(...); _shared.py holds the
+                        request models + formatters (kills the create_app↔route-module import cycle). app.py is
+                        now a 189-LOC composition root. run_routes threads StartRun.idempotency_key (25-08).
+  chat/mode_profile.py  (25-07, C-4) ChatModeProfile + PROFILES{read_only,copilot,feature_spec} + resolve_profile;
+                        ChatSession resolves ONE profile per session (no `self.mode ==` branching).
+  db/migrations/        m0013_lifecycle (lifecycle_transitions audit, 25-01) + m0014_row_version (optimistic-lock
+                        CAS column on kb_features/kb_feature_specs, 25-08); current_version=14.
+  runs/manager.py       RunManager.start(idempotency_key=…) — in-memory dedupe of a double-submit (25-08, §17).
 ```
 
 ---

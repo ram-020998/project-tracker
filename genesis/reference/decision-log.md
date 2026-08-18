@@ -1182,3 +1182,29 @@ them); only the sidebar entry is dropped. `/` renders Applications (no redirect)
 A); a later rename to "Manage"/"System" (Option B) is noted as optional follow-up since Overview/Catalog are not strictly
 config. Frontend-only; still ships a genesis release (committed `web/static`). Spec:
 `specs/phase-24-ux-revamp-and-environment-credentials/24-02-nav-and-ia-revamp.md`.
+
+
+## ADR-050 — Typed SDLC domain + single-authority LifecycleService (Phase 25-01)
+
+**Status:** Accepted (2026-08-18; shipped — genesis v0.49.0, CI green). **Context:** the code-review flagged SDLC lifecycle
+status as loose strings mutated last-write-wins from route handlers (any→any possible; no audit; validation scattered).
+**Decision:** model the SDLC domain as typed objects (`genesis/domain/`: `enums`/`entities`/`transitions`/`lifecycle`/
+`events`/`errors`) and route **every** status change through one authority — `LifecycleService.transition(kind, id, action)`.
+It resolves `(state, action)` against a declarative transition table (a missing pair → `IllegalTransitionError`; a legal pair
+with an unmet precondition → `PreconditionFailedError`), persists via injected store accessors, and emits a `LifecycleEvent`
+recorded append-only to **m0013 `lifecycle_transitions`** (`LifecycleAuditStore`). API becomes action-based:
+`POST /features/{id}/spec/actions/{action}` + `GET .../spec/allowed` (illegal/precondition → **409** with the allowed set);
+the any-status `PATCH .../spec/status` is deprecated. The web replaces its status `<select>` with allowed-action buttons. The
+service is store-agnostic + unit-testable without a DB. Extended in 25-08 with a state-CAS so concurrent transitions can't both
+win. Spec: `specs/phase-25-architectural-foundation-hardening/25-01-typed-domain-and-lifecycle.md`.
+
+## ADR-051 — AgentProvider interface over the agent runtime (Phase 25-05)
+
+**Status:** Accepted (2026-08-18; shipped — genesis-core v0.9.4, CI green). **Context:** `nodes/agent` bound the workflow-agent
+turn directly to the Kiro/ACP loader, making the runtime hard to swap or mock and coupling the engine to one agent backend.
+**Decision:** introduce an `AgentProvider` Protocol (`genesis_core/agents/`) with `KiroAcpProvider` as the default (wrapping the
+existing `_load_real` resolver), injected via `get/set_agent_provider`; `nodes/agent._run` drives turns through the provider.
+Behavior-preserving (the `set_collect_impl` test seam still works); additive, `CORE_MAJOR` unchanged. This is the seam a future
+non-Kiro provider or a chat session-provider plugs into (the chat session-provider is deferred). Its sibling **ADR-052
+DocumentProvider** (25-09) remains **Proposed** — not yet built. Spec:
+`specs/phase-25-architectural-foundation-hardening/25-05-agent-provider-interface.md`.

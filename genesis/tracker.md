@@ -165,7 +165,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **▸ 25-03 ✅ BUILT (2026-08-18, unreleased):** atomic+serialized JSON writes (`genesis_core/util/atomic_json.py`) across custom MCP/CLI stores + environments/secrets/dist; core `bc06930` + genesis `105c538`; core 71 / genesis 522 pytest green.
   **▸ 25-04 ✅ BUILT (2026-08-18, unreleased):** network-exposure guardrail — `genesis serve/up` refuse a non-loopback bind without `--i-understand-no-auth`/env override (logs a warning); commit `0a8f13f`; backend 535 pytest green.
   **▸ 25-05 ✅ BUILT (2026-08-18, unreleased):** `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`); `set_collect_impl` preserved; commit `a2a0ee1`; core 76 pytest green. Chat session-provider deferred.
-  **▸ 25-07 ✅ BUILT:** ChatModeProfile (C-4, `4cfb3fe`) — read_only/copilot/feature_spec behavior composed into one per-session profile; branch-free session methods (guard: no self.mode ==); posture ported verbatim + pinned; chat/manager.py 716→639; 551 pytest (+8). **▸ 25-08 ⏳ IN PROGRESS:** concurrency & optimistic locking (D-1/§17, m0014).
+  **▸ 25-08 ✅ SHIPPED:** optimistic locking (m0014 row_version CAS + StaleWriteError→409 + LifecycleService state-CAS + run-start idempotency; D-1/§17). **▸ RELEASED:** 25-01..25-08 shipped as **genesis v0.49.0 + genesis-core v0.9.4** (2026-08-18, CI green); ADR-050/051 Accepted; 25-09..25-14 remain.
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -215,6 +215,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 25 PARTIAL RELEASE — genesis v0.49.0 + genesis-core v0.9.4 — CI GREEN):** shipped sub-phases
+  **25-01..25-08** as one coordinated release (release order core → genesis, ADR-019). **genesis-core v0.9.4** (additive,
+  `CORE_MAJOR` still 1) = `util/atomic_json.py` (25-03) + `agents/` AgentProvider (25-05, ADR-051), tag pushed, pipeline
+  #6600462 success. **genesis v0.49.0** (pins core v0.9.4) = 25-01 typed domain + `LifecycleService` + m0013 + action API
+  (ADR-050) · 25-02 structured logging · 25-03 atomic JSON writes · 25-04 network guardrail · 25-05 AgentProvider (ADR-051) ·
+  25-06 god-module decomposition (KbStore 1373→652 + api/app.py 841→189 + ApplicationSyncService) · 25-07 ChatModeProfile ·
+  25-08 optimistic locking (m0014 row_version CAS + StaleWriteError→409 + run-start idempotency), pipeline #6600502.
+  **Gate:** genesis **561** pytest + ruff · genesis-core **76** + ruff · web **163** vitest + eslint(0 err) + tsc + build +
+  stale-bundle guard — all green. **ADR-050 + ADR-051 → Accepted** (decision-log + bible/04); **ADR-052 (DocumentProvider)
+  stays Proposed** (25-09 pending). Bible refreshed: §2 (tags/test-counts/db m0001–m0014), §4 (new Phase-25 modules), §5
+  (ADR-050/051), §9 (25-01..25-08 SHIPPED), §0 + index Last-refreshed. Deviations (flagged): KbStore split via mixins (not the
+  spec's facade); `FeatureService` skipped (25-01 already holds the LifecycleService authority). **Remaining Phase 25:
+  25-09 DocumentProvider, 25-10 reliable_agent_step, 25-12 AI cost pass, 25-13 observability, 25-14 closeout (25-11 backlog).**
 
 - **2026-08-18 (Phase 25-07 — ChatModeProfile — ✅ BUILT `4cfb3fe`; NOT released):** replaced the scattered
   `if self.mode == "copilot"/"feature_spec"` branches in `ChatSession` (cwd, fs sandbox, trust set, MCP wiring,

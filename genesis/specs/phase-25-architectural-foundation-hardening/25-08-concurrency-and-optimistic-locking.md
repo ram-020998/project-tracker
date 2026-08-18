@@ -1,6 +1,15 @@
 # 25-08 — Concurrency & Optimistic Locking
 
-- **Status:** 📝 DRAFTED · **Review items:** D-1, §17 · **Roadmap:** Phase 3 · **Repos:** genesis (+ migration **m0014**) · **Depends on:** 25-01 (typed entities to version)
+- **Status:** ✅ BUILT + SHIPPED (2026-08-18, commit `09826e7`; released in **genesis v0.49.0 + genesis-core v0.9.4**, CI green) — row-version CAS on features/specs, `StaleWriteError`→409, LifecycleService state-CAS, run-start idempotency; **m0014**. · **Review items:** D-1, §17 · **Roadmap:** Phase 3 · **Repos:** genesis (+ migration **m0014**) · **Depends on:** 25-01 (typed entities to version)
+
+## As built (commit `09826e7`; genesis 561 pytest + ruff green; shipped v0.49.0)
+- **m0014 `row_version`** (`INTEGER NOT NULL DEFAULT 0`) on `kb_features` + `kb_feature_specs`; `current_version` → 14 (version tests + the synthetic next-migration → 15 bumped).
+- **`StaleWriteError`** (domain error, carries `expected`/`actual`); `FeatureStore` mutating methods (`update_feature`/`set_status`/`set_spec_html`/`set_md_export`) bump `row_version` and compare-and-swap via a shared `_cas_update` helper — a stale write (rowcount 0 on a supplied guard) raises it; no-guard writes stay unconditional (single-user back-compat).
+- **`LifecycleService.transition` state-CAS:** `write_state` threads the expected from-state → `set_status(expected_status=from)`, so two concurrent transitions from the same state → exactly one wins (the store-agnostic abstraction unchanged; the unit-test fake store updated to mirror the CAS contract).
+- **API:** `spec_action` maps `StaleWriteError` → **409** `{expected, actual, allowed}`.
+- **Run-start idempotency:** `RunManager.start(idempotency_key=…)` (in-memory key→run_id) dedupes a double-submit into one run; `StartRun` + `POST /runs` thread the key.
+- **Tests:** `tests/test_optimistic_locking.py` (6) + `tests/test_run_idempotency.py` (4) — lost-update rejected, concurrent-transition-one-wins, double-submit-one-run.
+- **Note:** D-1 is "critical *if* parallel stories land" (25-11, backlog) — this is defense-in-depth ahead of that + real lost-update/double-submit protection today.
 
 ## 1. Goal
 Add **optimistic concurrency control** to the mutable domain rows (features/specs and, when they land, stories/stages) so concurrent writers — the near-term goal of parallel story execution — cannot silently lose updates or corrupt state.

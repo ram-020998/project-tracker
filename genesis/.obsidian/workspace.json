@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "8c3bbeaddb2b142e",
+        "id": "b926c82804482f00",
         "type": "tabs",
         "children": [
           {
-            "id": "eb08e2f74588268d",
+            "id": "cacfa5374e736f8c",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -181,8 +181,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "eb08e2f74588268d",
+  "active": "cacfa5374e736f8c",
   "lastOpenFiles": [
+    "specs/phase-01-core-platform-foundation.md",
+    "specs/phase-25-architectural-foundation-hardening/25-13-observability-metrics-and-lifecycle-audit.md",
+    "specs/phase-25-architectural-foundation-hardening/25-12-ai-cost-and-performance-pass.md",
+    "specs/phase-25-architectural-foundation-hardening/25-10-reliable-agent-step-helper.md",
+    "specs/phase-25-architectural-foundation-hardening/25-09-document-provider-interface.md",
     "specs/phase-25-architectural-foundation-hardening/25-08-concurrency-and-optimistic-locking.md",
     "specs/phase-25-architectural-foundation-hardening/25-07-chat-mode-profile.md",
     "specs/phase-25-architectural-foundation-hardening/25-06-god-module-decomposition-and-service-layer.md",
