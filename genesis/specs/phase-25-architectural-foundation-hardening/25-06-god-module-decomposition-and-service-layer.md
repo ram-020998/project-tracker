@@ -1,8 +1,8 @@
 # 25-06 — God-Module Decomposition & Application/Service Layer
 
-- **Status:** ⏳ IN PROGRESS (2026-08-18) — service layer + KbStore fully decomposed + app.py config routes extracted; **runs-routes extraction remaining**. **NOT released** (ships via 25-14). · **Review items:** C-3, C-5, E-4 · **Roadmap:** Phase 2/3 · **Repos:** genesis · **Depends on:** 25-01 (done)
+- **Status:** ✅ BUILT (2026-08-18) — service layer + both god modules (`KbStore`, `api/app.py`) decomposed; **DoD met**. **NOT released** (ships via 25-14). · **Review items:** C-3, C-5, E-4 · **Roadmap:** Phase 2/3 · **Repos:** genesis · **Depends on:** 25-01 (done)
 
-## Progress (as built so far — all committed locally, unreleased; 543 pytest + ruff green after each slice)
+## Progress (as built — all committed locally, unreleased; 543 pytest + ruff green after each slice)
 
 | Commit | Slice | Effect |
 |---|---|---|
@@ -12,12 +12,21 @@
 | `579317b` | `KbEvidenceMixin` | KbStore split (Business Evidence Pack) |
 | `8a80398` | `KbObjectReadsMixin` | KbStore split (object/dep/bundle/orphan reads) |
 | `715fb1b` | `register_config_routes` (`api/config_routes.py`) | app.py split (24 `/config/*` routes) |
+| `73c34ea` | `register_run_routes` (`api/run_routes.py`) | run lifecycle + artifacts + SSE + Phase-14 skill-output routes (incl. ADR-033 `_enforce_copilot_start`, verbatim) |
+| `d1f66d1` | `register_catalog_routes` (`api/catalog_routes.py`) | catalog/library/workflows + `/home` |
+| `85f6ae9` | `api/_shared.py` + repoint imports | shared request models + formatters out of app.py; kills the create_app↔route-module import cycle |
 
-**Results:** `KbStore` **1373 → 652 LOC** (four read mixins; the SCD-2 **write/sync path deliberately kept** in `store.py` — the `to_thread` deadlock-sensitive code, bible §7). `api/app.py` **841 → 672 LOC** (config/integrations routes → `register_config_routes(api, config, settings, manager)`; shared request models + card formatters imported from `app.py` via a deferred import). Every extraction is a verbatim move; the composed class/router behaves identically (KbStore inherits the mixins — MRO keeps all `self.` calls identical).
+**Results:** `KbStore` **1373 → 652 LOC** (four read mixins; the SCD-2 **write/sync path deliberately kept** in `store.py` — the `to_thread` deadlock-sensitive code, bible §7). `api/app.py` **841 → 189 LOC** — now a pure composition root (build deps → `configure_logging` → `register_{chat,skills,native_mcp,native_cli,applications,documents,features,system,schedules,catalog,config,run}_routes` → `include_router` → mount SPA). Every extraction is a **verbatim** move; `create_app()` builds and serves `/api/config/health`,`/api/catalog`,`/api/runs`,`/api/home` (200), and the ADR-033 copilot enforcement + CRLF SSE stream are byte-identical (`test_copilot_e2e`/`safety`/`test_api`/`test_runs` green).
 
-## Remaining
-- **Runs-routes extraction** (`api/app.py`, 17 routes → `register_run_routes`). **Highest-risk piece** — it touches the ADR-033 copilot blast-radius enforcement (`_enforce_copilot_start`) + SSE streaming, and the routes are interspersed with the artifacts routes (not a clean contiguous block). To be done as a careful dedicated step with the copilot/SSE logic preserved verbatim.
-- **`FeatureService` — recommended SKIP** (honest pushback): 25-01 already established the single-authority `LifecycleService` in `api/features.py`; a wrapper adds churn without benefit. Marked not-needed unless requested.
+## DoD (§9) status
+- ✅ **C-3:** `KbStore` decomposed; `api/app.py` **< 250** (189). `chat/manager.py` mode-composition = 25-07's scope (not here).
+- ✅ **C-5:** `ApplicationSyncService` de-duplicates API vs scheduler.
+- ✅ All suites green (543 pytest + ruff).
+- ⏸️ genesis release CI-green + `bible/03` codebase-map update → **deferred to the 25-14 capstone** (per the no-release directive; version held 0.48.7 / core 0.9.3).
+
+## Deviations from §4 (flagged, goal preserved)
+1. **KbStore split via mixins, not the facade+3-module (`sync_writer`/`query`/`releases`) design.** Mixins gave a verbatim, MRO-preserving move with zero call-site churn and kept the deadlock-sensitive SCD-2 write path untouched in `store.py`. Same outcome (god module broken, public surface unchanged), lower risk.
+2. **`FeatureService` skipped** — 25-01 already established the single-authority `LifecycleService` in `api/features.py`; a wrapper is churn (prior-session agreement).
 
 ## 1. Goal
 Break the three god modules along seams they already imply, and introduce a **thin Application/Service layer** so multi-store orchestration lives in one place (reachable from API, scheduler, and copilot) instead of being duplicated in route closures.

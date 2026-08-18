@@ -26,16 +26,20 @@
 >   (`0a8f13f`).
 > - **25-05 ✅ built** — `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`);
 >   `set_collect_impl` preserved (`a2a0ee1`). ADR-051. (chat session-provider deferred.)
-> - **25-06 ⏳ in progress** — **C-5 done:** `ApplicationSyncService` de-dupes API vs scheduler (`e143c5e`). **C-3 substantial:**
->   `KbStore` **1373 → 652 LOC** via four read mixins (`57f0704`,`07a12f2`,`579317b`,`8a80398`); `api/app.py` **841 → 672 LOC** via
->   `register_config_routes` (`715fb1b`). **Remaining:** the runs-routes extraction (copilot/SSE — highest-risk, careful step);
->   `FeatureService` recommended-skip.
-> - **25-07..25-10, 25-12, 25-13** — not started. **25-14** — release/closeout capstone (flips ADRs to Accepted, one coordinated release).
+> - **25-06 ✅ built** — **C-5:** `ApplicationSyncService` de-dupes API vs scheduler (`e143c5e`). **C-3:**
+>   `KbStore` **1373 → 652 LOC** via four read mixins (`57f0704`,`07a12f2`,`579317b`,`8a80398`; SCD-2 write path
+>   kept); `api/app.py` **841 → 189 LOC** — a pure composition root, via `register_config_routes` (`715fb1b`),
+>   `register_run_routes` (`73c34ea`, incl. ADR-033 copilot enforcement + SSE, verbatim), `register_catalog_routes`
+>   (`d1f66d1`), and `api/_shared.py` (`85f6ae9`, models/formatters out + kills the create_app↔route import cycle).
+>   DoD met (<250). Deviations (flagged): KbStore via mixins not facade; `FeatureService` skipped (25-01 already
+>   holds the LifecycleService authority).
+> - **25-07 ⏳ in progress** — `ChatModeProfile` (C-4): compose `read_only`/`copilot`/`feature_spec` chat behavior.
+> - **25-08..25-10, 25-12, 25-13** — not started. **25-14** — release/closeout capstone (flips ADRs to Accepted, one coordinated release).
 > - **Backlog:** 25-11 per-story execution (gated on Breakdown→Stories + per-stage workflows).
 >
 > New modules (for the eventual `bible/03` update at 25-14): `genesis/domain/`, `genesis/services/`, `genesis/runtime/logging.py`,
 > `genesis-core/util/atomic_json.py`, `genesis-core/agents/`, `genesis/kb/_{graph_reads,relationship_reads,evidence,object_reads}_mixin.py`,
-> `genesis/api/config_routes.py`, migration **m0013** `lifecycle_transitions`.
+> `genesis/api/{config_routes,run_routes,catalog_routes,_shared}.py` (app.py 841→189 composition root), migration **m0013** `lifecycle_transitions`.
 
 ### ✅ SHIPPED (COMPLETE) — Phase 24: UX revamp + environment-scoped credentials (24-01 genesis v0.48.5; 24-02 genesis v0.48.6)
 

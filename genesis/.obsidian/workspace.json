@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "13555c9b34dcbb3c",
+        "id": "8c3bbeaddb2b142e",
         "type": "tabs",
         "children": [
           {
-            "id": "06d6f73091e46f15",
+            "id": "eb08e2f74588268d",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -181,8 +181,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "06d6f73091e46f15",
+  "active": "eb08e2f74588268d",
   "lastOpenFiles": [
+    "specs/phase-25-architectural-foundation-hardening/25-08-concurrency-and-optimistic-locking.md",
+    "specs/phase-25-architectural-foundation-hardening/25-07-chat-mode-profile.md",
+    "specs/phase-25-architectural-foundation-hardening/25-06-god-module-decomposition-and-service-layer.md",
     "bible/01-current-state.md",
     "bible/00-onboarding-and-overview.md",
     "specs/phase-07-code-review-fixes/README.md",
