@@ -42,7 +42,7 @@ Every action item from the review (§C findings, §D critical, §E high-priority
 | **25-02** ✅ BUILT | Structured Logging & Correlation IDs | E-2 | Phase 0 | genesis, genesis-core |
 | **25-03** ✅ BUILT | Atomic JSON-Store Hardening | E-5, D-1 (files) | Phase 0 | genesis, genesis-core |
 | **25-04** ✅ BUILT | Network-Exposure Guardrail (localhost-bind / no-auth intent) | D-2 | Phase 0 | genesis |
-| **25-05** | AgentProvider Interface | E-3 | Phase 2 | genesis-core, genesis |
+| **25-05** ✅ BUILT | AgentProvider Interface | E-3 | Phase 2 | genesis-core, genesis |
 | **25-06** | God-Module Decomposition & Application/Service Layer | C-3, C-5 | Phase 2/3 | genesis |
 | **25-07** | ChatModeProfile — compose chat modes | C-4 | Phase 2 | genesis |
 | **25-08** | Concurrency & Optimistic Locking | D-1 | Phase 3 | genesis |

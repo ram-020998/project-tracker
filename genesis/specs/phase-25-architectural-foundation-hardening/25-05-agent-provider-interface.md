@@ -1,6 +1,8 @@
 # 25-05 — AgentProvider Interface
 
-- **Status:** 📝 DRAFTED · **Review items:** E-3, §F (new LLM provider), §5 (agent architecture) · **Roadmap:** Phase 2 · **Repos:** genesis-core, genesis · **Proposed ADR:** ADR-051 · **Depends on:** nothing
+- **Status:** ✅ BUILT (2026-08-18) — implemented + tested + committed locally; **NOT released** (ships via 25-14). · **Review items:** E-3, §F, §5 · **Roadmap:** Phase 2 · **Repos:** genesis-core · **Proposed ADR:** ADR-051 · **Depends on:** nothing
+- **As built:** `genesis_core/agents/` — `AgentProvider` Protocol (options_cls/supports_streaming/collect/collect_streaming) + `KiroAcpProvider` wrapping the existing `nodes/agent._load_real` resolver + `get/set_agent_provider` registry; `nodes/agent._run` resolves the runtime via the provider (default delegates to `_load_real`, so behavior is identical and `set_collect_impl` still works). A `FakeAgentProvider` drives a real `kiro_node` with no kiro-agent-sdk — proving the seam. Additive; `CORE_MAJOR`/version unchanged. Commit genesis-core `a2a0ee1`; core **76** pytest (+5) + ruff green; genesis smoke/dist green.
+- **Deferred follow-up:** `genesis/chat` uses a richer *session*/ACP-extension surface (persistent client, set_model, commands, permission bridge) that the narrow one-shot `collect` interface doesn't model yet; a session-oriented provider abstraction for chat is a later refinement (does not block the E-3 seam for workflow-agent execution).
 
 ## 1. Goal
 Formalize a named **`AgentProvider`** interface (Protocol) for the agent/LLM runtime so Kiro-CLI-over-ACP becomes *one implementation behind an interface* rather than the only, hard-wired provider. Adding a second provider (or a fake for tests) becomes an **additive adapter**, not a cross-cutting edit.
