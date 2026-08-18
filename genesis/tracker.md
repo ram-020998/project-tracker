@@ -188,6 +188,13 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-18 (genesis v0.48.4 — one-click Update upgrades the whole stack; CI green):** `updater.apply()` now also runs
+  `genesis install` to refresh the **genesis-workflows** library (the only related repo that isn't a pip dep — genesis-core /
+  kiro-agent-sdk / genesis-appian-parser are already re-pulled by `pip install .` as git+ssh tag pins). So clicking **Update
+  genesis** upgrades genesis + core + sdk + parser + workflows to the genesis release's pinned set. Library refresh is
+  non-fatal. Backend **474** pytest + ruff green. (Future: independent multi-repo version check so a workflows-only tag also
+  surfaces the banner.)
+
 - **2026-08-17 (genesis v0.48.2 + v0.48.3 & genesis-workflows v0.9.4 — real-install Dev-MCP + packaging fixes; CI green):**
   From deploying to fresh machines. **v0.48.2:** (a) **SPA packaging** — the wheel didn't ship `web/static` (repo sibling, not
   in `packages`) so `/` 404'd on a real install; fixed via `force-include web/static → genesis/web_static` +
