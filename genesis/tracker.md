@@ -161,6 +161,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **▸ 25-01 ✅ BUILT (2026-08-18, unreleased):** typed `genesis/domain/` + single-authority `LifecycleService` + m0013 audit + spec
   action endpoints (409 on illegal/precondition) + web allowed-action buttons; backend 509 pytest, web 163 vitest, all green;
   committed locally (`d70bd20`+`0b90392`), version held at 0.48.7 (ships via 25-14).
+  **▸ 25-02 ✅ BUILT (2026-08-18, unreleased):** structured logging + correlation IDs (`genesis/runtime/logging.py`; zero-dep stdlib configure + contextvars run_id/request_id + JSON/console + redaction), wired into create_app/worker/CLI; commit `c8ec7d6`; backend 521 pytest green.
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -210,6 +211,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 25-02 — Structured logging + correlation IDs — ✅ BUILT; NOT released):** `genesis/runtime/logging.py`
+  — zero-dependency stdlib `configure_logging()` (console / JSON via `GENESIS_LOG_JSON`), a `contextvars` correlation bag
+  (run_id/session_id/tool_call_id/request_id/workflow_id) auto-attached by a `ContextFilter`, `JsonFormatter`+`ConsoleFormatter`,
+  and secret-key redaction. Wired into `create_app` (+ a per-request `request_id` middleware), the subprocess worker (binds
+  run_id/workflow_id), and the CLI; the existing scheduler/sync_jobs loggers now correlate for free. Kept legitimate
+  `launcher.py` CLI output + stdio MCP-server stderr; a guard test forbids NEW diagnostic `print()` in app-process modules.
+  Deliberately no structlog/OTel (review §36). Commit `c8ec7d6`; version held at 0.48.7 (ships via 25-14). Backend **521**
+  pytest + ruff green (+12 tests). **Phase 25: 25-01 + 25-02 built.** Next: 25-03 (atomic JSON stores).
 
 - **2026-08-18 (Phase 25-01 — Typed SDLC domain + LifecycleService — ✅ BUILT; NOT released):** Implemented the keystone
   behind tests, committed locally to genesis master (`d70bd20` domain core + `0b90392` audit/API/web) with **version held at

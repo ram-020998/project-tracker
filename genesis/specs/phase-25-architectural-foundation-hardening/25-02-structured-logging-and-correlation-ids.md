@@ -1,6 +1,7 @@
 # 25-02 — Structured Logging & Correlation IDs
 
-- **Status:** 📝 DRAFTED · **Review items:** E-2, §22 · **Roadmap:** Phase 0 · **Repos:** genesis, genesis-core · **Depends on:** nothing (parallelizable)
+- **Status:** ✅ BUILT (2026-08-18) — implemented + tested + committed locally; **NOT released** (ships via 25-14). · **Review items:** E-2, §22 · **Roadmap:** Phase 0 · **Repos:** genesis, genesis-core · **Depends on:** nothing (parallelizable)
+- **As built:** `genesis/runtime/logging.py` — zero-dependency stdlib `configure_logging()` (console / JSON via `GENESIS_LOG_JSON`), a `contextvars` correlation bag (run_id/session_id/tool_call_id/request_id/workflow_id) auto-attached by a `ContextFilter`, `JsonFormatter`+`ConsoleFormatter`, secret-key redaction. Wired into `create_app` (+ per-request `request_id` middleware), the subprocess worker (binds run_id/workflow_id), and the CLI. Kept legitimate `launcher.py` CLI output + stdio MCP-server stderr (subprocesses); a guard test forbids NEW diagnostic `print()` in app-process modules. Commit `c8ec7d6`. Backend **521** pytest + ruff green. No genesis-core change needed (the app-process loggers cover it). Version held at 0.48.7.
 
 ## 1. Goal
 Give the backend **structured, correlated, level-based logging** so the review's observability questions ("what happened? which agent? which run? what failed?") are answerable outside a single run's `run_events` timeline — without adding heavy infra.
