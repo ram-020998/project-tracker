@@ -147,6 +147,19 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   `APPIAN_DOMAIN` auto-derived + hidden; non-destructive migration of legacy server-scoped creds). **(2, 24-02)**
   **Applications-first IA** — primary nav = Applications · Chat · Runs · Documents; Overview + Catalog move to Settings tabs
   (default Overview). **ADR-048/049** (PROPOSED). Release: genesis-workflows (`mcp-registry.json`) + genesis (+ frontend).
+- **Phase 25** — `specs/phase-25-architectural-foundation-hardening.md` (+ `phase-25-architectural-foundation-hardening/25-01..25-10,25-12,25-13,25-14`)
+  — **Architectural Foundation Hardening (code-review remediation)** 📝 SPECS DRAFTED; awaiting approval to build. Umbrella +
+  **13 active** sub-phase specs covering every action item from `code-review/genesis-production-readiness-review-2026-08-18.md`:
+  **25-01** typed SDLC domain + single-authority `LifecycleService` (keystone; C-1/C-2), **25-02** structured logging +
+  correlation ids (E-2), **25-03** atomic JSON-store hardening (E-5), **25-04** network-exposure guardrail (D-2), **25-05**
+  `AgentProvider` interface (E-3), **25-06** god-module decomposition + service layer (C-3/C-5), **25-07** `ChatModeProfile`
+  (C-4), **25-08** concurrency + optimistic locking (D-1), **25-09** `DocumentProvider` interface, **25-10**
+  `reliable_agent_step()` helper, **25-12** AI cost & performance pass, **25-13** observability II (metrics + lifecycle audit),
+  **25-14** phase release & closeout (tag/ship/document — ADRs→Accepted, pin alignment, bible refresh, review-delta). **Proposed
+  ADR-050/051/052.** Sequencing: Phase-0 guardrails (02/03/04) ∥ keystone 25-01 → seams (05/06/07/09/10) → concurrency 08 →
+  observability 13 / cost 12 → **capstone 25-14**. **Completability (2026-08-18): all 13 completable with today's app state.**
+  🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
+  (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
@@ -194,6 +207,33 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-18 (Phase 25 — added 25-14 release & closeout capstone):** Added a final sub-phase
+  `phase-25-architectural-foundation-hardening/25-14-phase-release-and-closeout.md` — the capstone that tags/ships + documents
+  the whole phase (release-integrity sweep across repos, cross-repo pin alignment, ADR-050/051/052 → Accepted + mirrored to
+  bible/04, ADR-026 guardrail amendment, bible/tracker/progress refresh, and a review-delta closeout re-scoring the §A
+  ratings). No product code — release + documentation only. Phase 25 is now **13 active** sub-phases (25-01..25-10, 25-12,
+  25-13, 25-14) + backlog 25-11.
+
+- **2026-08-18 (Phase 25 — completability triage + 25-11 → backlog):** Assessed the 13 drafted sub-phases against **today's**
+  app state (Features + a single Spec + placeholder Design/Breakdown; **no Story / no Breakdown→Stories / no per-stage
+  workflows**). **12 of 13 are completable now** — immediately-independent: 25-02/03/04/05/07/09/10/12; after the keystone
+  25-01: 25-06/08/13. **Moved former 25-11 (per-story execution + WorkflowRun linkage) to backlog**
+  (`specs/backlog/phase-25-11-per-story-execution.md`): it is new product capability (not code-review remediation) and is not
+  acceptance-testable until a Breakdown step produces Stories + per-stage agent workflows exist; 25-01 pre-defines the
+  `Story`/`Stage` types so it stays a clean pickup. Umbrella + §3 index updated to 12 active; §1.1 records the assessment.
+
+- **2026-08-18 (Phase 25 — Architectural Foundation Hardening — 📝 SPECS DRAFTED; awaiting approval to build):** From the
+  principal-architect production-readiness review (`code-review/genesis-production-readiness-review-2026-08-18.md`). Created the
+  umbrella `specs/phase-25-architectural-foundation-hardening.md` + **13 sub-phase specs** (`phase-25-…/25-01..25-13`) covering
+  **every** review action item: 25-01 typed SDLC domain + single-authority `LifecycleService` (keystone; C-1/C-2), 25-02
+  structured logging + correlation ids (E-2), 25-03 atomic JSON-store hardening (E-5), 25-04 network-exposure guardrail (D-2),
+  25-05 `AgentProvider` interface (E-3), 25-06 god-module decomposition + service layer (C-3/C-5), 25-07 `ChatModeProfile`
+  (C-4), 25-08 concurrency + optimistic locking (D-1), 25-09 `DocumentProvider` interface, 25-10 `reliable_agent_step()`
+  helper, 25-11 per-story execution + WorkflowRun linkage, 25-12 AI cost/perf pass, 25-13 observability II (metrics + lifecycle
+  audit). **Proposed ADR-050** (typed domain + LifecycleService), **ADR-051** (AgentProvider), **ADR-052** (DocumentProvider) —
+  to be formalized in the decision log on approval. Thesis: *the engine scales, the SDLC domain does not — yet*; build the thin
+  domain/service layer + provider seams now while the codebase is small + well-tested. **Awaiting go-ahead to implement.**
 
 - **2026-08-18 (genesis v0.48.7 — env-dialog viewport fix; CI green):** the environment Add/Edit dialog overflowed the
   viewport after the Phase 24-01 credential fields — `DialogContent` is now `max-h-[90vh]` flex-col with the fields scrolling
