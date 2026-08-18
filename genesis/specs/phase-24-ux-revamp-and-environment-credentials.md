@@ -1,8 +1,8 @@
-# Spec (umbrella) — UX revamp + environment-scoped credentials
+# Phase 24 — UX revamp & environment-scoped credentials (umbrella)
 
 > **Status:** 📝 DRAFT (approved direction, 2026-08-18). Two user-feedback changes, delivered together. **Not yet
 > implemented** — specs written for review. ADRs: **048** (env-scoped core-MCP creds) + **049** (Applications-first IA).
-> Sub-specs live in [`environment-credentials-and-nav-revamp/`](./environment-credentials-and-nav-revamp/).
+> Sub-specs live in [`phase-24-ux-revamp-and-environment-credentials/`](./phase-24-ux-revamp-and-environment-credentials/).
 
 ## Background
 Two pieces of user feedback:
@@ -12,11 +12,11 @@ Two pieces of user feedback:
    cards, separate from the Environments tab.
 
 ## Sub-specs
-- **[01 — Environment-scoped credentials](./environment-credentials-and-nav-revamp/01-environment-credentials.md)** — enter
+- **[01 — Environment-scoped credentials](./phase-24-ux-revamp-and-environment-credentials/24-01-environment-credentials.md)** — enter
   the Dev/DevOps creds on the environment form; store per-env in the SecretProvider (`env:<label>`); resolve them **only**
   from the dev env; `LCP_API_PATH` becomes a public env field; hide `LCP_URL`/`APPIAN_DOMAIN` (auto-derived); one-time
   non-destructive migration of legacy server-scoped creds. Backend-anchored → **do this first**.
-- **[02 — Nav & IA revamp](./environment-credentials-and-nav-revamp/02-nav-and-ia-revamp.md)** — Applications is the landing +
+- **[02 — Nav & IA revamp](./phase-24-ux-revamp-and-environment-credentials/24-02-nav-and-ia-revamp.md)** — Applications is the landing +
   first tab; primary nav = Applications · Chat · Runs · Documents; Overview + Catalog become Settings tabs (default =
   Overview). Frontend-only.
 

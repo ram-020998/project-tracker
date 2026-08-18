@@ -1168,7 +1168,7 @@ copies legacy server-scoped creds into the dev env's scope (originals untouched,
 re-enter nothing. **Scope:** ONLY `appian-dev`/`appian-devops`; every other MCP keeps its own card. API exposes only
 `is_set` booleans for creds, never values. **Localization:** genesis-core `McpRegistry` is untouched — a thin genesis-side
 SecretProvider adapter (in `ConfigService`) maps these two servers' lookups to `env:<label>`. Spec:
-`specs/environment-credentials-and-nav-revamp/01-environment-credentials.md`.
+`specs/phase-24-ux-revamp-and-environment-credentials/24-01-environment-credentials.md`.
 
 ## ADR-049 — Applications-first IA: primary nav is Applications · Chat · Runs · Documents; Overview + Catalog live under Settings
 
@@ -1181,4 +1181,4 @@ the default Settings tab**. The `/catalog/:workflowId[/launch]` deep-link routes
 them); only the sidebar entry is dropped. `/` renders Applications (no redirect). Kept the container name "Settings" (Option
 A); a later rename to "Manage"/"System" (Option B) is noted as optional follow-up since Overview/Catalog are not strictly
 config. Frontend-only; still ships a genesis release (committed `web/static`). Spec:
-`specs/environment-credentials-and-nav-revamp/02-nav-and-ia-revamp.md`.
+`specs/phase-24-ux-revamp-and-environment-credentials/24-02-nav-and-ia-revamp.md`.

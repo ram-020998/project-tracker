@@ -1,4 +1,4 @@
-# Spec — Navigation & IA revamp (Applications-first; Overview + Catalog under Settings)
+# Phase 24-02 — Navigation & IA revamp (Applications-first; Overview + Catalog under Settings)
 
 > **Status:** 📝 DRAFT (approved direction, 2026-08-18) · **Area:** genesis web (`app/router.tsx`,
 > `shared/layout/Sidebar.tsx`, `features/settings`, `features/overview`, `features/catalog`) · **Type:** frontend-only UX.
@@ -58,4 +58,4 @@ If users still hunt for Overview under a gear icon, revisit renaming the contain
 label-only change captured here for future reference.
 
 ## 8. Out of scope
-Any metric/Catalog *content* changes (pure relocation); the credentials change (spec 01).
+Any metric/Catalog *content* changes (pure relocation); the credentials change (24-01).

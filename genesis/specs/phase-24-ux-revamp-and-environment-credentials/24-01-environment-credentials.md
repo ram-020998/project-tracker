@@ -1,4 +1,4 @@
-# Spec — Environment-scoped credentials for the two core Appian MCPs
+# Phase 24-01 — Environment-scoped credentials for the two core Appian MCPs
 
 > **Status:** 📝 DRAFT (approved direction, 2026-08-18) · **Area:** genesis `config/` + `api/` + web Environments +
 > genesis-workflows `mcp-registry.json` · **Type:** functionality + small UX. **Related ADR:** new ADR-048 (below).
@@ -74,4 +74,4 @@ sourced only from the env scope.
 - API responses expose only `is_set` booleans for cred fields, never values.
 
 ## 9. Out of scope
-Per-env creds for non-core MCPs (they keep their own cards); write/deploy scopes (unchanged); the nav/IA revamp (spec 02).
+Per-env creds for non-core MCPs (they keep their own cards); write/deploy scopes (unchanged); the nav/IA revamp (24-02).

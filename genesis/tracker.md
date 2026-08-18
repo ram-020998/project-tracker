@@ -140,6 +140,13 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **`document-library-sync`** (`scope=library`, **08/12/16/20 IST**), with preflight skips (no dev env / no `gws`). Schedule +
   last-run held in **m0012 `scheduled_jobs`** (backend-fixed now; the seam for later user config). **ADR-047** (PROPOSED).
   genesis-only release → **v0.48.0** (+ m0012).
+- **Phase 24** — `specs/phase-24-ux-revamp-and-environment-credentials.md` (+ `phase-24-ux-revamp-and-environment-credentials/24-01..24-02`)
+  — **UX revamp + environment-scoped credentials** 📝 SPECS DRAFTED (awaiting approval to build). **(1, 24-01)** the two core
+  Appian MCPs (`appian-dev`/`appian-devops`) take their creds from the **environment** (entered on the env form, stored per-env
+  in the SecretProvider `env:<label>` scope, resolved ONLY from the dev env; `LCP_API_PATH` → public env field; `LCP_URL`/
+  `APPIAN_DOMAIN` auto-derived + hidden; non-destructive migration of legacy server-scoped creds). **(2, 24-02)**
+  **Applications-first IA** — primary nav = Applications · Chat · Runs · Documents; Overview + Catalog move to Settings tabs
+  (default Overview). **ADR-048/049** (PROPOSED). Release: genesis-workflows (`mcp-registry.json`) + genesis (+ frontend).
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
@@ -188,8 +195,8 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
-- **2026-08-18 (SPECS DRAFTED — UX revamp + environment-scoped credentials; not yet implemented):** Two user-feedback
-  changes specced under `specs/environment-credentials-and-nav-revamp/` (00 umbrella + 01 creds + 02 nav). **ADR-048**:
+- **2026-08-18 (Phase 24 — UX revamp + environment-scoped credentials — 📝 SPECS DRAFTED; awaiting approval to build):** Two user-feedback
+  changes specced under `specs/phase-24-ux-revamp-and-environment-credentials/` (00 umbrella + 01 creds + 02 nav). **ADR-048**:
   core Appian-MCP creds (`appian-dev`/`appian-devops`) are entered on the **environment** form + stored per-env
   (`env:<label>` SecretProvider scope) + resolved ONLY from the dev env; `LCP_API_PATH` → public env field;
   `LCP_URL`/`APPIAN_DOMAIN` auto-derived + hidden; one-time non-destructive migration of legacy server-scoped creds.
