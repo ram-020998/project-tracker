@@ -1151,3 +1151,34 @@ indicator, clear/compact, and image attachments — in **both** the main chat an
   **non-interactive** actor; bounded by local single-user (ADR-026), no network exposure. Sync writes are SCD-2 (reversible
   history), not destructive. Live acceptance of the real morning/4-hourly firing is observed over time (fake-clock unit tests +
   a forced-slot manual run are the pre-release evidence).
+
+
+## ADR-048 — Core Appian-MCP credentials are environment-scoped (entered on the environment, resolved from the dev env only)
+
+**Status:** Proposed (2026-08-18). **Context:** the `appian-dev`/`appian-devops` creds (`LCP_USERNAME`/`LCP_PASSWORD`/
+`LCP_API_PATH`, `APPIAN_API_KEY`) were entered on each MCP card and stored server-scoped in the SecretProvider
+(`appian-dev/…`), split from the Environments tab that holds the same target's URL/dev-tag. **Decision:** for the two
+**core** Appian MCPs ONLY, credentials are entered on the **environment** form and stored per-environment in the
+SecretProvider under a new **`env:<label>`** scope; the Dev/DevOps MCPs resolve their creds **only** from the **dev-tagged**
+env's scope (no server-scope/global lookup for these two). `LCP_API_PATH` becomes a **public** env field (in
+`environments.json`, like `url`/`api_endpoint`); `LCP_URL`/`APPIAN_DOMAIN` stay **auto-derived** from the env's `url` and are
+no longer surfaced as fields. All cred fields are optional. **Invariant preserved:** true secrets stay in the SecretProvider
+(0600 + atomic, ADR/​v0.20.1 lesson) — never in `environments.json`. **Back-compat:** a one-time, non-destructive migration
+copies legacy server-scoped creds into the dev env's scope (originals untouched, no longer consulted) — existing users
+re-enter nothing. **Scope:** ONLY `appian-dev`/`appian-devops`; every other MCP keeps its own card. API exposes only
+`is_set` booleans for creds, never values. **Localization:** genesis-core `McpRegistry` is untouched — a thin genesis-side
+SecretProvider adapter (in `ConfigService`) maps these two servers' lookups to `env:<label>`. Spec:
+`specs/environment-credentials-and-nav-revamp/01-environment-credentials.md`.
+
+## ADR-049 — Applications-first IA: primary nav is Applications · Chat · Runs · Documents; Overview + Catalog live under Settings
+
+**Status:** Proposed (2026-08-18). **Context:** user feedback that the 6-destination primary nav (Overview, Chat, Runs,
+Applications, Documents, Catalog) is too broad and the landing should be work-focused. **Decision:** **Applications** is the
+landing page (index route) and first primary tab; the primary sidebar is reduced to **Applications · Chat · Runs ·
+Documents**. **Overview** (metrics) and **Catalog** (Workflows | Skills browse/launch) move into the **Settings** workspace as
+tabs (two zones — Workspace: Overview, Catalog; Configuration: MCP, CLI, GitLab, Environments, General), with **Overview as
+the default Settings tab**. The `/catalog/:workflowId[/launch]` deep-link routes are retained (the Copilot launch flow uses
+them); only the sidebar entry is dropped. `/` renders Applications (no redirect). Kept the container name "Settings" (Option
+A); a later rename to "Manage"/"System" (Option B) is noted as optional follow-up since Overview/Catalog are not strictly
+config. Frontend-only; still ships a genesis release (committed `web/static`). Spec:
+`specs/environment-credentials-and-nav-revamp/02-nav-and-ia-revamp.md`.

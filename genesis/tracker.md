@@ -188,6 +188,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-18 (SPECS DRAFTED — UX revamp + environment-scoped credentials; not yet implemented):** Two user-feedback
+  changes specced under `specs/environment-credentials-and-nav-revamp/` (00 umbrella + 01 creds + 02 nav). **ADR-048**:
+  core Appian-MCP creds (`appian-dev`/`appian-devops`) are entered on the **environment** form + stored per-env
+  (`env:<label>` SecretProvider scope) + resolved ONLY from the dev env; `LCP_API_PATH` → public env field;
+  `LCP_URL`/`APPIAN_DOMAIN` auto-derived + hidden; one-time non-destructive migration of legacy server-scoped creds.
+  **ADR-049**: Applications-first IA — primary nav = Applications · Chat · Runs · Documents; Overview + Catalog move to
+  Settings tabs (default Overview). Delivery order: creds first (backend), then nav (frontend). Awaiting go-ahead to implement.
+
 - **2026-08-18 (genesis v0.48.4 — one-click Update upgrades the whole stack; CI green):** `updater.apply()` now also runs
   `genesis install` to refresh the **genesis-workflows** library (the only related repo that isn't a pip dep — genesis-core /
   kiro-agent-sdk / genesis-appian-parser are already re-pulled by `pip install .` as git+ssh tag pins). So clicking **Update
