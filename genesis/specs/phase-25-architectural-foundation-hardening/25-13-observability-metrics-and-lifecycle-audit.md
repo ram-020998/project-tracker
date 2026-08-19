@@ -1,6 +1,14 @@
 # 25-13 — Observability II: Metrics & Lifecycle Audit Stream
 
-- **Status:** 📝 DRAFTED · **Review items:** §22 (metrics/audit), Roadmap Phase 4 · **Repos:** genesis, web · **Depends on:** 25-01 (lifecycle events), 25-02 (correlation ids)
+- **Status:** ✅ BUILT (2026-08-19, backend `cba724e` + web `3504c28`; **NOT released**) — metrics + provenance + lifecycle activity feed (backend) + Feature Activity + Settings Metrics (web). · **Review items:** §22 (metrics/audit), Roadmap Phase 4 · **Repos:** genesis, web · **Depends on:** 25-01 (lifecycle events), 25-02 (correlation ids)
+
+## As built (backend `cba724e` 571 pytest / web `3504c28` 168 vitest — all + ruff/eslint/tsc green)
+- **`api/metrics.py` `register_metrics_routes`:** `GET /system/metrics` (JSON snapshot — runs by status, features/specs by state, credit totals + provenance; no Prometheus, §36) + `GET /runs/{id}/provenance` (read-projection over `run_events`: workflow id+version [reproduction anchor], tools, nodes, outcome, credits — the §22 reproduce view).
+- **`api/features.py` `GET /features/{id}/activity`:** the spec's time-ordered lifecycle transitions from the m0013 append-only audit (powers §26 Activity).
+- Repository-layer read helpers `RunStore.counts_by_status` + `FeatureStore.counts`. +`tests/test_metrics_api.py` (5, incl. activity via the real action endpoints → LifecycleService → m0013).
+- **Web:** `lib/api/metrics.ts` + hooks; `ActivityFeed` on the feature page (below the pipeline); `MetricsSection` folded into Settings → Overview. +`observability.test.tsx` (RTL + jest-axe); patched features/settings tests with the new handlers. web/static rebuilt + committed.
+- **Design notes:** the Activity feed is rendered as a **section** (not a separate tab) and Metrics is **folded into Settings→Overview** — lowest-risk additive integration into the shipped pages (spec allowed "or fold into Overview"). `/runs/{id}/provenance` ships as an **API** (reproduction answers); a dedicated provenance UI is a deferred nice-to-have.
+- **DoD:** met except genesis release CI + `bible/03` release update → deferred to the next release (unreleased).
 
 ## 1. Goal
 Round out observability so the review's §22 questions are answerable end-to-end: a lightweight **metrics** surface and a **lifecycle audit stream** (a first-class activity feed) built from the domain events 25-01 emits — appropriate to a **local single-user** app (no external tracing stack).

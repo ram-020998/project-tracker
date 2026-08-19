@@ -167,6 +167,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **▸ 25-05 ✅ BUILT (2026-08-18, unreleased):** `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`); `set_collect_impl` preserved; commit `a2a0ee1`; core 76 pytest green. Chat session-provider deferred.
   **▸ 25-08 ✅ SHIPPED:** optimistic locking (m0014 row_version CAS + StaleWriteError→409 + LifecycleService state-CAS + run-start idempotency; D-1/§17). **▸ RELEASED:** 25-01..25-08 shipped as **genesis v0.49.0 + genesis-core v0.9.4** (2026-08-18, CI green); ADR-050/051 Accepted; 25-09..25-14 remain.
   **▸ 25-09 ✅ BUILT (unreleased):** DocumentProvider interface + GoogleDriveProvider (`cd9abc8`); DocumentSyncEngine depends on the interface; ADR-052 Proposed until its release. **▸ 25-10 ⏳ IN PROGRESS:**   **▸ 25-10 ◑ CORE BUILT (unreleased):** reliable_agent_step() in genesis-core (`679ee73`, +4 tests); workflow adoption deferred (user) + release-gated. **▸ NEXT = 25-13** (observability; 25-12 cost pass depends on it + needs live telemetry).
+  **▸ 25-13 ✅ BUILT (unreleased):** observability — `/system/metrics` + `/runs/{id}/provenance` + feature lifecycle Activity feed + web Activity/Metrics (`cba724e`+`3504c28`). **▸ Remaining: 25-12** (cost pass, data-driven/live-gated) + **25-14** closeout.
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -216,6 +217,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-19 (Phase 25-13 — Observability II: metrics + lifecycle audit — BUILT; NOT released):** closed the
+  review's section-22 gap for local single-user scope. Backend (cba724e, 571 pytest): api/metrics.py — GET
+  /system/metrics (JSON snapshot: runs by status, features/specs by state, credit totals+provenance; no
+  Prometheus) + GET /runs/{id}/provenance (read-projection over run_events: workflow id+version, tools, nodes,
+  outcome, credits) + GET /features/{id}/activity (spec lifecycle transitions from the m0013 append-only audit
+  -> the Activity tab). Repo-layer read helpers RunStore.counts_by_status + FeatureStore.counts;
+  +test_metrics_api.py (5). Web (3504c28, 168 vitest): lib/api/metrics.ts + hooks; ActivityFeed section on the
+  feature page; MetricsSection folded into Settings->Overview; +observability.test.tsx (RTL + jest-axe); patched
+  features/settings MSW handlers; web/static rebuilt+committed. Lowest-risk additive integration (activity=
+  section, metrics=Overview fold). provenance shipped as API (UI deferred). Unreleased (0.49.0). Phase 25:
+  25-01..25-08 shipped (v0.49.0); 25-09 / 25-10-core / 25-13 built-unreleased; remaining = 25-12 (cost pass —
+  data-driven/live-gated) + 25-14 closeout; 25-11 backlog.
 
 - **2026-08-19 (Phase 25-10 — reliable_agent_step helper — ◑ CORE BUILT; NOT released):** shipped
   `genesis_core/nodes/reliable.py` — `reliable_agent_step(...)` bundles kiro_node agent + validator_node +

@@ -49,7 +49,7 @@ Every action item from the review (§C findings, §D critical, §E high-priority
 | **25-09** ✅ BUILT | DocumentProvider Interface | F (doc-provider), §19/§20 | Phase 2 | genesis |
 | **25-10** ◑ CORE BUILT | `reliable_agent_step()` Workflow Helper | §F (agent-step), §28 | Phase 2 | genesis-core, genesis-workflows |
 | **25-12** | AI Cost & Performance Pass | §31, §32 | Phase 5 | genesis-workflows, genesis |
-| **25-13** | Ops Observability II — Metrics & Lifecycle Audit Stream | §22 (metrics/audit) | Phase 4 | genesis, web |
+| **25-13** ✅ BUILT | Ops Observability II — Metrics & Lifecycle Audit Stream | §22 (metrics/audit) | Phase 4 | genesis, web |
 | **25-14** | Phase Release & Closeout (tag, ship, document) | process / phase DoD | final | all touched + project-tracker |
 
 > **13 active sub-phases** (25-01..25-10, 25-12, 25-13, 25-14). A 14th by original number — **per-story execution & WorkflowRun
