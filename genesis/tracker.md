@@ -147,7 +147,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   `APPIAN_DOMAIN` auto-derived + hidden; non-destructive migration of legacy server-scoped creds). **(2, 24-02)**
   **Applications-first IA** — primary nav = Applications · Chat · Runs · Documents; Overview + Catalog move to Settings tabs
   (default Overview). **ADR-048/049** (PROPOSED). Release: genesis-workflows (`mcp-registry.json`) + genesis (+ frontend).
-- **Phase 25** — `specs/phase-25-architectural-foundation-hardening.md` (+ `phase-25-architectural-foundation-hardening/25-01..25-10,25-12,25-13,25-14`)
+- **Phase 25** — `specs/phase-25-architectural-foundation-hardening.md` (+ `phase-25-architectural-foundation-hardening/25-01..25-10,25-13,25-14`) — **✅ SHIPPED + COMPLETE** (genesis v0.49.0 + v0.50.0, core v0.9.4 + v0.9.5; 25-11 + 25-12 → `specs/backlog/`)
   — **Architectural Foundation Hardening (code-review remediation)** 📝 SPECS DRAFTED; awaiting approval to build. Umbrella +
   **13 active** sub-phase specs covering every action item from `code-review/genesis-production-readiness-review-2026-08-18.md`:
   **25-01** typed SDLC domain + single-authority `LifecycleService` (keystone; C-1/C-2), **25-02** structured logging +

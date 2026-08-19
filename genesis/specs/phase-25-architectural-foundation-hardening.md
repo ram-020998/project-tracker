@@ -1,6 +1,6 @@
 # Phase 25 — Architectural Foundation Hardening (Code-Review Remediation)
 
-- **Status:** 📝 SPECS DRAFTED — awaiting approval to build
+- **Status:** ✅ SHIPPED + COMPLETE (2026-08-19) — released across **genesis v0.49.0 + genesis-core v0.9.4** (25-01..25-08) and **genesis v0.50.0 + genesis-core v0.9.5** (25-09, 25-10-core, 25-13), both CI-green. ADR-050/051/052 Accepted + ADR-026 amended. **25-11 (per-story execution) + 25-12 (AI cost pass) → backlog.** See §3 table + `progress/phase-25-architectural-foundation-hardening.md`.
 - **Created:** 2026-08-18
 - **Source:** `code-review/genesis-production-readiness-review-2026-08-18.md` (principal-architect production-readiness review)
 - **Applies to (baseline):** genesis **v0.48.7** · genesis-core **v0.9.3** · kiro-agent-sdk **v0.7.0** · genesis-workflows **v0.9.5** · genesis-appian-parser **v0.2.0**

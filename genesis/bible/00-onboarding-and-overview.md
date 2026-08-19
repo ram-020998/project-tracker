@@ -19,10 +19,10 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-18 — latest SHIPPED: genesis v0.49.0 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-19 — latest SHIPPED: genesis v0.50.0 +
 > genesis-workflows v0.9.5 +
-> genesis-core v0.9.4 + kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0** (genesis v0.50.0 + core v0.9.5 =
-> the Phase-25 Architectural Foundation Hardening partial release, 25-01..25-10 + 25-13; 25-11 + 25-12 backlog — see §9 (COMPLETE)) (Phases 9 Agent-Artifact-I/O,
+> genesis-core v0.9.5 + kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0** (genesis v0.50.0 + core v0.9.5 =
+> the Phase-25 Architectural Foundation Hardening release (v0.49.0 + v0.50.0) — Phase 25 COMPLETE; 25-11 + 25-12 backlog — see §9) (Phases 9 Agent-Artifact-I/O,
 > 10 Chat-assistant, 11 Credit-tracking, 12 Appian Code-Review Workflow, 13 Chat Copilot & Run Orchestrator,
 > 14 Skills in Chat all shipped). **Phase 15 — Design-Document Workflow — COMPLETE (15-01..15-05 shipped):**
 > a new **`design-doc`** workflow ports the Jarvis design-doc process into a deterministic Genesis graph —
