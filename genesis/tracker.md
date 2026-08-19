@@ -219,6 +219,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-19 (live fix — document viewer hang on a large doc — SHIPPED genesis v0.50.2):** opening
+  `/documents/4` froze the tab. Root cause: the full-screen viewer (`DocumentDetailPage`) rendered the whole
+  parsed Markdown (`content_md` ~858 KB / 3,240 lines, spreadsheet-derived, wide GFM tables) via react-markdown +
+  remark-gfm on the main thread with no size guard → thousands of table cells committed to the DOM. Fix: a
+  **Rendered | Source** toggle; Source renders the raw Markdown in the existing `CodeBlock` (plain `<pre>`, instant),
+  and docs > 200k chars default to Source so they open immediately. Pure default in `documentView.ts` (+2 vitest);
+  web 166→168, lint/tsc/build green, `web/static` rebuilt. genesis v0.50.2 (frontend-only). `be8a6e6`. See §7 lesson
+  + `progress/2026-08-19-live-fixes-apikey-scope-and-gws-cwd.md` (#3).
+
 - **2026-08-19 (live fixes — sync-application APPIAN_API_KEY scope + gws --output cwd — SHIPPED):** two runtime
   failures on a real deployment (app ahead of the installed workflow / gws newly connected), diagnosed by the user +
   verified against the code. **(1) genesis-workflows v0.9.6 (sync-application v0.2.3, `a15efb9`):** baseline export

@@ -7,6 +7,7 @@ diagnosed by the user and verified against the code. Two independent patches, bo
 |---|---|---|---|
 | #1 APPIAN_API_KEY scope | genesis-workflows | **v0.9.6** (workflow **v0.2.3**) | ADR-048 version skew: app stores the key in the per-env scope; workflow read `appian-devops`/`global` only |
 | #2 gws `--output` confinement | genesis | **v0.50.1** | `GwsClient` spawned gws with no `cwd`; absolute `-o` under `~/Genesis/runs/…` is outside cwd → gws 0.22.5 rejects |
+| #3 document viewer hang | genesis | **v0.50.2** | `/documents/:id` rendered ~858 KB Markdown via react-markdown on the main thread → tab froze; large docs now default to a raw-source view |
 
 ## #1 — `sync-application` can't read APPIAN_API_KEY (run `r-0860e9961b20`)
 **Symptom:** baseline export of "AS GSS Full Application" failed —
@@ -37,6 +38,21 @@ Reproduced directly: gws from the repo with `-o /tmp/…` → the 400; gws with 
 path is always inside cwd. The isolated config dir is an absolute env var (`GOOGLE_WORKSPACE_CLI_CONFIG_DIR`), so
 changing cwd is safe. **+3 regression tests** (a confining fake gws mirroring 0.22.5 for export + download; a direct
 `cwd`/relative-`-o` spawn-contract assertion). Commit `276be73`, tag **v0.50.1**.
+
+## #3 — document viewer hangs on a large doc (`/documents/4`)
+**Symptom:** opening `http://127.0.0.1:8760/documents/4` hangs the tab for a long time.
+**Root cause (verified):** the full-screen viewer `web/features/library/DocumentDetailPage.tsx` rendered the
+entire parsed Markdown (`content_md`) via `MarkdownView` (react-markdown + remark-gfm) **unconditionally, no
+size guard/virtualization**. Doc #4 is spreadsheet-derived: `content_md` **~858 KB / 3,240 lines** (longest line
+8,344 chars; `tables.json` 1.5 MB). remark parses the whole blob (GFM tables are expensive) and React commits
+**thousands of `<tr>`/`<td>`** to the DOM on the main thread → freeze. Not backend/network (content is sent inline
+over localhost in ~ms) and not a crash — smaller docs open fine.
+**Fix (genesis v0.50.2, frontend-only):** a **Rendered | Source** `SegmentedControl`. Source renders the raw
+Markdown in the existing `CodeBlock` (plain `<pre>` = one text node, instant at any size); docs over
+`LARGE_DOC_CHARS` (200k chars) **default to Source** so they open immediately (flip to Rendered on demand; small
+docs still default Rendered). Pure default logic in `web/features/library/documentView.ts` (**+2 vitest**).
+web 166 → 168 vitest, lint(0 err)/tsc/build green; `web/static` rebuilt + committed. Commit `be8a6e6`, tag **v0.50.2**.
+(Future richer option: render `tables.json` as a paged/virtualized grid for spreadsheets.)
 
 ## Gates
 - genesis-workflows: 14 sync-application pytest + `validate_library` (7 workflows) green. CI = validate/test only (no ruff).
