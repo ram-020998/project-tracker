@@ -166,7 +166,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **▸ 25-04 ✅ BUILT (2026-08-18, unreleased):** network-exposure guardrail — `genesis serve/up` refuse a non-loopback bind without `--i-understand-no-auth`/env override (logs a warning); commit `0a8f13f`; backend 535 pytest green.
   **▸ 25-05 ✅ BUILT (2026-08-18, unreleased):** `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`); `set_collect_impl` preserved; commit `a2a0ee1`; core 76 pytest green. Chat session-provider deferred.
   **▸ 25-08 ✅ SHIPPED:** optimistic locking (m0014 row_version CAS + StaleWriteError→409 + LifecycleService state-CAS + run-start idempotency; D-1/§17). **▸ RELEASED:** 25-01..25-08 shipped as **genesis v0.49.0 + genesis-core v0.9.4** (2026-08-18, CI green); ADR-050/051 Accepted; 25-09..25-14 remain.
-  **▸ 25-09 ✅ BUILT (unreleased):** DocumentProvider interface + GoogleDriveProvider (`cd9abc8`); DocumentSyncEngine depends on the interface; ADR-052 Proposed until its release. **▸ 25-10 ⏳ IN PROGRESS:** reliable_agent_step() helper.
+  **▸ 25-09 ✅ BUILT (unreleased):** DocumentProvider interface + GoogleDriveProvider (`cd9abc8`); DocumentSyncEngine depends on the interface; ADR-052 Proposed until its release. **▸ 25-10 ⏳ IN PROGRESS:**   **▸ 25-10 ◑ CORE BUILT (unreleased):** reliable_agent_step() in genesis-core (`679ee73`, +4 tests); workflow adoption deferred (user) + release-gated. **▸ NEXT = 25-13** (observability; 25-12 cost pass depends on it + needs live telemetry).
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -216,6 +216,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-19 (Phase 25-10 — reliable_agent_step helper — ◑ CORE BUILT; NOT released):** shipped
+  `genesis_core/nodes/reliable.py` — `reliable_agent_step(...)` bundles kiro_node agent + validator_node +
+  retry/escalation into a `ReliableStep` (ADR-011 trio by construction) + `add_reliable_step(g, step, …)`
+  wiring via the unchanged attach_reliability; supports validator_name/target_artifact so adoption preserves
+  a step's exact node name + artifact. +4 tests (structural + stubbed-collect end-to-end retry→escalate,
+  retry→pass). Purely additive; reliability lint unchanged. genesis-core **80** pytest + ruff green,
+  committed `679ee73` (unreleased). **Workflow adoption (design-doc/steering + LOC proof) DEFERRED** per user
+  ("look at using this later") and release-gated: genesis-workflows pins an older genesis-core without the
+  helper, so any workflow `import reliable_agent_step` fails CI until genesis-core ships it + repin; and every
+  workflow uses bespoke validator names/artifacts with non-uniform routing (design-doc = §7 unusual-topology)
+  → recommend hello-appian as the clean proof, not design-doc. **Sequencing:** doing **25-13** (observability,
+  buildable now) before **25-12** (AI cost pass — data-driven, benefits from 25-13 metrics + needs live runs).
 
 - **2026-08-19 (Phase 25-09 — DocumentProvider interface — ✅ BUILT; NOT released):** introduced a thin document-sourcing
   capability boundary (ADR-052, F/§19/§20): new `genesis/integrations/documents/` with a `DocumentProvider` Protocol +

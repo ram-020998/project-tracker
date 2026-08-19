@@ -1,6 +1,14 @@
 # 25-10 — `reliable_agent_step()` Workflow Helper
 
-- **Status:** 📝 DRAFTED · **Review items:** §F (new agent step ergonomics), §28 (Open/Closed), §31 (duplication) · **Roadmap:** Phase 2 · **Repos:** genesis-core, genesis-workflows · **Depends on:** nothing (composes with 25-05)
+- **Status:** ◑ CORE BUILT (2026-08-19, genesis-core commit `679ee73`; **NOT released**) — `reliable_agent_step()` + `add_reliable_step()` shipped in genesis-core with +4 tests. **Workflow adoption + steering + LOC proof DEFERRED** (user 2026-08-19: "look at using this later") — and release-gated (genesis-workflows pins an older genesis-core without the helper; adoption needs a genesis-core release + repin). · **Review items:** §F, §28, §31 · **Roadmap:** Phase 2 · **Repos:** genesis-core, genesis-workflows · **Depends on:** nothing (composes with 25-05)
+
+## As built (genesis-core, commit `679ee73`; 80 pytest [+4] + ruff green)
+- **`genesis_core/nodes/reliable.py`:** `reliable_agent_step(...)` bundles `kiro_node` agent + `validator_node` + retry/escalation into a `ReliableStep` (the ADR-011 trio **by construction**); `add_reliable_step(g, step, nxt=, on_exhaust_gate=)` wires it via the unchanged `attach_reliability`. Supports `validator_name`/`target_artifact` so an existing step's exact node name + artifact are preserved on adoption. Exported from `genesis_core`.
+- **Tests:** structural (trio kinds/retry/gate) + stubbed-collect **end-to-end** (retry-on-fail → escalate-on-exhaustion, retry-then-pass) via the 25-05 provider seam — no real Kiro.
+- **Purely additive:** the primitives + the CI reliability lint (`genesis/lint/reliability.py`) are unchanged.
+
+## Deferred (to a later release)
+- **Workflow adoption + LOC proof.** Verified constraint: every workflow uses **bespoke validator names + `target_artifact`s** and `design-doc` has **non-uniform routing** (KB-freshness/mockup→i18n/open-questions branches) — the spec's §7 "unusual topology → keep the primitives" case, so a `design-doc` retrofit is high-risk / marginal-LOC. Recommendation at release: adopt in **hello-appian** (1 clean trio) as the concrete proof, or steering-only + opportunistic migration. **Also release-gated** (needs genesis-core shipped with the helper + genesis-workflows repin).
 
 ## 1. Goal
 Provide a composition helper that bundles the **reliability trio** (agent node + validator + retry + escalation) into a single call, cutting the hand-wired boilerplate every workflow repeats — without changing the CI-enforced invariant or the node model.
