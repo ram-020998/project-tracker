@@ -33,3 +33,13 @@ Commit `052ce36`, tag **v0.51.3**, CI green (#6609135: genesis + frontend + clea
 ## Notes / future
 - SVG favicons cover all modern browsers; a legacy `.ico` fallback wasn't added (local single-user, modern browser).
 - A wordmark/full-lockup component + a light-theme-tuned mark are easy follow-ons if wanted.
+
+## Update — v0.51.4 (logo redesign per feedback)
+The first mark (an abstract orbit ring + node) was replaced with a **more modern, standard "G" monogram**:
+the blue→purple gradient tile + a clean geometric white **G** (an open ring + an inward crossbar). The
+`animated` prop on `GenesisLogo` was dropped — the mark is now always static, and the **loading animation is
+a standard spinner ring** (`.genesis-spinner` in `index.css`) rotating around the static mark, used by both
+`LoadingScreen` and the `index.html` boot splash (replacing the spinning-orbit/pulsing-core animation). Favicon
++ apple-touch-icon + boot splash SVGs updated to the G. web 182→181 vitest (dropped the animated-classes test),
+gates green; genesis **v0.51.4** (`5a7a532`), CI green (#6609256).
+
