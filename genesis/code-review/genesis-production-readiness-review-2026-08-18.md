@@ -269,3 +269,26 @@ The engine, tools, MCP model, event log, and reliability trio stay exactly as th
 **The engine will scale; the domain model will not — yet.** Genesis has an unusually disciplined *execution* foundation (typing, tests, sandboxing, reliability) but the *SDLC domain* the product is meant to become is still mostly strings and placeholders. Build the thin domain/service layer and the two provider interfaces now, while the codebase is small and well-tested, and future stages/agents/providers become additive rather than structural.
 
 **Recommended next step:** write a spec for **#1 (typed domain + `LifecycleService`)** first (per the planning-before-implementation loop), get sign-off on the entity/transition design, then implement behind tests. No code changes until the spec is approved.
+
+---
+
+## Phase 25 outcome (closeout 2026-08-19)
+
+Phase 25 (Architectural Foundation Hardening) remediated this review across two coordinated releases —
+**genesis v0.49.0 + genesis-core v0.9.4** (25-01..25-08) and **genesis v0.50.0 + genesis-core v0.9.5**
+(25-09, 25-10-core, 25-13) — both CI-green.
+
+**Resolved:** C-1/C-2 (typed SDLC domain + single-authority `LifecycleService`, ADR-050); C-3 (god
+modules: `KbStore` 1373→652, `api/app.py` 841→189, `chat/manager.py` mode branching → `ChatModeProfile`);
+C-4 (ChatModeProfile); C-5 (`ApplicationSyncService` de-dup); E-2 (structured logging + correlation ids);
+E-3 (`AgentProvider`, ADR-051); E-5/D-1-files (atomic JSON writes); D-1/§17 (optimistic locking m0014 +
+run-start idempotency); D-2 (localhost-bind guardrail, ADR-026 amended); §F/§19/§20 (`DocumentProvider`,
+ADR-052); §22 (metrics + `/runs/{id}/provenance` + lifecycle Activity feed).
+
+**Partially resolved:** §F agent-step ergonomics — `reliable_agent_step()` shipped (genesis-core), workflow
+adoption opportunistic; §22 story-level Activity — feature-spec Activity shipped, story activity pending the
+backlog 25-11.
+
+**Deferred (backlog / separate track):** 25-11 per-story execution; 25-12 AI cost & performance pass
+(data-driven — needs live run telemetry); auth/multi-tenancy, Salesforce, Postgres (ADR-026/030 triggers,
+out of scope for local single-user).

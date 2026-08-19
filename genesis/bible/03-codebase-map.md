@@ -211,6 +211,19 @@ genesis/genesis/
   db/migrations/        m0013_lifecycle (lifecycle_transitions audit, 25-01) + m0014_row_version (optimistic-lock
                         CAS column on kb_features/kb_feature_specs, 25-08); current_version=14.
   runs/manager.py       RunManager.start(idempotency_key=…) — in-memory dedupe of a double-submit (25-08, §17).
+genesis-core/genesis_core/
+  nodes/reliable.py     (25-10) reliable_agent_step(...) + add_reliable_step(g, step, …) — compose the ADR-011
+                        trio (kiro_node agent + validator_node + retry/escalation) in one call; ReliableStep.
+genesis/genesis/
+  integrations/documents/  (25-09, ADR-052) provider.py (DocumentProvider Protocol + DocRef/DocMeta +
+                        DocumentProviderError), gdrive.py (GoogleDriveProvider — wraps the read-only gws
+                        connector), __init__.py (build_document_providers registry). DocumentSyncEngine depends
+                        on the interface (not GwsClient).
+  api/metrics.py        (25-13, §22) register_metrics_routes: GET /system/metrics (JSON snapshot — runs/features/
+                        credits; no Prometheus) + GET /runs/{id}/provenance (reproduction view over run_events).
+                        api/features.py adds GET /features/{id}/activity (lifecycle feed over m0013). Web:
+                        features/features/ActivityFeed + settings/components/MetricsSection.
+                        (Overview trimmed: Active-runs + Installed-workflows sections removed.)
 ```
 
 ---

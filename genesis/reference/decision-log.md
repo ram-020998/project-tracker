@@ -1208,3 +1208,30 @@ Behavior-preserving (the `set_collect_impl` test seam still works); additive, `C
 non-Kiro provider or a chat session-provider plugs into (the chat session-provider is deferred). Its sibling **ADR-052
 DocumentProvider** (25-09) remains **Proposed** — not yet built. Spec:
 `specs/phase-25-architectural-foundation-hardening/25-05-agent-provider-interface.md`.
+
+
+## ADR-052 — DocumentProvider interface for document sourcing (Phase 25-09)
+
+**Status:** Accepted (2026-08-19; shipped — genesis v0.50.0, CI green). **Context:** the `gws` Google-Drive
+connector was reasonably isolated (`integrations/gws/`, `DocumentSyncEngine` via `ctx.extras`) but there was
+**no `DocumentProvider` interface** — a second source (SharePoint) would mean a sibling adapter wired through
+`DocumentSyncEngine` with branches (review §F/§19/§20). **Decision:** document *sourcing* (resolve metadata +
+change-fingerprint, fetch bytes) sits behind a thin Protocol (`genesis/integrations/documents/`:
+`DocumentProvider` + provider-neutral `DocRef`/`DocMeta` + `DocumentProviderError`), with `GoogleDriveProvider`
+as the first implementation (wrapping the read-only `gws` connector; `resolve`=get_file+fingerprint,
+`fetch`=export[native]/download[binary]). `DocumentSyncEngine` depends on the interface, not `GwsClient`; the
+`gws_provider` ctor arg stays back-compat (auto-builds the default registry), and `runtime/context.py` injects
+`build_document_providers()` at the composition root. A second source is now an **additive adapter + one
+registry entry**. The fingerprint (Drive revision/md5) drives stale-detection (§21). **Constrained scope
+(§36):** define capability interfaces only where a 2nd implementation is plausibly on the roadmap — documents
+qualify; the **Appian Deployment REST export stays concrete** until a second deploy target exists. Uploads
+remain a built-in local path. Spec: `specs/phase-25-architectural-foundation-hardening/25-09-document-provider-interface.md`.
+
+## ADR-026 amendment (Phase 25-04) — localhost-bind guardrail
+
+**Status:** Accepted (2026-08-19; shipped — genesis v0.49.0). Amends ADR-026's local-single-user posture: since
+Genesis ships **no authentication**, `genesis serve`/`up` **refuse a non-loopback bind** (e.g. `0.0.0.0`/`::`)
+unless the operator explicitly opts in via `--i-understand-no-auth` / `GENESIS_ALLOW_NON_LOOPBACK=1`. This
+prevents accidentally exposing an unauthenticated app on the network while keeping the intended localhost use
+frictionless. Implemented in `runtime/launcher.py` + the `serve`/`up` CLI handlers. Spec:
+`specs/phase-25-architectural-foundation-hardening/25-04-network-exposure-guardrail.md`.

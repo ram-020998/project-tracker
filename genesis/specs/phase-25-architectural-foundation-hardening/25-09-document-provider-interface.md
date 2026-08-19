@@ -1,6 +1,6 @@
 # 25-09 — DocumentProvider Interface
 
-- **Status:** ✅ BUILT (2026-08-19, commit `cd9abc8`; **NOT released** — ADR-052 stays Proposed until the next release) — `DocumentProvider` Protocol + `GoogleDriveProvider`; `DocumentSyncEngine` depends on the interface; fake-provider tests green (no gws). · **Review items:** F (new document provider), §19, §20 · **Roadmap:** Phase 2 · **Repos:** genesis · **Proposed ADR:** ADR-052 · **Depends on:** nothing
+- **Status:** ✅ BUILT (2026-08-19, commit `cd9abc8`; **SHIPPED genesis v0.50.0**, ADR-052 Accepted) — `DocumentProvider` Protocol + `GoogleDriveProvider`; `DocumentSyncEngine` depends on the interface; fake-provider tests green (no gws). · **Review items:** F (new document provider), §19, §20 · **Roadmap:** Phase 2 · **Repos:** genesis · **Proposed ADR:** ADR-052 · **Depends on:** nothing
 
 ## As built (commit `cd9abc8`; genesis 566 pytest [+5] + ruff green)
 - **`genesis/integrations/documents/` (NEW):** `DocumentProvider` Protocol (`supports`/`resolve`/`fetch`) + provider-neutral `DocRef`/`DocMeta` (fingerprint map for stale-detection, §21) + `DocumentProviderError`; `GoogleDriveProvider` wraps the read-only `gws` connector (resolve=`get_file`+modifiedTime/version/md5; fetch=export[native]/download[binary] — `is_google_native`/`google_export_target` moved out of the engine into here); `build_document_providers()` = composition-root registry `{gdrive: …}`.

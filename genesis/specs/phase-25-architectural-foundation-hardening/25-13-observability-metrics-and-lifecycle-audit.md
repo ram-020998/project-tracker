@@ -1,6 +1,6 @@
 # 25-13 — Observability II: Metrics & Lifecycle Audit Stream
 
-- **Status:** ✅ BUILT (2026-08-19, backend `cba724e` + web `3504c28`; **NOT released**) — metrics + provenance + lifecycle activity feed (backend) + Feature Activity + Settings Metrics (web). · **Review items:** §22 (metrics/audit), Roadmap Phase 4 · **Repos:** genesis, web · **Depends on:** 25-01 (lifecycle events), 25-02 (correlation ids)
+- **Status:** ✅ BUILT (2026-08-19, backend `cba724e` + web `3504c28`; **SHIPPED genesis v0.50.0**) — metrics + provenance + lifecycle activity feed (backend) + Feature Activity + Settings Metrics (web). · **Review items:** §22 (metrics/audit), Roadmap Phase 4 · **Repos:** genesis, web · **Depends on:** 25-01 (lifecycle events), 25-02 (correlation ids)
 
 ## As built (backend `cba724e` 571 pytest / web `3504c28` 168 vitest — all + ruff/eslint/tsc green)
 - **`api/metrics.py` `register_metrics_routes`:** `GET /system/metrics` (JSON snapshot — runs by status, features/specs by state, credit totals + provenance; no Prometheus, §36) + `GET /runs/{id}/provenance` (read-projection over `run_events`: workflow id+version [reproduction anchor], tools, nodes, outcome, credits — the §22 reproduce view).

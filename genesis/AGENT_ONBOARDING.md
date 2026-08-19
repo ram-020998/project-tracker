@@ -17,9 +17,9 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-08-18 — latest SHIPPED: genesis v0.49.0 + genesis-core v0.9.4 + genesis-workflows v0.9.5 +
-> kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.49.0 + genesis-core v0.9.4 = the
-> Phase-25 Architectural Foundation Hardening partial release, sub-phases 25-01..25-08; 25-09..25-14 follow.)
+> **Last refreshed: 2026-08-18 — latest SHIPPED: genesis v0.50.0 + genesis-core v0.9.5 + genesis-workflows v0.9.5 +
+> kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.50.0 + genesis-core v0.9.5 = the
+> Phase-25 Architectural Foundation Hardening partial release, sub-phases 25-01..25-10 + 25-13 (25-11 + 25-12 backlog) — Phase 25 COMPLETE.)
 > (Full phase/release banner + version detail live in
 > `bible/00-onboarding-and-overview.md` and `bible/01-current-state.md`.)
 

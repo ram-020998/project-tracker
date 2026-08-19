@@ -1,6 +1,6 @@
 # 25-14 — Phase Release & Closeout (tag, ship, document)
 
-- **Status:** 📝 DRAFTED · **Review items:** process (Definition of Done for all of Phase 25) · **Roadmap:** final · **Repos:** genesis, genesis-core, genesis-workflows (as touched) + project-tracker · **Depends on:** all other active sub-phases (25-01..25-10, 25-12, 25-13)
+- **Status:** ✅ DONE (2026-08-19) — Phase 25 released in two coordinated releases (v0.49.0/core v0.9.4 + v0.50.0/core v0.9.5), CI green; ADR-050/051/052 Accepted + ADR-026 amended; bible/tracker/progress + review-delta current. **PHASE 25 COMPLETE** (25-11 + 25-12 backlog). · **Review items:** process (Definition of Done for all of Phase 25) · **Roadmap:** final · **Repos:** genesis, genesis-core, genesis-workflows (as touched) + project-tracker · **Depends on:** all other active sub-phases (25-01..25-10, 25-12, 25-13)
 
 ## 1. Goal
 The capstone that turns the individually-shipped sub-phases into a **cleanly released, fully documented Phase 25**: cross-repo version/pin alignment, ADRs flipped to Accepted, the bible + tracker + progress brought current, CI green everywhere, and a closing **review-delta** note that re-scores the codebase against the review's §A targets.

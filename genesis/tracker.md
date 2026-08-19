@@ -168,6 +168,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **▸ 25-08 ✅ SHIPPED:** optimistic locking (m0014 row_version CAS + StaleWriteError→409 + LifecycleService state-CAS + run-start idempotency; D-1/§17). **▸ RELEASED:** 25-01..25-08 shipped as **genesis v0.49.0 + genesis-core v0.9.4** (2026-08-18, CI green); ADR-050/051 Accepted; 25-09..25-14 remain.
   **▸ 25-09 ✅ BUILT (unreleased):** DocumentProvider interface + GoogleDriveProvider (`cd9abc8`); DocumentSyncEngine depends on the interface; ADR-052 Proposed until its release. **▸ 25-10 ⏳ IN PROGRESS:**   **▸ 25-10 ◑ CORE BUILT (unreleased):** reliable_agent_step() in genesis-core (`679ee73`, +4 tests); workflow adoption deferred (user) + release-gated. **▸ NEXT = 25-13** (observability; 25-12 cost pass depends on it + needs live telemetry).
   **▸ 25-13 ✅ BUILT (unreleased):** observability — `/system/metrics` + `/runs/{id}/provenance` + feature lifecycle Activity feed + web Activity/Metrics (`cba724e`+`3504c28`). **▸ Remaining: 25-12** (cost pass, data-driven/live-gated) + **25-14** closeout.
+  **▸ PHASE 25 COMPLETE (2026-08-19):** 25-09/25-10-core/25-13 shipped in **genesis v0.50.0 + genesis-core v0.9.5** (CI green); ADR-050/051/052 Accepted + ADR-026 amended; 25-11 + 25-12 in backlog.
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -217,6 +218,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-19 (Phase 25-14 — CLOSEOUT — PHASE 25 COMPLETE):** shipped the remaining active sub-phases in a
+  second coordinated release — **genesis v0.50.0 + genesis-core v0.9.5** (25-09 DocumentProvider interface;
+  25-10-core reliable_agent_step helper; 25-13 observability metrics/provenance/Activity feed + web views;
+  plus the Overview trim removing the Active-runs + Installed-workflows sections). CI green (core #6607186,
+  genesis #6607193). Gate: genesis 571 pytest + ruff, core 80, web 166 vitest + lint/tsc/build + stale-bundle
+  guard. **ADR-050/051/052 -> Accepted** + **ADR-026 amended** (25-04 guardrail) in decision-log + bible/04.
+  Bible refreshed (00/01 versions+counts, 03 modules, 04 ADRs, 08 Phase-25 -> COMPLETE, index Last-refreshed);
+  progress rollup `progress/phase-25-architectural-foundation-hardening.md`; review-delta closeout appended.
+  **25-11 (per-story execution) + 25-12 (AI cost pass) moved to BACKLOG** (25-12 relocated to specs/backlog/;
+  it is data-driven and needs live run telemetry). **25-10 workflow adoption** left opportunistic. Two-release
+  phase: v0.49.0 (25-01..25-08) + v0.50.0 (25-09/10-core/13). PHASE 25 COMPLETE.
 
 - **2026-08-19 (Phase 25-13 — Observability II: metrics + lifecycle audit — BUILT; NOT released):** closed the
   review's section-22 gap for local single-user scope. Backend (cba724e, 571 pytest): api/metrics.py — GET

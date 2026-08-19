@@ -1,6 +1,7 @@
 # 25-12 — AI Cost & Performance Pass
 
-- **Status:** 📝 DRAFTED · **Review items:** §31 (Performance), §32 (Cost Efficiency) · **Roadmap:** Phase 5 · **Repos:** genesis-workflows, genesis · **Depends on:** nothing (can slot anytime; benefits from 25-13 metrics)
+- **Status:** ⏸ BACKLOG (moved 2026-08-19) — data-driven cost pass; its measured-reduction core needs REAL run telemetry (headless-undrivable) + benefits from the 25-13 metrics substrate. Revisit with live credit data.
+- _(orig)_ 📝 DRAFTED · **Review items:** §31 (Performance), §32 (Cost Efficiency) · **Roadmap:** Phase 5 · **Repos:** genesis-workflows, genesis · **Depends on:** nothing (can slot anytime; benefits from 25-13 metrics)
 
 ## 1. Goal
 A measured pass to cut avoidable LLM spend and latency: replace LLM calls that should be deterministic code, trim oversized/duplicated context, and identify parallelizable agent steps — using Genesis's **real** credit data (ADR-032) as the evidence base.

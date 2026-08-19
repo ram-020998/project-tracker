@@ -8,14 +8,11 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### ⭐ IN PROGRESS (25-01..25-08 SHIPPED as genesis v0.49.0 + genesis-core v0.9.4; 25-09..25-14 remain) — Phase 25: Architectural Foundation Hardening (code-review remediation)
+### ✅ SHIPPED (COMPLETE) — Phase 25: Architectural Foundation Hardening (code-review remediation) — genesis v0.50.0 + genesis-core v0.9.5
 
 > **Specs:** `specs/phase-25-architectural-foundation-hardening.md` (umbrella) + `phase-25-…/25-01..25-14` (25-11 → backlog).
-> **ADR-050 + ADR-051 → Accepted (shipped); ADR-052 (DocumentProvider) still Proposed (25-09 pending).** Remediates the production-readiness review (`code-review/genesis-production-readiness-review-2026-08-18.md`).
-> **Release model:** built incrementally with the version held, then **25-01..25-08 shipped together as a partial release — genesis
-> v0.49.0 + genesis-core v0.9.4 (2026-08-18, CI green: core #6600462, genesis #6600502)**; the remainder (25-09..25-13 + the 25-14
-> closeout) ships in a later release. Gate: genesis **561** pytest + ruff · core **76** + ruff · web **163** vitest + eslint(0)/tsc/build
-> + stale-bundle guard — all green. Sub-phases:
+> **ADR-050 + ADR-051 + ADR-052 → Accepted (shipped); ADR-026 amended (25-04 localhost guardrail).** Remediates the production-readiness review (`code-review/genesis-production-readiness-review-2026-08-18.md`).
+> **Shipped in two releases:** **v0.49.0 + core v0.9.4** (25-01..25-08, 2026-08-18) and **v0.50.0 + core v0.9.5** (25-09/25-10-core/25-13 + Overview trim, 2026-08-19), both CI-green. **25-11 (per-story execution) + 25-12 (AI cost pass) are BACKLOG.** Sub-phases:
 >
 > - **25-01 ✅ SHIPPED** — typed SDLC domain (`genesis/domain/`) + single-authority `LifecycleService` + m0013 audit + spec action
 >   endpoints (illegal/precondition → 409) + web allowed-action buttons (`d70bd20`+`0b90392`). ADR-050 (Proposed→Accepted at 25-14).
@@ -38,9 +35,13 @@
 >   sandbox/trust/mcp/permission/token/steering) composed into one profile resolved per session; branch-free session
 >   methods (guard: no `self.mode ==`); posture ported verbatim + pinned. `chat/manager.py` 716→639.
 > - **25-08 ✅ SHIPPED** — optimistic concurrency (D-1/§17, `09826e7`): **m0014** row_version CAS on features/specs + `StaleWriteError`→409 + LifecycleService state-CAS + run-start idempotency key; +test_optimistic_locking/test_run_idempotency. Precedes 25-11.
-> - **25-09 ✅ BUILT (unreleased, `cd9abc8`)** — DocumentProvider interface + GoogleDriveProvider (ADR-052 Proposed until its release).
-> - **25-10 ◑ CORE BUILT (unreleased, `679ee73`)** — reliable_agent_step() helper in genesis-core (+4 tests); workflow adoption + steering + LOC proof DEFERRED (user) + release-gated.
-> - **25-13 ✅ BUILT (unreleased, `cba724e`+`3504c28`)** — observability: `/system/metrics` + `/runs/{id}/provenance` + feature lifecycle Activity feed + web Activity/Metrics views (§22). **25-12 ⏳ remaining** — AI cost & performance pass (data-driven; benefits from 25-13 metrics + needs real run telemetry → partly live-gated). **25-14** — release/closeout capstone (flips ADRs to Accepted, one coordinated release).
+> - **25-09 ✅ SHIPPED (v0.50.0)** — `DocumentProvider` interface + `GoogleDriveProvider` (`integrations/documents/`); `DocumentSyncEngine` depends on the interface (`cd9abc8`). **ADR-052 Accepted.**
+> - **25-10 ◑ CORE SHIPPED (core v0.9.5, `679ee73`)** — `reliable_agent_step()` helper in genesis-core (+4 tests). **Workflow adoption + LOC proof deferred/opportunistic** (release-gated + design-doc = §7 unusual-topology; adopt in hello-appian when picked up).
+> - **25-13 ✅ SHIPPED (v0.50.0)** — observability (§22): `/system/metrics` + `/runs/{id}/provenance` + feature lifecycle Activity feed (m0013) + web Activity/Metrics views (`cba724e`+`3504c28`). Also: Overview trimmed (Active-runs + Installed-workflows removed, `97a0570`).
+> - **25-14 ✅ DONE** — this closeout: two coordinated releases verified CI-green; ADR-050/051/052 Accepted + ADR-026 amended; bible/tracker/progress + review-delta current.
+> - **25-11 (per-story execution) + 25-12 (AI cost & performance pass) → BACKLOG.** 25-12 moved to backlog 2026-08-19 (data-driven; needs live run telemetry — revisit with real data); 25-11 gated on Breakdown→Stories + per-stage workflows.
+>
+> **PHASE 25 COMPLETE.** Release gate (v0.50.0 / core v0.9.5): genesis **571** pytest + ruff · genesis-core **80** + ruff · web **166** vitest + eslint(0)/tsc/build + stale-bundle guard — all green; CI green (core #6607186, genesis #6607193).
 > - **Backlog:** 25-11 per-story execution (gated on Breakdown→Stories + per-stage workflows).
 > (bible/03 codebase-map + bible/04 ADR-050/051 updated with the shipped modules.)
 
