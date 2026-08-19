@@ -166,6 +166,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **▸ 25-04 ✅ BUILT (2026-08-18, unreleased):** network-exposure guardrail — `genesis serve/up` refuse a non-loopback bind without `--i-understand-no-auth`/env override (logs a warning); commit `0a8f13f`; backend 535 pytest green.
   **▸ 25-05 ✅ BUILT (2026-08-18, unreleased):** `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`); `set_collect_impl` preserved; commit `a2a0ee1`; core 76 pytest green. Chat session-provider deferred.
   **▸ 25-08 ✅ SHIPPED:** optimistic locking (m0014 row_version CAS + StaleWriteError→409 + LifecycleService state-CAS + run-start idempotency; D-1/§17). **▸ RELEASED:** 25-01..25-08 shipped as **genesis v0.49.0 + genesis-core v0.9.4** (2026-08-18, CI green); ADR-050/051 Accepted; 25-09..25-14 remain.
+  **▸ 25-09 ✅ BUILT (unreleased):** DocumentProvider interface + GoogleDriveProvider (`cd9abc8`); DocumentSyncEngine depends on the interface; ADR-052 Proposed until its release. **▸ 25-10 ⏳ IN PROGRESS:** reliable_agent_step() helper.
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
@@ -215,6 +216,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-19 (Phase 25-09 — DocumentProvider interface — ✅ BUILT; NOT released):** introduced a thin document-sourcing
+  capability boundary (ADR-052, F/§19/§20): new `genesis/integrations/documents/` with a `DocumentProvider` Protocol +
+  provider-neutral `DocRef`/`DocMeta` (fingerprint for stale-detection) + `DocumentProviderError`, and `GoogleDriveProvider`
+  wrapping the read-only `gws` connector (resolve=get_file+fingerprint; fetch=export[native]/download[binary]).
+  `DocumentSyncEngine.fetch`/`add_gdrive` now depend on the interface (gws types no longer imported there); the `gws_provider`
+  ctor arg stays back-compat (auto-builds `build_document_providers()`), and `runtime/context.py` injects `providers=` at the
+  composition root. fetch() result shapes + auth fail-fast + fingerprint stale-skip preserved (existing 45 doc/gws tests green
+  via GoogleDriveProvider); +5 `test_document_provider.py` drive the engine end-to-end with a FakeDocumentProvider (no gws).
+  The Appian Deployment REST export stays concrete (one impl; §36 over-abstraction). Backend **566** pytest + ruff green.
+  Committed `cd9abc8`, unreleased (version held 0.49.0) — ADR-052 flips to Accepted at 25-09's release. **Phase 25: 25-01..25-08
+  shipped (v0.49.0); 25-09 built-unreleased; 25-10 (reliable_agent_step) starting.**
 
 - **2026-08-18 (Phase 25 PARTIAL RELEASE — genesis v0.49.0 + genesis-core v0.9.4 — CI GREEN):** shipped sub-phases
   **25-01..25-08** as one coordinated release (release order core → genesis, ADR-019). **genesis-core v0.9.4** (additive,

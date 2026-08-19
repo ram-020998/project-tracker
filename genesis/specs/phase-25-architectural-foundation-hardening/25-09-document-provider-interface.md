@@ -1,6 +1,13 @@
 # 25-09 — DocumentProvider Interface
 
-- **Status:** 📝 DRAFTED · **Review items:** F (new document provider), §19, §20 · **Roadmap:** Phase 2 · **Repos:** genesis · **Proposed ADR:** ADR-052 · **Depends on:** nothing
+- **Status:** ✅ BUILT (2026-08-19, commit `cd9abc8`; **NOT released** — ADR-052 stays Proposed until the next release) — `DocumentProvider` Protocol + `GoogleDriveProvider`; `DocumentSyncEngine` depends on the interface; fake-provider tests green (no gws). · **Review items:** F (new document provider), §19, §20 · **Roadmap:** Phase 2 · **Repos:** genesis · **Proposed ADR:** ADR-052 · **Depends on:** nothing
+
+## As built (commit `cd9abc8`; genesis 566 pytest [+5] + ruff green)
+- **`genesis/integrations/documents/` (NEW):** `DocumentProvider` Protocol (`supports`/`resolve`/`fetch`) + provider-neutral `DocRef`/`DocMeta` (fingerprint map for stale-detection, §21) + `DocumentProviderError`; `GoogleDriveProvider` wraps the read-only `gws` connector (resolve=`get_file`+modifiedTime/version/md5; fetch=export[native]/download[binary] — `is_google_native`/`google_export_target` moved out of the engine into here); `build_document_providers()` = composition-root registry `{gdrive: …}`.
+- **`kb/doc_sync.py`:** `DocumentSyncEngine.fetch`/`add_gdrive` depend on the interface (gws types no longer imported there; `GwsError`→`DocumentProviderError`). The `gws_provider` constructor arg stays back-compat (auto-builds the registry); `runtime/context.py` injects `providers=` at the composition root.
+- **Behavior preserved:** `fetch()` result shapes + auth fail-fast + fingerprint stale-skip byte-identical; existing `test_doc_sync`/`test_documents_api`/`test_gws_client` (45) green via `GoogleDriveProvider`. +5 `test_document_provider.py` drive the engine end-to-end with a `FakeDocumentProvider` (no gws).
+- **Design note:** the Appian Deployment REST export stays **concrete** (one impl; review §36 over-abstraction) — only documents got an interface.
+- **DoD:** met except ADR-052→Accepted + genesis release CI + `bible/03` release update → deferred to the next release (ships with 25-09..).
 
 ## 1. Goal
 Introduce a thin **`DocumentProvider`** interface so document sourcing is a capability with a clean boundary (Google Drive as the first implementation, behind the interface), making a second source (e.g. SharePoint) an **additive adapter + registry entry** rather than a sibling adapter wired via branches through business logic.

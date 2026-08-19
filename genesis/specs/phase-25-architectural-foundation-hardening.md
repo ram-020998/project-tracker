@@ -46,7 +46,7 @@ Every action item from the review (§C findings, §D critical, §E high-priority
 | **25-06** ✅ SHIPPED | God-Module Decomposition & Application/Service Layer | C-3, C-5 | Phase 2/3 | genesis |
 | **25-07** ✅ SHIPPED | ChatModeProfile — compose chat modes | C-4 | Phase 2 | genesis |
 | **25-08** ✅ SHIPPED | Concurrency & Optimistic Locking | D-1 | Phase 3 | genesis |
-| **25-09** | DocumentProvider Interface | F (doc-provider), §19/§20 | Phase 2 | genesis |
+| **25-09** ✅ BUILT | DocumentProvider Interface | F (doc-provider), §19/§20 | Phase 2 | genesis |
 | **25-10** | `reliable_agent_step()` Workflow Helper | §F (agent-step), §28 | Phase 2 | genesis-core, genesis-workflows |
 | **25-12** | AI Cost & Performance Pass | §31, §32 | Phase 5 | genesis-workflows, genesis |
 | **25-13** | Ops Observability II — Metrics & Lifecycle Audit Stream | §22 (metrics/audit) | Phase 4 | genesis, web |

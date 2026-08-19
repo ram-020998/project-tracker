@@ -38,7 +38,9 @@
 >   sandbox/trust/mcp/permission/token/steering) composed into one profile resolved per session; branch-free session
 >   methods (guard: no `self.mode ==`); posture ported verbatim + pinned. `chat/manager.py` 716→639.
 > - **25-08 ✅ SHIPPED** — optimistic concurrency (D-1/§17, `09826e7`): **m0014** row_version CAS on features/specs + `StaleWriteError`→409 + LifecycleService state-CAS + run-start idempotency key; +test_optimistic_locking/test_run_idempotency. Precedes 25-11.
-> - **25-09, 25-10, 25-12, 25-13** — not started. **25-14** — release/closeout capstone (flips ADRs to Accepted, one coordinated release).
+> - **25-09 ✅ BUILT (unreleased, `cd9abc8`)** — DocumentProvider interface + GoogleDriveProvider (ADR-052 Proposed until its release).
+> - **25-10 ⏳ in progress** — reliable_agent_step() workflow helper (genesis-core + genesis-workflows).
+> - **25-12, 25-13** — not started. **25-14** — release/closeout capstone (flips ADRs to Accepted, one coordinated release).
 > - **Backlog:** 25-11 per-story execution (gated on Breakdown→Stories + per-stage workflows).
 > (bible/03 codebase-map + bible/04 ADR-050/051 updated with the shipped modules.)
 
