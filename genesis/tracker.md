@@ -219,6 +219,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-19 (UX — auto-select the document viewer; drop the toggle — SHIPPED genesis v0.51.2):** removed the
+  document viewer's Rendered/Source/Sheets `SegmentedControl` (+ modeOverride state + the `viewModeOptions`
+  helper/test). The renderer is now auto-selected by document type in `DocumentBody` via `defaultDocViewMode`:
+  tabular (a `tables_path`) → Sheets grid; other docs → Rendered Markdown; a very large non-tabular doc → raw
+  Source (small inline note) as an invisible hang safety net. Frontend-only; web 179→178 vitest, lint(0)/tsc/build
+  green, web/static rebuilt. genesis v0.51.2 (`37b0d5a`), CI green (#6608068). (This time verified `git status`
+  clean after staging — the v0.51.0 lesson.)
+
 - **2026-08-19 (release-integrity — v0.51.0 superseded by v0.51.1):** the spreadsheet-viewer release's commit
   omitted `genesis/api/documents.py` from its explicit `git add` list, so **v0.51.0** shipped the tables *test*
   but not the `/documents/{id}/tables` *endpoint* → `test_document_tables_endpoint` 404'd, `genesis` CI job red
