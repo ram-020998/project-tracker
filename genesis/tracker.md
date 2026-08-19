@@ -219,6 +219,24 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-19 (release-integrity — v0.51.0 superseded by v0.51.1):** the spreadsheet-viewer release's commit
+  omitted `genesis/api/documents.py` from its explicit `git add` list, so **v0.51.0** shipped the tables *test*
+  but not the `/documents/{id}/tables` *endpoint* → `test_document_tables_endpoint` 404'd, `genesis` CI job red
+  (frontend + clean-install green — the tell of an unstaged backend file). Fixed forward: committed the missing
+  endpoint + **v0.51.1** (`938af9b`), no tag force-move. New §7 lesson: verify `git status` is clean after a
+  path-listed commit; tests + their implementation ship together.
+
+- **2026-08-19 (feature — per-sheet spreadsheet viewer — SHIPPED genesis v0.51.1):** multi-tab Excel docs were
+  flattened into one Markdown page. The document viewer now has a **Sheets** mode (default for docs with a
+  `tables_path`) that renders the parser's `tables.json` as an Excel-like **sheet-tab strip + paged grid** (column
+  letters, 1-based row numbers, 100-row paging, horizontal scroll, no header assumption). Backend: `GET
+  /documents/{id}/tables` (lazy; non-tabular → []; corrupt → []; 404 on unknown) + `test_document_tables_endpoint`.
+  Frontend (`web/features/library`): `SpreadsheetView` + pure `spreadsheet.ts`; `documentView.ts` third mode +
+  `viewModeOptions`; `documentsApi.tables` + `useDocumentTables` (lazy); `DocumentDetailPage` → `DocumentBody`
+  (Sheets|Rendered|Source). Gates: backend 574→575 pytest+ruff; web 168→179 vitest, lint(0)/tsc/build; web/static
+  rebuilt. genesis v0.51.1 (core/workflows unchanged). `938af9b`. Completes the v0.50.2 lesson's "richer option".
+  See `progress/2026-08-19-spreadsheet-viewer.md`.
+
 - **2026-08-19 (live fix — document viewer hang on a large doc — SHIPPED genesis v0.50.2):** opening
   `/documents/4` froze the tab. Root cause: the full-screen viewer (`DocumentDetailPage`) rendered the whole
   parsed Markdown (`content_md` ~858 KB / 3,240 lines, spreadsheet-derived, wide GFM tables) via react-markdown +
