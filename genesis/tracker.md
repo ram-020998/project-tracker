@@ -219,6 +219,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-19 (branding — logo, favicon, app-wide loading animations — SHIPPED genesis v0.51.3):** gave Genesis a
+  real brand mark + loading experience (frontend-only). `GenesisLogo` (`shared/ui/logo.tsx`) = inline SVG, a
+  blue→purple gradient tile + white orbit ring/core/node (size/animated props); used in the Sidebar (replaced the
+  Zap tile). Favicon = inline SVG data-URI in index.html (+ apple-touch-icon, theme-color, title "Genesis") —
+  inlined because the backend serves index.html for any non-/api//assets path. App-wide loading: a pre-JS boot
+  splash inside #root (animated mark, replaced on React mount, dark bg = no white flash) + a branded LoadingScreen
+  (RouterProvider Suspense fallback); genesis-spin/genesis-core-pulse keyframes (reduced-motion-safe). Tests
+  logo.test.tsx (4); web 178→182 vitest, lint(0)/tsc/build green, web/static rebuilt (built index.html verified to
+  keep favicon+splash). genesis v0.51.3 (`052ce36`), CI green (#6609135). See
+  `progress/2026-08-19-branding-logo-and-loading.md`.
+
 - **2026-08-19 (UX — auto-select the document viewer; drop the toggle — SHIPPED genesis v0.51.2):** removed the
   document viewer's Rendered/Source/Sheets `SegmentedControl` (+ modeOverride state + the `viewModeOptions`
   helper/test). The renderer is now auto-selected by document type in `DocumentBody` via `defaultDocViewMode`:
