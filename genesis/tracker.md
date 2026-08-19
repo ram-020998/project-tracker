@@ -219,6 +219,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-19 (branding v2 — G-monogram logo + spinner loader — SHIPPED genesis v0.51.4):** per feedback the
+  logo was redesigned to a **more modern, standard 'G' monogram** — the blue→purple gradient tile + a clean
+  geometric white G (open ring + inward crossbar), replacing the abstract orbit/node mark. Updated GenesisLogo
+  (dropped the `animated` prop), the SVG data-URI favicon + apple-touch-icon, and the boot splash. The loading
+  animation is now the **standard spinner ring** rotating around the static mark (`.genesis-spinner`; used by
+  LoadingScreen + the boot splash) — replaced the spinning orbit/pulsing core. web 182→181 vitest, lint(0)/tsc/
+  build green, web/static rebuilt (built index.html verified: new G, orbit removed). genesis v0.51.4 (`5a7a532`),
+  CI green (#6609256). See `progress/2026-08-19-branding-logo-and-loading.md` (updated).
+
 - **2026-08-19 (branding — logo, favicon, app-wide loading animations — SHIPPED genesis v0.51.3):** gave Genesis a
   real brand mark + loading experience (frontend-only). `GenesisLogo` (`shared/ui/logo.tsx`) = inline SVG, a
   blue→purple gradient tile + white orbit ring/core/node (size/animated props); used in the Sidebar (replaced the
