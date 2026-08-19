@@ -219,6 +219,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-19 (live fixes — sync-application APPIAN_API_KEY scope + gws --output cwd — SHIPPED):** two runtime
+  failures on a real deployment (app ahead of the installed workflow / gws newly connected), diagnosed by the user +
+  verified against the code. **(1) genesis-workflows v0.9.6 (sync-application v0.2.3, `a15efb9`):** baseline export
+  failed with "APPIAN_API_KEY secret is not set (scope 'appian-devops' or 'global')" (run r-0860e996…) — ADR-048
+  version skew: since genesis v0.48.5 the core creds live in the per-env scope (`env-<hash>/APPIAN_API_KEY`) resolved
+  via `EnvironmentRegistry.resolve_var`, but the v0.2.2 workflow read `ctx.secrets.resolve(..., server='appian-devops')`
+  which checks only `appian-devops/`+`global/`. Fix: resolve via `ctx.environments.resolve_var('APPIAN_API_KEY')` first,
+  legacy secret fallback second; error repointed at Settings→Environments; +2 tests. **(2) genesis v0.50.1 (`276be73`):**
+  `sync-documents` gws export to .xlsx failed — "…is outside the current directory (validationError 400)": gws 0.22.5
+  confines `--output` to the process cwd, but `GwsClient._run` spawned gws with no `cwd=` so an absolute `-o` under
+  ~/Genesis/runs/… was rejected. Fix: export/download run gws with `cwd=out_path.parent` + a relative `-o`; +3 tests
+  (confining fake gws). Gates: genesis 574 pytest + ruff; genesis-workflows 14 sync-application + validate_library.
+  genesis-core unchanged (v0.9.5). Bible refreshed (01 versions/counts, 06 two lessons, 00/index banners); progress
+  `progress/2026-08-19-live-fixes-apikey-scope-and-gws-cwd.md`.
+
 - **2026-08-19 (Phase 25-14 — CLOSEOUT — PHASE 25 COMPLETE):** shipped the remaining active sub-phases in a
   second coordinated release — **genesis v0.50.0 + genesis-core v0.9.5** (25-09 DocumentProvider interface;
   25-10-core reliable_agent_step helper; 25-13 observability metrics/provenance/Activity feed + web views;
