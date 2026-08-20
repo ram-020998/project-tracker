@@ -21,9 +21,10 @@
 > kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.50.0 + genesis-core v0.9.5 = the
 > Phase-25 Architectural Foundation Hardening release (v0.49.0 + v0.50.0), sub-phases 25-01..25-10 + 25-13 (25-11 + 25-12 backlog) — Phase 25 COMPLETE.)
 > **Newest planning: Phase 26 — Agentic Memory Layer — IN PROGRESS. 26-01 + 26-02 + 26-03 + 26-05 (read-path
-> MCP) + 26-08 (Memory Management UI + curation API) are BUILT (unreleased — local on `genesis` +
-> `genesis-workflows` master, no tag; the phase release is 26-07). NEXT = 26-04 (the memory-maintenance
-> "dreaming" workflow). Umbrella + 26-01..26-08 spec'd; Proposed ADR-053 + ADR-054.**
+> MCP) + 26-08 (Memory Management UI + curation API) + 26-04 (the memory-maintenance "dreaming" workflow) are
+> BUILT (unreleased — local on `genesis` + `genesis-workflows` master, no tag; the phase release is 26-07).
+> NEXT = 26-06 (scheduler + config + `GET /api/system/memory`). Umbrella + 26-01..26-08 spec'd; Proposed
+> ADR-053 + ADR-054.**
 > See `bible/08-roadmap-and-backlog.md` §9 + `specs/phase-26-agentic-memory-layer.md` + `progress/phase-26-agentic-memory-layer.md`.
 > (Full phase/release banner + version detail live in
 > `bible/00-onboarding-and-overview.md` and `bible/01-current-state.md`.)
@@ -77,52 +78,49 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ▶ ACTIVE HANDOFF — continue Phase 26 (Agentic Memory Layer) at **26-04**
+## ▶ ACTIVE HANDOFF — continue Phase 26 (Agentic Memory Layer) at **26-06**
 
 > **After reading the whole bible, this is the work to pick up.** Phase 26 is IN PROGRESS; **26-01 + 26-02 +
-> 26-03 + 26-05 + 26-08 are BUILT + tested green but UNRELEASED** (local commits, no tag — the phase release
-> is **26-07**).
+> 26-03 + 26-04 + 26-05 + 26-08 are BUILT + tested green but UNRELEASED** (local commits, no tag — the phase
+> release is **26-07**). Only **26-06** remains before the **26-07** release.
 >
 > **Read first (in this order):** `specs/phase-26-agentic-memory-layer.md` (umbrella) →
-> `specs/phase-26-agentic-memory-layer/26-04-memory-maintenance-dreaming.md` (the next task) →
+> `specs/phase-26-agentic-memory-layer/26-06-scheduler-integration-and-config.md` (the next task) →
 > `progress/phase-26-agentic-memory-layer.md` (as-built for 26-01..26-08) → `bible/08` §9 Phase-26 block →
 > **Proposed ADR-053 + ADR-054** in `bible/04`. Then read the code the task cites before editing.
 >
-> **Done so far (reuse these — do NOT rebuild):**
-> - **26-01** store/graph + `mm0001` (curation columns present); **26-02** embedder + vector index;
->   **26-03** the `memory-consolidation` write workflow + `ctx.extras`; **26-05** the read-only
->   `genesis-memory` MCP + `genesis/memory/retrieval.py` hybrid fuse (chat-wired); **26-08** the browser-only
->   curation API (`genesis/api/memory.py`) + the `/memory` web workspace (graph/list/inspector/review).
-> - **Maintenance guardrail already in place:** `MemoryStore.forget_before(cutoff, max_importance)` skips
->   `pinned`/`protected`/`user_verified`/`origin='user'` — 26-04 MUST route decay/forget through it (or the
->   same predicate). Reuse `record_reflection` (origin='reflection'), `upsert_community`, `add_memory_link`,
->   `GraphStore.related_entities`, `search_memories`; new maintenance memories go through `embed_pending`.
+> **Done so far (reuse these — do NOT rebuild):** 26-01 store/graph + `mm0001`; 26-02 embedder + vectors;
+> 26-03 `memory-consolidation` write workflow + `ctx.extras`; 26-04 `memory-maintenance` "dreaming" workflow;
+> 26-05 read-only `genesis-memory` MCP + retrieval (chat-wired); 26-08 curation API (`genesis/api/memory.py`)
+> + the `/memory` web workspace. Both workflows are registered in genesis-workflows `registry.json`.
 >
-> **NEXT = 26-04 — the `memory-maintenance` "dreaming" workflow (genesis-workflows):** a periodic (Sun ~03:00
-> IST — confirm) LangGraph workflow that consolidates/synthesizes memory: reflection (synthesize higher-level
-> `origin='reflection'` memories from clusters), community detection (`upsert_community`), decay/forget
-> (`forget_before`), and de-dup/merge — but it **never overrides human curation** (skip protected/pinned/
-> user/verified; it may only *suggest* by writing `review_status='pending'` for the 26-08 review queue).
-> Model it on the `memory-consolidation` workflow (26-03) — same standalone-graph + reliability-trio + `apply`
-> via `asyncio.to_thread`; stores via `ctx.extras`; register in `registry.json`; stub Kiro in tests.
+> **NEXT = 26-06 — scheduler integration + config (genesis):** (1) register two backend `Scheduler` jobs
+> (mirror `genesis/runtime/sync_jobs.py` `DEFAULT_JOBS` + `register_sync_jobs`, wired in `api/app.py`):
+> **memory-consolidation** (~02:00 IST daily) + **memory-maintenance** (~Sun 03:00 IST) — each starts the
+> workflow via `RunManager.start(<id>, {owner})`. (2) A **`memory_owner_username`** Setting
+> (`runtime/settings.py`, env `GENESIS_MEMORY_OWNER`) threaded into: the MCP launch `--owner`
+> (`chat/mcp.py._memory_entry` already reads `getattr(settings,'memory_owner_username','local')` — make the
+> attr real), the workflow `owner` input, and `api/memory.py`'s `edited_by`. (3) **`GET /api/system/memory`**
+> — memory health/stats (counts by scope/type, pending-embeddings, last consolidation/maintenance run from
+> `consolidation_cursor()`), + a web surface if in scope. (4) The **internal-server node-injection
+> follow-up from 26-05** — let agentic workflow nodes inject `genesis-memory` (a genesis-core seam mirroring
+> `_kb_entry` for nodes; the shared `mcp-registry.json` can't express the venv `command`).
 >
-> **Then (remaining build order):** 26-04 → **26-06** (scheduler jobs [consolidation ~02:00 + maintenance
-> ~Sun 03:00 IST] + the `memory_owner_username` setting + `GET /api/system/memory` + the internal-server
-> node-injection follow-up from 26-05) → **26-07** (release: bump/tag **genesis + genesis-workflows**,
-> `genesis db upgrade` covers both DBs, ADR-053/054 → Accepted, bible/tracker/progress).
+> **Then:** **26-07** (release: bump/tag **genesis + genesis-workflows**, `genesis db upgrade` covers both
+> DBs, ADR-053/054 → Accepted, docs). This is the FIRST push to master for Phase 26 — everything above is
+> local/unpushed until the human approves the release.
 >
 > **Gotchas / rules:** memory.db is **separate** (`settings.memory_db_path`), own migrations; the embedder/
 > vector index only load in the **worker/MCP subprocess**; retrieval degrades under `NullEmbedder`; memory.db
 > writes in async nodes go via `asyncio.to_thread` (bible §7). **Code commits are local/unpushed** (genesis
-> master ahead ~6; genesis-workflows ahead 1) — the release is 26-07; don't push master / bump versions until
+> master ahead ~7; genesis-workflows ahead 2) — the release is 26-07; don't push master / bump versions until
 > then unless the human asks.
 >
 > **Dev/test (bible §6):** venv `genesis/.venv`. Gates: `cd genesis && .venv/bin/python -m pytest -q -p
-> no:warnings` (currently **625**) `+ .venv/bin/ruff check genesis`; web `cd genesis/web && npx tsc --noEmit
+> no:warnings` (currently **627**) `+ .venv/bin/ruff check genesis`; web `cd genesis/web && npx tsc --noEmit
 > && npx eslint . && npx vitest run` (**189**) then `npm run build` (→ web/static, commit it); workflows
 > `cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_library.py + ... -m pytest -q workflows
-> --ignore=workflows/_fixtures` (**86**). Stub Kiro via `set_collect_impl` (see
-> `workflows/memory-consolidation/tests/`).
+> --ignore=workflows/_fixtures` (**93**). Stub Kiro via `set_collect_impl` (see the memory workflow tests).
 
 ---
 

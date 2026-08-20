@@ -237,6 +237,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-20 (Phase 26 — 26-04 BUILT, unreleased):** the periodic **"dreaming"** refiner — the
+  `memory-maintenance` LangGraph workflow (genesis-workflows `93e3c4f`) + two store helpers (genesis
+  `d080335`: `clear_communities`, `memory_link_targets`). `load_candidates → reflect → curate → apply →
+  recompute_communities → decay_forget → embed_new → present` (reliability trio on both agents; to_thread
+  writes; reused ctx.extras). Reflect synthesizes higher-level memories from entity clusters (cited +
+  linked); curate MERGE/INVALIDATE near-dups bi-temporally; communities via connected components
+  (idempotent); decay via `forget_before`. **Never overrides human curation** (auto-eligible set excludes
+  pinned/protected/verified/user; apply only touches eligible ids), never crosses scope/owner, nothing
+  hard-deleted, converges on re-run. **Gates:** genesis store tests 13→15 + ruff clean; validate_library
+  PASSED (9 workflows), workflows suite 86→**93**. Local/unreleased. **NEXT = 26-06** (scheduler + config +
+  `memory_owner_username` + `GET /api/system/memory` + the internal-server node-injection follow-up).
+
 - **2026-08-20 (Phase 26 — 26-08 BUILT, unreleased):** the **Memory Management UI + curation API** (genesis
   `5c6cc0d` backend + `07bc946` web). Browser-only `genesis/api/memory.py` (list/detail+history/graph/
   review + manual-add, edit=supersede, re-scope guard, pin/protect/verify, invalidate/archive, hard-purge,

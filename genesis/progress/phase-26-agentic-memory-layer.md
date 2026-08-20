@@ -139,9 +139,30 @@
 - **Deferred within 26-08 (noted follow-up):** the two contextual reuses — Application-detail "Memory" tab
   + Settings "Your Memory" panel — reuse these components (thin wiring).
 
+## 26-04 — memory-maintenance "dreaming" workflow ✅ BUILT (unreleased)
+- **Commits:** genesis `d080335` (store helpers) + genesis-workflows `93e3c4f` (the workflow). Local, no tag.
+- **As built:** a deterministic LangGraph workflow (`workflows/memory-maintenance/`) modelled on 26-03 —
+  `load_candidates → [reflect → v_reflect] → [curate → v_curate] → apply → recompute_communities →
+  decay_forget → embed_new → present` (per-agent escalation gates; reliability trio on both agents; memory.db
+  writes via `to_thread`; reused `ctx.extras`). **reflect** synthesizes higher-level memories from entity
+  clusters citing real source ids (`record_reflection` + `add_memory_link('elaborates')`); **curate** MERGEs
+  near-duplicates / INVALIDATEs contradicted members bi-temporally (reversible); **recompute_communities**
+  = connected components over shared relationships (idempotent via `clear_communities`); **decay_forget** =
+  `forget_before` soft-archive; **embed_new** embeds the reflections.
+- **Safety:** `load_candidates` builds the auto-eligible set EXCLUDING pinned/protected/user_verified/
+  origin∈{user,reflection}, and `apply` only touches ids in that set — **never overrides human curation**
+  (26-08 guardrail), never crosses scope/owner, nothing hard-deleted. Idempotent + bounded → a re-run
+  converges (reflected clusters are skipped via `memory_link_targets`; merged dups are closed).
+- **genesis store helpers added:** `clear_communities(scope?, owner?)` (idempotent recompute) +
+  `memory_link_targets(link_type?)` (reflection convergence guard).
+- **Verified:** genesis pytest `test_memory_store.py` 13→15, ruff clean; genesis-workflows
+  `ci/validate_library.py` PASSED (9 workflows, reliability trio enforced), workflows suite **86→93**
+  (reflection+convergence, curate-merge reversible, decay-skips-protected, communities-idempotent, pure
+  units). Unreleased.
+
 ## Next
-- **26-04** — the `memory-maintenance` "dreaming" workflow (reflection/synthesis, community detection,
-  decay/merge) — MUST skip protected/pinned/user_verified/origin='user' (the guardrail `forget_before`
-  already enforces; wire it + `upsert_community` + `record_reflection`). Then 26-06 (scheduler +
-  `memory_owner_username` + `GET /api/system/memory` + the internal-server node-injection follow-up from
-  26-05), 26-07 (release).
+- **26-06** — scheduler integration + config: register the consolidation (~02:00 IST) + maintenance
+  (~Sun 03:00 IST) jobs in the backend `Scheduler` (`sync_jobs`-style), the `memory_owner_username` Setting
+  (wired into the MCP `--owner` + workflow `owner` input + `edited_by`), a `GET /api/system/memory` health/
+  stats endpoint, and the **internal-server node-injection follow-up from 26-05** (let agentic nodes inject
+  `genesis-memory`). Then 26-07 (release: bump/tag genesis + genesis-workflows, ADR-053/054 → Accepted).
