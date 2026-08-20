@@ -8,6 +8,57 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
+### 📋 DRAFT (SPECS ONLY — awaiting approval to implement) — Phase 26: Agentic Memory Layer
+
+> **Specs:** `specs/phase-26-agentic-memory-layer.md` (umbrella) + `phase-26-agentic-memory-layer/26-01..26-08`. **Proposed
+> ADR-053** (Genesis Agentic Memory Layer) + **ADR-054** (memory store/infra + local embedder). **Pushed** (project-tracker
+> `5f5d4f8` umbrella+26-01..07; `7917b6b` 26-08 + threaded edits). **NO implementation started — do not start until explicitly
+> approved.** Repos when built: **genesis** + **genesis-workflows** (genesis-core likely unchanged).
+>
+> **Goal.** Distil the conversations Genesis already stores (`chat_sessions`/`chat_messages`) into a persistent, self-maintaining
+> **agentic memory** so agents get radically more effective over time. **Two scopes** — **personal** (a *named user's*
+> preferences / instructions / feedback / work habits / coding style / review rules; **never shared**) vs **shared** (an
+> application's knowledge / architecture / decisions / best practices / business rules / patterns; **entity-anchored** with
+> **traversable relationships**) — × **three types** (semantic / episodic / procedural), **bi-temporal** (invalidate, don't
+> overwrite). Grounded in a survey of **mem0 / Zep-Graphiti / Letta-MemGPT / LangMem / cognee / A-MEM / Stanford
+> generative-agents** — we reproduce a **minimal local subset** of their concepts and integrate **no** external memory service.
+>
+> **Architecture (decided).**
+> - **Store (ADR-054):** a **NEW, separate `~/.genesis/memory.db`** (genesis.db untouched) with its own migration set (`mm0001`) —
+>   a bi-temporal **entity-relationship graph** (`memory_entities`/`memory_relationships`/`memories`/`memory_links`/
+>   `memory_communities`) + **FTS5** keyword index + a **`sqlite-vec`** vector index, behind **DB-agnostic seams**
+>   (`MemoryStore` + `GraphStore` [recursive-CTE traversal] + `VectorIndex` + `Embedder`). This is the explicit **ADR-030
+>   "transcript RAG" trigger** for vectors; the seam makes a later **Postgres + pgvector (+ Apache AGE)** swap a re-home, not a
+>   rewrite.
+> - **Embeddings:** a **small local model** (ONNX/static — e.g. quantized `bge-small` via `fastembed`, or `model2vec`; ~30–150 MB,
+>   CPU, ms-latency) loaded **only in the worker/MCP subprocess**, behind a swappable `Embedder` (a `NullEmbedder` degrades to
+>   FTS5+graph). **No outbound data** (ADR-026); it is NOT a chat LLM.
+> - **Write path (nightly):** a deterministic **`memory-consolidation`** LangGraph workflow — `extract atomic memories →
+>   classify personal/shared + type → extract entities+relationships → reconcile ADD/UPDATE/INVALIDATE/NOOP (vs top-k similar) →
+>   embed + write`. **Kiro-over-ACP** does the reasoning (**ADR-001** preserved; every agent node under the **reliability trio**
+>   ADR-011); program nodes do all I/O (genesis.db read-only; memory.db writes via `asyncio.to_thread` — the §7 lesson).
+> - **Maintenance ("dreaming", periodic):** a **`memory-maintenance`** workflow — **reflect** (synthesize higher-level memories) /
+>   **dedup-merge-evolve** (A-MEM) / **invalidate** contradicted facts (bi-temporal) / **decay-forget** (soft) / recompute
+>   **communities**. Idempotent + reversible; **skips human-curated (protected/pinned/user) memories**.
+> - **Read path:** a **separate read-only `genesis-memory` MCP** (`mcp/memory_server.py`, modeled on `genesis-kb`, **not merged**)
+>   with `search_memory` / `get_entity` / `get_related_entities` (graph traversal) / `get_personal_memory`; **hybrid retrieval** =
+>   relevance (semantic + keyword + entity/graph) × **recency** × **importance** (Generative-Agents scoring), owner/entity-scoped.
+>   Injection is **MCP-only** (the agent is prompted via steering to query it; ADR-002/004/020, ADR-031/045 preserved).
+> - **Management UI (26-08):** a rich, accessible browser to **see + edit** memory centered on an **Obsidian-style force-directed
+>   memory graph** (hover-highlight, local-graph focus, search/filters, **bi-temporal time-scrub**, community coloring) + a
+>   list/table workbench + an inspector editor + a **review queue** + a **browser-only curation API** (edit/supersede, pin/protect/
+>   verify, soft-forget, hard-delete, relationship CRUD, manual add). **Human edits are authoritative + protected** from the
+>   nightly maintenance; the **agent MCP stays read-only**. Force-graph lib is a **lazy-loaded ADR-027 stack extension**.
+> - **Scheduling + config:** the two jobs fire on the **Phase-23 scheduler** (m0012 `scheduled_jobs`, ADR-047) — consolidation
+>   nightly, maintenance weekly, preflight-skip when unconfigured; a **named-user** setting owns personal memory; a read-only
+>   `GET /api/system/memory` status.
+>
+> **Confirmed decisions (2026-08-19/20):** SQLite+sqlite-vec now + an easy Postgres swap (seam) · a true relationship graph with
+> traversal · reflection/"dreaming" in v1 · MCP-only injection · personal memory keyed to a named user · a small local embedder ·
+> a rich visual Memory Management UI with an Obsidian-style graph in v1. **Non-goals/deferred:** multi-user ACL enforcement; the
+> Postgres migration itself (seam only); hot-path in-turn writes; auto pre-fetch/prompt-injection; embedding the KB/documents
+> into memory. **Suggested build order:** 26-01 → 26-02 → 26-03 → 26-05 → 26-08 → 26-04 → 26-06 → 26-07.
+
 ### ✅ SHIPPED (COMPLETE) — Phase 25: Architectural Foundation Hardening (code-review remediation) — genesis v0.50.0 + genesis-core v0.9.5
 
 > **Specs:** `specs/phase-25-architectural-foundation-hardening.md` (umbrella) + `phase-25-…/25-01..25-14` (25-11 → backlog).

@@ -171,6 +171,24 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   **▸ PHASE 25 COMPLETE (2026-08-19):** 25-09/25-10-core/25-13 shipped in **genesis v0.50.0 + genesis-core v0.9.5** (CI green); ADR-050/051/052 Accepted + ADR-026 amended; 25-11 + 25-12 in backlog.
   🅱️ **Backlog:** former **25-11** per-story execution + WorkflowRun linkage → `specs/backlog/phase-25-11-per-story-execution.md`
   (new product capability; gated on Breakdown→Stories + per-stage workflows). Do NOT start until explicitly approved.
+- **Phase 26** — `specs/phase-26-agentic-memory-layer.md` (+ `phase-26-agentic-memory-layer/26-01..26-08`) —
+  **Agentic Memory Layer** 📋 SPEC DRAFT; awaiting approval to implement. Distil the conversations already in `genesis.db` into a
+  persistent, self-maintaining **agentic memory** — **personal** (a named user's preferences/rules/habits, never shared) vs
+  **shared** (application knowledge/architecture/decisions/patterns, **entity-anchored** with **traversable relationships**), ×
+  three types (semantic/episodic/procedural), **bi-temporal**. Formed in the background by a **nightly `memory-consolidation`
+  workflow** (extract → classify → entities/relationships → reconcile ADD/UPDATE/INVALIDATE/NOOP → embed → write) and refined by
+  a periodic **`memory-maintenance` "dreaming" workflow** (reflect / dedup-evolve / invalidate / decay / communities); all
+  reasoning is **Kiro-over-ACP inside deterministic workflows** (ADR-001 + reliability trio), embeddings by a **small local
+  model** in the worker/MCP subprocess (no outbound data). Stored in a **separate `~/.genesis/memory.db` on SQLite + sqlite-vec +
+  FTS5** behind **DB-agnostic seams** (`MemoryStore`/`GraphStore`/`VectorIndex`/`Embedder`) — the ADR-030 "transcript RAG"
+  trigger, with an easy **Postgres + pgvector** swap later. Read via a **separate read-only `genesis-memory` MCP** (hybrid
+  semantic+keyword+entity × recency × importance; **MCP-only** injection). Plus a **Memory Management UI (26-08)** — a rich,
+  accessible browser to **see + edit** memory centered on an **Obsidian-style force-directed memory graph** (hover-highlight,
+  local-graph focus, search/filters, bi-temporal time-scrub, community coloring) + list/inspector/review-queue + a browser-only
+  curation API; human edits are **authoritative** and **protected from the nightly maintenance**, while the agent MCP stays
+  read-only. Fires on the **Phase-23 scheduler**; personal memory keyed to a **named user**. **Proposed ADR-053** (Memory Layer) +
+  **ADR-054** (store/infra + local embedder). Grounded in a survey of mem0/Zep-Graphiti/Letta/LangMem/cognee/A-MEM/generative-agents;
+  integrates **no** external memory service. Repos: **genesis** + **genesis-workflows** (genesis-core likely unchanged).
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
@@ -218,6 +236,27 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ---
 
 ## 6. Status log
+
+- **2026-08-20 (Phase 26 — Agentic Memory Layer — SPECS DRAFTED + pushed; awaiting approval to implement):** on the user's
+  request, designed a **persistent agentic memory layer** for Genesis after a grounded survey of mem0 / Zep-Graphiti / Letta /
+  LangMem / cognee / A-MEM / the Stanford generative-agents paper (integrate **none** of them — reproduce a minimal local subset
+  of the concepts). Distils the conversations already in `genesis.db` into memory with two scopes — **personal** (a named user's
+  preferences/rules/habits, never shared) vs **shared** (application knowledge/architecture/decisions/patterns, **entity-anchored**
+  with **traversable relationships**) — × three types (semantic/episodic/procedural), **bi-temporal** (invalidate, don't
+  overwrite). Formed by a **nightly `memory-consolidation` workflow** (extract → classify → entities/relationships → reconcile
+  ADD/UPDATE/INVALIDATE/NOOP → embed → write) + a periodic **`memory-maintenance` "dreaming" workflow** (reflect / dedup-evolve /
+  invalidate / decay / communities); all reasoning is **Kiro-over-ACP in deterministic workflows** (ADR-001 + reliability trio),
+  embeddings by a **small local model** (ONNX/static, ~30–150 MB, CPU) in the worker/MCP subprocess — **no outbound data**
+  (ADR-026). Stored in a **separate `~/.genesis/memory.db` on SQLite + sqlite-vec + FTS5** behind DB-agnostic seams
+  (`MemoryStore`/`GraphStore`/`VectorIndex`/`Embedder`) — the **ADR-030 "transcript RAG" trigger**, with an easy **Postgres +
+  pgvector** swap later. Read via a **separate read-only `genesis-memory` MCP** (hybrid semantic+keyword+entity × recency ×
+  importance; **MCP-only** injection). Plus a **Memory Management UI (26-08)** — a rich, accessible browser to **see + edit**
+  memory centered on an **Obsidian-style force-directed memory graph** (+ list/inspector/review-queue + a browser-only curation
+  API); human edits are **authoritative + protected** from the nightly maintenance, the agent MCP stays **read-only**. Personal
+  memory keyed to a **named user**; jobs on the **Phase-23 scheduler**. Spec set: umbrella + **26-01..26-08**; **Proposed ADR-053
+  + ADR-054**. Pushed to project-tracker (`5f5d4f8` umbrella+26-01..07; `7917b6b` 26-08 + threaded edits). Repos when built:
+  **genesis** + **genesis-workflows** (genesis-core likely unchanged). **DRAFT — no implementation started; do not start until
+  explicitly approved.**
 
 - **2026-08-19 (branding v2 — G-monogram logo + spinner loader — SHIPPED genesis v0.51.4):** per feedback the
   logo was redesigned to a **more modern, standard 'G' monogram** — the blue→purple gradient tile + a clean
