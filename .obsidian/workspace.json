@@ -1,24 +1,20 @@
 {
   "main": {
-    "id": "e6ea018b77609cb3",
+    "id": "e9b8b5859cec76bc",
     "type": "split",
     "children": [
       {
-        "id": "de3d3829ff401638",
+        "id": "fe7ec98a0bf0a39b",
         "type": "tabs",
         "children": [
           {
-            "id": "e87cd4d23e7f0440",
+            "id": "ecb2b5a17f16d715",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "tracker.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "tracker"
+              "title": "New tab"
             }
           }
         ]
@@ -27,15 +23,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "d1206c84ebb971ec",
+    "id": "8a185a29e6fb7c2c",
     "type": "split",
     "children": [
       {
-        "id": "4d50f1a243a82d15",
+        "id": "1a735c7d9d6c272d",
         "type": "tabs",
         "children": [
           {
-            "id": "fbcd3743f8386373",
+            "id": "c6bdddb13429190f",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -50,7 +46,7 @@
             }
           },
           {
-            "id": "465a591a56c371f3",
+            "id": "a5ce06a084e992c5",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -67,7 +63,7 @@
             }
           },
           {
-            "id": "4f4880bffa347531",
+            "id": "f5765d29284c6536",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -86,20 +82,19 @@
     "width": 300
   },
   "right": {
-    "id": "e79ddad29faf2345",
+    "id": "79a05438f98adf9d",
     "type": "split",
     "children": [
       {
-        "id": "b196a9dc2a0e58eb",
+        "id": "74c8660b36bcecbf",
         "type": "tabs",
         "children": [
           {
-            "id": "fc60c4db4a7fb1a4",
+            "id": "06c2b76c0d02a14e",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "tracker.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,12 +108,11 @@
             }
           },
           {
-            "id": "5f6f9c980dd76db4",
+            "id": "8fc9664daf3049b9",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "tracker.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -127,7 +121,7 @@
             }
           },
           {
-            "id": "4834948269df2812",
+            "id": "892e13d02d8a6429",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -142,7 +136,7 @@
             }
           },
           {
-            "id": "d7764d4413a6beba",
+            "id": "eb36b737a902ee46",
             "type": "leaf",
             "state": {
               "type": "all-properties",
@@ -156,12 +150,11 @@
             }
           },
           {
-            "id": "10eb782cbc84864e",
+            "id": "6fa5123873bd2d0c",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "tracker.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -188,35 +181,8 @@
       "bases:Create new base": false
     }
   },
-  "active": "e87cd4d23e7f0440",
+  "active": "ecb2b5a17f16d715",
   "lastOpenFiles": [
-    "design/ui-screen-catalog.md",
-    "design",
-    "specs/phase-26-agentic-memory-layer/26-08-memory-management-ui-and-graph.md",
-    "specs/phase-26-agentic-memory-layer/26-07-release-and-acceptance.md",
-    "specs/phase-25-architectural-foundation-hardening.md",
-    "specs/00-architecture-overview.md",
-    "specs/phase-26-agentic-memory-layer/26-06-scheduler-integration-and-config.md",
-    "specs/phase-26-agentic-memory-layer/26-05-genesis-memory-mcp-and-retrieval.md",
-    "specs/phase-26-agentic-memory-layer/26-04-memory-maintenance-dreaming.md",
-    "specs/phase-26-agentic-memory-layer/26-03-consolidation-workflow.md",
-    "specs/phase-26-agentic-memory-layer/26-02-embedding-and-vector-index.md",
-    "specs/phase-26-agentic-memory-layer/26-01-memory-model-and-store.md",
-    "specs/phase-26-agentic-memory-layer.md",
-    "specs/phase-25-architectural-foundation-hardening/25-10-reliable-agent-step-helper.md",
-    "specs/phase-26-agentic-memory-layer",
-    "progress/2026-08-19-branding-logo-and-loading.md",
-    "progress/2026-08-19-spreadsheet-viewer.md",
-    "progress/2026-08-19-live-fixes-apikey-scope-and-gws-cwd.md",
-    "progress/phase-25-architectural-foundation-hardening.md",
-    "specs/phase-25-architectural-foundation-hardening/25-12-ai-cost-and-performance-pass.md",
-    "specs/backlog/phase-25-12-ai-cost-and-performance-pass.md",
-    "progress/phase-25-partial-release.md",
-    "specs/phase-01-core-platform-foundation.md",
-    "specs/phase-25-architectural-foundation-hardening/25-13-observability-metrics-and-lifecycle-audit.md",
-    "specs/phase-25-architectural-foundation-hardening/25-09-document-provider-interface.md",
-    "specs/phase-25-architectural-foundation-hardening/25-08-concurrency-and-optimistic-locking.md",
-    "specs/phase-25-architectural-foundation-hardening/25-07-chat-mode-profile.md",
-    "specs/phase-25-architectural-foundation-hardening/25-06-god-module-decomposition-and-service-layer.md"
+    "genesis/artifacts/designs/Genesis_Appian_Orchestrator_Feature_Workspace_UX_Design.md"
   ]
 }
