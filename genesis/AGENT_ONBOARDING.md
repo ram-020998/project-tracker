@@ -17,14 +17,15 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-08-20 — latest SHIPPED: genesis v0.51.4 + genesis-core v0.9.5 + genesis-workflows v0.9.6 +
-> kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.50.0 + genesis-core v0.9.5 = the
-> Phase-25 Architectural Foundation Hardening release (v0.49.0 + v0.50.0), sub-phases 25-01..25-10 + 25-13 (25-11 + 25-12 backlog) — Phase 25 COMPLETE.)
-> **Newest planning: Phase 26 — Agentic Memory Layer — IN PROGRESS. All BUILD sub-phases are done + green but
-> UNRELEASED (local on `genesis` + `genesis-workflows` master, no tag): 26-01/02 (store+embedder+vectors),
-> 26-03 (consolidation), 26-04 (maintenance/dreaming), 26-05 (read-path MCP), 26-06 (scheduler + config +
-> status), 26-08 (Memory UI + curation API). NEXT = 26-07 (RELEASE: bump/tag both repos — the first Phase-26
-> push to master — + ADR-053/054 → Accepted). Umbrella + 26-01..26-08 spec'd; Proposed ADR-053 + ADR-054.**
+> **Last refreshed: 2026-08-20 — latest SHIPPED: genesis v0.52.0 + genesis-core v0.9.5 + genesis-workflows v0.10.0 +
+> kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
+> **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
+> **Newest SHIPPED: Phase 26 — Agentic Memory Layer — COMPLETE (26-01..26-08): genesis v0.52.0 +
+> genesis-workflows v0.10.0, CI green; ADR-053 + ADR-054 Accepted.** A persistent, self-maintaining memory
+> distilled from chats: separate `memory.db` (bi-temporal entity-relationship graph + FTS5 + `sqlite-vec`),
+> a nightly `memory-consolidation` + weekly `memory-maintenance` workflow, a read-only `genesis-memory` MCP
+> (hybrid retrieval, chat-wired), and a browser-only curation API + `/memory` web workspace. See
+> `bible/08` §9 + `specs/phase-26-agentic-memory-layer.md` + `progress/phase-26-agentic-memory-layer.md`.
 > See `bible/08-roadmap-and-backlog.md` §9 + `specs/phase-26-agentic-memory-layer.md` + `progress/phase-26-agentic-memory-layer.md`.
 > (Full phase/release banner + version detail live in
 > `bible/00-onboarding-and-overview.md` and `bible/01-current-state.md`.)
@@ -80,37 +81,20 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 
 ## ▶ ACTIVE HANDOFF — continue Phase 26 (Agentic Memory Layer) at **26-07 (RELEASE)**
 
-> **After reading the whole bible, this is the work to pick up.** Every BUILD sub-phase of Phase 26 is DONE +
-> tested green but **UNRELEASED** (local commits on `genesis` master ~ahead 8 + `genesis-workflows` ~ahead 2,
-> no tag). **Only 26-07 (the release) remains.**
+## ✅ NO ACTIVE PHASE — Phase 26 (Agentic Memory Layer) SHIPPED (v0.52.0 / v0.10.0)
+
+> **There is no in-flight phase handoff.** Phase 26 (Agentic Memory Layer, 26-01..26-08) is **released** —
+> genesis **v0.52.0** + genesis-workflows **v0.10.0**, CI green, ADR-053/054 Accepted, installed. Do **not**
+> start new-phase or backlog work unless the human asks. If asked to continue Genesis, read `bible/08` §9 (the
+> shipped Phase-26 block + backlog) and the newest `tracker.md` §6 entries first.
 >
-> **Read first (in this order):** `specs/phase-26-agentic-memory-layer.md` (umbrella) →
-> `specs/phase-26-agentic-memory-layer/26-07-release-and-acceptance.md` (the next task) →
-> `progress/phase-26-agentic-memory-layer.md` (as-built for ALL of 26-01..26-08) → `bible/05` (release
-> protocol) + `bible/08` §9 → **Proposed ADR-053 + ADR-054** in `bible/04`.
->
-> **Built (all local/unreleased — reuse, don't rebuild):** 26-01 store/graph+`mm0001`; 26-02 embedder+vectors;
-> 26-03 `memory-consolidation` workflow + `ctx.extras`; 26-04 `memory-maintenance` workflow; 26-05 read-only
-> `genesis-memory` MCP + retrieval (chat-wired); 26-06 scheduler jobs + `memory_owner_username` +
-> `GET /api/system/memory`; 26-08 curation API + `/memory` web workspace. Both workflows registered.
->
-> **NEXT = 26-07 — RELEASE + acceptance (follow `bible/05`):** ⚠️ **the human must approve the release** —
-> this is the FIRST push to master for Phase 26. Steps: (1) run ALL gates green (genesis pytest **635** +
-> ruff; web tsc+eslint+vitest **189** + `npm run build` committed; genesis-workflows `validate_library` +
-> pytest **93**); (2) confirm `genesis db upgrade` migrates BOTH genesis.db + memory.db and `db status` shows
-> both; (3) walk the 26-07 acceptance checklist across 26-01..26-08 end-to-end; (4) **bump + tag** `genesis`
-> and `genesis-workflows` (per bible/05 versioning — genesis-core is unchanged), push master + tags, verify CI
-> green; (5) flip **ADR-053 + ADR-054 → Accepted** (`bible/04` + `reference/decision-log.md`); (6) finalize
-> `bible/01` (versions/test counts), `bible/08`, tracker §6, and this banner/handoff.
->
-> **Open follow-ups (backlog, NOT release blockers):** the 26-05 internal-server node-injection seam (let
-> agentic workflow nodes inject `genesis-memory` — needs a genesis-core mechanism); the two 26-08 contextual
-> reuses (Application-detail "Memory" tab + Settings "Your Memory" panel); a canvas force-graph lib swap
-> (react-force-graph) for very large graphs; OS-user default for `memory_owner_username`.
->
-> **Gotchas / rules:** memory.db is **separate** (`settings.memory_db_path`); embedder/vector index load only
-> in the worker/MCP subprocess; retrieval degrades under `NullEmbedder`; memory.db writes in async nodes via
-> `asyncio.to_thread` (bible §7). Until 26-07 is approved, **do not push master / bump versions**.
+> **Phase-26 backlog / deferred follow-ups (NOT started — pick up only if asked):** the 26-05 internal-server
+> node-injection seam (let agentic workflow nodes inject `genesis-memory` — needs a genesis-core mechanism, as
+> the shared `mcp-registry.json` can't express the venv `command`); the two 26-08 contextual reuses
+> (Application-detail "Memory" tab + Settings "Your Memory" panel — thin wiring over the existing components);
+> a canvas force-graph lib swap (`react-force-graph`) for very large memory graphs; an OS-user default for
+> `memory_owner_username`; and the umbrella §9 non-goals (multi-user ACL, Postgres+pgvector migration,
+> auto-prefetch injection, hard-delete/purge) which are seams-built-now.
 >
 > **Dev/test (bible §6):** venv `genesis/.venv`. `cd genesis && .venv/bin/python -m pytest -q -p no:warnings`
 > (**635**) `+ ruff check genesis`; web `cd genesis/web && npx tsc --noEmit && npx eslint . && npx vitest run`

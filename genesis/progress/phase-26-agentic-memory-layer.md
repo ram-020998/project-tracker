@@ -185,8 +185,35 @@
   consolidation skips no-new-sessions, `GET /system/memory` shape; `test_sync_jobs` expectation +2 jobs),
   ruff clean, full suite green.
 
-## Next
-- **26-07** — RELEASE + acceptance (the last sub-phase): bump/tag **genesis + genesis-workflows** (this is
-  the FIRST push to master for Phase 26 — needs the human's go-ahead), verify `genesis db upgrade` covers
-  both DBs, run the acceptance checklist across 26-01..26-08, flip **ADR-053 + ADR-054 → Accepted**, and
-  finalize bible/tracker/progress.
+## 26-07 — RELEASE + acceptance ✅ SHIPPED — Phase 26 COMPLETE
+- **Tags:** genesis **v0.52.0** (commit `8ed1460`) + genesis-workflows **v0.10.0** (commit `88b2bae`);
+  genesis-core unchanged (v0.9.5). Release chain: genesis pushed + CI green first, then genesis-workflows
+  (its pin resolves to v0.52.0).
+- **CI (all green):** genesis #6620119 (master) + #6620121 (v0.52.0); genesis-workflows #6620190 (master) +
+  #6620191 (v0.10.0).
+- **Gates:** genesis pytest **635** + ruff clean; web tsc + eslint + vitest **189** (jest-axe) + `npm run build`
+  (stale-bundle guard passed); genesis-workflows `ci/validate_library.py` (9 workflows, reliability trio) +
+  pytest **93**. `genesis db upgrade` verified on a fresh state dir → genesis.db v14 + memory.db v1 (idempotent);
+  `genesis install --from ../genesis-workflows` registers `memory-consolidation` + `memory-maintenance`.
+- **ADRs:** ADR-053 (memory layer) + ADR-054 (store/infra + local embedder) flipped **Proposed → Accepted**
+  (bible/04 §5 + reference/decision-log.md).
+- **Release hiccup (fixed, → bible/06 lesson):** the first genesis-workflows push failed CI — a stale
+  transitive `genesis-core@v0.9.2` pin conflicted with genesis v0.52.0's `genesis-core@v0.9.5`
+  (`ResolutionImpossible`). Fixed by aligning the pin to v0.9.5 (`88b2bae`) + re-pointing the v0.10.0 tag;
+  CI green. Locally-editable venvs masked it — the clean-install CI job caught it.
+- **Docs (DoD):** bible/00+01 banners/versions/test-counts/data-plane, bible/03 modules, bible/04+decision-log
+  ADRs Accepted, bible/06 lesson, bible/08 flipped to SHIPPED, AGENT_ONBOARDING banner + handoff retired
+  (no active phase), tracker §6 release entry, this progress doc.
+
+## Deferred (seams built — backlog, not started)
+Multi-user ACL enforcement; Postgres+pgvector migration (seam only); auto-prefetch injection; hard-delete/
+purge; the 26-05 agentic-node `genesis-memory` injection seam (needs a genesis-core mechanism — the shared
+`mcp-registry.json` can't express the venv `command`); the two 26-08 contextual reuses (Application-detail
+"Memory" tab + Settings "Your Memory" panel); a canvas force-graph lib swap for very large graphs; an OS-user
+default for `memory_owner_username`.
+
+## Acceptance (user-observed — headless-undrivable)
+The reasoning-quality checks (§5 of 26-07) are user-driven: trigger `memory-consolidation` with real chats →
+scoped/typed/entity-anchored memories (no secrets); query `genesis-memory` → relevant + owner-scoped results
++ graph traversal; trigger `memory-maintenance` → merges/invalidations/decay + a convergent second run; leave
+`genesis serve` across the nightly slot → one fire + `GET /api/system/memory` reflects counts.

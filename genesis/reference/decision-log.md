@@ -1209,6 +1209,17 @@ non-Kiro provider or a chat session-provider plugs into (the chat session-provid
 DocumentProvider** (25-09) remains **Proposed** — not yet built. Spec:
 `specs/phase-25-architectural-foundation-hardening/25-05-agent-provider-interface.md`.
 
+- **ADR-053 (ACCEPTED — Phase 26, SHIPPED genesis v0.52.0 + genesis-workflows v0.10.0)** — the **Genesis Agentic
+  Memory Layer**: personal (named-user) vs shared (entity-anchored, traversable) memory × semantic/episodic/procedural,
+  bi-temporal; a nightly `memory-consolidation` + a periodic `memory-maintenance` ("dreaming") workflow; a read-only
+  `genesis-memory` MCP (hybrid retrieval) as the ONLY injection path (steered, no auto-prefetch); a browser-only curation
+  API + `/memory` UI where human edits are authoritative + exempt from maintenance. Deferred (seams built): multi-user ACL,
+  auto-prefetch, hard-delete, agentic-node MCP injection. Specs: `specs/phase-26-agentic-memory-layer.md` + `26-01..26-08`.
+- **ADR-054 (ACCEPTED — Phase 26, SHIPPED genesis v0.52.0)** — memory **store/infra + local embedder**: a separate
+  `~/.genesis/memory.db` (`mm0001`; bi-temporal graph + FTS5 + `sqlite-vec`) behind DB-agnostic seams (`MemoryStore`/
+  `GraphStore`/`VectorIndex`/`Embedder`) for a future Postgres+pgvector re-home; a small LOCAL embedder (model2vec default)
+  loaded only in the worker/MCP subprocess, degrading to NullEmbedder when absent. `genesis db upgrade` covers both DBs.
+
 
 ## ADR-052 — DocumentProvider interface for document sourcing (Phase 25-09)
 

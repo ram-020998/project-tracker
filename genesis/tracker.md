@@ -237,6 +237,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-20 (Phase 26 — 26-07 RELEASED ✅ — Agentic Memory Layer COMPLETE):** shipped **genesis v0.52.0**
+  (commit `8ed1460`) + **genesis-workflows v0.10.0** (commit `88b2bae`); genesis-core unchanged (v0.9.5).
+  CI green — genesis #6620119 (master) + #6620121 (v0.52.0); genesis-workflows #6620190 (master) + #6620191
+  (v0.10.0). **ADR-053 + ADR-054 → Accepted** (bible/04 + decision-log). `genesis db upgrade` upgrades both
+  genesis.db (v14) + memory.db (v1); `genesis install --from ../genesis-workflows` registers
+  `memory-consolidation` + `memory-maintenance`. Gates: genesis pytest **635** + ruff; web tsc/eslint/vitest
+  **189** (jest-axe) + build (stale-bundle guard); genesis-workflows `validate_library` (9) + pytest **93**.
+  **Release hiccup + fix (hard-won lesson, bible/06):** the first genesis-workflows push (v0.10.0) failed CI —
+  its `genesis-core@v0.9.2` runtime pin conflicted with genesis v0.52.0's `genesis-core@v0.9.5` dep
+  (`ResolutionImpossible`); fixed by aligning the transitive pin to v0.9.5 (commit `88b2bae`), re-pointed the
+  v0.10.0 tag, CI green. **Deferred (seams built, backlog):** multi-user ACL, auto-prefetch injection,
+  hard-delete/purge, agentic-node `genesis-memory` injection, the two 26-08 contextual reuses, a canvas
+  force-graph swap. Phase 26 COMPLETE — no active phase.
+
 - **2026-08-20 (Phase 26 — 26-06 BUILT, unreleased):** scheduler integration + config (genesis `f5d34be`).
   `runtime/memory_jobs.py` fires **memory-consolidation** (nightly 02:00 IST) + **memory-maintenance**
   (weekly Sun 03:00 IST) on the existing Phase-23 scheduler, with preflight skips (no Kiro / not installed /

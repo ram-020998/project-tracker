@@ -74,7 +74,10 @@ genesis/genesis/
             background tasks, handler-gated, mark-before-work, restart-safe within-day; started/stopped in the app
             lifespan); schedule_store.py (ScheduleStore over m0012 `scheduled_jobs`); sync_jobs.py (DEFAULT_JOBS +
             register_sync_jobs → `application-sync` [all apps, 07:00 IST wkdays, serialized] + `document-library-sync`
-            [scope=library, 08/12/16/20 IST wkdays], preflight-skips).**
+            [scope=library, 08/12/16/20 IST wkdays], preflight-skips).** **memory_jobs.py (Phase 26-06): DEFAULT_MEMORY_JOBS
+            + register_memory_jobs → `memory-consolidation` [nightly 02:00 IST] + `memory-maintenance` [weekly Sun 03:00 IST,
+            via `due_slot`'s `days` filter], preflight-skips (no Kiro / not installed / no new sessions); threads
+            `memory_owner_username`.**
   dist/     gitlab.py, local.py, catalog.py, lockfile.py (**+InstalledSkill / Lockfile.skills — Phase 14, additive/back-compat**),
             install.py, loader.py (check_compat gate, meta_of [yaml, no import], graph_of, installed, load_build);
             **skill_catalog.py (reads skills-registry.json) + skill_install.py (SkillInstaller: pull skills/<id>/** at a
@@ -111,6 +114,17 @@ genesis/genesis/
             KbStore with Atlas-mirrored shapes; get_object_code/get_orphan fetch live SAIL via the Dev MCP
             (kb/dev_mcp.object_code), graceful code_status:unavailable. Launched `-m genesis.mcp.kb_server --db <db>`;
             wired into chat (chat/mcp.py) in place of appian-atlas**;
+            **memory_server.py (Phase 26-05) — read-only genesis-memory MCP: hybrid retrieval + entity/graph tools
+            (search_memory/get_personal_memory/get_entity/get_entity_memories/get_related_entities/get_relationships)
+            over a `mode=ro` memory.db; builds the embedder in-subprocess; owner-scoped; launched
+            `-m genesis.mcp.memory_server --db <memory.db> --owner <u>`; chat-wired alongside genesis-kb**;
+            **memory/ (Phase 26, ADR-053/054) — the agentic memory layer: migrations/mm0001_memory.py (separate
+            memory.db); store.py (MemoryStore + GraphStore [recursive-CTE traversal]); models.py; embedder.py
+            (Embedder Protocol; Null/Fake/Local[model2vec/fastembed] + build_embedder); vector.py (VectorIndex;
+            SqliteVecIndex + BruteForceVectorIndex + build_vector_index/embed_pending/purge_vectors); retrieval.py
+            (pure hybrid fuse — semantic+keyword+entity/graph × recency × importance); chat_read.py (read-only chat
+            accessor for consolidation); db.py. api/memory.py = the browser-only curation API; web/features/memory/ =
+            the /memory workspace (graph/list/inspector/review). The two workflows live in genesis-workflows.**
             **native/ (Phase 16-08, ADR-038) — installer.py (NativeMcpInstaller: install(id,bundle_path)→uv sync under
             settings.mcp_servers_dir/<id>/versions/<v>/ → verify entry → sha+lockfile → set current; rollback;
             active_launch_spec [launch from the per-server venv, not uv]; status; NO network update) + lockfile.py

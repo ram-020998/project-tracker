@@ -8,20 +8,19 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 📋 IN PROGRESS (26-01 + 26-02 BUILT, unreleased) — Phase 26: Agentic Memory Layer
+### ⭐ SHIPPED — Phase 26: Agentic Memory Layer (26-01..26-08) — genesis v0.52.0 + genesis-workflows v0.10.0
 
-> **Specs:** `specs/phase-26-agentic-memory-layer.md` (umbrella) + `phase-26-agentic-memory-layer/26-01..26-08`. **Proposed
-> ADR-053** (Genesis Agentic Memory Layer) + **ADR-054** (memory store/infra + local embedder). As-built:
->> `progress/phase-26-agentic-memory-layer.md`. **Build status: 26-01** (separate `memory.db` + `MemoryStore`/`GraphStore` +
-> `mm0001`; genesis `14eb3ab`) **+ 26-02** (local `Embedder` + `sqlite-vec` `VectorIndex` + brute-force fallback + `embed_pending`;
-> genesis `67bd71b`) **+ 26-03** (the nightly `memory-consolidation` workflow + `ctx.extras` wiring; genesis `a416a21` +
-> genesis-workflows `8cb06e3`) **+ 26-05** (the read-only `genesis-memory` MCP + hybrid retrieval, chat-wired; genesis `f95ac0b`)
-> **+ 26-08** (Memory Management UI + browser-only curation API; genesis `5c6cc0d`+`07bc946`)
-> **+ 26-04** (the `memory-maintenance` "dreaming" workflow; genesis `d080335` + genesis-workflows `93e3c4f`)
-> **+ 26-06** (scheduler jobs + `memory_owner_username` + `GET /api/system/memory`; genesis `f5d34be`)
-> are **BUILT + tested (genesis pytest 635, web vitest 189, workflows 93, ruff clean) but UNRELEASED** — local on master, no tag.
-> **All build sub-phases are done; NEXT = 26-07 (RELEASE: bump/tag genesis + genesis-workflows, ADR-053/054 → Accepted).**
-> Repos: **genesis** + **genesis-workflows** (genesis-core unchanged).
+> **Specs:** `specs/phase-26-agentic-memory-layer.md` (umbrella) + `phase-26-agentic-memory-layer/26-01..26-08`. **ADR-053**
+> (Genesis Agentic Memory Layer) + **ADR-054** (memory store/infra + local embedder) — **Accepted**. As-built:
+>> `progress/phase-26-agentic-memory-layer.md`. **SHIPPED (26-01 store/`mm0001` + 26-02 embedder/`sqlite-vec` + 26-03
+> `memory-consolidation` + 26-04 `memory-maintenance` + 26-05 read-only `genesis-memory` MCP + 26-06 scheduler/config/
+> `GET /api/system/memory` + 26-08 curation API + `/memory` web workspace).** Release commits genesis `8ed1460` (v0.52.0) +
+> genesis-workflows `88b2bae` (v0.10.0); CI green — genesis #6620119 (master) + #6620121 (v0.52.0), genesis-workflows #6620190
+> (master) + #6620191 (v0.10.0). Gates: genesis pytest **635**, web vitest **189** (jest-axe), genesis-workflows **93** +
+> `validate_library` (reliability trio), ruff/tsc/eslint clean. `genesis db upgrade` covers both genesis.db (v14) + memory.db
+> (v1). Repos: **genesis** + **genesis-workflows** (genesis-core unchanged at v0.9.5). **Deferred (seams built, backlog):**
+> multi-user ACL, auto-prefetch injection, hard-delete/purge, agentic-node `genesis-memory` injection, the two 26-08 contextual
+> reuses (app-detail Memory tab + Settings "Your Memory"), a canvas force-graph lib swap.
 >
 > **Goal.** Distil the conversations Genesis already stores (`chat_sessions`/`chat_messages`) into a persistent, self-maintaining
 > **agentic memory** so agents get radically more effective over time. **Two scopes** — **personal** (a *named user's*
