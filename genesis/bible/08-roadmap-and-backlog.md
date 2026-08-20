@@ -15,9 +15,10 @@
 >> `progress/phase-26-agentic-memory-layer.md`. **Build status: 26-01** (separate `memory.db` + `MemoryStore`/`GraphStore` +
 > `mm0001`; genesis `14eb3ab`) **+ 26-02** (local `Embedder` + `sqlite-vec` `VectorIndex` + brute-force fallback + `embed_pending`;
 > genesis `67bd71b`) **+ 26-03** (the nightly `memory-consolidation` workflow + `ctx.extras` wiring; genesis `a416a21` +
-> genesis-workflows `8cb06e3`) are **BUILT + tested (genesis pytest 598, workflows 86, ruff clean) but UNRELEASED** — local on
-> master, no tag (the phase release is 26-07). **NEXT = 26-05** (the read-only `genesis-memory` MCP + hybrid retrieval). Repos:
-> **genesis** + **genesis-workflows** (genesis-core unchanged).
+> genesis-workflows `8cb06e3`) **+ 26-05** (the read-only `genesis-memory` MCP + hybrid retrieval, chat-wired; genesis `f95ac0b`)
+> are **BUILT + tested (genesis pytest 616, workflows 86, ruff clean) but UNRELEASED** — local on master, no tag (the phase
+> release is 26-07). **NEXT = 26-08** (Memory Management UI + curation API + Obsidian-style graph). Repos: **genesis** +
+> **genesis-workflows** (genesis-core unchanged).
 >
 > **Goal.** Distil the conversations Genesis already stores (`chat_sessions`/`chat_messages`) into a persistent, self-maintaining
 > **agentic memory** so agents get radically more effective over time. **Two scopes** — **personal** (a *named user's*

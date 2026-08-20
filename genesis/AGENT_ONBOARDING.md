@@ -22,70 +22,115 @@
 > Phase-25 Architectural Foundation Hardening release (v0.49.0 + v0.50.0), sub-phases 25-01..25-10 + 25-13 (25-11 + 25-12 backlog) — Phase 25 COMPLETE.)
 > **Newest planning: Phase 26 — Agentic Memory Layer — IN PROGRESS. 26-01 (separate `memory.db` + MemoryStore/
 > GraphStore + mm0001) + 26-02 (local Embedder + sqlite-vec VectorIndex) + 26-03 (the nightly
-> `memory-consolidation` workflow + ctx.extras wiring) are BUILT (unreleased — local on `genesis` +
-> `genesis-workflows` master, no tag; the phase release is 26-07). NEXT = 26-05 (the read-only `genesis-memory`
-> MCP). Umbrella + 26-01..26-08 spec'd; Proposed ADR-053 + ADR-054.**
+> `memory-consolidation` workflow + ctx.extras wiring) + 26-05 (the read-only `genesis-memory` MCP + hybrid
+> retrieval, chat-wired) are BUILT (unreleased — local on `genesis` + `genesis-workflows` master, no tag; the
+> phase release is 26-07). NEXT = 26-08 (Memory Management UI + curation API + graph). Umbrella + 26-01..26-08
+> spec'd; Proposed ADR-053 + ADR-054.**
 > See `bible/08-roadmap-and-backlog.md` §9 + `specs/phase-26-agentic-memory-layer.md` + `progress/phase-26-agentic-memory-layer.md`.
 > (Full phase/release banner + version detail live in
 > `bible/00-onboarding-and-overview.md` and `bible/01-current-state.md`.)
 
 ---
 
-## ▶ ACTIVE HANDOFF — continue Phase 26 (Agentic Memory Layer) at **26-05**
+Onboard to the Genesis project by reading its bible before doing anything else.
+  
+  1. Read the bible INDEX first:
+     /Users/ramaswamy.u/repo/project-tracker/genesis/AGENT_ONBOARDING.md
+  
+  2. Then read EVERY chunk it lists, in order — do not skip any (they are interdependent):
+     - bible/00-onboarding-and-overview.md   (purpose, what Genesis is, read-order)
+     - bible/01-current-state.md             (repos/tags, tests, what works)
+     - bible/02-architecture.md              (mental model)
+     - bible/03-codebase-map.md              (where code lives)
+     - bible/04-adrs-and-constraints.md      (ADR-001..047 — non-negotiable)
+     - bible/05-dev-loop-and-release.md      (env, tests, release, CI)
+     - bible/06-hard-won-lessons.md          (do-not-regress bugs)
+     - bible/07-working-on-tasks-and-agreements.md (the work loop + working agreements)
+     - bible/08-roadmap-and-backlog.md       (shipped phases + what's next)
+  
+  3. Then read the supporting docs the bible points to (at least):
+     - tracker.md  — read §6 STATUS LOG top-down (the running history / source of truth for "what is done")
+     - reference/decision-log.md      (the ADRs — the "why")
+     - reference/coding-standards.md  (§1 is the hard floor)
+     For the specific area you'll touch, also read the relevant specs/<phase>.md and progress/<phase>.md,
+     and the cited source files, BEFORE editing.
+  
+  4. When done, briefly RESTATE: the layered architecture, the reliability trio, the state/blackboard rule,
+     the subprocess-worker model, the SQLite data plane, and the release/versioning protocol — plus the
+     current shipped versions.
+  
+  Then follow the bible religiously for the rest of the session: obey the ADRs (§5) and working agreements
+  (§8/§10), respect the hard-won lessons (§7), and use the work loop in §8 (understand → verify against real
+  code → smallest correct change → test → run all gates green → release if a repo changed → update the bible
+  + tracker + progress → report with cited evidence). Do NOT start backlog or a new phase unless I explicitly
+  ask. Ask before any destructive/irreversible action.
+  
+  Do not write any code or make changes until you have read the above and given me the restatement.
+  
+  If you want a shorter version for quick use:
+  
+  Read the Genesis bible before doing anything: start at
+  /Users/ramaswamy.u/repo/project-tracker/genesis/AGENT_ONBOARDING.md and read the INDEX plus EVERY chunk in
+  bible/ (00–08) in order — don't skip any. Then read tracker.md §6, reference/decision-log.md, and
+  reference/coding-standards.md, plus the specs/ + progress/ docs and source files for the area I name.
+  Briefly restate the architecture + current state + non-negotiables, then follow the bible religiously
+  (ADRs and working agreements are non-negotiable; use the §8 work loop). Don't start backlog/new-phase work
+  unless I ask, and ask before destructive actions. No code changes until you've read it and restated.
+  
+  Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
+
+## ▶ ACTIVE HANDOFF — continue Phase 26 (Agentic Memory Layer) at **26-08**
 
 > **After reading the whole bible, this is the work to pick up.** Phase 26 is IN PROGRESS; **26-01 + 26-02 +
-> 26-03 are BUILT + tested green but UNRELEASED** (local commits, no tag — the phase release is **26-07**).
+> 26-03 + 26-05 are BUILT + tested green but UNRELEASED** (local commits, no tag — the phase release is
+> **26-07**).
 >
 > **Read first (in this order):** `specs/phase-26-agentic-memory-layer.md` (umbrella) →
-> `specs/phase-26-agentic-memory-layer/26-05-genesis-memory-mcp-and-retrieval.md` (the next task) →
-> `progress/phase-26-agentic-memory-layer.md` (as-built for 26-01..26-03) → `bible/08` §9 Phase-26 block →
+> `specs/phase-26-agentic-memory-layer/26-08-memory-management-ui-and-graph.md` (the next task) →
+> `progress/phase-26-agentic-memory-layer.md` (as-built for 26-01..26-05) → `bible/08` §9 Phase-26 block →
 > **Proposed ADR-053 + ADR-054** in `bible/04`. Then read the code the task cites (below) before editing.
 >
 > **Done so far (reuse these — do NOT rebuild):**
-> - **26-01** — a **separate `~/.genesis/memory.db`** (genesis.db untouched at v14) + `mm0001` + `MemoryStore`
->   / `GraphStore` in `genesis/genesis/memory/{store,models,db,migrations}.py`. Key reads you'll call:
->   `MemoryStore.search_memories(query,scope,owner,types,entity_ids,top_k,current)` (FTS5 + filters),
->   `get_entity`/`get_entity_by_id`/`get_entity_memories`, `mark_used(ids)`; `GraphStore.related_entities(id,
->   rel_type,depth,current)` (recursive-CTE traversal) / `relationships_of`. DB-agnostic (ADR-030/054).
-> - **26-02** — `genesis/memory/embedder.py` (`Embedder` protocol; `NullEmbedder`/`FakeEmbedder`/`LocalEmbedder`
->   [default **model2vec** static, optional extra `pip install genesis[embeddings]`]; `build_embedder(settings)`
->   → degrades to NullEmbedder if the dep is absent) and `genesis/memory/vector.py` (`VectorIndex` protocol;
->   `SqliteVecIndex` [sqlite-vec `vec0` cosine] + `BruteForceVectorIndex` pure-python fallback;
->   `build_vector_index(db,dim)` returns None when dim==0; `embed_pending`). `sqlite-vec==0.1.9` is a core dep.
-> - **26-03** — `ctx.extras` now carries `memory_store` / `chat_read` (read-only) / `embedder_factory` (lazy),
->   wired in `genesis/runtime/context.py`; the nightly **`memory-consolidation`** workflow lives in
->   genesis-workflows (`workflows/memory-consolidation/`, registered).
+> - **26-01** — separate `~/.genesis/memory.db` + `mm0001` + `MemoryStore`/`GraphStore` in
+>   `genesis/genesis/memory/{store,models,db,migrations}.py`. mm0001 ALREADY has the 26-08 curation columns on
+>   `memories`: `origin`, `pinned`, `protected`, `user_verified`, `review_status`, `edited_by`, `confidence`.
+>   Curation writes to reuse: `MemoryStore.set_flags(...)` (pin/protect/verify/review_status/edited_by),
+>   `update_memory` (supersede+history), `invalidate_memory`, `archive_memory`; reads:
+>   `search_memories`, `list_entities`, `get_entity*`, `GraphStore.related_entities`/`relationships_of`.
+> - **26-02** — `memory/embedder.py` (`build_embedder`→Null/Local) + `memory/vector.py` (`build_vector_index`,
+>   `embed_pending`). **26-03** — the nightly `memory-consolidation` workflow (genesis-workflows) + `ctx.extras`
+>   (`memory_store`/`chat_read`/`embedder_factory`) in `genesis/runtime/context.py`.
+> - **26-05** — the read-only **`genesis-memory` MCP** (`genesis/mcp/memory_server.py`) + the hybrid
+>   **`genesis/memory/retrieval.py`** fuse (semantic+keyword+entity/graph × recency × importance; α=0 under a
+>   NullEmbedder). Chat-wired in `genesis/chat/mcp.py` (+ steering in `chat/mode_profile.py`). **Open follow-up
+>   (do in 26-06):** internal servers can't go in genesis-workflows `mcp-registry.json` (it doesn't
+>   `${}`-resolve a server `command` → can't express the venv python), so agentic **workflow-node** injection
+>   of `genesis-memory` needs an internal-server node-injection seam in genesis-core (mirror `_kb_entry` for
+>   nodes). Chat injection is done.
 >
-> **NEXT = 26-05 — the read-only `genesis-memory` MCP + hybrid retrieval (makes memory usable by the agent):**
-> - Model it on **`genesis/genesis/mcp/kb_server.py`** (read-only stdio JSON-RPC MCP; launched `-m
->   genesis.mcp.memory_server --db <memory.db>`). Add `genesis/genesis/mcp/memory_server.py` +
->   **`genesis/genesis/memory/retrieval.py`** (a PURE, unit-tested fuse: relevance [semantic vector +
->   keyword FTS5 + entity/graph proximity] × **recency** [exp decay on `last_used_at`/`created_at`] ×
->   **importance**; α=0 when NullEmbedder → degrades to keyword+entity — Generative-Agents scoring).
-> - Tools (all read-only, owner/entity-scoped): `search_memory(query,scope,entity_refs,types,top_k)`,
->   `get_entity`/`get_entity_memories`, `get_related_entities(entity_ref,rel_type,depth)` (graph traversal),
->   `get_relationships`, `get_personal_memory` (the configured owner only).
-> - **Build the embedder inside the MCP subprocess** via `build_embedder(settings)` (NEVER in the web process);
->   candidate-generate with `VectorIndex.search` (scope/entity pre-filtered) ∪ `MemoryStore.search_memories`
->   ∪ `GraphStore`; owner scoping — until the 26-06 `memory_owner_username` setting lands, pass `--owner`
->   (default `"local"`). **Injection is MCP-only** (ADR-002/004/020, ADR-031/045): wire `genesis-memory` into
->   chat (`genesis/genesis/chat/mcp.py`, alongside `genesis-kb`) + relevant agentic nodes + a **steering hint**
->   telling the agent to query it; add a `genesis-memory` entry to genesis-workflows `mcp-registry.json`.
->   **No write tools** — the MCP stays strictly read-only.
+> **NEXT = 26-08 — Memory Management UI + curation API + Obsidian-style graph:** a rich visual surface to
+> browse/search memories (personal + shared), inspect + curate them (pin / protect / mark-verified / edit /
+> hard-delete), and explore the entity-relationship graph (Obsidian-style force-directed). Build: a write-side
+> **curation API** (`genesis/api/...`) over the `MemoryStore` curation methods above (human edits set
+> `origin='user'` / `edited_by` / `review_status`); a read API for the graph (`GraphStore`); the SPA
+> screens (see `design/ui-screen-catalog.md`); pick the graph lib (open build-time item). **Human-curated
+> memories are protected from the maintenance job** (26-04) — `forget_before` already skips
+> pinned/protected/user_verified/`origin='user'`. Follow the existing API + SPA patterns (read the nearest
+> `genesis/api/*` router + the web app structure first).
 >
-> **Then (remaining build order):** 26-05 → **26-08** (Memory Management UI + Obsidian-style graph + curation
-> API) → **26-04** (the `memory-maintenance` "dreaming" workflow) → **26-06** (scheduler jobs + `memory_owner_username`
-> setting + `GET /api/system/memory`) → **26-07** (release: bump/tag **genesis + genesis-workflows**, `genesis db
+> **Then (remaining build order):** 26-08 → **26-04** (the `memory-maintenance` "dreaming" workflow) →
+> **26-06** (scheduler jobs + `memory_owner_username` setting + `GET /api/system/memory` + the internal-server
+> node-injection follow-up) → **26-07** (release: bump/tag **genesis + genesis-workflows**, `genesis db
 > upgrade` covers both DBs, ADR-053/054 → Accepted, bible/tracker/progress).
 >
-> **Gotchas / rules:** memory.db is **separate** (`settings.memory_db_path`) with its own migration set — never
-> mix with genesis.db migrations; the embedder/vector index only load in the **worker/MCP subprocess**;
-> retrieval must handle `NullEmbedder` (dim 0 / index None) → FTS+graph; memory.db writes inside async nodes go
-> via `asyncio.to_thread` (bible §7). **Code commits are local/unpushed** (genesis + genesis-workflows master,
-> no tag) — the release is 26-07; don't push master / bump versions until then unless the human asks.
+> **Gotchas / rules:** memory.db is **separate** (`settings.memory_db_path`) with its own migration set;
+> the embedder/vector index only load in the **worker/MCP subprocess**; retrieval degrades under `NullEmbedder`
+> (dim 0 / index None) → FTS+graph; memory.db writes inside async nodes go via `asyncio.to_thread` (bible §7).
+> **Code commits are local/unpushed** (genesis master, no tag; `genesis-workflows` too for 26-03) — the release
+> is 26-07; don't push master / bump versions until then unless the human asks.
 >
 > **Dev/test (bible §6):** venv `genesis/.venv`. Gates: `cd genesis && .venv/bin/python -m pytest -q -p
-> no:warnings` (currently **598**) `+ .venv/bin/ruff check genesis`; workflows `cd genesis-workflows &&
+> no:warnings` (currently **616**) `+ .venv/bin/ruff check genesis`; workflows `cd genesis-workflows &&
 > ../genesis/.venv/bin/python ci/validate_library.py` `+ ... -m pytest -q workflows --ignore=workflows/_fixtures`
 > (currently **86**). Stub Kiro in tests via `set_collect_impl` (see `workflows/memory-consolidation/tests/`).
 

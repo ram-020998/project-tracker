@@ -75,7 +75,43 @@
   reliability trio enforced, graph parity); full workflows suite **77→86**; genesis pytest 598 (build_context
   regression-checked), ruff clean.
 
+## 26-05 — genesis-memory MCP + hybrid retrieval ✅ BUILT (unreleased)
+- **Commit:** genesis `f95ac0b` (local, no tag). genesis-only (see the registry note below).
+- **As built:**
+  - **`genesis/memory/retrieval.py`** — a pure, framework-free hybrid fuse (generative-agents scoring):
+    `score = w_rel·relevance + w_rec·recency + w_imp·importance`, `relevance = minmax(α·semantic +
+    β·keyword + γ·entity/graph_proximity)`, **α=0 under a NullEmbedder**. `HybridRetriever` candidate-
+    generates from the vector index (26-02) ∪ FTS5 (26-01) ∪ graph proximity (26-01), **always scope/owner
+    pre-filtered** (vector search never global), then fuses + ranks. Keyword is a **binary presence** signal
+    (the store surfaces no BM25 and its ordering already folds in recency/importance → rank-decay would
+    double-count). DB-agnostic (consumes `Memory` + `VectorIndex`).
+  - **`genesis/mcp/memory_server.py`** — a **separate** read-only stdio JSON-RPC MCP (modeled on
+    `kb_server`, NOT merged with `genesis-kb`), launched `-m genesis.mcp.memory_server --db <memory.db>
+    [--owner <u>]`. Tools (all read-only): `search_memory`, `get_personal_memory`, `get_entity`,
+    `get_entity_memories`, `get_related_entities` (graph traversal), `get_relationships`. Reads via a
+    `mode=ro` connection; the embedder is built **in this subprocess** via `build_embedder` (NullEmbedder →
+    keyword+graph). **Owner scoping:** personal reads restricted to `--owner`; `search_memory` defaults to
+    `shared` so one user's personal memory is never volunteered. **Strictly read-only** — no write tools; the
+    `mark_used` recency bump is deliberately not done here (nightly job owns recency).
+  - **Injection (MCP-only, §11.5):** `chat/mcp.py` wires `genesis-memory` into every chat session (read_only
+    / copilot / feature_spec) alongside `genesis-kb`, auto-trusted; `chat/mode_profile.py` adds a memory
+    steering hint to all three preambles (recall personal prefs + shared app knowledge before re-asking the
+    user; no auto-prefetch). Owner via `getattr(settings,'memory_owner_username','local')` — forward-compat
+    with the 26-06 setting.
+- **Scope note (deviation from 26-05 §5):** `genesis-memory` is **NOT** added to genesis-workflows
+  `mcp-registry.json`. That registry does not `${}`-resolve a server's `command`, so it can't express the
+  venv python an internal module server needs — exactly why `genesis-kb` (the internal-server precedent) is
+  chat-wired, not in the registry. Injecting internal servers into **agentic workflow nodes** needs an
+  internal-server node-injection mechanism in genesis-core (mirroring `_kb_entry` for nodes) — a deliberate
+  follow-up (filed against 26-06/26-07 wiring). The primary agent surface (chat) is fully delivered.
+- **Verified:** `tests/test_memory_retrieval.py` (pure units + `HybridRetriever` over a temp memory.db +
+  FakeEmbedder + BruteForceVectorIndex: keyword/semantic rank, scope/owner isolation, entity-proximity
+  boost, NullEmbedder degradation) + `tests/test_memory_server.py` (tool-contract shapes, owner-scoped
+  personal reads, shared default doesn't leak personal, graph traversal, read-only guard, tools/list). genesis
+  pytest **598→616**, ruff clean; a **subprocess smoke** (initialize/tools/list/search/personal) passes.
+
 ## Next
-- **26-05** — the read-only `genesis-memory` MCP + hybrid retrieval (makes memory usable by the agent). Then
-  26-08 (UI), 26-04 (dreaming), 26-06 (scheduler/config), 26-07 (release: bump/tag genesis + genesis-workflows,
-  ADR-053/054 → Accepted).
+- **26-08** — the Memory Management UI (Obsidian-style graph + curation API): browse/search/edit/pin/
+  protect/verify/hard-delete memories + entities/relationships; the write-side curation API + record-level
+  provenance columns (already in `mm0001`). Then 26-04 (dreaming), 26-06 (scheduler + `memory_owner_username`
+  + `GET /api/system/memory` + the internal-server node-injection follow-up), 26-07 (release).

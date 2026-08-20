@@ -237,6 +237,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-20 (Phase 26 — 26-05 BUILT, unreleased):** the memory **read path** — a **separate read-only
+  `genesis-memory` MCP** + hybrid retrieval (genesis `f95ac0b`). `genesis/memory/retrieval.py` fuses semantic
+  (vectors) + keyword (FTS5) + entity/graph proximity × recency × importance (generative-agents scoring;
+  α=0 under a NullEmbedder → degrades to keyword+graph), always scope/owner pre-filtered.
+  `genesis/mcp/memory_server.py` (modeled on `kb_server`, not merged with it) exposes read-only tools
+  (`search_memory`, `get_personal_memory`, `get_entity`, `get_entity_memories`, `get_related_entities`
+  [graph traversal], `get_relationships`); personal reads are `--owner`-scoped and `search_memory` defaults to
+  `shared` (never volunteers another user's personal memory); strictly read-only. Wired into all chat modes
+  (`chat/mcp.py`) + a memory steering hint (`chat/mode_profile.py`); injection is MCP-only (no auto-prefetch).
+  **Deviation:** NOT added to `mcp-registry.json` (that registry can't `${}`-resolve a server's `command` →
+  can't express the venv python an internal module server needs, like `genesis-kb`); agentic-node injection is
+  a genesis-core follow-up. **Gates:** genesis pytest 598→**616**, ruff clean, subprocess smoke green. Local/
+  unreleased (no tag). **NEXT = 26-08** (Memory Management UI + curation API + Obsidian-style graph).
+
 - **2026-08-20 (Phase 26 — 26-03 BUILT, unreleased):** the nightly memory **write path** — the
   **`memory-consolidation`** LangGraph workflow (genesis-workflows `8cb06e3`) + `ctx.extras` wiring (genesis
   `a416a21`). `build_context` now injects `memory_store`, a read-only **`chat_read`** accessor, and a lazy
