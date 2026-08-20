@@ -52,7 +52,30 @@
   loads); `embed_pending` backfill + NullEmbedder→skipped; `build_embedder` fallback. genesis pytest
   588→598; ruff clean across `genesis`.
 
+## 26-03 — memory-consolidation workflow ✅ BUILT (unreleased)
+- **Commits:** genesis `a416a21` (ctx.extras wiring) + genesis-workflows `8cb06e3` (the workflow). Local, no tag.
+- **As built:**
+  - **genesis** — `build_context` injects three memory extras (all cheap; deferred load): `memory_store`
+    (MemoryStore over memory.db), **`chat_read`** (a NEW read-only `ChatReadAccessor` over genesis.db
+    chat_sessions/messages — no write methods; the job is read-only against chat), and **`embedder_factory`**
+    (a lazy `build_embedder(settings)` callable — a model loads only in the embed node, never at every build).
+  - **genesis-workflows** — `workflows/memory-consolidation/` (graph.py + workflow.yaml) + registry entry.
+    Graph: `resolve_window → load_sessions (redact secrets) → [extract → v_extract] → reconcile_prep →
+    [reconcile → v_reconcile] → apply → advance_cursor → present`; an `escalate` gate on validation
+    exhaustion; an **empty-day short-circuit** (resolve_window → advance_cursor when no sessions). Two Kiro
+    turns only interpret (ADR-001; reliability trio ADR-011): **extract** emits atomic memories (scope
+    personal/shared, type semantic/episodic/procedural, importance, shared-entity/relationship structure);
+    **reconcile** classifies each candidate vs the top-k similar EXISTING memories (fetched keyword+entity in
+    `reconcile_prep`) as **ADD/UPDATE/INVALIDATE/NOOP** (mem0 ops + Graphiti invalidation). **apply** is a raw
+    async node (`to_thread`) writing memory.db (entities/relationships/memories, bi-temporal), then embeds via
+    the lazy factory (NullEmbedder → `skipped`). Secrets redacted before the agent/memory.
+- **Verified:** 9 workflow tests (stubbed Kiro + seeded chat + separate memory.db) — happy path
+  (memories/entities/relationships + graph traversal), ADD / UPDATE-supersede / INVALIDATE, empty-day no-op +
+  cursor advance, secret redaction, pure helpers/validators; `ci/validate_library.py` PASSED (8 workflows,
+  reliability trio enforced, graph parity); full workflows suite **77→86**; genesis pytest 598 (build_context
+  regression-checked), ruff clean.
+
 ## Next
-- **26-03** — the nightly `memory-consolidation` LangGraph workflow (genesis-workflows) + `ctx.extras`
-  wiring (memory_store / chat_read / embedder) in genesis. Then 26-05 (MCP), 26-08 (UI), 26-04 (dreaming),
-  26-06 (scheduler/config), 26-07 (release: bump/tag genesis + genesis-workflows, ADR-053/054 → Accepted).
+- **26-05** — the read-only `genesis-memory` MCP + hybrid retrieval (makes memory usable by the agent). Then
+  26-08 (UI), 26-04 (dreaming), 26-06 (scheduler/config), 26-07 (release: bump/tag genesis + genesis-workflows,
+  ADR-053/054 → Accepted).

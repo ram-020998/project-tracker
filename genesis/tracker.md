@@ -237,6 +237,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-20 (Phase 26 — 26-03 BUILT, unreleased):** the nightly memory **write path** — the
+  **`memory-consolidation`** LangGraph workflow (genesis-workflows `8cb06e3`) + `ctx.extras` wiring (genesis
+  `a416a21`). `build_context` now injects `memory_store`, a read-only **`chat_read`** accessor, and a lazy
+  **`embedder_factory`**. Graph: `resolve_window → load_sessions(redact) → [extract → v_extract] →
+  reconcile_prep → [reconcile → v_reconcile] → apply → advance_cursor → present` + an `escalate` gate + an
+  empty-day short-circuit. Two Kiro turns interpret (ADR-001; reliability trio ADR-011): extract emits atomic
+  memories (personal/shared × semantic/episodic/procedural + shared entities/relationships); reconcile
+  classifies each vs the top-k similar existing as **ADD/UPDATE/INVALIDATE/NOOP** (mem0 + Graphiti); apply
+  writes memory.db off-loop (`to_thread`) + embeds (NullEmbedder→skipped); secrets redacted. **Gates:** 9
+  workflow tests (stubbed Kiro + seeded chat + memory.db); `ci/validate_library.py` PASSED (reliability trio
+  enforced); workflows suite 77→**86**; genesis pytest 598, ruff clean. Local/unreleased (no tag). **NEXT =
+  26-05** (the read-only `genesis-memory` MCP + hybrid retrieval).
+
 - **2026-08-20 (Phase 26 — 26-01 + 26-02 BUILT, unreleased):** started implementing the Agentic Memory Layer
   in `genesis`. **26-01** (commit `14eb3ab`): a NEW, separate **`~/.genesis/memory.db`** (genesis.db untouched
   at v14) with its own migration set (`mm0001`) — the bi-temporal entity-relationship model (`memory_entities`

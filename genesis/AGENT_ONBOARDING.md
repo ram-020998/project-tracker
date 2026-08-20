@@ -21,8 +21,10 @@
 > kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.50.0 + genesis-core v0.9.5 = the
 > Phase-25 Architectural Foundation Hardening release (v0.49.0 + v0.50.0), sub-phases 25-01..25-10 + 25-13 (25-11 + 25-12 backlog) — Phase 25 COMPLETE.)
 > **Newest planning: Phase 26 — Agentic Memory Layer — IN PROGRESS. 26-01 (separate `memory.db` + MemoryStore/
-> GraphStore + mm0001) + 26-02 (local Embedder + sqlite-vec VectorIndex) are BUILT (unreleased — local on
-> `genesis` master, no tag; the phase release is 26-07). Umbrella + 26-01..26-08 spec'd; Proposed ADR-053 + ADR-054.**
+> GraphStore + mm0001) + 26-02 (local Embedder + sqlite-vec VectorIndex) + 26-03 (the nightly
+> `memory-consolidation` workflow + ctx.extras wiring) are BUILT (unreleased — local on `genesis` +
+> `genesis-workflows` master, no tag; the phase release is 26-07). NEXT = 26-05 (the read-only `genesis-memory`
+> MCP). Umbrella + 26-01..26-08 spec'd; Proposed ADR-053 + ADR-054.**
 > See `bible/08-roadmap-and-backlog.md` §9 + `specs/phase-26-agentic-memory-layer.md` + `progress/phase-26-agentic-memory-layer.md`.
 > (Full phase/release banner + version detail live in
 > `bible/00-onboarding-and-overview.md` and `bible/01-current-state.md`.)
