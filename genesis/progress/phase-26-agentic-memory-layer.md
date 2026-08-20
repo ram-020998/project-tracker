@@ -110,8 +110,38 @@
   personal reads, shared default doesn't leak personal, graph traversal, read-only guard, tools/list). genesis
   pytest **598→616**, ruff clean; a **subprocess smoke** (initialize/tools/list/search/personal) passes.
 
+## 26-08 — Memory Management UI + curation API ✅ BUILT (unreleased)
+- **Commits:** genesis `5c6cc0d` (08a backend) + `07bc946` (08b web). Local, no tag. genesis-only.
+- **08a — browser-only curation API** (`genesis/api/memory.py`, all under `/api`; the agent MCP stays
+  read-only): reads `GET /memory` (filter/paginate), `/memory/{id}` (+ bi-temporal history), `/memory/graph`
+  (nodes+edges; `?entity_ref+depth` local graph; `?at` point-in-time; `?include_invalidated`),
+  `/memory/entities[/{id}]`, `/memory/relationships`, `/memory/review`; writes: manual add (origin='user',
+  pending embed), PATCH = supersede (history kept; re-scope guarded by `confirm_scope_change`),
+  pin/protect/verify(+un), invalidate/archive/unarchive, DELETE `?hard=true` (gated purge), review
+  approve/discard, bulk, relationship POST/PATCH/DELETE, entity PATCH. New `MemoryStore` methods
+  (list_memories, memory_history, delete_memory, get/list/update/delete_relationship, update_entity,
+  unarchive) + `vector.purge_vectors`. Human edits set `origin='user'` → already exempt from
+  `forget_before` maintenance.
+- **08b — the web workspace** (`web/src/features/memory/**`, route `/memory` + a Sidebar entry): a
+  SplitPane `main | inspector` with a **Graph ⇄ List ⇄ Review** switch + shared selection/scope state.
+  **MemoryGraph** = an Obsidian-style `@xyflow/react` explorer (node size by degree, colour by kind,
+  invalidated edges dashed; hover→neighbour-highlight+dim, click→inspector, node search, MiniMap; toolbar:
+  find-node, `as of` time-scrub, show-invalidated) over a **pure, unit-tested `graph.ts`** radial fold.
+  **MemoryList** (FTS search + scope/type filters + bulk pin/verify/archive), **MemoryInspector** (edit
+  every attribute = supersede; pin/protect/verify; invalidate/forget/hard-delete; provenance + version
+  history), **ReviewQueue** (approve/edit/discard). No new dependency (reused `@xyflow/react`; a canvas
+  force lib is a deferred ADR-027 swap; community colouring deferred to 26-04 → colour-by-kind for now).
+- **Verified:** genesis pytest **616→625** (`tests/test_memory_api.py`: add/list/detail+history,
+  edit-supersede, re-scope guard, flags, soft-forget vs hard-purge, invalidate, relationship+entity CRUD +
+  graph payload, review, and the maintenance guardrail), ruff clean; web **tsc + eslint + vitest 181→189**
+  green (`graph.test.ts` pure units + `memory.test.tsx` RTL + **jest-axe** clean), `web/static` rebuilt +
+  committed.
+- **Deferred within 26-08 (noted follow-up):** the two contextual reuses — Application-detail "Memory" tab
+  + Settings "Your Memory" panel — reuse these components (thin wiring).
+
 ## Next
-- **26-08** — the Memory Management UI (Obsidian-style graph + curation API): browse/search/edit/pin/
-  protect/verify/hard-delete memories + entities/relationships; the write-side curation API + record-level
-  provenance columns (already in `mm0001`). Then 26-04 (dreaming), 26-06 (scheduler + `memory_owner_username`
-  + `GET /api/system/memory` + the internal-server node-injection follow-up), 26-07 (release).
+- **26-04** — the `memory-maintenance` "dreaming" workflow (reflection/synthesis, community detection,
+  decay/merge) — MUST skip protected/pinned/user_verified/origin='user' (the guardrail `forget_before`
+  already enforces; wire it + `upsert_community` + `record_reflection`). Then 26-06 (scheduler +
+  `memory_owner_username` + `GET /api/system/memory` + the internal-server node-injection follow-up from
+  26-05), 26-07 (release).

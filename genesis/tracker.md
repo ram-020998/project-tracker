@@ -237,6 +237,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-20 (Phase 26 — 26-08 BUILT, unreleased):** the **Memory Management UI + curation API** (genesis
+  `5c6cc0d` backend + `07bc946` web). Browser-only `genesis/api/memory.py` (list/detail+history/graph/
+  review + manual-add, edit=supersede, re-scope guard, pin/protect/verify, invalidate/archive, hard-purge,
+  relationship/entity CRUD, bulk) over new `MemoryStore` curation methods + `purge_vectors`; the agent-facing
+  genesis-memory MCP stays read-only. Web `/memory` workspace (`features/memory/**`): Graph ⇄ List ⇄ Review
+  + a shared Inspector — an Obsidian-style `@xyflow/react` graph (hover-highlight, local focus, search,
+  time-scrub, show-invalidated) over a pure unit-tested `graph.ts`; edits are bi-temporal + authoritative;
+  maintenance (26-04) skips protected/pinned/user memories. No new dep (reused @xyflow; force-graph lib
+  deferred). **Gates:** genesis pytest 616→**625**, ruff clean; web tsc+eslint+vitest 181→**189** (incl.
+  jest-axe), `web/static` rebuilt. Local/unreleased (no tag). **NEXT = 26-04** (the memory-maintenance
+  "dreaming" workflow).
+
 - **2026-08-20 (Phase 26 — 26-05 BUILT, unreleased):** the memory **read path** — a **separate read-only
   `genesis-memory` MCP** + hybrid retrieval (genesis `f95ac0b`). `genesis/memory/retrieval.py` fuses semantic
   (vectors) + keyword (FTS5) + entity/graph proximity × recency × importance (generative-agents scoring;
