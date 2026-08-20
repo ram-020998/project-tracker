@@ -8,12 +8,15 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 📋 DRAFT (SPECS ONLY — awaiting approval to implement) — Phase 26: Agentic Memory Layer
+### 📋 IN PROGRESS (26-01 + 26-02 BUILT, unreleased) — Phase 26: Agentic Memory Layer
 
 > **Specs:** `specs/phase-26-agentic-memory-layer.md` (umbrella) + `phase-26-agentic-memory-layer/26-01..26-08`. **Proposed
-> ADR-053** (Genesis Agentic Memory Layer) + **ADR-054** (memory store/infra + local embedder). **Pushed** (project-tracker
-> `5f5d4f8` umbrella+26-01..07; `7917b6b` 26-08 + threaded edits). **NO implementation started — do not start until explicitly
-> approved.** Repos when built: **genesis** + **genesis-workflows** (genesis-core likely unchanged).
+> ADR-053** (Genesis Agentic Memory Layer) + **ADR-054** (memory store/infra + local embedder). As-built:
+> `progress/phase-26-agentic-memory-layer.md`. **Build status: 26-01** (separate `memory.db` + `MemoryStore`/`GraphStore` +
+> `mm0001`; genesis `14eb3ab`) **+ 26-02** (local `Embedder` + `sqlite-vec` `VectorIndex` + brute-force fallback + `embed_pending`;
+> genesis `67bd71b`) are **BUILT + tested (genesis pytest 598, ruff clean) but UNRELEASED** — local on `genesis` master, no tag
+> (the phase release is 26-07). **NEXT = 26-03** (the nightly `memory-consolidation` workflow). Repos: **genesis** (+
+> **genesis-workflows** from 26-03; genesis-core likely unchanged).
 >
 > **Goal.** Distil the conversations Genesis already stores (`chat_sessions`/`chat_messages`) into a persistent, self-maintaining
 > **agentic memory** so agents get radically more effective over time. **Two scopes** — **personal** (a *named user's*

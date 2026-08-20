@@ -237,6 +237,23 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-20 (Phase 26 — 26-01 + 26-02 BUILT, unreleased):** started implementing the Agentic Memory Layer
+  in `genesis`. **26-01** (commit `14eb3ab`): a NEW, separate **`~/.genesis/memory.db`** (genesis.db untouched
+  at v14) with its own migration set (`mm0001`) — the bi-temporal entity-relationship model (`memory_entities`
+  + traversable `memory_relationships`, atomic `memories` incl. the 26-08 curation columns, `memory_entity_links`,
+  `memory_links`, `memory_communities`, a consolidation cursor, FTS5) — plus **`MemoryStore`** (bi-temporal
+  add/supersede/invalidate/archive, `forget_before` that skips human-curated memories, entity upsert, FTS5+filter
+  search, cursor) and **`GraphStore`** (recursive-CTE traversal), all DB-agnostic (ADR-030/054); wired
+  `Settings.memory_db_path` + `migrate_memory` into `create_app` boot + `genesis db upgrade`/`status`. Caught+fixed
+  a real NULL-owner UNIQUE dedup pitfall. **26-02** (commit `67bd71b`): a pluggable **`Embedder`** (Null / Fake /
+  `LocalEmbedder` — default **model2vec static**, `build_embedder` degrades to Null if the optional dep is absent)
+  + a **`VectorIndex`** (`SqliteVecIndex` over `sqlite-vec` `vec0` cosine, with a pure-Python `BruteForceVectorIndex`
+  fallback) + `embed_pending`; `sqlite-vec==0.1.9` in core, model2vec/fastembed as optional extras (core stays light
+  per ADR-046; embedder runs only in the worker/MCP subprocess — no outbound data, ADR-026). **Gates:** genesis
+  pytest 575→**598** (+13 store, +10 vector), ruff clean; genesis.db `current_version` unchanged (14). **Both
+  commits are local on `genesis` master (unreleased — no tag; the phase release is 26-07).** As-built:
+  `progress/phase-26-agentic-memory-layer.md`. **NEXT = 26-03** (the nightly `memory-consolidation` workflow).
+
 - **2026-08-20 (Phase 26 — Agentic Memory Layer — SPECS DRAFTED + pushed; awaiting approval to implement):** on the user's
   request, designed a **persistent agentic memory layer** for Genesis after a grounded survey of mem0 / Zep-Graphiti / Letta /
   LangMem / cognee / A-MEM / the Stanford generative-agents paper (integrate **none** of them — reproduce a minimal local subset
