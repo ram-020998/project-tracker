@@ -237,6 +237,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-20 (Phase 26 — 26-06 BUILT, unreleased):** scheduler integration + config (genesis `f5d34be`).
+  `runtime/memory_jobs.py` fires **memory-consolidation** (nightly 02:00 IST) + **memory-maintenance**
+  (weekly Sun 03:00 IST) on the existing Phase-23 scheduler, with preflight skips (no Kiro / not installed /
+  no new sessions). `due_slot` gains a `days` weekday filter (weekly, backward-compatible); a
+  `memory_owner_username` Setting (env `GENESIS_MEMORY_OWNER`) is threaded to the workflow `owner` input, the
+  MCP `--owner`, and curation `edited_by`; `GET /api/system/memory` exposes owner + memory.db version +
+  counts + last-run times (`MemoryStore.stats`). **Gates:** genesis pytest 625→**635**, ruff clean.
+  Local/unreleased. **All build sub-phases (26-01..26-06, 26-08) are DONE — NEXT = 26-07 (release):** bump/
+  tag genesis + genesis-workflows (the first Phase-26 push to master, pending go-ahead), ADR-053/054 →
+  Accepted.
+
 - **2026-08-20 (Phase 26 — 26-04 BUILT, unreleased):** the periodic **"dreaming"** refiner — the
   `memory-maintenance` LangGraph workflow (genesis-workflows `93e3c4f`) + two store helpers (genesis
   `d080335`: `clear_communities`, `memory_link_targets`). `load_candidates → reflect → curate → apply →

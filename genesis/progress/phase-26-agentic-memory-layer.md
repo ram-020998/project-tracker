@@ -160,9 +160,33 @@
   (reflection+convergence, curate-merge reversible, decay-skips-protected, communities-idempotent, pure
   units). Unreleased.
 
+## 26-06 — scheduler integration + config + status ✅ BUILT (unreleased)
+- **Commit:** genesis `f5d34be` (local, no tag). genesis-only.
+- **As built:**
+  - **`runtime/memory_jobs.py`** — `DEFAULT_MEMORY_JOBS` (seeded via `ScheduleStore.ensure_defaults`) +
+    `register_memory_jobs`: **memory-consolidation** nightly **02:00 IST**, **memory-maintenance** weekly
+    **Sun 03:00 IST**. Handlers `RunManager.start(<id>, {owner})` → poll to terminal → `(status, detail)`.
+    **Preflight skips** (logged, never 500): Kiro not signed in, workflow not installed, or (consolidation)
+    no new chat sessions since the cursor. Wired in `api/app.py`.
+  - **`runtime/scheduler.py`** — `due_slot` gains an optional `days` filter (`[int]` Mon=0..Sun=6) for
+    weekly jobs (backward-compatible); `api/schedules.py` `_next_due` honours it.
+  - **`runtime/settings.py`** — `memory_owner_username` (env `GENESIS_MEMORY_OWNER`; "" → "local"), threaded
+    to the workflow `owner` input, the `genesis-memory` MCP `--owner`, and `api/memory.py` `edited_by` (all
+    already read `getattr`).
+  - **`GET /api/system/memory`** — `{owner, memory_db_version, counts (MemoryStore.stats), last_consolidation_at,
+    last_maintenance_at}`.
+- **Design note (build-time):** `memory_owner_username` defaults to **"local"** (env-overridable) rather than
+  auto-detecting the OS user — deterministic + matches the existing single-user default; OS-user auto-detect
+  is a trivial follow-up. Both jobs ship **enabled** (local + reversible). The 26-05 internal-server
+  node-injection follow-up is **deferred to 26-07/backlog** (chat injection already works; it's not on the
+  release critical path).
+- **Verified:** genesis pytest **625→635** (`tests/test_memory_jobs.py`: weekly Sunday due-slot + no-refire,
+  maintenance skips no-Kiro/not-installed, happy path threads owner, `GENESIS_MEMORY_OWNER` threaded,
+  consolidation skips no-new-sessions, `GET /system/memory` shape; `test_sync_jobs` expectation +2 jobs),
+  ruff clean, full suite green.
+
 ## Next
-- **26-06** — scheduler integration + config: register the consolidation (~02:00 IST) + maintenance
-  (~Sun 03:00 IST) jobs in the backend `Scheduler` (`sync_jobs`-style), the `memory_owner_username` Setting
-  (wired into the MCP `--owner` + workflow `owner` input + `edited_by`), a `GET /api/system/memory` health/
-  stats endpoint, and the **internal-server node-injection follow-up from 26-05** (let agentic nodes inject
-  `genesis-memory`). Then 26-07 (release: bump/tag genesis + genesis-workflows, ADR-053/054 → Accepted).
+- **26-07** — RELEASE + acceptance (the last sub-phase): bump/tag **genesis + genesis-workflows** (this is
+  the FIRST push to master for Phase 26 — needs the human's go-ahead), verify `genesis db upgrade` covers
+  both DBs, run the acceptance checklist across 26-01..26-08, flip **ADR-053 + ADR-054 → Accepted**, and
+  finalize bible/tracker/progress.

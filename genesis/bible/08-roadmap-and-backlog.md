@@ -18,9 +18,10 @@
 > genesis-workflows `8cb06e3`) **+ 26-05** (the read-only `genesis-memory` MCP + hybrid retrieval, chat-wired; genesis `f95ac0b`)
 > **+ 26-08** (Memory Management UI + browser-only curation API; genesis `5c6cc0d`+`07bc946`)
 > **+ 26-04** (the `memory-maintenance` "dreaming" workflow; genesis `d080335` + genesis-workflows `93e3c4f`)
-> are **BUILT + tested (genesis pytest 627, web vitest 189, workflows 93, ruff clean) but UNRELEASED** — local on master, no tag
-> (the phase release is 26-07). **NEXT = 26-06** (scheduler integration + config + `GET /api/system/memory`). Repos: **genesis** +
-> **genesis-workflows** (genesis-core unchanged).
+> **+ 26-06** (scheduler jobs + `memory_owner_username` + `GET /api/system/memory`; genesis `f5d34be`)
+> are **BUILT + tested (genesis pytest 635, web vitest 189, workflows 93, ruff clean) but UNRELEASED** — local on master, no tag.
+> **All build sub-phases are done; NEXT = 26-07 (RELEASE: bump/tag genesis + genesis-workflows, ADR-053/054 → Accepted).**
+> Repos: **genesis** + **genesis-workflows** (genesis-core unchanged).
 >
 > **Goal.** Distil the conversations Genesis already stores (`chat_sessions`/`chat_messages`) into a persistent, self-maintaining
 > **agentic memory** so agents get radically more effective over time. **Two scopes** — **personal** (a *named user's*
