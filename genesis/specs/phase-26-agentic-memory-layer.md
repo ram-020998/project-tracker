@@ -128,11 +128,14 @@ system is local and ADR-compliant.
 | **26-04** | **Memory-maintenance ("dreaming")** | `memory-maintenance` workflow: reflect (synthesize) → dedup/merge/evolve (A-MEM) → invalidate contradicted (bi-temporal) → decay/forget → recompute communities. Idempotent, bounded. | genesis-workflows (+ genesis wiring) |
 | **26-05** | **`genesis-memory` MCP + retrieval** | `genesis/mcp/memory_server.py` (read-only, separate from `genesis-kb`) with `search_memory`/`get_entity`/`get_related_entities`/`get_personal_memory`; **hybrid retrieval** (semantic+keyword+entity × recency × importance); embeds the query in-process; steering hint so the agent knows to query it; wired into chat + agentic workflow nodes. | genesis (+ genesis-workflows registry) |
 | **26-06** | **Scheduler integration + config** | Register `memory-consolidation` (nightly) + `memory-maintenance` (weekly) on the Phase-23 scheduler (`scheduled_jobs` rows + handlers, preflight-skip when unconfigured); a **named-user** setting for personal-memory ownership; read-only `GET /api/system/memory` status (counts/last-run). | genesis |
+| **26-08** | **Memory Management UI + curation API** | A rich, accessible UI to **see + edit** memory: an **Obsidian-style force-directed memory graph** (entities+relationships; hover-highlight, local-graph focus, search/filters, bi-temporal time-scrub, community coloring) + a list/table workbench + an inspector editor + a review queue; a **browser-only curation API** (edit/supersede, pin/protect/verify, soft-forget, hard-delete, relationship CRUD, manual add). Human edits are **bi-temporal + authoritative** and **protected from auto-maintenance**; the agent MCP stays **read-only**. Adds provenance/protection columns (folded into 26-01) + a maintenance guardrail (26-04). | genesis (API + web) |
 | **26-07** | **Release + acceptance** | Release chain (genesis + genesis-workflows), CI green, **ADR-053 + ADR-054 → Accepted**, bible/tracker/progress. | both |
 
 **Suggested order:** 26-01 → 26-02 (store + vectors, testable with fakes, nothing running) → 26-03 (nightly write path) →
-26-05 (read path/MCP — makes the memory usable) → 26-04 (dreaming) → 26-06 (schedule + config) → 26-07 (release). 26-04 can trail
-26-05 so memory is *usable* before it's *refined*; both ship in the phase (dreaming is v1 per decision §11.4).
+26-05 (read path/MCP — makes the memory usable) → 26-08 (visual browse + curation UI/graph — makes memory *legible + editable*) →
+26-04 (dreaming, respecting human curation) → 26-06 (schedule + config) → 26-07 (release). 26-04 trails 26-08 so the
+maintenance guardrail (skip protected/pinned/user memories) is honored from the start; all ship in the phase (dreaming + the
+management UI are v1 per decisions §11.4 / §11.7).
 
 ---
 
@@ -250,16 +253,17 @@ Recorded as **ADR-053** (the Memory Layer) + **ADR-054** (the store/infra + loca
   multi-user track (ADR-026).
 - **Postgres + pgvector (+ Apache AGE) migration** — designed-for (the seam), not built now; a later swap when scale/multi-user
   triggers it (ADR-054 records the plan).
-- **A memory-browser UI** — out of v1 (a read-only `GET /api/system/memory` status is the only surface); a Settings "Memory"
-  panel to inspect/pin/forget memories is a follow-up.
 - **Hot-path (in-turn) memory writes** — v1 forms memory in the **background** (nightly), not on every turn (LangMem's hot path is
   deferred; avoids per-turn latency/cost).
 - **Auto pre-fetch + prompt injection at chat start** — deferred; **MCP-only** now (decision §11.5). (An optional pre-fetch behind
   a flag is a possible follow-up.)
-- **Hard-deleting memories** — v1 invalidates/archives (bi-temporal, reversible); a true purge/GDPR-style delete is a later gated
-  option.
 - **Embedding the full KB / documents into memory** — out; memory is distilled from **conversations**. (The KB + Document Library
   remain their own stores/MCP.)
+
+**In scope (added 2026-08-20):** a **visual Memory Management UI + curation API (26-08)** — users **see and edit** memory through
+a rich, accessible UI with an **Obsidian-style memory graph**, and human edits are **authoritative** (protected from the nightly
+maintenance). A **human hard-delete/"forget"** is allowed via that UI (the browser-only curation path) — the agent MCP stays
+read-only. (A fully automated GDPR-style purge remains out of scope; deletion is a deliberate human action.)
 
 ---
 
@@ -276,7 +280,10 @@ Recorded as **ADR-053** (the Memory Layer) + **ADR-054** (the store/infra + loca
   preserved; not merged with `genesis-kb`). **Bi-temporal** validity (Graphiti-style) invalidates rather than overwrites.
   **Local single-user** (ADR-026) — personal/shared is a scope label now, a multi-user ACL later. No external memory service.
   Concepts adopted from mem0 / Zep-Graphiti / Letta / LangMem / cognee / A-MEM / generative-agents (§2). Ships genesis + a local
-  embedder + two genesis-workflows.
+  embedder + two genesis-workflows. **Human curation is first-class + authoritative:** a browser-only Memory Management UI (26-08,
+  with an Obsidian-style memory graph) lets the user see/edit/pin/protect/forget memories; human edits are **bi-temporal +
+  authoritative** and **exempt from the automated maintenance** (protected/pinned/user memories are never auto-merged, decayed, or
+  invalidated), while the **agent-facing `genesis-memory` MCP stays strictly read-only**.
 - **ADR-054 (PROPOSED) — Memory store & infrastructure: separate `memory.db` on SQLite + sqlite-vec now, DB-agnostic seam to
   Postgres + pgvector later; local embedder.** Agentic memory lives in a **new, separate `~/.genesis/memory.db`** (not
   `genesis.db`) with its own migration set, holding a **bi-temporal entity-relationship model** + **FTS5 keyword index** +
@@ -302,6 +309,12 @@ Recorded as **ADR-053** (the Memory Layer) + **ADR-054** (the store/infra + loca
    multi-user split clean.
 6. **Embedder → a small local model** (ONNX/static, CPU, subprocess-loaded), behind a swappable `Embedder` seam — accepted after
    confirming it is **not** a RAM-heavy LLM (~30–150 MB artifact, CPU, loaded only in the worker/MCP subprocess, ms-latency).
+7. **Visual memory management (26-08) → in v1, with a rich UX.** Users can **see and edit** memory through a rich, accessible UI
+   (list + inspector + review queue) centered on an **Obsidian-style force-directed memory graph** (and richer: bi-temporal
+   time-scrub, community coloring, importance/confidence weighting, local-graph focus). Human curation is **authoritative** and
+   **protected from the nightly maintenance**; the agent MCP stays read-only. Follows a **standard approach** — the existing
+   design system/tokens, master-detail pattern, TanStack Query hooks, feature folders, jest-axe a11y — with a force-graph library
+   as a **lazy-loaded ADR-027 stack extension** (confirm the exact lib + IA placement at build; §26-08.8).
 
 ---
 

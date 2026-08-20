@@ -51,6 +51,10 @@ load_candidates (program)          # clusters/episodics per scope+entity; near-d
   read-only against genesis.db, memory.db writes via `to_thread`. **Idempotent + bounded** (top-N per group; a re-run converges —
   no runaway merging). **Reversible** (invalidate/archive set flags/`valid_to`, never `DELETE`).
 - **Scope integrity:** never merges/links/reflects across `scope` or `owner` (personal stays personal).
+- **Human curation is authoritative (26-08 guardrail):** `load_candidates` **excludes** memories that are `pinned`,
+  `protected`, `origin='user'`, or `user_verified` from the auto **merge / decay / invalidation** sets. The job may *suggest*
+  a change on such a memory by surfacing it in the **review queue** (`review_status` note), but it **never overrides** a human
+  edit. `pinned` memories are always retrieval-eligible and are never archived by decay.
 
 ## 4. Files & tests
 - **New (genesis-workflows):** `workflows/memory-maintenance/{workflow.yaml, graph.py, common/…}` + `tests/`. Reuses the

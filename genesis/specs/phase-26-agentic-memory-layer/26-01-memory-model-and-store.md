@@ -70,17 +70,23 @@ memories                                    -- the atomic memories (facts/notes)
   entities_json TEXT                        -- linked memory_entities.id[] (denormalized for fast filter)
   source_session_id TEXT                     -- provenance (chat_sessions.id)
   source_message_ids_json TEXT
-  origin        TEXT NOT NULL DEFAULT 'consolidation'  -- 'consolidation'|'reflection'
+  origin        TEXT NOT NULL DEFAULT 'consolidation'  -- 'consolidation'|'reflection'|'user'  (user = human-authored/edited, 26-08)
   valid_from    TEXT NOT NULL
   valid_to      TEXT                        -- NULL = current; set = invalidated/superseded
   superseded_by INTEGER REFERENCES memories(id) ON DELETE SET NULL
   archived      INTEGER NOT NULL DEFAULT 0  -- decay/forget (soft)
+  pinned        INTEGER NOT NULL DEFAULT 0  -- user-pinned: always retrievable, never auto-forgotten (26-08)
+  protected     INTEGER NOT NULL DEFAULT 0  -- user-curated: exempt from auto merge/decay/invalidate (26-08)
+  user_verified INTEGER NOT NULL DEFAULT 0  -- user-approved: trust signal + ranking boost (26-08)
+  confidence    REAL                        -- model confidence at write (0..1); user edits set high (26-08)
+  review_status TEXT NOT NULL DEFAULT 'approved'  -- 'pending'|'approved'|'discarded' — the review queue (26-08)
+  edited_by     TEXT                        -- username of the last human editor (26-08 provenance)
   access_count  INTEGER NOT NULL DEFAULT 0
   last_used_at  TEXT
   embedding_status TEXT NOT NULL DEFAULT 'pending'  -- 'pending'|'embedded'|'skipped'
   created_at    TEXT NOT NULL
   updated_at    TEXT NOT NULL
-  INDEX(scope, owner), INDEX(memory_type), INDEX(valid_to), INDEX(archived), INDEX(embedding_status)
+  INDEX(scope, owner), INDEX(memory_type), INDEX(valid_to), INDEX(archived), INDEX(embedding_status), INDEX(review_status), INDEX(pinned), INDEX(protected)
 
 memory_entity_links                         -- memories ⋈ entities (many-to-many, for join queries)
   memory_id     INTEGER NOT NULL REFERENCES memories(id) ON DELETE CASCADE
