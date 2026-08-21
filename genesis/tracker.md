@@ -237,6 +237,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-21 (genesis v0.52.1 RELEASED ✅ — memory graph constellation UI):** the `/memory` graph view is
+  now a dark **d3-force constellation** (`web/features/memory/MemoryGraph` + pure `graph.ts`) replacing the
+  React Flow radial layout — entity nodes shaped/coloured by kind (application=circle/cyan, feature=diamond/
+  violet, record_type=square/amber, concept=circle/rose) + sized by degree; hover-highlight-connected + dim;
+  drag-to-pin (double-click releases); scroll/controls zoom + drag-pan; kind legend + zoom controls + hint;
+  search dims non-matches. Modelled on the reference memory-mcp explorer. Adds `d3-force`/`d3-zoom`/
+  `d3-selection`/`d3-drag` web deps (were transitive via mermaid; now explicit). Commit `9ab4966`, tag
+  **v0.52.1**; CI green (#6626838 master + #6626839 v0.52.1). Gates: web tsc/eslint clean, vitest 189→**191**
+  (buildGraph/kindStyle units + a constellation mount/click test), build + stale-bundle guard; genesis pytest
+  635 unchanged (no Python/API change). Frontend-only patch (static committed); genesis-workflows unchanged.
+
 - **2026-08-20 (Phase 26 — 26-07 RELEASED ✅ — Agentic Memory Layer COMPLETE):** shipped **genesis v0.52.0**
   (commit `8ed1460`) + **genesis-workflows v0.10.0** (commit `88b2bae`); genesis-core unchanged (v0.9.5).
   CI green — genesis #6620119 (master) + #6620121 (v0.52.0); genesis-workflows #6620190 (master) + #6620191
