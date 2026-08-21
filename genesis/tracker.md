@@ -237,6 +237,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-21 (Phase 27 — 27-03 mockups RECREATED in a Mira-Pro / modern Material-admin style):** per user
+  feedback (more modern + techy, richer elevation/display elements, glassy semi-transparent top bar/breadcrumbs,
+  motion throughout — ref: MUI Mira Pro), rebuilt `/dev/mockups`. `theme-next.css` → Mira/Horizon palette (cool-gray
+  canvas `#f4f7fe`, deep-navy text `#1b2559`, vivid **indigo/violet brand `#4318ff`/`#7551ff`** + gradients), soft
+  cool-tinted elevation, generous radii, `.glass` utilities, and animation keyframes (staggered fade-up · sparkline
+  draw-in · bar grow · float · live-pulse · sheen; reduced-motion-safe). `Mockups.tsx` → shared display widgets
+  (StatCard+Sparkline, MiniBars chart, Progress, Avatar, Delta, Chip, gradient hero, activity feed) across a
+  dashboard-style landing + all page-groups. Scoped to `.theme-next` (live default untouched until 27-04). Gates
+  green (tsc/eslint/**vitest 191**/build; `web/static` rebuilt); genesis commit **`4a979da` LOCAL/unpushed**. Design
+  spec `27-03-design-language.md` §1a updated to the recreated palette. **Awaiting user review of `/dev/mockups`.**
+
 - **2026-08-21 (Phase 27 — 27-03 Hi-fi UI mockups 📋 DELIVERED, for review):** built navigable **light-first coded
   mockups at `/dev/mockups`** (`web/src/dev/mockups/{Mockups.tsx,theme-next.css}`) in a **scoped `.theme-next`** preview
   palette (so the live app default is untouched until 27-04) + the finalized `27-03-design-language.md` (token/type/

@@ -8,6 +8,14 @@ A **navigable, light-first coded mockup** at `web/src/dev/mockups/Mockups.tsx` (
 
 **Screens mocked (all page-groups):** the new **shell** (expanded labelled sidebar + slim top app bar with breadcrumbs + ⌘K search + theme toggle) · **Applications** (with the D2 KPI strip) · **Application detail** (tabs + KPIs + distribution) · **Runs** list · **Run detail** (node-graph + HITL inspector split) · **Spec builder** (chat + action bar) · **Chat** · **Memory** (token-driven, **light-aware constellation**) · **Catalog** · **Documents** · **Settings** (with in-page theme toggle) · a **Design-language** panel (color/type/elevation/buttons).
 
+## 1a. Iteration 2 (2026-08-21) — Mira-Pro recreation (supersedes the §2 draft values)
+Per user feedback, the mockups were recreated in a **Mira-Pro / modern Material-admin** spirit — more techy-modern, richer elevation + display elements, **glassy semi-transparent top bar/breadcrumbs**, and **motion throughout**. The finalized values below **supersede** the initial §2 draft:
+- **Palette (light-first):** canvas `--bg #f4f7fe` (cool blue-gray), `--surface-1 #ffffff`, deep-navy text `--fg #1b2559` (techy), `--fg-muted #4a5578`, `--fg-subtle #64709b` (AA); **brand `--primary #4318ff` (vivid indigo-violet) + `--accent #7551ff`** with a `--grad-brand` gradient; semantic `success #05a878` / `warning #d98a00` / `danger #e0403f` / `info #3965ff`.
+- **Elevation:** soft, wide, cool-tinted (`e1` 3px/8px, `e2` 14/28px, `e3` 28/56px) + generous card radii (14–22px).
+- **Glass:** `.glass` / `.glass-chip` (translucent + `backdrop-blur` + saturate) on the top bar, breadcrumbs, search, and view-toggles.
+- **Motion (reduced-motion-safe):** staggered `fade-up` entrance, sparkline **draw-in**, bar-chart **grow**, hover-**lift** on cards, floating hero orbs, soft **live-pulse** dots, sheen. Keyframes + utilities live in `theme-next.css`.
+- **New display widgets** (in `Mockups.tsx`, to become real primitives in 27-04): `StatCard`+`Sparkline`, `MiniBars` chart, `Progress`, `Avatar`, `Delta`, `Chip`, gradient hero, activity feed, pill-tabs.
+
 ## 2. Finalized visual language (implementable tokens)
 The refined **light-first** token set (in `theme-next.css`; 27-04 promotes it into `styles/tokens.css` as the global default + refreshes the dark parity set):
 
