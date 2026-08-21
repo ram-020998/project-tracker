@@ -8,6 +8,16 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
+### ▶ NEXT — Phase 27: UI/UX Revamp (27-01..27-11) — PLANNING (specs authored 2026-08-21)
+
+> **Specs:** `specs/phase-27-ui-ux-revamp.md` (umbrella) + `phase-27-ui-ux-revamp/27-01..27-11`. As-built: `progress/phase-27-ui-ux-revamp.md`. **ADR-055** (UI/UX design language + light-first theming; MUI adopt-vs-evolve) — **Proposed**, decided in 27-01 with the user.
+>
+> **Goal.** A ground-up **look-and-feel + UX modernization** of the entire web app — from the current **dark-default** aesthetic to a **light-first, modern, future-looking** design language (**MUI/Material-3** as the visual north star), with **every page audited → wireframed → hi-fi mocked → then implemented** standards-first. **No product/behavioural/API/DB change** — presentation + interaction + IA only; **genesis** repo only (ships `web/static` per phase). Requested by the user 2026-08-21.
+>
+> **Pipeline (review-gated).** **27-01** research + functional audit (→ ADR-055) → **27-02** UX revamp + lo-fi wireframes → **27-03** hi-fi light-first mockups (**⭐ user-approval gate — unlocks implementation**) → **27-04** design-system foundation + light-first tokens/theme-toggle → **27-05** app shell & nav → **27-06** Applications/Features/Spec → **27-07** Runs/Run-detail → **27-08** Chat/Copilot → **27-09** Documents/Memory (incl. reconciling the v0.52.1 constellation to tokens) → **27-10** Catalog/Settings/Overview → **27-11** polish + a11y/responsive audit + dark-parity + release (likely v0.53.0).
+>
+> **Key grounding (verified 2026-08-21).** Theming is **already token-driven** (`tailwind.config.ts` → `var(--*)`; `tokens.css` has `.theme-dark` default + a full `.theme-light`), so light-first is a palette-refine + default-flip + persisted toggle + reconcile the **one** hardcoded-hex surface (`memory/MemoryGraph.tsx`), not a rewrite. 16+ page-surfaces enumerated from `router.tsx`. Pivotal open decision (ADR-055): adopt `@mui/material` vs **evolve** the existing Tailwind/token primitives to a MUI-inspired language (recommend evolve). **No implementation until 27-03 mockups are approved.**
+
 ### ⭐ SHIPPED — Phase 26: Agentic Memory Layer (26-01..26-08) — genesis v0.52.0 + genesis-workflows v0.10.0
 
 > **Specs:** `specs/phase-26-agentic-memory-layer.md` (umbrella) + `phase-26-agentic-memory-layer/26-01..26-08`. **ADR-053**

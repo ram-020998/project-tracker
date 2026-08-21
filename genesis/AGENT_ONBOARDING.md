@@ -80,12 +80,24 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ✅ NO ACTIVE PHASE — Phase 26 (Agentic Memory Layer) SHIPPED (v0.52.0 / v0.10.0)
+## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — PLANNING (specs authored; research → wireframes → mockups are review-gated)
 
-> **There is no in-flight phase handoff.** Phase 26 (Agentic Memory Layer, 26-01..26-08) is **released** —
-> genesis **v0.52.0** + genesis-workflows **v0.10.0**, CI green, ADR-053/054 Accepted, installed. Do **not**
-> start new-phase or backlog work unless the human asks. If asked to continue Genesis, read `bible/08` §9 (the
-> shipped Phase-26 block + backlog) and the newest `tracker.md` §6 entries first.
+> **Active phase: Phase 27 — UI/UX Revamp.** A ground-up **light-first, modern, MUI-inspired** look-and-feel + UX
+> modernization of the **entire** web app (drop the dark default). **Frontend-only (genesis)** — **no API/DB/behavioural
+> change**. **Specs authored 2026-08-21:** umbrella `specs/phase-27-ui-ux-revamp.md` + sub-specs `27-01..27-11` +
+> `progress/phase-27-ui-ux-revamp.md` + `bible/08` §9 NEXT block + **ADR-055 (Proposed)**. **Pipeline (review-gated):**
+> 27-01 research + functional audit (→ decide **ADR-055**: light-first + MUI adopt-vs-evolve, *with the user*) → 27-02
+> UX + lo-fi wireframes → 27-03 hi-fi light-first mockups (**⭐ user-approval gate**) → 27-04 design-system foundation +
+> light-first tokens/theme-toggle → 27-05 shell/nav → 27-06 Applications/Features/Spec → 27-07 Runs/Run-detail → 27-08
+> Chat/Copilot → 27-09 Documents/Memory (+ reconcile the v0.52.1 constellation to tokens) → 27-10 Catalog/Settings/
+> Overview → 27-11 polish/a11y/dark-parity/release (likely v0.53.0). **Do NOT start implementation (27-04+) until the
+> 27-03 mockups are approved; do NOT start other new-phase/backlog work unless the human asks.** Next action = **27-01**.
+> Grounding: theming is **already token-driven** (`tokens.css` has a full `.theme-light`), so light-first ≈ palette-refine
+> + default-flip + toggle + reconcile the one hardcoded-hex file (`memory/MemoryGraph.tsx`) — not a rewrite.
+>
+> **Prior phase — Phase 26 (Agentic Memory Layer, 26-01..26-08) — SHIPPED** (genesis **v0.52.0** + genesis-workflows
+> **v0.10.0**, CI green, ADR-053/054 Accepted, installed; + the **v0.52.1** memory-graph constellation UI patch). If
+> asked about it, read `bible/08` §9 + the newest `tracker.md` §6 entries first.
 >
 > **Phase-26 backlog / deferred follow-ups (NOT started — pick up only if asked):** the 26-05 internal-server
 > node-injection seam (let agentic workflow nodes inject `genesis-memory` — needs a genesis-core mechanism, as

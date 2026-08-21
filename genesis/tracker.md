@@ -237,6 +237,22 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-21 (Phase 27 — UI/UX Revamp — PLANNING 📋, specs authored):** kicked off a multi-phase **UI/UX
+  revamp** on the user's request — move off the **dark-default** theme to a **light-first, modern, future-looking**
+  design language (**MUI/Material-3** north star), auditing + wireframing + hi-fi-mocking **every** page before a
+  standards-first, page-group-phased implementation. **Frontend-only (genesis)**; no API/DB/behavioural change.
+  Authored the umbrella `specs/phase-27-ui-ux-revamp.md` + **11 sub-specs** (`27-01` research → `27-02` wireframes →
+  `27-03` mockups [⭐ user-approval gate] → `27-04` design-system/light-first tokens+toggle → `27-05` shell/nav →
+  `27-06` Applications/Features/Spec → `27-07` Runs/Run-detail → `27-08` Chat/Copilot → `27-09` Documents/Memory
+  [+ reconcile the v0.52.1 constellation to tokens] → `27-10` Catalog/Settings/Overview → `27-11` polish/a11y/
+  release) + `progress/phase-27-ui-ux-revamp.md` + bible/08 §9 NEXT block + **ADR-055 (Proposed)**. Grounding
+  (verified vs real code): theming is **already token-driven** (`tailwind.config.ts`→`var(--*)`; `tokens.css` has a
+  full `.theme-light`), so light-first ≈ palette-refine + default-flip + toggle + reconcile the **one** hardcoded-hex
+  file (`memory/MemoryGraph.tsx`), not a rewrite; 16+ surfaces enumerated from `router.tsx`. **Pivotal open decision
+  (ADR-055, 27-01 with the user):** adopt `@mui/material` vs **evolve** the existing Tailwind/token primitives to a
+  MUI-inspired language (recommend evolve). **No implementation until 27-03 mockups are approved.** No genesis release
+  (docs-only so far).
+
 - **2026-08-21 (genesis v0.52.1 RELEASED ✅ — memory graph constellation UI):** the `/memory` graph view is
   now a dark **d3-force constellation** (`web/features/memory/MemoryGraph` + pure `graph.ts`) replacing the
   React Flow radial layout — entity nodes shaped/coloured by kind (application=circle/cyan, feature=diamond/
