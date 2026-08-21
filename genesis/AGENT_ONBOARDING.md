@@ -97,9 +97,12 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > `27-02-wireframes.md`: revamped IA/nav + top app bar + ⌘K + flows + responsive strategy + lo-fi wireframes for all 16
 > surfaces; open decisions **D1** promote Catalog / **D2** Applications KPI strip / **D3** expanded nav). **27-03
 > DELIVERED — FOR REVIEW**: coded light-first mockups live at **`/dev/mockups`** (`web/src/dev/mockups/*`, scoped
-> `.theme-next` preview so the live default is untouched) + `27-03-design-language.md`; gates green (vitest 191/build),
-> genesis commit **`7c7ffe0` LOCAL/unpushed, not tagged** (release deferred to 27-04). **Next action = user review of
-> `/dev/mockups` → then 27-04** (promote theme-next → global light default + flip useTheme default + evolve primitives/shell).
+> `.theme-next` preview so the live default is untouched) + `27-03-design-language.md`; iterated to a **Mira-Pro
+> style then the user's brand feedback** (primary **`#C2410C`** orange + secondary **`#57534E`** stone, **Poppins**,
+> differentiated elevated side-nav, Home-rooted breadcrumb, more motion). **27-03 ✅ APPROVED (2026-08-21)** — genesis
+> mockup commits **pushed to master** (`…16c2b8a`), **no tag** (ships with 27-04). **Next action = 27-04** (design-system
+> foundation: promote `theme-next` → `styles/tokens.css` as the global light default + dark parity, add Poppins, flip
+> `useTheme` default dark→light, evolve `AppShell`/`Sidebar`/primitives + motion, refresh `/dev` KitchenSink; ships a genesis release).
 > Grounding: theming is **already token-driven** (`tokens.css` has a full `.theme-light`), so light-first ≈ palette-refine
 > + default-flip + toggle + reconcile the one hardcoded-hex file (`memory/MemoryGraph.tsx`) — not a rewrite.
 >

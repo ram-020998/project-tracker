@@ -237,6 +237,12 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-21 (Phase 27 — 27-03 mockups ✅ APPROVED):** user approved the `/dev/mockups` look (orange `#C2410C` +
+  stone `#57534E`, Poppins, differentiated side-nav, motion). Genesis mockup commits **pushed to master**
+  (`7c7ffe0`→`4a979da`→`16c2b8a`; `9ab4966..16c2b8a`), **no tag/release** (the /dev preview ships with 27-04). Gate
+  passed → implementation unlocked. **Next: 27-04 — design-system foundation** (promote `theme-next` → global light
+  default + dark parity, add Poppins, flip `useTheme` default, evolve shell/primitives + motion, refresh `/dev`; ships a genesis release).
+
 - **2026-08-21 (Phase 27 — 27-03 mockups iteration 3, user feedback applied):** `/dev/mockups` updated —
   (1) single **primary `#C2410C`** (burnt orange) + **secondary `#57534E`** (stone) across the app (semantic
   colors reserved for status/deltas); (2) **Poppins** type; (3) **side-nav differentiated** as an elevated white

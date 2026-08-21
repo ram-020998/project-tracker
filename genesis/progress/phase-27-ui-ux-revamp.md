@@ -29,5 +29,9 @@
 - **Palette:** light-first; indigo primary `#4f46e5` + violet accent; `fg-subtle` fixed to AA; light-tuned soft elevation. Reflects ADR-055 (evolve, no `@mui/material`) + D1/D2/D3.
 - **Gates:** tsc/eslint/vitest **191**/build green; `web/static` rebuilt. genesis commit **`7c7ffe0` LOCAL (unpushed, not tagged)** — release deferred to 27-04.
 
+## 27-03 — Hi-fi UI mockups ✅ APPROVED (2026-08-21)
+- **Outcome:** the user approved the `/dev/mockups` look after the orange/stone + Poppins iteration. Genesis mockup commits **pushed to master** (`7c7ffe0`→`4a979da`→`16c2b8a`); **no tag/release** (the /dev preview ships with the 27-04 foundation).
+- **Final language:** primary **`#C2410C`** (burnt orange) + secondary **`#57534E`** (stone), warm-gray canvas, **Poppins**, differentiated elevated white side-nav, glassy top bar, Home-rooted breadcrumb (drops current page), soft warm elevation, generous radii, and motion (screen fade-up, nav-icon hover, sparkline draw-in, bar-grow, animated brand gradient, live-pulse). Spec: `27-03-design-language.md` (§1a = final).
+
 ## Next
-- ⭐ **User review of the `/dev/mockups`** (palette/density/type/per-screen layout). On approval → **27-04 — design-system foundation**: promote `theme-next` → `styles/tokens.css` as the global light default (+ dark parity + per-theme elevation), flip the `useTheme` default dark→light, evolve the shared primitives + `AppShell`/`Sidebar` (top bar, expanded nav, breadcrumbs, ⌘K), refresh `/dev` KitchenSink — then the page-group phases.
+- **27-04 — Design-system foundation + light-first theming** (first implementation phase; ships a genesis release): promote `theme-next.css` → `styles/tokens.css` as the **global default light theme** (orange/secondary + warm neutrals + per-theme soft elevation) + refresh the **dark** parity set; add **Poppins** to the app font stack; **flip `useTheme` default dark→light**; evolve the shared primitives + `AppShell`/`Sidebar` (differentiated nav, glassy top bar, Home-rooted breadcrumbs, ⌘K) + the motion utilities to match the mockups; refresh `/dev` KitchenSink. Then page-groups 27-05..27-10, polish/release 27-11.

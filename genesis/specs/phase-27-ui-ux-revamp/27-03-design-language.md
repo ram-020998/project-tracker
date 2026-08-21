@@ -1,7 +1,7 @@
 # 27-03 — Design language + component redline (finalized spec)
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 03.** Spec: `27-03-ui-mockups.md`. Depends on: 27-02 wireframes.
-> **Status:** 📋 **FOR REVIEW (2026-08-21)** — coded mockups live at **`/dev/mockups`** (reload the dev server). **Medium:** coded, themeable mockups in `/dev` (ADR-055). **Gate:** ⭐ **user approval of the mockups unlocks implementation (27-04+).**
+> **Status:** ✅ **APPROVED (2026-08-21)** — coded mockups at **`/dev/mockups`** (orange/stone + Poppins iteration); genesis master pushed. **Gate passed → 27-04 unlocked.**
 
 ## 1. What was built (increment 1)
 A **navigable, light-first coded mockup** at `web/src/dev/mockups/Mockups.tsx` (route `/dev/mockups`, outside the app shell), rendered inside a **scoped `.theme-next`** preview palette (`theme-next.css`) so it demonstrates the new language **without changing the live app default** (that flip is 27-04). Gates green: tsc/eslint/vitest **191**/build; `web/static` rebuilt.
