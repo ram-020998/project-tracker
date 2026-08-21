@@ -93,7 +93,10 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > Overview → 27-11 polish/a11y/dark-parity/release (likely v0.53.0). **Do NOT start implementation (27-04+) until the
 > 27-03 mockups are approved; do NOT start other new-phase/backlog work unless the human asks.** **27-01 ✅ COMPLETE**
 > (2026-08-21 — findings `27-01-findings.md`, **ADR-055 Accepted**: light-first + *evolve* the token/Tailwind primitives
-> to a MUI-inspired language, no `@mui/material`, coded mockups in `/dev`). **Next action = 27-02** (UX revamp + wireframes).
+> to a MUI-inspired language, no `@mui/material`, coded mockups in `/dev`). **27-02 DELIVERED — FOR REVIEW** (wireframes
+> `27-02-wireframes.md`: revamped IA/nav + top app bar + ⌘K + flows + responsive strategy + lo-fi wireframes for all 16
+> surfaces; open decisions **D1** promote Catalog / **D2** Applications KPI strip / **D3** expanded nav). **Next action =
+> user review of 27-02 (+ D1–D3) → then 27-03** (hi-fi coded mockups in `/dev`).
 > Grounding: theming is **already token-driven** (`tokens.css` has a full `.theme-light`), so light-first ≈ palette-refine
 > + default-flip + toggle + reconcile the one hardcoded-hex file (`memory/MemoryGraph.tsx`) — not a rewrite.
 >

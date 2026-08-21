@@ -237,6 +237,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-21 (Phase 27 — 27-02 UX revamp & wireframes 📋 DELIVERED, for review):** authored
+  `specs/phase-27-ui-ux-revamp/27-02-wireframes.md` — revamped **IA** (Applications-first; **Catalog promoted out of
+  Settings**), a **navigation model** (persistent labelled left sidebar + a **re-introduced slim top app bar** carrying
+  breadcrumbs + **⌘K command palette/search** + theme toggle + environment/update), **core flows** (onboard app ·
+  feature→spec→annotate · launch→monitor run · curate memory/docs · settings), a **responsive/density strategy**
+  (split-panes→tabs <1024, tab-overflow menus, sticky-header tables), an **interaction-pattern library** (reuses
+  `feedback/states`), and **lo-fi ASCII wireframes for all 16 surfaces + the shell**. **Open decisions for the user:**
+  D1 promote Catalog (revisits ADR-049) · D2 Applications KPI strip · D3 expanded-by-default nav. Behaviour-preserving;
+  docs-only (no genesis release). **Next: user review of 27-02 + D1–D3 → then 27-03 (hi-fi coded mockups in `/dev`).**
+
 - **2026-08-21 (Phase 27 — 27-01 Research & functional audit ✅ COMPLETE):** walked all 16 page-surfaces + the
   design system against real code → `specs/phase-27-ui-ux-revamp/27-01-findings.md` (per-page functional inventory,
   prioritized UX heuristic audit, a11y baseline [15 jest-axe suites + gaps + a `fg-subtle` sub-AA contrast finding],

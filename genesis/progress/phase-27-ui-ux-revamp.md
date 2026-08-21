@@ -18,5 +18,10 @@
 - **Key finding:** the "outdated" feel is **aesthetic + IA, not structural** — theming is already a pure token swap (`tokens.css` has a full `.theme-light`; the theme toggle already exists in Settings→General), so light-first is a palette-refine + default-flip + reconcile the one hardcoded surface (`MemoryGraph.tsx`), not a rewrite.
 - **Decisions (ADR-055 Accepted with the user):** light-first (dark retained/toggleable) · **evolve** the Tailwind/token primitives to a MUI-inspired language (no `@mui/material`) · coded mockups in `/dev` · nav to gain expanded/hybrid + breadcrumbs + command palette (designed in 27-02) · presentation/IA only (no behavioural/API/DB change).
 
+## 27-02 — UX revamp & wireframes 📋 DELIVERED — FOR REVIEW (2026-08-21)
+- **Deliverable:** `specs/phase-27-ui-ux-revamp/27-02-wireframes.md` — revamped **IA** (Applications-first, Catalog promoted out of Settings), **navigation model + shell regions** (persistent labelled left sidebar + a re-introduced slim top app bar carrying breadcrumbs + ⌘K command palette/search + theme toggle + environment/update), **core flows** (A onboard app · B feature→spec→annotate · C launch→monitor run · D curate memory/docs · E settings), a **responsive + density strategy** (split-panes→tabs <1024; tab overflow menus; sticky-header tables), an **interaction-pattern library** (reusing `feedback/states`), and **lo-fi ASCII wireframes for all 16 surfaces** + the shell.
+- **Open decisions for the user (wireframe gate):** **D1** promote Catalog to primary nav (revisits ADR-049) · **D2** add a compact KPI strip to Applications vs metrics-only-in-Settings · **D3** expanded-by-default nav. Recommendations given for each.
+- Docs-only; no genesis code/release. **Behaviour-preserving** (existing features re-arranged, not changed).
+
 ## Next
-- **27-02 — UX revamp & wireframes:** revamped IA + navigation model + core flows + responsive/density strategy + lo-fi wireframes for every surface (§8 of the findings). Review-gated with the user before 27-03 mockups.
+- ⭐ **User review of 27-02** (wireframes + D1–D3). On approval → **27-03 — hi-fi coded mockups in `/dev`** (light-first) for every surface + the finalized token/type/elevation/motion spec + component redline. **No implementation until 27-03 is approved.**

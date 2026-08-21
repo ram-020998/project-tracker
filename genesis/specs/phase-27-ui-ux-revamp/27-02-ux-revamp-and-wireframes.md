@@ -1,7 +1,7 @@
 # 27-02 — UX revamp & wireframes
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 02 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`. Depends on: **27-01** (ADR-055 decided).
-> **Status:** 📋 DRAFT · **Type:** UX/docs-only (no genesis code, no release) · **Gate:** wireframe review with the user before 27-03.
+> **Status:** 📋 **DELIVERED — FOR REVIEW (2026-08-21)** — wireframes: `27-02-wireframes.md` (incl. open decisions D1–D3). · **Type:** UX/docs-only (no genesis code, no release) · **Gate:** ⭐ user review of the wireframe set + D1–D3 before 27-03.
 
 ## Objective
 Turn the 27-01 findings into a **re-thought user experience**: a modern **information architecture + navigation model**, the **core end-to-end flows**, a **responsive + density strategy**, standardized **interaction patterns**, and **lo-fi wireframes for every page-group** — the structural blueprint the hi-fi mockups (27-03) will paint.
