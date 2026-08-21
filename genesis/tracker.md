@@ -237,6 +237,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-21 (Phase 27 — 27-03 mockups iteration 3, user feedback applied):** `/dev/mockups` updated —
+  (1) single **primary `#C2410C`** (burnt orange) + **secondary `#57534E`** (stone) across the app (semantic
+  colors reserved for status/deltas); (2) **Poppins** type; (3) **side-nav differentiated** as an elevated white
+  panel (`.mock-sidebar` + right shadow) against a warm-gray page; (4) **more motion** (keyed screen fade-up on nav,
+  nav-icon hover scale, button press, animated brand gradient, hover-lift); (5) **breadcrumb** now Home-rooted and
+  **drops the current page name** (was duplicated); (6) warmer, more modern palette. Scoped to `.theme-next`. Gates
+  green (tsc/eslint/**vitest 191**/build; `web/static` rebuilt); genesis commit **`16c2b8a` LOCAL/unpushed**. Design
+  spec §1a updated. **Awaiting user review of `/dev/mockups`.**
+
 - **2026-08-21 (Phase 27 — 27-03 mockups RECREATED in a Mira-Pro / modern Material-admin style):** per user
   feedback (more modern + techy, richer elevation/display elements, glassy semi-transparent top bar/breadcrumbs,
   motion throughout — ref: MUI Mira Pro), rebuilt `/dev/mockups`. `theme-next.css` → Mira/Horizon palette (cool-gray
