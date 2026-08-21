@@ -95,8 +95,11 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > (2026-08-21 — findings `27-01-findings.md`, **ADR-055 Accepted**: light-first + *evolve* the token/Tailwind primitives
 > to a MUI-inspired language, no `@mui/material`, coded mockups in `/dev`). **27-02 DELIVERED — FOR REVIEW** (wireframes
 > `27-02-wireframes.md`: revamped IA/nav + top app bar + ⌘K + flows + responsive strategy + lo-fi wireframes for all 16
-> surfaces; open decisions **D1** promote Catalog / **D2** Applications KPI strip / **D3** expanded nav). **Next action =
-> user review of 27-02 (+ D1–D3) → then 27-03** (hi-fi coded mockups in `/dev`).
+> surfaces; open decisions **D1** promote Catalog / **D2** Applications KPI strip / **D3** expanded nav). **27-03
+> DELIVERED — FOR REVIEW**: coded light-first mockups live at **`/dev/mockups`** (`web/src/dev/mockups/*`, scoped
+> `.theme-next` preview so the live default is untouched) + `27-03-design-language.md`; gates green (vitest 191/build),
+> genesis commit **`7c7ffe0` LOCAL/unpushed, not tagged** (release deferred to 27-04). **Next action = user review of
+> `/dev/mockups` → then 27-04** (promote theme-next → global light default + flip useTheme default + evolve primitives/shell).
 > Grounding: theming is **already token-driven** (`tokens.css` has a full `.theme-light`), so light-first ≈ palette-refine
 > + default-flip + toggle + reconcile the one hardcoded-hex file (`memory/MemoryGraph.tsx`) — not a rewrite.
 >

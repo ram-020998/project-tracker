@@ -23,5 +23,11 @@
 - **Open decisions for the user (wireframe gate):** **D1** promote Catalog to primary nav (revisits ADR-049) · **D2** add a compact KPI strip to Applications vs metrics-only-in-Settings · **D3** expanded-by-default nav. Recommendations given for each.
 - Docs-only; no genesis code/release. **Behaviour-preserving** (existing features re-arranged, not changed).
 
+## 27-03 — Hi-fi UI mockups 📋 DELIVERED — FOR REVIEW (2026-08-21)
+- **Deliverable:** coded, light-first mockups at **`/dev/mockups`** (`web/src/dev/mockups/{Mockups.tsx,theme-next.css}`) + the finalized `specs/phase-27-ui-ux-revamp/27-03-design-language.md` (token/type/elevation/motion spec + component redline). Rendered in a **scoped `.theme-next`** preview palette so the new language shows **without** changing the live default (that flip is 27-04).
+- **Screens:** new shell (expanded labelled sidebar + slim top app bar: breadcrumbs + ⌘K + theme toggle) + all page-groups — Applications (KPI strip), App detail, Runs, Run detail (HITL), Spec, Chat, Memory (token-driven light-aware constellation), Catalog, Documents, Settings + a Design-language panel.
+- **Palette:** light-first; indigo primary `#4f46e5` + violet accent; `fg-subtle` fixed to AA; light-tuned soft elevation. Reflects ADR-055 (evolve, no `@mui/material`) + D1/D2/D3.
+- **Gates:** tsc/eslint/vitest **191**/build green; `web/static` rebuilt. genesis commit **`7c7ffe0` LOCAL (unpushed, not tagged)** — release deferred to 27-04.
+
 ## Next
-- ⭐ **User review of 27-02** (wireframes + D1–D3). On approval → **27-03 — hi-fi coded mockups in `/dev`** (light-first) for every surface + the finalized token/type/elevation/motion spec + component redline. **No implementation until 27-03 is approved.**
+- ⭐ **User review of the `/dev/mockups`** (palette/density/type/per-screen layout). On approval → **27-04 — design-system foundation**: promote `theme-next` → `styles/tokens.css` as the global light default (+ dark parity + per-theme elevation), flip the `useTheme` default dark→light, evolve the shared primitives + `AppShell`/`Sidebar` (top bar, expanded nav, breadcrumbs, ⌘K), refresh `/dev` KitchenSink — then the page-group phases.

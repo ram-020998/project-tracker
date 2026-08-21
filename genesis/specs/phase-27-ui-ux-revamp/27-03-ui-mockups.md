@@ -1,7 +1,7 @@
 # 27-03 — Hi-fi UI mockups
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 03 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`. Depends on: **27-02** (wireframes approved).
-> **Status:** 📋 DRAFT · **Type:** design/mockups (medium per ADR-055 §6 — recommended: coded mockups in `/dev`) · **Gate:** ⭐ **user review + approval of mockups is the gate that unlocks all implementation (27-04+).**
+> **Status:** 📋 **DELIVERED — FOR REVIEW (2026-08-21)** — coded mockups live at **`/dev/mockups`**; finalized spec: `27-03-design-language.md`. · **Type:** design/mockups (coded in `/dev`, ADR-055) · **Gate:** ⭐ **user approval of the mockups unlocks implementation (27-04+).**
 
 ## Objective
 Produce **modern, future-looking, light-first hi-fi mockups for every revamped page**, and finalize the **visual design language** as an **implementable token + component spec** — the single source of truth the implementation phases build to, pixel-for-pixel.

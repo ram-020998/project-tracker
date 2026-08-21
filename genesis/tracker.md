@@ -237,6 +237,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-21 (Phase 27 — 27-03 Hi-fi UI mockups 📋 DELIVERED, for review):** built navigable **light-first coded
+  mockups at `/dev/mockups`** (`web/src/dev/mockups/{Mockups.tsx,theme-next.css}`) in a **scoped `.theme-next`** preview
+  palette (so the live app default is untouched until 27-04) + the finalized `27-03-design-language.md` (token/type/
+  elevation/motion spec + component redline). Covers the **new shell** (expanded labelled sidebar + slim top app bar:
+  breadcrumbs + ⌘K + theme toggle) and **all page-groups** (Applications w/ KPI strip, App detail, Runs, Run detail w/
+  HITL, Spec, Chat, Memory [token-driven **light-aware constellation**], Catalog, Documents, Settings) + a Design-language
+  panel. Palette: indigo primary `#4f46e5` + violet accent, `fg-subtle` fixed to AA, light-tuned soft elevation. Reflects
+  ADR-055 (evolve, **no** `@mui/material`) + D1/D2/D3. Gates green (tsc/eslint/**vitest 191**/build; `web/static` rebuilt);
+  running dev server serves it. genesis commit **`7c7ffe0` LOCAL/unpushed, not tagged** — release deferred to 27-04.
+  **Next: user review of `/dev/mockups` → then 27-04 (design-system foundation + global light-first flip).**
+
 - **2026-08-21 (Phase 27 — 27-02 UX revamp & wireframes 📋 DELIVERED, for review):** authored
   `specs/phase-27-ui-ux-revamp/27-02-wireframes.md` — revamped **IA** (Applications-first; **Catalog promoted out of
   Settings**), a **navigation model** (persistent labelled left sidebar + a **re-introduced slim top app bar** carrying
