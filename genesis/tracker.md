@@ -237,6 +237,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-21 (Phase 27 — 27-01 Research & functional audit ✅ COMPLETE):** walked all 16 page-surfaces + the
+  design system against real code → `specs/phase-27-ui-ux-revamp/27-01-findings.md` (per-page functional inventory,
+  prioritized UX heuristic audit, a11y baseline [15 jest-axe suites + gaps + a `fg-subtle` sub-AA contrast finding],
+  design-system inventory [20+ primitives; **only 4 hardcoded-hex files** — all memory/logo], MUI adopt-vs-evolve study).
+  **Key finding:** the "outdated" feel is **aesthetic + IA, not structural** — theming is already a pure token swap
+  (`tokens.css` has a full `.theme-light`; the theme toggle already lives in Settings→General), so light-first = a
+  palette-refine + default-flip + reconcile the one hardcoded surface (`MemoryGraph.tsx`), not a rewrite.
+  **ADR-055 Accepted** (with the user): light-first (dark retained/toggleable) · **evolve** the Tailwind/token primitives
+  to a MUI-inspired language (**no** `@mui/material`) · coded mockups in `/dev` · nav to gain expanded/hybrid +
+  breadcrumbs + command palette (designed in 27-02) · presentation/IA only. Docs-only; no genesis release. **Next: 27-02.**
+
 - **2026-08-21 (Phase 27 — UI/UX Revamp — PLANNING 📋, specs authored):** kicked off a multi-phase **UI/UX
   revamp** on the user's request — move off the **dark-default** theme to a **light-first, modern, future-looking**
   design language (**MUI/Material-3** north star), auditing + wireframing + hi-fi-mocking **every** page before a

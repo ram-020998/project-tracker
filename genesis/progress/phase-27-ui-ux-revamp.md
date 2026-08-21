@@ -13,5 +13,10 @@
   - Shared primitives live in `web/src/shared/{ui,layout,feedback}`; a `/dev` KitchenSink gallery already exists (the natural home for the new component language / coded mockups).
 - **Pivotal open decision (→ ADR-055, decided in 27-01 with the user):** **adopt `@mui/material`** as the component library **vs evolve** the existing Tailwind/token/shadcn-style primitives to a **MUI-inspired** language. Recommendation to validate: *evolve* (keeps the proven token/gate system, lower risk) unless the user wants literal Material components.
 
+## 27-01 — Research & functional audit ✅ COMPLETE (2026-08-21)
+- **Deliverable:** `specs/phase-27-ui-ux-revamp/27-01-findings.md` — per-page functional inventory (16 surfaces), UX heuristic audit (prioritized), a11y baseline (15 jest-axe suites + gaps + a `fg-subtle` sub-AA contrast finding), design-system inventory (20+ primitives; **only 4 hardcoded-hex files**, all memory/logo), and the MUI adopt-vs-evolve study. Docs-only; no genesis code.
+- **Key finding:** the "outdated" feel is **aesthetic + IA, not structural** — theming is already a pure token swap (`tokens.css` has a full `.theme-light`; the theme toggle already exists in Settings→General), so light-first is a palette-refine + default-flip + reconcile the one hardcoded surface (`MemoryGraph.tsx`), not a rewrite.
+- **Decisions (ADR-055 Accepted with the user):** light-first (dark retained/toggleable) · **evolve** the Tailwind/token primitives to a MUI-inspired language (no `@mui/material`) · coded mockups in `/dev` · nav to gain expanded/hybrid + breadcrumbs + command palette (designed in 27-02) · presentation/IA only (no behavioural/API/DB change).
+
 ## Next
-- **27-01 — Research & functional audit** (docs-only): per-page functional inventory + UX/a11y audit + design-system/hardcoded-hex inventory + MUI study → **ADR-055 decided with the user**. Then 27-02 wireframes.
+- **27-02 — UX revamp & wireframes:** revamped IA + navigation model + core flows + responsive/density strategy + lo-fi wireframes for every surface (§8 of the findings). Review-gated with the user before 27-03 mockups.

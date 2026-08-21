@@ -91,7 +91,9 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > light-first tokens/theme-toggle → 27-05 shell/nav → 27-06 Applications/Features/Spec → 27-07 Runs/Run-detail → 27-08
 > Chat/Copilot → 27-09 Documents/Memory (+ reconcile the v0.52.1 constellation to tokens) → 27-10 Catalog/Settings/
 > Overview → 27-11 polish/a11y/dark-parity/release (likely v0.53.0). **Do NOT start implementation (27-04+) until the
-> 27-03 mockups are approved; do NOT start other new-phase/backlog work unless the human asks.** Next action = **27-01**.
+> 27-03 mockups are approved; do NOT start other new-phase/backlog work unless the human asks.** **27-01 ✅ COMPLETE**
+> (2026-08-21 — findings `27-01-findings.md`, **ADR-055 Accepted**: light-first + *evolve* the token/Tailwind primitives
+> to a MUI-inspired language, no `@mui/material`, coded mockups in `/dev`). **Next action = 27-02** (UX revamp + wireframes).
 > Grounding: theming is **already token-driven** (`tokens.css` has a full `.theme-light`), so light-first ≈ palette-refine
 > + default-flip + toggle + reconcile the one hardcoded-hex file (`memory/MemoryGraph.tsx`) — not a rewrite.
 >

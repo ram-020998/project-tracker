@@ -1,7 +1,7 @@
 # 27-01 — Research & functional audit + design-language decision
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 01 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`.
-> **Status:** 📋 DRAFT · **Type:** research/docs-only (no genesis code, no release) · **Gate:** review with the user → ADR-055 decided before 27-02.
+> **Status:** ✅ **COMPLETE (2026-08-21)** — findings: `27-01-findings.md`; **ADR-055 Accepted**. · **Type:** research/docs-only (no genesis code, no release) · **Gate:** ✅ reviewed with the user → 27-02 unblocked.
 
 ## Objective
 Build the factual + decision foundation for the revamp: **understand every page** (function + implementation), **audit UX + accessibility**, **inventory the design system**, **study the MUI reference**, and **decide the design-language + theming direction** (light-first; MUI adopt-vs-evolve) as **ADR-055**.
