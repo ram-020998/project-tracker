@@ -20,6 +20,7 @@
 > **Last refreshed: 2026-08-21 — latest SHIPPED: genesis v0.52.1 + genesis-core v0.9.5 + genesis-workflows v0.10.0 +
 > kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
+> **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
 > **Newest SHIPPED: Phase 26 — Agentic Memory Layer — COMPLETE (26-01..26-08): genesis v0.52.0 +
 > genesis-workflows v0.10.0, CI green; ADR-053 + ADR-054 Accepted.** A persistent, self-maintaining memory
 > distilled from chats: separate `memory.db` (bi-temporal entity-relationship graph + FTS5 + `sqlite-vec`),
@@ -42,7 +43,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
      - bible/01-current-state.md             (repos/tags, tests, what works)
      - bible/02-architecture.md              (mental model)
      - bible/03-codebase-map.md              (where code lives)
-     - bible/04-adrs-and-constraints.md      (ADR-001..047 — non-negotiable)
+     - bible/04-adrs-and-constraints.md      (ADR-001..054 — non-negotiable)
      - bible/05-dev-loop-and-release.md      (env, tests, release, CI)
      - bible/06-hard-won-lessons.md          (do-not-regress bugs)
      - bible/07-working-on-tasks-and-agreements.md (the work loop + working agreements)
@@ -79,8 +80,6 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ▶ ACTIVE HANDOFF — continue Phase 26 (Agentic Memory Layer) at **26-07 (RELEASE)**
-
 ## ✅ NO ACTIVE PHASE — Phase 26 (Agentic Memory Layer) SHIPPED (v0.52.0 / v0.10.0)
 
 > **There is no in-flight phase handoff.** Phase 26 (Agentic Memory Layer, 26-01..26-08) is **released** —
@@ -111,7 +110,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 | 1 | [`bible/01-current-state.md`](./bible/01-current-state.md) | §2 | **Current state** — the five-repo tag table, dependency chain, test counts, milestones, and "what works today". *Changes every release.* |
 | 2 | [`bible/02-architecture.md`](./bible/02-architecture.md) | §3 | **Architecture / mental model** — layered design (agents never orchestrate), the reliability trio, state/blackboard rule, subprocess-worker execution, the SQLite data plane, HITL modes, release/versioning. |
 | 3 | [`bible/03-codebase-map.md`](./bible/03-codebase-map.md) | §4 | **Codebase map** — where every module lives across genesis-core / genesis / genesis-workflows / kiro-agent-sdk / genesis-appian-parser. |
-| 4 | [`bible/04-adrs-and-constraints.md`](./bible/04-adrs-and-constraints.md) | §5 | **Non-negotiable constraints** — ADR-001..047 + key implementation contracts. **Do not violate; flag + confirm if a task requires it.** |
+| 4 | [`bible/04-adrs-and-constraints.md`](./bible/04-adrs-and-constraints.md) | §5 | **Non-negotiable constraints** — ADR-001..054 + key implementation contracts. **Do not violate; flag + confirm if a task requires it.** |
 | 5 | [`bible/05-dev-loop-and-release.md`](./bible/05-dev-loop-and-release.md) | §6 | **Environment, dev loop, release, CI** — the venv, how to run tests/app, the versioning/tag/push protocol, CI, npm/gitignore gotchas. |
 | 6 | [`bible/06-hard-won-lessons.md`](./bible/06-hard-won-lessons.md) | §7 | **Hard-won lessons** — concrete bugs + root causes you must not regress. *Grows often.* |
 | 7 | [`bible/07-working-on-tasks-and-agreements.md`](./bible/07-working-on-tasks-and-agreements.md) | §8 + §10 | **The work loop** (understand→verify→scope→test→gates→release→document→report) + the **working agreements** (honest pushback, ask before destructive actions, keep scope tight). |
