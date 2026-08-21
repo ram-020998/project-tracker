@@ -98,7 +98,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 >
 > **Dev/test (bible §6):** venv `genesis/.venv`. `cd genesis && .venv/bin/python -m pytest -q -p no:warnings`
 > (**635**) `+ ruff check genesis`; web `cd genesis/web && npx tsc --noEmit && npx eslint . && npx vitest run`
-> (**189**) `+ npm run build`; workflows `cd genesis-workflows && ../genesis/.venv/bin/python
+> (**191**) `+ npm run build`; workflows `cd genesis-workflows && ../genesis/.venv/bin/python
 > ci/validate_library.py + ... -m pytest -q workflows --ignore=workflows/_fixtures` (**93**).
 
 ---
