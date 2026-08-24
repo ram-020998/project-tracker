@@ -237,6 +237,13 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — mockup alignment, user request; LOCAL):** (1) **Left nav** to the mockup — Settings under a
+  **System** section label, a brand **version + description card** pinned at the footer (single-source `web/src/version.ts`),
+  and a token-driven **right-edge shadow** (`--shadow-nav`, both themes). (2) **Home** — the welcome hero gains an **Add
+  application** CTA; light `--shadow-e1` nudged up so cards read elevated app-wide. (3) **Memory** — the right-side
+  inspector (memory details) now has a **white `bg-surface-1`** card. Gates: tsc/eslint(0)/**vitest 204**/build green;
+  hex CLEAN. genesis `8392819` LOCAL/untagged — held v0.53.0 train (14 local commits).
+
 - **2026-08-24 (Phase 27 — Settings is configuration-only, user request; LOCAL):** removed the **Catalog** and
   **Metrics** tabs from Settings. Catalog is reached via its top-level nav; the **`MetricsSection`** system-metrics
   breakdown is **relocated onto the Home dashboard** (below the at-a-glance band) so the 25-13 observability isn't
