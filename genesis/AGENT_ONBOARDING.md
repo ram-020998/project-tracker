@@ -100,9 +100,13 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > `.theme-next` preview so the live default is untouched) + `27-03-design-language.md`; iterated to a **Mira-Pro
 > style then the user's brand feedback** (primary **`#C2410C`** orange + secondary **`#57534E`** stone, **Poppins**,
 > differentiated elevated side-nav, Home-rooted breadcrumb, more motion). **27-03 ✅ APPROVED (2026-08-21)** — genesis
-> mockup commits **pushed to master** (`…16c2b8a`), **no tag** (ships with 27-04). **Next action = 27-04** (design-system
-> foundation: promote `theme-next` → `styles/tokens.css` as the global light default + dark parity, add Poppins, flip
-> `useTheme` default dark→light, evolve `AppShell`/`Sidebar`/primitives + motion, refresh `/dev` KitchenSink; ships a genesis release).
+> mockup commits **pushed to master** (`…16c2b8a`), **no tag** (ships with 27-04). **27-04 ✅ BUILT (unreleased,
+> 2026-08-24, genesis `286528c` LOCAL/untagged):** Indigo·Slate promoted to the **global default** — light-first
+> `tokens.css` (two `:root` brand knobs = single source; both themes + gradients derive via `color-mix`), Poppins
+> self-hosted, default flipped dark→light (no-FOUC), per-theme shadows, motion utils; independent review = SHIP;
+> gates green (vitest 191). **Next action = release 27-04 as v0.53.0 on the user's go-ahead** (bump pyproject+FastAPI
+> version, tag, push, CI) → then **27-05** (app shell & navigation — first structural UX phase). Known: `/memory`
+> constellation still dark → reconciled in 27-09.
 > Grounding: theming is **already token-driven** (`tokens.css` has a full `.theme-light`), so light-first ≈ palette-refine
 > + default-flip + toggle + reconcile the one hardcoded-hex file (`memory/MemoryGraph.tsx`) — not a rewrite.
 >

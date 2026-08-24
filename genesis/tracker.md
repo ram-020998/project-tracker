@@ -237,6 +237,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — 27-04 Design-system foundation ✅ BUILT, unreleased):** promoted the approved Indigo·Slate
+  language into the **global** token system as the **default**. `styles/tokens.css` light-first (`:root==.theme-light`)
+  + dark parity; **two `:root` brand knobs** (`--brand #4f46e5` / `--brand-secondary #475569`) = single source of truth,
+  both themes + gradients/glows/focus derive via `color-mix()`; per-theme `--shadow-e1..e3`; AA `fg-subtle`.
+  `tailwind.config` `boxShadow→var(--shadow-*)` + Poppins + `secondary` token + radii lg14/xl18/2xl22. **Poppins
+  self-hosted** (`@fontsource/poppins@5.3.0`, latin subset) — offline-safe. **Default flipped dark→light** (theme.ts +
+  `index.html` no-FOUC inline script + light boot splash w/ `.theme-dark` override + indigo brand gradient). Reusable
+  motion utils; KitchenSink re-theme note. Primitives auto-refresh via tokens (no restructure). Gates: tsc/eslint(0)/
+  **vitest 191**/build green; zero hardcoded brand hex in components; **independent sub-agent review = SHIP** (AA verified
+  both themes) — polish items applied (latin-only fonts, dynamic theme-color, comments). genesis `286528c` LOCAL/untagged.
+  Known temporary: `/memory` constellation still dark → 27-09. **Next: release as v0.53.0 (on go-ahead) → then 27-05.**
+
 - **2026-08-24 (Phase 27 — 27-03 palette LOCKED: Indigo·Slate + single-source theming):** user chose **Indigo·Slate**
   (`--primary #4f46e5` / `--secondary #475569`, cool neutrals). Per the user's configurability ask, `theme-next.css`
   now **derives** gradients (`--grad-brand`/`-soft`) + the live-pulse glow **from `--primary` via `color-mix()`** — so

@@ -33,5 +33,17 @@
 - **Outcome:** the user approved the `/dev/mockups` look after the orange/stone + Poppins iteration. Genesis mockup commits **pushed to master** (`7c7ffe0`→`4a979da`→`16c2b8a`); **no tag/release** (the /dev preview ships with the 27-04 foundation).
 - **Final language:** primary **`#C2410C`** (burnt orange) + secondary **`#57534E`** (stone), warm-gray canvas, **Poppins**, differentiated elevated white side-nav, glassy top bar, Home-rooted breadcrumb (drops current page), soft warm elevation, generous radii, and motion (screen fade-up, nav-icon hover, sparkline draw-in, bar-grow, animated brand gradient, live-pulse). Spec: `27-03-design-language.md` (§1a = final).
 
+## 27-04 — Design-system foundation + light-first theming ✅ BUILT (unreleased) — 2026-08-24
+- **Commit:** genesis `286528c` (LOCAL on master, unpushed/untagged — awaiting release go-ahead).
+- **As built:** promoted the approved Indigo·Slate language into the **global** token system as the **default**:
+  - `styles/tokens.css` — light-first (`:root == .theme-light`) + refreshed dark parity; **two brand knobs at `:root`** (`--brand #4f46e5`, `--brand-secondary #475569`) are the single source of truth — both themes + all gradients/glows/focus derive from them via `color-mix()`; per-theme `--shadow-e1..e3`; `fg-subtle` meets WCAG AA in both.
+  - `tailwind.config.ts` — `boxShadow e1..e3 → var(--shadow-*)`; `sans` adds **Poppins**; new `secondary` token; radii lg14/xl18/2xl22.
+  - **Poppins self-hosted** via `@fontsource/poppins@5.3.0` (latin subset, weights 400/500/600/700) — offline-safe (ADR-026), no CDN.
+  - **Default flipped dark→light**: `stores/theme.ts` default light; `index.html` `html.theme-light` + **no-FOUC inline theme-init script** (also sets `theme-color`) + light boot splash with `.theme-dark` override; brand gradient (favicon/splash/`logo.tsx`) → indigo.
+  - `styles/index.css` — reusable reduced-motion-safe `.anim-fade-up` + `.hover-lift`; KitchenSink "How to re-theme" note.
+  - Primitives **not** restructured — token/config changes refresh them (same prop APIs, minimal churn).
+- **Quality:** tsc/eslint(0 err)/**vitest 191**/build green; **zero hardcoded brand hex** in components; **independent sub-agent review = SHIP** (no blockers; AA verified numerically both themes); its polish items applied (latin-only fonts, dynamic theme-color, comments).
+- **Known temporary:** the `/memory` d3 **constellation is still hardcoded dark** (a dark panel in the now-light app) → reconciled in **27-09**.
+
 ## Next
-- **27-04 — Design-system foundation + light-first theming** (first implementation phase; ships a genesis release): promote `theme-next.css` → `styles/tokens.css` as the **global default light theme** (orange/secondary + warm neutrals + per-theme soft elevation) + refresh the **dark** parity set; add **Poppins** to the app font stack; **flip `useTheme` default dark→light**; evolve the shared primitives + `AppShell`/`Sidebar` (differentiated nav, glassy top bar, Home-rooted breadcrumbs, ⌘K) + the motion utilities to match the mockups; refresh `/dev` KitchenSink. Then page-groups 27-05..27-10, polish/release 27-11.
+- **Release 27-04 as genesis v0.53.0** (on the user's go-ahead): bump `pyproject` + FastAPI app version, commit, tag, push master + tag, verify CI green (incl. the frontend stale-bundle guard). Then **27-05 — App shell & navigation** (the first structural UX phase: differentiated sidebar, top app bar, breadcrumbs, ⌘K, states).
