@@ -22,8 +22,8 @@
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
 > **IN PROGRESS — Phase 27 (UI/UX Revamp):** a light-first, modern (**Indigo·Slate**) re-theme + UX overhaul of the
-> entire web app. **27-01..27-06 done** — **27-04** (design-system foundation) + **27-05** (app shell & navigation) + **27-06**
-> (Applications/Features/Spec) are **BUILT but UNRELEASED** (committed LOCAL on genesis master); **next = 27-07**; the phase ships as
+> entire web app. **27-01..27-07 done** — **27-04** (design-system foundation) + **27-05** (app shell & navigation) + **27-06**
+> (Applications/Features/Spec) are **BUILT but UNRELEASED** (committed LOCAL on genesis master); **next = 27-08**; the phase ships as
 > **genesis v0.53.0**. See the ACTIVE handoff below + `progress/phase-27-ui-ux-revamp.md`.
 > **Newest SHIPPED: Phase 26 — Agentic Memory Layer — COMPLETE (26-01..26-08): genesis v0.52.0 +
 > genesis-workflows v0.10.0, CI green; ADR-053 + ADR-054 Accepted.** A persistent, self-maintaining memory
@@ -84,7 +84,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — IN PROGRESS · resume at 27-07
+## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — IN PROGRESS · resume at 27-08
 
 > **Phase 27 = a light-first, modern, MUI-inspired look-and-feel + UX modernization of the ENTIRE web app**
 > (frontend-only, **genesis** repo; **NO API/DB/behavioural change** — presentation + IA only). Specs: umbrella
@@ -106,16 +106,18 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > `shared/layout/{nav,breadcrumbs,command-palette-store,CommandPalette,TopBar}` + recomposed `AppShell`) — genesis
 > **`cf8bfb8`** · **27-06** Applications/Features/Spec — the core SDLC surface rebuilt to the mockups (gradient brand
 > tiles, rounded-2xl, hover-lift + staggered motion, glassy spec-builder chrome, business-map tokenized) + real
-> breadcrumb names via `useSetCrumb(app:<uuid>)` / `useSetCrumb(feature:<id>)` — genesis **`a85dd83`**. All
-> independently reviewed = **SHIP**. Gates green: **web vitest 200**, tsc/eslint/build clean; genesis pytest unaffected
+> breadcrumb names via `useSetCrumb(app:<uuid>)` / `useSetCrumb(feature:<id>)` — genesis **`a85dd83`** · **27-07**
+> Runs & Run detail (runs table + glassy run header + rounded run-graph nodes + HITL gate card; `useSetCrumb(run:<runId>)`)
+> — genesis **`1000af0`**. All independently reviewed = **SHIP**. Gates green: **web vitest 200**, tsc/eslint/build clean; genesis pytest unaffected
 > (web-only).
 >
-> **▶ NEXT = 27-07 — Runs & Run detail** (spec `specs/phase-27-ui-ux-revamp/27-07-*.md`). Rebuild the execution-
-> monitoring surface to the `/dev/mockups` language (page layout/UX; **behaviour-preserving**): the Runs list (status
-> chips + table), the Run detail React-Flow **graph** + node inspector, the turn-grouped Kiro **conversation**, and the
-> HITL **gate cards**. Reuse the 27-06 patterns (rounded-2xl cards, `hover-lift`, `anim-fade-up`, gradient tiles,
-> glassy chrome) + wire `useSetCrumb(run:<runId>)` for the real run label. Do NOT restyle shared primitives (MetricCard,
-> Tabs) — those are deferred to the 27-10/27-11 primitives pass.
+> **▶ NEXT = 27-08 — Chat & Copilot** (spec `specs/phase-27-ui-ux-revamp/27-08-*.md`). Rebuild the conversational
+> surfaces to the `/dev/mockups` language (**behaviour-preserving**): the main Chat (session list + `ChatThread` +
+> `Composer` with the model selector / slash palette / context meter), the message bubbles + turn/thinking views, and
+> the copilot cards (permission / gate / terminal / supervised-runs strip). Reuse the established patterns (rounded-2xl,
+> `hover-lift`, `anim-fade-up`, gradient tiles, glassy chrome) + `useSetCrumb(session:<id>)` for the chat title. The
+> `ChatThread`/`Composer` are SHARED with the Spec Builder (27-06) — keep both call sites working (chrome="spec" vs main).
+> Do NOT restyle shared primitives (MetricCard, Tabs, StatusPill) — deferred to the 27-10/27-11 primitives pass.
 >
 > **Per-sub-phase loop (every time):** verify against real code → smallest correct change to the mockup language →
 > `cd genesis/web && npx tsc --noEmit && npx eslint . && npx vitest run && npm run build` → rebuild + **commit

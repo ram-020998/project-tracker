@@ -77,7 +77,21 @@
   primitives (MetricCard, Tabs) left untouched — deferred to the 27-10/27-11 primitives pass. **Independent review = SHIP
   (clean)**; 2 SHOULD-FIX applied (reduced-motion delay, dead surface class).
 
+## 27-07 — Runs & Run detail ✅ BUILT (unreleased) — 2026-08-24
+- **Commit:** genesis `1000af0` (LOCAL on master, unpushed/untagged — ships with the Phase 27 release train).
+- **As built** (behaviour-preserving; no change to run execution / node-state semantics / HITL protocol):
+  - **Runs list** (`RunsTable`) → `rounded-2xl` card + `shadow-e1`; uppercase, muted header row on `bg-surface-2`;
+    fade-in. `StatusPill` labels + all row actions (pause/cancel/review/open) preserved.
+  - **Run Detail** (`RunDetailPage`) → glassy header (`bg-surface-1/70` + backdrop-blur) + wired
+    **`useSetCrumb(run:<runId>)`** (breadcrumb shows the workflow, matching the page header).
+  - **Run graph** (`NodeCard`) → `rounded-xl` + an icon chip; **no transform-hover** (would fight React-Flow node
+    transforms); StatusPill + counters + status rings preserved. React-Flow already token-driven (light + dark parity).
+  - **HITL** (`HitlBar`) → the gate prompt card gets `rounded-xl` + `shadow-e1` (elevated); controls/aria unchanged.
+- **Quality:** tsc/eslint(0 err; 2 pre-existing RunsPage warnings untouched)/**web vitest 200** (jest-axe + the
+  run-detail / HITL / documents suites)/build green; zero hardcoded brand hex; all asserted labels/roles preserved.
+  **Independent review = SHIP** (no MUST-FIX). Shared primitives (StatusPill, Tabs, MetricCard) untouched → 27-10/27-11.
+
 ## Next
-- **27-07 — Runs & Run detail** (the execution-monitoring surface: runs list + the React-Flow run graph + inspector +
-  turn-grouped conversation + HITL gate cards, to the mockup language). Release train: 27-04 + 27-05 + 27-06 (+ later
-  phases) ship together as **genesis v0.53.0** on the user's go-ahead.
+- **27-08 — Chat & Copilot** (the conversational surfaces: ChatThread/Composer, session list, copilot cards, slash
+  palette → the mockup language). Release train: 27-04..27-07 (+ later phases) ship together as **genesis v0.53.0** on
+  the user's go-ahead.

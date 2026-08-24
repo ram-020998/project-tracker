@@ -9,10 +9,10 @@
 ## 2. Current state (as of genesis v0.52.1)
 
 > **In progress (UNRELEASED) — Phase 27 UI/UX Revamp:** a **light-first Indigo·Slate** re-theme + UX overhaul of the
-> entire web app (frontend-only; no API/DB/behavioural change). **27-01..27-06 done** — **27-04** (global light-first
+> entire web app (frontend-only; no API/DB/behavioural change). **27-01..27-07 done** — **27-04** (global light-first
 > design-system foundation: single-source `tokens.css` brand knobs + `color-mix`-derived gradients, self-hosted Poppins,
 > default flipped dark→light) + **27-05** (app shell & navigation: differentiated Sidebar, glassy TopBar + breadcrumbs +
-> ⌘K command palette) + **27-06** (Applications/Features/Spec → the mockup language) are **BUILT + committed LOCAL on genesis master (untagged)**; **next = 27-07**; the phase ships as
+> ⌘K command palette) + **27-06** (Applications/Features/Spec → the mockup language) are **BUILT + committed LOCAL on genesis master (untagged)**; **next = 27-08**; the phase ships as
 > **genesis v0.53.0**. Web **vitest 200**. See `bible/08` §9 + `progress/phase-27-ui-ux-revamp.md`. (The tag table below
 > reflects the last SHIPPED release, v0.52.1.)
 

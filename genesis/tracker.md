@@ -237,6 +237,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — 27-07 Runs & Run detail ✅ BUILT, unreleased):** run observability rebuilt to the
+  `/dev/mockups` language, behaviour-preserving (no change to run execution / node-state semantics / HITL protocol).
+  **Runs table** → rounded-2xl + shadow-e1 + uppercase muted header; **Run Detail** header glassy + `useSetCrumb(run:<runId>)`;
+  **run-graph NodeCard** rounded-xl + icon chip (no transform-hover — avoids fighting React-Flow); **HITL gate card**
+  rounded-xl + shadow. StatusPill labels + all controls preserved; React-Flow already token-driven (both-theme parity).
+  Gates: tsc/eslint(0)/**vitest 200** (run-detail/HITL/documents + jest-axe)/build green; zero hardcoded brand hex.
+  **Independent review = SHIP.** genesis `1000af0` LOCAL/untagged. **Next: 27-08 (Chat/Copilot).** Release train → v0.53.0.
+
 - **2026-08-24 (Phase 27 — 27-06 Applications/Features/Spec ✅ BUILT, unreleased):** the core SDLC authoring surface
   rebuilt to the `/dev/mockups` light-first language, behaviour-preserving. Global `styles/index.css` gains reusable
   **token-derived** `.grad-brand`/`.grad-brand-soft`/`.text-grad` (single-source; no hardcoded hex) + reduced-motion
