@@ -158,6 +158,16 @@
   optional shared-primitive refinements (`MetricCard` equal-height, `Tabs`/`SegmentedControl` pill language) — filed as
   polish, not release-blocking.
 
+## 27-11 refinement — Home dashboard (user request, 2026-08-24) ✅ (LOCAL, part of the held v0.53.0 train)
+- **Commit:** genesis `b9fd741`. Amends **ADR-049** (decision-log + bible/04 updated).
+- The landing is now a **Home dashboard**: the "Applications" nav item is **relabeled "Home"** (home icon; route stays
+  `/applications`), and the **at-a-glance KPIs + run trend** (reused `OverviewSection`) **moved from Settings → Overview
+  onto the Home page**, above the applications grid. The Settings **Overview tab is removed**; the remaining
+  `MetricsSection` becomes a lean **"Metrics"** tab; **Catalog is the default Settings tab**. TopBar drops the now-
+  redundant home-root breadcrumb (the leading Home icon covers it). This matches the approved 27-03 mockup's Dashboard.
+- Tests updated (shell nav/breadcrumb → Home; applications +/api/home; settings default → Catalog + Metrics tab).
+  Gates: tsc/eslint(0)/**web vitest 204**/build green; hex gate CLEAN. Independent review pending.
+
 ## Release (HELD — awaiting user go-ahead)
 The whole Phase 27 train (27-04..27-11) is **8 local unpushed commits** on genesis master, untagged. On the user's
 go-ahead, cut **genesis v0.53.0**: bump `pyproject` `[project].version` + the FastAPI `create_app` version → commit →

@@ -1183,6 +1183,15 @@ A); a later rename to "Manage"/"System" (Option B) is noted as optional follow-u
 config. Frontend-only; still ships a genesis release (committed `web/static`). Spec:
 `specs/phase-24-ux-revamp-and-environment-credentials/24-02-nav-and-ia-revamp.md`.
 
+**Amendment (2026-08-24, Phase 27-11, LOCAL/unreleased — ships with v0.53.0):** the landing is refined into a **Home
+dashboard**. The primary nav item **"Applications" is relabeled "Home"** (home icon; the route stays `/applications`,
+`/` still redirects there). The **at-a-glance metrics + run trend** (the reused `OverviewSection`) **move from the
+Settings → Overview tab onto the Home page**, rendered above the tracked-applications grid. Consequently the Settings
+**"Overview" tab is removed**; the remaining system-observability panel (`MetricsSection`, 25-13) becomes a lean
+**"Metrics"** tab, and the **default Settings tab is now Catalog**. This partially reverses the original "Overview lives
+in Settings" decision (user feedback: metrics belong on the landing, and this matches the approved 27-03 mockup's
+Dashboard concept). The standalone `OverviewPage`/`/overview` route is retained for deep links. Frontend-only.
+
 
 ## ADR-050 — Typed SDLC domain + single-authority LifecycleService (Phase 25-01)
 

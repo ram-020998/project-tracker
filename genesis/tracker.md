@@ -237,6 +237,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — Home dashboard refinement, user request; LOCAL, amends ADR-049):** the landing is now a
+  **Home dashboard**. The "Applications" nav item → **"Home"** (home icon; route stays `/applications`); the
+  **at-a-glance KPIs + run trend** moved from **Settings → Overview** onto the **Home page** (above the app grid). The
+  Settings **Overview tab is removed** → the remaining `MetricsSection` becomes a lean **"Metrics"** tab; **default
+  Settings tab = Catalog**. TopBar drops the redundant home-root crumb (the leading Home icon covers it). Matches the
+  approved 27-03 mockup Dashboard. **ADR-049 amended** (decision-log + bible/04). Gates: tsc/eslint(0)/**vitest 204**/
+  build green; hex CLEAN. genesis `b9fd741` LOCAL/untagged — part of the **held v0.53.0** train (now 9 local commits).
+
 - **2026-08-24 (Phase 27 — 27-11 final polish + a11y ✅ WORK COMPLETE, release HELD):** the closing quality pass —
   **memory constellation nodes made keyboard-operable** (role=button + tabIndex + aria-label + Enter/Space +
   focus→highlight; closes the 27-09 a11y follow-up); **jest-axe added to RunsPage/CatalogPage/OverviewPage + the
