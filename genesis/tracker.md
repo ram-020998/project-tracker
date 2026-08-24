@@ -237,6 +237,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — light-theme polish, user-reported; LOCAL):** four fixes on the held train.
+  (1) **Tables** RunsTable + DocumentTable get a white `bg-surface-1` body (header/rows now differentiate
+  from the page canvas); **DocumentTable rows are fully clickable** (whole `<tr>` → open + cursor + hover;
+  title/actions stop-propagate). (2) **Markdown legibility** — `MarkdownView` dropped `prose-invert` (it
+  forced light text → invisible on the light white bg) and now drives Tailwind Typography from design
+  tokens (`--tw-prose-*` → `--fg`/`--fg-muted`/`--primary`/`--border`) → legible in BOTH themes (chat,
+  run documents, library viewer). (3) **Home** got an **animated welcome hero** (grad-brand + floating
+  shapes, reduced-motion-safe) as the page header, and the shared **MetricCard** was restyled to the
+  mockup **StatCard** (soft-gradient icon chip, big value, label beneath, pill trend). (4) **Left-nav
+  icons** animate (scale/rotate) on row hover. Gates: tsc/eslint(0)/**vitest 204**/build green; hex CLEAN.
+  genesis `ffa6fed` LOCAL/untagged — held v0.53.0 train (now 10 local commits).
+
 - **2026-08-24 (Phase 27 — Home dashboard refinement, user request; LOCAL, amends ADR-049):** the landing is now a
   **Home dashboard**. The "Applications" nav item → **"Home"** (home icon; route stays `/applications`); the
   **at-a-glance KPIs + run trend** moved from **Settings → Overview** onto the **Home page** (above the app grid). The
