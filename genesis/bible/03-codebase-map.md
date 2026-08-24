@@ -159,8 +159,10 @@ genesis/genesis/
             ApiError; resource modules], query/** [keys + client]}; src/stores/**; src/shared/ui/**
             (primitives: Button/Card/Badge/Chip/Dialog+Drawer/Tabs/SegmentedControl/Switch/Input+Field+
             Textarea/HealthDot/MetricCard/TrendChart/format/icons); src/shared/layout/** (AppShell/
-            Sidebar/SplitPane/Page — **no top bar (removed v0.43.0); no breadcrumbs (removed v0.42.0); the theme
-            toggle lives in Settings → General (`AppearanceSection`)**); src/shared/feedback/** (Empty/Error/Loading); src/app/**
+            Sidebar/SplitPane/Page + **Phase-27 shell: `nav.ts` [single-source PRIMARY_NAV, Home-first], `TopBar`
+            [glassy — route breadcrumbs + ⌘K search + theme toggle], `breadcrumbs.ts` [route-pattern trail + `useSetCrumb`],
+            `CommandPalette` + `command-palette-store` [⌘K]; differentiated Sidebar with a version card + edge collapse]**);
+            **`src/version.ts` (GENESIS_VERSION shown in the sidebar)**; src/shared/feedback/** (Empty/Error/Loading); src/app/**
             (providers, router, RootLayout, routes); src/features/{overview,settings,catalog,runs,
             run-detail,documents,chat,applications,library,features}/**; src/test/fixtures (golden contract fixtures); src/dev/KitchenSink.
             **features/features (Phase 20): FeaturesTab + CreateFeatureDialog + FeaturePage + SpecWorkspace (reused ChatThread
