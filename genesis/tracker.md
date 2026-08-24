@@ -237,6 +237,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — 27-05 App shell & navigation ✅ BUILT, unreleased):** first structural UX phase, behaviour-
+  preserving. New `shared/layout/`: `nav.ts` (single-source primary nav, **Catalog promoted** to top level),
+  rebuilt **Sidebar** (expanded+labelled default, differentiated elevated panel, active `aria-current`+left marker),
+  new glassy **TopBar** (route **breadcrumbs** ancestors-only + **⌘K** search trigger + one-click **theme toggle**),
+  `breadcrumbs.ts` (route-pattern trail, dedupe-by-pathname so static beats param, current-page dropped; crumb-label
+  store + `useSetCrumb`), **CommandPalette** (⌘K/Ctrl-K, Radix Dialog, listbox arrow/enter nav, Navigate+Actions),
+  `AppShell` recomposed (+ palette mounted once). Gates: tsc/eslint(0)/**vitest 200** (+9 shell.test.tsx)/build green;
+  token-driven both themes. **Independent sub-agent review = SHIP**; applied all 3 SHOULD-FIX (breadcrumb
+  `/catalog/skills` collision, palette listbox ARIA ownership + `aria-activedescendant`) + new tests. genesis
+  `cf8bfb8` LOCAL/untagged. Known: `/memory` constellation still dark → 27-09. **Next: 27-06.** Release train (27-04
+  +27-05+…) → v0.53.0 on go-ahead.
+
 - **2026-08-24 (Phase 27 — 27-04 Design-system foundation ✅ BUILT, unreleased):** promoted the approved Indigo·Slate
   language into the **global** token system as the **default**. `styles/tokens.css` light-first (`:root==.theme-light`)
   + dark parity; **two `:root` brand knobs** (`--brand #4f46e5` / `--brand-secondary #475569`) = single source of truth,

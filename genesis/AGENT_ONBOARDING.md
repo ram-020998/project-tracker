@@ -107,6 +107,13 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > gates green (vitest 191). **Next action = release 27-04 as v0.53.0 on the user's go-ahead** (bump pyproject+FastAPI
 > version, tag, push, CI) → then **27-05** (app shell & navigation — first structural UX phase). Known: `/memory`
 > constellation still dark → reconciled in 27-09.
+>
+> **27-05 ✅ BUILT (unreleased, 2026-08-24, genesis `cf8bfb8` LOCAL/untagged):** app shell & navigation — single-source
+> `nav.ts` (Catalog promoted), rebuilt differentiated **Sidebar** (expanded+labelled), glassy **TopBar** (route
+> breadcrumbs ancestors-only + **⌘K** palette + theme toggle), `breadcrumbs.ts` + **CommandPalette** (Radix Dialog,
+> listbox nav) + recomposed `AppShell`. Independent review = SHIP (all fixes applied); gates green (**vitest 200**,
+> +9 shell tests). **Next action = 27-06** (Applications / Application detail / Features / Spec builder). Release train
+> 27-04+27-05(+…) → **v0.53.0** on go-ahead.
 > Grounding: theming is **already token-driven** (`tokens.css` has a full `.theme-light`), so light-first ≈ palette-refine
 > + default-flip + toggle + reconcile the one hardcoded-hex file (`memory/MemoryGraph.tsx`) — not a rewrite.
 >

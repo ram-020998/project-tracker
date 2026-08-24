@@ -45,5 +45,16 @@
 - **Quality:** tsc/eslint(0 err)/**vitest 191**/build green; **zero hardcoded brand hex** in components; **independent sub-agent review = SHIP** (no blockers; AA verified numerically both themes); its polish items applied (latin-only fonts, dynamic theme-color, comments).
 - **Known temporary:** the `/memory` d3 **constellation is still hardcoded dark** (a dark panel in the now-light app) → reconciled in **27-09**.
 
+## 27-05 — App shell & navigation ✅ BUILT (unreleased) — 2026-08-24
+- **Commit:** genesis `cf8bfb8` (LOCAL on master, unpushed/untagged — ships with the Phase 27 release train).
+- **As built** (behaviour-preserving; first structural UX phase):
+  - `shared/layout/nav.ts` — single source of truth for primary nav (`PRIMARY_NAV`+`SETTINGS_NAV`); **Catalog promoted** to top level (revisits ADR-049). Shared by sidebar + palette.
+  - `Sidebar.tsx` — rebuilt: **expanded + labelled** by default (collapsible icon-rail), **differentiated** elevated white panel vs the warm canvas, grouped, active = `bg-primary/10` + primary left-marker + `aria-current`, brand tile (`var(--grad-brand)`) + health/env.
+  - `TopBar.tsx` — new **glassy** header (`bg-surface-1/70` + backdrop-blur): **breadcrumbs** (ancestors only — current page omitted), **⌘K search trigger**, one-click **theme toggle**, notifications.
+  - `breadcrumbs.ts` — route-pattern trail (`matchPath` end:false, depth+specificity ordered, **dedupe by resolved pathname** so static beats param, current dropped); crumb-label zustand store + `useSetCrumb` (generic fallbacks, never raw ids).
+  - `CommandPalette.tsx` (+ `command-palette-store.ts`) — global **⌘K/Ctrl-K** palette on the Radix Dialog primitive: fuzzy filter + arrow/enter listbox nav, Navigate + Actions (theme toggle); proper ARIA (`role=listbox>group>option`, `aria-activedescendant`, scroll-into-view, focus-trap + Esc).
+  - `AppShell.tsx` — composes Sidebar + (TopBar + UpdateBanner + scrollable main) + right rail; palette mounted once; **expanded by default**.
+- **Quality:** tsc/eslint(0 err)/**vitest 200** (+9 `shell.test.tsx`)/build green; token-driven both themes; no hardcoded hex. **Independent sub-agent review = SHIP**; all 3 SHOULD-FIX applied (breadcrumb `/catalog/skills` collision, palette listbox ARIA ownership + `aria-activedescendant`) + covered by new tests. System banners left token-driven (deeper polish → 27-11).
+
 ## Next
-- **Release 27-04 as genesis v0.53.0** (on the user's go-ahead): bump `pyproject` + FastAPI app version, commit, tag, push master + tag, verify CI green (incl. the frontend stale-bundle guard). Then **27-05 — App shell & navigation** (the first structural UX phase: differentiated sidebar, top app bar, breadcrumbs, ⌘K, states).
+- **27-06 — Applications, Application Detail, Features & Spec Builder** (the core SDLC surface; page-level UX/layout to the mockups; wire `useSetCrumb` for real app/feature names). Release train: 27-04 + 27-05 (+27-06…) ship together as **genesis v0.53.0** on the user's go-ahead.
