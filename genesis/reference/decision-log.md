@@ -1190,7 +1190,7 @@ Settings → Overview tab onto the Home page**, rendered above the tracked-appli
 **"Overview" tab is removed**; the remaining system-observability panel (`MetricsSection`, 25-13) becomes a lean
 **"Metrics"** tab, and the **default Settings tab is now Catalog**. This partially reverses the original "Overview lives
 in Settings" decision (user feedback: metrics belong on the landing, and this matches the approved 27-03 mockup's
-Dashboard concept). The standalone `OverviewPage`/`/overview` route is retained for deep links. Frontend-only.
+Dashboard concept). The standalone `OverviewPage`/`/overview` route is retained for deep links. Frontend-only. **Refined same day (user):** Settings is now **configuration-only** — the **Catalog and Metrics tabs are removed** too. Catalog is reached via its top-level nav; the system-metrics breakdown (`MetricsSection`) is **relocated onto the Home dashboard** (below the at-a-glance band) so no observability is lost. Settings = MCP · CLI · GitLab · Environments · General (**default MCP**); the Workspace/Configuration zone split is dropped.
 
 
 ## ADR-050 — Typed SDLC domain + single-authority LifecycleService (Phase 25-01)

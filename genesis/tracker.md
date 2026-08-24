@@ -237,6 +237,13 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — Settings is configuration-only, user request; LOCAL):** removed the **Catalog** and
+  **Metrics** tabs from Settings. Catalog is reached via its top-level nav; the **`MetricsSection`** system-metrics
+  breakdown is **relocated onto the Home dashboard** (below the at-a-glance band) so the 25-13 observability isn't
+  lost. Settings = MCP · CLI · GitLab · Environments · General (**default MCP**); the Workspace/Configuration zone
+  split is dropped. Further amends ADR-049 (decision-log + bible/04). Gates: tsc/eslint(0)/**vitest 204**/build green.
+  genesis `ca49618` LOCAL/untagged — held v0.53.0 train (13 local commits).
+
 - **2026-08-24 (Phase 27 — light-theme polish, user-reported; LOCAL):** four fixes on the held train.
   (1) **Tables** RunsTable + DocumentTable get a white `bg-surface-1` body (header/rows now differentiate
   from the page canvas); **DocumentTable rows are fully clickable** (whole `<tr>` → open + cursor + hover;
