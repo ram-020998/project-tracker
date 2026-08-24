@@ -237,6 +237,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — 27-08 Chat & Copilot ✅ BUILT, unreleased):** the conversational surface restyled to the
+  `/dev/mockups` language, behaviour-preserving (no chat/ACP protocol / session-mode / MCP change). **SessionList**
+  active item → soft-gradient nav treatment; **Composer** footer glassy (backdrop-blur; parity toolbar unchanged);
+  **ChatThread** mode banner/nudge + **copilot cards** (permission/gate/terminal) + supervised-runs strip → rounded-xl;
+  **ChatPage** empty state gets a gradient brand tile. Chat session is always the breadcrumb leaf → no `useSetCrumb`;
+  the shared `ChatThread`/`Composer` (also the Spec Builder, `chrome="spec"`) verified on both call sites. Gates:
+  tsc/eslint(0)/**vitest 200** (chat/copilot/skills-chat + jest-axe)/build green; zero hardcoded brand hex.
+  **Independent review = SHIP.** genesis `f541af1` LOCAL/untagged. **Next: 27-09 (Documents/Memory — incl. reconciling
+  the `/memory` constellation to tokens).** Release train → v0.53.0.
+
 - **2026-08-24 (Phase 27 — 27-07 Runs & Run detail ✅ BUILT, unreleased):** run observability rebuilt to the
   `/dev/mockups` language, behaviour-preserving (no change to run execution / node-state semantics / HITL protocol).
   **Runs table** → rounded-2xl + shadow-e1 + uppercase muted header; **Run Detail** header glassy + `useSetCrumb(run:<runId>)`;

@@ -91,7 +91,22 @@
   run-detail / HITL / documents suites)/build green; zero hardcoded brand hex; all asserted labels/roles preserved.
   **Independent review = SHIP** (no MUST-FIX). Shared primitives (StatusPill, Tabs, MetricCard) untouched → 27-10/27-11.
 
+## 27-08 — Chat & Copilot ✅ BUILT (unreleased) — 2026-08-24
+- **Commit:** genesis `f541af1` (LOCAL on master, unpushed/untagged — ships with the Phase 27 release train).
+- **As built** (behaviour-preserving; no change to the chat/ACP protocol, session modes, or MCP wiring):
+  - **SessionList** → the active session uses the soft-gradient nav treatment (`grad-brand-soft` + `text-primary`),
+    rounded-lg items; rename/delete/aria preserved.
+  - **Composer** → glassy footer (`bg-surface-1/80` + backdrop-blur); the full ACP parity toolbar (model select,
+    context meter, Clear/Compact, slash palette, image attach, export) unchanged.
+  - **ChatThread** → mode banner + system nudge `rounded-xl`; **copilot cards** (permission/gate/terminal) + the
+    **supervised-runs strip** `rounded-xl`. **ChatPage** empty state gets a gradient brand tile.
+- **Note:** the chat session is always the breadcrumb leaf (current page dropped), so no `useSetCrumb` is needed here.
+  `ChatThread`/`Composer` are shared with the Spec Builder (`chrome="spec"`) — both call sites verified green.
+- **Quality:** tsc/eslint(0)/**web vitest 200** (chat/copilot/skills-chat + jest-axe)/build green; zero hardcoded brand
+  hex; all asserted labels/roles preserved. **Independent review = SHIP.** Shared run-detail `Conversation` (used for
+  assistant messages) + primitives untouched → 27-11 polish.
+
 ## Next
-- **27-08 — Chat & Copilot** (the conversational surfaces: ChatThread/Composer, session list, copilot cards, slash
-  palette → the mockup language). Release train: 27-04..27-07 (+ later phases) ship together as **genesis v0.53.0** on
-  the user's go-ahead.
+- **27-09 — Documents & Memory** (the Document Library + viewer + the **`/memory` workspace** — and **reconcile the
+  v0.52.1 d3-force constellation to tokens** so it's light-first, not the hardcoded dark panel it is today). Release
+  train: 27-04..27-08 (+ later phases) ship together as **genesis v0.53.0** on the user's go-ahead.

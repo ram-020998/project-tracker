@@ -22,8 +22,8 @@
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
 > **IN PROGRESS — Phase 27 (UI/UX Revamp):** a light-first, modern (**Indigo·Slate**) re-theme + UX overhaul of the
-> entire web app. **27-01..27-07 done** — **27-04** (design-system foundation) + **27-05** (app shell & navigation) + **27-06**
-> (Applications/Features/Spec) are **BUILT but UNRELEASED** (committed LOCAL on genesis master); **next = 27-08**; the phase ships as
+> entire web app. **27-01..27-08 done** — **27-04** (design-system foundation) + **27-05** (app shell & navigation) + **27-06**
+> (Applications/Features/Spec) are **BUILT but UNRELEASED** (committed LOCAL on genesis master); **next = 27-09**; the phase ships as
 > **genesis v0.53.0**. See the ACTIVE handoff below + `progress/phase-27-ui-ux-revamp.md`.
 > **Newest SHIPPED: Phase 26 — Agentic Memory Layer — COMPLETE (26-01..26-08): genesis v0.52.0 +
 > genesis-workflows v0.10.0, CI green; ADR-053 + ADR-054 Accepted.** A persistent, self-maintaining memory
@@ -84,7 +84,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — IN PROGRESS · resume at 27-08
+## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — IN PROGRESS · resume at 27-09
 
 > **Phase 27 = a light-first, modern, MUI-inspired look-and-feel + UX modernization of the ENTIRE web app**
 > (frontend-only, **genesis** repo; **NO API/DB/behavioural change** — presentation + IA only). Specs: umbrella
@@ -108,16 +108,17 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > tiles, rounded-2xl, hover-lift + staggered motion, glassy spec-builder chrome, business-map tokenized) + real
 > breadcrumb names via `useSetCrumb(app:<uuid>)` / `useSetCrumb(feature:<id>)` — genesis **`a85dd83`** · **27-07**
 > Runs & Run detail (runs table + glassy run header + rounded run-graph nodes + HITL gate card; `useSetCrumb(run:<runId>)`)
-> — genesis **`1000af0`**. All independently reviewed = **SHIP**. Gates green: **web vitest 200**, tsc/eslint/build clean; genesis pytest unaffected
+> — genesis **`1000af0`** · **27-08** Chat & Copilot (soft-gradient session list, glassy composer, rounded copilot
+> cards, gradient empty-state) — genesis **`f541af1`**. All independently reviewed = **SHIP**. Gates green: **web vitest 200**, tsc/eslint/build clean; genesis pytest unaffected
 > (web-only).
 >
-> **▶ NEXT = 27-08 — Chat & Copilot** (spec `specs/phase-27-ui-ux-revamp/27-08-*.md`). Rebuild the conversational
-> surfaces to the `/dev/mockups` language (**behaviour-preserving**): the main Chat (session list + `ChatThread` +
-> `Composer` with the model selector / slash palette / context meter), the message bubbles + turn/thinking views, and
-> the copilot cards (permission / gate / terminal / supervised-runs strip). Reuse the established patterns (rounded-2xl,
-> `hover-lift`, `anim-fade-up`, gradient tiles, glassy chrome) + `useSetCrumb(session:<id>)` for the chat title. The
-> `ChatThread`/`Composer` are SHARED with the Spec Builder (27-06) — keep both call sites working (chrome="spec" vs main).
-> Do NOT restyle shared primitives (MetricCard, Tabs, StatusPill) — deferred to the 27-10/27-11 primitives pass.
+> **▶ NEXT = 27-09 — Documents & Memory** (spec `specs/phase-27-ui-ux-revamp/27-09-*.md`). Rebuild the Document
+> Library (list/table + full-screen viewer + Sheets/Spreadsheet view) and the **`/memory` workspace** (graph / list /
+> inspector / review) to the `/dev/mockups` language (**behaviour-preserving**). **KEY 27-09 item:** reconcile the
+> **v0.52.1 `/memory` d3-force constellation** (`web/features/memory/MemoryGraph` + `graph.ts`) — it is still **hardcoded
+> dark** (a dark panel in the light app) → drive its node/edge/label colors + canvas from **design tokens** so it is
+> light-first with dark parity (this is the one remaining hardcoded-dark surface flagged since 27-04). Reuse the
+> established patterns (rounded-2xl, `anim-fade-up`, glassy chrome). Do NOT restyle shared primitives — deferred to 27-11.
 >
 > **Per-sub-phase loop (every time):** verify against real code → smallest correct change to the mockup language →
 > `cd genesis/web && npx tsc --noEmit && npx eslint . && npx vitest run && npm run build` → rebuild + **commit
