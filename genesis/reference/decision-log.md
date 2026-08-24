@@ -1183,7 +1183,7 @@ A); a later rename to "Manage"/"System" (Option B) is noted as optional follow-u
 config. Frontend-only; still ships a genesis release (committed `web/static`). Spec:
 `specs/phase-24-ux-revamp-and-environment-credentials/24-02-nav-and-ia-revamp.md`.
 
-**Amendment (2026-08-24, Phase 27-11, LOCAL/unreleased — ships with v0.53.0):** the landing is refined into a **Home
+**Amendment (2026-08-24, Phase 27-11, shipped in genesis v0.53.0):** the landing is refined into a **Home
 dashboard**. The primary nav item **"Applications" is relabeled "Home"** (home icon; the route stays `/applications`,
 `/` still redirects there). The **at-a-glance metrics + run trend** (the reused `OverviewSection`) **move from the
 Settings → Overview tab onto the Home page**, rendered above the tracked-applications grid. Consequently the Settings

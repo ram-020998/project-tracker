@@ -89,8 +89,8 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > **Phase 27 = a light-first, modern, MUI-inspired look-and-feel + UX modernization of the ENTIRE web app**
 > (frontend-only, **genesis** repo; **NO API/DB/behavioural change** — presentation + IA only). Specs: umbrella
 > `specs/phase-27-ui-ux-revamp.md` + `27-01..27-11`; as-built `progress/phase-27-ui-ux-revamp.md`; **ADR-055 Accepted**.
-> Everything here is **committed LOCAL on genesis master, UNRELEASED** — 27-04 + 27-05 (+ later page phases) ship
-> together as **genesis v0.53.0** on the user's go-ahead. The **live dev app already reflects it** (web/static rebuilt).
+> Everything here **SHIPPED as genesis v0.53.0** (2026-08-24; release `fba9a94`, tag `v0.53.0`; CI green — #6641436
+> master + #6641437 tag). **Phase 27 COMPLETE** — frontend-only, other repos unchanged.
 >
 > **Locked design decisions (ADR-055):** light is the **default** theme (dark retained + toggleable); **evolve** the
 > existing Tailwind/token/shadcn primitives to a MUI-inspired language (do **NOT** adopt `@mui/material`); palette =
