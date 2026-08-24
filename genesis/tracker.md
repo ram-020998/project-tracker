@@ -237,6 +237,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — 27-10 Catalog/Settings/Overview ✅ BUILT, unreleased):** the remaining discovery/config
+  surfaces restyled to the `/dev/mockups` language, behaviour-preserving (no launch-schema / settings-persistence /
+  metrics-API change). **Catalog** WorkflowCard + SkillCard → soft-gradient icon chip + rounded-2xl + hover-lift +
+  fade-in (stretched-link + actions preserved); **Overview** KPI cards staggered fade-up + trend card rounded-2xl;
+  **Settings** shell/sections left as-is (already token-driven). Shared primitives (MetricCard/Tabs/SegmentedControl)
+  deliberately NOT restyled — blast radius; any primitive polish → 27-11. Gates: tsc/eslint(0)/**vitest 200**/build
+  green; zero hardcoded brand hex. **Independent review = SHIP.** genesis `bf41220` LOCAL/untagged. **Next: 27-11
+  (final polish + a11y/responsive + dark-parity + cut v0.53.0).**
+
 - **2026-08-24 (Phase 27 — 27-09 Documents & Memory ✅ BUILT, unreleased):** knowledge surfaces restyled to the
   `/dev/mockups` language, behaviour-preserving. **Headline:** the v0.52.1 `/memory` **d3-force constellation** — the
   **one remaining hardcoded-dark surface** (flagged since 27-04) — is now **fully token-driven** (new `--mem-*` token

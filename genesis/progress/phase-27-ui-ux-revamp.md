@@ -125,8 +125,22 @@
   `features/library`. **Independent review = SHIP.** Known pre-existing (out of scope): graph nodes aren't keyboard-
   operable → a11y follow-up for 27-11. Shared primitives untouched.
 
+## 27-10 — Catalog, Settings & Overview ✅ BUILT (unreleased) — 2026-08-24
+- **Commit:** genesis `bf41220` (LOCAL on master, unpushed/untagged — ships with the Phase 27 release train).
+- **As built** (behaviour-preserving; no change to launch-schema semantics, settings persistence, or metrics/API):
+  - **Catalog** — `WorkflowCard` + `SkillCard` get a soft-gradient icon chip + `rounded-2xl` + `hover-lift` + fade-in;
+    WorkflowCard keeps its stretched-link whole-card nav + Install/Launch/Remove; SkillCard keeps source badge/actions.
+  - **Overview** — KPI `MetricCard`s wrapped in staggered `anim-fade-up`; the Run-trend card `rounded-2xl`.
+  - **Settings** — the tab shell + section components already use the token-driven Tabs/section pattern → left as-is.
+- **Deliberate scope call:** the shared primitives (`MetricCard`, `Tabs`, `SegmentedControl`) were **NOT** restyled —
+  they're used app-wide; any primitive-level polish is deferred to **27-11** (mind the blast radius).
+- **Quality:** tsc/eslint(0; 2 pre-existing warnings untouched)/**web vitest 200** (catalog/skills/settings/overview/
+  kiro/copilot + jest-axe)/build green; zero hardcoded brand hex. **Independent review = SHIP.** Minor cosmetic note
+  (Overview KPI equal-height under the fade-up wrapper) folded into 27-11.
+
 ## Next
-- **27-10 — Catalog, Settings & Overview** (the remaining configuration/discovery surfaces: Catalog Workflows|Skills,
-  the Settings tab shell + MCP/CLI/Environments/General, and the Overview metrics — to the mockup language; this is
-  where the shared-primitive polish, e.g. Tabs/MetricCard, naturally lands). Release train: 27-04..27-09 (+ 27-10/27-11)
-  ship together as **genesis v0.53.0** on the user's go-ahead.
+- **27-11 — Polish, a11y/responsive audit, dark-parity & release** (the FINAL sub-phase): a cross-surface polish pass +
+  full jest-axe/responsive/both-theme audit, optional shared-primitive refinements (MetricCard equal-height, Tabs/
+  SegmentedControl), memory-graph keyboard-nav (the 27-09 a11y follow-up), system-banner polish — then **cut the Phase 27
+  release as genesis v0.53.0** (bump pyproject + FastAPI version, tag, push master + tag, verify CI incl. the frontend
+  stale-bundle guard). This is the release gate for the whole 27-04..27-10 train.

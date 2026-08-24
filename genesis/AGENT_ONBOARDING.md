@@ -22,8 +22,8 @@
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
 > **IN PROGRESS — Phase 27 (UI/UX Revamp):** a light-first, modern (**Indigo·Slate**) re-theme + UX overhaul of the
-> entire web app. **27-01..27-09 done** — **27-04** (design-system foundation) + **27-05** (app shell & navigation) + **27-06**
-> (Applications/Features/Spec) are **BUILT but UNRELEASED** (committed LOCAL on genesis master); **next = 27-10**; the phase ships as
+> entire web app. **27-01..27-10 done** — **27-04** (design-system foundation) + **27-05** (app shell & navigation) + **27-06**
+> (Applications/Features/Spec) are **BUILT but UNRELEASED** (committed LOCAL on genesis master); **next = 27-11 (final: polish + release v0.53.0)**; the phase ships as
 > **genesis v0.53.0**. See the ACTIVE handoff below + `progress/phase-27-ui-ux-revamp.md`.
 > **Newest SHIPPED: Phase 26 — Agentic Memory Layer — COMPLETE (26-01..26-08): genesis v0.52.0 +
 > genesis-workflows v0.10.0, CI green; ADR-053 + ADR-054 Accepted.** A persistent, self-maintaining memory
@@ -84,7 +84,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — IN PROGRESS · resume at 27-10
+## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — IN PROGRESS · resume at 27-11 (final)
 
 > **Phase 27 = a light-first, modern, MUI-inspired look-and-feel + UX modernization of the ENTIRE web app**
 > (frontend-only, **genesis** repo; **NO API/DB/behavioural change** — presentation + IA only). Specs: umbrella
@@ -111,16 +111,18 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > — genesis **`1000af0`** · **27-08** Chat & Copilot (soft-gradient session list, glassy composer, rounded copilot
 > cards, gradient empty-state) — genesis **`f541af1`** · **27-09** Documents & Memory — restyled + **tokenized the
 > `/memory` d3-force constellation** (the last hardcoded-dark surface → light-first with dark parity; new `--mem-*`
-> tokens) — genesis **`9b2e733`**. All independently reviewed = **SHIP**. Gates green: **web vitest 200**, tsc/eslint/build clean; genesis pytest unaffected
+> tokens) — genesis **`9b2e733`** · **27-10** Catalog/Settings/Overview (gradient catalog cards + Overview motion;
+> shared primitives left for 27-11) — genesis **`bf41220`**. All independently reviewed = **SHIP**. Gates green: **web vitest 200**, tsc/eslint/build clean; genesis pytest unaffected
 > (web-only).
 >
-> **▶ NEXT = 27-10 — Catalog, Settings & Overview** (spec `specs/phase-27-ui-ux-revamp/27-10-*.md`). Rebuild the
-> remaining configuration/discovery surfaces to the `/dev/mockups` language (**behaviour-preserving**): the **Catalog**
-> (Workflows|Skills cards + launch), the **Settings** tab shell + MCP/CLI/GitLab/Environments/General sections, and the
-> **Overview** metrics (embedded in Settings per ADR-049). **This is the natural home for the shared-primitive polish**
-> — the `Tabs`, `MetricCard`, and `SegmentedControl` primitives are used heavily here, so if a primitives pass is worth
-> doing it lands in 27-10/27-11 (mind the blast radius — they're used app-wide; verify every consumer + jest-axe). Reuse
-> the established patterns (rounded-2xl, gradient tiles, `hover-lift`, `anim-fade-up`, glassy chrome).
+> **▶ NEXT = 27-11 — Polish, a11y/responsive audit, dark-parity & RELEASE** (the FINAL sub-phase; spec
+> `specs/phase-27-ui-ux-revamp/27-11-*.md`). A cross-surface polish pass + a full **jest-axe / responsive / both-theme**
+> audit across every 27-05..27-10 surface; optional shared-primitive refinements (`MetricCard` equal-height, `Tabs`/
+> `SegmentedControl` to the pill language) — mind the app-wide blast radius (verify every consumer + jest-axe); the
+> **memory-graph keyboard-nav** a11y follow-up (from 27-09); system-banner polish. **Then CUT THE RELEASE — genesis
+> v0.53.0:** bump `pyproject` + the FastAPI `create_app` version, commit, tag `v0.53.0`, push master + tag, verify CI
+> green (incl. the frontend stale-bundle guard). This release gates the whole **27-04..27-10** local train (currently
+> ahead 7 on master). Get the user's go-ahead before tagging/pushing a release.
 >
 > **Per-sub-phase loop (every time):** verify against real code → smallest correct change to the mockup language →
 > `cd genesis/web && npx tsc --noEmit && npx eslint . && npx vitest run && npm run build` → rebuild + **commit
