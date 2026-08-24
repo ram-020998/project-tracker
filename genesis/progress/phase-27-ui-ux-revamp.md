@@ -106,7 +106,27 @@
   hex; all asserted labels/roles preserved. **Independent review = SHIP.** Shared run-detail `Conversation` (used for
   assistant messages) + primitives untouched → 27-11 polish.
 
+## 27-09 — Documents & Memory ✅ BUILT (unreleased) — 2026-08-24
+- **Commit:** genesis `9b2e733` (LOCAL on master, unpushed/untagged — ships with the Phase 27 release train).
+- **Headline:** the v0.52.1 `/memory` d3-force **constellation** — the **one remaining hardcoded-dark surface**
+  (flagged since 27-04) — is now **fully token-driven** and light-first with dark parity. **No hardcoded hex remains
+  in `features/memory`.**
+- **As built** (behaviour-preserving; no change to document parsing/sync or memory data/API; the d3-force sim is unchanged):
+  - `tokens.css` — new **`--mem-*`** token set for BOTH themes (canvas, star/dot texture, label, edge / edge-active /
+    edge-invalid, per-kind node hues, selected stroke, glass panel bg/border/fg). Light = a clean dotted surface with
+    legible node hues; dark = the original starfield aesthetic, tokenized.
+  - `graph.ts` KIND_STYLE colours → `var(--mem-node-*)` (+ `--mem-node-default` fallback); `graph.test` updated.
+  - `MemoryGraph.tsx` — every hex/rgba replaced with `--mem-*`; **SVG fills/strokes moved into the `style` prop**
+    (CSS `var()` doesn't resolve in SVG presentation attributes — the key trap). Interactions (hover-highlight,
+    drag-pin, zoom/pan, search) unchanged.
+  - `MemoryWorkspace` header → glassy; `DocumentTable` → rounded-2xl + shadow-e1 + uppercase muted header.
+- **Quality:** tsc/eslint(0; 2 pre-existing SpreadsheetView warnings untouched)/**web vitest 200** (memory graph/list/
+  inspector/review + jest-axe empty-graph + library suites)/build green; **zero hardcoded hex** in `features/memory` +
+  `features/library`. **Independent review = SHIP.** Known pre-existing (out of scope): graph nodes aren't keyboard-
+  operable → a11y follow-up for 27-11. Shared primitives untouched.
+
 ## Next
-- **27-09 — Documents & Memory** (the Document Library + viewer + the **`/memory` workspace** — and **reconcile the
-  v0.52.1 d3-force constellation to tokens** so it's light-first, not the hardcoded dark panel it is today). Release
-  train: 27-04..27-08 (+ later phases) ship together as **genesis v0.53.0** on the user's go-ahead.
+- **27-10 — Catalog, Settings & Overview** (the remaining configuration/discovery surfaces: Catalog Workflows|Skills,
+  the Settings tab shell + MCP/CLI/Environments/General, and the Overview metrics — to the mockup language; this is
+  where the shared-primitive polish, e.g. Tabs/MetricCard, naturally lands). Release train: 27-04..27-09 (+ 27-10/27-11)
+  ship together as **genesis v0.53.0** on the user's go-ahead.

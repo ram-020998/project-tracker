@@ -237,6 +237,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — 27-09 Documents & Memory ✅ BUILT, unreleased):** knowledge surfaces restyled to the
+  `/dev/mockups` language, behaviour-preserving. **Headline:** the v0.52.1 `/memory` **d3-force constellation** — the
+  **one remaining hardcoded-dark surface** (flagged since 27-04) — is now **fully token-driven** (new `--mem-*` token
+  set for both themes; `graph.ts` KIND_STYLE → `var(--mem-node-*)`; `MemoryGraph.tsx` hex/rgba → tokens with SVG
+  fills/strokes moved into the `style` prop so `var()` resolves) and **light-first with dark starfield parity** — **zero
+  hardcoded hex remains in `features/memory`**. d3-force sim + interactions unchanged. Also: `MemoryWorkspace` header
+  glassy; `DocumentTable` rounded-2xl + uppercase muted header. Gates: tsc/eslint(0)/**vitest 200** (memory + library +
+  jest-axe)/build green. **Independent review = SHIP.** genesis `9b2e733` LOCAL/untagged. **Next: 27-10
+  (Catalog/Settings/Overview).** Release train → v0.53.0.
+
 - **2026-08-24 (Phase 27 — 27-08 Chat & Copilot ✅ BUILT, unreleased):** the conversational surface restyled to the
   `/dev/mockups` language, behaviour-preserving (no chat/ACP protocol / session-mode / MCP change). **SessionList**
   active item → soft-gradient nav treatment; **Composer** footer glassy (backdrop-blur; parity toolbar unchanged);
