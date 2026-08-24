@@ -23,7 +23,7 @@
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
 > **IN PROGRESS — Phase 27 (UI/UX Revamp):** a light-first, modern (**Indigo·Slate**) re-theme + UX overhaul of the
 > entire web app. **27-01..27-11 done (all 11 sub-phases BUILT)** — **27-04** (design-system foundation) + **27-05** (app shell & navigation) + **27-06**
-> (Applications/Features/Spec) … through **27-11** (final polish + a11y) are **BUILT but UNRELEASED** (8 LOCAL commits on genesis master); **the v0.53.0 release is HELD pending the user's verification of the running app**; the phase ships as
+> (Applications/Features/Spec) … through **27-11** (final polish + a11y) + a **Home-dashboard refinement** are **BUILT but UNRELEASED** (9 LOCAL commits on genesis master); **the v0.53.0 release is HELD pending the user's verification of the running app**; the phase ships as
 > **genesis v0.53.0**. See the ACTIVE handoff below + `progress/phase-27-ui-ux-revamp.md`.
 > **Newest SHIPPED: Phase 26 — Agentic Memory Layer — COMPLETE (26-01..26-08): genesis v0.52.0 +
 > genesis-workflows v0.10.0, CI green; ADR-053 + ADR-054 Accepted.** A persistent, self-maintaining memory
@@ -117,8 +117,8 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > (web-only).
 >
 > **▶ NEXT = CUT THE RELEASE (genesis v0.53.0) — HELD for the user's verification.** All 11 Phase-27 sub-phases are
-> BUILT + reviewed = SHIP; the whole train is **8 LOCAL unpushed commits** on genesis master (`286528c` 27-04 →
-> `b8defa0` 27-11), untagged. The user is verifying the running app first. **On their go-ahead:** bump `pyproject`
+> BUILT + reviewed = SHIP; the whole train is **9 LOCAL unpushed commits** on genesis master (`286528c` 27-04 →
+> `b8defa0` 27-11 → `b9fd741` Home-dashboard refinement), untagged. The user is verifying the running app first. **On their go-ahead:** bump `pyproject`
 > `[project].version` + the FastAPI `create_app` version → commit → tag **`v0.53.0`** → push master + tag → verify CI
 > green (python `genesis` job + `frontend` stale-bundle guard + clean-install). Frontend-only phase — genesis-core /
 > kiro-agent-sdk / genesis-workflows / genesis-appian-parser unchanged; genesis pytest unaffected. **Do NOT tag/push
