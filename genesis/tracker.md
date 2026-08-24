@@ -237,6 +237,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — 27-06 Applications/Features/Spec ✅ BUILT, unreleased):** the core SDLC authoring surface
+  rebuilt to the `/dev/mockups` light-first language, behaviour-preserving. Global `styles/index.css` gains reusable
+  **token-derived** `.grad-brand`/`.grad-brand-soft`/`.text-grad` (single-source; no hardcoded hex) + reduced-motion
+  `animation-delay` neutralized. **Applications** grid → gradient brand tiles + `rounded-2xl` + `hover-lift` + staggered
+  fade-up; **Application Detail** → new header pattern (gradient app tile + name + uuid + release + Refresh/Untrack) +
+  `useSetCrumb(app:<uuid>)` (real breadcrumb name); **Features** cards/pipeline/activity → rounded + motion +
+  `useSetCrumb(feature:<id>)`; **Spec Builder** chrome → glassy. **Business map** canvases rounded + dead `bg-surface-0`
+  fixed (React-Flow already token-driven, both-theme parity). Shared MetricCard/Tabs untouched (→ 27-10/11). Gates:
+  tsc/eslint(0)/**vitest 200** (jest-axe on redesigned pages)/build green; zero hardcoded brand hex; all asserted
+  labels/roles preserved. **Independent review = SHIP (clean)**; 2 SHOULD-FIX applied. genesis `a85dd83` LOCAL/untagged.
+  Known: `/memory` constellation still dark → 27-09. **Next: 27-07 (Runs/Run detail).** Release train → v0.53.0 on go-ahead.
+
 - **2026-08-24 (Phase 27 — 27-05 App shell & navigation ✅ BUILT, unreleased):** first structural UX phase, behaviour-
   preserving. New `shared/layout/`: `nav.ts` (single-source primary nav, **Catalog promoted** to top level),
   rebuilt **Sidebar** (expanded+labelled default, differentiated elevated panel, active `aria-current`+left marker),

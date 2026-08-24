@@ -56,5 +56,28 @@
   - `AppShell.tsx` — composes Sidebar + (TopBar + UpdateBanner + scrollable main) + right rail; palette mounted once; **expanded by default**.
 - **Quality:** tsc/eslint(0 err)/**vitest 200** (+9 `shell.test.tsx`)/build green; token-driven both themes; no hardcoded hex. **Independent sub-agent review = SHIP**; all 3 SHOULD-FIX applied (breadcrumb `/catalog/skills` collision, palette listbox ARIA ownership + `aria-activedescendant`) + covered by new tests. System banners left token-driven (deeper polish → 27-11).
 
+## 27-06 — Applications, Application Detail, Features & Spec Builder ✅ BUILT (unreleased) — 2026-08-24
+- **Commit:** genesis `a85dd83` (LOCAL on master, unpushed/untagged — ships with the Phase 27 release train).
+- **As built** (behaviour-preserving; the core SDLC authoring surface, rebuilt to `/dev/mockups`):
+  - `styles/index.css` — added reusable, **token-derived** `.grad-brand` / `.grad-brand-soft` / `.text-grad`
+    (single-source: derive from the two `:root` brand knobs via `--grad-brand*`; no hardcoded hex; reduced-motion
+    already neutralizes) + neutralized `animation-delay` under `prefers-reduced-motion` (no stagger flash) + refreshed
+    the stale React-Flow override comment (the business-map is token-driven, both-theme parity).
+  - **Applications** (`ApplicationsPage`) — grid cards get a **gradient brand tile**, `rounded-2xl`, `hover-lift`,
+    staggered `anim-fade-up`. **Application Detail** replaces the generic `Page` header with the mockup **header
+    pattern** (gradient app tile + name `h1` + mono uuid + release badge + Refresh/Untrack) and wires
+    **`useSetCrumb(app:<uuid>)`** so the breadcrumb shows the real app name; Overview KPIs + cards get motion + `rounded-2xl`.
+  - **Features** — feature cards get a soft gradient icon chip + `rounded-2xl` + `hover-lift` + stagger; **FeaturePage**
+    wires **`useSetCrumb(feature:<id>)`**; the **artifact pipeline** + **activity feed** adopt `rounded-2xl` + motion;
+    the **Spec Builder** toolbar + page header go **glassy** (`backdrop-blur`).
+  - **Business map** — canvases + header strip `rounded-2xl`; dead `bg-surface-0` → `bg-surface-1`; React-Flow already
+    token-driven (light + dark parity, no retire needed).
+- **Quality:** tsc/eslint(0 err)/**web vitest 200** (jest-axe on the redesigned Applications/BusinessMap/Features pages
+  passes)/build green; zero hardcoded brand hex; all asserted labels/roles/titles preserved (presentation-only). Shared
+  primitives (MetricCard, Tabs) left untouched — deferred to the 27-10/27-11 primitives pass. **Independent review = SHIP
+  (clean)**; 2 SHOULD-FIX applied (reduced-motion delay, dead surface class).
+
 ## Next
-- **27-06 — Applications, Application Detail, Features & Spec Builder** (the core SDLC surface; page-level UX/layout to the mockups; wire `useSetCrumb` for real app/feature names). Release train: 27-04 + 27-05 (+27-06…) ship together as **genesis v0.53.0** on the user's go-ahead.
+- **27-07 — Runs & Run detail** (the execution-monitoring surface: runs list + the React-Flow run graph + inspector +
+  turn-grouped conversation + HITL gate cards, to the mockup language). Release train: 27-04 + 27-05 + 27-06 (+ later
+  phases) ship together as **genesis v0.53.0** on the user's go-ahead.
