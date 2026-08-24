@@ -1,7 +1,7 @@
 # 27-06 — Applications, Application Detail, Features & Spec Builder
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 06 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`. Depends on: **27-04, 27-05**.
-> **Status:** ✅ **BUILT (unreleased) — 2026-08-24** (genesis `a85dd83`, LOCAL/untagged; independent review = SHIP clean, 2 SHOULD-FIX applied). *The core SDLC authoring surface.*
+> **Status:** ⭐ **RELEASED — genesis v0.53.0 (2026-08-24)** (genesis `a85dd83`; independent review = SHIP clean, 2 SHOULD-FIX applied). *The core SDLC authoring surface.*
 
 ## Objective
 Redesign the primary product surface to the approved mockups, behaviour-preserving: the **Applications** landing, **Application Detail** (overview + business-map + features + business-artifacts tabs), the **Feature page** (artifact pipeline + activity feed), and the **Spec Builder** (full-width chat + full-screen annotatable preview).

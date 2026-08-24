@@ -1,7 +1,7 @@
 # 27-10 — Catalog, Settings & Overview/metrics
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 10 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`. Depends on: **27-04, 27-05**.
-> **Status:** ✅ **BUILT (unreleased) — 2026-08-24** (genesis `bf41220`, LOCAL/untagged; independent review = SHIP).
+> **Status:** ⭐ **RELEASED — genesis v0.53.0 (2026-08-24)** (genesis `bf41220`; independent review = SHIP).
 
 ## Objective
 Redesign the remaining surfaces to the approved mockups, behaviour-preserving: the **Catalog** (Workflows | Skills), **Workflow Detail**, the **Launch Form**, the multi-tab **Settings** (Overview, Catalog, Environments, MCP, CLI, Copilot, General/Kiro), and the **Overview/metrics** surface.

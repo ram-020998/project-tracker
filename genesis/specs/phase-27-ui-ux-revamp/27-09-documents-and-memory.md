@@ -1,7 +1,7 @@
 # 27-09 — Documents Library & viewer + Memory workspace
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 09 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`. Depends on: **27-04, 27-05**.
-> **Status:** ✅ **BUILT (unreleased) — 2026-08-24** (genesis `9b2e733`, LOCAL/untagged; independent review = SHIP; the `/memory` constellation is now token-driven — the last hardcoded-dark surface is resolved).
+> **Status:** ⭐ **RELEASED — genesis v0.53.0 (2026-08-24)** (genesis `9b2e733`; independent review = SHIP; the `/memory` constellation is now token-driven — the last hardcoded-dark surface is resolved).
 
 ## Objective
 Redesign the knowledge surfaces to the approved mockups, behaviour-preserving: the **Documents Library** + auto-renderer **viewer**, and the **Memory workspace** (graph/list/inspector/review) — **including reconciling the v0.52.1 memory "constellation" to be token-driven / light-theme-aware** (it currently hardcodes dark cosmic hex — the only hardcoded-hex offender).

@@ -1,7 +1,7 @@
 # 27-04 — Design-system foundation + light-first theming
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 04 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`. Depends on: **27-03 mockups APPROVED**.
-> **Status:** ✅ **BUILT (unreleased) — 2026-08-24** (genesis `286528c`, LOCAL/untagged; independent review = SHIP). · **Type:** genesis frontend (ships a release) · **First implementation phase — foundation everything else builds on.**
+> **Status:** ⭐ **RELEASED — genesis v0.53.0 (2026-08-24)** (genesis `286528c`; independent review = SHIP). · **Type:** genesis frontend (ships a release) · **First implementation phase — foundation everything else builds on.**
 
 ## Objective
 Implement the finalized design language as the **platform**: the modernized **light-first token set** (with dark parity), a **persisted theme toggle** (default flipped dark→light), the **modernized `shared/ui` + layout primitives**, the type/space/elevation/motion scales, and a refreshed **`/dev` KitchenSink** as the living style guide — all behaviour-neutral to feature pages.

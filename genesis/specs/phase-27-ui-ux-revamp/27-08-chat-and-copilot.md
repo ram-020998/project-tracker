@@ -1,7 +1,7 @@
 # 27-08 — Chat & Copilot
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 08 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`. Depends on: **27-04, 27-05**.
-> **Status:** ✅ **BUILT (unreleased) — 2026-08-24** (genesis `f541af1`, LOCAL/untagged; independent review = SHIP).
+> **Status:** ⭐ **RELEASED — genesis v0.53.0 (2026-08-24)** (genesis `f541af1`; independent review = SHIP).
 
 ## Objective
 Redesign the conversational surface to the approved mockups, behaviour-preserving: the **Chat** page (session list, thread, composer with the Kiro/ACP parity toolbar + commands palette + images), inline **cards**, the **launch dialog**, and **session outputs**.

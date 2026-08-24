@@ -1,7 +1,7 @@
 # 27-05 — App shell & navigation
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 05 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`. Depends on: **27-04**.
-> **Status:** ✅ **BUILT (unreleased) — 2026-08-24** (genesis `cf8bfb8`, LOCAL/untagged; independent review = SHIP, fixes applied). · **Type:** genesis frontend (ships a release).
+> **Status:** ⭐ **RELEASED — genesis v0.53.0 (2026-08-24)** (genesis `cf8bfb8`; independent review = SHIP, fixes applied). · **Type:** genesis frontend (ships a release).
 
 ## Objective
 Rebuild the application **frame + navigation** to the approved IA/mockups: `AppShell`, `Sidebar` (and/or top-bar/hybrid per ADR-055), context header + breadcrumbs, optional **command palette / global search**, theme toggle placement, and the system banners (`UpdateBanner`, `PreflightChecklist`) — the consistent chrome every page renders inside.
