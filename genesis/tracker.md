@@ -237,6 +237,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — 27-03 palette LOCKED: Indigo·Slate + single-source theming):** user chose **Indigo·Slate**
+  (`--primary #4f46e5` / `--secondary #475569`, cool neutrals). Per the user's configurability ask, `theme-next.css`
+  now **derives** gradients (`--grad-brand`/`-soft`) + the live-pulse glow **from `--primary` via `color-mix()`** — so
+  changing the one `--primary` re-themes everything (gradients included); the mockup swatch picker sets only
+  `--primary`/`--secondary` (7 combos retained as selectable options). **27-04 spec updated** with a ⭐ single-source
+  configurable-theming deliverable + acceptance (grep-guard for zero hardcoded brand hex; a "How to re-theme" note).
+  Genesis master pushed (`2586fe8`); gates green (tsc/eslint/**vitest 191**/build). **Next: 27-04.**
+
 - **2026-08-21 (Phase 27 — 27-03 mockups ✅ APPROVED):** user approved the `/dev/mockups` look (orange `#C2410C` +
   stone `#57534E`, Poppins, differentiated side-nav, motion). Genesis mockup commits **pushed to master**
   (`7c7ffe0`→`4a979da`→`16c2b8a`; `9ab4966..16c2b8a`), **no tag/release** (the /dev preview ships with 27-04). Gate
