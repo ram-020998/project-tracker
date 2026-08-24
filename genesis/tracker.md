@@ -237,6 +237,14 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — ⭐ RELEASED genesis v0.53.0, CI green):** the whole UI/UX Revamp (27-01..27-11) + user
+  refinements shipped. Release commit `fba9a94`, tag `v0.53.0`, pushed to master; **CI green — #6641436 (master) +
+  #6641437 (v0.53.0 tag)**. Frontend-only (genesis web/static; other four repos unchanged); pyproject + FastAPI +
+  `web/src/version.ts` → 0.53.0. Gates: web **vitest 204** (jest-axe) + tsc/eslint/build, genesis pytest **635** + ruff,
+  stale-bundle clean. Light-first Indigo·Slate design system, differentiated app shell (sidebar/glassy TopBar/⌘K),
+  tokenized `/memory` constellation, Home dashboard, config-only Settings. ADR-055 Accepted; ADR-049 amended.
+  **PHASE 27 COMPLETE — no active phase.** bible/00/01/04/08 + onboarding + progress + 27-11 spec updated to SHIPPED.
+
 - **2026-08-24 (Phase 27 — Home/nav tweaks, user request; LOCAL):** Avg-duration KPI now shows compact **hours**
   (`2.0h`/`<0.1h`); **removed the system-metrics card from Home** (below the run trend); the sidebar **collapse control
   is now a small chevron toggle on the nav's right border** (was a full-width footer button). Gates: tsc/eslint(0)/

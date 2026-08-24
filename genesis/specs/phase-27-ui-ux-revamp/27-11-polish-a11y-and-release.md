@@ -1,7 +1,7 @@
 # 27-11 — Cross-cutting polish, a11y/responsive audit, dark-mode parity & release
 
 > **Phase 27 (UI/UX Revamp) · sub-phase 11 of 11.** Umbrella: `specs/phase-27-ui-ux-revamp.md`. Depends on: **27-04..27-10**.
-> **Status:** ✅ **WORK COMPLETE (release HELD) — 2026-08-24** (genesis `b8defa0`, LOCAL/untagged; independent review = SHIP). The polish + a11y/responsive/hex audit is done; the **v0.53.0 release is intentionally deferred pending the user's verification of the running app**.
+> **Status:** ⭐ **RELEASED — genesis v0.53.0 (2026-08-24)** — release `fba9a94`, tag `v0.53.0`, CI green (#6641436 master + #6641437 tag). Polish + a11y/responsive/hex audit done; **PHASE 27 COMPLETE**.
 
 ## Objective
 Land the final quality pass across the whole app and **release the revamp**: a consistent empty/loading/error sweep, a full **responsive** and **accessibility** audit, verified **dark-mode parity**, documentation, and the tagged release.

@@ -17,14 +17,14 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-08-24 — latest SHIPPED: genesis v0.52.1 + genesis-core v0.9.5 + genesis-workflows v0.10.0 +
+> **Last refreshed: 2026-08-24 — latest SHIPPED: genesis v0.53.0 + genesis-core v0.9.5 + genesis-workflows v0.10.0 +
 > kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
-> **IN PROGRESS — Phase 27 (UI/UX Revamp):** a light-first, modern (**Indigo·Slate**) re-theme + UX overhaul of the
-> entire web app. **27-01..27-11 done (all 11 sub-phases BUILT)** — **27-04** (design-system foundation) + **27-05** (app shell & navigation) + **27-06**
-> (Applications/Features/Spec) … through **27-11** (final polish + a11y) + a **Home-dashboard refinement** are **BUILT but UNRELEASED** (9 LOCAL commits on genesis master); **the v0.53.0 release is HELD pending the user's verification of the running app**; the phase ships as
-> **genesis v0.53.0**. See the ACTIVE handoff below + `progress/phase-27-ui-ux-revamp.md`.
+> **⭐ SHIPPED — Phase 27 (UI/UX Revamp) — COMPLETE: genesis v0.53.0** (2026-08-24; release `fba9a94`, tag `v0.53.0`;
+> CI green — #6641436 master + #6641437 tag). A light-first, modern (**Indigo·Slate**) re-theme + UX overhaul of the
+> entire web app (27-01..27-11 + user refinements: Home dashboard, tables/markdown/chat legibility, sidebar to mockup).
+> Frontend-only; web **vitest 204**, genesis pytest **635**. See §9 + `progress/phase-27-ui-ux-revamp.md`.
 > **Newest SHIPPED: Phase 26 — Agentic Memory Layer — COMPLETE (26-01..26-08): genesis v0.52.0 +
 > genesis-workflows v0.10.0, CI green; ADR-053 + ADR-054 Accepted.** A persistent, self-maintaining memory
 > distilled from chats: separate `memory.db` (bi-temporal entity-relationship graph + FTS5 + `sqlite-vec`),
@@ -84,7 +84,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — ALL SUB-PHASES BUILT · RELEASE HELD (awaiting user verification)
+## ⭐ SHIPPED — Phase 27 (UI/UX Revamp) — COMPLETE · genesis v0.53.0 (2026-08-24, CI green)
 
 > **Phase 27 = a light-first, modern, MUI-inspired look-and-feel + UX modernization of the ENTIRE web app**
 > (frontend-only, **genesis** repo; **NO API/DB/behavioural change** — presentation + IA only). Specs: umbrella
@@ -116,14 +116,13 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > hex gate CLEAN; dark parity verified) — genesis **`b8defa0`**. All independently reviewed = **SHIP**. **web vitest 204.** Gates green: **web vitest 200**, tsc/eslint/build clean; genesis pytest unaffected
 > (web-only).
 >
-> **▶ NEXT = CUT THE RELEASE (genesis v0.53.0) — HELD for the user's verification.** All 11 Phase-27 sub-phases are
-> BUILT + reviewed = SHIP; the whole train is **9 LOCAL unpushed commits** on genesis master (`286528c` 27-04 →
-> `b8defa0` 27-11 → `b9fd741` Home-dashboard refinement), untagged. The user is verifying the running app first. **On their go-ahead:** bump `pyproject`
-> `[project].version` + the FastAPI `create_app` version → commit → tag **`v0.53.0`** → push master + tag → verify CI
-> green (python `genesis` job + `frontend` stale-bundle guard + clean-install). Frontend-only phase — genesis-core /
-> kiro-agent-sdk / genesis-workflows / genesis-appian-parser unchanged; genesis pytest unaffected. **Do NOT tag/push
-> without the user's explicit go-ahead.** After releasing: bump bible/00 banner + bible/01 §2 to v0.53.0, flip the
-> Phase-27 blocks to SHIPPED, and record the release commit/tag/CI ids.
+> **✅ RELEASED — genesis v0.53.0 (2026-08-24). Phase 27 COMPLETE.** All 11 sub-phases + the user refinements shipped:
+> release commit `fba9a94`, tag `v0.53.0`, pushed to master; **CI green — #6641436 (master) + #6641437 (v0.53.0 tag)**.
+> Frontend-only — genesis-core / kiro-agent-sdk / genesis-workflows / genesis-appian-parser unchanged; `pyproject`
+> `[project].version` + FastAPI `create_app` + `web/src/version.ts` all at 0.53.0. Gates at release: web **vitest 204**
+> (jest-axe) + tsc/eslint/build, genesis pytest **635** + ruff, stale-bundle guard clean. **There is NO active phase —
+> do NOT start backlog or a new phase unless the human asks.** Non-blocking follow-ups (polish): optional Home stat-card
+> sparklines / recent-activity feed; the now-unused `MetricsSection` component may be deleted if desired.
 >
 > **Per-sub-phase loop (every time):** verify against real code → smallest correct change to the mockup language →
 > `cd genesis/web && npx tsc --noEmit && npx eslint . && npx vitest run && npm run build` → rebuild + **commit

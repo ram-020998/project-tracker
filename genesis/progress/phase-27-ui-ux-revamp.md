@@ -168,7 +168,14 @@
 - Tests updated (shell nav/breadcrumb → Home; applications +/api/home; settings default → Catalog + Metrics tab).
   Gates: tsc/eslint(0)/**web vitest 204**/build green; hex gate CLEAN. Independent review pending.
 
-## Release (HELD — awaiting user go-ahead)
+## Release ⭐ SHIPPED — genesis v0.53.0 (2026-08-24)
+- Release commit `fba9a94`, tag `v0.53.0`, pushed to master; **CI green — #6641436 (master) + #6641437 (v0.53.0 tag)**.
+- Frontend-only: genesis-core / kiro-agent-sdk / genesis-workflows / genesis-appian-parser unchanged; `pyproject`
+  `[project].version` + FastAPI `create_app` + `web/src/version.ts` all bumped to 0.53.0.
+- Release gates: web **vitest 204** (jest-axe) + tsc/eslint/build; genesis pytest **635** + ruff; stale-bundle guard clean.
+- **PHASE 27 COMPLETE.** ADR-055 Accepted; ADR-049 amended (Home dashboard / config-only Settings).
+
+### Original release plan (for reference)
 The whole Phase 27 train (27-04..27-11) is **8 local unpushed commits** on genesis master, untagged. On the user's
 go-ahead, cut **genesis v0.53.0**: bump `pyproject` `[project].version` + the FastAPI `create_app` version → commit →
 tag `v0.53.0` → push master + tag → verify CI green (python `genesis` job + `frontend` stale-bundle guard + clean-install).
