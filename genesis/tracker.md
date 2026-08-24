@@ -237,6 +237,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — 27-11 final polish + a11y ✅ WORK COMPLETE, release HELD):** the closing quality pass —
+  **memory constellation nodes made keyboard-operable** (role=button + tabIndex + aria-label + Enter/Space +
+  focus→highlight; closes the 27-09 a11y follow-up); **jest-axe added to RunsPage/CatalogPage/OverviewPage + the
+  populated MemoryGraph** (all green). **Hex gate CLEAN** (components hex-free; only the token layer + scoped mockups +
+  the fixed brand logo carry hex); dark parity structurally verified (every token has a `.theme-dark` value).
+  Gates: tsc/eslint(0)/**web vitest 204**/build green. **Independent review = SHIP.** genesis `b8defa0` LOCAL/untagged.
+  **The whole Phase 27 train (27-04..27-11) = 8 local unpushed commits; the v0.53.0 RELEASE IS HELD pending the user's
+  verification of the running app** (per user instruction). ADR-055 Accepted.
+
 - **2026-08-24 (Phase 27 — 27-10 Catalog/Settings/Overview ✅ BUILT, unreleased):** the remaining discovery/config
   surfaces restyled to the `/dev/mockups` language, behaviour-preserving (no launch-schema / settings-persistence /
   metrics-API change). **Catalog** WorkflowCard + SkillCard → soft-gradient icon chip + rounded-2xl + hover-lift +

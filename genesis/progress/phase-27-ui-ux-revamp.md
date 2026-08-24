@@ -138,9 +138,29 @@
   kiro/copilot + jest-axe)/build green; zero hardcoded brand hex. **Independent review = SHIP.** Minor cosmetic note
   (Overview KPI equal-height under the fade-up wrapper) folded into 27-11.
 
-## Next
-- **27-11 — Polish, a11y/responsive audit, dark-parity & release** (the FINAL sub-phase): a cross-surface polish pass +
-  full jest-axe/responsive/both-theme audit, optional shared-primitive refinements (MetricCard equal-height, Tabs/
-  SegmentedControl), memory-graph keyboard-nav (the 27-09 a11y follow-up), system-banner polish — then **cut the Phase 27
-  release as genesis v0.53.0** (bump pyproject + FastAPI version, tag, push master + tag, verify CI incl. the frontend
-  stale-bundle guard). This is the release gate for the whole 27-04..27-10 train.
+## 27-11 — Polish, a11y/responsive audit & dark-parity ✅ WORK COMPLETE (release HELD) — 2026-08-24
+- **Commit:** genesis `b8defa0` (LOCAL on master, unpushed/untagged). **The v0.53.0 release is intentionally deferred
+  pending the user's verification of the running app** (per the user's instruction, 2026-08-24).
+- **As built** (behaviour-preserving final quality pass):
+  - **A11y — memory constellation keyboard nav:** graph nodes are now `role="button"` + `tabIndex={0}` + `aria-label`
+    (entity name) + Enter/Space activation + focus→hover-highlight. Closes the 27-09 review's a11y follow-up.
+  - **jest-axe page coverage:** added axe assertions to **RunsPage, CatalogPage, OverviewPage** (the page suites that
+    lacked them) + the **populated MemoryGraph** — all green. (RunDetailPage can't mount headlessly due to its SSE
+    stream; its constituents — Conversation/DocumentsTab/HitlBar/NodeListView — are already axe/unit-covered.)
+  - **Hex gate: CLEAN** — no hardcoded hex in components; only the token layer (`tokens.css`/`index.css`), the scoped
+    `/dev/mockups`, and the fixed brand mark `logo.tsx` carry hex (all intentional).
+  - **Dark parity:** every token used has a `.theme-dark` counterpart (structurally verified); reduced-motion
+    neutralizes all `anim-fade-up`/`hover-lift`.
+- **Quality:** tsc clean, eslint 0 errors (pre-existing RunsPage warnings untouched), **web vitest 204** (+4 axe:
+  runs/catalog/overview/memory-populated), build green. **Independent review = SHIP.** ADR-055 remains **Accepted**.
+- **Deferred to the user + noted:** a manual **both-theme + responsive walkthrough** of every surface (headless-
+  undrivable); optional cross-browser focus-ring on the SVG node shape (focus→highlight already provides the cue);
+  optional shared-primitive refinements (`MetricCard` equal-height, `Tabs`/`SegmentedControl` pill language) — filed as
+  polish, not release-blocking.
+
+## Release (HELD — awaiting user go-ahead)
+The whole Phase 27 train (27-04..27-11) is **8 local unpushed commits** on genesis master, untagged. On the user's
+go-ahead, cut **genesis v0.53.0**: bump `pyproject` `[project].version` + the FastAPI `create_app` version → commit →
+tag `v0.53.0` → push master + tag → verify CI green (python `genesis` job + `frontend` stale-bundle guard + clean-install).
+Frontend-only phase → genesis-core / kiro-agent-sdk / genesis-workflows / genesis-appian-parser unchanged; genesis
+pytest unaffected (web-only).
