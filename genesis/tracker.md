@@ -237,6 +237,11 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-24 (Phase 27 — Home/nav tweaks, user request; LOCAL):** Avg-duration KPI now shows compact **hours**
+  (`2.0h`/`<0.1h`); **removed the system-metrics card from Home** (below the run trend); the sidebar **collapse control
+  is now a small chevron toggle on the nav's right border** (was a full-width footer button). Gates: tsc/eslint(0)/
+  vitest 204/build green. genesis LOCAL/untagged — held v0.53.0 train.
+
 - **2026-08-24 (Phase 27 — mockup alignment, user request; LOCAL):** (1) **Left nav** to the mockup — Settings under a
   **System** section label, a brand **version + description card** pinned at the footer (single-source `web/src/version.ts`),
   and a token-driven **right-edge shadow** (`--shadow-nav`, both themes). (2) **Home** — the welcome hero gains an **Add
