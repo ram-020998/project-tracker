@@ -17,10 +17,14 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-08-21 — latest SHIPPED: genesis v0.52.1 + genesis-core v0.9.5 + genesis-workflows v0.10.0 +
+> **Last refreshed: 2026-08-24 — latest SHIPPED: genesis v0.52.1 + genesis-core v0.9.5 + genesis-workflows v0.10.0 +
 > kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
+> **IN PROGRESS — Phase 27 (UI/UX Revamp):** a light-first, modern (**Indigo·Slate**) re-theme + UX overhaul of the
+> entire web app. **27-01..27-05 done** — **27-04** (light-first design-system foundation) + **27-05** (app shell &
+> navigation) are **BUILT but UNRELEASED** (committed LOCAL on genesis master); **next = 27-06**; the phase ships as
+> **genesis v0.53.0**. See the ACTIVE handoff below + `progress/phase-27-ui-ux-revamp.md`.
 > **Newest SHIPPED: Phase 26 — Agentic Memory Layer — COMPLETE (26-01..26-08): genesis v0.52.0 +
 > genesis-workflows v0.10.0, CI green; ADR-053 + ADR-054 Accepted.** A persistent, self-maintaining memory
 > distilled from chats: separate `memory.db` (bi-temporal entity-relationship graph + FTS5 + `sqlite-vec`),
@@ -80,47 +84,49 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — PLANNING (specs authored; research → wireframes → mockups are review-gated)
+## ▶ ACTIVE — Phase 27 (UI/UX Revamp) — IN PROGRESS · resume at 27-06
 
-> **Active phase: Phase 27 — UI/UX Revamp.** A ground-up **light-first, modern, MUI-inspired** look-and-feel + UX
-> modernization of the **entire** web app (drop the dark default). **Frontend-only (genesis)** — **no API/DB/behavioural
-> change**. **Specs authored 2026-08-21:** umbrella `specs/phase-27-ui-ux-revamp.md` + sub-specs `27-01..27-11` +
-> `progress/phase-27-ui-ux-revamp.md` + `bible/08` §9 NEXT block + **ADR-055 (Proposed)**. **Pipeline (review-gated):**
-> 27-01 research + functional audit (→ decide **ADR-055**: light-first + MUI adopt-vs-evolve, *with the user*) → 27-02
-> UX + lo-fi wireframes → 27-03 hi-fi light-first mockups (**⭐ user-approval gate**) → 27-04 design-system foundation +
-> light-first tokens/theme-toggle → 27-05 shell/nav → 27-06 Applications/Features/Spec → 27-07 Runs/Run-detail → 27-08
-> Chat/Copilot → 27-09 Documents/Memory (+ reconcile the v0.52.1 constellation to tokens) → 27-10 Catalog/Settings/
-> Overview → 27-11 polish/a11y/dark-parity/release (likely v0.53.0). **Do NOT start implementation (27-04+) until the
-> 27-03 mockups are approved; do NOT start other new-phase/backlog work unless the human asks.** **27-01 ✅ COMPLETE**
-> (2026-08-21 — findings `27-01-findings.md`, **ADR-055 Accepted**: light-first + *evolve* the token/Tailwind primitives
-> to a MUI-inspired language, no `@mui/material`, coded mockups in `/dev`). **27-02 DELIVERED — FOR REVIEW** (wireframes
-> `27-02-wireframes.md`: revamped IA/nav + top app bar + ⌘K + flows + responsive strategy + lo-fi wireframes for all 16
-> surfaces; open decisions **D1** promote Catalog / **D2** Applications KPI strip / **D3** expanded nav). **27-03
-> DELIVERED — FOR REVIEW**: coded light-first mockups live at **`/dev/mockups`** (`web/src/dev/mockups/*`, scoped
-> `.theme-next` preview so the live default is untouched) + `27-03-design-language.md`; iterated to a **Mira-Pro
-> style then the user's brand feedback** (primary **`#C2410C`** orange + secondary **`#57534E`** stone, **Poppins**,
-> differentiated elevated side-nav, Home-rooted breadcrumb, more motion). **27-03 ✅ APPROVED (2026-08-21)** — genesis
-> mockup commits **pushed to master** (`…16c2b8a`), **no tag** (ships with 27-04). **27-04 ✅ BUILT (unreleased,
-> 2026-08-24, genesis `286528c` LOCAL/untagged):** Indigo·Slate promoted to the **global default** — light-first
-> `tokens.css` (two `:root` brand knobs = single source; both themes + gradients derive via `color-mix`), Poppins
-> self-hosted, default flipped dark→light (no-FOUC), per-theme shadows, motion utils; independent review = SHIP;
-> gates green (vitest 191). **Next action = release 27-04 as v0.53.0 on the user's go-ahead** (bump pyproject+FastAPI
-> version, tag, push, CI) → then **27-05** (app shell & navigation — first structural UX phase). Known: `/memory`
-> constellation still dark → reconciled in 27-09.
+> **Phase 27 = a light-first, modern, MUI-inspired look-and-feel + UX modernization of the ENTIRE web app**
+> (frontend-only, **genesis** repo; **NO API/DB/behavioural change** — presentation + IA only). Specs: umbrella
+> `specs/phase-27-ui-ux-revamp.md` + `27-01..27-11`; as-built `progress/phase-27-ui-ux-revamp.md`; **ADR-055 Accepted**.
+> Everything here is **committed LOCAL on genesis master, UNRELEASED** — 27-04 + 27-05 (+ later page phases) ship
+> together as **genesis v0.53.0** on the user's go-ahead. The **live dev app already reflects it** (web/static rebuilt).
 >
-> **27-05 ✅ BUILT (unreleased, 2026-08-24, genesis `cf8bfb8` LOCAL/untagged):** app shell & navigation — single-source
-> `nav.ts` (Catalog promoted), rebuilt differentiated **Sidebar** (expanded+labelled), glassy **TopBar** (route
-> breadcrumbs ancestors-only + **⌘K** palette + theme toggle), `breadcrumbs.ts` + **CommandPalette** (Radix Dialog,
-> listbox nav) + recomposed `AppShell`. Independent review = SHIP (all fixes applied); gates green (**vitest 200**,
-> +9 shell tests). **Next action = 27-06** (Applications / Application detail / Features / Spec builder). Release train
-> 27-04+27-05(+…) → **v0.53.0** on go-ahead.
-> Grounding: theming is **already token-driven** (`tokens.css` has a full `.theme-light`), so light-first ≈ palette-refine
-> + default-flip + toggle + reconcile the one hardcoded-hex file (`memory/MemoryGraph.tsx`) — not a rewrite.
+> **Locked design decisions (ADR-055):** light is the **default** theme (dark retained + toggleable); **evolve** the
+> existing Tailwind/token/shadcn primitives to a MUI-inspired language (do **NOT** adopt `@mui/material`); palette =
+> **Indigo `#4f46e5` + Slate `#475569`** on cool neutrals; **single-source theming** — two `:root` knobs
+> (`--brand` / `--brand-secondary`) in `web/src/styles/tokens.css` drive both themes + all gradients/glows via
+> `color-mix` (change once → everywhere; **no hardcoded brand hex** in components); **Poppins** self-hosted
+> (`@fontsource/poppins`, latin subset); the coded hi-fi **mockups at `/dev/mockups`** are the reference for every page.
 >
-> **Prior phase — Phase 26 (Agentic Memory Layer, 26-01..26-08) — SHIPPED** (genesis **v0.52.0** + genesis-workflows
-> **v0.10.0**, CI green, ADR-053/054 Accepted, installed; + the **v0.52.1** memory-graph constellation UI patch). If
-> asked about it, read `bible/08` §9 + the newest `tracker.md` §6 entries first.
+> **Done (✅):** 27-01 research/audit · 27-02 wireframes · 27-03 mockups (**APPROVED**; mockup commits pushed to master
+> through `16c2b8a`) · **27-04** design-system foundation (global light-first `tokens.css`, Poppins, default flip
+> dark→light, per-theme shadows, motion utils) — genesis **`286528c`** · **27-05** app shell & navigation
+> (differentiated **Sidebar**, glassy **TopBar** + route **breadcrumbs** + **⌘K CommandPalette**; new
+> `shared/layout/{nav,breadcrumbs,command-palette-store,CommandPalette,TopBar}` + recomposed `AppShell`) — genesis
+> **`cf8bfb8`**. Both independently reviewed = **SHIP**. Gates green: **web vitest 200**, tsc/eslint/build clean;
+> genesis pytest unaffected (web-only).
 >
+> **▶ NEXT = 27-06 — Applications, Application Detail, Features & Spec Builder**
+> (spec `specs/phase-27-ui-ux-revamp/27-06-applications-features-spec.md`). Rebuild that page-group to the `/dev/mockups`
+> language (page layout/UX; **behaviour-preserving**): Applications (grid + optional KPI strip), Application Detail
+> (tabs + KPIs + business-map), Feature page (artifact pipeline), Spec Builder (chat + annotatable preview). Also:
+> **tokenize the business-map React-Flow** (retire the `index.css` global overrides), **group the dense Spec action
+> bar**, and **wire `useSetCrumb(...)`** (from `shared/layout/breadcrumbs`) so breadcrumbs show real names — keys
+> `app:<uuid>` and `feature:<featureId>`.
+>
+> **Per-sub-phase loop (every time):** verify against real code → smallest correct change to the mockup language →
+> `cd genesis/web && npx tsc --noEmit && npx eslint . && npx vitest run && npm run build` → rebuild + **commit
+> `web/static`** (stale-bundle guard) → check **both themes** + **jest-axe** on touched pages → **no hardcoded brand
+> hex** → keep prop APIs stable (minimize churn) → commit **LOCAL** on genesis master (do **NOT** push/tag a release
+> without the user's go-ahead) → update `progress/phase-27-ui-ux-revamp.md` + `tracker.md` §6 + this handoff → get an
+> independent review.
+>
+> **Known temporary:** the `/memory` d3 constellation is still hardcoded dark (a dark panel in the light app) →
+> reconciled in **27-09**; system banners get deeper polish in **27-11**. Remaining: 27-07 Runs/Run-detail · 27-08
+> Chat/Copilot · 27-09 Documents/Memory · 27-10 Catalog/Settings/Overview · 27-11 polish + a11y/responsive + dark-parity
+> + release. **Do NOT start other new-phase/backlog work unless the human asks.**
+
 > **Phase-26 backlog / deferred follow-ups (NOT started — pick up only if asked):** the 26-05 internal-server
 > node-injection seam (let agentic workflow nodes inject `genesis-memory` — needs a genesis-core mechanism, as
 > the shared `mcp-registry.json` can't express the venv `command`); the two 26-08 contextual reuses
@@ -131,7 +137,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 >
 > **Dev/test (bible §6):** venv `genesis/.venv`. `cd genesis && .venv/bin/python -m pytest -q -p no:warnings`
 > (**635**) `+ ruff check genesis`; web `cd genesis/web && npx tsc --noEmit && npx eslint . && npx vitest run`
-> (**191**) `+ npm run build`; workflows `cd genesis-workflows && ../genesis/.venv/bin/python
+> (**200**) `+ npm run build`; workflows `cd genesis-workflows && ../genesis/.venv/bin/python
 > ci/validate_library.py + ... -m pytest -q workflows --ignore=workflows/_fixtures` (**93**).
 
 ---

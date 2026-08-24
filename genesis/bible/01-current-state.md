@@ -8,6 +8,14 @@
 
 ## 2. Current state (as of genesis v0.52.1)
 
+> **In progress (UNRELEASED) — Phase 27 UI/UX Revamp:** a **light-first Indigo·Slate** re-theme + UX overhaul of the
+> entire web app (frontend-only; no API/DB/behavioural change). **27-01..27-05 done** — **27-04** (global light-first
+> design-system foundation: single-source `tokens.css` brand knobs + `color-mix`-derived gradients, self-hosted Poppins,
+> default flipped dark→light) + **27-05** (app shell & navigation: differentiated Sidebar, glassy TopBar + breadcrumbs +
+> ⌘K command palette) are **BUILT + committed LOCAL on genesis master (untagged)**; **next = 27-06**; the phase ships as
+> **genesis v0.53.0**. Web **vitest 200**. See `bible/08` §9 + `progress/phase-27-ui-ux-revamp.md`. (The tag table below
+> reflects the last SHIPPED release, v0.52.1.)
+
 **Five repos** at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, all pushed to
 `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git` (the 5th, `genesis-appian-parser`, is new in Phase 16):
 
