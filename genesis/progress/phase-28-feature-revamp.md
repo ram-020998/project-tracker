@@ -18,9 +18,9 @@ LOCAL on genesis master (`a649ac9`, no tag/push); wireframes + docs pushed to pr
 | 28-01 | Research & UX analysis | ✅ **DELIVERED — FOR REVIEW** (`28-01-findings.md`) |
 | 28-02 | Wireframes & hi-fi mockups (`/dev/feature-workspace`) | ✅ **DELIVERED — FOR REVIEW** |
 | 28-03 | Brainstorm & finalize mockups | ✅ **FINAL — FOR BUILD SIGN-OFF** (`28-03-final-design.md`) |
-| 28-04 | Feature-workspace architecture build | ✅ **BUILT (unreleased)** — genesis LOCAL `b9568c3` |
-| 28-05 | Code review & hardening | 📋 PLANNED — **NEXT** |
-| 28-06 | Release | 📋 PLANNED |
+| 28-04 | Feature-workspace architecture build | ✅ **BUILT (unreleased)** — genesis LOCAL `b9568c3` (hardened `be0e7cc`) |
+| 28-05 | Code review & hardening | ✅ **DONE — review SHIP** (genesis LOCAL `be0e7cc`) |
+| 28-06 | Release | 📋 PLANNED — **NEXT** (on go-ahead) |
 
 ## Decisions locked with the user (2026-08-25)
 
@@ -108,3 +108,26 @@ workspace + a jest-axe test. **Extensibility:** a future stage = one `STAGE_DEFS
 **vitest 205** (features 12 incl jest-axe), **build**; `web/static` rebuilt + committed (stale-bundle guard
 OK). Backend untouched → genesis pytest unaffected (confirm at 28-06). **ADR-056 stays Proposed** (flip to
 Accepted after the 28-05 review). **NEXT = 28-05 independent review.**
+
+## 28-05 — Code review & hardening (2026-08-25) — review SHIP
+
+Independent review (subagent `tao-architect`, read-only, blocking) returned **NEEDS_CHANGES** first: the
+live-stage plug-in path leaked spec-specific `if`s in 3 shell spots (the phase's headline promise). Fixed:
+- **stages.ts** — self-describing `StageDescriptor` (+ `artifactKind` + a per-descriptor `deriveStatus`);
+  `deriveStages` is now generic (no `if key==='spec'`).
+- **stage-registry.tsx** (new, data-only) — the component-wiring plug-in point (`key → {Workspace, CardActions}`).
+- **StageWorkspacePage** — dispatches via the registry (no spec branch).
+- **StageCard** (FeaturePage) — generic; delegates to the registry's `CardActions` with an Open/Details fallback.
+- **SpecCardActions.tsx** (new) — the Spec card's Create/Open/View + read-only preview, self-contained.
+- **StageWorkspaceHeader.tsx** (new) — shared header for the builder + not-available workspace.
+- **SpecBuilderPage** — shared header + **Escape-to-exit** immersive (a11y).
+- **FeaturePage** — ARIA tabs (`role=tab/tabpanel` + `aria-controls` + ids).
+- **stages.test.ts** (new) — unit tests for `deriveStages` + `deriveFeatureStatus`.
+
+**Re-review = SHIP:** all 4 MUST-FIX RESOLVED (cited); no residual per-stage `if`/`isSpec` in the shell; no
+new circular imports/dead code; the UX-Design plug-in walkthrough confirmed to touch only a `STAGE_DEFS` row
++ a registry entry + the new inner component (+ backend machine) — **no shell edits**. Two cosmetic
+non-blockers noted (a hardcoded `/spec` breadcrumb label outside the shell; a duplicated local `type Tone`).
+Committed LOCAL on genesis master (`be0e7cc`, no tag). Gates green: tsc, eslint (0 warnings in features/),
+**vitest 210** (incl the new pure-fn tests + jest-axe), build; web/static committed. **ADR-056 → Accepted.**
+**NEXT = 28-06 release (on the user's go-ahead).**

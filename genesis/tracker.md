@@ -237,6 +237,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-25 (Phase 28 — 28-05 Code review & hardening — ✅ review SHIP):** independent tao-architect review
+  (read-only) first returned **NEEDS_CHANGES** (the live-stage plug-in path leaked spec-specific `if`s in
+  StageWorkspacePage/deriveStages/StageCard). Hardened: self-describing `StageDescriptor` + generic
+  `deriveStages`; a data-only **`stage-registry.tsx`** plug-in point; registry-dispatched StageWorkspacePage +
+  generic StageCard; extracted `SpecCardActions`; shared `StageWorkspaceHeader`; Escape-to-exit immersive;
+  ARIA tabs; new `stages.test.ts`. **Re-review = SHIP** (all 4 MUST-FIX resolved; a future live stage adds
+  with NO shell edits). Committed LOCAL on genesis master (`be0e7cc`, no tag). Gates: tsc/eslint(0 warn)/
+  **vitest 210**/build; web/static committed. **ADR-056 → Accepted**; bible/03 codebase-map updated.
+  **NEXT = 28-06 release on go-ahead.**
+
 - **2026-08-25 (Phase 28 — 28-04 Feature Workspace framework — ✅ BUILT, unreleased):** replaced the linear
   `ArtifactPipeline` with the **Feature Workspace** (command-center Overview + peer **stage cards**; derived
   rolled-up status + non-gating progress; tabs Overview/Artifacts/Activity/Stories[reserved]; opening a stage

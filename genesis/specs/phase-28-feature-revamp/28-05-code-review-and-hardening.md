@@ -1,6 +1,6 @@
 # 28-05 — Code Review & Hardening
 
-> **Status:** 📋 **PLANNED** (after 28-04). · **Type:** review / hardening (no release) · **Phase:** 28 (Feature Revamp) · **Gate:** review clean (all MUST/SHOULD-FIX resolved) → 28-06.
+> **Status:** ✅ **COMPLETE — review clean / SHIP (2026-08-25)** (genesis LOCAL `be0e7cc`, no tag). · **Type:** review / hardening (no release) · **Phase:** 28 (Feature Revamp) · **Gate:** review clean (all MUST/SHOULD-FIX resolved) → 28-06.
 
 ---
 
