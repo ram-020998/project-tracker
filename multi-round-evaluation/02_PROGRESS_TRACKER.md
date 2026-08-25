@@ -4,7 +4,7 @@
 > Companion docs: `01_FEATURE_AND_TECHNICAL_DESIGN.md`, `03_AGENT_ONBOARDING.md`.
 
 **Last updated:** 2026-08-25
-**Overall status:** 🟡 Foundation in place (record type + duplicate engine + setup wizard skeleton + rounds panel). Not yet end-to-end.
+**Overall status:** 🟡 Foundation in place (record type + duplicate engine + setup wizard skeleton + rounds panel). First tab enhancement shipped (Vendors → "Last Participated Round"). Round sub-tabs not yet built.
 
 ---
 
@@ -55,18 +55,27 @@
 
 ## 5. Rounds display & navigation
 
+> Detailed design for the round-aware tabs is in **`04_TABS_IMPLEMENTATION_PLAN.md`**.
+
 | # | Item | Status | Notes |
 | :-- | :--- | :--- | :--- |
 | 5.1 | `AS_GSS_SEC_rounds` panel (cards + status colors) | ✅ | Built |
 | 5.2 | "Setup New Round" link in panel | ⬜ | Not present in component |
-| 5.3 | Sequence-based sorting of rounds | ⬜ | Query supports sort; not applied |
-| 5.4 | Factors tab per-round rendering config | 🟡 | `returnViewRenderingConfigFor_Factors` built; wire into tab |
-| 5.5 | Round sub-tabs on Ratings | ⬜ | |
-| 5.6 | Round sub-tabs on Consensus Reports | ⬜ | |
-| 5.7 | Round sub-tabs on Teams | ⬜ | |
-| 5.8 | Factors tab "Rounds" column | ⬜ | |
-| 5.9 | Summary shows only current-round factors | ⬜ | |
-| 5.10 | Vendors tab: Last participated round + Decision | ⬜ | |
+| 5.3 | Sequence-based sorting of rounds | ⬜ | Query supports sort; not applied (see plan §4.2) |
+| 5.4 | Factors tab per-round rendering config | ✅ | `viewFactors_Parent` + `returnViewRenderingConfigFor_Factors` wired to view `_n_87YA` |
+| 5.5 | Round sub-tabs on Ratings | ⬜ | **record-based** loader (query eval per round) — plan WI-4/6e |
+| 5.6 | Round sub-tabs on Consensus Reports | ⬜ | id-based wrapper — plan WI-5 |
+| 5.7 | Round sub-tabs on Teams | ⬜ | id-based wrapper — plan WI-6 |
+| 5.7a | Round sub-tabs on Documents | ⬜ | id-based; nested inner Documents/Drafts tabs — plan WI-6a |
+| 5.7b | Round sub-tabs on Task History | ⬜ | id-based wrapper — plan WI-6b |
+| 5.7c | Round sub-tabs on Tasks | ⬜ | **record-based** loader — plan WI-6c |
+| 5.7d | Round sub-tabs on Evaluation History | ⬜ | **record-based, heavy** (6 collections/round); do lazy pattern — plan WI-6d |
+| 5.8 | Factors tab "Rounds" column | ⬜ | Add to `AS_GSS_GRD_ViewFactorsAndSubfactors` — plan WI-7 |
+| 5.9 | Summary shows only current-round factors | ⬜ | plan WI-9 |
+| 5.10 | Vendors tab: Decision column | ✅ | Already existed in `AS_GSS_GRD_EvaluationVendors` (decisionType-based) |
+| 5.10a | Vendors tab: Last Participated Round column | ✅ | Built + render-verified (eval 12 → "Round 3 \| Test Round 03"). New rule `AS_GSS_UT_returnLastParticipatedRoundForVendors` keyed on **uniqueEntityId**; grid+tab wired; column gated by `showLastParticipatedRound`. i18n key TODO (literal label). |
+| 5.11 | Anchor / Round-1 inclusion in tab list (blocker) | 🔵 | Rounds query filters `parentEvalId = id` (children only) — verify Round 1 shows & child-record anchor — plan WI-1 |
+| 5.12 | Generic `returnRoundTabRenderingConfig` + `roundTabs_Parent` (8 tabs) | ⬜ | Consolidate wrappers; 3 record-based loaders — plan WI-2/WI-3/WI-6c/6d/6e |
 
 ## 6. Round lifecycle actions
 
@@ -87,6 +96,7 @@
 | 7.2 | `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` | ✅ | |
 | 7.3 | `AS_GSS_UT_returnIdentifiersForEvaluationRounds` | 🟡 | Active child via max(id) — make sequence-based |
 | 7.4 | `AS_GSS_CP_evaluationSummaryStampField` | ✅ | Stamp component |
+| 7.5 | `AS_GSS_UT_returnLastParticipatedRoundForVendors` | ✅ | Per-vendor (by uniqueEntityId) max-sequence round across the family; anchor = coalesce(parentEvalId, evaluationId) |
 
 ## 8. Integrations
 
@@ -118,12 +128,13 @@
 ---
 
 ## Immediate next candidates (proposed order)
-1. Review the Round-1 / Start Evaluation path (§4) to confirm the entry point and round-1 record creation.
-2. Fix `maxSelections` on the vendor grid (§2.4) and make active-round selection sequence-based (§7.3).
-3. Build Setup New Round Step 3 + VM resubmission trigger (§2.5, §8.1).
-4. Wire per-round sub-tabs (§5.4–5.10).
+1. Wire per-round sub-tabs — start with an ID-based tab (Teams) to prove the generic path (plan WI-2/WI-3/WI-6), then Consensus, Task History, Documents, then record-based (Ratings, Tasks, Evaluation History).
+2. Review the Round-1 / Start Evaluation path (§4) to confirm the entry point, round-1 record creation, and settle the anchor question (plan WI-1). The anchor helper pattern is proven (see Session Log 2026-08-25 Vendors, learning #3).
+3. Fix `maxSelections` on the vendor grid (§2.4) and make active-round selection sequence-based (§7.3).
+4. Build Setup New Round Step 3 + VM resubmission trigger (§2.5, §8.1).
+5. Add i18n bundle key for the Vendors "Last Participated Round" column label (§5.10a).
 
-*(Confirm priority with the team before starting — the user indicated we will pick work items after documentation.)*
+*(Confirm priority with the team before starting each item.)*
 
 ---
 
@@ -134,3 +145,41 @@
 - Explored AS GSS Full Application via `lcp` MCP; identified all new objects (1 record type, 3 interfaces, 5 rules) and mapped the "round = duplicated evaluation" architecture.
 - Authored `01_FEATURE_AND_TECHNICAL_DESIGN.md`, this tracker, and `03_AGENT_ONBOARDING.md`.
 - No functional changes made to Appian objects yet.
+
+### 2026-08-25 — Tabs analysis & plan
+- Analyzed the Factors round-sub-tab pattern (view `uiExpr` → `AS_GSS_CPS_viewFactors_Parent` → `AS_GSS_UT_returnViewRenderingConfigFor_Factors` → per-round `AS_GSS_CPS_viewFactors`).
+- Catalogued input shapes for all Evaluation record tabs: Ratings is **record-based** (`evaluation`), Consensus/Teams/Factors/Vendors are **id-based** (`evaluationId`).
+- Identified a blocker: rounds query filters `parentEvalId = id` (children only) — need to confirm Round 1 inclusion + child-record anchor resolution.
+- Authored `04_TABS_IMPLEMENTATION_PLAN.md` (per-tab treatment, generic config rule + parent proposal, work items, validation checklist, sequencing).
+- No functional changes made to Appian objects yet.
+
+### 2026-08-25 — Expanded tab scope (stakeholder request)
+- Added Documents, Tasks, Task History, and Evaluation History to the round-sub-tab set (now 8 tabs total incl. Factors).
+- Confirmed input shapes: Documents (id, has inner Documents/Drafts tabs), Task History (id), Tasks (record), Evaluation History (record + 6 queried collections — heavy).
+- Updated plan §2/§3/§5/§6/§7/§8/§9/§10 and tracker §5: 5 ID-based + 3 RECORD-based tabs; recommended per-round **loader** interfaces for record-based tabs + a lazy `showWhen` pattern for the heavy Evaluation History tab.
+- No functional changes made to Appian objects yet.
+
+### 2026-08-25 — Vendors tab: "Last Participated Round" column (SHIPPED + verified)
+First functional change to Appian objects. Implemented and render-verified in this session.
+
+**Objects changed:**
+- **Created** `AS_GSS_UT_returnLastParticipatedRoundForVendors` (`_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42461`) — input `evaluationId`; returns `List of Map{uniqueEntityId, sequence, roundName, roundLabel}` where roundLabel = "Round {seq} | {roundName}".
+- **Updated** `AS_GSS_GRD_EvaluationVendors` (`_a-0000e5da-a251-8000-9bbe-011c48011c48_1082078`) — added inputs `lastParticipatedRounds` (Map, multiple) + `showLastParticipatedRound` (Boolean); added a "Last Participated Round" column before the existing Decision column.
+- **Updated** `AS_GSS_FM_evaluationVendorsTab` (`_a-0000e5da-a251-8000-9bbe-011c48011c48_1082379`) — computes the rounds via the new rule (RECORD_ACTION refresh) and passes to the grid; column shown only when the eval has round records (`isNotBlank`).
+
+**Verification:**
+- `testRule` (eval 12): `123456789123 → "Round 3 | Test Round 03"`, `123456789122 → "Round 2 | Test Round 01"`.
+- `testInterface` (eval 12): tab rendered, `diagnostics.error = null`; grid shows Test Vendor 001 with column value "Round 3 | Test Round 03".
+- PO verified visually — approved.
+
+**Key learnings (important for future tabs):**
+1. **Cross-round vendor identity = `uniqueEntityId` (UEI).** `vendorRefId` is **null in the data** (never populated) and `vendorId` is the per-row PK that changes each round (10/11 → 16/17 → 18/19 → 20). Do NOT use vendorId or vendorRefId to correlate a vendor across rounds — use `uniqueEntityId`. (For state/local vendors UEI may be blank → `stateAndLocalIdentifier` fallback is a future refinement.)
+2. **Decision data already exists.** `AS_GSS_EvaluationVendor_SYNCEDRECORD` has `decisionTypeId` + `decisionType` relationship (`6732b53c…` → `c34b12a0-4ae7-4d21-adb9-09320118b98e`), and the grid already renders a Decision column via `AS_GSS_UT_returnDecisionLabelForViewActions`. Only "Last Participated Round" was missing vs the mockup.
+3. **Anchor resolution pattern that works for both root and child records:** `anchorId = a!defaultValue(viewedEval.parentEvalId, evaluationId)`, then family = `append(anchorId, children where parentEvalId = anchorId)`. This includes the root even though `returnEvaluationRoundsForGivenEvaluation` returns children only — reuse this for the tab wrappers (WI-1).
+4. **`AS_CO_UT_queryRecord`** accepts returnType strings `"SINGLE_OBJECT"` / `"OBJECT_ARRAY"` and takes `recordType`, `fields`, `filters` (single or list of `a!queryFilter`). Used directly for custom cross-record queries.
+5. **`union()` is type-strict** — it errors on mixed types (e.g. Integer scalar + Any-Type empty `{}`). Use `append(tointeger(x), tointeger(a!defaultValue(list, {})))` or `AS_CO_UT_distinct` instead.
+6. **`AS_CO_UT_indexWhere`** returns ALL matches (a list). Test data had duplicate `sequence` values across rounds → wrap with `index(..., 1, null)` to take the first, and `tointeger(max(...))` to avoid "3.0" in labels.
+7. **`validateDesignObject` on the grid reports a false-positive** (`Cannot index property 'lbl_Vendors'…`) because it stubs `i18nData` as null; the grid requires a real bundle. The tab validates clean and the interface renders fine — trust `testInterface` over `validateDesignObject` for i18n-dependent components.
+8. **Non-round (legacy) evals are unaffected** — the helper returns empty when no round records exist, so the column stays hidden. Safe, backward-compatible pattern to reuse.
+9. **i18n TODO:** column label is a literal ("Last Participated Round"); add a bundle key (e.g. `lbl_LastParticipatedRound`) to the GSS General bundle for consistency. Mockup casing is "Last participated round".
+10. **Scope note:** the vendor list still queries only the viewed evaluation's vendors (vendor query untouched). Whether the list should aggregate dropped vendors across rounds is deferred to the anchor/Start-Evaluation work.

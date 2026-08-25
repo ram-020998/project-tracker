@@ -144,6 +144,7 @@ AS_GSS_Evaluation_SYNCEDRECORD (Round 2 clone)
 | `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` | `…42289` | Return round records for all child evals of a parent |
 | `AS_GSS_UT_returnIdentifiersForEvaluationRounds` | `…42301` | Return parent/child ids, active child, next sequence |
 | `AS_GSS_UT_returnViewRenderingConfigFor_Factors` | `…42412` | Build per-round tab config for the Factors tab |
+| `AS_GSS_UT_returnLastParticipatedRoundForVendors` | `…42461` | Per-vendor (by uniqueEntityId) last/highest-sequence round across the family. Powers the Vendors tab "Last Participated Round" column. |
 
 *(UUID prefix for the `…` rules above: `_a-0000f04a-0c6d-8000-9ba8-011c48011c48`.)*
 
@@ -192,7 +193,27 @@ AS_GSS_Evaluation_SYNCEDRECORD (Round 2 clone)
 
 ---
 
+## 6.6 Shipped tab enhancements
+
+- **Vendors tab → "Last Participated Round" column** (2026-08-25, verified): shows each vendor's highest-sequence round (e.g. "Round 3 | Test Round 03"). Backed by `AS_GSS_UT_returnLastParticipatedRoundForVendors` → passed into `AS_GSS_GRD_EvaluationVendors` via new inputs `lastParticipatedRounds` + `showLastParticipatedRound`, computed in `AS_GSS_FM_evaluationVendorsTab`. The **Decision** column already existed. Column is hidden for non-round evals.
+
+## 6.7 Data-model gotchas & SAIL learnings (from implementation)
+
+These are hard-won details — read before touching vendor/round data or building the tab wrappers.
+
+1. **Cross-round vendor identity = `uniqueEntityId` (UEI).** In the current data, `vendorRefId` is **null** and `vendorId` is a per-round PK (changes each clone: 10/11 → 16/17 → 18/19 → 20). Correlate the same vendor across rounds by `uniqueEntityId`. State/local vendors may lack UEI → `stateAndLocalIdentifier` fallback is a future refinement.
+2. **Vendor Decision** lives on `AS_GSS_EvaluationVendor_SYNCEDRECORD.decisionTypeId` + `decisionType` relationship (`6732b53c…` → decision-type record `c34b12a0-4ae7-4d21-adb9-09320118b98e`). Label via `AS_GSS_UT_returnDecisionLabelForViewActions`.
+3. **Anchor resolution (root ⇄ child):** `anchorId = a!defaultValue(viewedEval.parentEvalId, evaluationId)`; family = `append(anchorId, evals where parentEvalId = anchorId)`. Includes the root even though `returnEvaluationRoundsForGivenEvaluation` returns children only. **Reuse this for every tab wrapper.**
+4. **`AS_CO_UT_queryRecord`** accepts returnType strings `"SINGLE_OBJECT"`/`"OBJECT_ARRAY"`; takes `recordType`, `fields`, `filters` (single or list of `a!queryFilter`).
+5. **`union()` is type-strict** (errors on Integer + Any-Type empty `{}`). Use `append(tointeger(x), tointeger(a!defaultValue(list,{})))` or `AS_CO_UT_distinct`.
+6. **`AS_CO_UT_indexWhere` returns ALL matches** (a list). Wrap with `index(...,1,null)` for first match; `tointeger(max(...))` to avoid "3.0" in labels.
+7. **`validateDesignObject` false-positive on i18n components:** grids that require an `i18nData` bundle report `Cannot index property 'lbl_…'` under null-stub validation. Trust `testInterface`/`testRule` (with real inputs) over `validateDesignObject` for these.
+8. **Backward-compat pattern:** round-aware helpers should return empty for evals without round records so new UI stays hidden on legacy evaluations.
+9. **i18n:** new labels need a bundle key added to the GSS General bundle (loaded via `AS_GSS_CO_UT_loadBundleFromFolder`); the local `.properties` copy is stale. The Vendors column currently uses a literal label (TODO: `lbl_LastParticipatedRound`).
+
 ## 7. Known gaps & open risks (to address later)
+
+
 
 1. **Setup New Round Step 3 (VM resubmission config) not built.** Wizard is coded as "Step 1 of 2"; missing the *Send as Update / Send as Email* + title/description step, and the actual VM request-resubmission trigger.
 2. **`maxSelections: 10`** hardcoded on the vendor selection grid — conflicts with spec ("no max"; Round 1 up to ~400 vendors).

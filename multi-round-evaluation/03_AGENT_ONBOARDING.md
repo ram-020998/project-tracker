@@ -71,6 +71,7 @@ When creating new objects, **match the existing pattern** rather than inventing 
 | `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42289` |
 | `AS_GSS_UT_returnIdentifiersForEvaluationRounds` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42301` |
 | `AS_GSS_UT_returnViewRenderingConfigFor_Factors` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42412` |
+| `AS_GSS_UT_returnLastParticipatedRoundForVendors` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42461` |
 
 **Existing core (read-only context):**
 | Object | UUID |
@@ -108,7 +109,14 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 ## 7. Current state in one line
 
-Foundation done: round record type, the evaluation-duplication engine, a 2-step Setup New Round wizard, the Rounds panel, and supporting query rules. **Not yet end-to-end** — see `02_PROGRESS_TRACKER.md` for the live checklist and the known gaps in `01_…` §7.
+Foundation done: round record type, the evaluation-duplication engine, a 2-step Setup New Round wizard, the Rounds panel, and supporting query rules. **First tab enhancement shipped:** Vendors → "Last Participated Round" column (verified). Round sub-tabs (8 tabs) not yet built — see `02_PROGRESS_TRACKER.md` and gaps in `01_…` §7.
+
+## 7a. Gotchas you MUST know before coding (details in `01_…` §6.7)
+- **Correlate vendors across rounds by `uniqueEntityId`** — `vendorRefId` is null and `vendorId` changes every round.
+- **Resolve the anchor** with `coalesce(parentEvalId, evaluationId)`, then family = `append(anchor, children where parentEvalId = anchor)` (root isn't returned by `returnEvaluationRoundsForGivenEvaluation`).
+- **`union()` is type-strict**; **`indexWhere` returns all matches** (use `index(...,1,null)`).
+- **Trust `testInterface`/`testRule` over `validateDesignObject`** for i18n-bundle-dependent grids (false-positive `lbl_…` index errors under null stubs).
+- **Keep it backward-compatible:** round helpers return empty for non-round evals so new UI stays hidden.
 
 ---
 
