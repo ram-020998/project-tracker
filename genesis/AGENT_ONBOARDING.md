@@ -17,7 +17,7 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-08-24 — latest SHIPPED: genesis v0.53.0 + genesis-core v0.9.5 + genesis-workflows v0.10.0 +
+> **Last refreshed: 2026-08-25 — latest SHIPPED: genesis v0.54.0 + genesis-workflows v0.11.0 + genesis-core v0.9.5 +
 > kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
@@ -83,6 +83,21 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   unless I ask, and ask before destructive actions. No code changes until you've read it and restated.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
+
+## ⭐ SHIPPED — Phase 28 (Feature Revamp) — COMPLETE · genesis v0.54.0 + genesis-workflows v0.11.0 (2026-08-25, CI green)
+
+> **Phase 28 = the Feature Workspace framework (ADR-056, supersedes ADR-044's sequential unlock).** A Feature is a
+> **parallel, plug-in workspace**: a command-center Overview + peer **stage cards** (Spec live; UX/Technical-Design/
+> Breakdown first-class **"arriving in a later phase"**, NOT gated) + a **derived** rolled-up status + a non-gating
+> progress indicator; opening a stage routes to its **full-bleed** workspace (`…/features/:id/:stage`; the Spec
+> builder gained **Expand→immersive**). A self-describing `StageDescriptor` (`stages.ts`) + a data-only
+> `stage-registry.tsx` let a future stage plug in with **no shell edits** (independent review = SHIP). Frontend-only
+> (no migration; stages/status derived client-side). Also shipped **genesis-workflows v0.11.0** — 2 new library
+> skills (`appian-object-generation`, `sail-mockup-generation`). Releases: genesis `8ab4b41` / **v0.54.0** (CI
+> **#6650764** master + **#6650766** tag) + genesis-workflows `db45cb7` / **v0.11.0** (CI **#6650936** + **#6650937**).
+> **No active phase** — await direction. See §9 + `progress/phase-28-feature-revamp.md`.
+
+---
 
 ## ⭐ SHIPPED — Phase 27 (UI/UX Revamp) — COMPLETE · genesis v0.53.0 (2026-08-24, CI green)
 

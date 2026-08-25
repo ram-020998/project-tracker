@@ -1,6 +1,6 @@
 # 28-06 — Release
 
-> **Status:** 📋 **PLANNED** (final; after 28-05). · **Type:** release / docs (ships the genesis version) · **Phase:** 28 (Feature Revamp) · **Gate:** CI green + docs current.
+> **Status:** ⭐ **RELEASED — genesis v0.54.0 (2026-08-25)** (release `8ab4b41`, tag `v0.54.0`, CI green #6650764/#6650766; + genesis-workflows v0.11.0 `db45cb7`/#6650936/#6650937). · **Type:** release / docs (ships the genesis version) · **Phase:** 28 (Feature Revamp) · **Gate:** CI green + docs current.
 
 ---
 

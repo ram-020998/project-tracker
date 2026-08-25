@@ -8,7 +8,7 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 📋 PLANNED (spec drafting) — Phase 28: Feature Revamp (the Feature Workspace framework)
+### ⭐ SHIPPED (COMPLETE) — Phase 28: Feature Revamp (the Feature Workspace framework) — genesis v0.54.0 + genesis-workflows v0.11.0
 
 > **Specs:** `specs/phase-28-feature-revamp.md` (umbrella) + `phase-28-feature-revamp/28-01..28-06`. As-built:
 > `progress/phase-28-feature-revamp.md`. **ADR-056** (the parallel Feature Workspace model) — **Proposed**
@@ -35,9 +35,18 @@
 > (genesis vX.Y.0, frontend-heavy + thin backend; other repos unchanged; small additive migration only if needed).
 >
 > **Origin.** Triggered by the user's draft `artifacts/designs/Genesis_Appian_Orchestrator_Feature_Workspace_
-> UX_Design.md` (a multi-user, spec→deploy vision) — this phase **adopts its feature-level mental model and adapts
-> it** to Genesis's single-user, read-only-now reality. **Status: SPEC DRAFT — start 28-01 on the user's go-ahead.**
-> **Do NOT start building before the 28-03 sign-off gate.**
+> UX_Design.md` (a multi-user, spec→deploy vision) — adopted its feature-level mental model, adapted to Genesis's
+> single-user, read-only-now reality.
+>
+> **✅ SHIPPED (2026-08-25).** 28-01 research → 28-02 mockups (`/dev/feature-workspace`) → 28-03 final design (locked)
+> → 28-04 build → 28-05 independent review (**SHIP**) → 28-06 release. **genesis v0.54.0** (release `8ab4b41`, tag
+> `v0.54.0`; CI green **#6650764** master + **#6650766** tag) + **genesis-workflows v0.11.0** (release `db45cb7`, tag
+> `v0.11.0`; CI **#6650936** + **#6650937** — 2 new library skills `appian-object-generation` + `sail-mockup-generation`).
+> **ADR-056 Accepted** (supersedes ADR-044's sequential unlock). Frontend-only (no migration; stages/derived status
+> computed client-side); genesis-core / kiro-agent-sdk / genesis-appian-parser unchanged. Gates: web **vitest 210**
+> (incl jest-axe + `stages.test.ts`) + tsc/eslint/build; genesis pytest **635** + ruff; genesis-workflows validate_skills
+> (3) + validate_library (9) + pytest **93**. A future stage plugs in via a `STAGE_DEFS` row + a registry entry + a
+> `LifecycleService` machine — **no shell edits**. **PHASE 28 COMPLETE — no active phase.**
 
 ### ⭐ SHIPPED (COMPLETE) — Phase 27: UI/UX Revamp (27-01..27-11) — genesis v0.53.0
 

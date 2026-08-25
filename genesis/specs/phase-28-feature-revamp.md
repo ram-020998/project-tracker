@@ -1,6 +1,6 @@
 # Phase 28 — Feature Revamp (the Feature Workspace framework)
 
-> **Status:** 📋 **DRAFT — spec only (umbrella + 28-01..28-06); awaiting review, then start 28-01 (research).** · **Author:** Genesis agent · **Date:** 2026-08-25
+> **Status:** ⭐ **COMPLETE — SHIPPED as genesis v0.54.0 + genesis-workflows v0.11.0 (2026-08-25, CI green).** · **Author:** Genesis agent · **Date:** 2026-08-25
 > **Type:** genesis frontend + a thin backend lifecycle/model layer (ships a release) · **Depends on:** Phase 20/21 (Features & Specs; ADR-042/044), Phase 25-01 (`LifecycleService`/`domain/`; ADR-050), Phase 27 (the light-first design language; ADR-055).
 
 ---

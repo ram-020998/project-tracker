@@ -8,8 +8,7 @@
 
 ## Status
 
-🎨 **28-02 (mockups) DELIVERED — awaiting user review before 28-03 (finalize).** Coded mockup committed
-LOCAL on genesis master (`a649ac9`, no tag/push); wireframes + docs pushed to project-tracker.
+⭐ **PHASE 28 COMPLETE — SHIPPED genesis v0.54.0 + genesis-workflows v0.11.0 (2026-08-25, CI green).**
 
 ## Sub-phase ledger
 
@@ -20,7 +19,7 @@ LOCAL on genesis master (`a649ac9`, no tag/push); wireframes + docs pushed to pr
 | 28-03 | Brainstorm & finalize mockups | ✅ **FINAL — FOR BUILD SIGN-OFF** (`28-03-final-design.md`) |
 | 28-04 | Feature-workspace architecture build | ✅ **BUILT (unreleased)** — genesis LOCAL `b9568c3` (hardened `be0e7cc`) |
 | 28-05 | Code review & hardening | ✅ **DONE — review SHIP** (genesis LOCAL `be0e7cc`) |
-| 28-06 | Release | 📋 PLANNED — **NEXT** (on go-ahead) |
+| 28-06 | Release | ⭐ **RELEASED** — genesis v0.54.0 + genesis-workflows v0.11.0 |
 
 ## Decisions locked with the user (2026-08-25)
 
@@ -131,3 +130,16 @@ non-blockers noted (a hardcoded `/spec` breadcrumb label outside the shell; a du
 Committed LOCAL on genesis master (`be0e7cc`, no tag). Gates green: tsc, eslint (0 warnings in features/),
 **vitest 210** (incl the new pure-fn tests + jest-axe), build; web/static committed. **ADR-056 → Accepted.**
 **NEXT = 28-06 release (on the user's go-ahead).**
+
+## 28-06 — Release ⭐ SHIPPED (2026-08-25)
+
+- **genesis v0.54.0** — release commit `8ab4b41`, tag `v0.54.0`, pushed to master; **CI green — #6650764 (master) +
+  #6650766 (v0.54.0 tag)**. Bumps: `pyproject` + FastAPI `create_app` + `web/src/version.ts` → 0.54.0. Frontend-only
+  (no migration); genesis-core / kiro-agent-sdk / genesis-appian-parser unchanged.
+- **genesis-workflows v0.11.0** — release commit `db45cb7`, tag `v0.11.0`; **CI green — #6650936 (master) + #6650937
+  (v0.11.0 tag)**. Two new library skills (`appian-object-generation`, `sail-mockup-generation`) + `skills-registry.json`
+  entries; pins unchanged (genesis-core@v0.9.5 + genesis@v0.52.0). (Released alongside on the user's request.)
+- **Gates:** web **vitest 210** (jest-axe + `stages.test.ts`) + tsc/eslint/build; genesis pytest **635** + ruff;
+  genesis-workflows validate_skills (3) + validate_library (9) + pytest **93**. `web/static` rebuilt + committed.
+- **ADR-056 Accepted.** Docs flipped to SHIPPED (bible/00 banner, bible/01 §2 rows + counts, bible/03 map, bible/04 +
+  decision-log ADR-056, bible/08 §9, AGENT_ONBOARDING, spec statuses, this progress, tracker). **PHASE 28 COMPLETE.**

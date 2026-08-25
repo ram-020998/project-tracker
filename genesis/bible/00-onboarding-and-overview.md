@@ -19,7 +19,7 @@
 > (2) do whatever work is asked, following §8's loop.
 >
 > **Keep this current.** When tags, architecture, ADRs, or hard-won lessons change, update §2 (state),
-> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-24 — Latest SHIPPED: **genesis v0.53.0** — Phase 27 UI/UX Revamp COMPLETE (light-first Indigo·Slate; 27-01..27-11 + refinements; CI green #6641436/#6641437). Prior: genesis v0.52.1 +
+> §5 (ADRs), §7 (lessons), and §9 (roadmap). **Last refreshed: 2026-08-25 — Latest SHIPPED: **genesis v0.54.0 + genesis-workflows v0.11.0** — Phase 28 Feature Workspace framework COMPLETE (parallel plug-in stages, ADR-056; CI green #6650764/#6650766 + #6650936/#6650937). Prior: genesis v0.53.0 (Phase 27) +
 > genesis-workflows v0.10.0 +
 > genesis-core v0.9.5 + kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0** (genesis v0.50.0 + core v0.9.5 =
 > the Phase-25 Architectural Foundation Hardening release (v0.49.0 + v0.50.0) — Phase 25 COMPLETE; 25-11 + 25-12 backlog — see §9) (Phases 9 Agent-Artifact-I/O,

@@ -237,6 +237,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-25 (Phase 28 — Feature Revamp — ⭐ RELEASED genesis v0.54.0 + genesis-workflows v0.11.0, CI green):**
+  the Feature Workspace framework shipped (28-01 research → 28-02 mockups → 28-03 final design → 28-04 build →
+  28-05 review SHIP → 28-06 release). A Feature is now a **parallel, plug-in workspace** (ADR-056, supersedes
+  ADR-044's sequential unlock): command-center Overview + peer stage cards (Spec live; UX/Tech-Design/Breakdown
+  first-class "arriving in a later phase", not gated); derived rolled-up status; full-bleed per-stage workspace
+  (`…/features/:id/:stage`; Spec builder + Expand→immersive); self-describing `StageDescriptor` + data-only
+  `stage-registry` (a future stage plugs in with no shell edits). **genesis v0.54.0** (`8ab4b41`, tag `v0.54.0`;
+  CI **#6650764**/**#6650766**) — frontend-only, no migration; other repos unchanged. **genesis-workflows v0.11.0**
+  (`db45cb7`, tag `v0.11.0`; CI **#6650936**/**#6650937**) — 2 new library skills (`appian-object-generation`,
+  `sail-mockup-generation`) on the user's request. Gates: web vitest **210** + tsc/eslint/build; genesis pytest
+  **635** + ruff; workflows validate_skills(3)/validate_library(9)/pytest **93**. **ADR-056 Accepted.** bible
+  00/01/03/04/08 + onboarding + decision-log + specs + progress updated. **PHASE 28 COMPLETE — no active phase.**
+
 - **2026-08-25 (Phase 28 — 28-05 Code review & hardening — ✅ review SHIP):** independent tao-architect review
   (read-only) first returned **NEEDS_CHANGES** (the live-stage plug-in path leaked spec-specific `if`s in
   StageWorkspacePage/deriveStages/StageCard). Hardened: self-describing `StageDescriptor` + generic
