@@ -1,6 +1,6 @@
 # 28-02 — Wireframes & Hi-Fi Mockups
 
-> **Status:** 📋 **PLANNED** (after 28-01). · **Type:** design / coded mockups (dev-only; no production wiring; no release) · **Phase:** 28 (Feature Revamp) · **Gate:** ⭐ user review of the mockup set before 28-03.
+> **Status:** ✅ **DELIVERED — FOR REVIEW (2026-08-25)** — wireframes: `28-02-wireframes.md`; coded mockup: genesis `/dev/feature-workspace` (LOCAL `a649ac9`). · **Type:** design / coded mockups (dev-only; no production wiring; no release) · **Phase:** 28 (Feature Revamp) · **Gate:** ⭐ user review of the mockup set before 28-03.
 
 ---
 

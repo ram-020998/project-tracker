@@ -237,6 +237,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-25 (Phase 28 — 28-02 Wireframes & hi-fi mockups — ✅ DELIVERED, for review):** lo-fi wireframes
+  (`specs/phase-28-feature-revamp/28-02-wireframes.md`) + a coded hi-fi mockup at **`/dev/feature-workspace`**
+  (`web/src/dev/mockups/FeatureWorkspaceMockups.tsx`, dev-only) committed **LOCAL** on genesis master
+  (`a649ac9`, no tag/push). Renders the recommended model — command-center **Overview + peer stage cards**
+  (non-gating progress meter), a reusable **stage-container** (Spec = side-by-side chat + live-artifact
+  canvas; UX/Tech/Breakdown = first-class **"arriving in a later phase"**, not gated), **Artifacts** +
+  **Activity** tabs, a **reserved Stories** slot, **plus the stages-as-tabs alternative**; Layout + light/dark
+  toggles. Shipped tokens/primitives only (no hardcoded hex). Gates green: tsc/eslint/**vitest 204**/build;
+  web/static rebuilt+committed (stale-bundle guard OK). **NEXT = user review of the mockups → 28-03 finalize.**
+
 - **2026-08-25 (Phase 28 — 28-01 Research & UX analysis — ✅ DELIVERED, for review):**
   `specs/phase-28-feature-revamp/28-01-findings.md` — cited product-pattern research (Jira epic roll-up,
   Linear parallel views, NN/g tabs/progressive-disclosure, PatternFly stepper=ordered, ChatGPT-Canvas/Claude-
