@@ -18,8 +18,8 @@ LOCAL on genesis master (`a649ac9`, no tag/push); wireframes + docs pushed to pr
 | 28-01 | Research & UX analysis | ✅ **DELIVERED — FOR REVIEW** (`28-01-findings.md`) |
 | 28-02 | Wireframes & hi-fi mockups (`/dev/feature-workspace`) | ✅ **DELIVERED — FOR REVIEW** |
 | 28-03 | Brainstorm & finalize mockups | ✅ **FINAL — FOR BUILD SIGN-OFF** (`28-03-final-design.md`) |
-| 28-04 | Feature-workspace architecture build | 📋 PLANNED — **NEXT** (on sign-off) |
-| 28-05 | Code review & hardening | 📋 PLANNED |
+| 28-04 | Feature-workspace architecture build | ✅ **BUILT (unreleased)** — genesis LOCAL `b9568c3` |
+| 28-05 | Code review & hardening | 📋 PLANNED — **NEXT** |
 | 28-06 | Release | 📋 PLANNED |
 
 ## Decisions locked with the user (2026-08-25)
@@ -88,3 +88,23 @@ per-(feature,stage) `LifecycleService` machines; additive API); the **web compon
 `ArtifactPipeline`). **ADR-056** finalized (Proposed) in `reference/decision-log.md` + `bible/04` (also
 backfilled the missing **ADR-055** into bible/04 — a Phase-27 gap). **Gate: user sign-off on 28-03-final-design
 unlocks 28-04 (build).**
+
+## 28-04 — Feature-workspace architecture build (BUILT 2026-08-25, unreleased)
+
+Committed **LOCAL** on genesis master (`b9568c3`, ahead 3, **no tag/push**). **Frontend-only** — only Spec is
+live this phase, so **no migration** (stages + derived status are computed client-side from the existing
+feature+spec APIs; the generalized per-stage persistence lands with the first stage that needs it). Files
+(`web/src/features/features/`): **`stages.ts`** (framework core — `StageDescriptor` + `deriveStages` +
+`deriveFeatureStatus` + stage-agnostic status vocabulary); **`FeaturePage.tsx`** rewritten as the
+**Feature Workspace** (derived status badge + non-gating `ProgressMeter`; tabs Overview · Artifacts ·
+Activity · Stories[reserved]; Overview = Feature-health + single-user Needs-attention + a peer **StageCard**
+grid; `ArtifactsTab` from the spec + the app's linked docs; **reuses `ActivityFeed`**; `StoriesReserved`;
+`SpecPreviewOverlay` = read-only `annotate=0` "View"); **`StageWorkspacePage.tsx`** (routed full-bleed stage
+workspace — `spec`→the builder, else a first-class **not-available** workspace); **`SpecBuilderPage.tsx`**
+gained an **Expand → immersive** toggle (`fixed inset-0 z-50`); **router** `…/features/:id/:stage` (absorbs
+`…/spec`); **deleted `ArtifactPipeline.tsx`**; **`features.test.tsx`** landing block rewritten to the new
+workspace + a jest-axe test. **Extensibility:** a future stage = one `STAGE_DEFS` entry + its inner
+`Workspace` + a `LifecycleService` machine — **no shell changes**. Gates green: **tsc**, **eslint**,
+**vitest 205** (features 12 incl jest-axe), **build**; `web/static` rebuilt + committed (stale-bundle guard
+OK). Backend untouched → genesis pytest unaffected (confirm at 28-06). **ADR-056 stays Proposed** (flip to
+Accepted after the 28-05 review). **NEXT = 28-05 independent review.**

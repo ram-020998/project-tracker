@@ -1,6 +1,6 @@
 # 28-04 — Feature-Workspace Architecture Build
 
-> **Status:** 📋 **PLANNED** (after 28-03 sign-off). · **Type:** genesis frontend + thin backend lifecycle/model layer (ships in the 28-06 release) · **Phase:** 28 (Feature Revamp) · **Gate:** independent review = SHIP.
+> **Status:** ✅ **BUILT (unreleased) — 2026-08-25** (genesis LOCAL `b9568c3`, no tag; gates green). Independent review = 28-05. · **Type:** genesis frontend + thin backend lifecycle/model layer (ships in the 28-06 release) · **Phase:** 28 (Feature Revamp) · **Gate:** independent review = SHIP.
 
 ---
 

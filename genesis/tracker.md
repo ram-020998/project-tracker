@@ -237,6 +237,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-25 (Phase 28 — 28-04 Feature Workspace framework — ✅ BUILT, unreleased):** replaced the linear
+  `ArtifactPipeline` with the **Feature Workspace** (command-center Overview + peer **stage cards**; derived
+  rolled-up status + non-gating progress; tabs Overview/Artifacts/Activity/Stories[reserved]; opening a stage
+  → a full-bleed `…/features/:id/:stage` workspace — Spec builder [+ Expand→immersive], others first-class
+  **not-available**). Framework core `stages.ts` (`StageDescriptor` + derive fns) → a future stage plugs in
+  with no shell changes. **Frontend-only, no migration** (only Spec live; stages/status derived client-side).
+  Committed LOCAL on genesis master (`b9568c3`, no tag). Gates green: tsc/eslint/**vitest 205** (incl
+  jest-axe)/build; web/static committed. ADR-056 still Proposed. **NEXT = 28-05 independent review.**
+
 - **2026-08-25 (Phase 28 — 28-03 Brainstorm & finalize — ✅ FINAL, for build sign-off):** user approved
   Overview+cards + the full-bleed stage workspace. Locked buildable design
   `specs/phase-28-feature-revamp/28-03-final-design.md` (D1–D11; IA + `/:stage` full-bleed routes + expand/
