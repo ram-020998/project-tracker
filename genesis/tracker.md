@@ -237,6 +237,11 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-25 (Phase 28 — 28-02 rev, full-bleed stage workspace):** user approved the **Overview + cards**
+  layout; refined the mockup so opening a stage routes to a **full-bleed workspace** (big work area; Spec
+  canvas fills full height) with an **Expand → immersive** toggle (hides shell). Committed LOCAL on genesis
+  master (`9342f92`, no tag). Gates green (tsc/eslint/vitest 204/build). **NEXT = 28-03 brainstorm/finalize.**
+
 - **2026-08-25 (Phase 28 — 28-02 Wireframes & hi-fi mockups — ✅ DELIVERED, for review):** lo-fi wireframes
   (`specs/phase-28-feature-revamp/28-02-wireframes.md`) + a coded hi-fi mockup at **`/dev/feature-workspace`**
   (`web/src/dev/mockups/FeatureWorkspaceMockups.tsx`, dev-only) committed **LOCAL** on genesis master

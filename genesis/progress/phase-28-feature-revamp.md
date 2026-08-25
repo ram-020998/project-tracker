@@ -65,3 +65,13 @@ with provenance chips) + **Activity** (audit timeline, object links, "not a chat
 tradeoff). **Layout** (overview+cards | stages-as-tabs) + **light/dark** toggles. Shipped tokens/primitives
 only (no hardcoded brand hex); themed via `.theme-light`/`.theme-dark`. Gates green: tsc, eslint, **vitest
 204**, build; `web/static` rebuilt + committed (stale-bundle guard OK). **Gate: user review before 28-03.**
+
+### 28-02 rev (2026-08-25) — full-bleed stage workspace
+
+Per user feedback (stage work area too small): opening a stage from a card/tab now routes to a **full-bleed
+stage workspace** filling the whole content area (the Spec chat + live-artifact canvas fills full height),
+with an **Expand → immersive** toggle that hides the faux sidebar + control bar for a maximal canvas
+("Exit full screen" returns). Mirrors the real per-stage builder route pattern (deep-linkable; a stage card
+can be cmd-clicked to a new browser tab since it's a real URL). Committed LOCAL on genesis master (`9342f92`,
+no tag). Gates green: tsc/eslint/**vitest 204**/build; web/static rebuilt. Overview + cards layout confirmed
+by the user as the direction.
