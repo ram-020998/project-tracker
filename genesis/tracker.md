@@ -237,6 +237,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-25 (Phase 28 — Feature Revamp — 📋 SPEC DRAFT):** authored the parent umbrella spec
+  (`specs/phase-28-feature-revamp.md`) + 6 sub-phase specs (`phase-28-feature-revamp/28-01..28-06`: research →
+  mockups[/dev/mockups] → brainstorm/finalize → architecture build → code review → release) + a progress
+  scaffold. Reframes a Feature as a durable **workspace** with **parallel** feature-level stages (Spec, UX
+  Design, Technical Design, Breakdown — any order), replacing the linear `ArtifactPipeline` (Spec + disabled
+  Design/Breakdown). **ADR-056 Proposed** (supersedes ADR-044's sequential clause). Locked with the user:
+  single-user (no assignment/roles/My-Work), read-only-now (no write/deploy — reserved plug-points), Stories
+  first-class later (reserve slot), framework/architecture only. Reuses `LifecycleService`/`domain/` (ADR-050),
+  Phase-27 design language (ADR-055), Phase-20/21 spec authoring. **No genesis code changed; nothing tagged.**
+  NEXT = start 28-01 (research) on the user's go-ahead; do not build before the 28-03 sign-off gate.
+
 - **2026-08-24 (Phase 27 — ⭐ RELEASED genesis v0.53.0, CI green):** the whole UI/UX Revamp (27-01..27-11) + user
   refinements shipped. Release commit `fba9a94`, tag `v0.53.0`, pushed to master; **CI green — #6641436 (master) +
   #6641437 (v0.53.0 tag)**. Frontend-only (genesis web/static; other four repos unchanged); pyproject + FastAPI +

@@ -8,6 +8,37 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
+### 📋 PLANNED (spec drafting) — Phase 28: Feature Revamp (the Feature Workspace framework)
+
+> **Specs:** `specs/phase-28-feature-revamp.md` (umbrella) + `phase-28-feature-revamp/28-01..28-06`. As-built:
+> `progress/phase-28-feature-revamp.md`. **ADR-056** (the parallel Feature Workspace model) — **Proposed**
+> (supersedes ADR-044's sequential unlock clause).
+>
+> **Goal.** Re-conceive a Feature as a durable, UX-centric **workspace** — a framework into which every future
+> capability plugs in — replacing today's **linear** artifact pipeline (`ArtifactPipeline.tsx`: Spec functional +
+> Design/Breakdown disabled placeholders, sequential unlock). **Feature-level stages run in PARALLEL** (Spec, UX
+> Design, Technical Design, Feature Breakdown — any order, none gating another), over a shared artifact /
+> version-provenance / activity / lifecycle substrate, with a reusable **stage-container** plug-in contract.
+>
+> **Constraints (locked with the user 2026-08-25).** Single-user — **no assignment/roles/permissions/lenses/
+> My-Work** (ADR-026). Read-only-now — **no Appian write/deploy**; the draft's story-execution write stages +
+> git/branch model + environment promotion are OUT (future program, own ADRs); framework leaves clean plug-points
+> only. **Stories first-class LATER** (reserve the slot; don't finalize/build the story workflow now).
+> **Framework/architecture only** — no stage capability built this phase; **Spec** is wired in as the one live
+> stage; UX Design / Technical Design / Breakdown appear as first-class **"not yet available"** containers (NOT
+> sequential-locked). Reuses `LifecycleService`/`domain/` (ADR-050 — `ArtifactKind` + a forward story-stage machine
+> already exist), the Phase-27 light-first design language (ADR-055), and Phase-20/21 spec authoring + versioning.
+>
+> **Sub-phases (linear, each gated on the prior):** 28-01 research & UX analysis (docs-only) → 28-02 wireframes +
+> hi-fi coded mockups at `/dev/mockups` → 28-03 brainstorm & finalize (lock IA + ADR-056) → 28-04 architecture
+> build (production framework; Spec wired; ADR-056 Accepted) → 28-05 code review & hardening → 28-06 release
+> (genesis vX.Y.0, frontend-heavy + thin backend; other repos unchanged; small additive migration only if needed).
+>
+> **Origin.** Triggered by the user's draft `artifacts/designs/Genesis_Appian_Orchestrator_Feature_Workspace_
+> UX_Design.md` (a multi-user, spec→deploy vision) — this phase **adopts its feature-level mental model and adapts
+> it** to Genesis's single-user, read-only-now reality. **Status: SPEC DRAFT — start 28-01 on the user's go-ahead.**
+> **Do NOT start building before the 28-03 sign-off gate.**
+
 ### ⭐ SHIPPED (COMPLETE) — Phase 27: UI/UX Revamp (27-01..27-11) — genesis v0.53.0
 
 > **Specs:** `specs/phase-27-ui-ux-revamp.md` (umbrella) + `phase-27-ui-ux-revamp/27-01..27-11`. As-built: `progress/phase-27-ui-ux-revamp.md`. **ADR-055** (UI/UX design language + light-first theming) — **Accepted**.
