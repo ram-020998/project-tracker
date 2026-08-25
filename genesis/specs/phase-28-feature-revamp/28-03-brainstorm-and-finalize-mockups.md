@@ -1,6 +1,6 @@
 # 28-03 — Brainstorm & Finalize Mockups
 
-> **Status:** 📋 **PLANNED** (after 28-02). · **Type:** design finalization / docs + mockup iteration (dev-only; no release) · **Phase:** 28 (Feature Revamp) · **Gate:** ⭐ user sign-off → the build (28-04) is unlocked.
+> **Status:** ✅ **FINAL — FOR BUILD SIGN-OFF (2026-08-25)** — locked design: `28-03-final-design.md`; ADR-056 Proposed. · **Type:** design finalization / docs + mockup iteration (dev-only; no release) · **Phase:** 28 (Feature Revamp) · **Gate:** ⭐ user sign-off → the build (28-04) is unlocked.
 
 ---
 

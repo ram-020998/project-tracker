@@ -17,8 +17,8 @@ LOCAL on genesis master (`a649ac9`, no tag/push); wireframes + docs pushed to pr
 |---|---|---|
 | 28-01 | Research & UX analysis | ✅ **DELIVERED — FOR REVIEW** (`28-01-findings.md`) |
 | 28-02 | Wireframes & hi-fi mockups (`/dev/feature-workspace`) | ✅ **DELIVERED — FOR REVIEW** |
-| 28-03 | Brainstorm & finalize mockups | 📋 PLANNED — **NEXT** (after review) |
-| 28-04 | Feature-workspace architecture build | 📋 PLANNED |
+| 28-03 | Brainstorm & finalize mockups | ✅ **FINAL — FOR BUILD SIGN-OFF** (`28-03-final-design.md`) |
+| 28-04 | Feature-workspace architecture build | 📋 PLANNED — **NEXT** (on sign-off) |
 | 28-05 | Code review & hardening | 📋 PLANNED |
 | 28-06 | Release | 📋 PLANNED |
 
@@ -75,3 +75,16 @@ with an **Expand → immersive** toggle that hides the faux sidebar + control ba
 can be cmd-clicked to a new browser tab since it's a real URL). Committed LOCAL on genesis master (`9342f92`,
 no tag). Gates green: tsc/eslint/**vitest 204**/build; web/static rebuilt. Overview + cards layout confirmed
 by the user as the direction.
+
+## 28-03 — Brainstorm & finalize (2026-08-25)
+
+User approved **Overview + cards** and the **full-bleed stage workspace + expand-to-immersive**. Locked design:
+`specs/phase-28-feature-revamp/28-03-final-design.md` — 11 resolved decisions (D1–D11); IA + routes (feature
+workspace + `/:stage` full-bleed route, deep-linkable, `?expand=1` immersive); the **stage-container contract**
+(`StageDescriptor` + inner `Workspace`); a **stage-agnostic lifecycle** + a **derived feature status** pure fn;
+Overview composition; feature-wide **Artifacts** + **Activity** (m0013); the **backend plan** (a generalized
+per-stage artifact model — `m0015 kb_feature_stages` sketch or a `spec+stage` refinement, decided at build;
+per-(feature,stage) `LifecycleService` machines; additive API); the **web component inventory** (replaces
+`ArtifactPipeline`). **ADR-056** finalized (Proposed) in `reference/decision-log.md` + `bible/04` (also
+backfilled the missing **ADR-055** into bible/04 — a Phase-27 gap). **Gate: user sign-off on 28-03-final-design
+unlocks 28-04 (build).**

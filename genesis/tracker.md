@@ -237,6 +237,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-25 (Phase 28 — 28-03 Brainstorm & finalize — ✅ FINAL, for build sign-off):** user approved
+  Overview+cards + the full-bleed stage workspace. Locked buildable design
+  `specs/phase-28-feature-revamp/28-03-final-design.md` (D1–D11; IA + `/:stage` full-bleed routes + expand/
+  immersive; stage-container contract; stage-agnostic lifecycle + derived feature status; feature-wide
+  Artifacts/Activity over m0013; backend plan = generalized per-stage artifact model [m0015 sketch] + per-
+  (feature,stage) LifecycleService machines + additive API; component inventory replacing ArtifactPipeline).
+  **ADR-056 Proposed** (parallel Feature Workspace; supersedes ADR-044 sequential clause) in decision-log +
+  bible/04 (+ backfilled the missing ADR-055 into bible/04). **NEXT = user sign-off → 28-04 build.**
+
 - **2026-08-25 (Phase 28 — 28-02 rev, full-bleed stage workspace):** user approved the **Overview + cards**
   layout; refined the mockup so opening a stage routes to a **full-bleed workspace** (big work area; Spec
   canvas fills full height) with an **Expand → immersive** toggle (hides shell). Committed LOCAL on genesis
