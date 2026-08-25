@@ -1,6 +1,6 @@
 # 28-01 — Research & UX Analysis
 
-> **Status:** 📋 **PLANNED — NEXT (start here).** · **Type:** research / docs-only (no genesis code, no release) · **Phase:** 28 (Feature Revamp) · **Gate:** ⭐ user review of the findings + recommended model before 28-02.
+> **Status:** ✅ **DELIVERED — FOR REVIEW (2026-08-25)** — findings: `28-01-findings.md`. · **Type:** research / docs-only (no genesis code, no release) · **Phase:** 28 (Feature Revamp) · **Gate:** ⭐ user review of the findings + recommended model before 28-02.
 
 ---
 

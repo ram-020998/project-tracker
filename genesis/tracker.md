@@ -237,6 +237,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-25 (Phase 28 — 28-01 Research & UX analysis — ✅ DELIVERED, for review):**
+  `specs/phase-28-feature-revamp/28-01-findings.md` — cited product-pattern research (Jira epic roll-up,
+  Linear parallel views, NN/g tabs/progressive-disclosure, PatternFly stepper=ordered, ChatGPT-Canvas/Claude-
+  Artifacts split-screen, activity=audit-not-transcript) + a current-code audit + an adopt/adapt/defer/drop
+  table vs the user's draft + a recommended model (command-center Overview + **peer stage cards** with a
+  **non-gating** progress indicator; a reusable **stage-container** contract; **derived** feature status;
+  side-by-side canvas for the spec builder; single-user needs-attention) + **ADR-056 draft** (parallel Feature
+  Workspace; supersedes ADR-044's sequential clause). Key reuse finding: `LifecycleService`/`domain/`
+  (ADR-050) is generic → feature-stage machines are additive; `ArtifactKind` + a forward story-stage table
+  already exist; main new backend = a generalized per-stage artifact model (likely a small additive
+  migration). No genesis code changed. **NEXT = user review → 28-02 mockups.**
+
 - **2026-08-25 (Phase 28 — Feature Revamp — 📋 SPEC DRAFT):** authored the parent umbrella spec
   (`specs/phase-28-feature-revamp.md`) + 6 sub-phase specs (`phase-28-feature-revamp/28-01..28-06`: research →
   mockups[/dev/mockups] → brainstorm/finalize → architecture build → code review → release) + a progress
