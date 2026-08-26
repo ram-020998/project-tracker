@@ -23,8 +23,10 @@ Full details: **`01_FEATURE_AND_TECHNICAL_DESIGN.md`**. Live status: **`02_PROGR
 | Design doc | `01_FEATURE_AND_TECHNICAL_DESIGN.md` |
 | Progress tracker | `02_PROGRESS_TRACKER.md` |
 | This onboarding | `03_AGENT_ONBOARDING.md` |
-| **Tabs implementation plan** (active phase) | `04_TABS_IMPLEMENTATION_PLAN.md` — per-tab treatment, id-vs-record input shapes, record-view urlStubs, work items WI-1..9, sequencing |
-| **Docs git repo** | `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). These 5 docs live under `multi-round-evaluation/`. Commit + push after every session. |
+| **Tabs implementation plan** | `04_TABS_IMPLEMENTATION_PLAN.md` — per-tab treatment, id-vs-record input shapes, record-view urlStubs, work items WI-1..9, sequencing |
+| **WI-1 analysis** | `05_START_EVALUATION_WI1_ANALYSIS.md` — current-state analysis of Start Evaluation |
+| **WI-1 implementation plan** (active phase) | `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` — **authoritative build spec** for Best Value Start Evaluation as Round 1 (read this before building WI-1) |
+| **Docs git repo** | `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). These docs live under `multi-round-evaluation/`. Commit + push after every session. |
 | **The actual code (Appian objects)** | Appian **AS GSS Full Application**, accessed via the **`lcp` MCP server** — there is **no local git repo** for these objects |
 
 **Environment:** `gam-gss-32-innovate.appianpreview.com`
@@ -98,6 +100,33 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 **Evaluation status constants (seen in code):** `AS_GSS_REF_ID_EVALUATION_STATUS_SETTING_UP`, `…_INPROGRESS`, `…_AWARDEES_SELECTED`, `…_COMPLETE`.
 
+**WI-1 / Start Evaluation objects (verified — for the build):**
+| Thing | UUID / value |
+| :--- | :--- |
+| Existing action `startEvaluation` (keep for non-Best-Value) | key `startEvaluation`, PM `0002ecdd-8ec4-8000-bf9c-7f0000014e7a` |
+| Existing form `AS_GSS_FM_startEvaluation` (confirm-only; clone from it) | `_a-0000ecda-a664-8000-9dc8-011c48011c48_14286788` |
+| Existing visibility rule | `AS_GSS_BL_getRelatedActionVisibilityForStartEvaluation(statusId, evaluationId)` |
+| Setup New Round wizard (reuse round-detail + factor-picker components) | `AS_GSS_FM_startNewRound` `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42072` |
+| Sub-proc: Generate Evaluation Tasks | `0002edab-48b7-8000-cee8-7f0000014e7a` |
+| Sub-proc: Generate Evaluation Tasks Per Assignee (MNI) | `000aedab-3243-8000-cedd-7f0000014e7a` |
+| Leaf rule: factor×vendor task builder | `AS_GSS_generateEvaluationTasksForAssignee` `_a-0000edaa-0a95-8000-9e03-011c48011c48_15676146` |
+| Rule: assignee→factors grouping | `AS_GSS_UT_constructAssigneeWithMappedCriteria` |
+| Rule: transactional ratings (factor-scoped) | `AS_GSS_BL_createTransactionalRatings` `_a-0000ecda-a664-8000-9dc8-011c48011c48_14296322` |
+| Sub-proc: Create Consensus Reports | `0003ece5-8031-8000-bff8-7f0000014e7a` |
+| Sub-proc: Generate LPTA Task (EXCLUDE from Best Value PM) | `0002ee10-7d81-8000-d4cf-7f0000014e7a` |
+| Sub-proc: Sync Eval Status in GCW | `0006ef1c-885e-8000-e8da-7f0000014e7a` |
+| Sub-proc: Trigger Reqt Extraction (behind `cons!AS_GSS_TOGGLE_VENDOR_ANALYSIS_ENABLED`) | `0005ef63-71ba-8000-ebfe-7f0000014e7a` |
+| Sub-proc: Capture Audit (`AS_GSS_UT_constructStartEvaluationAudit`) | `0007e5df-28c1-8000-0dd7-7f0000014e7a` |
+| Duplicate-for-new-round rule (round-creation reference) | `AS_GSS_UT_duplicateEvaluationForNewRound` `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42160` |
+| Method const: Best Value = 5 · LPTA = 67 | `cons!AS_GSS_REF_ID_EVALUATION_METHOD_BEST_VALUE` / `…_LPTA` |
+| Task record type | `AS_GSS_TMG_Task_SYNCEDRECORD` `9a04b944-b726-41f5-9b37-8ec71b6cc370` |
+| Rating record type | `AS_GSS_Rating_SYNCEDRECORD` `49daf634-1b3a-4396-99e9-f95bff85ff03` |
+
+**Field UUID cheat-sheet (for SAIL field refs):**
+- **Evaluation** (`e6bc8561-…`): `evaluationId` `7f7c2d3b-1410-4650-a5c8-afd218753011` · `evaluationStatusId` `4e467ee1-e9e1-4350-9df9-ec1266418014` · `evaluationMethodId` `b363eb20-ab64-4c30-8b65-8ca9fc976109` · `parentEvalId` `6889c500-986b-4df6-93c2-6aa8a890cbd7` · `isOnSpotConsensus` `8962d2c5-f856-4959-9b99-b790b5c22e4b` · `evaluationStartDate` `5e919546-839d-478a-9310-11a10b61c377` · `evaluationDueDate` `46715106-5a77-40eb-86d7-52bb59f5eb33` · `evaluationNumber` `b8cdd695-bc67-4c28-9f7e-90de99810528` · `evaluationTitle` `1aabcd17-e034-4b85-b375-2bb63146a122` · **rel `round`** `ffe492a5-ac35-47c4-93e3-8655da20b9fa`.
+- **EvaluationRound** (`931e8145-…`): `evaluationId` `1756683f-efcf-4edb-8ed1-aa9d83468af7` · `roundName` `31c08880-eb84-47ee-b92b-9f3c41a446fb` · `sequence` `d20a1017-98de-4b58-abaa-f8a119687931` · `startDate` `7abbf0d2-90d9-4342-9b6a-034ba226298d` · `endDate` `c3f17341-a436-4024-a184-6a70957ca7fd` · `duration` `ecb1038d-6c8d-4249-905b-e030e48e9201` · `isOnSpotConsensus` `85812d35-fe1f-4ccc-b7b0-c61f0e2757d0`.
+- **Criteria** (`11dcc745-…`): `criteriaId` `6ecea02c-1a1f-45ad-b9ae-fc21ab2ca79b` · `parentCriteriaId` `4a3dfb5e-6c0f-4c1e-b9c1-ebf1c1c7492e` · `dueDate` `5aa75ff7-f7ff-460a-965c-885fea7c4e0a` · `factorNumber` `a37cdba7-beef-42ae-829a-dc4fa25067cd` · `criteriaChair` `81325af3-81d6-48d0-866b-caf987f4ebfe` · `evaluatorTeamId` `863f75e7-0222-4461-9c82-9d32fdc62638` · `isActive` `27d31368-c230-4cda-92c9-5fa08da680e1` · rel `SubCriteria` `d5f2eb9d-e929-49fd-8d7d-11e29285293d`.
+
 ---
 
 ## 6. The must-know business rules
@@ -118,7 +147,9 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 ## 7. Current state in one line
 
-**All 8 round sub-tabs are shipped and verified** (Factors, Teams, Consensus Reports, Documents, Task History, Ratings, Checklist Items/Tasks, Evaluation History), plus Vendors → "Last Participated Round". Remaining: (a) retrofit the 4 ID-based parents with the current-eval fallback the 3 record-based parents use; (b) the deferred Start Evaluation / round-1 anchor work (WI-1). See `02_PROGRESS_TRACKER.md` for the live checklist.
+**All 8 round sub-tabs are shipped and verified** (Factors, Teams, Consensus Reports, Documents, Task History, Ratings, Checklist Items/Tasks, Evaluation History), plus Vendors → "Last Participated Round". 
+
+**Active phase — WI-1 (Start Evaluation as Round 1 + anchor):** fully analyzed and spec'd; **build has not started.** Read `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` (authoritative) then §10 below. This also retires the temporary current-eval fallback in the 3 record-based tab parents once the anchor resolution lands. See `02_PROGRESS_TRACKER.md` for the live checklist.
 
 ## 7b. Continuing the current phase — round sub-tabs (read `04_…` first)
 
@@ -177,3 +208,42 @@ getRecordType(uuid: "931e8145-3f77-4270-a52a-b51de6e76983")
 Then dump the round interfaces/rules to `/tmp/gss_review/*.sail` with `getInterface`/`getExpressionRule` and read them.
 
 **Known test data:** evaluation **12** is part of a multi-round test family (root **6** → child rounds **10, 11, 12**; vendors keyed by UEI `123456789123`, `123456789122`). Use eval 12 with `testInterface`/`testRule` to verify round-aware behavior. (Round records exist for evals 7,8,9,10,11,12; some have null `sequence` — a known data gap.)
+
+---
+
+## 10. WI-1 build guide — Start Evaluation as Round 1 (Best Value)
+
+> **Read `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` first — it is the authoritative spec.** This section is the quick-start for the agent doing the build. All decisions are locked (no open questions).
+
+### 10.1 What we're building & why
+Today **Start Evaluation** is a confirm-only dialog and the parent evaluation never becomes a round, so Round 1 never appears in the round sub-tabs and the anchor family can't resolve. WI-1 makes clicking Start Evaluation (on a **Best Value** eval) collect **round info + selected factors**, register the **parent eval as Round 1** (`EvaluationRound` row, `sequence=1`, `parentEvalId=null`), and generate **tasks/ratings/consensus only for the selected factors × the eval's vendors**.
+
+### 10.2 The three verified mechanisms you rely on
+1. **Task/rating/consensus generation is factor-list driven.** Everything flows from `pv!evaluationFactorsAndSubFactors`. The leaf `AS_GSS_generateEvaluationTasksForAssignee` is literally `forEach(factors) × forEach(vendors)`. ⇒ **Scope that list to the selected factors (+ their subfactors) and generation is scoped automatically.** No subprocess edits needed.
+2. **Rounds are created by the Evaluation→`round` relationship cascade.** Populate `evaluation['…round']` with one `EvaluationRound` and the eval Write Records node persists it (as `AS_GSS_UT_duplicateEvaluationForNewRound` does). **No separate EvaluationRound write.**
+3. **Anchor = `coalesce(parentEvalId, evaluationId)`; root keeps `parentEvalId = null`.**
+
+### 10.3 Build steps (in order)
+1. **New interface `AS_GSS_FM_startEvaluationBestValue`** — single-screen modal per mockup p3 (`GSS - Multiround Evaluation (1).pdf`; render with the pymupdf snippet in §10.5). Fields: Round Name* (default "Initial Evaluation"), Start Date, Duration (days), Due Date; a **factor multi-select** (parent factors, showing Team/Evaluators/factor due date; default all selected; "N of N selected"). **No vendor step, no on-spot toggle.** Reuse the round-detail + factor-picker components from `AS_GSS_FM_startNewRound`. On Start: set `userAction=START`; update the eval (status→INPROGRESS, start/due dates, modified*) **and populate `evaluation['…round']`** = one EvaluationRound (`evaluationId`=this eval, `sequence`=1, roundName/startDate/endDate=dueDate/duration, `isOnSpotConsensus`=eval's); output `selectedFactorIds`. `testInterface` on a SETTING_UP Best Value eval.
+2. **New process model** — clone `0002ecdd-8ec4-8000-bf9c` **minus the LPTA branch**. Add PV `selectedFactorIds`; add a script node computing `pv!scopedFactors` = rows of `pv!evaluationFactorsAndSubFactors` where `criteriaId ∈ selectedFactorIds` **OR** `parentCriteriaId ∈ selectedFactorIds`. On the eval Write node, write `pv!evaluation` **with the populated `round` relationship** (cascade → Round 1). Feed `pv!scopedFactors` into ratings (`createTransactionalRatings`), the factor write, `Generate Evaluation Tasks` (`0002edab`) and `Create Consensus Reports` (`0003ece5`), and the audit. Keep Sync-GCW, vendor-analysis toggle, and on-spot vs default XOR. Reuse all subprocess UUIDs from §5.
+3. **New record action `startEvaluationBestValue`** on `AS_GSS_Evaluation_RECORD` (`4db4a62e-…`) → new PM. Visibility = `and(getRelatedActionVisibilityForStartEvaluation(...), method = BEST_VALUE(5))`. **Also add `method <> BEST_VALUE` to the existing action's visibility** so exactly one shows. (Record-action changes via `addRecordTypeAction`/`updateRecordTypeAction`; recall `updateRecordTypeView` fails on this RT, but **actions** are fine — verify.)
+4. **Anchor** — edit `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` (`_a-…42289`) to resolve the family: `anchor=coalesce(parentEvalId,evaluationId)`, return EvaluationRound rows for anchor + children (`parentEvalId=anchor`), sorted by `sequence`. `testRule` on root **6** and a child.
+5. **Retire the current-eval fallback** in the 3 record-based tab parents (`AS_GSS_CPS_evaluationRatingsTab_Parent` `_…42562`, `AS_GSS_TMG_CPS_viewRecordTasks_Parent` `_…42542`, `AS_GSS_FM_evaluationAuditHistory_Parent` `_…42552`); keep an empty-safe render. Re-verify all 8 parents on eval 6.
+6. **Test end-to-end** (see plan §5): Round-1 row created; tasks count = selectedFactors×vendors; ratings/consensus scoped; on-spot variant (no tasks); LPTA/non-Best-Value unaffected; Round 1 shows in the tabs/rounds panel.
+7. **Docs + commit/push** (working agreements §8): update `02_PROGRESS_TRACKER.md` (mark WI-1 items, add session log), then commit + push.
+
+### 10.4 WI-1-specific gotchas
+- **Only one action visible at a time** — remember to add the `<> BEST_VALUE` guard to the *existing* action (the single edit to an existing object).
+- **Include subfactors** of selected parents in `scopedFactors` (selection is at parent-factor level in the modal).
+- **On-spot Best Value** = no evaluation tasks, only consensus reports — keep that XOR branch.
+- **Round-1 dates:** also set the eval's `evaluationStartDate`/`evaluationDueDate` from the modal (mirrors `duplicateEvaluationForNewRound`).
+- **Legacy in-flight evals** (already INPROGRESS, no Round-1 row) are **not** backfilled — anchor query returns only their children; acceptable, flag to PO.
+- **Process-model editing** is done via the `lcp` PM tools (`createProcessModel`, `createProcessModelNode`, `getProcessModelNodeTypeSchema`, `updateProcessModelNode`). Use `getProcessModelNodeTypeSchema` for each node type; serialize per-node edits.
+
+### 10.5 Render the mockup (for the modal layout)
+```
+cd /Users/ramaswamy.u/repo/project-tracker/multi-round-evaluation && mkdir -p /tmp/gss_mock && python3 -c "
+import fitz; d=fitz.open('GSS - Multiround Evaluation (1).pdf')
+[p.get_pixmap(dpi=110).save(f'/tmp/gss_mock/p{i+1:02d}.png') for i,p in enumerate(d)]"
+```
+Then read images. **p3** = the Start Evaluation modal (target). p2 = Rounds empty state ("Start the evaluation to begin Round 1."). p4–p8 = Setup New Round (separate flow, for component reuse). p9 = Rounds-panel states. p14 = Summary-vs-Factors-tab note (a small follow-up: Summary shows current round's factors, Factors tab shows all).
