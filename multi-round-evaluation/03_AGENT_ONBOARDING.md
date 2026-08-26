@@ -75,6 +75,7 @@ When creating new objects, **match the existing pattern** rather than inventing 
 | `AS_GSS_UT_returnViewRenderingConfigFor_Factors` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42412` |
 | `AS_GSS_UT_returnLastParticipatedRoundForVendors` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42461` |
 | `AS_GSS_CPS_viewEvaluatorTeam_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42490` |
+| `AS_GSS_CPS_consensusReportView_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42504` |
 
 **Existing core (read-only context):**
 | Object | UUID |
@@ -112,7 +113,7 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 ## 7. Current state in one line
 
-Foundation done: round record type, the evaluation-duplication engine, a 2-step Setup New Round wizard, the Rounds panel, and supporting query rules. **Shipped tab work:** Vendors → "Last Participated Round" column; **Teams → round sub-tabs** (verified). Round sub-tabs remaining for 6 tabs — follow the recipe in `01_…` §6.6. See `02_PROGRESS_TRACKER.md` for the live checklist.
+Foundation done: round record type, the evaluation-duplication engine, a 2-step Setup New Round wizard, the Rounds panel, and supporting query rules. **Shipped tab work:** Vendors → "Last Participated Round" column; **Teams** and **Consensus Reports** → round sub-tabs (verified). Round sub-tabs remaining for 5 tabs — follow the recipe in `01_…` §6.6. See `02_PROGRESS_TRACKER.md` for the live checklist.
 
 ## 7b. Continuing the current phase — round sub-tabs (read `04_…` first)
 
@@ -130,7 +131,9 @@ Foundation done: round record type, the evaluation-duplication engine, a 2-step 
 **Open blocker (WI-1):** `returnEvaluationRoundsForGivenEvaluation` filters `parentEvalId = id` (children only), so Round 1 (root) may not appear as a tab and opening a *child* round record yields no tabs. Affects Factors + Teams equally. Fix by resolving anchor = `coalesce(parentEvalId, evaluationId)` and including the root (pattern already used in `AS_GSS_UT_returnLastParticipatedRoundForVendors`). Tied to the Start Evaluation / round-1-record work (§4 in tracker).
 
 ## 7a. Gotchas you MUST know before coding (details in `01_…` §6.6–6.7)
-- **Tab content must be embeddable** — a `tabItem` rejects `HeaderContentLayout`. Strip a tab interface's outer `AS_GSS_HCL_displayWrapperContents`/`headerContentLayout` before nesting it per round (the `_Parent` supplies one frame).
+- **Tab content must be embeddable** — a `tabItem` rejects `HeaderContentLayout`. Strip a tab interface's outer `AS_GSS_HCL_displayWrapperContents`/`headerContentLayout` before nesting it per round (the `_Parent` supplies one frame). Multi-branch interfaces may have **several** frames to strip (Consensus had 3).
+- **Null-harden embedded content** — a per-round evaluationId may resolve to a null evaluation; guard `status = cons!X` comparisons with `a!defaultValue(field, -1)` (`and()` does not short-circuit). Pass `testInputs` to `updateInterface` so it validates against real data, not nulls.
+- **`returnEvaluationRoundsForGivenEvaluation` needs a non-empty `additionalFields`** (empty → `[""]` error). Copy the Teams/Consensus parent's field ref.
 - **Round-listing goes inside the `_Parent` interface**, not a standalone expression rule (per-round content uses `env!features`, which fails expression-rule validation).
 - **Repoint Evaluation record views manually in Appian Designer** — `updateRecordTypeView`/`getRecordType` fail on `AS_GSS_Evaluation_RECORD` (`None is not a valid RecordTypeSourceType`). MCP creates the `_Parent`; a human swaps the one-line view reference.
 - Run **`getObjectDependents`** before refactoring a shared interface to confirm blast radius.
