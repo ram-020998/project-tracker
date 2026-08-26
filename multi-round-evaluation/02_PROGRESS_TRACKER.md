@@ -3,8 +3,8 @@
 > Update this file at the end of every working session. Keep the **Session Log** append-only.
 > Companion docs: `01_FEATURE_AND_TECHNICAL_DESIGN.md`, `03_AGENT_ONBOARDING.md`.
 
-**Last updated:** 2026-08-25
-**Overall status:** 🟡 Foundation in place (record type + duplicate engine + setup wizard skeleton + rounds panel). First tab enhancement shipped (Vendors → "Last Participated Round"). Round sub-tabs not yet built.
+**Last updated:** 2026-08-26
+**Overall status:** 🟡 Foundation in place. Shipped: Vendors → "Last Participated Round"; **Teams → round sub-tabs** (first round-sub-tab tab beyond Factors). Remaining round sub-tabs: Ratings, Consensus, Documents, Tasks, Task History, Evaluation History.
 
 ---
 
@@ -65,7 +65,7 @@
 | 5.4 | Factors tab per-round rendering config | ✅ | `viewFactors_Parent` + `returnViewRenderingConfigFor_Factors` wired to view `_n_87YA` |
 | 5.5 | Round sub-tabs on Ratings | ⬜ | **record-based** loader (query eval per round) — plan WI-4/6e |
 | 5.6 | Round sub-tabs on Consensus Reports | ⬜ | id-based wrapper — plan WI-5 |
-| 5.7 | Round sub-tabs on Teams | ⬜ | id-based wrapper — plan WI-6 |
+| 5.7 | Round sub-tabs on Teams | ✅ | Built + verified. `AS_GSS_CPS_viewEvaluatorTeam_Parent` (inlined config) → per-round `AS_GSS_CPS_viewEvaluatorTeam` (made embeddable). View `_j9bz9g` repointed manually (MCP can't update this record type). |
 | 5.7a | Round sub-tabs on Documents | ⬜ | id-based; nested inner Documents/Drafts tabs — plan WI-6a |
 | 5.7b | Round sub-tabs on Task History | ⬜ | id-based wrapper — plan WI-6b |
 | 5.7c | Round sub-tabs on Tasks | ⬜ | **record-based** loader — plan WI-6c |
@@ -97,6 +97,7 @@
 | 7.3 | `AS_GSS_UT_returnIdentifiersForEvaluationRounds` | 🟡 | Active child via max(id) — make sequence-based |
 | 7.4 | `AS_GSS_CP_evaluationSummaryStampField` | ✅ | Stamp component |
 | 7.5 | `AS_GSS_UT_returnLastParticipatedRoundForVendors` | ✅ | Per-vendor (by uniqueEntityId) max-sequence round across the family; anchor = coalesce(parentEvalId, evaluationId) |
+| 7.6 | `AS_GSS_CPS_viewEvaluatorTeam_Parent` (interface) | ✅ | Round-aware Teams wrapper; inlined round-listing (env!features prevents an expression-rule config) |
 
 ## 8. Integrations
 
@@ -128,11 +129,13 @@
 ---
 
 ## Immediate next candidates (proposed order)
-1. Wire per-round sub-tabs — start with an ID-based tab (Teams) to prove the generic path (plan WI-2/WI-3/WI-6), then Consensus, Task History, Documents, then record-based (Ratings, Tasks, Evaluation History).
-2. Review the Round-1 / Start Evaluation path (§4) to confirm the entry point, round-1 record creation, and settle the anchor question (plan WI-1). The anchor helper pattern is proven (see Session Log 2026-08-25 Vendors, learning #3).
-3. Fix `maxSelections` on the vendor grid (§2.4) and make active-round selection sequence-based (§7.3).
+1. Continue round sub-tabs using the **Teams pattern** (embeddable content interface + `_Parent` wrapper): next ID-based tabs — **Consensus** (WI-5), **Task History** (WI-6b), **Documents** (WI-6a, watch nested inner tabs). Then record-based — **Ratings** (WI-4), **Tasks** (WI-6c), **Evaluation History** (WI-6d).
+   - ⚠️ Each `_Parent` wrapper is created via MCP, but **repointing the record view must be done manually in Appian Designer** — the `updateRecordTypeView` MCP tool errors on this record type (`None is not a valid RecordTypeSourceType`). Provide the CO the one-line rule swap.
+   - ⚠️ Check whether each tab's content interface self-wraps in `AS_GSS_HCL_displayWrapperContents`/`headerContentLayout`; if so, make it embeddable (as done for Teams) before nesting in a tab.
+2. Review the Round-1 / Start Evaluation path (§4); settle the anchor question (plan WI-1). Anchor helper pattern proven (Vendors learning #3).
+3. Fix `maxSelections` on the vendor grid (§2.4) and sequence-based active-round (§7.3) + round sort (§5.3).
 4. Build Setup New Round Step 3 + VM resubmission trigger (§2.5, §8.1).
-5. Add i18n bundle key for the Vendors "Last Participated Round" column label (§5.10a).
+5. i18n bundle keys for new literal labels (Vendors column, round tab labels if needed).
 
 *(Confirm priority with the team before starting each item.)*
 
@@ -183,3 +186,27 @@ First functional change to Appian objects. Implemented and render-verified in th
 8. **Non-round (legacy) evals are unaffected** — the helper returns empty when no round records exist, so the column stays hidden. Safe, backward-compatible pattern to reuse.
 9. **i18n TODO:** column label is a literal ("Last Participated Round"); add a bundle key (e.g. `lbl_LastParticipatedRound`) to the GSS General bundle for consistency. Mockup casing is "Last participated round".
 10. **Scope note:** the vendor list still queries only the viewed evaluation's vendors (vendor query untouched). Whether the list should aggregate dropped vendors across rounds is deferred to the anchor/Start-Evaluation work.
+
+### 2026-08-26 — Teams tab → round sub-tabs (SHIPPED + verified)
+First round-sub-tab tab beyond Factors. Established the reusable per-tab wrapper pattern.
+
+**Objects changed:**
+- **Created** `AS_GSS_CPS_viewEvaluatorTeam_Parent` (`_a-0000f04b-38cd-8000-9baa-011c48011c48_42490`) — round-aware wrapper: `a!headerContentLayout` + `a!tabLayout`, one `a!tabItem` per round (label `"Round " & sequence`), contents = `AS_GSS_CPS_viewEvaluatorTeam(evaluationId: <round clone>)`. Round list via `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` (same call Factors uses).
+- **Modified** `AS_GSS_CPS_viewEvaluatorTeam` (`_a-0000e5da-a251-8000-9bbe-011c48011c48_1061788`) — removed its outer `AS_GSS_HCL_displayWrapperContents(...)` frame so it returns embeddable content (the inner `if(...)`). The parent now supplies the page frame.
+- **Repointed (manually, by CO in Appian Designer)** the Teams record view `_j9bz9g` on `AS_GSS_Evaluation_RECORD` from `viewEvaluatorTeam(...)` → `viewEvaluatorTeam_Parent(...)`.
+
+**Verification:** `testInterface` on the parent (eval 12) → `diagnostics.error = null`, `tabLayout` renders one tab per round with the team content embedded (empty-state shows correctly). CO confirmed working in the UI.
+
+**Key learnings (critical for the remaining 6 tabs):**
+1. **Tab content must be EMBEDDABLE.** `a!tabItem.contents` rejects a `HeaderContentLayout`. Tab interfaces that self-wrap in `AS_GSS_HCL_displayWrapperContents` or `a!headerContentLayout` (Teams, Documents, Tasks, Task History, Evaluation History likely) must have that outer frame removed first; the `_Parent` supplies ONE frame. `viewFactors` was already embeddable — that's why Factors worked out of the box.
+2. **The round config CANNOT be a standalone expression rule** when its per-round content calls an interface using `env!features` (fails `createExpressionRule` validation: "Could not find variable 'env!features'"). **Inline the round-listing inside the `_Parent` interface** instead (interfaces have `env` context). This is the chosen pattern for all remaining tabs (deviates from Factors' separate `_UT_` config rule).
+3. **`updateRecordTypeView` (and `getRecordType`) fail on `AS_GSS_Evaluation_RECORD`** with `None is not a valid RecordTypeSourceType` (service-backed record, no DB sourceType). **Repointing any Evaluation record view must be done manually in Appian Designer.** Build the `_Parent` via MCP, then hand the CO the one-line rule swap. `listRecordTypeViews` still works for reading.
+4. **Safe-refactor check:** run `getObjectDependents` on the content interface first. `viewEvaluatorTeam` was used only by the Teams view → safe to make embeddable in place (no new `_Content` object needed).
+5. **Consistency:** using the same `returnEvaluationRoundsForGivenEvaluation` as Factors means Teams shows the identical round-tab set. Blank "Round " labels for null-`sequence` rounds are a pre-existing data issue shared with Factors (tracker 5.3 / WI-1), not introduced here.
+
+**Reusable recipe for the next tab:**
+1. `getInterface` the tab's content interface; `getObjectDependents` to confirm scope.
+2. If it self-wraps in HCL/headerContentLayout, strip the wrapper → embeddable; `updateInterface`.
+3. Create `AS_GSS_CPS_<tab>_Parent(evaluationId)` = `headerContentLayout` + `tabLayout` + `forEach(rounds)` → `tabItem(label:"Round "&sequence, contents: <content interface>(roundEvalId))`. For RECORD-based tabs, wrap the content call in a per-round loader that queries the record(s) first.
+4. `testInterface` the parent on eval 12.
+5. Hand the CO the one-line view repoint for the record view urlStub.

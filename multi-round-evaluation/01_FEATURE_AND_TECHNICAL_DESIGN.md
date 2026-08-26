@@ -133,6 +133,7 @@ AS_GSS_Evaluation_SYNCEDRECORD (Round 2 clone)
 | Name | UUID | Purpose |
 | :--- | :--- | :--- |
 | `AS_GSS_FM_startNewRound` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42072` | Setup New Round wizard (currently **2 steps**) |
+| `AS_GSS_CPS_viewEvaluatorTeam_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42490` | Round-aware Teams wrapper (tab per round → embeddable `viewEvaluatorTeam`) |
 | `AS_GSS_SEC_rounds` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42270` | Rounds panel (cards per round) on Summary |
 | `AS_GSS_CP_evaluationSummaryStampField` | `_a-0000e5da-a251-8000-9bbe-011c48011c48_1007655` | Colored circular stamp (icon/text) component |
 
@@ -196,6 +197,13 @@ AS_GSS_Evaluation_SYNCEDRECORD (Round 2 clone)
 ## 6.6 Shipped tab enhancements
 
 - **Vendors tab → "Last Participated Round" column** (2026-08-25, verified): shows each vendor's highest-sequence round (e.g. "Round 3 | Test Round 03"). Backed by `AS_GSS_UT_returnLastParticipatedRoundForVendors` → passed into `AS_GSS_GRD_EvaluationVendors` via new inputs `lastParticipatedRounds` + `showLastParticipatedRound`, computed in `AS_GSS_FM_evaluationVendorsTab`. The **Decision** column already existed. Column is hidden for non-round evals.
+- **Teams tab → round sub-tabs** (2026-08-26, verified): `AS_GSS_CPS_viewEvaluatorTeam_Parent` renders `a!tabLayout`, one tab per round, embedding the (now frame-less) `AS_GSS_CPS_viewEvaluatorTeam` per round clone. Established the reusable per-tab wrapper recipe for the remaining 6 tabs.
+
+### Round-sub-tab wrapper recipe (proven with Teams)
+1. The per-round **content interface must be embeddable** — `a!tabItem.contents` rejects a `HeaderContentLayout`. If the tab interface self-wraps in `AS_GSS_HCL_displayWrapperContents`/`a!headerContentLayout`, strip that outer frame (after `getObjectDependents` confirms scope). `viewFactors` was already embeddable.
+2. Put the round-listing **inside the `_Parent` interface** — it cannot be a standalone expression rule because per-round content calls an interface using `env!features` (fails expression-rule validation).
+3. `_Parent(evaluationId)` = `headerContentLayout` + `tabLayout` + `forEach(returnEvaluationRoundsForGivenEvaluation)` → `tabItem(label:"Round "&sequence, contents: <content>(roundEvalId))`. RECORD-based tabs wrap the content in a per-round loader that queries the record(s) first.
+4. **Repoint the record view manually in Appian Designer** — `updateRecordTypeView`/`getRecordType` fail on `AS_GSS_Evaluation_RECORD` (`None is not a valid RecordTypeSourceType`, service-backed). MCP can create the `_Parent`; a human swaps the one-line rule reference in the view.
 
 ## 6.7 Data-model gotchas & SAIL learnings (from implementation)
 

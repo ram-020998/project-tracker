@@ -72,6 +72,7 @@ When creating new objects, **match the existing pattern** rather than inventing 
 | `AS_GSS_UT_returnIdentifiersForEvaluationRounds` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42301` |
 | `AS_GSS_UT_returnViewRenderingConfigFor_Factors` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42412` |
 | `AS_GSS_UT_returnLastParticipatedRoundForVendors` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42461` |
+| `AS_GSS_CPS_viewEvaluatorTeam_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42490` |
 
 **Existing core (read-only context):**
 | Object | UUID |
@@ -109,11 +110,15 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 ## 7. Current state in one line
 
-Foundation done: round record type, the evaluation-duplication engine, a 2-step Setup New Round wizard, the Rounds panel, and supporting query rules. **First tab enhancement shipped:** Vendors → "Last Participated Round" column (verified). Round sub-tabs (8 tabs) not yet built — see `02_PROGRESS_TRACKER.md` and gaps in `01_…` §7.
+Foundation done: round record type, the evaluation-duplication engine, a 2-step Setup New Round wizard, the Rounds panel, and supporting query rules. **Shipped tab work:** Vendors → "Last Participated Round" column; **Teams → round sub-tabs** (verified). Round sub-tabs remaining for 6 tabs — follow the recipe in `01_…` §6.6. See `02_PROGRESS_TRACKER.md` for the live checklist.
 
-## 7a. Gotchas you MUST know before coding (details in `01_…` §6.7)
+## 7a. Gotchas you MUST know before coding (details in `01_…` §6.6–6.7)
+- **Tab content must be embeddable** — a `tabItem` rejects `HeaderContentLayout`. Strip a tab interface's outer `AS_GSS_HCL_displayWrapperContents`/`headerContentLayout` before nesting it per round (the `_Parent` supplies one frame).
+- **Round-listing goes inside the `_Parent` interface**, not a standalone expression rule (per-round content uses `env!features`, which fails expression-rule validation).
+- **Repoint Evaluation record views manually in Appian Designer** — `updateRecordTypeView`/`getRecordType` fail on `AS_GSS_Evaluation_RECORD` (`None is not a valid RecordTypeSourceType`). MCP creates the `_Parent`; a human swaps the one-line view reference.
+- Run **`getObjectDependents`** before refactoring a shared interface to confirm blast radius.
 - **Correlate vendors across rounds by `uniqueEntityId`** — `vendorRefId` is null and `vendorId` changes every round.
-- **Resolve the anchor** with `coalesce(parentEvalId, evaluationId)`, then family = `append(anchor, children where parentEvalId = anchor)` (root isn't returned by `returnEvaluationRoundsForGivenEvaluation`).
+- **Resolve the anchor** with `coalesce(parentEvalId, evaluationId)`, then family = `append(anchor, children where parentEvalId = anchor)`.
 - **`union()` is type-strict**; **`indexWhere` returns all matches** (use `index(...,1,null)`).
 - **Trust `testInterface`/`testRule` over `validateDesignObject`** for i18n-bundle-dependent grids (false-positive `lbl_…` index errors under null stubs).
 - **Keep it backward-compatible:** round helpers return empty for non-round evals so new UI stays hidden.
