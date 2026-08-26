@@ -240,6 +240,32 @@ Today **Start Evaluation** is a confirm-only dialog and the parent evaluation ne
 - **Legacy in-flight evals** (already INPROGRESS, no Round-1 row) are **not** backfilled — anchor query returns only their children; acceptable, flag to PO.
 - **Process-model editing** is done via the `lcp` PM tools (`createProcessModel`, `createProcessModelNode`, `getProcessModelNodeTypeSchema`, `updateProcessModelNode`). Use `getProcessModelNodeTypeSchema` for each node type; serialize per-node edits.
 
+### 10.45 BUILD STATUS (as of 2026-08-26) — what exists, what's manual
+**Built + verified via MCP:**
+- **Interface** `AS_GSS_FM_startEvaluationBestValue` = `_a-0000f04b-38cd-8000-9baa-011c48011c48_42569` — single-screen modal; `testInterface` on eval 12 renders clean (Round Name default "Initial Evaluation", start/duration/due auto-calc, factor multi-select all-checked, live "N of N selected"). **PO-verified in UI.** (v1 factor card shows factor name + factor number + due date; Team/Evaluators display deferred — the `EvaluatorTeam` relationship join returned empty in the harness.)
+- **Process model** `AS GSS Start Evaluation Best Value` = **`0000f04b-68ab-8000-fbf5-7f0000014e7a`** — 16 nodes, `validateDesignObject` = no errors. Clone of `0002ecdd…` minus LPTA, plus a **Scope Selected Factors** UMQ node (filters `evaluationFactorsAndSubFactors` to `criteriaId ∈ selectedFactorIds OR parentCriteriaId ∈ selectedFactorIds`). PVs: evaluation, originalEvaluation, evaluationFactorsAndSubFactors, originalEvaluationFactorsAndSubFactors, vendors, userAction, **selectedFactorIds** (List of Integer), evaluationRatings. Start form = the interface above (inputMap evaluation/userAction/selectedFactorIds).
+  - **Tooling deviation:** MCP could **not** create `start-process-4` (Start Process) nodes — platform NPE `acSchemaId is null`. The two Start Process steps (Sync GCW `0006ef1c`, Reqt Extraction `0005ef63`) were replaced with **async `SUB_PROC` (internal.38)** nodes calling the same PMs (both accept `evaluationId`) — equivalent fire-and-forget. Review these two in Designer.
+  - **Tooling deviation:** bulk `updateProcessModel(nodes=…)` also hit that NPE; the graph was built **incrementally** with `createProcessModelNode` (backward from End) — all validated.
+- **Anchor rule** `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` (`_a-…42289`, v4) — rewritten to resolve `anchor = a!defaultValue(getEvaluationByIdentifier(id).parentEvalId, id)` then return rounds for the anchor **+** its children (two queries appended). Verified in-context: Teams parent renders round tabs on eval 6, `diagnostics.error: null`. (Round 1 tab appears once the new action runs and creates the sequence-1 row.)
+
+**Step 5 (tab-parent fallback):** left **as-is** — the current-eval fallback in the 3 record-based parents is compatible with the anchor change and still handles non-round evals gracefully. No change needed.
+
+**MANUAL (MCP blocked — `addRecordTypeAction`/`updateRecordTypeView`/`getRecordType` all fail on `AS_GSS_Evaluation_RECORD` with `None is not a valid RecordTypeSourceType`):**
+1. **Create action** `startEvaluationBestValue` on `AS_GSS_Evaluation_RECORD` → PM `0000f04b-68ab-8000-fbf5-7f0000014e7a`; icon `f251`; dialog `MEDIUM_PLUS`/`TALL`; label `rule!AS_GSS_UT_displayDynamicLabel(bundleKey: "lbl_StartEvaluation")`.
+   - **Visibility** (SETTING_UP AND Best Value):
+     ```
+     and(
+       rule!AS_GSS_BL_getRelatedActionVisibilityForStartEvaluation(
+         statusId: rv!record['recordType!{4db4a62e-d099-4e54-be19-41498c17b9cc}AS_GSS_Evaluation_RECORD.fields.{evaluationStatus}evaluationStatus.{refDataId}refDataId'],
+         evaluationId: rv!record['recordType!{4db4a62e-d099-4e54-be19-41498c17b9cc}AS_GSS_Evaluation_RECORD.fields.{evaluationId}evaluationId']),
+       tointeger(rule!AS_GSS_QR_getEvaluationByIdentifier(
+         evaluationId: rv!record['recordType!{4db4a62e-d099-4e54-be19-41498c17b9cc}AS_GSS_Evaluation_RECORD.fields.{evaluationId}evaluationId'])['recordType!{e6bc8561-d3a6-4679-b7af-6e279910468e}AS_GSS_Evaluation_SYNCEDRECORD.fields.{b363eb20-ab64-4c30-8b65-8ca9fc976109}evaluationMethodId'])
+         = cons!AS_GSS_REF_ID_EVALUATION_METHOD_BEST_VALUE)
+     ```
+   - **contextExpr:** copy the existing `startEvaluation` action's contextExpr verbatim, and add `selectedFactorIds: {}` to the returned map (keys must match PV names: evaluation, originalEvaluation, evaluationFactorsAndSubFactors, originalEvaluationFactorsAndSubFactors, vendors, selectedFactorIds, userAction).
+2. **Guard the existing `startEvaluation` action** — wrap its visibility with the Best Value **exclusion** (`… <> cons!AS_GSS_REF_ID_EVALUATION_METHOD_BEST_VALUE`) so only one Start Evaluation shows.
+3. **End-to-end UI test** on a fresh SETTING_UP **Best Value** eval: action visible (LPTA: not visible, old action shows); submit with a factor subset → Round-1 row (`sequence=1`, `parentEvalId` null), status INPROGRESS, tasks/ratings/consensus only for selected factors × vendors; Round 1 tab appears across round-aware tabs.
+
 ### 10.5 Render the mockup (for the modal layout)
 ```
 cd /Users/ramaswamy.u/repo/project-tracker/multi-round-evaluation && mkdir -p /tmp/gss_mock && python3 -c "

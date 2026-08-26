@@ -274,3 +274,23 @@ The 3 **record-based** tabs, done in one session. **This completes all 8 round s
 13. **`a!paneLayout` is NOT allowed inside `a!tabItem`** (same as `headerContentLayout`). Convert panes → `a!columnsLayout`/`a!columnLayout` (drop the pane-only `accessibilityText`; keep `width`). Trade-off: loses the panes' independent scroll, acceptable inside a tab.
 14. **Test-input cardinality matters.** For a single-typed record input, a testInput expression returning an OBJECT_ARRAY makes `ri!x.field` a **list**, breaking downstream `=` filters (`TypedValue[it=101,v={12}]`). Use SINGLE_OBJECT test values for single inputs. (When a real rule! call feeds a declared-single input, Appian coerces list→single; raw testInputs do not.)
 15. **`a!tabLayout` loads inactive tabs lazily** — the heavy per-round Evaluation-History queries (6 each) run only for the open round, so cost scales with interaction, not round count.
+
+---
+
+## Session Log — 2026-08-26 — WI-1 Start Evaluation (Best Value) build
+
+**Built + verified (MCP):**
+- Interface `AS_GSS_FM_startEvaluationBestValue` (`_a-0000f04b-38cd-8000-9baa-011c48011c48_42569`) — single-screen modal (round name/start/duration/due + factor multi-select + live counter). testInterface clean on eval 12. **PO-verified in UI.** Team/Evaluators on factor card deferred (relationship join empty in harness); shows factor name + number + due date.
+- Process model `AS GSS Start Evaluation Best Value` (`0000f04b-68ab-8000-fbf5-7f0000014e7a`) — 16 nodes, validates clean. Clone of Start Eval PM minus LPTA + new **Scope Selected Factors** node. `selectedFactorIds` PV added; start form wired.
+- Anchor rule `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` (v4) — family resolution `coalesce(parentEvalId, evaluationId)` → anchor + children rounds. Verified in-context via Teams parent on eval 6 (diagnostics.error null).
+
+**Tooling deviations (Appian/MCP limits):**
+- `start-process-4` nodes uncreatable via MCP (`acSchemaId is null` NPE) → replaced Sync-GCW + Reqt-Extraction with async SUB_PROC nodes (same PMs, accept `evaluationId`).
+- Bulk `updateProcessModel(nodes)` hit same NPE → built graph incrementally with `createProcessModelNode`.
+
+**Manual (MCP blocked on `AS_GSS_Evaluation_RECORD` — `None is not a valid RecordTypeSourceType`):**
+- CO to create action `startEvaluationBestValue` (PM above; MEDIUM_PLUS/TALL; visibility = SETTING_UP & Best Value; contextExpr = existing + `selectedFactorIds:{}`) and guard the existing `startEvaluation` action with `method <> BEST_VALUE`. Full copy-paste spec in `03_AGENT_ONBOARDING.md` §10.45.
+
+**Step 5 (tab fallback):** no change — current-eval fallback is compatible with the anchor change and still handles non-round evals.
+
+**Next:** CO creates the two actions per spec → end-to-end UI test on a fresh Best Value eval (Round-1 row seq=1, scoped tasks/ratings/consensus, Round 1 tab appears).
