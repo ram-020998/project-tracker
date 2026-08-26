@@ -312,3 +312,14 @@ The 3 **record-based** tabs, done in one session. **This completes all 8 round s
 - **`AS_CO_UT_filterCdtByField(field:"parentCriteriaId")` returns empty against `AS_GSS_QR_getCriteria` output** (UUID-keyed record maps, not named CDT). Use a UUID-based `wherecontains(true, a!forEach(... isnull(...parentCriteriaId)))` filter instead. (The `continueSetup` contexts use `filterCdtByField` on `AS_GSS_QE_getEvaluationCriteria`, which returns named CDT — that works.)
 - **`testInterface`/`testRule` `inputs` maps pass values literally** (a record-typed value passed as a string errors `Could not cast from Text`). Prefer saved default test inputs (set via create/update `testInputs`) and call with no `inputs`.
 - **Read-tool display quirk:** node/rule expressions come back with a spurious `pv!`/`=` prefix (e.g. `pv!rule!...`, `pv!pv!evaluation`) — this is cosmetic; the stored expression is correct.
+
+## Session Log — 2026-08-26 (WI-2: Start Round)
+
+Built **Start Round** — starting an already-created child round, reusing the existing Start Evaluation process without creating a new round.
+
+- **`AS_GSS_FM_startRound`** (`_a-0000f04b-38cd-8000-9baa-011c48011c48_42738`) — p8 confirm dialog; dynamic round number + included-vendor count; sets INPROGRESS + userAction on Start. Query logic verified via throwaway integer-input probe (eval 12→Round 3/1 vendor; eval 13→Round 1/2 vendors) — `testInterface` can't inject a typed eval so it renders generic in-harness (`AS_CO_UT_queryRecord` drops empty-value filters).
+- **`AS GSS Start Round`** PM (`0000f04b-9451-8000-fc0b-7f0000014e7a`) — thin wrapper: Start (start form = new form) → SUB_PROC `internal.38` → `0002ecdd…` (sync, chained, forwards 6 params) → End. Reuses the entire Start Evaluation flow; no round creation. `validateDesignObject` clean.
+- **`startRound` action** (CO-created, `84ac0b39-bf4e-43ba-bbb3-050dd2e5d9f4`) → wrapper PM; visibility SETTING_UP + BestValue + `isNotBlank(parentEvalId)`; contextExpr = existing `startEvaluation` (no selectedFactorIds). **"Start Evaluation (BV)"** guarded with `isBlank(parentEvalId)` (root only).
+- **`AS_GSS_SEC_rounds`** (`…42270` v7) — added `startRound` recordActionItem to each round card's action field (keyed by round `evaluationId`). Validates clean.
+
+**Design note:** a record action's dialog is its PM's single start form, so reusing `0002ecdd…` *and* showing a new form required the wrapper-PM-calls-subprocess pattern. Remaining: end-to-end UI test (start a fully set-up child round → INPROGRESS, scoped tasks/ratings/consensus generated, no new EvaluationRound row).

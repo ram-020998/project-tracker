@@ -292,6 +292,18 @@ Independent enhancement (not WI-1). The duplicate rule copies each carried vendo
 - **Expression-rule `additionalFields` empty test value → `[""]`** invalid-fields error. Pass a real field-ref test value when validating rules that spread `additionalFields` into query `fields`.
 - **Read-tool display quirk:** node/rule expressions come back with a spurious `pv!`/`=` prefix (e.g. `pv!rule!...`, `pv!pv!evaluation`) — cosmetic; the stored expression is correct.
 
+### 10.48 Start Round (WI-2) — start an already-created round (reuses Start Evaluation)
+Goal: after **Setup New Round** creates a child round eval (SETTING_UP), the CO clicks **Start Round** in the Rounds card to run the full Start-Evaluation generation (INPROGRESS + ratings/tasks/consensus + on-spot XOR) **without creating a new round**. Factors/vendors are already scoped on the clone, so no factor-selection step.
+
+**Key constraint that shaped the design:** a record action's dialog *is* its PM's start form, and one PM binds exactly one start form. To show a new Start Round confirm form while reusing the existing Start Evaluation process, we use a **thin wrapper PM** whose start form is the new form and which calls the existing PM as a subprocess (max reuse, no duplication, and avoids recreating the un-createable start-process-4 nodes — §10.47).
+
+Built objects:
+- **Interface `AS_GSS_FM_startRound`** = `_a-0000f04b-38cd-8000-9baa-011c48011c48_42738` — p8 confirm dialog. Dynamic **round number** (queries `AS_GSS_EvaluationRound` by `evaluationId` → `sequence`) and **included-vendor count** (active `EvaluationVendor` for the eval). On Start: `userAction=START`, eval → INPROGRESS + modifiedBy/modifiedDatetime + weighted/on-spot metrics; on Cancel: `userAction=CANCEL`. Inputs `evaluation`, `userAction`. NOTE: `testInterface` can't inject a typed record, so `ri!evaluation` is null in-harness and `AS_CO_UT_queryRecord` (which uses `ignoreFiltersWithEmptyValues:true`) drops the eval filter → shows generic values; verified the query logic with a throwaway integer-input probe (eval 12→Round 3/1 vendor, eval 13→Round 1/2 vendors).
+- **Wrapper PM `AS GSS Start Round`** = `0000f04b-9451-8000-fc0b-7f0000014e7a` — Start (start form = the new form) → SUB_PROC `internal.38` calling **`0002ecdd…`** (synchronous, chained, forwards evaluation/userAction/vendors/evaluationFactorsAndSubFactors/originalEvaluation/originalEvaluationFactorsAndSubFactors) → End. PVs match those 6 params. `validateDesignObject` clean. (The reused `0002ecdd…` writes `pv!evaluation` with **no** `round` relationship → no new round; its cancel XOR handles `userAction=CANCEL`.)
+- **Record action `startRound`** (CO-created) = `84ac0b39-bf4e-43ba-bbb3-050dd2e5d9f4` on `4db4a62e` → wrapper PM. Visibility = `and(getRelatedActionVisibilityForStartEvaluation(status,id), method = BEST_VALUE, isNotBlank(parentEvalId))`. contextExpr = the existing `startEvaluation` contextExpr (no `selectedFactorIds`).
+- **"Start Evaluation (BV)" guard** (CO): added `isBlank(parentEvalId)` so it fires only on the **root** (Round 1). Net: root→Start Evaluation (BV, creates Round 1); child round→Start Round (reuses `0002ecdd…`, no new round); LPTA/non-BV→original Start Evaluation.
+- **Rounds card button:** `AS_GSS_SEC_rounds` (`…42270`, v7) — added a `startRound` `a!recordActionItem` (keyed by the round's `evaluationId` `1756683f`) alongside the existing `edit` in each card's `a!recordActionField`. Its own visibility gates it to startable SETTING_UP child rounds.
+
 ### 10.5 Render the mockup (for the modal layout)
 ```
 cd /Users/ramaswamy.u/repo/project-tracker/multi-round-evaluation && mkdir -p /tmp/gss_mock && python3 -c "
