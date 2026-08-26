@@ -137,6 +137,9 @@ AS_GSS_Evaluation_SYNCEDRECORD (Round 2 clone)
 | `AS_GSS_CPS_consensusReportView_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42504` | Round-aware Consensus wrapper (tab per round → embeddable, null-hardened `consensusReportView`) |
 | `AS_GSS_FM_evaluationDocumentsTab_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42514` | Round-aware Documents wrapper (tab per round → embeddable `evaluationDocumentsTab`; inner Docs/Drafts tabs nest) |
 | `AS_GSS_TMG_FM_taskAuditActionHistory_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42524` | Round-aware Task History wrapper (tab per round → embeddable `taskAuditActionHistory`) |
+| `AS_GSS_CPS_evaluationRatingsTab_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42562` | Round-aware Ratings wrapper (per-round eval query; content paneLayout→columnsLayout; current-eval fallback) |
+| `AS_GSS_TMG_CPS_viewRecordTasks_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42542` | Round-aware Checklist Items wrapper (per-round eval query; current-eval fallback) |
+| `AS_GSS_FM_evaluationAuditHistory_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42552` | Round-aware Evaluation History wrapper (per-round 6 queries, lazy; current-eval fallback) |
 | `AS_GSS_SEC_rounds` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42270` | Rounds panel (cards per round) on Summary |
 | `AS_GSS_CP_evaluationSummaryStampField` | `_a-0000e5da-a251-8000-9bbe-011c48011c48_1007655` | Colored circular stamp (icon/text) component |
 
@@ -204,6 +207,13 @@ AS_GSS_Evaluation_SYNCEDRECORD (Round 2 clone)
 - **Consensus Reports tab → round sub-tabs** (2026-08-26, verified): `AS_GSS_CPS_consensusReportView_Parent`; the content interface `AS_GSS_CPS_consensusReportView` had **3** HCL frames stripped (one per `if` branch) and its status comparisons **null-hardened** (`a!defaultValue(..., -1)`). Parent supplies `loggedInUser()`.
 - **Documents tab → round sub-tabs** (2026-08-26, verified): `AS_GSS_FM_evaluationDocumentsTab_Parent`; content interface `AS_GSS_FM_evaluationDocumentsTab` had 1 HCL frame stripped. Its own Documents/Drafts `a!tabLayout` nests inside the round tab (tabs-in-tabs). No null-hardening needed.
 - **Task History tab → round sub-tabs** (2026-08-26, verified): `AS_GSS_TMG_FM_taskAuditActionHistory_Parent`; content interface had 1 HCL frame stripped. Last ID-based tab.
+- **Ratings, Checklist Items (Tasks), Evaluation History → round sub-tabs** (2026-08-26, verified): the 3 **record-based** tabs. Parents `AS_GSS_CPS_evaluationRatingsTab_Parent`, `AS_GSS_TMG_CPS_viewRecordTasks_Parent`, `AS_GSS_FM_evaluationAuditHistory_Parent`. Because these content interfaces take **queried objects** (not an evaluationId), the parent runs the view's query per round inside the `tabItem`. Ratings' `paneLayout` was converted to `columnsLayout` (panes aren't allowed in a tab). All 3 use the **current-eval fallback** (see below). **This completes all 8 round sub-tabs.**
+
+### Record-based tab specifics
+- **Leaf-eval fallback:** `returnEvaluationRoundsForGivenEvaluation(id)` returns children only, so a leaf/round-clone eval returns `[]`. Instead of the null-default-empty-round, these parents compute `local!roundTabs = if(isNullOrEmpty(roundsRaw), {a!map(evalId: ri!evaluationId, seq: null)}, forEach → a!map(evalId, seq))` and drive the forEach off plain maps. This shows the current eval's own data instead of passing a null evaluationId (which crashes Ratings/Eval-History). **TODO:** retrofit the 4 ID-based parents with this same fallback (ties to WI-1 anchor).
+- **`a!paneLayout` is rejected inside `a!tabItem`** (like `headerContentLayout`) — convert panes to `columnsLayout`.
+- **Lazy tab loading:** `a!tabLayout` evaluates only the open tab's contents, so the 6 Evaluation-History queries run per opened round, not per round up front.
+- **Test-input cardinality:** for single-typed record inputs, use SINGLE_OBJECT test values; an OBJECT_ARRAY testInput makes `ri!x.field` a list and breaks `=` filters.
 
 ### Round-sub-tab wrapper recipe (proven with Teams)
 1. The per-round **content interface must be embeddable** — `a!tabItem.contents` rejects a `HeaderContentLayout`. If the tab interface self-wraps in `AS_GSS_HCL_displayWrapperContents`/`a!headerContentLayout`, strip that outer frame (after `getObjectDependents` confirms scope). An interface with multiple `if` branches may have **multiple frames** to strip (Consensus had 3). `tabItem` contents may be a plain list `{...}` or a `forEach`. `viewFactors` was already embeddable.

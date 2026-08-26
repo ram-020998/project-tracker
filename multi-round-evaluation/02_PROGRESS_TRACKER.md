@@ -4,7 +4,7 @@
 > Companion docs: `01_FEATURE_AND_TECHNICAL_DESIGN.md`, `03_AGENT_ONBOARDING.md`.
 
 **Last updated:** 2026-08-26
-**Overall status:** 🟡 Foundation in place. Shipped round sub-tabs: Factors, **Teams**, **Consensus Reports**, **Documents**, **Task History** (all ID-based tabs done). Plus Vendors → "Last Participated Round". Remaining round sub-tabs: Ratings, Tasks, Evaluation History (record-based — query per round).
+**Overall status:** 🟢 **All 8 round sub-tabs shipped** (Factors, Teams, Consensus Reports, Documents, Task History, Ratings, Checklist Items/Tasks, Evaluation History) + Vendors → "Last Participated Round". Remaining: retrofit the 4 ID-based parents with the current-eval fallback (ties to WI-1 anchor), and the deferred Start Evaluation / round-1 anchor work.
 
 ---
 
@@ -63,13 +63,13 @@
 | 5.2 | "Setup New Round" link in panel | ⬜ | Not present in component |
 | 5.3 | Sequence-based sorting of rounds | ⬜ | Query supports sort; not applied (see plan §4.2) |
 | 5.4 | Factors tab per-round rendering config | ✅ | `viewFactors_Parent` + `returnViewRenderingConfigFor_Factors` wired to view `_n_87YA` |
-| 5.5 | Round sub-tabs on Ratings | ⬜ | **record-based** loader (query eval per round) — plan WI-4/6e |
+| 5.5 | Round sub-tabs on Ratings | ✅ | Built + verified. `AS_GSS_CPS_evaluationRatingsTab_Parent` → per-round query + `AS_GSS_CPS_evaluationRatingsTab`. Content **paneLayout → columnsLayout** (panes not allowed in a tabItem). Current-eval fallback. View `_30fhDw` repointed manually. |
 | 5.6 | Round sub-tabs on Consensus Reports | ✅ | Built + verified. `AS_GSS_CPS_consensusReportView_Parent` → per-round `AS_GSS_CPS_consensusReportView` (made embeddable: stripped 3 HCL frames + null-hardened status comparisons). View `_KJy-Pg` repointed manually; drop the `loggedInUser` arg (parent supplies it). |
 | 5.7 | Round sub-tabs on Teams | ✅ | Built + verified. `AS_GSS_CPS_viewEvaluatorTeam_Parent` (inlined config) → per-round `AS_GSS_CPS_viewEvaluatorTeam` (made embeddable). View `_j9bz9g` repointed manually (MCP can't update this record type). |
 | 5.7a | Round sub-tabs on Documents | ✅ | Built + verified. `AS_GSS_FM_evaluationDocumentsTab_Parent` → per-round `AS_GSS_FM_evaluationDocumentsTab` (made embeddable: stripped 1 HCL frame; inner Documents/Drafts tabs nest fine; no null-hardening needed). View `_wHo-OA` repointed manually. |
 | 5.7b | Round sub-tabs on Task History | ✅ | Built + verified. `AS_GSS_TMG_FM_taskAuditActionHistory_Parent` → per-round `AS_GSS_TMG_FM_taskAuditActionHistory` (made embeddable: stripped 1 HCL frame; no null-hardening). View `_YpCKng` repointed manually. |
-| 5.7c | Round sub-tabs on Tasks | ⬜ | **record-based** loader — plan WI-6c |
-| 5.7d | Round sub-tabs on Evaluation History | ⬜ | **record-based, heavy** (6 collections/round); do lazy pattern — plan WI-6d |
+| 5.7c | Round sub-tabs on Tasks | ✅ | Built + verified. `AS_GSS_TMG_CPS_viewRecordTasks_Parent` → per-round query (SINGLE_OBJECT) + `AS_GSS_TMG_CPS_viewRecordTasks` (1 HCL frame stripped). Current-eval fallback. View `_WTzSLQ` repointed manually. |
+| 5.7d | Round sub-tabs on Evaluation History | ✅ | Built + verified. `AS_GSS_FM_evaluationAuditHistory_Parent` → per-round 6 queries + `AS_GSS_FM_evaluationAuditHistory` (unwrapped to its grid rule). Lazy tab-load keeps queries per open round. Current-eval fallback. View `_JJzYag` repointed manually. |
 | 5.8 | Factors tab "Rounds" column | ⬜ | Add to `AS_GSS_GRD_ViewFactorsAndSubfactors` — plan WI-7 |
 | 5.9 | Summary shows only current-round factors | ⬜ | plan WI-9 |
 | 5.10 | Vendors tab: Decision column | ✅ | Already existed in `AS_GSS_GRD_EvaluationVendors` (decisionType-based) |
@@ -101,6 +101,9 @@
 | 7.7 | `AS_GSS_CPS_consensusReportView_Parent` (interface) | ✅ | Round-aware Consensus wrapper; parent supplies `loggedInUser()` |
 | 7.8 | `AS_GSS_FM_evaluationDocumentsTab_Parent` (interface) | ✅ | Round-aware Documents wrapper; inner Documents/Drafts sub-tabs nest per round |
 | 7.9 | `AS_GSS_TMG_FM_taskAuditActionHistory_Parent` (interface) | ✅ | Round-aware Task History wrapper |
+| 7.10 | `AS_GSS_CPS_evaluationRatingsTab_Parent` (interface) | ✅ | Round-aware Ratings wrapper; per-round eval query; current-eval fallback |
+| 7.11 | `AS_GSS_TMG_CPS_viewRecordTasks_Parent` (interface) | ✅ | Round-aware Checklist Items wrapper; per-round eval query; current-eval fallback |
+| 7.12 | `AS_GSS_FM_evaluationAuditHistory_Parent` (interface) | ✅ | Round-aware Evaluation History wrapper; per-round 6 queries (lazy); current-eval fallback |
 
 ## 8. Integrations
 
@@ -132,13 +135,12 @@
 ---
 
 ## Immediate next candidates (proposed order)
-1. Continue round sub-tabs using the **established pattern** (embeddable content interface + `_Parent` wrapper): next ID-based — **Task History** (WI-6b). Then record-based — **Ratings** (WI-4), **Tasks** (WI-6c), **Evaluation History** (WI-6d).
-   - ⚠️ Each `_Parent` wrapper is created via MCP, but **repointing the record view must be done manually in Appian Designer** — the `updateRecordTypeView` MCP tool errors on this record type (`None is not a valid RecordTypeSourceType`). Provide the CO the one-line rule swap.
-   - ⚠️ Check whether each tab's content interface self-wraps in `AS_GSS_HCL_displayWrapperContents`/`headerContentLayout`; if so, make it embeddable (as done for Teams) before nesting in a tab.
-2. Review the Round-1 / Start Evaluation path (§4); settle the anchor question (plan WI-1). Anchor helper pattern proven (Vendors learning #3).
+1. **Retrofit the 4 ID-based parents** (Teams/Consensus/Documents/Task History) with the **current-eval fallback** the 3 record-based parents use — so a leaf/round-clone record shows its own data instead of a blank "Round " tab. Ties to WI-1. Needs quick re-verification of each.
+2. Review the Round-1 / Start Evaluation path (§4); settle the anchor question (plan WI-1): resolve anchor = `coalesce(parentEvalId, evaluationId)` and include the root as its own round tab (Round 1). This would replace the per-parent current-eval fallback with a proper family-wide round list.
 3. Fix `maxSelections` on the vendor grid (§2.4) and sequence-based active-round (§7.3) + round sort (§5.3).
 4. Build Setup New Round Step 3 + VM resubmission trigger (§2.5, §8.1).
-5. i18n bundle keys for new literal labels (Vendors column, round tab labels if needed).
+5. i18n bundle keys for new literal labels (Vendors column, "Round " tab labels).
+6. Update the stale description on `AS_GSS_UT_returnLastParticipatedRoundForVendors` (says "by vendorRefId"; actually keyed on uniqueEntityId).
 
 *(Confirm priority with the team before starting each item.)*
 
@@ -255,3 +257,20 @@ Fourth round-sub-tab; last of the ID-based tabs.
 **Verification:** `testInterface` parent (eval 12) → `diagnostics.error = null`; per-round tab embeds the full audit view (Phase History left panel, audit trail with real entries, filters, pagination "1-5 of 16"). CO confirmed in UI.
 
 **Milestone:** all 4 ID-based round sub-tabs done (Teams, Consensus, Documents, Task History), plus Factors. Remaining: the 3 record-based tabs (Ratings, Tasks, Evaluation History) whose views pass queried collections rather than an evaluationId — the parent must run the same queries per round (inlined in the `tabItem` contents; `a!tabLayout` loads inactive tabs lazily, so the heavy Evaluation-History queries only run when a round tab is opened).
+
+### 2026-08-26 — Ratings + Checklist Items + Evaluation History → round sub-tabs (SHIPPED + verified)
+The 3 **record-based** tabs, done in one session. **This completes all 8 round sub-tabs.**
+
+**Objects changed:**
+- **Ratings:** created `AS_GSS_CPS_evaluationRatingsTab_Parent` (`_a-0000f04b-38cd-8000-9baa-011c48011c48_42562`); modified `AS_GSS_CPS_evaluationRatingsTab` (`_a-0000efa1-370d-8000-9ea1-011c48011c48_19633560`, v3) — stripped the `a!headerContentLayout` frame AND **converted its `a!paneLayout` (2 panes) to a 2-column `a!columnsLayout`** (NARROW_PLUS + AUTO), because a `paneLayout` is rejected inside a `tabItem`. Per-round content: `evaluationRatingsTab(evaluation: getEvaluationByIdentifier(roundEvalId))`.
+- **Checklist Items / Tasks:** created `AS_GSS_TMG_CPS_viewRecordTasks_Parent` (`_a-0000f04b-38cd-8000-9baa-011c48011c48_42542`); modified `AS_GSS_TMG_CPS_viewRecordTasks` (`_a-0000e2cd-bc96-8000-9ba2-011c48011c48_57203-tmg-am-am`, v2) — stripped 1 HCL frame. Per-round content: `viewRecordTasks(evaluation: getEvaluation(SINGLE_OBJECT, roundEvalId))`. (View passes OBJECT_ARRAY but the input is single; SINGLE_OBJECT is the correct, unambiguous form.)
+- **Evaluation History:** created `AS_GSS_FM_evaluationAuditHistory_Parent` (`_a-0000f04b-38cd-8000-9baa-011c48011c48_42552`); modified `AS_GSS_FM_evaluationAuditHistory` (`_a-0000e5da-a251-8000-9bbe-011c48011c48_998301`, v2) — the whole interface was just an HCL wrapper around `AS_GSS_GRD_evaluationChangesAudit(...)`; unwrapped to return that grid rule directly. Per-round content: the 6 audit queries (evaluation SINGLE_OBJECT + phases/vendors/criteria/teams/docs OBJECT_ARRAY, getActiveAndInactive/fetchAll true).
+- **Repointed (manually, by CO)** views `_30fhDw` (Ratings), `_WTzSLQ` (Checklist Items), `_JJzYag` (Evaluation History) — each simplified to a single `evaluationId` arg (parent runs the queries).
+
+**Verification:** `testInterface` all three on eval 12 → `diagnostics.error = null`. Ratings shows the 2-column factor/legend/vendor-ratings layout; Eval History shows the audit grid with 4 real rows ("Duplicated the evaluation…", added factors/phases/teams); Tasks shows the checklist status cards + grid. CO confirmed all three in the UI.
+
+**New learnings (critical):**
+12. **`returnEvaluationRoundsForGivenEvaluation(id)` returns children only** (`parentEvalId = id`). For a **leaf/round-clone** eval (e.g. eval 12), it returns **`[]`**. The old `a!defaultValue(rounds, default: emptyRoundRecord())` then yields a round with **null evaluationId** → content is called with a null eval. The 4 ID-based content interfaces tolerated null (blank tab); Ratings and Eval History **crash** on it (`queryFilter "=" null`, and a grid "data may not contain fv!pagingInfo" on empty arrays). **Fix pattern (record-based parents):** compute `local!roundTabs` = `if(isNullOrEmpty(roundsRaw), {a!map(evalId: ri!evaluationId, seq: null)}, forEach → a!map(evalId, seq))`, i.e. **fall back to the CURRENT evaluation** (a real, non-null eval) and drive the forEach off plain maps (`fv!item.evalId` / `fv!item.seq`) instead of record field refs. Recommended to retrofit the 4 ID-based parents with the same fallback (ties to WI-1).
+13. **`a!paneLayout` is NOT allowed inside `a!tabItem`** (same as `headerContentLayout`). Convert panes → `a!columnsLayout`/`a!columnLayout` (drop the pane-only `accessibilityText`; keep `width`). Trade-off: loses the panes' independent scroll, acceptable inside a tab.
+14. **Test-input cardinality matters.** For a single-typed record input, a testInput expression returning an OBJECT_ARRAY makes `ri!x.field` a **list**, breaking downstream `=` filters (`TypedValue[it=101,v={12}]`). Use SINGLE_OBJECT test values for single inputs. (When a real rule! call feeds a declared-single input, Appian coerces list→single; raw testInputs do not.)
+15. **`a!tabLayout` loads inactive tabs lazily** — the heavy per-round Evaluation-History queries (6 each) run only for the open round, so cost scales with interaction, not round count.
