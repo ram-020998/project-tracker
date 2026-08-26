@@ -323,3 +323,12 @@ Built **Start Round** — starting an already-created child round, reusing the e
 - **`AS_GSS_SEC_rounds`** (`…42270` v7) — added `startRound` recordActionItem to each round card's action field (keyed by round `evaluationId`). Validates clean.
 
 **Design note:** a record action's dialog is its PM's single start form, so reusing `0002ecdd…` *and* showing a new form required the wrapper-PM-calls-subprocess pattern. Remaining: end-to-end UI test (start a fully set-up child round → INPROGRESS, scoped tasks/ratings/consensus generated, no new EvaluationRound row).
+
+## Session Log — 2026-08-26 (WI-3: Complete Round + Setup New Round gating)
+
+- **`AS GSS Complete Round`** PM (`0000f04b-add3-8000-fc11-7f0000014e7a`) — no start form; Start → SUB_PROC → `0004e60d…` (Mark Evaluation as Complete) with evaluation pre-set to COMPLETE + `userAction=SUBMIT` → End. Backend-only completion, reuses original write/GCW/audit, original untouched. Validates clean.
+- **`completeRound` action** (CO-created, `853cb2b7-5587-48fa-8af4-15d6206a7421`) → wrapper PM; contextExpr passes `evaluation`; visibility = `getRelatedActionVisibilityForMarkEvaluationAsComplete`.
+- **`AS_GSS_SEC_rounds`** (v9): actions rebuilt as `a!flatten({ startRound (latest+SetUp), completeRound (INPROGRESS), edit })`. Verified render on eval 6 (Round 03 shows Start Round+Edit; no INPROGRESS round so Complete Round absent), diagnostics.error null.
+- **`setupNewRound` visibility** (MANUAL, CO applied): visible only when ≥1 round exists and none is SETTING_UP/INPROGRESS (all COMPLETE) — corrected from the initial "any round complete" which wrongly showed while a later round was active. Optional `count(rounds) < 5` cap offered.
+
+Lifecycle now: Round INPROGRESS → Complete Round → COMPLETE → Setup New Round appears → new round SETTING_UP → Start Round → INPROGRESS → … End-to-end UI test pending.

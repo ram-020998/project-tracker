@@ -304,6 +304,14 @@ Built objects:
 - **"Start Evaluation (BV)" guard** (CO): added `isBlank(parentEvalId)` so it fires only on the **root** (Round 1). Net: root→Start Evaluation (BV, creates Round 1); child round→Start Round (reuses `0002ecdd…`, no new round); LPTA/non-BV→original Start Evaluation.
 - **Rounds card button:** `AS_GSS_SEC_rounds` (`…42270`, v8) — added a `startRound` `a!recordActionItem` (keyed by the round's `evaluationId` `1756683f`) alongside the existing `edit` in each card's `a!recordActionField`. The item is included **only on the latest round** (its `sequence` = `local!maxSequence`, the max over the family) **and** only when that round is SETTING_UP, so older set-up rounds never show it; the action's own visibility (start-readiness) still gates the final render. Verified on eval 6 (rounds seq 2/2/3): only the seq-3 card includes the Start Round slot.
 
+### 10.49 Complete Round + Setup New Round gating (WI-3)
+**Complete Round** — backend-only completion of the active round, reusing Mark-Complete without a form.
+- **`AS GSS Complete Round`** PM = `0000f04b-add3-8000-fc11-7f0000014e7a` — **no start form**; Start → SUB_PROC `internal.38` → **`0004e60d…` (AS GSS Mark Evaluation as Complete)** with `evaluation` pre-set to COMPLETE (`updateRecordsByModelRecord`: evaluationStatusId=`cons!…_COMPLETE`, modifiedBy=`pp!initiator`, modifiedDatetime=now()) and `userAction = cons!AS_CO_ENUM_USER_ACTION_SUBMIT` → End. Reuses the original's write + GCW sync + audit; original untouched. Because the PM has no start form, clicking the action runs it directly (no dialog). `validateDesignObject` clean.
+- **`completeRound` action** (CO-created) = `853cb2b7-5587-48fa-8af4-15d6206a7421` → the wrapper PM; contextExpr passes `evaluation` (= existing `completeEvaluation` contextExpr). Suggested visibility = `AS_GSS_BL_getRelatedActionVisibilityForMarkEvaluationAsComplete(evaluationId)`.
+- **Rounds card** (`…42270`, v9): actions are now `a!flatten({ if(latest+SetUp → startRound, {}), if(INPROGRESS → completeRound, {}), edit })`. Complete Round shows only on the **INPROGRESS** round; Start Round only on the latest **Set Up** round; Edit always.
+
+**Setup New Round gating** (MANUAL, `setupNewRound` visibility — CO applied): visible only when the family has ≥1 round and **no round is SETTING_UP or INPROGRESS** (i.e., all rounds COMPLETE) — so a new round can be set up only after the current/latest round is completed. Expression uses `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` (additionalFields = round→evaluation→evaluationStatusId) then `not(or(contains(statuses, SETTING_UP), contains(statuses, INPROGRESS)))` AND `isNotBlank(roundId)`. (Earlier "any round complete" was rejected — it would show while a later round is still active.) Optional cap: `count(local!rounds) < 5`.
+
 ### 10.5 Render the mockup (for the modal layout)
 ```
 cd /Users/ramaswamy.u/repo/project-tracker/multi-round-evaluation && mkdir -p /tmp/gss_mock && python3 -c "
