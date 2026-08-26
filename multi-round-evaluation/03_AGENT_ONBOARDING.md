@@ -83,6 +83,8 @@ When creating new objects, **match the existing pattern** rather than inventing 
 | `AS_GSS_CPS_evaluationRatingsTab_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42562` |
 | `AS_GSS_TMG_CPS_viewRecordTasks_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42542` |
 | `AS_GSS_FM_evaluationAuditHistory_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42552` |
+| `AS_GSS_FM_startEvaluationBestValue` (WI-1 modal) | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42569` |
+| `AS GSS Start Evaluation Best Value` (WI-1 PM) | `0000f04b-68ab-8000-fbf5-7f0000014e7a` |
 
 **Existing core (read-only context):**
 | Object | UUID |
@@ -249,6 +251,15 @@ Today **Start Evaluation** is a confirm-only dialog and the parent evaluation ne
 - **Anchor rule** `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` (`_a-…42289`, v4) — rewritten to resolve `anchor = a!defaultValue(getEvaluationByIdentifier(id).parentEvalId, id)` then return rounds for the anchor **+** its children (two queries appended). Verified in-context: Teams parent renders round tabs on eval 6, `diagnostics.error: null`. (Round 1 tab appears once the new action runs and creates the sequence-1 row.)
 
 **Step 5 (tab-parent fallback):** left **as-is** — the current-eval fallback in the 3 record-based parents is compatible with the anchor change and still handles non-round evals gracefully. No change needed.
+
+**New PM node map** (`0000f04b-68ab-8000-fbf5-7f0000014e7a`): 1 Start → 3 XOR *Is cancel?* (cancel→2 End, else→4) → 4 Write *Update Evaluation Record* (writes `pv!evaluation` incl. `round` rel → cascades Round 1) → 5 *Sync Eval Status in GCW* (async SUB_PROC `0006ef1c`) → 6 UMQ *Scope Selected Factors* (`internal.16`; filters `evaluationFactorsAndSubFactors` to `criteriaId ∈ selectedFactorIds OR parentCriteriaId ∈ selectedFactorIds`) → 7 UMQ *Populate Parent And Child Ratings* (`createTransactionalRatings`) → 8 Write *Write Rating Records* (+ `updateRatingDetailsToCriteriaRecords`) → 9 Write *Update Factors And SubFactors With Ratings* → 10 XOR *Toggle* (`AS_GSS_TOGGLE_VENDOR_ANALYSIS_ENABLED`: on→11, else→12) → 11 *Trigger Reqt Extraction* (async SUB_PROC `0005ef63`) → 12 UMQ *Dummy* → 13 XOR *Identify Workflow* (on-spot→15, else→14) → 14 SUB_PROC *Generate Evaluation Tasks* (`0002edab`) → 15 SUB_PROC *Create Consensus Reports* (`0003ece5`) → 16 SUB_PROC *Capture Audit* (`0007e5df`, `AS_GSS_UT_constructStartEvaluationAudit`) → 2 End. All SUB_PROC/Gen-Tasks/Consensus receive `pv!evaluationFactorsAndSubFactors` (already scoped by node 6). **No LPTA branch.**
+
+### 10.46 Vendor documents carried to new round (`AS_GSS_UT_duplicateEvaluationForNewRound`, v8)
+Independent enhancement (not WI-1). The duplicate rule now copies each carried vendor's **documents** into the new round, mirroring the `businessTypes` copy: inside the vendor `updateRecordsByModelRecord`, the **`documents`** relationship (`f017ee11-aaec-48c1-bef6-ba4e201c4017`, ONE_TO_MANY on `vendorId`, target `AS_GSS_EvaluationDocument_SYNCEDRECORD` `9c497e08`) is set to `a!forEach(items: fv!item[…{f017ee11}documents], expression: updateRecordsByModelRecord(records: fv!item, modelRecord: EvaluationDocument(nulled keys…)))`.
+- **Nulled:** `evaluationDocumentId`(PK) `f7ef236a`, `vendorId` `7771b188` (set by cascade), `evaluationId` `f1f3c4f7`, `consensusId` `5f719599`, `criteriaId` `93fca4ae`, `taskId` `41c000b4`. **Preserved:** `appianDocId` `fb650755` (same file), `documentName` `0c3871d9`, `documentDescription` `e74cd04a`, `fileType` `ff24466b`, `docType` `41df7759`, `documentTemplate` `711e2d00`, `documentSubType` `df9a6bdb`, `version` `fd74ffc6`, `isPriceExtractionSelected` `3bf77819`, `sourceApplicationId` `61cfca97`, `isDeleted` `f0a0bf35`. **Reset:** createdBy/modifiedBy=initiator, created/modifiedDatetime=now().
+- **DEPENDENCY (verify in UI):** reads the loaded `documents` relationship off `ri!templateEvaluation.vendor`. If the Setup New Round vendor source (`AS_GSS_FM_startNewRound` → `AS_GSS_GRD_vendorListForSelection`/`selectedVendors`) doesn't load `documents`, the copy silently no-ops → patch that query to include the `documents` relationship.
+- copied docs' `evaluationId` is null; they attach to the eval via the new `vendorId`. Fine for per-vendor access.
+
 
 **MANUAL (MCP blocked — `addRecordTypeAction`/`updateRecordTypeView`/`getRecordType` all fail on `AS_GSS_Evaluation_RECORD` with `None is not a valid RecordTypeSourceType`):**
 1. **Create action** `startEvaluationBestValue` on `AS_GSS_Evaluation_RECORD` → PM `0000f04b-68ab-8000-fbf5-7f0000014e7a`; icon `f251`; dialog `MEDIUM_PLUS`/`TALL`; label `rule!AS_GSS_UT_displayDynamicLabel(bundleKey: "lbl_StartEvaluation")`.

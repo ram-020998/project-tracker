@@ -161,3 +161,22 @@ Clone of `0002ecdd…` **minus the LPTA branch**, plus factor scoping and round 
 - **Two Start actions:** the visibility guard on the existing action prevents both showing.
 - **Anchor change affecting shipped tabs:** re-verify the 8 parents after §2.4 (retire fallback carefully; keep empty-safe render for legacy in-flight evals with no Round-1 row — those simply show no round tab until started, acceptable).
 - **Legacy in-flight evals** (already INPROGRESS, no Round-1 row): not backfilled; anchor query returns their children only. Acceptable; note for PO.
+
+---
+
+## 7. BUILD OUTCOME (2026-08-26)
+
+**Built via MCP (verified):**
+- **Interface** `AS_GSS_FM_startEvaluationBestValue` = `_a-0000f04b-38cd-8000-9baa-011c48011c48_42569` — single-screen modal per mockup p3 (Round Name default "Initial Evaluation"; Start/Duration/Due with auto-calc + Due≥Start validation; factor multi-select defaulting to all, live "N of N selected"; factor card = name + factor number + due date). Inputs `evaluation`, `userAction`, `selectedFactorIds`. On Start: status→INPROGRESS, sets eval start/due, **populates `round` relationship** (Round 1, `sequence=1`, `isOnSpotConsensus` inherited, created/modified), keeps weighted/on-spot metrics, outputs `selectedFactorIds`. testInterface clean on eval 12. **PO-verified in UI.**
+  - *Deferred:* Team/Evaluators on the factor card (the `EvaluatorTeam` join returned empty in the harness); v1 shows factor number instead.
+- **Process model** `AS GSS Start Evaluation Best Value` = `0000f04b-68ab-8000-fbf5-7f0000014e7a` — 16 nodes, validates clean (see §10.45 node map in onboarding). Clone of `0002ecdd…` **minus LPTA**, plus **Scope Selected Factors** node; `selectedFactorIds` PV; start form wired.
+- **Anchor rule** `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` v4 — family resolution `coalesce(parentEvalId, evaluationId)` → anchor + children rounds. Verified in-context (Teams parent on eval 6, diagnostics.error null).
+
+**Deviations from plan (tooling limits — see tracker "Tooling limitations"):**
+- The two **Start Process** nodes (Sync GCW, Reqt Extraction) were implemented as **async SUB_PROC** (MCP can't create `start-process-4`; `acSchemaId` NPE). Same target PMs, both accept `evaluationId`.
+- PM built **incrementally** (bulk `updateProcessModel(nodes)` hit the same NPE).
+- **Step 5 (retire tab fallback):** NOT done — the current-eval fallback is compatible with the anchor change and still handles non-round evals; retiring adds risk with no gain.
+
+**Manual (MCP blocked on `AS_GSS_Evaluation_RECORD`):** CO to create the `startEvaluationBestValue` action + guard the existing `startEvaluation` action. Full copy-paste spec in `03_AGENT_ONBOARDING.md` §10.45 (§A visibility+contextExpr, §B guard).
+
+**Pending end-to-end verification (after CO wires the actions):** fresh Best Value SETTING_UP eval → action visible (LPTA shows old action); submit factor subset → Round-1 row (`sequence=1`, `parentEvalId` null), status INPROGRESS, tasks/ratings/consensus only for selected factors × vendors, Round 1 tab appears across round-aware tabs; on-spot variant creates no eval tasks; LPTA/non-Best-Value unaffected.
