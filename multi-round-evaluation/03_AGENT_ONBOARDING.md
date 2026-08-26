@@ -23,6 +23,8 @@ Full details: **`01_FEATURE_AND_TECHNICAL_DESIGN.md`**. Live status: **`02_PROGR
 | Design doc | `01_FEATURE_AND_TECHNICAL_DESIGN.md` |
 | Progress tracker | `02_PROGRESS_TRACKER.md` |
 | This onboarding | `03_AGENT_ONBOARDING.md` |
+| **Tabs implementation plan** (active phase) | `04_TABS_IMPLEMENTATION_PLAN.md` — per-tab treatment, id-vs-record input shapes, record-view urlStubs, work items WI-1..9, sequencing |
+| **Docs git repo** | `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). These 5 docs live under `multi-round-evaluation/`. Commit + push after every session. |
 | **The actual code (Appian objects)** | Appian **AS GSS Full Application**, accessed via the **`lcp` MCP server** — there is **no local git repo** for these objects |
 
 **Environment:** `gam-gss-32-innovate.appianpreview.com`
@@ -112,6 +114,21 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 Foundation done: round record type, the evaluation-duplication engine, a 2-step Setup New Round wizard, the Rounds panel, and supporting query rules. **Shipped tab work:** Vendors → "Last Participated Round" column; **Teams → round sub-tabs** (verified). Round sub-tabs remaining for 6 tabs — follow the recipe in `01_…` §6.6. See `02_PROGRESS_TRACKER.md` for the live checklist.
 
+## 7b. Continuing the current phase — round sub-tabs (read `04_…` first)
+
+**Goal:** give each Evaluation record tab per-round sub-tabs (like Factors ✅ and Teams ✅). Remaining: **Consensus, Documents, Task History** (ID-based), then **Ratings, Tasks, Evaluation History** (RECORD-based — need a per-round loader that queries the record(s) first). Full input-shape table + interface UUIDs + record-view urlStubs are in `04_TABS_IMPLEMENTATION_PLAN.md` §2/§8.
+
+**Reference implementations to copy:** Factors (`AS_GSS_CPS_viewFactors` + `_Parent`, view `_n_87YA`) and Teams (`AS_GSS_CPS_viewEvaluatorTeam` + `_Parent`, view `_j9bz9g`).
+
+**Per-tab recipe** (from `01_…` §6.6):
+1. `getInterface` the tab's content interface + `getObjectDependents` to confirm scope.
+2. If it self-wraps in `AS_GSS_HCL_displayWrapperContents`/`headerContentLayout`, strip that frame → embeddable; `updateInterface`.
+3. Create `AS_GSS_CPS_<tab>_Parent(evaluationId)` = `headerContentLayout` + `tabLayout` + `a!forEach(rule!AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation)` → `tabItem(label:"Round "&sequence, contents: <content>(roundEvalId))`. RECORD-based tabs: wrap the content call in a per-round loader interface that runs the same queries the current view does.
+4. `testInterface` the `_Parent` on **eval 12** (known multi-round test family: evals 6→10,11,12).
+5. Hand the CO the one-line view repoint (MCP can't update `AS_GSS_Evaluation_RECORD` views).
+
+**Open blocker (WI-1):** `returnEvaluationRoundsForGivenEvaluation` filters `parentEvalId = id` (children only), so Round 1 (root) may not appear as a tab and opening a *child* round record yields no tabs. Affects Factors + Teams equally. Fix by resolving anchor = `coalesce(parentEvalId, evaluationId)` and including the root (pattern already used in `AS_GSS_UT_returnLastParticipatedRoundForVendors`). Tied to the Start Evaluation / round-1-record work (§4 in tracker).
+
 ## 7a. Gotchas you MUST know before coding (details in `01_…` §6.6–6.7)
 - **Tab content must be embeddable** — a `tabItem` rejects `HeaderContentLayout`. Strip a tab interface's outer `AS_GSS_HCL_displayWrapperContents`/`headerContentLayout` before nesting it per round (the `_Parent` supplies one frame).
 - **Round-listing goes inside the `_Parent` interface**, not a standalone expression rule (per-round content uses `env!features`, which fails expression-rule validation).
@@ -127,7 +144,7 @@ Foundation done: round record type, the evaluation-duplication engine, a 2-step 
 
 ## 8. Working agreements
 
-1. **Update `02_PROGRESS_TRACKER.md`** at the end of every session (statuses + append a Session Log entry).
+1. **Update `02_PROGRESS_TRACKER.md`** at the end of every session (statuses + append a Session Log entry), then **`git add` + commit + push** the `multi-round-evaluation/` docs from `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). Do NOT stage the unrelated `genesis/` folder.
 2. **Validate** every changed object (`validateDesignObject`) and, where possible, `testInterface` / `testRule` before considering work done.
 3. **Confirm priority** with the team before starting a work item — the plan is to pick items *after* documentation is in place.
 4. **Match existing conventions** (naming, helper rules, constants) — don't introduce new patterns without reason.
@@ -147,3 +164,5 @@ listExpressionRules(appUuid: <above>, query: "round")
 getRecordType(uuid: "931e8145-3f77-4270-a52a-b51de6e76983")
 ```
 Then dump the round interfaces/rules to `/tmp/gss_review/*.sail` with `getInterface`/`getExpressionRule` and read them.
+
+**Known test data:** evaluation **12** is part of a multi-round test family (root **6** → child rounds **10, 11, 12**; vendors keyed by UEI `123456789123`, `123456789122`). Use eval 12 with `testInterface`/`testRule` to verify round-aware behavior. (Round records exist for evals 7,8,9,10,11,12; some have null `sequence` — a known data gap.)
