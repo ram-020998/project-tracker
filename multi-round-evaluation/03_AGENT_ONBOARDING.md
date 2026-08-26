@@ -85,6 +85,10 @@ When creating new objects, **match the existing pattern** rather than inventing 
 | `AS_GSS_FM_evaluationAuditHistory_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42552` |
 | `AS_GSS_FM_startEvaluationBestValue` (WI-1 modal) | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42569` |
 | `AS GSS Start Evaluation Best Value` (WI-1 PM) | `0000f04b-68ab-8000-fbf5-7f0000014e7a` |
+| `AS_GSS_FM_startRound` (WI-2 modal) | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42738` |
+| `AS GSS Start Round` (WI-2 wrapper PM) | `0000f04b-9451-8000-fc0b-7f0000014e7a` |
+| `AS GSS Complete Round` (WI-3 wrapper PM) | `0000f04b-add3-8000-fc11-7f0000014e7a` |
+| `AS_GSS_UT_returnLatestChildEvaluationInSetupForGivenEvaluation` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_43812` |
 
 **Existing core (read-only context):**
 | Object | UUID |
