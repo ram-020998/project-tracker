@@ -4,7 +4,7 @@
 > Companion docs: `01_FEATURE_AND_TECHNICAL_DESIGN.md`, `03_AGENT_ONBOARDING.md`.
 
 **Last updated:** 2026-08-26
-**Overall status:** 🟡 Foundation in place. Shipped round sub-tabs: Factors, **Teams**, **Consensus Reports**, **Documents**. Plus Vendors → "Last Participated Round". Remaining round sub-tabs: Task History, Ratings, Tasks, Evaluation History.
+**Overall status:** 🟡 Foundation in place. Shipped round sub-tabs: Factors, **Teams**, **Consensus Reports**, **Documents**, **Task History** (all ID-based tabs done). Plus Vendors → "Last Participated Round". Remaining round sub-tabs: Ratings, Tasks, Evaluation History (record-based — query per round).
 
 ---
 
@@ -67,7 +67,7 @@
 | 5.6 | Round sub-tabs on Consensus Reports | ✅ | Built + verified. `AS_GSS_CPS_consensusReportView_Parent` → per-round `AS_GSS_CPS_consensusReportView` (made embeddable: stripped 3 HCL frames + null-hardened status comparisons). View `_KJy-Pg` repointed manually; drop the `loggedInUser` arg (parent supplies it). |
 | 5.7 | Round sub-tabs on Teams | ✅ | Built + verified. `AS_GSS_CPS_viewEvaluatorTeam_Parent` (inlined config) → per-round `AS_GSS_CPS_viewEvaluatorTeam` (made embeddable). View `_j9bz9g` repointed manually (MCP can't update this record type). |
 | 5.7a | Round sub-tabs on Documents | ✅ | Built + verified. `AS_GSS_FM_evaluationDocumentsTab_Parent` → per-round `AS_GSS_FM_evaluationDocumentsTab` (made embeddable: stripped 1 HCL frame; inner Documents/Drafts tabs nest fine; no null-hardening needed). View `_wHo-OA` repointed manually. |
-| 5.7b | Round sub-tabs on Task History | ⬜ | id-based wrapper — plan WI-6b |
+| 5.7b | Round sub-tabs on Task History | ✅ | Built + verified. `AS_GSS_TMG_FM_taskAuditActionHistory_Parent` → per-round `AS_GSS_TMG_FM_taskAuditActionHistory` (made embeddable: stripped 1 HCL frame; no null-hardening). View `_YpCKng` repointed manually. |
 | 5.7c | Round sub-tabs on Tasks | ⬜ | **record-based** loader — plan WI-6c |
 | 5.7d | Round sub-tabs on Evaluation History | ⬜ | **record-based, heavy** (6 collections/round); do lazy pattern — plan WI-6d |
 | 5.8 | Factors tab "Rounds" column | ⬜ | Add to `AS_GSS_GRD_ViewFactorsAndSubfactors` — plan WI-7 |
@@ -100,6 +100,7 @@
 | 7.6 | `AS_GSS_CPS_viewEvaluatorTeam_Parent` (interface) | ✅ | Round-aware Teams wrapper; inlined round-listing (env!features prevents an expression-rule config) |
 | 7.7 | `AS_GSS_CPS_consensusReportView_Parent` (interface) | ✅ | Round-aware Consensus wrapper; parent supplies `loggedInUser()` |
 | 7.8 | `AS_GSS_FM_evaluationDocumentsTab_Parent` (interface) | ✅ | Round-aware Documents wrapper; inner Documents/Drafts sub-tabs nest per round |
+| 7.9 | `AS_GSS_TMG_FM_taskAuditActionHistory_Parent` (interface) | ✅ | Round-aware Task History wrapper |
 
 ## 8. Integrations
 
@@ -242,3 +243,15 @@ Third round-sub-tab beyond Factors. Straightforward — one frame, no null-harde
 **Learnings:**
 10. **Nested tabs are fine.** A content interface that itself renders an `a!tabLayout` embeds cleanly inside a round `tabItem` (Documents' inner Documents/Drafts tabs). No special handling.
 11. **No null-hardening was needed here** — unlike Consensus. Whether it's required depends on the content interface's own null-tolerance; check per tab rather than assuming.
+
+### 2026-08-26 — Task History tab → round sub-tabs (SHIPPED + verified)
+Fourth round-sub-tab; last of the ID-based tabs.
+
+**Objects changed:**
+- **Created** `AS_GSS_TMG_FM_taskAuditActionHistory_Parent` (`_a-0000f04b-38cd-8000-9baa-011c48011c48_42524`).
+- **Modified** `AS_GSS_TMG_FM_taskAuditActionHistory` (`_a-0000e2cd-bc96-8000-9ba2-011c48011c48_137309-tmg-am-am`, v3) — stripped the single outer `AS_GSS_HCL_displayWrapperContents` frame (wrapped a `columnsLayout`) → embeddable. No null-hardening needed.
+- **Repointed (manually, by CO)** the Task History view `_YpCKng`.
+
+**Verification:** `testInterface` parent (eval 12) → `diagnostics.error = null`; per-round tab embeds the full audit view (Phase History left panel, audit trail with real entries, filters, pagination "1-5 of 16"). CO confirmed in UI.
+
+**Milestone:** all 4 ID-based round sub-tabs done (Teams, Consensus, Documents, Task History), plus Factors. Remaining: the 3 record-based tabs (Ratings, Tasks, Evaluation History) whose views pass queried collections rather than an evaluationId — the parent must run the same queries per round (inlined in the `tabItem` contents; `a!tabLayout` loads inactive tabs lazily, so the heavy Evaluation-History queries only run when a round tab is opened).

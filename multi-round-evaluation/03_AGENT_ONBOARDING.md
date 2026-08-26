@@ -77,6 +77,7 @@ When creating new objects, **match the existing pattern** rather than inventing 
 | `AS_GSS_CPS_viewEvaluatorTeam_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42490` |
 | `AS_GSS_CPS_consensusReportView_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42504` |
 | `AS_GSS_FM_evaluationDocumentsTab_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42514` |
+| `AS_GSS_TMG_FM_taskAuditActionHistory_Parent` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_42524` |
 
 **Existing core (read-only context):**
 | Object | UUID |
@@ -114,7 +115,7 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 ## 7. Current state in one line
 
-Foundation done: round record type, the evaluation-duplication engine, a 2-step Setup New Round wizard, the Rounds panel, and supporting query rules. **Shipped tab work:** Vendors → "Last Participated Round" column; **Teams**, **Consensus Reports**, and **Documents** → round sub-tabs (verified). Round sub-tabs remaining for 4 tabs — follow the recipe in `01_…` §6.6. See `02_PROGRESS_TRACKER.md` for the live checklist.
+Foundation done: round record type, the evaluation-duplication engine, a 2-step Setup New Round wizard, the Rounds panel, and supporting query rules. **Shipped tab work:** Vendors → "Last Participated Round" column; **Teams**, **Consensus Reports**, **Documents**, **Task History** → round sub-tabs (verified — all ID-based tabs done). Remaining: 3 record-based tabs (Ratings, Tasks, Evaluation History). See `02_PROGRESS_TRACKER.md` for the live checklist.
 
 ## 7b. Continuing the current phase — round sub-tabs (read `04_…` first)
 
