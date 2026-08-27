@@ -74,6 +74,7 @@ When creating new objects, **match the existing pattern** rather than inventing 
 | `AS_GSS_EvaluationRound_SYNCEDRECORD` | `931e8145-3f77-4270-a52a-b51de6e76983` |
 | `AS_GSS_FM_startNewRound` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42072` |
 | `AS_GSS_SEC_rounds` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42270` |
+| `AS_GSS_SEC_DisplayActiveRoundVendorsInSummary` | `_a-0000f04b-38cd-8000-9baa-011c48011c48_43806` |
 | `AS_GSS_CP_evaluationSummaryStampField` | `_a-0000e5da-a251-8000-9bbe-011c48011c48_1007655` |
 | `AS_GSS_UT_duplicateEvaluationForNewRound` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42160` |
 | `AS_GSS_QR_getEvaluationRoundDetails` | `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42276` |
