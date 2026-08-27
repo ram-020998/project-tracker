@@ -898,13 +898,111 @@ Both related actions on `AS_GSS_Evaluation_RECORD`; both surfaced from the Round
 | **Start Round** | `startRound` | 7.2 | method = Best Value **and** `parentEvalId` not blank (a child round). (Panel further restricts to latest + Set Up.) | `evaluation`, `originalEvaluation`, `evaluationFactorsAndSubFactors` (active criteria), `originalEvaluationFactorsAndSubFactors`, `vendors`, `userAction: null`. |
 | **Complete Round** | `completeRound` | 7.3 | `not(rule!AS_GSS_UT_hasOpenCompleteEvaluationTask(evaluationId: rv!identifier))` — no open Complete-Evaluation task. (Panel restricts to In Progress.) | `evaluation` (single object). |
 
+## 8. Summary recomposition + Vendors
+
+The Summary drives the whole lifecycle from the parent workspace: the left column shows the **active round's** vendors + factors + tasks; the right column shows the **Rounds panel** plus settings/description/personnel. The Vendors tab gains a **Last Participated Round** column.
+
+### 8.1 `AS_GSS_CPS_evaluationInformationForLeftPanelOfSummary`
+**Purpose:** left column of Summary — vendors, factor details, and evaluation-approach tasks for the current/active round.
+**Inputs:** `evaluationRecord` (the parent), `i18nData`, factor/selection inputs, `loggedInUser`, `isStateOrLocal`, refresh triggers.
+**Round-aware behaviour (the only change from single-round):** the **Vendors** block branches:
+1. awardees selected / complete with decisions → winning-vendors grid;
+2. **else a child round is active** (`AS_GSS_UT_returnLatestChildEvaluationInSetupForGivenEvaluation(evaluationId)` is non-null) → render `AS_GSS_SEC_DisplayActiveRoundVendorsInSummary` (8.3) for that round;
+3. else → the parent evaluation's vendor cards.
+Factor details and evaluation-approach tasks are rendered by their existing component rules unchanged.
+**Notes:** keep this interface a thin composition of the vendor/factor/task component rules; the round branch is a single `if` on the active-round helper.
+
+### 8.2 `AS_GSS_CPS_evaluationInformationForRightPanelOfSummary`
+**Purpose:** right column of Summary.
+**Inputs:** `evaluationRecord`, `i18nData`, `loggedInUser`, factor records, `triggerRefresh`.
+**Composition (top to bottom):** **Rounds panel** `AS_GSS_SEC_rounds(evaluationId)` (7.5) → Settings → Description (with show-more + edit action) → Factor weights (when weighted + status in progress/awardees/complete) → Related Procurements → Related Opportunity → Personnel (Contracting Officer/Specialist/Chief, mask-evaluators) → Phases.
+**Round-aware change:** only the addition of the Rounds panel at the top; the remaining sections read the parent evaluation as before.
+
+### 8.3 `AS_GSS_SEC_DisplayActiveRoundVendorsInSummary`
+**Purpose:** render the **active round's** vendor cards inside the parent Summary.
+**Inputs:** `evaluationId` (parent), `i18nData`, `isStateOrLocal`.
+**Implementation (shape):**
+```
+a!localVariables(
+  local!triggerRefresh: now(),
+  /* the round currently being worked */
+  local!activeRoundEvalId: rule!AS_GSS_UT_returnLatestChildEvaluationInSetupForGivenEvaluation(evaluationId: ri!evaluationId),
+  local!activeRoundEval: rule!AS_GSS_UT_updateEvaluationRecordWithAllVendors(evaluation: local!activeRoundEvalId, triggerRefresh: local!triggerRefresh, executeWhen: true()),
+  local!vendorPagingInfo: <same sort as the summary vendor cards>,
+  rule!AS_GSS_CPS_vendorsInfoForEvaluationSummary(
+    i18nData: ri!i18nData,
+    pagingInfo: local!vendorPagingInfo,
+    vendorInfo: rule!AS_GSS_formatVendorInfoForCards(evaluationRecord: local!activeRoundEval, pagingInfo: local!vendorPagingInfo),
+    evaluation: local!activeRoundEval,
+    isSetUpPending: <status in {TEMP, SETTING_UP}>,
+    factorCount: local!activeRoundEval['recordType!{e6bc8561}...{59f64a3b}factorCount'],
+    isStateOrLocal: ri!isStateOrLocal
+  )
+)
+```
+**Notes:** reuses the shared vendor-cards component (`AS_GSS_CPS_vendorsInfoForEvaluationSummary`) — this interface only resolves the active round and hands it that component. Confirm the "active round" definition with the PO (latest not-complete round); align the helper accordingly if it should include In-Progress.
+
+### 8.4 `AS_GSS_UT_returnLastParticipatedRoundForVendors`
+**Purpose:** per vendor (keyed by **`uniqueEntityId`**), the highest-sequence round they took part in across the family — for the Vendors tab column.
+**Inputs:** `evaluationId` (Integer, any family member).
+**Implementation** (reuses the family resolver, so no manual anchor/children queries):
+```
+a!localVariables(
+  /* family rounds: evaluationId + sequence + roundName, sequence-ordered */
+  local!rounds: rule!AS_GSS_QR_getRoundsForEvaluation(evaluationId: ri!evaluationId),
+  local!familyEvalIds: local!rounds['recordType!{931e8145}...{1756683f}evaluationId'],
+  /* active vendor rows across the family; uniqueEntityId is the stable cross-round identity */
+  local!vendorRows: rule!AS_CO_UT_queryRecord(
+    recordType: 'recordType!{b6081510}AS_GSS_EvaluationVendor_SYNCEDRECORD',
+    returnType: cons!AS_CO_ENUM_QE_RETURN_TYPE_OBJECT_ARRAY,
+    executeWhen: a!isNotNullOrEmpty(local!familyEvalIds),
+    fields: { '…{1b15a370}uniqueEntityId', '…{f99475b5}evaluationId' },
+    filters: {
+      a!queryFilter(field: '…{f99475b5}evaluationId', operator: "in", value: local!familyEvalIds),
+      a!queryFilter(field: '…{47c7340f}isActive', operator: "=", value: true())
+    }
+  ),
+  a!forEach(
+    items: rule!AS_CO_UT_distinct(rule!AS_CO_UT_rejectNullValuesFromArray(local!vendorRows['…{1b15a370}uniqueEntityId'])),
+    expression: a!localVariables(
+      /* rounds this vendor appears in → their sequences */
+      local!vendorEvalIds: index(local!vendorRows['…{f99475b5}evaluationId'],
+        wherecontains(fv!item, local!vendorRows['…{1b15a370}uniqueEntityId']), {}),
+      local!seqs: index(local!rounds['recordType!{931e8145}...{d20a1017}sequence'],
+        wherecontains(tointeger(local!vendorEvalIds), tointeger(local!rounds['recordType!{931e8145}...{1756683f}evaluationId'])), {}),
+      local!maxSeq: if(a!isNullOrEmpty(local!seqs), null, tointeger(max(local!seqs))),
+      a!map(
+        uniqueEntityId: fv!item,
+        sequence: local!maxSeq,
+        roundName: index(local!rounds['recordType!{931e8145}...{31c08880}roundName'],
+          wherecontains(local!maxSeq, tointeger(local!rounds['recordType!{931e8145}...{d20a1017}sequence'])), null)
+      )
+    )
+  )
+)
+```
+**Notes:** returns `{uniqueEntityId, sequence, roundName}`; the Vendors grid composes the display label (i18n "Round N | name") — data assembly and label formatting are kept separate.
+**Test cases:** "Case with No Assertions". (1) null; (2) family where a vendor is dropped after round 1 → that vendor's `sequence` = 1.
+
+### 8.5 `AS_GSS_UT_returnEvaluationTaskProgressForGivenCriteria`
+**Purpose:** per-vendor task completion (total + completed) for one factor of one evaluation — drives the Summary factor progress %.
+**Inputs:** `evaluationId`, `factorId` (both Integer).
+**Implementation:** a single aggregation query on Tasks grouped by `vendorId` + `taskStatusId` (filters: `taskRefId = COMPLETE_EVALUATION`, active statuses, this `evaluationId` + `criteriaId`), then per distinct `vendorId` a `{vendorId, totalTasks, completedTasks}` map (completed = the COMPLETE-status count). Return `a!map(vendorId: 0, totalTasks: 0, completedTasks: 0)` when inputs are blank. Use `AS_CO_UT_distinct(local!groupedData.vendorId)` for the vendor loop (not `union(x, x)`).
+**Test cases:** "Case with No Assertions". (1) null inputs → zero map; (2) a factor with some complete + some open tasks → correct totals.
+
+### 8.6 Vendors tab — `AS_GSS_FM_evaluationVendorsTab` + `AS_GSS_GRD_EvaluationVendors`
+**Purpose:** the Vendors tab and its grid, on the parent evaluation.
+**Round-aware change:** add a **Last Participated Round** column. The tab loads `rule!AS_GSS_UT_returnLastParticipatedRoundForVendors(evaluationId)` once and passes it to the grid; the grid, per vendor row, looks up the entry by **`uniqueEntityId`** and renders "Round {sequence} | {roundName}" (i18n). No other columns change.
+**Notes:** correlate strictly by `uniqueEntityId` (not `vendorId`, which differs per round). Column is empty for vendors with no round participation.
+
 ## Batch tracker (build order)
 1. **Data model** — §2 ✅
 2. **Family & round helpers** — §3 ✅
 3. **Start Evaluation as Round 1** — §4 ✅
 4. **Round-aware tabs** — §5 ✅
 5. **Setup New Round + clone** — §6 ✅
-6. **Start / Complete round + Rounds panel** — §7 ✅ (confirm form, two wrapper PMs, status-display helper, panel, actions)
+6. **Start / Complete round + Rounds panel** — §7 ✅
+7. **Summary recomposition + Vendors** — §8 ✅ (left/right panels, active-round vendors, last-participated-round + task-progress rules, Vendors tab column)
 4. **Round-aware tabs** — embeddable content + wrapper(s)
 5. **Setup New Round + clone** — wizard, duplicate, team-mapping, factor-doc-mapping
 6. **Start / Complete round + Rounds panel**
