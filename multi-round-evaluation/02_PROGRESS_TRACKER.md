@@ -414,3 +414,10 @@ Net: multi-round is integration-safe under the parent-only model; **1 minor VM c
 
 - **VM Flow G — IMPLEMENTED.** `AS_GSS_mapVendorUpdatesToRecord` (`_a-0000ed8a-02db-8000-9dfc-011c48011c48_15443462`, now v2): after matching the parent by `evaluationNumber = noticeId`, it resolves the family's **latest round** (`AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation`, max `sequence` → that round's `evaluationId`) and targets the vendor query + writes the `VendorUpdates` against the **latest round's child `evaluationId`**; falls back to the parent when no round rows exist. `evaluationNumber` still holds the solicitation PIID. Fix for the `wherecontains` type mismatch: `tointeger(max(...))`. Verified via `testRule` on `26082602` → resolved to latest round eval **21** (not root 16), `error: null`. Doc 02 §1b updated to "Implemented".
 - **GCW Flow 10 — DECISION DOCUMENTED (implement later).** Doc 04 §1b now states: **GCW status syncs should be skipped for child evaluations** (only the parent's status should sync; Start Round/Complete Round must not push child statuses). Deferred to a later change.
+
+## Session Log — 2026-08-27 (Factor→document mapping carry-forward for new rounds)
+
+Implemented the "criteria pre-write" solution to carry `AS_GSS_FactorDocumentMapping` rows into new rounds.
+- **Built + verified rule** `AS_GSS_UT_constructFactorDocumentMappingsForNewRound` (`_a-0000f04c-8a45-8000-9bac-011c48011c48_83697`): correlates factor by `factorNumber` + document by `appianDocId`, copies active source mappings → new `FactorDocumentMapping` rows. `testRule` (new round 21, source 16) → 3 mappings (doc 52 → factors 43/44/45), `error:null`. Uses the criteria/doc ids already persisted by PM `000bf04a` node 6 "Write Evaluation".
+- **Remaining MANUAL step (Designer, MCP-blocked by lane):** add a "Write Records and Related Records" node after node 6 in PM `000bf04a` (lane System), Records = the rule call, Version 6, PauseOnError true, CaptureEvents false. Full spec in onboarding §10.50.
+- Decision on `isActive`: copy only currently-active source mappings; create new ones active. (Confirm if reactivating all was intended.)
