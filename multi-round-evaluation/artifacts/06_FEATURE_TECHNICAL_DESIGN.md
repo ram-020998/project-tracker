@@ -437,10 +437,105 @@ and(
 ```
 **Notes:** confirm the record exposes `evaluationMethod` (relationship → `refDataId`) and `parentEvalId` as record fields; if not, add them. Net effect: root Best-Value → Start Evaluation (BV); child round → Start Round (§6 batch); other methods → the original Start Evaluation.
 
+## 5. Round-aware content tabs
+
+Each Evaluation content tab shows **one sub-tab per round**, rendering that tab's existing content for the round's evaluation clone. The scaffolding (resolve family → tab per round → render content) is identical for every tab, so it lives in **one** wrapper; the per-tab content interfaces stay separate but must be **embeddable**.
+
+**Consolidation:** the eight prototype `_Parent` wrappers and the `returnViewRenderingConfigFor_Factors` rule are replaced by a **single** wrapper `AS_GSS_CPS_roundContentTabs`, selected per view by a `tabType`. (SAIL can't invoke a rule passed as a parameter, so the wrapper routes to the right content with `a!match` — one router, not eight copies.)
+
+### 5.1 Embeddable-content contract (applies to all 8 content interfaces)
+Each content interface (`AS_GSS_CPS_viewFactors`, `AS_GSS_CPS_viewEvaluatorTeam`, `AS_GSS_CPS_consensusReportView`, `AS_GSS_FM_evaluationDocumentsTab`, `AS_GSS_TMG_FM_taskAuditActionHistory`, `AS_GSS_CPS_evaluationRatingsTab`, `AS_GSS_TMG_CPS_viewRecordTasks`, `AS_GSS_FM_evaluationAuditHistory`) must:
+- render **without** an outer `headerContentLayout`/wrapper (the wrapper supplies the one frame) — a `tabItem` rejects a header layout; strip **all** such frames (some interfaces have several branches);
+- use `columnsLayout`, not `paneLayout`, at the top level (panes are rejected inside `tabItem`);
+- null-harden against a per-round evaluationId that resolves to nothing (guard status comparisons with `a!defaultValue(..., -1)`);
+- take a single per-round input — either the round's `evaluationId` or its queried `evaluation` (see 5.4).
+
+### 5.2 `AS_GSS_CPS_roundContentTabs` (the one wrapper — replaces all 8 `_Parent`)
+**Purpose:** render a record's content as one sub-tab per round of the family.
+**Used by:** all eight Evaluation record views (each passes its own `tabType`).
+**Inputs:** `evaluationId` (Integer — *"(Required) the record's evaluationId"*), `tabType` (Text — *"(Required) which content to render; one of `cons!AS_GSS_ENUM_ROUND_TAB_*`"*).
+**Implementation:**
+```
+a!localVariables(
+  local!i18nData: rule!AS_GSS_CO_UT_loadBundleFromFolder(langISOCode: null),
+  local!rounds: rule!AS_GSS_QR_getRoundsForEvaluation(evaluationId: ri!evaluationId),
+  /* Fallback to the current evaluation when there are no round rows (non-round / leaf record),
+     so content never receives a null evaluationId. */
+  local!tabs: if(
+    a!isNullOrEmpty(local!rounds),
+    { a!map(evaluationId: ri!evaluationId, sequence: null) },
+    a!forEach(
+      items: local!rounds,
+      expression: a!map(
+        evaluationId: fv!item['recordType!{931e8145}...{1756683f}evaluationId'],
+        sequence: fv!item['recordType!{931e8145}...{d20a1017}sequence']
+      )
+    )
+  ),
+  a!headerContentLayout(
+    contentsPadding: "NONE",
+    backgroundColor: rule!AS_GSS_BrandingValueByKey(brandingKey: "DefaultBackground", useSuiteBranding: true),
+    contents: a!tabLayout(
+      /* lazy-loads inactive tabs, so only the open round's content/query runs */
+      tabs: a!forEach(
+        items: local!tabs,
+        expression: a!tabItem(
+          label: rule!AS_GAM_CO_I18N_UT_displayLabel(
+            bundle: local!i18nData, bundleKey: "lbl_RoundN", arguments: fv!item.sequence
+          ),
+          contents: a!match(
+            value: ri!tabType,
+            equals: cons!AS_GSS_ENUM_ROUND_TAB_FACTORS,      then: rule!AS_GSS_CPS_viewFactors(evaluationId: fv!item.evaluationId, loggedInUser: loggedInUser()),
+            equals: cons!AS_GSS_ENUM_ROUND_TAB_TEAMS,        then: rule!AS_GSS_CPS_viewEvaluatorTeam(evaluationId: fv!item.evaluationId),
+            equals: cons!AS_GSS_ENUM_ROUND_TAB_CONSENSUS,    then: rule!AS_GSS_CPS_consensusReportView(evaluationId: fv!item.evaluationId),
+            equals: cons!AS_GSS_ENUM_ROUND_TAB_DOCUMENTS,    then: rule!AS_GSS_FM_evaluationDocumentsTab(evaluationId: fv!item.evaluationId),
+            equals: cons!AS_GSS_ENUM_ROUND_TAB_TASK_HISTORY, then: rule!AS_GSS_TMG_FM_taskAuditActionHistory(evaluationId: fv!item.evaluationId),
+            equals: cons!AS_GSS_ENUM_ROUND_TAB_RATINGS,      then: rule!AS_GSS_CPS_evaluationRatingsTab(evaluation: rule!AS_GSS_QR_getEvaluationByIdentifier(evaluationId: fv!item.evaluationId)),
+            equals: cons!AS_GSS_ENUM_ROUND_TAB_TASKS,        then: rule!AS_GSS_TMG_CPS_viewRecordTasks(evaluation: rule!AS_GSS_QR_getEvaluationByIdentifier(evaluationId: fv!item.evaluationId)),
+            equals: cons!AS_GSS_ENUM_ROUND_TAB_EVAL_HISTORY, then: rule!AS_GSS_FM_evaluationAuditHistory(evaluation: rule!AS_GSS_QR_getEvaluationByIdentifier(evaluationId: fv!item.evaluationId)),
+            default: {}
+          )
+        )
+      )
+    )
+  )
+)
+```
+**Notes:** `lbl_RoundN` takes the sequence as an argument; when `sequence` is null (fallback tab) it should render a plain "Round"/current label. Confirm each content interface's exact input name (5.4).
+**Test cases (interface):** default inputs = a multi-round family + each `tabType` → renders one tab per round; a non-round evaluation → single fallback tab.
+
+### 5.3 Tab-type constants
+Group as `cons!AS_GSS_ENUM_ROUND_TAB_*` (one text/int constant each): `FACTORS`, `TEAMS`, `CONSENSUS`, `DOCUMENTS`, `TASK_HISTORY`, `RATINGS`, `TASKS`, `EVAL_HISTORY`. (Constants so views are dependency-checkable; per best-practices §4.)
+
+### 5.4 Content-interface input map
+| Tab | Content interface (embeddable) | tabType | Per-round input |
+| :--- | :--- | :--- | :--- |
+| Factors | `AS_GSS_CPS_viewFactors` | `FACTORS` | `evaluationId` (+ `loggedInUser`) |
+| Teams | `AS_GSS_CPS_viewEvaluatorTeam` | `TEAMS` | `evaluationId` |
+| Consensus | `AS_GSS_CPS_consensusReportView` | `CONSENSUS` | `evaluationId` |
+| Documents | `AS_GSS_FM_evaluationDocumentsTab` | `DOCUMENTS` | `evaluationId` |
+| Task History | `AS_GSS_TMG_FM_taskAuditActionHistory` | `TASK_HISTORY` | `evaluationId` |
+| Ratings | `AS_GSS_CPS_evaluationRatingsTab` | `RATINGS` | `evaluation` (queried) |
+| Checklist / Tasks | `AS_GSS_TMG_CPS_viewRecordTasks` | `TASKS` | `evaluation` (queried) |
+| Evaluation History | `AS_GSS_FM_evaluationAuditHistory` | `EVAL_HISTORY` | `evaluation` (queried) |
+
+The three "queried" tabs take a full `evaluation` object, so the wrapper queries it per round via `AS_GSS_QR_getEvaluationByIdentifier` inside the branch (the tab layout lazy-loads, so only the open round queries).
+
+### 5.5 Record-view wiring (manual in Designer)
+Each of the eight Evaluation record views points its interface expression at the one wrapper with its `tabType`, e.g. the Teams view:
+```
+rule!AS_GSS_CPS_roundContentTabs(
+  evaluationId: rv!record['recordType!{4db4a62e}...{evaluationId}evaluationId'],
+  tabType: cons!AS_GSS_ENUM_ROUND_TAB_TEAMS
+)
+```
+Eliminated by this batch: the eight `*_Parent` wrappers and `AS_GSS_UT_returnViewRenderingConfigFor_Factors` (their behaviour is subsumed by `AS_GSS_CPS_roundContentTabs`).
+
 ## Batch tracker (build order)
 1. **Data model** — §2 ✅
-2. **Family & round helpers** — §3 ✅ (`getEvaluationRoundDetails`, `getRoundsForEvaluation`, `returnIdentifiersForEvaluationRounds`, `returnLatestChildEvaluationInSetupForGivenEvaluation`, `hasOpenCompleteEvaluationTask`)
-3. **Start Evaluation as Round 1** — §4 ✅ (modal, PM node-by-node, record actions + visibility split)
+2. **Family & round helpers** — §3 ✅
+3. **Start Evaluation as Round 1** — §4 ✅
+4. **Round-aware tabs** — §5 ✅ (one consolidated wrapper `AS_GSS_CPS_roundContentTabs` + embeddable-content contract; eliminates 8 wrappers + the factors config rule)
 4. **Round-aware tabs** — embeddable content + wrapper(s)
 5. **Setup New Round + clone** — wizard, duplicate, team-mapping, factor-doc-mapping
 6. **Start / Complete round + Rounds panel**
