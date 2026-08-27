@@ -372,3 +372,15 @@ Delivered **`artifacts/02_VM_GSS_MULTIROUND_IMPACT.md`** (per-flow breaks/works/
 - Identity (`externalVendorId`/UEI) + provenance (`sourceApplicationId=VM`) carry fine; toggles/sealed-bid unaffected.
 
 **Top fix:** decouple the VM join key from the label (keep raw PIID on every round), then add round-selection logic to F/G and decide the between-round→VM sync question. Failures are **silent** (no user-visible error), which raises priority. Open confirmations listed in doc §6.
+
+## Session Log — 2026-08-27 (GCW↔GSS Phase 1 — current state, both sides)
+
+GCW now installed (`AS GCW Full Application` `_a-0000e85f-3e2e-8000-9bfd-011c48011c48_2767135`). Delivered **`artifacts/03_GCW_GSS_CURRENT_STATE_INTEGRATION.md`**. **Paused for review before Phase 2 (GCW multi-round impact → `04_…`).**
+
+**Mechanism (KEY difference from VM):** GCW↔GSS uses **APPREF→ENTRYPOINT**, not HTTP. Each caller has an `AS_<APP>_APPREF_<TARGET>_…` wrapper that resolves the target's `AS_<TARGET>_…_ENTRYPOINT_…` rule **by name** via `AS_FRM_getRuleReferenceOrNoOp` (`refreshAlways:true`) and executes it in-process; if the target app isn't installed it's a graceful no-op (`ifNull_default:{}`). Same-environment, in-JVM, no connected system/API key. Entrypoint types: GETDATA (read), DISPLAY (UI fragment), RECORDACTION (action link), STARTPROCESS (returns {processModel,params} to start a process in the target = the write path).
+
+**Inventory:** 13 GSS→GCW APPREFs, 9 GCW→GSS APPREFs (all listed with UUIDs in doc 03 §2).
+
+**Lifecycle:** GCW solicitation → [createEvaluationFromSolicitation] → GSS Evaluation (evaluationNumber=PIID, sourceApplication=AM); GSS → [updateEvalSolicMapping]+[folder security] → GCW; status changes → [syncEvalStatusInGcw] → GCW keeps synced status copy; GCW summary ← [getEvaluationDetailsBySolicPiid/relatedEvaluationDetails]; completion → [getWinningVendorAndBasicInformation] → [create(Single/Multiple)AwardsFromEvaluation] → GCW Awards.
+
+**Multi-round seams (Phase 2):** (1) `getEvaluationDetailsBySolicPiid_V1` matches evaluationNumber=PIID + sourceApplication=AM → root-only (clones are "PIID Round N" + sourceApplication=GSS) → GCW shows Round-1 status regardless of active round; (2) status sync per evaluationId, `evaluationList` has no parentEvalId filter; (3) winning-vendor/award creation takes evaluationIds[] — must be the final round; (4) eval↔solic map created for root only; (5) two sync mechanisms (APPREF vs HTTP integration wired to PM 0006ef1c) — resolve which is active.
