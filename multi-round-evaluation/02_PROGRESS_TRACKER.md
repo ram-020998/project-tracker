@@ -332,3 +332,16 @@ Built **Start Round** — starting an already-created child round, reusing the e
 - **`setupNewRound` visibility** (MANUAL, CO applied): visible only when ≥1 round exists and none is SETTING_UP/INPROGRESS (all COMPLETE) — corrected from the initial "any round complete" which wrongly showed while a later round was active. Optional `count(rounds) < 5` cap offered.
 
 Lifecycle now: Round INPROGRESS → Complete Round → COMPLETE → Setup New Round appears → new round SETTING_UP → Start Round → INPROGRESS → … End-to-end UI test pending.
+
+## Session Log — 2026-08-27 (Cross-app integration research kickoff)
+
+Mapped GSS's external integration surface (verified via MCP) as prep for impact analysis of multi-round.
+- **7 connected systems, 15 integrations, 5 Web APIs.** Detailed inventory + VM contract in new doc **`07_CROSS_APP_IMPACT_RESEARCH.md`**.
+- **VM (Vendor Management)** — CS `_a-0000ed77…_15308175`. GSS→VM: OpportunityDetails (`getOppDetailsForEval?noticeId`), VendorIdentifierDetails (`getVendorIdentifierDetails?noticeId&isVendorLinked`), getVendorsAndDocuments (`getVendorDetailsForEvaluation?solicitationNumber&startIndex&batchSize&vendorId`), getProposalDocument (`downloadVmDocument?appianDocId`, binary), updateProposalVendorAction (POST `{solicitationPiid, vendorId[], actionType}`). VM→GSS Web APIs: `getEvaluationDetailsForVm` (eval details + site URL), `vendor-proposal-action` (proposal action inbound).
+- **GCW (Contract Writing)** — `evaluationList` Web API + `SyncEvaluationStatusList` integration push evaluation statuses. **Flagged HIGH impact**: multi-round emits N evaluations per solicitation, so status sync + PIID→evaluation resolution likely need round-awareness.
+- Other: Source Selection (external doc fetch), GSM/DRM (vendor reconciliation), SAM.gov, SharePoint/MS Graph, Azure OpenAI.
+- **Tooling note:** `getWebApi` returns `expression: null` in this env — Web API bodies must be traced via the expression rules they call.
+
+**Next phase = analysis only** (do not change integrations). Findings log + per-integration hypotheses seeded in `07_…` §4/§6. Docs updated: 03 onboarding (§2 table, §7 current state, §10.47), 07 created, 01 design (integrations note).
+
+Also consolidated prior build progress into onboarding §7: WI-1 (Start Evaluation as Round 1), WI-2 (Start Round), WI-3 (Complete Round + Setup New Round gating), rounds card v9, and `AS_GSS_UT_returnLatestChildEvaluationInSetupForGivenEvaluation` (`…43812`).

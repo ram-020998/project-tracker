@@ -25,7 +25,8 @@ Full details: **`01_FEATURE_AND_TECHNICAL_DESIGN.md`**. Live status: **`02_PROGR
 | This onboarding | `03_AGENT_ONBOARDING.md` |
 | **Tabs implementation plan** | `04_TABS_IMPLEMENTATION_PLAN.md` — per-tab treatment, id-vs-record input shapes, record-view urlStubs, work items WI-1..9, sequencing |
 | **WI-1 analysis** | `05_START_EVALUATION_WI1_ANALYSIS.md` — current-state analysis of Start Evaluation |
-| **WI-1 implementation plan** (active phase) | `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` — **authoritative build spec** for Best Value Start Evaluation as Round 1 (read this before building WI-1) |
+| **WI-1 implementation plan** | `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` — authoritative build spec for Best Value Start Evaluation as Round 1 (WI-1, shipped) |
+| **Cross-app impact research** (ACTIVE phase) | `07_CROSS_APP_IMPACT_RESEARCH.md` — **start here for the current phase**: how multi-round affects GSS↔VM/GCW/GSM/etc. integrations. Integration inventory + impact hypotheses + research method. |
 | **Docs git repo** | `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). These docs live under `multi-round-evaluation/`. Commit + push after every session. |
 | **The actual code (Appian objects)** | Appian **AS GSS Full Application**, accessed via the **`lcp` MCP server** — there is **no local git repo** for these objects |
 
@@ -155,7 +156,14 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 **All 8 round sub-tabs are shipped and verified** (Factors, Teams, Consensus Reports, Documents, Task History, Ratings, Checklist Items/Tasks, Evaluation History), plus Vendors → "Last Participated Round". 
 
-**Active phase — WI-1 (Start Evaluation as Round 1 + anchor):** **BUILT + verified via MCP** (interface `…42569`, PM `0000f04b-68ab…`, anchor rule `…42289` v4, plus the vendor-docs copy in `…42160` v9) — see **§10.45** for the authoritative build status and **§10.46/§10.47** for the vendor-docs change and tooling limits. All four objects re-validated 2026-08-26 (interface/PM/dup rule clean; anchor rule passes `testRule` on eval 6 — its `validateDesignObject` error is the documented empty-`additionalFields` false-positive). **Remaining = MANUAL only:** the CO must create the `startEvaluationBestValue` record action and guard the existing `startEvaluation` action in Designer (MCP is blocked on `AS_GSS_Evaluation_RECORD`, §10.47), then run the end-to-end UI test (§10.45 step 3). The temporary current-eval fallback in the 3 record-based tab parents was **intentionally kept** (Step 5 skipped — compatible with the anchor change). Read `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` (authoritative spec) then §10 below. See `02_PROGRESS_TRACKER.md` for the live checklist.
+**Start/rounds workflow — WI-1, WI-2, WI-3 BUILT + verified via MCP:**
+- **WI-1 Start Evaluation as Round 1 (Best Value):** interface `AS_GSS_FM_startEvaluationBestValue` `…42569`, PM `AS GSS Start Evaluation Best Value` `0000f04b-68ab…`, anchor rule `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` `…42289` v4, vendor-docs copy in `AS_GSS_UT_duplicateEvaluationForNewRound` `…42160` v9. Action `startEvaluationBestValue` (CO-created, root-only via `isBlank(parentEvalId)`). (§10.45–10.47)
+- **WI-2 Start Round** (start an already-created child round, no new round): form `AS_GSS_FM_startRound` `…42738`, wrapper PM `AS GSS Start Round` `0000f04b-9451…` (reuses `0002ecdd…` as subprocess), action `startRound` (CO-created). Shown in the rounds card only on the **latest Set Up** round. (§10.48)
+- **WI-3 Complete Round + Setup New Round gating:** wrapper PM `AS GSS Complete Round` `0000f04b-add3…` (no start form; reuses `0004e60d…` Mark-Complete, sets COMPLETE in backend), action `completeRound` (CO-created); rounds card shows it on the **In Progress** round. `setupNewRound` visibility gated to "all existing rounds COMPLETE". (§10.49)
+- **Rounds card** `AS_GSS_SEC_rounds` `…42270` v9 = `a!flatten({ startRound (latest+SetUp), completeRound (INPROGRESS), edit })`. Helper `AS_GSS_UT_returnLatestChildEvaluationInSetupForGivenEvaluation` `…43812`.
+- **Lifecycle:** root SETTING_UP → Start Evaluation (BV) → Round 1 INPROGRESS → Complete Round → COMPLETE → Setup New Round → next round SETTING_UP → Start Round → INPROGRESS → … Remaining across these: end-to-end UI walkthrough on a live family.
+
+**ACTIVE phase — Cross-application impact research:** assess how multi-round affects GSS's integrations with **VM (Vendor Management), GCW (Contract Writing), GSM/DRM, Source Selection, SAM.gov, SharePoint**. **Read `07_CROSS_APP_IMPACT_RESEARCH.md` first** — it has the verified integration inventory, the multi-round mechanics that break single-evaluation assumptions, per-integration impact hypotheses (GCW status sync and VM vendor/proposal flows are the HIGH-impact areas), and the research method. This is analysis-only; don't change integrations until impact is confirmed. See `02_PROGRESS_TRACKER.md` for the live checklist.
 
 ## 7b. Continuing the current phase — round sub-tabs (read `04_…` first)
 
@@ -295,6 +303,7 @@ Independent enhancement (not WI-1). The duplicate rule copies each carried vendo
 - **`testInterface`/`testRule` `inputs` maps pass values literally** (a record-typed value passed as a string errors `Could not cast from Text`). Prefer saved default test inputs (set via create/update `testInputs`) and call with no `inputs`.
 - **Expression-rule `additionalFields` empty test value → `[""]`** invalid-fields error. Pass a real field-ref test value when validating rules that spread `additionalFields` into query `fields`.
 - **Read-tool display quirk:** node/rule expressions come back with a spurious `pv!`/`=` prefix (e.g. `pv!rule!...`, `pv!pv!evaluation`) — cosmetic; the stored expression is correct.
+- **`getWebApi` returns `expression: null`** in this env — Web API expression bodies aren't exposed via MCP. To understand a Web API's logic/payload, trace the expression rules it calls (via `listExpressionRules` by topic + `getObjectDependents`). Relevant to the cross-app research (`07_…`).
 
 ### 10.48 Start Round (WI-2) — start an already-created round (reuses Start Evaluation)
 Goal: after **Setup New Round** creates a child round eval (SETTING_UP), the CO clicks **Start Round** in the Rounds card to run the full Start-Evaluation generation (INPROGRESS + ratings/tasks/consensus + on-spot XOR) **without creating a new round**. Factors/vendors are already scoped on the clone, so no factor-selection step.
