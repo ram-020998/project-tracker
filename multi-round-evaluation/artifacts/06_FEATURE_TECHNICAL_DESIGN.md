@@ -2,7 +2,7 @@
 
 Object-by-object technical design to build the feature: for each object, its **purpose, where it's used, the implementation, and test cases**. Read alongside `05_FEATURE_IMPLEMENTATION_PLAN.md` (the *what/where/why*). **Governing standard:** `SOLUTIONS - Design Best Practices & Guidance 3.md` — §1 below distills the parts most relevant here; that doc wins in any conflict.
 
-**Status: IN PROGRESS** — filled in batches, in build order (see the batch tracker at the end). Done: §1 conventions, §2 data model, §3 family & round helpers.
+**Status: COMPLETE** — all 8 batches specified (§2–§9). Filled in build order; see the batch tracker at the end. Open PO confirmations are flagged inline and summarized at the end.
 
 ---
 
@@ -995,6 +995,54 @@ a!localVariables(
 **Round-aware change:** add a **Last Participated Round** column. The tab loads `rule!AS_GSS_UT_returnLastParticipatedRoundForVendors(evaluationId)` once and passes it to the grid; the grid, per vendor row, looks up the entry by **`uniqueEntityId`** and renders "Round {sequence} | {roundName}" (i18n). No other columns change.
 **Notes:** correlate strictly by `uniqueEntityId` (not `vendorId`, which differs per round). Column is empty for vendors with no round participation.
 
+## 9. Integration touchpoints (VM & GCW)
+
+Under the parent-only model, external systems key off the **parent** evaluation (`evaluationNumber` = solicitation PIID). Two touchpoints need round-awareness.
+
+### 9.1 `AS_GSS_mapVendorUpdatesToRecord` (VM → GSS vendor proposal updates)
+**Purpose:** map an inbound VM vendor-proposal update (Web API body) onto the correct GSS vendor + write a `VendorUpdates` record.
+**Trigger:** the VM vendor-update Web API.
+**Inputs:** `requestBody` (Map — includes `noticeId` = solicitation PIID, `vendorId`, identifiers, proposal fields).
+**Round-aware behaviour:** `noticeId` resolves the **parent** (its `evaluationNumber`); the update must be applied to the vendor in the **latest round's** child evaluation, falling back to the parent when there are no rounds (legacy/single-round).
+**Clean latest-round resolution** (replaces the max-sequence/`wherecontains` block — `getRoundsForEvaluation` already returns rounds sequence-ascending, so the latest is the last element):
+```
+a!localVariables(
+  /* parent resolved from the solicitation PIID */
+  local!parentEvaluationId: index(local!matchingEvaluation, 'recordType!{e6bc8561}...{7f7c2d3b}evaluationId', null),
+  local!familyRounds: if(
+    a!isNullOrEmpty(local!parentEvaluationId),
+    {},
+    rule!AS_GSS_QR_getRoundsForEvaluation(evaluationId: local!parentEvaluationId)
+  ),
+  /* latest round = last element (sequence-ascending); fall back to the parent */
+  local!latestRoundEvaluationId: a!defaultValue(
+    index(local!familyRounds, count(local!familyRounds), {})['recordType!{931e8145}...{1756683f}evaluationId'],
+    local!parentEvaluationId
+  ),
+  /* … resolve the matching vendor on local!latestRoundEvaluationId (GSS-source by federal/state
+        identifier, or VM-source by externalVendorId), deactivate prior updates for this
+        externalVendorId + noticeId, and build the current VendorUpdates record with
+        evaluationId = local!latestRoundEvaluationId … */
+  ...
+)
+```
+**Rest of the rule (unchanged in shape):** the vendor match (GSS-source by federal/state identifier OR VM-source by `externalVendorId`), the de-activation of prior updates, and the `VendorUpdates` record construction all run against `local!latestRoundEvaluationId`. Return `{ matchingEvaluation, matchingEvaluationVendor, allVendorProposalUpdates }`.
+**Notes:** confirm with the PO whether "latest round" should be the max-sequence round regardless of status, or the latest **non-complete** round; align the selection accordingly (filter `familyRounds` by status before taking the last).
+**Test cases:** "Case with No Assertions". (1) blank `noticeId`; (2) a PIID whose family has 2+ rounds → the update's `evaluationId` = the latest round's; (3) a single-round PIID → `evaluationId` = the parent's.
+
+### 9.2 GCW status sync — suppress for child rounds
+**What:** the GCW status-sync process (`0006ef1c…`, "Sync Eval Status in GCW") runs from Start Evaluation (§4.2), Start Round (via the reused generation), and Complete Round (via Mark-Complete). It must sync **only the parent** — a child round moving to Complete/In Progress mid-competition must not tell GCW the whole evaluation changed state.
+**How (single guard, all callers covered):** at the **entry of the GCW sync process**, short-circuit when the evaluation is a child. First node = an XOR on `a!isNotBlank(parentEvalId)`:
+- child (`parentEvalId` populated) → go straight to End (no sync);
+- root (`parentEvalId` blank) → proceed with the existing sync.
+
+Resolve `parentEvalId` from the passed `evaluationId` (`AS_GSS_QR_getEvaluationByIdentifier`) if the process only receives the id.
+**Why guard inside the sync process (not each call site):** one change covers every current and future caller; call sites stay unchanged.
+**Notes:** this is the deferred GCW hygiene item — schedule with the GCW integration work; no other GCW flow changes are needed under the parent-only model.
+
+### 9.3 General rule for any other integration
+Any outbound reference to evaluation identity (GSM/DRM, SAM.gov, SharePoint, etc.) must resolve to the **anchor/parent** (`coalesce(parentEvalId, evaluationId)`) before reading or writing, so external systems always see the single, stable parent evaluation.
+
 ## Batch tracker (build order)
 1. **Data model** — §2 ✅
 2. **Family & round helpers** — §3 ✅
@@ -1002,7 +1050,10 @@ a!localVariables(
 4. **Round-aware tabs** — §5 ✅
 5. **Setup New Round + clone** — §6 ✅
 6. **Start / Complete round + Rounds panel** — §7 ✅
-7. **Summary recomposition + Vendors** — §8 ✅ (left/right panels, active-round vendors, last-participated-round + task-progress rules, Vendors tab column)
+7. **Summary recomposition + Vendors** — §8 ✅
+8. **Integration touchpoints (VM & GCW)** — §9 ✅
+
+**All batches complete.** This document specifies the full feature build. Open PO confirmations flagged inline: Setup-New-Round step count (2 vs 3), Phases tab in/out, "active round" definition for Summary/VM latest-round selection, and record-type suffix convention (`_SYNCEDRECORD` vs `_RecordType`).
 4. **Round-aware tabs** — embeddable content + wrapper(s)
 5. **Setup New Round + clone** — wizard, duplicate, team-mapping, factor-doc-mapping
 6. **Start / Complete round + Rounds panel**

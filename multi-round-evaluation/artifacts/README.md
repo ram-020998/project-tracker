@@ -9,6 +9,7 @@ Research artifacts for how **Vendor Management (VM)** and **Government Source Se
 | `03_GCW_GSS_CURRENT_STATE_INTEGRATION.md` | **Phase 1 (GCW)** — current-state map of the GCW↔GSS integration via the APPREF→ENTRYPOINT mechanism: full bidirectional flow inventory, triggers, what changes/returns. | ✅ Ready for review |
 | `04_GCW_GSS_MULTIROUND_IMPACT.md` | **Phase 2 (GCW)** — what multi-round breaks / preserves per flow, with root cause, severity, and prioritized fixes. | ✅ Complete |
 | `05_FEATURE_IMPLEMENTATION_PLAN.md` | **Feature Implementation Plan** — the authoritative, code-free blueprint to implement Multi-Round Evaluations from a clean baseline: what/where/why for every change, state transitions, build sequence, verification, and a full inventory of all 63 POC package objects (Appendix A). Built from the package object list + live inspection + design/build records. | ✅ Ready for review |
+| `06_FEATURE_TECHNICAL_DESIGN.md` | **Feature Technical Design** — object-by-object build spec (purpose, usage, real optimized SAIL / node-by-node PMs, test cases), conforming to the design best-practices doc. 8 batches: data model, family/round helpers, Start Evaluation, round-aware tabs (consolidated wrapper), Setup New Round + clone, Start/Complete round + Rounds panel, Summary + Vendors, integration touchpoints. | ✅ Complete |
 
 ## Phase status
 - **Phase 1 (current-state): COMPLETE** for VM and GCW.

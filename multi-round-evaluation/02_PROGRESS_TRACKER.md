@@ -441,3 +441,23 @@ Consolidated all progress; refreshed onboarding §2 (doc table) and §7 (current
 - **UI redesign from new mockups** — `08_…` (Summary Rounds panel, Setup New Round wizard, Start Evaluation form; some Designer-only).
 
 **Remaining/pending:** end-to-end UI walkthrough of the round lifecycle on a live family; the manual Designer steps (record actions per §10.45/10.48/10.49, factor-doc-mapping Write node per §10.50); the two deferred items above.
+
+## Session Log — 2026-08-27 (Feature Technical Design — COMPLETE)
+
+Authored `artifacts/06_FEATURE_TECHNICAL_DESIGN.md` — object-by-object, standards-compliant build spec (real optimized SAIL / node-by-node PMs / test cases), conforming to `SOLUTIONS - Design Best Practices & Guidance 3.md`. Written as a clean forward spec (no POC-diff/migration framing, per PO).
+
+**All 8 batches complete:**
+1. Data model — `EvaluationRound` + **`parentEvalId` on the rounds table** (family key; single-table resolution).
+2. Family/round helpers — `getEvaluationRoundDetails`, `getRoundsForEvaluation` (keystone, 2 queries rounds-table-only), `returnIdentifiersForEvaluationRounds`, `returnLatestChildEvaluationInSetupForGivenEvaluation`, `hasOpenCompleteEvaluationTask`.
+3. Start Evaluation as Round 1 — modal, PM (node-by-node), record actions + visibility split (relationship-based).
+4. Round-aware tabs — **consolidated to one wrapper `AS_GSS_CPS_roundContentTabs`** (replaces 8 `_Parent` + factors config rule) + embeddable-content contract.
+5. Setup New Round + clone — wizard, vendor grid, clone builder (copy/null/reset table), **simplified factor→team mapping via merge semantics**, factor→document carry, PM node-by-node, gated action.
+6. Start/Complete round + Rounds panel — confirm form, two wrapper PMs, **new `returnRoundStatusDisplayConfig` helper** (de-dupes 4 matches), panel, actions.
+7. Summary recomposition + Vendors — left/right panels, active-round vendors, last-participated-round rule (**reuses family resolver**), task-progress rule, Vendors "Last Participated Round" column.
+8. Integration touchpoints — VM `mapVendorUpdatesToRecord` (latest-round targeting, simplified), GCW sync suppression for child rounds (single guard), general anchor-resolution rule.
+
+**Key consolidations/optimizations captured:** 8 tab wrappers → 1; factors config rule eliminated; family resolution moved entirely to the rounds table (no Evaluation query); factor→team mapping reduced from full field re-list to a merge; standardized on `AS_CO_UT_queryRecord` + sort-in-query + i18n + relationship-based visibility throughout.
+
+**Open PO confirmations (flagged in doc):** Setup-New-Round step count (2 vs 3); Phases tab in/out; "active round" definition (Summary + VM latest-round); record-type suffix (`_SYNCEDRECORD` vs `_RecordType`).
+
+Next: PO review of `06_…`; then implement from a clean baseline in build-sequence order.
