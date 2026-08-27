@@ -88,6 +88,7 @@ Priority ordered by likely multi-round impact.
 - **Where to look:** the rule behind `evaluationList` (Web API expression is null — find via dependents of `AS_GSS_Evaluation` record / search rules referencing "EvaluationStatusList" / "GCW"); `AS_GSS_INT_POST_SyncEvaluationStatusList` request body.
 
 ### 4.2 VM — Vendors / Proposals ⚠️ HIGH
+> **Current-state fully mapped (both sides):** see `artifacts/01_VM_GSS_CURRENT_STATE_INTEGRATION.md`. The items below are the multi-round impact questions to answer in Phase 2 against that mapping.
 - VM integrations key on **solicitation PIID / solicitationNumber** and **vendorId**.
 - **Hypotheses:**
   - `getVendorsAndDocuments` / `VendorIdentifierDetails` fetch by PIID — fine, but the **`isVendorLinked` filter** ("vendors yet to be added to the evaluation") must be interpreted per **which** round/evaluation now.

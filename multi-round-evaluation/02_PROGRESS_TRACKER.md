@@ -345,3 +345,13 @@ Mapped GSS's external integration surface (verified via MCP) as prep for impact 
 **Next phase = analysis only** (do not change integrations). Findings log + per-integration hypotheses seeded in `07_…` §4/§6. Docs updated: 03 onboarding (§2 table, §7 current state, §10.47), 07 created, 01 design (integrations note).
 
 Also consolidated prior build progress into onboarding §7: WI-1 (Start Evaluation as Round 1), WI-2 (Start Round), WI-3 (Complete Round + Setup New Round gating), rounds card v9, and `AS_GSS_UT_returnLatestChildEvaluationInSetupForGivenEvaluation` (`…43812`).
+
+## Session Log — 2026-08-27 (VM↔GSS integration Phase 1 — current state, both sides)
+
+VM is now deployed in this env (`AS VM Full Application` `_a-0000e79a-fc04-8000-9bf4-011c48011c48_2088050`), so both sides of the integration were read directly. Delivered a complete current-state mapping in **`artifacts/01_VM_GSS_CURRENT_STATE_INTEGRATION.md`** (+ `artifacts/README.md`). **Paused for user review before Phase 2 (multi-round impact).**
+
+Traced all 7 flows end-to-end (trigger → request → handler → data written):
+- GSS→VM (5): OpportunityDetails, VendorIdentifier, **getVendorsAndDocuments** (writes GSS EvaluationVendor/Address/BusinessType/Document, sourceApplicationId=VM), downloadVmDocument (binary), **updateProposalVendorAction** (POST; flips VM `Proposal.isEvaluationLinked`, trigger PM `0002ed96`).
+- VM→GSS (2): **getEvaluationDetailsForVm** (VM opp summary shows GSS status+link), **vendor-proposal-action** (POST; GSS writes `VendorUpdates`, trigger PM `0002ed86`).
+
+Key mechanics documented: join key `Opportunity.noticeId == Evaluation.evaluationNumber`; vendor identity `externalVendorId=VM vendorId` + UEI; dedup via `Proposal.isEvaluationLinked`; sealed-bid gating; two master toggles. Phase-2 seams listed in doc 01 §9 (esp. PIID→evaluation now 1:N under multi-round; per-opportunity dedup vs per-round re-include). Full object/UUID evidence appendix in §10.
