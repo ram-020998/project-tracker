@@ -30,6 +30,7 @@ Full details: **`01_FEATURE_AND_TECHNICAL_DESIGN.md`**. Live status: **`02_PROGR
 | **WI-1 implementation plan** | `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` — authoritative build spec for Best Value Start Evaluation as Round 1 (WI-1, shipped) |
 | **Cross-app impact research** | `07_CROSS_APP_IMPACT_RESEARCH.md` — cross-app integration inventory + research method (VM & GCW deep-dives now live in `artifacts/`) |
 | **Integration research (VM & GCW)** | `artifacts/` — **current-state + multi-round impact** for VM (01/02) and GCW (03/04), reassessed under the parent-only model; see `artifacts/README.md` |
+| **Feature Implementation Plan** | `artifacts/05_FEATURE_IMPLEMENTATION_PLAN.md` — **code-free build blueprint** for the whole feature (what/where/why, state transitions, build sequence, verification) + full inventory of all 63 POC package objects. Start here to implement from a clean baseline. |
 | **UI redesign from new mockups** (DEFERRED) | `08_UI_REDESIGN_NEW_MOCKUPS.md` — per-screen change inventory from the new mockups; not started (PO-deferred) |
 | **Docs git repo** | `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). These docs live under `multi-round-evaluation/`. Commit + push after every session. |
 | **The actual code (Appian objects)** | Appian **AS GSS Full Application**, accessed via the **`lcp` MCP server** — there is **no local git repo** for these objects |

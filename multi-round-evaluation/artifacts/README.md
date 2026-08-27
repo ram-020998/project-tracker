@@ -1,6 +1,6 @@
-# Artifacts — VM ↔ GSS Integration Research
+# Artifacts — GSS Multi-Round: Integration Research + Feature Implementation Plan
 
-Research artifacts for how **Vendor Management (VM)** and **Government Source Selection (GSS)** integrate, and (Phase 2) how **Multi-Round Evaluations** affects that integration.
+Research artifacts for how **Vendor Management (VM)** and **Government Source Selection (GSS)** integrate, and (Phase 2) how **Multi-Round Evaluations** affects that integration — plus the **Feature Implementation Plan** (doc 05) that turns the verified POC into a build blueprint.
 
 | Doc | Contents | Status |
 | :--- | :--- | :--- |
@@ -8,6 +8,7 @@ Research artifacts for how **Vendor Management (VM)** and **Government Source Se
 | `02_VM_GSS_MULTIROUND_IMPACT.md` | **Phase 2 (VM)** — what multi-round breaks / preserves per flow, with root cause, severity, and prioritized fixes. | ✅ Complete |
 | `03_GCW_GSS_CURRENT_STATE_INTEGRATION.md` | **Phase 1 (GCW)** — current-state map of the GCW↔GSS integration via the APPREF→ENTRYPOINT mechanism: full bidirectional flow inventory, triggers, what changes/returns. | ✅ Ready for review |
 | `04_GCW_GSS_MULTIROUND_IMPACT.md` | **Phase 2 (GCW)** — what multi-round breaks / preserves per flow, with root cause, severity, and prioritized fixes. | ✅ Complete |
+| `05_FEATURE_IMPLEMENTATION_PLAN.md` | **Feature Implementation Plan** — the authoritative, code-free blueprint to implement Multi-Round Evaluations from a clean baseline: what/where/why for every change, state transitions, build sequence, verification, and a full inventory of all 63 POC package objects (Appendix A). Built from the package object list + live inspection + design/build records. | ✅ Ready for review |
 
 ## Phase status
 - **Phase 1 (current-state): COMPLETE** for VM and GCW.
