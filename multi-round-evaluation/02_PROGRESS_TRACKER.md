@@ -396,3 +396,16 @@ Delivered **`artifacts/04_GCW_GSS_MULTIROUND_IMPACT.md`**.
 **Top fix:** ensure award/winning-vendor creation targets the FINAL round's evaluationId (award correctness); then family-aware PIID summary (C) + decide status-sync semantics (10). Open confirmations (doc §6): which evaluationId GCW passes to award/H/F (root mapping vs GSS record action from awardees-selected round); whether GCW's synced list is meant to be plural.
 
 **All 4 integration artifacts (VM 01/02, GCW 03/04) complete.** Remaining suite integrations (GSM/DRM, SAM, SharePoint, OpenAI) not yet mapped (see 07).
+
+## Session Log — 2026-08-27 (PO clarification: hidden-child/parent-only model + reassessment)
+
+**Major design clarification from PO** (documented as authoritative in `01_…` §1a; principle added to onboarding §1):
+- **Parent evaluation is the ONLY user-facing evaluation.** Round clones are **backend-only, hidden from users** (technical records for per-round task/rating/consensus generation). Users only ever create/see "rounds" within the parent workspace.
+- **Vendor addition only on the parent** (subsequent rounds just select from already-added vendors). **Select Awardees + award creation only on the parent.**
+- Canonical workflow captured: Create Evaluation → Start Evaluation (Round 1 on parent) → complete tasks → **Complete Factor** → (Select Awardees | Start New Round) → Create New Round (child, Setup) → editable setup → **Start Round** (In Progress) → complete tasks → **Complete Round** → back on parent (Select Awardees | Create New Round) → … until final awardee.
+
+**Reassessment of integration impact (both docs updated with an authoritative §1b):**
+- **VM:** A/B/C/D/E/F = **Not an issue** (parent is the identity VM sees/links; vendor push only from parent; showing parent is intended). **Only Flow G (vendor proposal action) needs a minor change** — resolve the latest round's child evaluation and match the vendor there so the active round reflects the update.
+- **GCW:** B/4/7/C/H/8/11/F/9 + reads/toggles = **Not an issue** (parent-only display + parent-only awardee/award = correct). **Flow 10 (status sync) = optional low-sev review** — Start/Complete Round run on child evals and trigger the GCW sync, so confirm child-round statuses are suppressed/redirected to the parent (avoid leaking hidden-child rows to GCW).
+
+Net: multi-round is integration-safe under the parent-only model; **1 minor VM change (Flow G)** + **1 optional GCW hygiene item (Flow 10)**. Pre-clarification structural matrices retained in each doc §2 for the mechanism record.

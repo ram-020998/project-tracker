@@ -10,6 +10,8 @@ We are adding **Multi-Round Evaluations** to Appian **Government Source Selectio
 
 **The central design idea:** *a round is a full clone of the Evaluation record.* Each clone links back to the round‑1 root via `parentEvalId`, and a new `AS_GSS_EvaluationRound_SYNCEDRECORD` table stores round metadata + sequence. This gives per-round Ratings/Consensus/Teams/Factors for free.
 
+> **CRITICAL design principle (PO-confirmed 2026-08-27) — hidden-child / parent-only:** the **parent evaluation is the ONLY evaluation users see and work in.** Round clones are **backend-only, technical records hidden from users**. Users only ever create/see "rounds" *within* the parent workspace; they never perceive a child evaluation as a separate evaluation. ⇒ It is **correct and intended** that VM and GCW always resolve to / display the **parent (root)** — the "stale root-only" items in the integration impact docs are **expected behavior, not defects**. The full canonical end-to-end workflow (Create → Start Evaluation → Complete Factor → Select Awardees / Start New Round → Create New Round → Start Round → Complete Round → …) is in **`01_FEATURE_AND_TECHNICAL_DESIGN.md` §1a (authoritative)**. Integration analysis: **`artifacts/`** (VM 01/02, GCW 03/04).
+
 Full details: **`01_FEATURE_AND_TECHNICAL_DESIGN.md`**. Live status: **`02_PROGRESS_TRACKER.md`**.
 
 ---

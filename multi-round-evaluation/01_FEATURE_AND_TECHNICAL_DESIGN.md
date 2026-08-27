@@ -21,7 +21,34 @@ The research/early spec explored **"Multi-Phase"** (phases declared up front) an
 - **Only Best Value** evaluations are eligible (not LPTA).
 - **Out of scope:** Multi-Phase (upfront declaration), and adding vendors/factors to a round ad hoc.
 
+### 1a. The hidden-child / parent-only model + canonical workflow (PO-confirmed 2026-08-27) — AUTHORITATIVE
+
+> This subsection is the source of truth for how rounds behave and supersedes any conflicting detail elsewhere (including §3 below). It is essential context for anyone touching the feature or its integrations.
+
+**Core principle — one user-facing evaluation:** The **parent evaluation is the sole evaluation the user ever sees and works in.** Each "round" creates a **backend child Evaluation record** (a clone) **purely for technical handling** (per-round task/rating/consensus generation and factor×vendor scoping). **Child evaluations are hidden from users** — the UI suppresses them; users never navigate to or perceive a child evaluation as a separate evaluation. Round progress is surfaced *within* the parent workspace (rounds card / round info), but the parent is always the workspace and the identity.
+
+**Implication for integrations (VM & GCW):** because the parent is the only user-facing evaluation, it is **correct and intended** that VM and GCW always resolve to / display the **parent (root)** evaluation. "Stale root-only" behaviors flagged in the impact docs are therefore **expected behavior, not defects** (see `artifacts/02_…` and `artifacts/04_…`).
+
+**Canonical end-to-end workflow:**
+1. **Create Evaluation** (Source Selection): user enters all setup data — vendors, factors, documents, teams, dates. **Vendor addition happens only here (on the parent);** subsequent rounds only *select* from the already-added vendors (no new vendor addition).
+2. **Start Evaluation** → creates the **initial round (Round 1) on the parent**; all tasks are assigned within the parent evaluation (status → In Progress).
+3. Evaluators **complete all evaluation tasks** in the parent.
+4. **Complete Factor** → user marks all factors as completed.
+5. After factors are complete, the parent offers two options: **Select Awardees** or **Start New Round**.
+   - **Select Awardees** (available **only on the parent**) → pick awardees → **evaluation ends**.
+   - **Start New Round** → select which **vendors + factors** carry into the new round → **Create New Round** → a backend child evaluation is created in **Setup** status.
+6. **Setup** (round): user can still edit round data — update vendor info, upload additional vendor documents, update team members/assignments, update vendor proposal submission dates, etc.
+7. **Start Round** → round → **In Progress**; tasks are assigned for the selected factors × vendors; evaluators complete them.
+8. **Complete Round** (in the round card) → round → **Completed**.
+9. Back on the parent: again **Select Awardees** or **Create New Round**. Repeat until the final awardee is confirmed (up to N rounds).
+
+**Key data-handling consequences:**
+- Vendor add/remove → VM push (Flow E) fires **only from the parent** → uses the parent's `evaluationNumber` (raw solicitation PIID) → VM resolves correctly. Between-round down-select is *internal selection*, not a VM unlink.
+- Awardee selection + award creation happen **only on the parent** → GCW winning-vendors/award use the parent `evaluationId` → correct awardees.
+- Inbound VM vendor-proposal updates (Flow G) should target the vendor in the **latest round's child evaluation** so the active round reflects the update (minor handler change — see `artifacts/02_…`).
+
 ---
+
 
 ## 2. Business rules (confirmed decisions)
 

@@ -10,8 +10,8 @@ Research artifacts for how **Vendor Management (VM)** and **Government Source Se
 | `04_GCW_GSS_MULTIROUND_IMPACT.md` | **Phase 2 (GCW)** — what multi-round breaks / preserves per flow, with root cause, severity, and prioritized fixes. | ✅ Complete |
 
 ## Phase status
-- **Phase 1 (current-state): COMPLETE, awaiting user review.** Both the GSS side and the VM side were read directly (VM = `AS VM Full Application`, deployed in this env).
-- **Phase 2 (multi-round impact): pending Phase 1 sign-off.** Candidate seams are listed at the end of doc 01 (§9) as a bridge, but the impact analysis itself is deferred until review.
+- **Phase 1 (current-state): COMPLETE** for VM and GCW.
+- **Phase 2 (multi-round impact): COMPLETE** for VM and GCW, **reassessed under the PO-confirmed parent-only model** (see each doc's §1b). Net result: multi-round is integration-safe; only **1 minor VM change (Flow G)** and **1 optional GCW hygiene item (Flow 10)** remain. The authoritative workflow + hidden-child principle is in `../01_FEATURE_AND_TECHNICAL_DESIGN.md` §1a.
 
 ## Scope note
 This research covers **VM ↔ GSS** (docs 01/02) and **GCW ↔ GSS** (docs 03/04). GSS also integrates with GSM/DRM, SAM.gov, SharePoint and Azure OpenAI — inventoried in `../07_CROSS_APP_IMPACT_RESEARCH.md` but not yet deep-mapped here.

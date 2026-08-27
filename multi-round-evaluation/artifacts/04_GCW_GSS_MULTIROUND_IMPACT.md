@@ -21,7 +21,32 @@ Two secondary facts (from `02_…` §1, re-confirmed): round creation is **inter
 
 ---
 
+## 1b. Reassessment under the parent-only model (PO-confirmed 2026-08-27) — AUTHORITATIVE
+
+> **Design clarification received:** the **parent evaluation is the only user-facing evaluation**; round clones are **backend-only and hidden from users** (see `01_…` §1a). **Select Awardees and award creation happen only on the parent.** This changes the *verdicts* below — the mechanics in §1/§3 remain accurate, but nearly all items are **expected behavior, not defects.**
+
+**Revised verdicts:**
+| Flow | Original concern | Revised verdict (parent-only) |
+| :-- | :-- | :-- |
+| B createEvaluationFromSolicitation | — | ✅ **Not an issue** — seeds the parent. |
+| 4 updateEvalSolicMapping | Root-only mapping | ✅ **Not an issue** — the parent *is* the identity GCW should map to. |
+| 7 folder security | — | ✅ **Not an issue.** |
+| C getEvaluationDetailsBySolicPiid / relatedEvaluationDetails | Always Round-1 status/link | ✅ **Not an issue** — GCW is meant to show the **parent** only; parent status/link is correct. |
+| H getWinningVendorAndBasicInformation | Must be final round or wrong awardees | ✅ **Not an issue** — **Select Awardees is only on the parent**; the winning selection is recorded on the parent and only that is passed to GCW → correct. |
+| 8/11 create(Single/Multiple)AwardsFromEvaluation | Correct only if final-round id | ✅ **Not an issue** — award creation happens **only on the parent** → parent `evaluationId` used → correct. |
+| F getEvaluationandVendordetails | Wrong round if root id | ✅ **Not an issue** — the parent id is the intended id. |
+| 9 getAwardLinksForEvaluation | Scope mismatch | ✅ **Not an issue** — awards are created against the parent; links resolve under the parent. |
+| 10 syncEvalStatusInGcw + HTTP `evaluationList` | Accumulates one status row per round | 🔧 **Minor / optional review** — user-facing GCW status is parent-only (flow C), so any child rows are inert. **However**, Start Round / Complete Round run on child evals and currently trigger the GCW sync (via the reused Sync-GCW subprocess), so GCW may receive hidden-child status rows. Recommend confirming that child-round status syncs are **suppressed or redirected to the parent** so GCW isn't populated with hidden-child evaluations. Low severity. |
+| 2,5,6,13 / ref-data / toggles | — | ✅ **Not an issue** — round-agnostic. |
+
+**Net:** all GCW flows are correct under the parent-only model. The only follow-up is the **optional** status-sync hygiene item (10) — ensure child-round Start/Complete don't leak child statuses into GCW.
+
+---
+
 ## 2. Impact matrix
+
+> Superseded by §1b for verdicts. The severities below reflect the *pre-clarification* structural analysis and are retained for the mechanism record.
+
 
 | Flow | Direction | Verdict | Severity |
 | :-- | :-- | :-- | :-- |

@@ -30,7 +30,27 @@ Everything below is a consequence of this. Two secondary facts matter:
 
 ---
 
+## 1b. Reassessment under the parent-only model (PO-confirmed 2026-08-27) — AUTHORITATIVE
+
+> **Design clarification received:** the **parent evaluation is the only user-facing evaluation**; round clones are **backend-only and hidden from users** (see `01_…` §1a). Vendor addition happens **only on the parent**; awardee selection happens **only on the parent**. This changes the *verdicts* below — the underlying mechanics in §1/§3 remain accurate, but most items are **expected behavior, not defects.**
+
+**Revised verdicts:**
+| Flow | Original concern | Revised verdict (parent-only) |
+| :-- | :-- | :-- |
+| A Opportunity Details | Blank on round-clone views | ✅ **Not an issue** — users never open clone views. VM shows/links the parent, and the parent's `evaluationNumber` is the raw PIID → the call resolves. |
+| B / C / D | — | ✅ **Not an issue** — Round-1/parent activity; `appianDocId` retained for downloads. |
+| E Update Vendor Action → VM | Breaks from clones; between-round down-select not pushed | ✅ **Not an issue** — vendor add/remove→VM happens **only on the parent** (raw PIID → VM resolves). Between-round down-select is *internal selection* of already-linked vendors, **not** a VM unlink, so no push is expected. A vendor stays `isEvaluationLinked=1` in VM as long as it remains on the parent — which is correct. |
+| F Evaluation Details for VM | Stale (Round-1) status/link | ✅ **Not an issue** — showing the **parent** status/link is the **intended** behavior; VM screens are meant to reflect the parent evaluation only. |
+| G Vendor Proposal Action → GSS | Attaches to root, not active round | 🔧 **Minor change needed** — the handler should resolve the **latest round's child evaluation** for the solicitation and match the vendor **within that child** (by `externalVendorId`/UEI), so the currently-active round reflects the proposal update. Small, well-scoped logic addition to `AS_GSS_mapVendorUpdatesToRecord` (§3 Flow G). |
+
+**Net:** only **Flow G** requires a change, and it is minor. All other VM flows are correct under the parent-only model.
+
+---
+
 ## 2. Impact matrix (summary)
+
+> Superseded by §1b for verdicts. The severities below reflect the *pre-clarification* structural analysis and are retained for the mechanism record.
+
 
 | Flow | Direction | Multi-round verdict | Severity |
 | :-- | :-- | :-- | :-- |
