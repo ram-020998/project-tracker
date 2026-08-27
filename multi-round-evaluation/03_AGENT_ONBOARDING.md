@@ -184,9 +184,9 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 See `02_PROGRESS_TRACKER.md` for the full live checklist and session logs.
 
-## 7b. Continuing the current phase — round sub-tabs (read `04_…` first)
+## 7b. Round sub-tabs — SHIPPED (recipe retained for reference)
 
-**Goal:** give each Evaluation record tab per-round sub-tabs (like Factors ✅ and Teams ✅). Remaining: **Consensus, Documents, Task History** (ID-based), then **Ratings, Tasks, Evaluation History** (RECORD-based — need a per-round loader that queries the record(s) first). Full input-shape table + interface UUIDs + record-view urlStubs are in `04_TABS_IMPLEMENTATION_PLAN.md` §2/§8.
+**All 8 round sub-tabs are complete** (per §7). This section is kept only as the **reusable per-tab recipe** for future round-aware tabs. Full input-shape table + interface UUIDs + record-view urlStubs are in `04_TABS_IMPLEMENTATION_PLAN.md` §2/§8.
 
 **Reference implementations to copy:** Factors (`AS_GSS_CPS_viewFactors` + `_Parent`, view `_n_87YA`) and Teams (`AS_GSS_CPS_viewEvaluatorTeam` + `_Parent`, view `_j9bz9g`).
 
