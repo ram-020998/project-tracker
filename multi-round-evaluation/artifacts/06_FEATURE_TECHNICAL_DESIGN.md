@@ -216,10 +216,231 @@ a!localVariables(
 
 ---
 
+## 4. Start Evaluation as Round 1
+
+Starting a Best Value evaluation registers the parent as **Round 1** and generates tasks/ratings/consensus scoped to the selected factors. Three objects: the modal (4.1), the process (4.2), and the record actions (4.3).
+
+### 4.1 `AS_GSS_FM_startEvaluationBestValue` (form/modal)
+**Purpose:** confirm Round 1 details (name, dates) and choose the factors for the round; on submit, set the evaluation In Progress and register it as Round 1.
+**Used by:** the `startEvaluationBestValue` record action (4.3) as its start form.
+**Inputs:** `evaluation` (`AS_GSS_Evaluation_SYNCEDRECORD`, Required), `userAction` (Text — set to Start/Cancel on submit), `selectedFactorIds` (List of Integer — output: the factors chosen for the round).
+**Behaviour:**
+- Load parent factors (active, `parentCriteriaId` null); default **all** selected; show a live "N of N selected" count.
+- Round Name defaults to the "Initial Evaluation" label; Start Date + Duration keep Due Date in sync; validate Due ≥ Start **and** that round dates fall within the evaluation's dates.
+- On **Start**: output `selectedFactorIds` and `userAction = START`; set the evaluation to In Progress with the chosen dates + modified audit, and populate its `round` relationship with one `EvaluationRound` (`sequence = 1`, `parentEvalId = null`, `isOnSpotConsensus` from the evaluation) so the row cascades on the process write. On **Cancel**: `userAction = CANCEL`.
+- All display text via the app i18n bundle (`AS_GSS_CO_UT_loadBundleFromFolder` + `AS_GAM_CO_I18N_UT_displayLabel`); no hard-coded strings.
+
+**Implementation:**
+```
+a!localVariables(
+  local!i18nData: rule!AS_GSS_CO_UT_loadBundleFromFolder(langISOCode: null),
+  /* Active parent factors for this evaluation (subfactors excluded from the picker). */
+  local!factors: rule!AS_GSS_QR_getCriteria(
+    returnType: cons!AS_CO_ENUM_QE_RETURN_TYPE_OBJECT_ARRAY,
+    evaluationId: ri!evaluation['recordType!{e6bc8561}...{7f7c2d3b}evaluationId'],
+    isActive: true(),
+    parentCriteriaId: null   /* filter to parents; see getCriteria filter inputs */
+  ),
+  /* Default selection = all factors (mockup shows "N of N selected"). */
+  local!selectedFactorIds: a!defaultValue(
+    ri!selectedFactorIds,
+    local!factors['recordType!{11dcc745}...{6ecea02c}criteriaId']
+  ),
+  /* Round-1 record being built in the form. */
+  local!round: 'recordType!{931e8145}AS_GSS_EvaluationRound_SYNCEDRECORD'(
+    'recordType!{931e8145}...{31c08880}roundName': rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_InitialEvaluation"),
+    'recordType!{931e8145}...{7abbf0d2}startDate': ri!evaluation['recordType!{e6bc8561}...{5e919546}evaluationStartDate'],
+    'recordType!{931e8145}...{c3f17341}endDate': ri!evaluation['recordType!{e6bc8561}...{46715106}evaluationDueDate']
+  ),
+  a!formLayout(
+    label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_StartEvaluation"),
+    instructions: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "ins_StartEvaluationConfirm"),
+    contents: {
+      /* Round details: Name | Start | Duration | Due — Start+Duration keep Due in sync. */
+      a!columnsLayout(columns: {
+        a!columnLayout(contents: a!textField(
+          label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_RoundName"),
+          required: true(),
+          value: local!round['recordType!{931e8145}...{31c08880}roundName'],
+          saveInto: local!round['recordType!{931e8145}...{31c08880}roundName']
+        )),
+        a!columnLayout(contents: a!dateField(
+          label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_StartDate"),
+          required: true(),
+          value: local!round['recordType!{931e8145}...{7abbf0d2}startDate'],
+          saveInto: {
+            local!round['recordType!{931e8145}...{7abbf0d2}startDate'],
+            a!save(local!round['recordType!{931e8145}...{c3f17341}endDate'],
+              if(rule!AS_CO_UT_isNotBlank(local!round['recordType!{931e8145}...{ecb1038d}duration']),
+                 save!value + local!round['recordType!{931e8145}...{ecb1038d}duration'],
+                 local!round['recordType!{931e8145}...{c3f17341}endDate']))
+          }
+        )),
+        a!columnLayout(contents: a!integerField(
+          label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_DurationDays"),
+          value: local!round['recordType!{931e8145}...{ecb1038d}duration'],
+          saveInto: {
+            local!round['recordType!{931e8145}...{ecb1038d}duration'],
+            a!save(local!round['recordType!{931e8145}...{c3f17341}endDate'],
+              if(rule!AS_CO_UT_isNotBlank(local!round['recordType!{931e8145}...{7abbf0d2}startDate']),
+                 local!round['recordType!{931e8145}...{7abbf0d2}startDate'] + save!value,
+                 local!round['recordType!{931e8145}...{c3f17341}endDate']))
+          }
+        )),
+        a!columnLayout(contents: a!dateField(
+          label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_DueDate"),
+          required: true(),
+          value: local!round['recordType!{931e8145}...{c3f17341}endDate'],
+          saveInto: local!round['recordType!{931e8145}...{c3f17341}endDate'],
+          validations: a!validationMessage(
+            validateAfter: "SUBMIT",
+            message: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "vld_RoundDatesWithinEvaluation"),
+            /* Due ≥ Start, and round window within the evaluation window. */
+            showWhen: or(
+              local!round['recordType!{931e8145}...{c3f17341}endDate'] < local!round['recordType!{931e8145}...{7abbf0d2}startDate'],
+              local!round['recordType!{931e8145}...{7abbf0d2}startDate'] < ri!evaluation['recordType!{e6bc8561}...{5e919546}evaluationStartDate'],
+              local!round['recordType!{931e8145}...{c3f17341}endDate'] > ri!evaluation['recordType!{e6bc8561}...{46715106}evaluationDueDate']
+            )
+          )
+        ))
+      }),
+      /* Factor selector: header with live count + one selectable card per factor. */
+      a!sectionLayout(
+        label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_Factors"),
+        contents: {
+          a!richTextDisplayField(
+            labelPosition: "COLLAPSED",
+            value: a!richTextItem(
+              text: rule!AS_GAM_CO_I18N_UT_displayLabel(
+                bundle: local!i18nData, bundleKey: "txt_NOfMSelected",
+                arguments: { count(local!selectedFactorIds), count(local!factors) }
+              ),
+              style: "STRONG"
+            )
+          ),
+          a!forEach(
+            items: local!factors,
+            expression: a!cardLayout(
+              padding: "STANDARD",
+              marginBelow: "STANDARD",
+              contents: a!sideBySideLayout(
+                alignVertical: "MIDDLE",
+                items: {
+                  a!sideBySideItem(width: "MINIMIZE", item: a!checkboxField(
+                    labelPosition: "COLLAPSED",
+                    choiceLabels: { "" },
+                    choiceValues: { fv!item['recordType!{11dcc745}...{6ecea02c}criteriaId'] },
+                    value: if(contains(local!selectedFactorIds, fv!item['recordType!{11dcc745}...{6ecea02c}criteriaId']),
+                              fv!item['recordType!{11dcc745}...{6ecea02c}criteriaId'], null),
+                    saveInto: a!save(local!selectedFactorIds,
+                      if(contains(local!selectedFactorIds, fv!item['recordType!{11dcc745}...{6ecea02c}criteriaId']),
+                         remove(local!selectedFactorIds, wherecontains(fv!item['recordType!{11dcc745}...{6ecea02c}criteriaId'], local!selectedFactorIds)),
+                         append(local!selectedFactorIds, fv!item['recordType!{11dcc745}...{6ecea02c}criteriaId'])))
+                  )),
+                  a!sideBySideItem(item: a!richTextDisplayField(
+                    labelPosition: "COLLAPSED",
+                    value: a!richTextItem(text: fv!item['recordType!{11dcc745}...{7bfcd928}criteriaName'], style: "STRONG")
+                  ))
+                }
+              )
+            )
+          )
+        }
+      )
+    },
+    buttons: a!buttonLayout(
+      primaryButtons: a!buttonWidget(
+        label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "btn_StartEvaluation"),
+        submit: true(), validate: true(), style: "SOLID", loadingIndicator: true(),
+        saveInto: {
+          a!save(ri!selectedFactorIds, local!selectedFactorIds),
+          a!save(ri!userAction, cons!AS_GSS_ENUM_USER_ACTION_START),
+          a!save(ri!evaluation, rule!AS_GSS_UT_updateRecordsByModelRecord(
+            records: ri!evaluation,
+            modelRecord: 'recordType!{e6bc8561}AS_GSS_Evaluation_SYNCEDRECORD'(
+              'recordType!{e6bc8561}...{4e467ee1}evaluationStatusId': cons!AS_GSS_REF_ID_EVALUATION_STATUS_INPROGRESS,
+              'recordType!{e6bc8561}...{5e919546}evaluationStartDate': local!round['recordType!{931e8145}...{7abbf0d2}startDate'],
+              'recordType!{e6bc8561}...{46715106}evaluationDueDate': local!round['recordType!{931e8145}...{c3f17341}endDate'],
+              'recordType!{e6bc8561}...{fa99070d}modifiedBy': loggedInUser(),
+              'recordType!{e6bc8561}...{c795b29e}modifiedDatetime': now(),
+              /* Cascade Round 1: parentEvalId null (root), sequence 1. */
+              'recordType!{e6bc8561}...{ffe492a5}round': rule!AS_GSS_UT_updateRecordsByModelRecord(
+                records: local!round,
+                modelRecord: 'recordType!{931e8145}AS_GSS_EvaluationRound_SYNCEDRECORD'(
+                  'recordType!{931e8145}...{1756683f}evaluationId': ri!evaluation['recordType!{e6bc8561}...{7f7c2d3b}evaluationId'],
+                  'recordType!{931e8145}...{parentEvalId}parentEvalId': null,
+                  'recordType!{931e8145}...{d20a1017}sequence': 1,
+                  'recordType!{931e8145}...{85812d35}isOnSpotConsensus': a!defaultValue(ri!evaluation['recordType!{e6bc8561}...{8962d2c5}isOnSpotConsensus'], false()),
+                  'recordType!{931e8145}...{1929b250}createdBy': loggedInUser(),
+                  'recordType!{931e8145}...{bd6df6db}createdOn': now()
+                )
+              )
+            )
+          ))
+        }
+      ),
+      secondaryButtons: a!buttonWidget(
+        label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "btn_Cancel"),
+        submit: true(), validate: false(), style: "GHOST",
+        saveInto: a!save(ri!userAction, cons!AS_CO_ENUM_USER_ACTION_CANCEL)
+      )
+    )
+  )
+)
+```
+**Notes:** if `AS_GSS_QR_getCriteria` has no `parentCriteriaId` filter input, filter parents in a local instead. New i18n keys: `lbl_InitialEvaluation`, `ins_StartEvaluationConfirm`, `lbl_RoundName/StartDate/DurationDays/DueDate/Factors`, `txt_NOfMSelected`, `vld_RoundDatesWithinEvaluation`, `btn_StartEvaluation`.
+**Test cases (interface):** default inputs = a Set-Up Best Value evaluation with ≥2 factors → renders, all selected, count correct; toggling a factor updates the count.
+
+### 4.2 `AS GSS Start Evaluation Best Value` (process model)
+**Trigger:** the `startEvaluationBestValue` record action. **Start form:** 4.1 (headless-capable). **Lane/assignment:** initiator, unattended. **Security:** own group `AS GSS Start Evaluation Best Value PM Access` (viewers), business groups (Contracting Officer) as direct members. **Archiving:** delete after 1 day (backend). **PVs:** `evaluation`, `originalEvaluation`, `evaluationFactorsAndSubFactors`, `originalEvaluationFactorsAndSubFactors`, `vendors`, `selectedFactorIds` (List of Integer), `userAction`, `evaluationRatings`.
+
+Node-by-node (no LPTA branch):
+
+| # | Node | Type | Purpose / data |
+| :-- | :--- | :--- | :--- |
+| 1 | Start | Start | Start form = 4.1. |
+| 2 | Cancelled? | XOR | `userAction = CANCEL` → End; else node 3. |
+| 3 | Update Evaluation Record | Write Records | Write `pv!evaluation` (incl. `round` rel → cascades Round 1). |
+| 4 | Sync Eval Status in GCW | Subprocess (`0006ef1c…`) | async; pass `evaluationId`. |
+| 5 | Scope Selected Factors | Script (UMQ) | `pv!evaluationFactorsAndSubFactors` ← factors whose `criteriaId ∈ selectedFactorIds` **or** `parentCriteriaId ∈ selectedFactorIds`. |
+| 6 | Create Ratings | Script | `pv!evaluationRatings ← rule!AS_GSS_BL_createTransactionalRatings(initiator, evaluationFactorsAndSubFactors, evaluation)`. |
+| 7 | Write Rating Records | Write Records | write `pv!evaluationRatings`; then `pv!evaluationFactorsAndSubFactors ← rule!AS_GSS_BL_updateRatingDetailsToCriteriaRecords(...)`. |
+| 8 | Update Factors With Ratings | Write Records | write `pv!evaluationFactorsAndSubFactors` (Criteria). |
+| 9 | Vendor Analysis enabled? | XOR | `cons!AS_GSS_TOGGLE_VENDOR_ANALYSIS_ENABLED` → node 10; else node 11. |
+| 10 | Trigger Reqt Extraction | Subprocess (`0005ef63…`) | async; pass `evaluationId`. |
+| 11 | On-the-spot consensus? | XOR | `a!defaultValue(evaluation.isOnSpotConsensus, false)` → node 13 (consensus only); else node 12. |
+| 12 | Generate Evaluation Tasks | Subprocess (`0002edab…`) | pass scoped factors + vendors. |
+| 13 | Create Consensus Reports | Subprocess (`0003ece5…`) | pass scoped factors + vendors. |
+| 14 | Capture Audit | Subprocess (`0007e5df…`) | `AS_GSS_UT_constructStartEvaluationAudit(...)`. |
+| 15 | End | End | |
+
+**Notes:** all generation (nodes 12–13) receives the scoped `pv!evaluationFactorsAndSubFactors` from node 5, so tasks/ratings/consensus are automatically limited to the selected factors × vendors. Build the two async subprocess calls (4, 10) as **Start Process / subprocess** nodes per §7; no placeholder/"dummy" nodes.
+
+### 4.3 Record actions on `AS_GSS_Evaluation_RECORD`
+Both **related actions**. Visibility reads record **relationship/field values** (no re-query) for performance (§3.E.4); context passes specific objects, never `rv!record`.
+
+| Action | Key | Process | Visibility (plain English) | Context |
+| :--- | :--- | :--- | :--- | :--- |
+| **Start Evaluation (BV)** *(new)* | `startEvaluationBestValue` | 4.2 | Set-Up **and** method = Best Value **and** `parentEvalId` is blank (root only). | build `evaluation`, `originalEvaluation`, `evaluationFactorsAndSubFactors` (active criteria), `originalEvaluationFactorsAndSubFactors`, `vendors`, `selectedFactorIds: {}`, `userAction: null`. |
+| **Start Evaluation** *(existing — guard)* | `startEvaluation` | `0002ecdd…` | existing Start-Evaluation visibility **and** method **≠** Best Value. | unchanged. |
+
+Visibility for the new action (relationship-based):
+```
+and(
+  rule!AS_GSS_BL_getRelatedActionVisibilityForStartEvaluation(
+    statusId: rv!record['recordType!{4db4a62e}...{evaluationStatus}evaluationStatus.{refDataId}refDataId'],
+    evaluationId: rv!record['recordType!{4db4a62e}...{evaluationId}evaluationId']
+  ),
+  rv!record['recordType!{4db4a62e}...{evaluationMethod}evaluationMethod.{refDataId}refDataId'] = cons!AS_GSS_REF_ID_EVALUATION_METHOD_BEST_VALUE,
+  rule!AS_CO_UT_isBlank(rv!record['recordType!{4db4a62e}...{parentEvalId}parentEvalId'])
+)
+```
+**Notes:** confirm the record exposes `evaluationMethod` (relationship → `refDataId`) and `parentEvalId` as record fields; if not, add them. Net effect: root Best-Value → Start Evaluation (BV); child round → Start Round (§6 batch); other methods → the original Start Evaluation.
+
 ## Batch tracker (build order)
 1. **Data model** — §2 ✅
 2. **Family & round helpers** — §3 ✅ (`getEvaluationRoundDetails`, `getRoundsForEvaluation`, `returnIdentifiersForEvaluationRounds`, `returnLatestChildEvaluationInSetupForGivenEvaluation`, `hasOpenCompleteEvaluationTask`)
-3. **Start Evaluation as Round 1** — modal, PM (node-by-node), record actions + visibility — *next*
+3. **Start Evaluation as Round 1** — §4 ✅ (modal, PM node-by-node, record actions + visibility split)
 4. **Round-aware tabs** — embeddable content + wrapper(s)
 5. **Setup New Round + clone** — wizard, duplicate, team-mapping, factor-doc-mapping
 6. **Start / Complete round + Rounds panel**
