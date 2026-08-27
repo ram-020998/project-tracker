@@ -384,3 +384,15 @@ GCW now installed (`AS GCW Full Application` `_a-0000e85f-3e2e-8000-9bfd-011c480
 **Lifecycle:** GCW solicitation → [createEvaluationFromSolicitation] → GSS Evaluation (evaluationNumber=PIID, sourceApplication=AM); GSS → [updateEvalSolicMapping]+[folder security] → GCW; status changes → [syncEvalStatusInGcw] → GCW keeps synced status copy; GCW summary ← [getEvaluationDetailsBySolicPiid/relatedEvaluationDetails]; completion → [getWinningVendorAndBasicInformation] → [create(Single/Multiple)AwardsFromEvaluation] → GCW Awards.
 
 **Multi-round seams (Phase 2):** (1) `getEvaluationDetailsBySolicPiid_V1` matches evaluationNumber=PIID + sourceApplication=AM → root-only (clones are "PIID Round N" + sourceApplication=GSS) → GCW shows Round-1 status regardless of active round; (2) status sync per evaluationId, `evaluationList` has no parentEvalId filter; (3) winning-vendor/award creation takes evaluationIds[] — must be the final round; (4) eval↔solic map created for root only; (5) two sync mechanisms (APPREF vs HTTP integration wired to PM 0006ef1c) — resolve which is active.
+
+## Session Log — 2026-08-27 (GCW↔GSS Phase 2 — multi-round impact)
+
+Delivered **`artifacts/04_GCW_GSS_MULTIROUND_IMPACT.md`**.
+
+**Root cause = two identity models:** (a) PIID-keyed reads (`getEvaluationDetailsBySolicPiid_V1`: evaluationNumber=PIID AND sourceApplication=AM) → **root-only/stale** (clones are "PIID Round N" + sourceApplication=GSS); (b) `evaluationId`-keyed reads/writes (status sync, winning-vendors, vendor-details, awards) operate on exactly the ids passed — `constructEvalVendorAndDocsForMultipleEvalIds` uses `WHERE evaluationId IN (...)` with **no family expansion** — and GCW's eval↔solic mapping caches the **root** id.
+
+**Per-flow:** ✅ B(createEval root), 7(folder security), solicitation reads (2/5/6/13), ref-data/toggles. ⚠️ 4(mapping root-only), 10(status sync accumulates one row per round w/ mangled names, no parent context; contradicts C), F(single id → wrong round if root), 9(award-links scope). ❌ HIGH: C(GCW summary shows Round-1 status+link forever), H+8/11(winning-vendors/award correct ONLY if final round's evaluationId used, else Round-1 awardees — wrong). Identity (gsmVendorRefId/externalVendorId/UEI) + appianDocId carry fine → gap is round selection, not identity. Failures silent. Both sync paths (APPREF+HTTP) accumulate rounds.
+
+**Top fix:** ensure award/winning-vendor creation targets the FINAL round's evaluationId (award correctness); then family-aware PIID summary (C) + decide status-sync semantics (10). Open confirmations (doc §6): which evaluationId GCW passes to award/H/F (root mapping vs GSS record action from awardees-selected round); whether GCW's synced list is meant to be plural.
+
+**All 4 integration artifacts (VM 01/02, GCW 03/04) complete.** Remaining suite integrations (GSM/DRM, SAM, SharePoint, OpenAI) not yet mapped (see 07).
