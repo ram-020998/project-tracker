@@ -355,3 +355,20 @@ Traced all 7 flows end-to-end (trigger → request → handler → data written)
 - VM→GSS (2): **getEvaluationDetailsForVm** (VM opp summary shows GSS status+link), **vendor-proposal-action** (POST; GSS writes `VendorUpdates`, trigger PM `0002ed86`).
 
 Key mechanics documented: join key `Opportunity.noticeId == Evaluation.evaluationNumber`; vendor identity `externalVendorId=VM vendorId` + UEI; dedup via `Proposal.isEvaluationLinked`; sealed-bid gating; two master toggles. Phase-2 seams listed in doc 01 §9 (esp. PIID→evaluation now 1:N under multi-round; per-opportunity dedup vs per-round re-include). Full object/UUID evidence appendix in §10.
+
+## Session Log — 2026-08-27 (VM↔GSS Phase 2 — multi-round impact)
+
+Delivered **`artifacts/02_VM_GSS_MULTIROUND_IMPACT.md`** (per-flow breaks/works/risk + fixes), grounded in verified mechanics.
+
+**Root cause:** `evaluationNumber` is overloaded as both display label AND the VM join key (`Evaluation.evaluationNumber` ↔ `Opportunity.noticeId`). `duplicateEvaluationForNewRound` (v9) rewrites clones to `"<PIID> Round N"`, so only the **root (Round 1)** keeps the real PIID. Data-confirmed on the test family (root 16 `26082602`; clones 17/18/19 `26082602 Round 2/3/4`).
+
+**Per-flow verdict:**
+- ✅ **D (download):** works across all rounds — carried docs retain the same VM `appianDocId` (as intended).
+- ✅ **B/C (vendor pulls):** work — Round-1 activity on the root; later rounds carry vendors internally (no VM re-fetch).
+- ⚠️ **A (opportunity details):** blank on round-clone views if the clone's number is passed (Med).
+- ❌ **E (push add/remove):** breaks from clones (VM opp lookup on `"PIID Round N"` fails) + between-round down-selects never call VM at all → VM `isEvaluationLinked` reflects only Round-1 membership (High).
+- ❌ **F (VM reads GSS status):** always returns Round-1 status + Round-1 record URL, stale once advanced (High).
+- ❌ **G (proposal action → VendorUpdates):** always attaches to the Round-1 evaluation + Round-1 vendor row, not the active round (High).
+- Identity (`externalVendorId`/UEI) + provenance (`sourceApplicationId=VM`) carry fine; toggles/sealed-bid unaffected.
+
+**Top fix:** decouple the VM join key from the label (keep raw PIID on every round), then add round-selection logic to F/G and decide the between-round→VM sync question. Failures are **silent** (no user-visible error), which raises priority. Open confirmations listed in doc §6.
