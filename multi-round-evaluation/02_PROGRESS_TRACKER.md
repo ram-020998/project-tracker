@@ -421,3 +421,23 @@ Implemented the "criteria pre-write" solution to carry `AS_GSS_FactorDocumentMap
 - **Built + verified rule** `AS_GSS_UT_constructFactorDocumentMappingsForNewRound` (`_a-0000f04c-8a45-8000-9bac-011c48011c48_83697`): correlates factor by `factorNumber` + document by `appianDocId`, copies active source mappings → new `FactorDocumentMapping` rows. `testRule` (new round 21, source 16) → 3 mappings (doc 52 → factors 43/44/45), `error:null`. Uses the criteria/doc ids already persisted by PM `000bf04a` node 6 "Write Evaluation".
 - **Remaining MANUAL step (Designer, MCP-blocked by lane):** add a "Write Records and Related Records" node after node 6 in PM `000bf04a` (lane System), Records = the rule call, Version 6, PauseOnError true, CaptureEvents false. Full spec in onboarding §10.50.
 - Decision on `isActive`: copy only currently-active source mappings; create new ones active. (Confirm if reactivating all was intended.)
+
+## Session Log — 2026-08-27 (Documentation consolidation / session close)
+
+Consolidated all progress; refreshed onboarding §2 (doc table) and §7 (current state); added doc **`08_UI_REDESIGN_NEW_MOCKUPS.md`**. Full state of the feature as of now:
+
+**Shipped/built + verified (MCP):** WI-1 Start Evaluation as Round 1, WI-2 Start Round, WI-3 Complete Round + Setup New Round gating, rounds card v9, all 8 round sub-tabs, `AS_GSS_UT_returnLatestChildEvaluationInSetupForGivenEvaluation`. (Manual-in-Designer remnants: the record actions/guards per §10.45–10.49.)
+
+**Integration research — COMPLETE (VM & GCW), in `artifacts/`:** VM current-state (01) + multi-round impact (02); GCW current-state (03, APPREF→ENTRYPOINT + HTTP, both active) + multi-round impact (04). Reassessed under the **parent-only model** → integration-safe.
+
+**Design clarification (authoritative):** hidden-child / parent-only model + canonical end-to-end workflow documented in `01_…` §1a and onboarding §1.
+
+**Changes made this session:**
+- **VM Flow G IMPLEMENTED** — `AS_GSS_mapVendorUpdatesToRecord` v2 targets the latest round's child eval (verified via testRule).
+- **Factor→document mapping carry-forward** — new rule `AS_GSS_UT_constructFactorDocumentMappingsForNewRound` (`…83697`) built + verified; **1 manual PM node pending** (Write Records after node 6 in `000bf04a`, §10.50).
+
+**Deferred (PO, not now):**
+- **GCW Flow 10** — skip status syncs for child evaluations (implement later).
+- **UI redesign from new mockups** — `08_…` (Summary Rounds panel, Setup New Round wizard, Start Evaluation form; some Designer-only).
+
+**Remaining/pending:** end-to-end UI walkthrough of the round lifecycle on a live family; the manual Designer steps (record actions per §10.45/10.48/10.49, factor-doc-mapping Write node per §10.50); the two deferred items above.

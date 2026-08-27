@@ -28,7 +28,9 @@ Full details: **`01_FEATURE_AND_TECHNICAL_DESIGN.md`**. Live status: **`02_PROGR
 | **Tabs implementation plan** | `04_TABS_IMPLEMENTATION_PLAN.md` — per-tab treatment, id-vs-record input shapes, record-view urlStubs, work items WI-1..9, sequencing |
 | **WI-1 analysis** | `05_START_EVALUATION_WI1_ANALYSIS.md` — current-state analysis of Start Evaluation |
 | **WI-1 implementation plan** | `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` — authoritative build spec for Best Value Start Evaluation as Round 1 (WI-1, shipped) |
-| **Cross-app impact research** (ACTIVE phase) | `07_CROSS_APP_IMPACT_RESEARCH.md` — **start here for the current phase**: how multi-round affects GSS↔VM/GCW/GSM/etc. integrations. Integration inventory + impact hypotheses + research method. |
+| **Cross-app impact research** | `07_CROSS_APP_IMPACT_RESEARCH.md` — cross-app integration inventory + research method (VM & GCW deep-dives now live in `artifacts/`) |
+| **Integration research (VM & GCW)** | `artifacts/` — **current-state + multi-round impact** for VM (01/02) and GCW (03/04), reassessed under the parent-only model; see `artifacts/README.md` |
+| **UI redesign from new mockups** (DEFERRED) | `08_UI_REDESIGN_NEW_MOCKUPS.md` — per-screen change inventory from the new mockups; not started (PO-deferred) |
 | **Docs git repo** | `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). These docs live under `multi-round-evaluation/`. Commit + push after every session. |
 | **The actual code (Appian objects)** | Appian **AS GSS Full Application**, accessed via the **`lcp` MCP server** — there is **no local git repo** for these objects |
 
@@ -158,14 +160,29 @@ When creating new objects, **match the existing pattern** rather than inventing 
 
 **All 8 round sub-tabs are shipped and verified** (Factors, Teams, Consensus Reports, Documents, Task History, Ratings, Checklist Items/Tasks, Evaluation History), plus Vendors → "Last Participated Round". 
 
-**Start/rounds workflow — WI-1, WI-2, WI-3 BUILT + verified via MCP:**
+**Cross-application integration research — COMPLETE (VM & GCW), documented in `artifacts/`:**
+- **VM ↔ GSS** (HTTP integrations ↔ Web APIs): current state `artifacts/01_…`, multi-round impact `artifacts/02_…`.
+- **GCW ↔ GSS** (APPREF→ENTRYPOINT in-JVM pattern + HTTP status-sync — both active): current state `artifacts/03_…`, multi-round impact `artifacts/04_…`.
+- **Reassessed under the PO-confirmed parent-only model** (see below): multi-round is **integration-safe**; VM/GCW correctly resolve to the **parent** evaluation.
+
+**CRITICAL design principle (PO-confirmed 2026-08-27) — hidden-child / parent-only:** the **parent evaluation is the ONLY evaluation users see and work in**; round clones are **backend-only, hidden from users**. Vendor addition + Select Awardees + award creation happen **only on the parent**. ⇒ VM/GCW showing the parent (root) is **correct, not stale**. Canonical end-to-end workflow is in `01_FEATURE_AND_TECHNICAL_DESIGN.md` **§1a (authoritative)**.
+
+**Integration changes made this phase:**
+- **VM Flow G — IMPLEMENTED:** `AS_GSS_mapVendorUpdatesToRecord` (`_a-0000ed8a-02db-8000-9dfc-011c48011c48_15443462`, v2) now targets the vendor in the **latest round's child evaluation** (via `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation`, max sequence), falling back to the parent. Verified via `testRule`. (`artifacts/02_…` §1b)
+- **GCW Flow 10 — DECISION (deferred):** GCW status syncs should be **skipped for child evaluations** (only parent syncs). To implement later. (`artifacts/04_…` §1b)
+
+**Factor→document mapping carry-forward — rule BUILT + verified (1 manual PM node pending):** `AS_GSS_UT_constructFactorDocumentMappingsForNewRound` (`_a-0000f04c-8a45-8000-9bac-011c48011c48_83697`) copies active factor↔doc mappings to a new round (correlate factor by `factorNumber`, document by `appianDocId`). Manual Designer step = a Write Records node after node 6 in Setup-New-Round PM `000bf04a`. Full detail in **§10.50**.
+
+**DEFERRED (PO, not now) — UI redesign from new mockups:** per-screen change inventory in `08_UI_REDESIGN_NEW_MOCKUPS.md` (Summary Rounds panel, Setup New Round wizard, Start Evaluation form; some pieces Designer-only). Not started.
+
+**Start/rounds workflow — WI-1/2/3 BUILT + verified (unchanged this session):**
 - **WI-1 Start Evaluation as Round 1 (Best Value):** interface `AS_GSS_FM_startEvaluationBestValue` `…42569`, PM `AS GSS Start Evaluation Best Value` `0000f04b-68ab…`, anchor rule `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` `…42289` v4, vendor-docs copy in `AS_GSS_UT_duplicateEvaluationForNewRound` `…42160` v9. Action `startEvaluationBestValue` (CO-created, root-only via `isBlank(parentEvalId)`). (§10.45–10.47)
 - **WI-2 Start Round** (start an already-created child round, no new round): form `AS_GSS_FM_startRound` `…42738`, wrapper PM `AS GSS Start Round` `0000f04b-9451…` (reuses `0002ecdd…` as subprocess), action `startRound` (CO-created). Shown in the rounds card only on the **latest Set Up** round. (§10.48)
 - **WI-3 Complete Round + Setup New Round gating:** wrapper PM `AS GSS Complete Round` `0000f04b-add3…` (no start form; reuses `0004e60d…` Mark-Complete, sets COMPLETE in backend), action `completeRound` (CO-created); rounds card shows it on the **In Progress** round. `setupNewRound` visibility gated to "all existing rounds COMPLETE". (§10.49)
 - **Rounds card** `AS_GSS_SEC_rounds` `…42270` v9 = `a!flatten({ startRound (latest+SetUp), completeRound (INPROGRESS), edit })`. Helper `AS_GSS_UT_returnLatestChildEvaluationInSetupForGivenEvaluation` `…43812`.
 - **Lifecycle:** root SETTING_UP → Start Evaluation (BV) → Round 1 INPROGRESS → Complete Round → COMPLETE → Setup New Round → next round SETTING_UP → Start Round → INPROGRESS → … Remaining across these: end-to-end UI walkthrough on a live family.
 
-**ACTIVE phase — Cross-application impact research:** assess how multi-round affects GSS's integrations with **VM (Vendor Management), GCW (Contract Writing), GSM/DRM, Source Selection, SAM.gov, SharePoint**. **Read `07_CROSS_APP_IMPACT_RESEARCH.md` first** — it has the verified integration inventory, the multi-round mechanics that break single-evaluation assumptions, per-integration impact hypotheses (GCW status sync and VM vendor/proposal flows are the HIGH-impact areas), and the research method. This is analysis-only; don't change integrations until impact is confirmed. See `02_PROGRESS_TRACKER.md` for the live checklist.
+See `02_PROGRESS_TRACKER.md` for the full live checklist and session logs.
 
 ## 7b. Continuing the current phase — round sub-tabs (read `04_…` first)
 
