@@ -1,0 +1,359 @@
+,Type,Epic,Ticket Title,Description,Acceptance Criteria,Effort Estimate,Mockup Ref,Questions / Open Items,,
+,,AIDC App Ref & Entry Point Creation,Spike Ticket,Spike to check on building the appref and entrypoints in AIDC,,,,,,
+,,,Toggle Configuration,Question - How does the toggle constant handling work ,,,,,,
+,,,Reconciliation optional and mandatory toggle,,,,,,,
+,,,Inflight Handling,Question - How does the inflight instaance handling work,We can show the warning in missing info section in the summary,,,,,
+,,,Reconcile process tickets,Dependent on the spike #1,,,,,,
+Soma Sundaram D,Task,1. Pricing Extraction Data Model,Evaluation Vendor Table Changes,"Database and synced-record changes on the GSS side to track AI price extraction. Add tracking columns to AS_GSS_EVALUATION_VENDOR (price extraction status, confidence level, source document reference, is-reviewed flag) and link extracted line items in AS_GSS_VENDOR_PRICE_BREAKUP (already has EXTRACTION_TYPE_ID / SOURCE_APPLICATION_ID). Reuse existing AS_GSS_R_DATA reference values (no new ref types needed): AI Confidence = High/Medium/Low (101/102/103), AI Request Status = In Progress/Completed/Failed/Queued (97-100), Pricing Extraction Type = AI Document Extraction/Manual Entry (71/72). Update the DSE and synced records so new fields sync. Delivered as idempotent SMT scripts for MariaDB + Oracle (GSS v3.1).","AC 1: Extraction tracking columns added
+Given the GSS v3.1 SMT scripts are deployed
+When a price extraction is kicked off for an evaluation vendor
+Then the evaluation vendor record stores extraction status, confidence level, and source document reference
+And the values map to existing AS_GSS_R_DATA reference values (AI Request Status, AI Confidence)
+
+AC 2: Breakup rows tagged with extraction source
+Given AI-extracted price line items are written
+When they are saved to AS_GSS_VENDOR_PRICE_BREAKUP
+Then each row has EXTRACTION_TYPE_ID = 'AI Document Extraction' (71)
+And manually entered rows have EXTRACTION_TYPE_ID = 'Manual Entry' (72)
+
+AC 3: Synced records reflect new fields
+Given the DSE and synced records are updated
+When the records sync
+Then the new extraction tracking fields are queryable via the evaluation vendor record without errors
+
+AC 4: Idempotent multi-DB scripts
+Given the scripts run on the MariaDB and Oracle verification schemas
+When verification runs them twice
+Then both versions pass and are re-runnable without error",,,"Q1: Staging approach — should extraction status / confidence / source-document / reviewed-flag be added as columns on AS_GSS_EVALUATION_VENDOR, or live in a separate header record (e.g. AS_GSS_AI_VENDOR_PRICE_EXTRACTION) so unreviewed extracted values don't overwrite the confirmed totalPrice/pricingNotes? (mockup empty-state favors staging)
+Q2: Confirm we reuse existing AS_GSS_R_DATA ref values (AI Confidence 101-103, AI Request Status 97-100, Pricing Extraction Type 71/72) and add no new ref types.
+Q3: Where is the extracted price held before review — staged on the breakup table (IS_ACTIVE=0) or in the header record?",,
+Soma Sundaram D,Task,1. Pricing Extraction Data Model,"Extend pricing data model to track AI extraction status, confidence & source document","Record-type and query layer on top of the table changes. Add record relationships and query entities so interfaces and process models can read per-vendor extraction status, confidence, and which document was sent for extraction in a single query. Expose the confidence level and reviewed flag so downstream status tags and the reconciliation gate can branch between optional (High confidence) and mandatory (Medium/Low confidence) reconciliation.","AC 1: Read extraction state per vendor
+Given an evaluation vendor with an in-progress or completed extraction
+When the vendor record is queried
+Then status, confidence, source document, and reviewed flag are returned together
+
+AC 2: Confidence drives reconciliation mode
+Given a completed extraction
+When confidence is High
+Then the vendor is flagged for optional reconciliation
+And when confidence is Medium or Low, the vendor is flagged for mandatory reconciliation
+
+AC 3: Source document resolvable
+Given a vendor had a document selected for extraction
+When the source document reference is read
+Then it resolves to the correct AS_GSS_EVALUATION_DOCUMENT row (EVAL_DOCUMENT_ID)",Medium,,"Q1: Rows 7 and 8 overlap — keep the split (7 = tables/DSE, 8 = record relationships + query layer) or merge into one ticket?
+Q2: Is confidence stored as an FK to ref-data (High/Medium/Low) or as a numeric score like AS_GSS_AI_VENDOR_ANALYSIS.confidenceScore?
+Q3: Does the extraction live entirely in AIA/Doc Centre with GSS only reading status, or does GSS own its own extraction record?",,
+Soma Sundaram D,Task,1. Pricing Extraction Data Model,Add audit support for AI-extracted pricing fields,Extend the pricing audit data types AS_GSS_A_R_EvaluationVendor_PriceBreakup and AS_GSS_A_R_EvaluationVendor_PriceBreakup_Field so both the AI-extracted values and any subsequent user edits are captured. This feeds the admin effectiveness metric called out in the spec (how often users had to change extracted values).,"AC 1: Capture AI-extracted baseline
+Given AI extraction writes pricing values
+When the values are saved
+Then the audit record stores the original AI-extracted value with source = AI and a timestamp
+
+AC 2: Capture user edits
+Given a user edits an AI-extracted price during reconciliation
+When they save
+Then the audit record stores the previous value, the new value, the user, and the timestamp
+
+AC 3: Effectiveness reporting
+Given audited pricing edits exist
+When the admin adoption/effectiveness metric is computed
+Then the number of vendors whose extracted values were changed can be derived from the audit data",Small,,"Q1: Does the existing field-level audit on AS_GSS_VENDOR_PRICE_BREAKUP already capture edits, or do the audit data types need a new flag to distinguish AI-extracted vs user-entered values?
+Q2: Confirm the effectiveness metric source — derive 'how often users changed extracted values' from these audit rows, or from a dedicated MTR metric (AS_GSS_MTR_SAVE_* pattern)?",,
+Soma Sundaram D,Story,3. Add Vendors Wizard — Document Selection,Add radio button to select a document for AI price extraction in upload step,"On Add Vendors Step 2 (proposal details), in the Documents section ('Upload and select the document for AI pricing extraction'), add a required 'AI Pricing Extraction*' radio column to the documents grid. Grid columns: Document, Version, Type, Factor/Subfactor, AI Pricing Extraction (radio), remove (X). A single radio selects the one document sent for AI price extraction per vendor; include the help tooltip (?) on the column header. UPLOAD and IMPORT FROM OPPORTUNITY actions remain. Modify AS_GSS_UI_vendorGrid_uploadDocs. Column shown only when the AI pricing extraction toggle is ON. Ref: Mockup 'Selecting the document for AI price extraction'.","AC 1: AI Pricing Extraction radio column shown
+Given the AI pricing extraction toggle is ON and I am on Add Vendors Step 2
+When the Documents grid renders for a vendor
+Then an 'AI Pricing Extraction*' radio column is shown alongside Document, Version, Type, and Factor/Subfactor
+And a help tooltip is available on the column header
+
+AC 2: Single document selection
+Given multiple documents are listed for a vendor
+When I select the AI Pricing Extraction radio on one row
+Then any previously selected radio for that vendor is cleared so only one document is selected
+
+AC 3: Required selection
+Given the AI toggle is ON and at least one document exists for the vendor
+When I click Add without selecting a document for extraction
+Then a required-field validation blocks submission
+
+AC 4: Hidden when AI is off
+Given the AI pricing extraction toggle is OFF
+When the Documents grid renders
+Then the AI Pricing Extraction column is not shown and upload/import behavior is unchanged",Medium,Slide: 'Selecting the document for AI price extraction',"Q1: Is selecting a document for AI extraction mandatory when the toggle is ON (column shows 'AI Pricing Extraction*'), or can the user skip it for vendors with no pricing document?
+Q2: Multi-document extraction is excluded per spec — confirm strictly one document per vendor.
+Q3: Should already-extracted documents be re-selectable / re-runnable from this grid?",,
+Soma Sundaram D,Story,3. Add Vendors Wizard — Document Selection,Trigger extraction on vendor add for selected documents,"Wire the Add Vendors submission so AS GSS Add Evaluation Vendors invokes the price extraction orchestration for each vendor that has a document selected. Skip vendors with no selected document, and skip entirely when the AI pricing extraction toggle is OFF. On kickoff set the extraction status so the UI shows 'Extracting Pricing' (summary) / 'Extracting' (vendors tab).","AC 1: Extraction kicked off for selected vendors
+Given vendors are submitted with a document selected for extraction
+When the add-vendors process completes
+Then price extraction is started only for those vendors
+And their status is set so the UI shows the 'Extracting Pricing' / 'Extracting' indicator
+
+AC 2: No selection, no trigger
+Given a vendor has no document selected
+When vendors are submitted
+Then no extraction is triggered for that vendor
+
+AC 3: AI off, no trigger
+Given the AI pricing extraction toggle is OFF
+When vendors are submitted
+Then no extraction is triggered for any vendor",Small,,"Q1: Is extraction kicked off only on Add Vendors, or also on Update Vendors and on re-upload/replacement of the selected document?
+Q2: Confirm the initial status value used at kickoff (AI Request Status = 'In Progress' vs 'Queued').
+Q3: How are concurrent extractions across many vendors throttled (reuse AI Extract Findings Orchestrator MNI gating)?",,
+Soma Sundaram D,Story,4. Extraction Status Tags (Evaluation Summary & Vendors Tab),Show 'Extracting Pricing' and 'Pricing Extracted' tags on evaluation summary for optional,Evaluation summary Vendors section — per-vendor pricing status on the vendor cards for the OPTIONAL reconciliation case (High confidence). In progress shows '⟳ Extracting Pricing' (spinner); complete shows a 'Pricing Extracted' tag (highlighted). In optional mode the extracted price is added to the evaluation automatically; a 'Review' link remains available to view/adjust. Update AS_GSS_UI_vendorGrid_docTagLine / AS_GSS_UI_vendorGrid_vendorIcon. Ref: Mockup 'evaluation summary - price being / is extracted (Reconciliation optional)'.,"AC 1: In-progress indicator
+Given a vendor's price extraction is in progress
+When the evaluation summary vendor card renders
+Then it shows an '⟳ Extracting Pricing' indicator with a spinner
+
+AC 2: Completed tag (optional)
+Given extraction completed with High confidence (optional reconciliation)
+When the card renders
+Then it shows a 'Pricing Extracted' tag
+And the extracted price is added to the evaluation without requiring review
+
+AC 3: Review link available
+Given a 'Pricing Extracted' card in optional mode
+When I click the 'Review' link
+Then the pricing review screen opens for that vendor",Medium,Slides: 'To indicate on the evaluation summary that the price is being extracted' / '...is extracted',"Q1: In optional mode, does the 'Review' link always appear, or only when a discrepancy is detected (the 'Completed with Discrepancies' state)?
+Q2: Confirm High confidence = optional reconciliation and that the price is auto-added to the evaluation.
+Q3: What is the exact 'Extracting Pricing' vs 'Pricing Extracted' tag color/style spec from Figma?",,
+Soma Sundaram D,Story,4. Extraction Status Tags (Evaluation Summary & Vendors Tab),Show 'Extracting Pricing' and 'Pricing Extracted' tags on evaluation summary for mandatory,Evaluation summary vendor cards for the MANDATORY reconciliation case (Medium/Low confidence). In progress shows '⟳ Extracting Pricing'; complete shows a 'Pricing Extracted' tag with a warning icon (⚠) and a 'Review' action. The extracted price is NOT added to the evaluation until the user reviews and confirms it. Update AS_GSS_UI_vendorGrid_docTagLine / AS_GSS_UI_vendorGrid_vendorIcon. Ref: Mockup 'evaluation summary - price is extracted (Reconciliation mandatory)'.,"AC 1: Completed tag with warning + Review (mandatory)
+Given extraction completed with Medium or Low confidence
+When the evaluation summary vendor card renders
+Then it shows a 'Pricing Extracted' tag with a warning icon (⚠) and a 'Review' action
+And the extracted price is NOT yet added to the evaluation
+
+AC 2: Review routes to reconciliation
+Given the 'Review' action is shown
+When I click it
+Then the reconciliation screen opens for that vendor
+
+AC 3: Price added only after confirm
+Given a mandatory-reconciliation vendor
+When I review and confirm pricing
+Then the price is added to the evaluation and the warning indicator is cleared",,,"Q1: After the user confirms pricing in mandatory mode, what does the card become — 'Pricing Extracted' without the warning, or a distinct 'Reviewed' state?
+Q2: Confirm Medium/Low confidence = mandatory reconciliation and the price is withheld until confirmed.
+Q3: If the user never reviews, does the price stay out of the evaluation indefinitely (any reminder/blocker at award)?",,
+Soma Sundaram D,Story,4. Extraction Status Tags (Evaluation Summary & Vendors Tab),Show extraction tags on vendors tab for mandatory,"Vendors tab Price column — per-vendor pricing status for the OPTIONAL reconciliation case. During extraction the Price cell shows '⟳ Extracting'; when complete it shows the extracted price value with an edit icon, and the price is added to the evaluation. Note from mockup: the Vendors tab Price column layout is common across mandatory/optional during the setup phase, so coordinate with the mandatory Vendors-tab ticket (row 15). Ref: Mockup 'vendors tab - price is being extracted' + 'Vendors tab during set up phase'.","AC 1: Extracting indicator
+Given a vendor's price extraction is in progress
+When the Vendors tab loads
+Then the Price column shows '⟳ Extracting' for that vendor
+
+AC 2: Extracted price shown (optional)
+Given extraction completed with High confidence
+When the Vendors tab loads
+Then the Price column shows the extracted price value with an edit affordance
+And the price is reflected on the evaluation without requiring review
+
+AC 3: Consistency with summary
+Given a vendor's status changes
+When both the Vendors tab and the evaluation summary are viewed
+Then the same state is reflected in both",Medium,Slides: 'To indicate on the vendors tab...' / 'which document was sent' / 'View all vendors link',"Q1: The mockup notes the Vendors-tab Price column is common across optional/mandatory during setup — should row 14 (optional) and row 15 (mandatory) be merged into a single implementation ticket?
+Q2: Does clicking the price value / edit icon open the same reconciliation screen as the summary 'Review' action?
+Q3: Should the '⚠ needs review' indicator also show on the Vendors tab in optional mode when a discrepancy is detected?",,
+Ramaswamy Ulaganathan,,Extraction Status Tag in Vendors Tab - Mandatory Reconciliation,Show extraction tags on vendors tab for optional,,"AC1:
+Given I open the Vendors page of an evaluation where pricing documents have been submitted for multiple vendors for extraction and the system-wide Reconciliation Type is set to Optional
+When pricing extraction is completed for a vendor without any discrepancies
+Then the extracted Total Price should be displayed in the Price column of the vendors grid
+
+AC2:
+Given I open the Vendors page of an evaluation where pricing documents have been submitted for multiple vendors for extraction and the system-wide Reconciliation Type is set to Optional
+When pricing extraction is completed for a vendor with discrepancies
+Then the extracted Total Price should be displayed along with an exclamation icon indicating extraction issues
+
+AC3:
+Given a vendor has pricing extraction discrepancies and the system-wide Reconciliation Type is set to Optional
+When the vendor is displayed in the vendors grid
+Then an Edit action should be available next to the Total Price
+
+AC4:
+Given a vendor does not have pricing extraction discrepancies and the system-wide Reconciliation Type is set to Optional
+When the vendor is displayed in the vendors grid
+Then the Edit action should not be displayed next to the Total Price",,,,,
+Ramaswamy Ulaganathan,,Pricing Extraction Document Indicator - Documents tab,Show source-document indicator on documents tab,,"AC1:
+Given I land on the Documents tab of an evaluation where pricing extraction has been completed for one or more vendor documents
+When the documents grid is displayed
+Then an AI pencil icon should be shown for each document for which pricing extraction has been completed
+
+AC2:
+Given the documents grid is displayed
+When a document has not undergone pricing extraction
+Then the AI pencil icon should not be displayed for that document",,,,,
+Ramaswamy Ulaganathan,,All Vendors link in Vendors Section in Eval Summary,View All actions in vendors section in evaluation summary,,"AC1:
+Given I land on the summary page of an evaluation
+When the Vendors section header is displayed
+Then a new link labeled ""View All"" should be displayed before the ""Add Vendors"" link
+
+AC2:
+Given the ""View All"" link is displayed in the Vendors section header
+When I click on the ""View All"" link
+Then I should be navigated to the Vendors tab of the evaluation",,,,,
+Ramaswamy Ulaganathan,,Pricing Section - Display State - Extarction In Progress,Price card when extraction is in progress,,"AC1:
+Given the environment-level toggle for Price Extraction is turned ON
+When the user opens a vendor for whom a pricing document has been selected for extraction and the price extraction is in progress
+Then in the Price section, an empty state indicating that the price extraction is in progress should be displayed
+
+AC2:
+Given the price extraction is in progress for a vendor
+When the empty state is displayed
+Then a ""Refresh"" button should be available to refresh the extraction status",,,,,
+Ramaswamy Ulaganathan,,Pricing Section - Display State - Extarction Completed with Discrepancies - Optional Reconciliation,Price card when extraction is complete and discrepency detected,,"AC1:
+Given the environment-level toggle for Price Extraction is turned ON and the system-wide Reconciliation Type is set to Optional
+When the user opens a vendor for whom price extraction has completed with discrepancies
+Then the Price section should not display the extracted price details
+
+AC2:
+Given the environment-level toggle for Price Extraction is turned ON and the system-wide Reconciliation Type is set to Optional
+When the user opens a vendor for whom price extraction has completed with discrepancies
+Then an empty state indicating that the extraction has discrepancies should be displayed in the Price section
+
+AC3:
+Given the environment-level toggle for Price Extraction is turned ON and the system-wide Reconciliation Type is set to Optional
+When the empty state is displayed for a vendor with extraction discrepancies
+Then a ""Reconcile"" action should be displayed above the empty state to navigate the user to the reconciliation screen",,,,,
+Ramaswamy Ulaganathan,,Pricing Section - Display State - Extarction Completed without Discrepancies - Optional Reconciliation,Price card when extraction is complete and reconciliation is optional,,"AC1:
+Given the environment-level toggle for Price Extraction is turned ON and the system-wide Reconciliation Type is set to Optional
+When the user opens a vendor for whom price extraction has completed without discrepancies
+Then the extracted price details should be populated directly into the corresponding price fields in the Price section
+
+AC2:
+Given the environment-level toggle for Price Extraction is turned ON and the system-wide Reconciliation Type is set to Optional
+When the user opens a vendor for whom price extraction has completed without discrepancies
+Then a ""Reconcile"" action should be displayed above the Price section
+
+AC3:
+Given the ""Reconcile"" action is displayed
+When the user clicks on the ""Reconcile"" action
+Then the user should be navigated to the reconciliation page",,,,,
+Ramaswamy Ulaganathan,,Pricing Section - Display State - Extarction Completed - Mandatory Reconciliation,Price card when extraction is complete and reconciliation is mandatory,,"AC1:
+Given the environment-level toggle for Price Extraction is turned ON and the system-wide Reconciliation Type is set to Mandatory
+When the user opens a vendor for whom price extraction has completed, regardless of whether discrepancies exist
+Then an empty state indicating that the price extraction has been completed should be displayed in the Price section
+
+AC2:
+Given the environment-level toggle for Price Extraction is turned ON and the system-wide Reconciliation Type is set to Mandatory
+When the price extraction completion state is displayed
+Then a ""Reconcile"" link should be displayed above the Price section
+
+AC3:
+Given the ""Reconcile"" link is displayed
+When the user clicks on the ""Reconcile"" link
+Then the user should be navigated to the reconciliation page",,,,,
+Ganesh Raju,,Update Vendors,Plug Reconsile price action in Price card for reconciliation optional,,"AC 1: Reconcile price link visibility
+Given I am on the Update Vendors screen and the AI pricing extraction toggle (constant) is ON And the vendor has a document selected for pricing extraction 
+When the Price card is displayed
+Then I see a ""Reconcile price →"" link in the Price card header And the link is hidden when the toggle is OFF or no extraction instance exists for the vendor
+
+AC 2: Launch reconciliation screen (app-referenced from Doc Centre)
+Given the ""Reconcile price →"" link is visible
+ When I click it Then the AI Document Center ""Price Details"" screen opens (app-referenced from Doc Centre) showing extracted Total Price, Price Breakup line items, Pricing Notes, and the source document preview And when extraction completed but returned no data, the screen opens with blank extracted values And when extraction errored, 
+ Then I instead see a ""something went wrong"" message with the ability to enter price manually
+
+AC 3: Save reconciled pricing back to GSS
+Given I have reviewed/edited pricing on the reconciliation screen 
+When I click ""Save"" 
+Then both the original AI-extracted values and the user-entered values are stored in GSS (Total Price, VendorPriceBreakup rows, Pricing Notes) And the screen closes and the Price card reflects the saved user-entered values
+
+AC 4: Reconciliation is optional — direct entry allowed
+Given the toggle is ON and reconciliation is optional 
+When I do not use the ""Reconcile price"" action 
+Then I can directly edit the Total Price and Price Breakup inline and save via ""Update"" And directly edited GSS pricing is NOT pushed back to AIA 
+
+AC 5: Price card reflects extracted/reviewed state
+Given pricing has been extracted and reviewed for the vendor 
+When the Update Vendors screen loads 
+Then the Price card displays the saved Total Price and Price Breakup And if the extraction instance was deleted in Doc Centre, the extracted price shows as blank and no reconciliation is launched",,,,,
+Ganesh Raju,,Update Vendors,Price Details breakdown changes,,"AC 1: Open and view price details
+Given I click a vendor's price link on the Vendors grid 
+When the Price Details popup opens
+ Then I see the Total Price, a read-only Price Breakup table (Item Description, Qty, Unit Price, Amount), and Pricing Notes as per the new mockup
+
+AC 2: Review-needed indicator
+Given a vendor's extracted price has not been reviewed 
+When I view the Price column 
+Then a ""needs review"" warning icon shows next to the price, regardless of whether reconciliation is mandatory or optional
+
+AC 3: Close the popup
+Given the Price Details popup is open 
+When I click ""Close"" or ""X"" 
+Then the popup closes with no changes",,,,,
+Ganesh Raju,,Update Vendors,Add vendors screen when AI toggle is turned off,,"AC 1: Navigation buttons updated
+Given I am on Add Vendors Step 2 and the AI pricing extraction toggle is OFF 
+When the screen renders 
+Then the footer shows ""Cancel"", ""Back"", and ""Add"" buttons And the ""Back to browsing vendors"" link, ""Next Vendor"" button are removed
+
+AC 2: Vendor details moved to the right
+Given I am on Add Vendors Step 2 with the AI toggle OFF
+ When I select a vendor from the left list 
+ Then the UEI, CAGE, SAM.gov Status, and SAM.gov Expiration Date display on the right side of the vendor header
+
+AC 3: Back navigation
+Given I am on Add Vendors Step 2
+When I click ""Back""
+Then I return to Step 1 (browse/select vendors) with my selected vendors retained",,,,,
+Ganesh Raju,,Update Vendors,Update vendors screen when AI toggle is turned off,,"AC 1: AI pricing extraction elements hidden
+Given I open the Update Vendors screen with the AI pricing extraction toggle OFF 
+When the screen renders 
+Then the ""AI Pricing Extraction"" column and the ""Reconcile price →"" link are not shown
+
+AC 2: Vendor details on the right
+Given the AI toggle is OFF 
+When the screen renders 
+Then UEI, CAGE, SAM.gov Status, and SAM.gov Expiration Date display on the right side of the vendor header
+
+AC 3: Documents section
+Given the AI toggle is OFF 
+When the Documents section renders 
+Then I see ""Upload"" and ""Import from Opportunity"" actions with a grid showing Document, Version, Type, and Factor/Subfactor columns
+
+AC 4: Direct pricing entry
+Given the AI toggle is OFF
+ When I view the Price section 
+ Then I can directly edit Total Price, add/edit/remove Price Breakup line items, and edit Pricing Notes And I save via the ""Update"" button",,,,,
+Ganesh Raju,,Update Vendors,Delete vendor handling,,"AC 1:
+ Disable/hide delete during extraction Given a vendor's pricing extraction status is ""Extracting Pricing""
+ When I open the vendor card's action menu 
+ Then the ""Delete"" option is disabled And a tooltip explains delete is unavailable while extraction is in progress
+
+AC 2: 
+Allow delete after extraction completes Given a vendor's extraction status is ""Pricing Extracted"" or errored (or no extraction is running) 
+When I open the vendor card's action menu and click ""Delete""
+Then the vendor is deleted following the existing delete flow",,,,,What happens when we delete vendor should we delete the pricing extarction instance in AI doc Center?
+Ganesh Raju,,Update Vendors,Missing information banner,,"AC 1: AI toggle OFF — existing behavior
+Given the AI pricing toggle is OFF 
+When I view the summary setup banner 
+Then existing validations apply (attach document, add Total Price) And Start Evaluation enables once they are satisfied
+
+AC 2: Extraction in progress blocks setup
+Given the AI toggle is ON and a vendor's status is ""Extracting Pricing"" 
+When I view the summary 
+Then a validation shows that extraction is in progress for that vendor And Start Evaluation is disabled until extraction completes
+
+AC 3: Extraction failed requires manual price
+Given the AI toggle is ON and a vendor's extraction errored
+When I view the summary
+Then a validation shows ""extraction failed, enter price manually"" with an Update Vendor link And Start Evaluation is disabled until a price is entered
+
+AC 4: Mandatory reconciliation blocks on unreviewed prices
+Given the AI toggle is ON and reconciliation is Mandatory
+ When one or more vendors have extracted but unreviewed pricing 
+ Then a validation shows ""review extracted pricing"" with a Reconcile link for each And Start Evaluation is disabled until all vendors are reviewed
+
+AC 5: Optional reconciliation does not block on review
+Given the AI toggle is ON and reconciliation is Optional
+When vendors have extracted but unreviewed pricing (no in-progress, no errors)
+Then review appears as an optional nudge, not a blocking validation And Start Evaluation is enabled",,,,,
+Ganesh Raju,,Update Vendors,Disable Delete Document for Pricing enabled docs,,"AC 1: Pricing-extraction indicator on document
+Given a document was sent for AI price extraction 
+When I view it in the Documents grid (and other document lists)
+Then an indicator icon appears next to the Document Name showing it was used for price extraction
+
+AC 2: Delete disabled for pricing-enabled documents
+Given a document is selected/used for AI price extraction
+When I open the document's actions (Documents tab,Add/Update Vendor screens where doc can be removed)
+Then the Delete/Remove option is disabled And a tooltip explains the document cannot be deleted because it is used for price extraction
+
+AC 3: Delete allowed for non-pricing documents
+Given a document is not selected for AI price extraction
+When I see its actions 
+Then the Delete/Remove option is enabled and works as per the existing flow
+
+",,,,,
