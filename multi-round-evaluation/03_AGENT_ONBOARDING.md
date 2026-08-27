@@ -31,6 +31,9 @@ Full details: **`01_FEATURE_AND_TECHNICAL_DESIGN.md`**. Live status: **`02_PROGR
 | **Cross-app impact research** | `07_CROSS_APP_IMPACT_RESEARCH.md` — cross-app integration inventory + research method (VM & GCW deep-dives now live in `artifacts/`) |
 | **Integration research (VM & GCW)** | `artifacts/` — **current-state + multi-round impact** for VM (01/02) and GCW (03/04), reassessed under the parent-only model; see `artifacts/README.md` |
 | **Feature Implementation Plan** | `artifacts/05_FEATURE_IMPLEMENTATION_PLAN.md` — **code-free build blueprint** for the whole feature (what/where/why, state transitions, build sequence, verification) + full inventory of all 63 POC package objects. Start here to implement from a clean baseline. |
+| **Feature Technical Design** | `artifacts/06_FEATURE_TECHNICAL_DESIGN.md` — **object-by-object build spec** (real optimized SAIL / node-by-node PMs / test cases), standards-compliant. 8 batches (§2–§9). The *how* to build; read after 05. |
+| **Design best-practices (GOVERNING)** | `artifacts/SOLUTIONS - Design Best Practices & Guidance 3.md` — the solution coding standard; the Technical Design conforms to it and it wins any conflict. |
+| **POC package object list** | `../merge-assist-v2/modifiedObjects.md` — the 63 objects changed/added in the POC (basis for docs 05/06). |
 | **UI redesign from new mockups** (DEFERRED) | `08_UI_REDESIGN_NEW_MOCKUPS.md` — per-screen change inventory from the new mockups; not started (PO-deferred) |
 | **Docs git repo** | `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). These docs live under `multi-round-evaluation/`. Commit + push after every session. |
 | **The actual code (Appian objects)** | Appian **AS GSS Full Application**, accessed via the **`lcp` MCP server** — there is **no local git repo** for these objects |
@@ -159,6 +162,8 @@ When creating new objects, **match the existing pattern** rather than inventing 
 ---
 
 ## 7. Current state in one line
+
+> **ACTIVE PHASE — POC → production rebuild (docs complete, build pending).** Everything built to date is a **validated proof-of-concept**. The PO confirmed the feature works as intended and we have produced the authoritative build docs to reimplement it cleanly (not copy the POC code): **`artifacts/05_FEATURE_IMPLEMENTATION_PLAN.md`** (code-free what/where/why + all 63 POC objects) and **`artifacts/06_FEATURE_TECHNICAL_DESIGN.md`** (object-by-object optimized SAIL / node-by-node PMs, conforming to the governing best-practices doc). **Read §11 for this workstream** (decisions, consolidations, open PO confirmations, and the extra POC object UUIDs). The subsections below describe the POC as-built.
 
 **All 8 round sub-tabs are shipped and verified** (Factors, Teams, Consensus Reports, Documents, Task History, Ratings, Checklist Items/Tasks, Evaluation History), plus Vendors → "Last Participated Round". 
 
@@ -363,3 +368,68 @@ When a new round is created, carried vendor documents must also carry their **fa
 - **MANUAL step (MCP-blocked — Designer):** add a **"Write Records and Related Records"** node (`internal3.write_records_to_source_23r3`) in PM `000bf04a` immediately **after node 6 "Write Evaluation"** (rewire 6→newNode→7), **lane = System (0)**. (MCP `createProcessModelNode` can't set a lane on a laned PM, and full `updateProcessModel` node-replacement is too risky on this working PM — hence manual, per §10.47.)
   - **Records** = `=rule!AS_GSS_UT_constructFactorDocumentMappingsForNewRound(newEvaluationId: pv!newEvaluation['recordType!{e6bc8561-d3a6-4679-b7af-6e279910468e}AS_GSS_Evaluation_SYNCEDRECORD.fields.{7f7c2d3b-1410-4650-a5c8-afd218753011}evaluationId'], sourceEvaluationId: pv!duplicatedFromEvaluation['recordType!{e6bc8561-d3a6-4679-b7af-6e279910468e}AS_GSS_Evaluation_SYNCEDRECORD.fields.{7f7c2d3b-1410-4650-a5c8-afd218753011}evaluationId'], initiator: pp!initiator)`
   - **Version** = 6 · **PauseOnError** = true · **CaptureEvents** = false · (RecordType not required when not capturing events).
+
+---
+
+## 11. POC → Production rebuild — Feature Implementation Plan + Technical Design
+
+The build so far is a **validated POC** (hand-built, unoptimized, inconsistently named). The PO signed off that it behaves correctly and asked for two authoritative docs to rebuild it cleanly. **Do not copy the POC SAIL** — build from these docs.
+
+### 11.1 The two docs (+ governing standard)
+- **`artifacts/05_FEATURE_IMPLEMENTATION_PLAN.md`** — code-free *what/where/why*: the architecture (round = full Evaluation clone; hidden-child/parent-only), per-layer changes, state transitions, business rules, build sequence, verification, and **Appendix A** mapping **all 63 POC package objects** → role + New/Modified/Regenerated.
+- **`artifacts/06_FEATURE_TECHNICAL_DESIGN.md`** — the *how*: object-by-object spec (Purpose · Used by · Inputs · optimized SAIL / node-by-node PM · Test cases), 8 batches §2–§9. **COMPLETE.**
+- **`artifacts/SOLUTIONS - Design Best Practices & Guidance 3.md`** — GOVERNING coding standard. Wins any conflict.
+- **`../merge-assist-v2/modifiedObjects.md`** — the 63-object POC package list (source of truth for scope).
+
+### 11.2 PO decisions locked (2026-08-27)
+1. **Rename / consolidate / eliminate is approved** — final object set should be smaller/cleaner than the 63; signatures may change.
+2. **Family key = `parentEvalId` on the `AS_GSS_EvaluationRound` table** (a new column), so family resolution queries the **rounds table only** (no Evaluation query). `null` for the root's Round-1 row, `= root id` for child rounds.
+3. Deliver in **batches** with a review checkpoint each; **node-by-node** design for PMs (not XML); full SAIL for rules/interfaces.
+4. Content is a **clean forward spec** — no POC-diff / anti-pattern / migration framing (developers have no POC context).
+
+### 11.3 Key consolidations / optimizations captured in the Technical Design
+- **Round-aware tabs: 8 `_Parent` wrappers → 1** generic `AS_GSS_CPS_roundContentTabs(evaluationId, tabType)` (routes to content via `a!match`); **`AS_GSS_UT_returnViewRenderingConfigFor_Factors` eliminated**.
+- **Family resolver** `AS_GSS_QR_getRoundsForEvaluation` (renamed from `returnEvaluationRoundsForGivenEvaluation`): 2 queries, **rounds-table-only**, sequence-sorted, round-eval status joined; dead `additionalFields` + `excludeParent` flag removed.
+- **`getEvaluationRoundDetails`** kept as the single base query-rule; the resolver composes it.
+- **Factor→team mapping** (`updateFactorTeamMappingForDuplicatedEvaluation`) reduced from a full criteria-field re-list to a **merge that only sets `evaluatorTeamId`**.
+- **New helper `AS_GSS_UT_returnRoundStatusDisplayConfig`** de-dupes the 4 repeated status→color `a!match` blocks in the Rounds panel.
+- **`returnLastParticipatedRoundForVendors`** now reuses the family resolver (drops manual anchor/children queries); correlates vendors by **`uniqueEntityId`**.
+- **Querying standard:** everything uses **`AS_CO_UT_queryRecord`** (`_a-0000e6c8-d132-8000-9bbe-011c48011c48_469266`; inputs incl. `returnType`, `filters`, `logicalExpression`, `sort`, `pagingInfo`, `relatedRecordData`, `executeWhen`) with sort-in-query; plus i18n throughout, relationship-based record-action visibility, headless start forms + wrapper PMs, proper security/lane/archive.
+- **VM Flow G** (`mapVendorUpdatesToRecord`): latest-round targeting simplified to "last element of the sorted family rounds". **GCW sync**: single guard at the sync process entry — skip when `parentEvalId` is populated (child round).
+
+### 11.4 Open PO confirmations (flagged in doc 06)
+- Setup-New-Round wizard **step count (2 vs 3)** — is the resubmission-request step in?
+- **Phases tab** in or out (appears in some mockups, not others).
+- **"Active round" definition** for the Summary active-round vendors and the VM latest-round pick — max-sequence regardless of status, or latest **non-complete**?
+- **Record-type suffix** convention — keep GSS `_SYNCEDRECORD` or move new records to `_RecordType` (best-practices trend).
+
+### 11.5 Additional POC object UUIDs discovered this session (not previously in §5 — preserve)
+**New/feature rules & PMs:**
+- `AS_GSS_UT_checkifAnyOpenTaskForGivenEval` `_a-0000f04b-38cd-8000-9baa-011c48011c48_42867`
+- `AS_GSS_UT_returnEvaluationTaskProgressForGivenCriteria` `870b5ccb-3227-420a-b57b-b781a13d1c48`
+- `AS_GSS_QR_getEvaluationRoundDetails` `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42276`
+- `AS GSS Setup New Round` / "Duplicate Evaluation For New Round" PM `000bf04a-37b2-8000-fbec-7f0000014e7a`
+
+**Existing objects modified for the feature:**
+- `AS_GSS_mapVendorUpdatesToRecord` (VM Flow G) `_a-0000ed8a-02db-8000-9dfc-011c48011c48_15443462` (v2)
+- `AS_GSS_UT_updateFactorTeamMappingForDuplicatedEvaluation` `_a-0000eefb-2869-8000-9e60-011c48011c48_17825974`
+- `AS_GSS_UT_constructAllFactorAssignmentInformation` `_a-0000ed1b-44fe-8000-9de4-011c48011c48_14703108`
+- `AS_GSS_updateEvaluationRecordWithRelatedInfo` `_a-0000edb8-1944-8000-9e07-011c48011c48_15785382`
+
+**Summary / vendor UI objects:**
+- `AS_GSS_CPS_evaluationInformationForLeftPanelOfSummary` `_a-0000e5da-a251-8000-9bbe-011c48011c48_1007234`
+- `AS_GSS_CPS_evaluationInformationForRightPanelOfSummary` `_a-0000e5da-a251-8000-9bbe-011c48011c48_1007220`
+- `AS_GSS_GRD_ViewFactorsAndSubfactors` `_a-0000eb72-c933-8000-9d28-011c48011c48_10441382`
+- `AS_GSS_GRD_vendorListForSelection` `_a-0000f04a-0c6d-8000-9ba8-011c48011c48_42122`
+- `AS_GSS_FM_evaluationVendorsTab` `_a-0000e5da-a251-8000-9bbe-011c48011c48_1082379`
+- `AS_GSS_GRD_EvaluationVendors` `_a-0000e5da-a251-8000-9bbe-011c48011c48_1082078`
+
+**Record actions on `AS_GSS_Evaluation_RECORD` (`4db4a62e`) — CO-created in POC:**
+- `startEvaluationBestValue` `02b522c4-5b1f-45dd-843b-5ab400a2342f` → PM `0000f04b-68ab…`
+- `startRound` `84ac0b39-bf4e-43ba-bbb3-050dd2e5d9f4` → PM `0000f04b-9451…`
+- `completeRound` `853cb2b7-5587-48fa-8af4-15d6206a7421` → PM `0000f04b-add3…`
+- `setupNewRound` `723f77ca-d610-49d4-a711-778e2e0d4eb5` → PM `000bf04a-37b2…`
+- `edit` (reused for round Edit) `dbb4697d-a463-4b90-9638-e2fd83256b50` → PM `0039ed03-9dcc…`
+
+### 11.6 Next step
+PO review of `06_…`; resolve §11.4; then implement from a clean baseline in the build-sequence order (doc 06 §-order / batch tracker). The record-actions and record-view repoints remain **manual in Designer** (§10.47).
