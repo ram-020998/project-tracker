@@ -1,120 +1,109 @@
 # 06 — Feature Technical Design: GSS Multi-Round Evaluations
 
-> **Purpose.** Object-by-object technical design that turns the POC into a **production-quality** build. For each object: what the prototype did, why it works, where it's used — then a **redesigned, optimized, standards-compliant implementation** (with real code). This is **NOT** the prototype code from the environment: the POC was hand-built, unoptimized, inconsistently named, and full of shortcuts. This is where we fix that.
->
-> **Reads with:** `artifacts/05_FEATURE_IMPLEMENTATION_PLAN.md` (the *what/where/why*, code-free) and — **governing** — `artifacts/SOLUTIONS - Design Best Practices & Guidance 3.md` (**every design here conforms to it**).
->
-> **Status: IN PROGRESS.** Locked so far: the standard (§A), the data model = **Batch 1** (§B), and the compliant worked exemplar (§C). Remaining objects are filled in **batches, in build-sequence order** (§D.3), each batch reviewed before the next.
+Object-by-object technical design to build the feature: for each object, its **purpose, where it's used, the implementation, and test cases**. Read alongside `05_FEATURE_IMPLEMENTATION_PLAN.md` (the *what/where/why*). **Governing standard:** `SOLUTIONS - Design Best Practices & Guidance 3.md` — §1 below distills the parts most relevant here; that doc wins in any conflict.
+
+**Status: IN PROGRESS** — filled in batches, in build order (see the batch tracker at the end). Done: §1 conventions, §2 data model, §3 family & round helpers.
 
 ---
 
-## Decisions locked with the PO (2026-08-27)
-1. **Rename / consolidate / eliminate is approved** — the final object set should be *smaller and cleaner* than the 63 prototype objects; signatures may change.
-2. **Family key lives on the rounds table** — add **`parentEvalId` to `AS_GSS_EvaluationRound`** (not a new column on `Evaluation`). Family resolution then queries the **rounds table only** (§B.2, §C).
-3. **Governing standard** = the best-practices doc. §A distills the parts that most affect this feature; when in doubt, that doc wins.
-4. **Delivery in batches** with a review checkpoint after each.
-5. **Code depth:** full working SAIL for rules/interfaces; **node-by-node** design for process models (not literal XML).
+## 1. Conventions applied throughout
+
+- **Querying:** use **`AS_CO_UT_queryRecord`** with a `returnType` (`cons!AS_CO_ENUM_QE_RETURN_TYPE_*`); it exposes `filters`, `logicalExpression`, `sort`, `pagingInfo`, `relatedRecordData`, `executeWhen`, and sets `ignoreFiltersWithEmptyValues: true`. One round-trip per need; filter on related-record fields; select only used fields; **sort in the query**.
+- **Naming:** `_QR_` query-record · `_UT_` utility · `_BL_` business logic · `_CPS_`/`_CP_` component · `_SCT_` section · `_FM_` form/modal · `_GRD_` grid · `_UI_` standalone-error UI rule · `_VD_` validation · `_CONS_` constant list. Names state intent. Record types keep the GSS-prevailing `_SYNCEDRECORD` suffix for intra-app consistency.
+- **Scope & reuse:** one responsibility per object; compose small rules; store repeated logic in locals; ≤~5 behavioral params.
+- **Parameters:** keyword syntax; pass full objects (except when called from a record type); no behavior-changing flag args; behavioral booleans use `is`/`show`/`allow`, default when null, and carry `(Required)`-style rule-input descriptions.
+- **Variables/typing:** affirmative names; plural for arrays; strong-typed locals; booleans always `true`/`false`; bracket-notation + `a!defaultValue` for record fields; guard all null-exposed comparisons.
+- **Return:** consistent return type by contract.
+- **Test cases:** cover each outcome incl. all-null; rules that contain DB queries use **"Case with No Assertions" / "Test Case Completes without Error"** with a top comment `/*This rule cannot have assertion*/`; no hard-coded i18n labels or environment-specific data.
+- **Interfaces:** embeddable content (no outer header when meant to nest); no `paneLayout` in `a!tabItem`; logic lives in rules, not forms; `i18nData` loaded at top and passed down.
+- **Process models:** headless start forms; wrapper process to chain into a form; entry-point PMs each get a `… PM Access` group, backend PMs' viewer = app Security Groups; lane = initiator; archive user-facing after 3 days, delete backend after 1 day; reuse via subprocess.
+- **Record actions:** list vs related decided deliberately; never hardcode ids into related actions; don't pass `rv!record` into the process; drive visibility via relationships.
 
 ---
 
-## A. The standard this design follows (distilled from the best-practices doc)
+## 2. Data model
 
-Only the rules that most shape this feature are listed; the full doc governs.
+### 2.1 `AS_GSS_EvaluationRound_SYNCEDRECORD`
+Per-round metadata, one row per round.
 
-**Querying (§5.E, §3.F).** Never use raw Query Rules or ad-hoc `a!queryRecordType`; use **`AS_CO_UT_queryRecord`** with a `returnType` input (`SINGLE_OBJECT` / `OBJECT_ARRAY` / aggregation / count). It exposes `filters`, `logicalExpression`, `sort`, `pagingInfo`, `relatedRecordData`, `executeWhen`, `triggerRefresh`, and sets `ignoreFiltersWithEmptyValues: true`. **One round-trip per logical need**; filter on **related-record fields** instead of query-then-filter; **select only used fields**; **sort in the query** (the `sort` param), never rely on implicit order.
+| Field | Type | Notes |
+| :--- | :--- | :--- |
+| `roundId` | Integer, PK | |
+| `evaluationId` | Integer, FK → `Evaluation` | the round's own evaluation clone |
+| `parentEvalId` | Integer, FK → `Evaluation` | **family key**: `null` for the root's Round-1 row, `= root evaluationId` for every child round. Indexed. |
+| `roundName` | Text | |
+| `sequence` | Integer | 1-based round order |
+| `startDate` / `endDate` | Date | |
+| `duration` | Integer | days |
+| `isOnSpotConsensus` | Boolean | per-round |
+| audit columns | | `createdBy/On`, `modifiedBy/On` |
 
-**Naming (§2–§6).** Keep GSS prefixes: `_QR_` query-record · `_UT_` utility · `_BL_` business logic (customer-tweakable) · `_CPS_`/`_CP_` component · `_SEC_`→ per doc use `_SCT_` for sections · `_FM_` form/modal · `_GRD_` grid · `_UI_` error-on-standalone UI rules · `_VD_` validation · `_CONS_` constant lists · `_ENUM_` grouped constants. Record types trend to `_RecordType` (legacy `_SYNCEDRECORD`); **for GSS consistency we keep `_SYNCEDRECORD`** but note it. Names state intent; **rename** vague/misprefixed prototype objects (each with **OLD → NEW** + migration note).
+Relationship: many-to-one **`evaluation`** (`evaluationId` → `Evaluation.evaluationId`). Column/table naming per best-practices §2.E (UPPERCASE, ≤30 chars, no `VARCHAR length`; add `parentEvalId` `AFTER` the business columns, before audit columns). Populate `parentEvalId` on the same write that creates the round row (§ Start Evaluation / Setup New Round batches).
 
-**Scope & reuse (§1.C, §1.E).** One responsibility per object; inputs/outputs match the name. Break large objects down; **consolidate duplicates**; store repeated logic in a local variable. Don't over-parameterize (>~5 behavioral params → new object).
-
-**Parameters (§1.G).** Keyword syntax always. **Pass full objects**, not individual fields (exception: when called from a record type where only fields are available). **No behavior-changing flag args** (§5.A.1) — split into separate rules instead. Behavioral booleans use `is`/`show`/`allow` prefixes, default sensibly when null, and carry **rule-input descriptions** (start "(Required)…" when required).
-
-**Variables & typing (§1.F, §1.I).** Affirmative names (`isExisting`, not `isNotNew`); plural for arrays; same name for the same concept app-wide. **Strong-type** locals (init via `AS_CO_UT_initializeBlankLocalVariable`); booleans are always `true`/`false`, never null. Don't duplicate a concept across two locals. **Bracket-notation with `a!defaultValue`** for record fields (not `index()`), guard all null-exposed comparisons (`and()`/`or()` don't short-circuit).
-
-**Return (§5.C).** Prefer a consistent return type (cast where sensible); a record-array query rule returns that record-array type by contract.
-
-**Test cases (§5.D).** Every rule gets coverage incl. an all-null case. **Rules that contain DB queries** use test cases named **"Case with No Assertions"** / assertion **"Test Case Completes without Error"**, with a top comment `/*This rule cannot have assertion*/`. No hard-coded i18n labels; no environment-specific/user data (construct complex inputs inline).
-
-**Interfaces (§6).** No `a!form*`; headers via the header pattern. Content meant to nest per round is **embeddable** (no outer header/wrapper inside it). No `paneLayout` in `a!tabItem`. Keep logic out of forms; compartmentalize logic in rules. Load `i18nData` at top and pass down; display via the app's `displayLabel` rule; label-key prefixes per §10.B.
-
-**Constants (§4).** Type sub-prefixes (`INT`/`TXT`/`BOL`/`RT`/`PM`/`REF_TYPE`/`REF_CODE`…). **No array constants** — wrap lists in a `_CONS_` rule. Use constants for DB ids, ref codes, and dependency-checkable references.
-
-**Process models (§7).** Headless **start forms** (so Data Driver can run them); to chain into a form, use a **wrapper process**. **Security:** each entry-point PM has its own `… PM Access` group (business groups as direct members); backend PMs' viewer = the app Security Groups group. **Lane assigned to the initiator.** Alerts → the app Designer Alerts group. Archive user-facing PMs after 3 days; delete backend PMs after 1 day. Prefer **subprocess reuse** over cloned graphs.
-
-**Record actions (§3.E).** Decide **list vs related**; never hardcode an id into a related action; **don't pass `rv!record` into the process** (pass the id/needed fields); drive visibility via **relationships**, not queries (evaluated on every page load).
-
-**Security (§3.C, §8).** Groups not users; group-based object security; dynamic record-level security expressions.
+### 2.2 `AS_GSS_Evaluation_SYNCEDRECORD`
+Adds `parentEvalId` (`null` root / root-id child) and a cascading **`round`** relationship so writing an Evaluation with a populated `round` persists its `EvaluationRound` row atomically. No further core-schema change — family resolution rides on the rounds table (2.1).
 
 ---
 
-## B. Batch 1 — Data model (foundation)
+## 3. Family & round helpers
 
-### B.1 `AS_GSS_EvaluationRound_SYNCEDRECORD` (new) — keep, with one added column
-Fields: `roundId` (PK), `evaluationId` (FK → the round's Evaluation clone), `roundName`, `sequence`, `startDate`, `endDate`, `duration`, `isOnSpotConsensus`, audit columns; many-to-one `evaluation` relationship. **Add one column (see B.2).** Column/table naming per §2.E (UPPERCASE, ≤30 chars, no `VARCHAR length`, new column added `AFTER` existing business columns, before audit columns).
+> Minimal template per object: **Purpose · Used by · Inputs · Implementation · Test cases.**
+> Field refs abbreviated after first use; use full `recordType!{uuid}…{fieldUuid}fieldName` refs when building. `{parentEvalId}` = the new column from §2.1.
 
-### B.2 Add `parentEvalId` to the rounds table (PO decision)
-- **What:** a new `parentEvalId` (integer FK → Evaluation) on `AS_GSS_EvaluationRound`, **denormalized from the round's evaluation**: **null** for the root's Round-1 row, **= root evaluationId** for every child round's row. Same name = same concept as `Evaluation.parentEvalId` (§1.F.4).
-- **Why:** family resolution today queries the **Evaluation** table and then indexes the `round` relationship. With `parentEvalId` on the round row, the entire family can be resolved by querying the **rounds table only** — no Evaluation query, no relationship-index gymnastics (§C). Index the column (§12.B) — it's queried on every round-aware screen.
-- **Populate it:** set on the same write that creates each round row — null when the root is started (Round 1), root id when a child is cloned (§ Start Evaluation / Setup New Round batches).
-- **Migration:** backfill existing round rows (`parentEvalId` = the round evaluation's `parentEvalId`); legacy single-pass evaluations have no round rows and are unaffected.
+### 3.1 `AS_GSS_QR_getEvaluationRoundDetails` (base query rule)
+**Purpose:** single query-record getter for `EvaluationRound`, with optional filters. All round reads go through it.
+**Used by:** `AS_GSS_QR_getRoundsForEvaluation` and any screen needing round rows.
+**Inputs:** `returnType` (Required), `evaluationId` (List of Integer, optional — filters `evaluationId in`), `fields`, `logicalExpression`, `additionalFilters`, `sort`, `pagingInfo`, `aggregationFields`, `relatedRecordData`, `executeWhen`, `triggerRefresh`.
+**Implementation:**
+```
+rule!AS_CO_UT_queryRecord(
+  recordType: 'recordType!{931e8145-3f77-4270-a52a-b51de6e76983}AS_GSS_EvaluationRound_SYNCEDRECORD',
+  returnType: ri!returnType,
+  executeWhen: ri!executeWhen,
+  triggerRefresh: ri!triggerRefresh,
+  fields: ri!fields,
+  logicalExpression: ri!logicalExpression,
+  aggregationFields: ri!aggregationFields,
+  relatedRecordData: ri!relatedRecordData,
+  pagingInfo: ri!pagingInfo,
+  sort: ri!sort,
+  filters: {
+    a!queryFilter(
+      field: 'recordType!{931e8145}...{1756683f}evaluationId',
+      operator: "in",
+      value: ri!evaluationId,
+      applyWhen: rule!AS_CO_UT_isNotBlank(ri!evaluationId)
+    ),
+    ri!additionalFilters
+  }
+)
+```
+**Test cases:** contains DB query ⇒ "Case with No Assertions". (1) all-null; (2) `evaluationId` populated + `returnType` OBJECT_ARRAY.
 
-### B.3 `AS_GSS_Evaluation_SYNCEDRECORD` — keep `parentEvalId` + `round` relationship
-`parentEvalId` (null root / root-id child) and the cascading `round` relationship (writing an Evaluation with a populated `round` persists the EvaluationRound row atomically). **No further core-schema change** — the family key now rides on the rounds table (B.2).
-
-### B.4 Regenerated CDTs — verify, don't assume
-`AS_GSS_Evaluation` regenerates from the schema. The other 9 package types are dependency regenerations — **diff each vs. baseline** and carry forward only genuine field additions (per §13, never drop columns on a shipped table; comment-deprecate instead).
-
----
-
-## C. Worked exemplar (the template for every object) — family resolver
-
-### C.1 Prototype: `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation(evaluationId, additionalFields, excludeParent)`
-Reads the evaluation to get `parentEvalId`, computes `anchor = coalesce(parentEvalId, evaluationId)`, runs **two near-identical Evaluation queries** (anchor + its children) each selecting the `round` relationship + `additionalFields`, then `append`/`index`/`a!flatten`s out the round rows. `excludeParent` drops the anchor query.
-
-### C.2 Why it works
-`parentEvalId` defines the family; anchor + children cover Round 1 + Rounds 2..n; indexing `round` yields the `EvaluationRound` rows.
-
-### C.3 Callers
-`AS_GSS_SEC_rounds`, all round-aware `_Parent` tabs, the Setup-New-Round / Complete-Round visibility gates, `returnLatestChildEvaluationInSetupForGivenEvaluation`. **Hot path.**
-
-### C.4 Anti-patterns
-1. **Three queries** (1 Evaluation lookup + 2 family queries) — reducible to **two, on the rounds table only** (§B.2).
-2. **Dead `additionalFields`** — fetched on the Evaluation query but discarded (output only indexes `round`); empty value triggers the `[""]` invalid-fields error.
-3. **No `sequence` sort** — relies on implicit order.
-4. **Behavior-flag `excludeParent`** (violates §5.A.1) + manual `append`/`index`/`flatten` where a filter/sort belongs.
-5. Queries `Evaluation` (extra dependency) when callers consume `EvaluationRound` rows.
-
-### C.5 Optimized design
-**Rename:** `returnEvaluationRoundsForGivenEvaluation` → **`AS_GSS_QR_getRoundsForEvaluation`** (it's fundamentally a record query → `QR_get…`, §5.B). **Drop `additionalFields`** (dead) and **drop `excludeParent`** (behavior flag; child-only callers filter `sequence > 1` on the small result). Single input `evaluationId` with a description. Uses **`AS_CO_UT_queryRecord`**, sorts in-query, and joins the round-evaluation status callers actually need.
-
+### 3.2 `AS_GSS_QR_getRoundsForEvaluation` (family resolver)
+**Purpose:** return every round in an evaluation's family, in `sequence` order, each with its evaluation status — resolvable from any member (root or child).
+**Used by:** `AS_GSS_SEC_rounds`, the round-aware tab wrapper(s), and the helpers in 3.3–3.4.
+**Inputs:** `evaluationId` (Integer) — *"(Required) Any evaluation in the family (root or child round)."*
+**Implementation:**
 ```
 a!localVariables(
-  /* The round row for the passed evaluation — used only to read its family linkage.
-     returnType SINGLE_OBJECT: we expect at most one round row per evaluation clone. */
-  local!currentRound: rule!AS_CO_UT_queryRecord(
-    recordType: 'recordType!{931e8145-3f77-4270-a52a-b51de6e76983}AS_GSS_EvaluationRound_SYNCEDRECORD',
-    returnType: "SINGLE_OBJECT",
+  /* Round row for the passed evaluation — read only its family linkage. */
+  local!currentRound: rule!AS_GSS_QR_getEvaluationRoundDetails(
+    returnType: cons!AS_CO_ENUM_QE_RETURN_TYPE_SINGLE_OBJECT,
+    evaluationId: ri!evaluationId,
     fields: {
-      'recordType!{931e8145-3f77-4270-a52a-b51de6e76983}AS_GSS_EvaluationRound_SYNCEDRECORD.fields.{1756683f-efcf-4edb-8ed1-aa9d83468af7}evaluationId',
-      'recordType!{931e8145-3f77-4270-a52a-b51de6e76983}AS_GSS_EvaluationRound_SYNCEDRECORD.fields.{PARENT_EVAL_ID_UUID}parentEvalId'
-    },
-    filters: a!queryFilter(
-      field: 'recordType!{931e8145-3f77-4270-a52a-b51de6e76983}AS_GSS_EvaluationRound_SYNCEDRECORD.fields.{1756683f-efcf-4edb-8ed1-aa9d83468af7}evaluationId',
-      operator: "=",
-      value: ri!evaluationId
-    )
+      'recordType!{931e8145}...{1756683f}evaluationId',
+      'recordType!{931e8145}...{parentEvalId}parentEvalId'
+    }
   ),
-  /* Family anchor: a child round carries the root in parentEvalId; the root's round carries null,
-     so it is its own anchor. */
+  /* Family anchor: a child round carries the root in parentEvalId; the root's round carries null. */
   local!familyRootId: a!defaultValue(
-    local!currentRound['recordType!{931e8145-3f77-4270-a52a-b51de6e76983}AS_GSS_EvaluationRound_SYNCEDRECORD.fields.{PARENT_EVAL_ID_UUID}parentEvalId'],
+    local!currentRound['recordType!{931e8145}...{parentEvalId}parentEvalId'],
     ri!evaluationId
   ),
-  /* All rounds in the family — the root's own round OR any child of the root — in sequence order,
-     with each round's evaluation status joined in (used by gates/labels), in ONE query on the rounds table. */
-  rule!AS_CO_UT_queryRecord(
-    recordType: 'recordType!{931e8145-3f77-4270-a52a-b51de6e76983}AS_GSS_EvaluationRound_SYNCEDRECORD',
-    returnType: "OBJECT_ARRAY",
+  /* Whole family — root's own round OR any child of the root — sequence order, with status joined in. */
+  rule!AS_GSS_QR_getEvaluationRoundDetails(
+    returnType: cons!AS_CO_ENUM_QE_RETURN_TYPE_OBJECT_ARRAY,
     fields: {
       'recordType!{931e8145}...{3a4b03be}roundId',
       'recordType!{931e8145}...{1756683f}evaluationId',
@@ -123,64 +112,116 @@ a!localVariables(
       'recordType!{931e8145}...{7abbf0d2}startDate',
       'recordType!{931e8145}...{c3f17341}endDate',
       'recordType!{931e8145}...{85812d35}isOnSpotConsensus',
-      'recordType!{931e8145}...relationships.{029ebc2e-4210-4f78-bbea-00df4267bd1d}evaluation.fields.{4e467ee1-e9e1-4350-9df9-ec1266418014}evaluationStatusId'
+      'recordType!{931e8145}...relationships.{029ebc2e}evaluation.fields.{4e467ee1}evaluationStatusId'
     },
     logicalExpression: a!queryLogicalExpression(
       operator: "OR",
       filters: {
         a!queryFilter(field: 'recordType!{931e8145}...{1756683f}evaluationId', operator: "=", value: local!familyRootId),
-        a!queryFilter(field: 'recordType!{931e8145}...{PARENT_EVAL_ID_UUID}parentEvalId', operator: "=", value: local!familyRootId)
+        a!queryFilter(field: 'recordType!{931e8145}...{parentEvalId}parentEvalId', operator: "=", value: local!familyRootId)
       }
     ),
-    sort: a!sortInfo(
-      field: 'recordType!{931e8145}...{d20a1017}sequence',
-      ascending: true
-    )
+    sort: a!sortInfo(field: 'recordType!{931e8145}...{d20a1017}sequence', ascending: true)
   )
 )
 ```
-*(Field refs abbreviated after the first full form for readability; use full `recordType!{uuid}…{fieldUuid}fieldName` refs in the object. `PARENT_EVAL_ID_UUID` = the new column from §B.2.)*
+**Notes:** empty-safe — a non-round evaluation has no round row, so `familyRootId` = itself and the query returns `{}`.
+**Test cases:** "Case with No Assertions". (1) null; (2) root id; (3) child id.
 
-### C.6 Why this is better
-- **3 queries → 2**, and **entirely on the rounds table** (no Evaluation dependency).
-- **Correct output contract:** returns the `EvaluationRound` rows callers consume, **with** each round's evaluation status joined in — no dead param, no `[""]` error class.
-- **Deterministic `sequence` order**, sorted in-query.
-- **Single-responsibility, no flag branching, no manual `append`/`index`/`flatten`.**
-- **Empty-safe:** a non-round evaluation returns `{}` (no round row → `familyRootId` = self → no matches), so legacy evaluations render unchanged.
+### 3.3 `AS_GSS_UT_returnIdentifiersForEvaluationRounds`
+**Purpose:** convenience accessor returning the family's derived identifiers.
+**Used by:** Setup-New-Round context and rounds-card logic needing the next sequence / latest round.
+**Inputs:** `evaluationId` (Integer) — *"(Required) Any evaluation in the family."*
+**Implementation:**
+```
+a!localVariables(
+  /* Rounds are returned in ascending sequence, so the last element is the latest round. */
+  local!rounds: rule!AS_GSS_QR_getRoundsForEvaluation(evaluationId: ri!evaluationId),
+  local!latestRound: index(local!rounds, count(local!rounds), null),
+  a!map(
+    childEvalIds: local!rounds['recordType!{931e8145}...{1756683f}evaluationId'],
+    latestRoundEvalId: local!latestRound['recordType!{931e8145}...{1756683f}evaluationId'],
+    latestRoundStatusId: local!latestRound['recordType!{931e8145}...relationships.{029ebc2e}evaluation.fields.{4e467ee1}evaluationStatusId'],
+    nextSequence: count(local!rounds) + 1
+  )
+)
+```
+**Notes:** latest round is derived by `sequence` (the sorted last element), not by max id.
+**Test cases:** "Case with No Assertions". (1) null; (2) family id → map populated.
 
-### C.7 Test cases (§5.D — contains DB queries ⇒ "No Assertions")
-Top comment `/*This rule cannot have assertion*/`. Cases: (1) **null** `evaluationId` — completes without error; (2) **root** id — completes, returns the family; (3) **child** id — completes, resolves upward to the full family. Assertion type: "Test Case Completes without Error"; no env-specific ids asserted.
+### 3.4 `AS_GSS_UT_returnLatestChildEvaluationInSetupForGivenEvaluation`
+**Purpose:** evaluationId of the highest-`sequence` round currently in **Set Up** status; `null` if none. Drives where the rounds card shows **Start Round**.
+**Used by:** `AS_GSS_SEC_rounds`.
+**Inputs:** `evaluationId` (Integer) — *"(Required) Any evaluation in the family."*
+**Implementation:**
+```
+a!localVariables(
+  local!rounds: rule!AS_GSS_QR_getRoundsForEvaluation(evaluationId: ri!evaluationId),
+  /* indexes of rounds whose evaluation is in Set Up (rounds are already sequence-ascending) */
+  local!setupIndexes: wherecontains(
+    cons!AS_GSS_REF_ID_EVALUATION_STATUS_SETTING_UP,
+    tointeger(a!defaultValue(
+      local!rounds['recordType!{931e8145}...relationships.{029ebc2e}evaluation.fields.{4e467ee1}evaluationStatusId'],
+      {}
+    ))
+  ),
+  if(
+    a!isNullOrEmpty(local!setupIndexes),
+    null,
+    /* last matching index = highest sequence in Set Up */
+    index(
+      local!rounds,
+      index(local!setupIndexes, count(local!setupIndexes), 0),
+      {}
+    )['recordType!{931e8145}...{1756683f}evaluationId']
+  )
+)
+```
+**Test cases:** "Case with No Assertions". (1) null; (2) family with a Set-Up round → its child id; (3) family with none in Set Up → null.
 
-### C.8 Migration notes
-- Rename + repoint the C.3 callers to `AS_GSS_QR_getRoundsForEvaluation`.
-- Callers that passed `additionalFields` for round-evaluation status now read `…evaluation.evaluationStatusId` off the returned rows (already included).
-- Child-only callers replace `excludeParent: true` with a `sequence > 1` filter on the result.
-- **Consolidation candidate:** review `AS_GSS_QR_getEvaluationRoundDetails` and `AS_GSS_UT_returnIdentifiersForEvaluationRounds` against this rule in Batch 2 — likely collapsible into this one query rule (+ thin helpers).
+### 3.5 `AS_GSS_UT_hasOpenCompleteEvaluationTask`
+**Purpose:** boolean — does the evaluation still have an open (incomplete) *Complete Evaluation* task? Used to gate round completion (finalize before advancing).
+**Used by:** `completeRound` action visibility / Complete-Round guard.
+**Inputs:** `evaluationId` (Integer) — *"(Required) The evaluation (round) to check."*
+**Implementation:**
+```
+a!localVariables(
+  local!openCount: rule!AS_GSS_TMG_QR_getTasks(
+    returnType: cons!AS_CO_ENUM_QE_RETURN_TYPE_TOTAL_COUNT,
+    executeWhen: rule!AS_CO_UT_isNotBlank(ri!evaluationId),
+    evaluationId: ri!evaluationId,
+    fields: 'recordType!{9a04b944-b726-41f5-9b37-8ec71b6cc370}AS_GSS_TMG_Task_SYNCEDRECORD.fields.{1fabfb92-f90c-4989-9893-ec25aad2a246}taskId',
+    additionalFilters: {
+      a!queryFilter(
+        field: 'recordType!{9a04b944}...{d722d6e1}taskRefId',
+        operator: "=",
+        value: cons!AS_GSS_TMG_TASK_REF_ID_COMPLETE_EVALUATION
+      ),
+      a!queryFilter(
+        field: 'recordType!{9a04b944}...{5f21703e}taskStatusId',
+        operator: "not in",
+        value: {
+          cons!AS_GSS_TMG_REF_ID_TASK_STATUS_COMPLETE,
+          cons!AS_GSS_TMG_REF_ID_TASK_STATUS_NOT_NEEDED,
+          cons!AS_GSS_TMG_REF_ID_TASK_STATUS_CANCELLED
+        }
+      )
+    }
+  ),
+  a!defaultValue(local!openCount, 0) > 0
+)
+```
+**Notes:** affirmative return (`true` = an open task exists); callers gate with `not(...)`.
+**Test cases:** "Case with No Assertions". (1) null; (2) evaluation with an open Complete-Evaluation task → true; (3) none open → false.
 
 ---
 
-## D. Method for the remaining objects
-
-### D.1 Per-object template
-> **Object · Kind · New/Modified/Consolidated/Renamed (OLD → NEW)**
-> 1. Prototype (summary, not pasted) · 2. Why it works · 3. Callers · 4. Anti-patterns · 5. Optimized design (signature + real code) · 6. Why better · 7. Test cases · 8. Migration notes.
-
-For process models: node-by-node (nodes, gateways, data flow, lane, security group, start-form/wrapper, archive/delete) — not XML.
-
-### D.2 Consolidation watch-list (revisit as batches proceed)
-- Round query rules: `getRoundsForEvaluation` (this) ⊕ `getEvaluationRoundDetails` ⊕ `returnIdentifiersForEvaluationRounds` → collapse where possible.
-- The 8 `_Parent` wrappers likely share one generic per-round tab host → consider a single parametrized wrapper instead of eight near-duplicates.
-- Duplicate/round-clone helpers (`duplicateEvaluationForNewRound`, `updateFactorTeamMappingForDuplicatedEvaluation`, `constructFactorDocumentMappingsForNewRound`) → verify boundaries; keep single-responsibility but eliminate overlap.
-
-### D.3 Batch order (build-sequence, each reviewed before the next)
-1. **Data model** — §B ✅ (this revision).
-2. **Family/round helpers** — `getRoundsForEvaluation` ✅ exemplar; then `getEvaluationRoundDetails`, `returnIdentifiersForEvaluationRounds`, `returnLatestChildEvaluationInSetupForGivenEvaluation`, `checkifAnyOpenTaskForGivenEval`.
-3. **Start Evaluation as Round 1** — modal, PM (node-by-node), record actions + visibility split.
-4. **Round-aware tabs** — embeddable content contract + the wrapper(s).
-5. **Setup New Round + clone** — wizard, duplicate, team-mapping, factor-doc-mapping.
-6. **Start / Complete round + Rounds panel.**
-7. **Summary recomposition + Vendors.**
-8. **Integration touchpoints** (VM, GCW).
-
-### D.4 Next step
-Batch 2 (family/round helpers): read each prototype, then design the optimized/consolidated versions here in this document.
+## Batch tracker (build order)
+1. **Data model** — §2 ✅
+2. **Family & round helpers** — §3 ✅ (`getEvaluationRoundDetails`, `getRoundsForEvaluation`, `returnIdentifiersForEvaluationRounds`, `returnLatestChildEvaluationInSetupForGivenEvaluation`, `hasOpenCompleteEvaluationTask`)
+3. **Start Evaluation as Round 1** — modal, PM (node-by-node), record actions + visibility — *next*
+4. **Round-aware tabs** — embeddable content + wrapper(s)
+5. **Setup New Round + clone** — wizard, duplicate, team-mapping, factor-doc-mapping
+6. **Start / Complete round + Rounds panel**
+7. **Summary recomposition + Vendors**
+8. **Integration touchpoints** (VM, GCW)
