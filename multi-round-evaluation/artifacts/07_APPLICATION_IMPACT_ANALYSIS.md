@@ -1,6 +1,7 @@
 # Feature Impact Analysis — Multi-Round Evaluations vs. the whole GSS application
 
-> **Status: IN PROGRESS (first pass, evidence-based).**
+> **Status: MAJOR-SURFACE SWEEP COMPLETE (evidence-based); minor residuals listed in §12.**
+> All high-traffic surfaces (both evaluation lists, home + record-summary task grids, task-name generation, the email family, consensus view) have been read and their findings are CONFIRMED from SAIL. A short tail of low-traffic surfaces (documents grids, ratings rollups, alerts, awards, search/pickers) is enumerated in §12 as VERIFY.
 > **Purpose:** The POC focused on *building* the feature. It did **not** systematically ask *"what else in the application does the parent-child (hidden-child / parent-only) model touch?"* This document grounds the feature into the wider application: it walks the GSS app, finds every place a **child-round evaluation** can leak to users, break an aggregation, or violate an assumption, and raises the **decisions we need** to handle each.
 >
 > Read after `05_FEATURE_IMPLEMENTATION_PLAN.md` and `06_FEATURE_TECHNICAL_DESIGN.md`. This is the *"is it safe in the application?"* companion to those *"what/how to build"* docs. Integration (VM/GCW) impact already lives in `02_…`/`04_…`; this doc covers the **in-application** surfaces and references those where they overlap.
@@ -64,7 +65,7 @@ The same grid exposes record user-filters including `…filters.{cd37b4b3-…}Ev
 
 | Surface | Object(s) | Finding |
 | :-- | :-- | :-- |
-| Record-summary "active tasks" (per-evaluation) | `AS_GSS_TMG_CPS_recordSummaryActiveTasks`, `AS_GSS_CPS_activeTasks`, `AS_GSS_GRD_activeTasks` (non-home branch filters `evaluationId = ri!evaluationId`) | **[LIKELY]** When viewed on the **parent** record, does it show only the parent's own tasks, or all rounds' tasks? Round tasks live on child ids, so the parent summary will look empty unless it aggregates the family. Cross-links back to `evaluationId` still target children. (Q2, Q4) |
+| Record-summary "active tasks" (per-evaluation) | `AS_GSS_TMG_CPS_recordSummaryActiveTasks` (`…13367338`) → `AS_GSS_GRD_activeTasks` with `isHomePage:false` | **[CONFIRMED — miscount]** The non-home branch filters `evaluationId = ri!evaluationId`. On the **parent** record `ri!evaluationId` = parent id, so the parent's Tasks section shows **only the parent's own tasks and misses every round task** (those carry child ids). Must aggregate the family (or the active round) per the Q4 scope decision. |
 | Task detail / start-process link | `AS_GSS_TMG_UT_taskProcessAsLink`, `AS_GSS_TMG_QE_getRuntimeTask` | **[VERIFY]** Task forms open by `taskId` (safe), but any breadcrumb/header showing the parent evaluation resolves via child `evaluationId`. |
 | Factor / sub-factor task grids | `AS_GSS_GRD_factorTaskGrid`, `AS_GSS_CPS_factorTaskGridAndToolbar`, `AS_GSS_CPS_subFactorTaskGridAndToolbar` | **[VERIFY]** These are round-scoped by design (rendered inside a round context); confirm they never link out to the child eval header. |
 | Task % completion / KPIs | `AS_GSS_TMG_UT_calculateTaskPercentCompletion`, `AS_GSS_TMG_QE_calculateTotalAndCompletedTasks`, `AS_GSS_QE_getAggregatedUserByTaskStatus` | **[VERIFY — miscount]** If any home/summary KPI counts tasks "for an evaluation" by parent id, it will miss round tasks (they're on child ids); if it counts across the family it may double-count completed rounds. Define the intended scope. (Q4) |
@@ -90,13 +91,16 @@ The same grid exposes record user-filters including `…filters.{cd37b4b3-…}Ev
 
 ---
 
-## 4. The Evaluations record list & landing  [CONFIRMED-by-architecture — leak / miscount]
+## 4. The Evaluations lists & landing  [CONFIRMED — leak + miscount]
 
-The main way COs browse evaluations is the **`AS_GSS_Evaluation_RECORD` (`4db4a62e`) record list** (a site page over the record list) — not a hand-built interface (searches for a "home"/"landing" evaluations grid returned none; it is the record list itself).
+**Correction from the first pass:** the evaluation lists are **ordinary interfaces (readable via MCP)**, not the record-type record list — so this is now CONFIRMED by reading the SAIL, not blocked. There are **two** listing surfaces, and **neither filters out clones**:
 
-- **[CONFIRMED risk]** Child clones are full `AS_GSS_Evaluation` rows, so **they will appear as independent rows in the Evaluations list** (and in global record search / pickers) unless a **record-list filter or record-level security** excludes `parentEvalId is not null`. The POC has no such exclusion recorded.
-- **[VERIFY]** Any "number of evaluations" KPI, dashboard tile, or `count()` over the Evaluation record is inflated by the clones.
-- **MCP limitation:** the record list config, record-level security, and views on `4db4a62e` are **not readable/editable via MCP** (`None is not a valid RecordTypeSourceType`) — these must be inspected & changed in **Designer**. Flagged for manual review. (Q6)
+- **Evaluations page** — `AS_GSS_GRD_EvaluationRecordList` (`_a-0000ea82-c8e1-8000-9cb9-011c48011c48_7941671`), the target of the site's **Evaluations** page. Its `a!recordData` over `AS_GSS_Evaluation_RECORD` has exactly one structural filter — **`isActive = true`** — plus a role/status OR-block (createdBy / CO / CS / chief / `applicableEvaluationIds`). **No `parentEvalId` filter.** The name cell links `a!recordLink(identifier: evaluationId)`. **[CONFIRMED — child clones list as rows and link to the child.]** For evaluators, `applicableEvaluationIds` is built from assigned criteria + consensus + tasks + team membership — all of which, for round work, reference **child** ids → clones surface for evaluators too.
+- **Home "My Workspace"** — `AS_GSS_evaluationLandingPage` (`…13137819`) → **My Active Evaluations** cards via `AS_GSS_CPS_activeEvaluations` fed by `AS_GSS_BL_returnEvaluationInfoForLandingPage` (`_a-0000ec62-ac34-8000-9d9a-011c48011c48_13125383`). That rule filters by **`isActive` + status + role** (createdBy / criteria assignee / consensus startedBy / criteria chair / CO / CS / chief) — again **no `parentEvalId` exclusion**. **[CONFIRMED — clones appear as landing-page cards.]**
+
+**Fix:** add a `parentEvalId is null` (root-only) filter to **both** surfaces, and map any child-derived `applicableEvaluationIds` back to their parent so an evaluator's card/row points at the parent. Also confirm the **clone's `isActive`** value (Q14) — if clones are written `isActive = true` (default for a full clone), they pass today's only structural filter.
+
+**Counts/KPIs:** any `count()`/aggregation over `AS_GSS_Evaluation` (landing counts, reporting) is inflated by clones until the same filter is applied. (Q4/Q14)
 
 ---
 
@@ -104,7 +108,8 @@ The main way COs browse evaluations is the **`AS_GSS_Evaluation_RECORD` (`4db4a6
 
 Factor Chairs are *meant* to see consensus across rounds (a feature), but naming/links still matter.
 
-- `AS_GSS_ConsensusReport_RECORD` / `_SYNCEDRECORD`, `AS_GSS_CPS_consensusReportView` + `_Parent` (round-aware wrapper). Consensus rows are keyed on the **child** `evaluationId`.
+- `AS_GSS_ConsensusReport_RECORD` / `_SYNCEDRECORD`, `AS_GSS_CPS_consensusReportView` (`…40123`) + `_Parent` (round-aware wrapper). Consensus rows are keyed on the **child** `evaluationId`.
+- **[PARTIAL — already round-aware]** `AS_GSS_CPS_consensusReportView` already computes `local!isParentEval = isBlank(evaluation.parentEvalId)` and branches on it (e.g. factor filters `applyWhen: isParentEval`) — the POC touched it. So the cross-round consensus surface is *aware* of the parent/child distinction; the residual questions are labeling and links, not basic awareness.
 - **Questions:** In the cross-round consensus view, is each round labeled by **round name/sequence** (good) or by the **child evaluation number** (leak)? Do consensus **record links** (and the consensus-signature emails in §3) point to the parent? (Q7)
 
 ---
@@ -147,46 +152,56 @@ Award creation and Select Awardees happen **only on the parent** (per the parent
 
 ---
 
-## 11. Open questions register (for PO / team)
+## 11. CONSOLIDATED open-questions register (for PO / team)
 
-> These are the decisions needed to safely ground the feature. Grouped; each cites the section above.
+> **This is the single consolidated question list for the impact analysis** (Q1–Q15). It absorbs and extends the four "open confirmations" from onboarding §11.4 (the "active round" definition below is the same as §11.4's). Answers should be folded into `06_FEATURE_TECHNICAL_DESIGN.md` as explicit build items.
 
 **Identity & display**
 - **Q1 — Task-name convention.** What should the persisted `taskName` contain for a round task? Options: (a) parent `evaluationNumber` only; (b) parent number + "Round N"; (c) unchanged child number (rejected — leak). Note it is persisted, so it also affects historical rounds.
 - **Q2 — Parent-identity helper.** Approve a single shared helper that maps any `evaluationId` → parent id + parent number/title, to be used by every grid/column/email/link (vs. per-interface fixes)?
 - **Q3 — "Evaluation" user filters.** Where a task/consensus/document grid filters by evaluation, should options list **parents only** (children grouped under parent), or show rounds explicitly?
+- **Q15 — Landing/list identity for a family.** On the Evaluations page and home "My Active Evaluations" cards, a family should appear as **one row/card = the parent**. Should that row show the **current round's** status/progress (e.g. "Round 3 — In Progress") or the parent's own status? (Drives what the parent-only filter must still surface.)
 
 **Scope & aggregation**
-- **Q4 — Task scope on the parent.** On the parent summary/home KPIs, should "tasks for this evaluation" mean the **current/active round**, the **whole family**, or **parent-only**? (Drives every task count and the record-summary tasks tab.)
+- **Q4 — Task scope on the parent.** On the parent summary/home KPIs, should "tasks for this evaluation" mean the **current/active round**, the **whole family**, or **parent-only**? (Confirmed gap: the record-summary tasks section shows parent-only today and misses round tasks — §2.)
 - **Q9 — Ratings/audit rollups.** Same question for ratings rollups and the combined audit: current round, whole family, or parent-only?
 - **Q10 — Process-HQ / mining.** Exclude child clones from the audit/status-history mining feeds, or stitch them to the parent as one case? (Materially changes analytics.)
+- **Q14 — Clone `isActive` + list/count filter.** Both evaluation lists filter only on `isActive` + status + role with **no `parentEvalId` exclusion** (§4). Confirm the fix = add a `parentEvalId is null` (root-only) filter to `AS_GSS_GRD_EvaluationRecordList`, `AS_GSS_BL_returnEvaluationInfoForLandingPage`, and every evaluation `count()`/KPI — and decide whether clones should also be written `isActive = false` as defense-in-depth (and whether that breaks the round-aware tabs which query clones directly).
 
 **Comms & external**
 - **Q5 — Emails & Web API payloads.** Confirm every notification (§3) and every VM/GCW Web API response must render the **parent** identity/deep-link. Any exception?
 
 **Record list, security, navigation**
-- **Q6 — Evaluations record list.** Add a record-list filter / record-level rule to hide `parentEvalId is not null` clones from the list, global search, and pickers? (Manual in Designer — MCP-blocked.)
-- **Q11 — Child record access.** Should users be *hard-blocked* from opening a child evaluation record entirely (redirect to parent), or only steered away via links? What actions, if any, are valid on a child record?
+- **Q6 — Evaluation lists (interface-based, not the record list).** Confirmed the two lists are ordinary interfaces missing a parent filter (§4, Q14). Also decide **global record search / pickers** over `AS_GSS_Evaluation_RECORD` — should clones be excluded there too?
+- **Q11 — Child record access.** Should users be *hard-blocked* from opening a child evaluation record entirely (redirect to parent), or only steered away via links? What actions, if any, are valid on a child record? (Depends on record-level security on `4db4a62e` — Designer-only.)
 
 **Feature-specific**
-- **Q7 — Consensus cross-round labeling** — round name vs. child number; links to parent?
+- **Q7 — Consensus cross-round labeling** — the view is already `isParentEval`-aware (§5); confirm rounds are labeled by round name/sequence (not child number) and links resolve to parent.
 - **Q8 — Document scope** on the parent (family vs. round).
-- **Q12 — "Active round" definition** (max-sequence vs. latest non-complete) — reused by VM latest-round targeting and the Summary active-round vendors (this is also open §11.4 of the onboarding).
+- **Q12 — "Active round" definition** (max-sequence vs. latest non-complete) — reused by VM latest-round targeting and the Summary active-round vendors (= onboarding §11.4).
 - **Q13 — Awards** persist on parent while reading final-round data — confirm.
 
 ---
 
-## 12. Still to inspect (so we don't over-claim completeness)
+## 12. Sweep coverage — done vs. residual
 
-Not yet read in this pass — recommended next scans before calling the analysis complete:
-1. `AS_GSS_Evaluation_RECORD` **record list + views + record-level security** (Designer, MCP-blocked) — confirm child-hiding.
-2. Any **dashboard/report/KPI** interfaces over the Evaluation record (`listInterfaces(query:"dashboard"/"summary"/"report")`) for evaluation counts.
-3. **Global search / record pickers** that reference Evaluation (vendor pickers, cross-record links).
-4. The **record-summary active tasks** interface body (`…_13367338`) — confirm parent-vs-family task scope.
-5. Consensus view + consensus-signature email bodies — confirm labeling/links.
-6. Documents grids/exports and any "download all" that names the evaluation.
-7. In-app **alerts** (`AS_GSS_TMG_FM_alertTask`) and any alert text naming the evaluation.
-8. Award creation / awardee selection interfaces.
+**Read & CONFIRMED this sweep:**
+1. **Evaluations page** `AS_GSS_GRD_EvaluationRecordList` (`…7941671`) — no `parentEvalId` filter → clones list (§4). *(The earlier "MCP-blocked record list" concern was wrong — it is a readable interface.)*
+2. **Home landing** `AS_GSS_evaluationLandingPage` (`…13137819`) + `AS_GSS_BL_returnEvaluationInfoForLandingPage` (`…13125383`) + `AS_GSS_CPS_activeEvaluations` — no `parentEvalId` filter → clone cards (§4).
+3. **Home task grid** `AS_GSS_GRD_activeTasks` (`…13241781`) — evaluation column name+link resolve to child (§1).
+4. **Record-summary tasks** `AS_GSS_TMG_CPS_recordSummaryActiveTasks` (`…13367338`) — parent misses round tasks (§2).
+5. **Consensus view** `AS_GSS_CPS_consensusReportView` (`…40123`) — already `isParentEval`-aware (§5).
+6. **Task-name generator** + **task-assignment email** — child identity baked / rendered (§1, §3).
+7. **Sites/pages** — 3 site pages, all interface-backed (My Workspace, Evaluations, Vendors); Vendors page (`…16580901`) is a global GSM grid, **not** evaluation-scoped → low risk.
+
+**Residual (VERIFY — low-traffic, not yet read; recommend before build):**
+1. Remaining **email bodies** beyond task-assignment (consensus-signature, due/overdue, reassignment, VM proposal) — same vector, confirm each renders parent identity.
+2. **Documents** grids/exports and any "download all" that names the evaluation.
+3. **Ratings** rollups/reports keyed on parent id.
+4. **Process-HQ** audit/status-history mining feeds (analytics decision Q10).
+5. In-app **alerts** (`AS_GSS_TMG_FM_alertTask`).
+6. **Awards / awardee selection** interfaces.
+7. **Record-level security** on `AS_GSS_Evaluation_RECORD` (`4db4a62e`) — Designer-only (MCP-blocked) — governs whether a leaked child link is even openable (§8, Q11).
 
 ---
 

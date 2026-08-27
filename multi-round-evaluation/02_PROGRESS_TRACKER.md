@@ -476,3 +476,15 @@ Authored `artifacts/07_APPLICATION_IMPACT_ANALYSIS.md` — grounds the hidden-ch
 **Raised Q1–Q13** for the PO (identity/display, scope/aggregation, comms, record-list/security, feature-specifics). §12 lists surfaces still to inspect (record list config, dashboards, search/pickers, consensus/doc bodies, alerts, awards). Recommended fix strategy: one shared parent-identity helper + record-list filter + parent-routed emails/Web APIs, then fold Q1–Q13 resolutions into doc 06 as explicit build items.
 
 Next: PO answers Q1–Q13; complete the §12 follow-up scans; update doc 06.
+
+## Session Log — 2026-08-27 (Impact Analysis — major-surface sweep complete)
+
+Completed the full sweep for `artifacts/07_APPLICATION_IMPACT_ANALYSIS.md` by reading SAIL for the high-traffic surfaces. New CONFIRMED findings:
+- **Both evaluation lists leak clones** (no `parentEvalId` filter): Evaluations page `AS_GSS_GRD_EvaluationRecordList` (`…7941671`, only `isActive=true` structural filter) and home "My Active Evaluations" via `AS_GSS_BL_returnEvaluationInfoForLandingPage` (`…13125383`). Corrected the first-pass assumption that the list was the MCP-blocked record list — it's a readable interface.
+- **Record-summary tasks** (`AS_GSS_TMG_CPS_recordSummaryActiveTasks` `…13367338`) filters `evaluationId = ri!evaluationId` → the parent misses all round tasks (child ids). Confirmed miscount.
+- **Consensus view** (`AS_GSS_CPS_consensusReportView` `…40123`) is already `isParentEval`-aware (POC touched it) — good news, partial handling.
+- **Vendors page** (`…16580901`) is a global GSM grid, not evaluation-scoped → low risk.
+
+Question register consolidated to **Q1–Q15** (added Q14 clone `isActive`/list-filter, Q15 family-row identity), absorbing onboarding §11.4. §12 now lists only low-traffic residuals (other email bodies, documents grids, ratings rollups, Process-HQ feeds, alerts, awards, record-level security on `4db4a62e`).
+
+Next: PO answers Q1–Q15 (Q2 shared parent-identity helper + Q14 list filter are the biggest wins); then fold resolutions into doc 06 and complete the residual reads.
