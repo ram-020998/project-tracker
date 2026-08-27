@@ -488,3 +488,13 @@ Completed the full sweep for `artifacts/07_APPLICATION_IMPACT_ANALYSIS.md` by re
 Question register consolidated to **Q1–Q15** (added Q14 clone `isActive`/list-filter, Q15 family-row identity), absorbing onboarding §11.4. §12 now lists only low-traffic residuals (other email bodies, documents grids, ratings rollups, Process-HQ feeds, alerts, awards, record-level security on `4db4a62e`).
 
 Next: PO answers Q1–Q15 (Q2 shared parent-identity helper + Q14 list filter are the biggest wins); then fold resolutions into doc 06 and complete the residual reads.
+
+## Session Log — 2026-08-27 (Implementation Backlog)
+
+Authored `artifacts/08_IMPLEMENTATION_BACKLOG.md` — the whole feature broken into **sequenced stories (US-n, testable) + tasks (T-n, technical)** in actual build order across epics A–J, synthesized from docs 01/05/06/07 + VM/GCW (02/04) + deferred UI (08 top-level).
+
+**Order:** A decisions/naming → B data model + family helpers + parent-identity helper → C Start Evaluation as Round 1 → D round-aware tabs (consolidated wrapper) → E Setup New Round + clone → F Start/Complete round + Rounds panel → G hidden-child integrity (impact remediation; sequenced after clones exist so leaks are testable) → H VM/GCW integrations → I E2E + regression → **J UI redesign DEFERRED**.
+
+**Conventions:** stories = user-observable/testable with Given/When/Then AC; tasks = technical (incl. all MANUAL/Designer items MCP can't do). Each item has Deps + Src + gating Q#. Estimates/owners omitted pending decision.
+
+Open items surfaced to user: push to Jira vs keep markdown; granularity; add points/owners; whether to gate Q1–Q15-dependent stories or proceed on doc-06 defaults; break out deferred UI now. Awaiting answers before finalizing/estimating.
