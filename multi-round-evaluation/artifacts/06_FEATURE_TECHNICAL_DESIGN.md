@@ -531,11 +531,186 @@ rule!AS_GSS_CPS_roundContentTabs(
 ```
 Eliminated by this batch: the eight `*_Parent` wrappers and `AS_GSS_UT_returnViewRenderingConfigFor_Factors` (their behaviour is subsumed by `AS_GSS_CPS_roundContentTabs`).
 
+## 6. Setup New Round + clone
+
+Rounds 2–5 are created by cloning the current round. The wizard (6.1) gathers round details, factors, and the advancing vendors; the process (6.6) copies reference documents, builds and writes the clone, then carries the factor→team and factor→document mappings; the record action (6.7) gates availability.
+
+### 6.1 `AS_GSS_FM_startNewRound` (wizard)
+**Purpose:** collect the new round's details, its factors, and its down-selected vendors, and hand a fully-formed new-evaluation shell to the process.
+**Used by:** the `setupNewRound` record action as its start form.
+**Inputs:** `parentEvaluationId` (Integer, Required), `duplicatedFromEvaluation` (`AS_GSS_Evaluation_SYNCEDRECORD` — the round being cloned from), `newEvaluation` (`AS_GSS_Evaluation_SYNCEDRECORD` — output shell), `evaluators` (List of Text), `templateEvaluation` (`AS_GSS_Evaluation_SYNCEDRECORD`), `userAction` (Text).
+**Behaviour (wizard steps):**
+- **Step 1 — Round details + factors:** Round Name, Start/Duration/Due (kept in sync; validated within the parent evaluation's window), the per-round **On-the-Spot Consensus** toggle, and a factor checklist (Team/Evaluators shown; carried from the previous round, editable). "N of N selected".
+- **Step 2 — Vendor down-select:** the vendor grid (6.2); must advance **≥1**; previously-excluded vendors can be re-included.
+- **Step 3 (optional) — Resubmission request:** *Send as Update / Email* + Title/Description (include only if in scope — confirm with PO).
+- On submit, populate `newEvaluation` as a shell carrying the chosen dates, `parentEvalId` = the family root, selected factors, and the advancing vendors, plus the round row (`sequence` = previous + 1, `isOnSpotConsensus` from step 1); set `userAction = CREATE`. The heavy cloning of related data is done by the rule in the process (6.3), not in the form.
+- All display text via i18n; logic in rules, not the form (§ standard).
+
+**Notes:** the form stays light — it captures selections and defers cloning to `AS_GSS_UT_duplicateEvaluationForNewRound`. Step count (2 vs 3) is a PO decision.
+
+### 6.2 `AS_GSS_GRD_vendorListForSelection` (grid)
+**Purpose:** selectable list of the source round's vendors for down-selection (Name + UEI), with a running "N selected".
+**Inputs:** `evaluationId` (Integer — the source round), `selectedVendorIds` (List of Integer — in/out), `readOnly` (Boolean).
+**Implementation:** `a!gridField` over `AS_GSS_QR_getEvaluationVendors(returnType: OBJECT_ARRAY, evaluationId, isActive: true)`, with a selection column bound to `selectedVendorIds`; columns Name (`legalName`) and UEI (`uniqueEntityId`). Selection correlates vendors across rounds by **`uniqueEntityId`** (not `vendorId`, which changes each round). Empty-selection validation is enforced by the wizard.
+
+### 6.3 `AS_GSS_UT_duplicateEvaluationForNewRound` (clone builder)
+**Purpose:** build (not write) the new round's evaluation graph from the source round + the wizard's shell.
+**Inputs:** `sourceEvaluation`, `newEvaluation` (shell from the form), `newReferenceDocIds` (List of Integer — copies made in the process), `initiator` (User), `templateEvaluation`.
+**Output:** a map `{ newEvaluation, criteriaTeamMap }` — `newEvaluation` is the full graph to write; `criteriaTeamMap` is a list of `{criteriaNumber, teamName}` used later to re-point teams (6.4).
+**What the graph carries — copy / null / reset:**
+| Entity | Copy (preserve) | Null (new PK / re-link on write) | Reset |
+| :--- | :--- | :--- | :--- |
+| Evaluation | title, method, instrument, settings; **`parentEvalId` = family root**; status = SETTING_UP; start/due from form | `evaluationId` | created/modified = initiator/now |
+| `round` (EvaluationRound) | `roundName`, dates, `isOnSpotConsensus` from form; **`parentEvalId` = root**; `sequence` = source max + 1 | `roundId` | created/modified |
+| Criteria (+ SubCriteria) | name, description, weight, rating type, `factorNumber`, assignments | `criteriaId`, `parentCriteriaId` (re-linked on cascade); `evaluatorTeamId` set later (6.4) | — |
+| Vendors (down-selected) | business fields; correlate across rounds by `uniqueEntityId` | `vendorId`, `evaluationId` | — |
+| Vendor documents | `appianDocId` (same file; reference docs use `newReferenceDocIds`), name/type/version/flags | `evaluationDocumentId`, `vendorId`, `evaluationId`, `consensusId`, `criteriaId`, `taskId` | created/modified |
+**Notes:** full field-by-field construction is mechanical from this table; keep it a **builder only** (no writes/queries beyond what's needed to shape the graph) so the process controls persistence. `FactorDocumentMapping` is **not** built here (its FKs are DB-generated) — handled in 6.5.
+
+### 6.4 `AS_GSS_UT_updateFactorTeamMappingForDuplicatedEvaluation`
+**Purpose:** after the clone is written (teams now have new ids), set each criterion's `evaluatorTeamId` to the new round's team whose name matches the carried factor→team mapping.
+**Inputs:** `newEvaluation` (with `criteria` + `team` relationships loaded), `criteriaTeamMap` (List of Map `{criteriaNumber, teamName}`).
+**Implementation** (merge semantics — only `evaluatorTeamId` is overridden; all other criteria fields are preserved by `updateRecordsByModelRecord`):
+```
+a!localVariables(
+  /* New round's teams: parallel name/id arrays for lookup. */
+  local!teamNames: upper(a!flatten(ri!newEvaluation['recordType!{e6bc8561}...{fc1817be}team.fields.{be5bfc13}teamName'])),
+  local!teamIds: a!flatten(ri!newEvaluation['recordType!{e6bc8561}...{fc1817be}team.fields.{35b9691a}teamId']),
+  if(
+    rule!AS_CO_UT_isBlank(ri!criteriaTeamMap),
+    ri!newEvaluation,
+    rule!AS_GSS_UT_updateRecordsByModelRecord(
+      records: ri!newEvaluation,
+      modelRecord: 'recordType!{e6bc8561}AS_GSS_Evaluation_SYNCEDRECORD'(
+        'recordType!{e6bc8561}...{82cb0b32}criteria': a!forEach(
+          items: ri!newEvaluation['recordType!{e6bc8561}...{82cb0b32}criteria'],
+          expression: rule!AS_GSS_UT_updateRecordsByModelRecord(
+            records: fv!item,
+            modelRecord: 'recordType!{11dcc745}AS_GSS_Criteria_SYNCEDRECORD'(
+              /* factorNumber -> teamName (carried) -> new teamId */
+              'recordType!{11dcc745}...{863f75e7}evaluatorTeamId': index(
+                local!teamIds,
+                wherecontains(
+                  upper(index(ri!criteriaTeamMap.teamName,
+                    wherecontains(upper(fv!item['recordType!{11dcc745}...{a37cdba7}factorNumber']), upper(ri!criteriaTeamMap.criteriaNumber)), null)),
+                  local!teamNames
+                ),
+                null
+              ),
+              /* Same re-point for subfactors. */
+              'recordType!{11dcc745}...{d5f2eb9d}SubCriteria': a!forEach(
+                items: fv!item['recordType!{11dcc745}...{d5f2eb9d}SubCriteria'],
+                expression: rule!AS_GSS_UT_updateRecordsByModelRecord(
+                  records: fv!item,
+                  modelRecord: 'recordType!{11dcc745}AS_GSS_Criteria_SYNCEDRECORD'(
+                    'recordType!{11dcc745}...{863f75e7}evaluatorTeamId': index(
+                      local!teamIds,
+                      wherecontains(
+                        upper(index(ri!criteriaTeamMap.teamName,
+                          wherecontains(upper(fv!item['recordType!{11dcc745}...{a37cdba7}factorNumber']), upper(ri!criteriaTeamMap.criteriaNumber)), null)),
+                        local!teamNames
+                      ),
+                      null
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
+```
+**Test cases:** contains no DB query → assertable. (1) null map → returns input unchanged; (2) a criterion whose factorNumber maps to a team name present on the new round → `evaluatorTeamId` set to that team's id.
+
+### 6.5 `AS_GSS_UT_constructFactorDocumentMappingsForNewRound`
+**Purpose:** after the round is written, produce the new `FactorDocumentMapping` rows by correlating **factor by `factorNumber`** and **document by `appianDocId`**; a source mapping is copied only when both its factor and document exist on the new round (so dropped factors/docs drop their mappings).
+**Inputs:** `newEvaluationId`, `sourceEvaluationId`, `initiator`.
+**Implementation** (query both sides once, then translate each source mapping through the stable business keys):
+```
+a!localVariables(
+  /* SOURCE: mapping FKs -> business keys */
+  local!sourceCriteria: rule!AS_CO_UT_queryRecord(recordType: 'recordType!{11dcc745}…', returnType: cons!AS_CO_ENUM_QE_RETURN_TYPE_OBJECT_ARRAY,
+    fields: { criteriaId, factorNumber }, filters: { evaluationId = ri!sourceEvaluationId, isActive = true }),
+  local!sourceDocs: rule!AS_CO_UT_queryRecord(recordType: 'recordType!{9c497e08}…', returnType: OBJECT_ARRAY,
+    fields: { evaluationDocumentId, appianDocId }, filters: { vendorId in <source vendors>, isDeleted = false }),
+  local!sourceMappings: rule!AS_CO_UT_queryRecord(recordType: 'recordType!{acd503e1}…', returnType: OBJECT_ARRAY,
+    fields: { documentId, factorId }, filters: { documentId in local!sourceDocs.evaluationDocumentId, isActive = true }),
+  /* NEW: business keys -> new FKs */
+  local!newCriteria: rule!AS_CO_UT_queryRecord(recordType: 'recordType!{11dcc745}…', returnType: OBJECT_ARRAY,
+    fields: { criteriaId, factorNumber }, filters: { evaluationId = ri!newEvaluationId, isActive = true }),
+  local!newDocs: rule!AS_CO_UT_queryRecord(recordType: 'recordType!{9c497e08}…', returnType: OBJECT_ARRAY,
+    fields: { evaluationDocumentId, appianDocId }, filters: { vendorId in <new vendors>, isDeleted = false }),
+  a!flatten(a!forEach(
+    items: local!sourceMappings,
+    expression: a!localVariables(
+      /* source factorId -> factorNumber -> new criteriaId */
+      local!factorNumber: index(local!sourceCriteria.factorNumber, wherecontains(fv!item.factorId, local!sourceCriteria.criteriaId), null),
+      local!newFactorId: index(local!newCriteria.criteriaId, wherecontains(local!factorNumber, local!newCriteria.factorNumber), null),
+      /* source documentId -> appianDocId -> new documentId */
+      local!appianDocId: index(local!sourceDocs.appianDocId, wherecontains(fv!item.documentId, local!sourceDocs.evaluationDocumentId), null),
+      local!newDocumentId: index(local!newDocs.evaluationDocumentId, wherecontains(local!appianDocId, local!newDocs.appianDocId), null),
+      if(
+        or(a!isNullOrEmpty(local!newFactorId), a!isNullOrEmpty(local!newDocumentId)),
+        {},
+        'recordType!{acd503e1}AS_GSS_FactorDocumentMapping_SYNCEDRECORD'(
+          factorId: local!newFactorId, documentId: local!newDocumentId, isActive: true,
+          createdBy: ri!initiator, createdDatetime: now()
+        )
+      )
+    )
+  ))
+)
+```
+*(Field refs shown by name for brevity; use full UUID refs. Wrap index lookups' comparands with `tointeger(...)` where the keys are integer, and guard nulls as shown.)*
+**Test cases:** contains DB queries → "Case with No Assertions". (1) null ids; (2) source with mappings whose factor+doc carried → returns mappings; (3) a factor dropped from the new round → its mapping is not returned.
+
+### 6.6 `AS GSS Setup New Round` (process model)
+**Trigger:** `setupNewRound` action. **Start form:** 6.1. **Lane:** initiator, System lane for writes. **Security:** own `… PM Access` group. **Archive:** delete after 1 day (backend). **PVs:** `duplicatedFromEvaluation`, `newEvaluation`, `newReferenceDocIds` (List of Integer), `criteriaTeamMap` (List of Map), `evaluators`, `templateEvaluation`, `userAction`.
+
+| # | Node | Type | Purpose |
+| :-- | :--- | :--- | :--- |
+| 1 | Start | Start | form = 6.1 |
+| 2 | Cancelled? | XOR | `userAction = CANCEL` → End |
+| 3 | Get Source Reference Docs | Script | query source round's reference documents |
+| 4 | Any reference docs? | XOR | none → skip node 5 |
+| 5 | Copy Reference Docs | Copy Document (MNI) | copy each → collect `newReferenceDocIds` |
+| 6 | Construct Clone Graph | Script | `AS_GSS_UT_duplicateEvaluationForNewRound(...)` → `{newEvaluation, criteriaTeamMap}` |
+| 7 | Write Evaluation | Write Records | persist `newEvaluation` graph (criteria/vendors/docs/round) → new PKs |
+| 8 | Carry Factor→Team Mapping | Script + Write | `AS_GSS_UT_updateFactorTeamMappingForDuplicatedEvaluation(...)` → write updated criteria |
+| 9 | Write Factor→Document Mappings | Write Records | `AS_GSS_UT_constructFactorDocumentMappingsForNewRound(...)` |
+| 10 | Evaluation Setup | Subprocess (Create Evaluation, `0002ecdd…`) | folder/permission setup for the new round; synchronous |
+| 11 | End | End | |
+
+**Notes:** nodes 8–9 run **after** the write (they need the DB-generated criteria/document/team PKs). The new round is left **SETTING_UP** — generation happens later via **Start Round**.
+
+### 6.7 `setupNewRound` record action
+Related action on `AS_GSS_Evaluation_RECORD` → 6.6.
+- **Visibility (gate):** the family has ≥1 round, **no round is SETTING_UP or INPROGRESS** (all complete), and round count < 5:
+```
+a!localVariables(
+  local!rounds: rule!AS_GSS_QR_getRoundsForEvaluation(evaluationId: rv!record['recordType!{4db4a62e}...{evaluationId}evaluationId']),
+  local!statuses: tointeger(local!rounds['recordType!{931e8145}...relationships.{029ebc2e}evaluation.fields.{4e467ee1}evaluationStatusId']),
+  and(
+    a!isNotNullOrEmpty(local!rounds),
+    count(local!rounds) < 5,
+    not(or(
+      contains(local!statuses, cons!AS_GSS_REF_ID_EVALUATION_STATUS_SETTING_UP),
+      contains(local!statuses, cons!AS_GSS_REF_ID_EVALUATION_STATUS_INPROGRESS)
+    ))
+  )
+)
+```
+- **Context:** `parentEvaluationId: rv!identifier`, `duplicatedFromEvaluation: null`, `newEvaluation: null`, `templateEvaluation: null`, `evaluators: null`, `userAction: null` (the form loads the source round and builds the shell).
+
 ## Batch tracker (build order)
 1. **Data model** — §2 ✅
 2. **Family & round helpers** — §3 ✅
 3. **Start Evaluation as Round 1** — §4 ✅
-4. **Round-aware tabs** — §5 ✅ (one consolidated wrapper `AS_GSS_CPS_roundContentTabs` + embeddable-content contract; eliminates 8 wrappers + the factors config rule)
+4. **Round-aware tabs** — §5 ✅
+5. **Setup New Round + clone** — §6 ✅ (wizard, vendor grid, clone builder, factor→team + factor→document carry, PM node-by-node, gated action)
 4. **Round-aware tabs** — embeddable content + wrapper(s)
 5. **Setup New Round + clone** — wizard, duplicate, team-mapping, factor-doc-mapping
 6. **Start / Complete round + Rounds panel**
