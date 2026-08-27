@@ -41,9 +41,9 @@ Everything below is a consequence of this. Two secondary facts matter:
 | B / C / D | — | ✅ **Not an issue** — Round-1/parent activity; `appianDocId` retained for downloads. |
 | E Update Vendor Action → VM | Breaks from clones; between-round down-select not pushed | ✅ **Not an issue** — vendor add/remove→VM happens **only on the parent** (raw PIID → VM resolves). Between-round down-select is *internal selection* of already-linked vendors, **not** a VM unlink, so no push is expected. A vendor stays `isEvaluationLinked=1` in VM as long as it remains on the parent — which is correct. |
 | F Evaluation Details for VM | Stale (Round-1) status/link | ✅ **Not an issue** — showing the **parent** status/link is the **intended** behavior; VM screens are meant to reflect the parent evaluation only. |
-| G Vendor Proposal Action → GSS | Attaches to root, not active round | 🔧 **Minor change needed** — the handler should resolve the **latest round's child evaluation** for the solicitation and match the vendor **within that child** (by `externalVendorId`/UEI), so the currently-active round reflects the proposal update. Small, well-scoped logic addition to `AS_GSS_mapVendorUpdatesToRecord` (§3 Flow G). |
+| G Vendor Proposal Action → GSS | Attaches to root, not active round | ✅ **Implemented (2026-08-27, v2)** — `AS_GSS_mapVendorUpdatesToRecord` now resolves the family's **latest round** via `AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation` (max `sequence`) and targets the vendor + writes the `VendorUpdates` against that **latest round's child `evaluationId`** (falls back to the parent when the family has no round rows). `evaluationNumber` still stores the solicitation PIID. Verified via `testRule` on solicitation `26082602` → resolved to the latest round eval (21), not the root (16), `error: null`. |
 
-**Net:** only **Flow G** requires a change, and it is minor. All other VM flows are correct under the parent-only model.
+**Net:** **Flow G has been implemented** (latest-round targeting, v2, verified). All other VM flows are correct under the parent-only model with no change required.
 
 ---
 

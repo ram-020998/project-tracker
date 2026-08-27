@@ -409,3 +409,8 @@ Delivered **`artifacts/04_GCW_GSS_MULTIROUND_IMPACT.md`**.
 - **GCW:** B/4/7/C/H/8/11/F/9 + reads/toggles = **Not an issue** (parent-only display + parent-only awardee/award = correct). **Flow 10 (status sync) = optional low-sev review** — Start/Complete Round run on child evals and trigger the GCW sync, so confirm child-round statuses are suppressed/redirected to the parent (avoid leaking hidden-child rows to GCW).
 
 Net: multi-round is integration-safe under the parent-only model; **1 minor VM change (Flow G)** + **1 optional GCW hygiene item (Flow 10)**. Pre-clarification structural matrices retained in each doc §2 for the mechanism record.
+
+## Session Log — 2026-08-27 (Implemented VM Flow G; documented GCW Flow 10 decision)
+
+- **VM Flow G — IMPLEMENTED.** `AS_GSS_mapVendorUpdatesToRecord` (`_a-0000ed8a-02db-8000-9dfc-011c48011c48_15443462`, now v2): after matching the parent by `evaluationNumber = noticeId`, it resolves the family's **latest round** (`AS_GSS_UT_returnEvaluationRoundsForGivenEvaluation`, max `sequence` → that round's `evaluationId`) and targets the vendor query + writes the `VendorUpdates` against the **latest round's child `evaluationId`**; falls back to the parent when no round rows exist. `evaluationNumber` still holds the solicitation PIID. Fix for the `wherecontains` type mismatch: `tointeger(max(...))`. Verified via `testRule` on `26082602` → resolved to latest round eval **21** (not root 16), `error: null`. Doc 02 §1b updated to "Implemented".
+- **GCW Flow 10 — DECISION DOCUMENTED (implement later).** Doc 04 §1b now states: **GCW status syncs should be skipped for child evaluations** (only the parent's status should sync; Start Round/Complete Round must not push child statuses). Deferred to a later change.
