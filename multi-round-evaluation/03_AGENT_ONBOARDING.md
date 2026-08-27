@@ -38,6 +38,8 @@ Full details: **`01_FEATURE_AND_TECHNICAL_DESIGN.md`**. Live status: **`02_PROGR
 | **Docs git repo** | `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). These docs live under `multi-round-evaluation/`. Commit + push after every session. |
 | **The actual code (Appian objects)** | Appian **AS GSS Full Application**, accessed via the **`lcp` MCP server** — there is **no local git repo** for these objects |
 
+> ⚠️ **Doc-number disambiguation:** `05`/`06` are reused across folders. **Top-level** `05_START_EVALUATION_WI1_ANALYSIS.md` / `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` are the older **WI-1** docs. **`artifacts/`** `05_FEATURE_IMPLEMENTATION_PLAN.md` / `06_FEATURE_TECHNICAL_DESIGN.md` are the current **whole-feature rebuild** docs. Always cite the folder.
+
 **Environment:** `gam-gss-32-innovate.appianpreview.com`
 **Application:** AS GSS Full Application · UUID `_a-0000e5bc-4a9a-8000-9bbc-011c48011c48_930416`
 **Custom-objects app** (for customizations that deploy to higher envs): GSS Custom Objects · UUID `_a-0000f044-2075-8000-9ba6-011c48011c48_41633` (currently empty)
