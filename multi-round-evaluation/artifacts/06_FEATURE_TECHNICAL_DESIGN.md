@@ -705,12 +705,206 @@ a!localVariables(
 ```
 - **Context:** `parentEvaluationId: rv!identifier`, `duplicatedFromEvaluation: null`, `newEvaluation: null`, `templateEvaluation: null`, `evaluators: null`, `userAction: null` (the form loads the source round and builds the shell).
 
+## 7. Start / Complete round + Rounds panel
+
+Starting a round runs the same generation as Start Evaluation (without creating a round); completing a round marks its factors and the evaluation complete. The Rounds panel shows the family and hosts these actions.
+
+### 7.1 `AS_GSS_FM_startRound` (confirm dialog)
+**Purpose:** confirm that revised proposals are in and lock the round, then set it In Progress.
+**Used by:** the `startRound` record action as its start form.
+**Inputs:** `evaluation` (`AS_GSS_Evaluation_SYNCEDRECORD`, Required), `userAction` (Text).
+**Behaviour:** show the round number and the count of **included (active) vendors**; warn that the action is irreversible (factors + vendor assignments lock). On **Start**: `userAction = START` and set the evaluation In Progress (+ modified audit); capture the weighted-factors / on-the-spot metrics. On **Cancel**: `userAction = CANCEL`. All text i18n.
+**Implementation:**
+```
+a!localVariables(
+  local!i18nData: rule!AS_GSS_CO_UT_loadBundleFromFolder(langISOCode: null),
+  local!evaluationId: ri!evaluation['recordType!{e6bc8561}...{7f7c2d3b}evaluationId'],
+  /* this round's sequence + included-vendor count */
+  local!roundSequence: rule!AS_GSS_QR_getEvaluationRoundDetails(
+    returnType: cons!AS_CO_ENUM_QE_RETURN_TYPE_SINGLE_OBJECT,
+    evaluationId: local!evaluationId,
+    fields: 'recordType!{931e8145}...{d20a1017}sequence'
+  )['recordType!{931e8145}...{d20a1017}sequence'],
+  local!includedVendorCount: rule!AS_GSS_QR_getEvaluationVendors(
+    returnType: cons!AS_CO_ENUM_QE_RETURN_TYPE_TOTAL_COUNT,
+    evaluationId: local!evaluationId,
+    isActive: true()
+  ),
+  a!formLayout_25r1(
+    label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_StartRoundN", arguments: local!roundSequence),
+    contents: {
+      a!richTextDisplayField(
+        labelPosition: "COLLAPSED",
+        value: rule!AS_GAM_CO_I18N_UT_displayLabel(
+          bundle: local!i18nData, bundleKey: "ins_StartRoundConfirm", arguments: local!includedVendorCount
+        )
+      ),
+      a!cardLayout(
+        style: "WARN", showBorder: false(), padding: "LESS",
+        contents: a!richTextDisplayField(
+          labelPosition: "COLLAPSED",
+          value: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "txt_StartRoundIrreversible")
+        )
+      )
+    },
+    buttons: a!buttonLayout(
+      primaryButtons: a!buttonWidget(
+        label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "btn_StartRound"),
+        submit: true(), style: "SOLID", loadingIndicator: true(),
+        saveInto: {
+          a!save(ri!userAction, cons!AS_GSS_ENUM_USER_ACTION_START),
+          a!save(ri!evaluation, rule!AS_GSS_UT_updateRecordsByModelRecord(
+            records: ri!evaluation,
+            modelRecord: 'recordType!{e6bc8561}AS_GSS_Evaluation_SYNCEDRECORD'(
+              'recordType!{e6bc8561}...{4e467ee1}evaluationStatusId': cons!AS_GSS_REF_ID_EVALUATION_STATUS_INPROGRESS,
+              'recordType!{e6bc8561}...{fa99070d}modifiedBy': loggedInUser(),
+              'recordType!{e6bc8561}...{c795b29e}modifiedDatetime': now()
+            )
+          )),
+          if(a!defaultValue(ri!evaluation['recordType!{e6bc8561}...{59157834}isWeightedFactorsRequired'], false()),
+             rule!AS_GSS_MTR_SAVE_weightedFactorsRequiredForEvaluation(),
+             rule!AS_GSS_MTR_SAVE_weightedFactorsNotRequiredForEvaluation()),
+          if(a!defaultValue(ri!evaluation['recordType!{e6bc8561}...{8962d2c5}isOnSpotConsensus'], false()),
+             rule!AS_GSS_MTR_SAVE_onSpotConsensusForEvaluation(), {})
+        }
+      ),
+      secondaryButtons: a!buttonWidget(
+        label: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "btn_Cancel"),
+        submit: true(), validate: false(), style: "GHOST",
+        saveInto: a!save(ri!userAction, cons!AS_CO_ENUM_USER_ACTION_CANCEL)
+      )
+    ),
+    skipAutoFocus: true()
+  )
+)
+```
+**Notes:** `formLayout_25r1` is required for `skipAutoFocus`. New i18n keys: `lbl_StartRoundN`, `ins_StartRoundConfirm`, `txt_StartRoundIrreversible`, `btn_StartRound`.
+
+### 7.2 `AS GSS Start Round` (wrapper process)
+**Trigger:** `startRound` action. **Start form:** 7.1. **Lane:** initiator. **Security:** `… PM Access` group. **Archive:** delete after 1 day. **PVs:** `evaluation`, `originalEvaluation`, `evaluationFactorsAndSubFactors`, `originalEvaluationFactorsAndSubFactors`, `vendors`, `userAction`.
+
+| # | Node | Type | Purpose |
+| :-- | :--- | :--- | :--- |
+| 1 | Start | Start | form = 7.1 |
+| 2 | Run Start Evaluation Generation | Subprocess (`0002ecdd…`, synchronous, chained) | runs the shared generation (ratings/tasks/consensus, on-the-spot XOR) writing the evaluation **without** a `round` relationship → no new round. Forwards all six PVs. |
+| 3 | End | End | |
+
+**Notes:** reuse of the generation process (no duplicated node graph); the round already carries its factors/vendors, so no factor/vendor step.
+
+### 7.3 `AS GSS Complete Round` (wrapper process)
+**Trigger:** `completeRound` action (no dialog — runs on click). **Lane:** initiator/System. **Security:** `… PM Access` group. **Archive:** delete after 1 day. **PVs:** `evaluation`.
+
+| # | Node | Type | Purpose |
+| :-- | :--- | :--- | :--- |
+| 1 | Start | Start | no form |
+| 2 | Complete Factors | Write Records | mark every factor of the round `completedOn = now()`, `completedBy = initiator` (via `AS_GSS_UT_updateEvaluationRecordWithAllFactors` → merge). |
+| 3 | Run Mark Evaluation As Complete | Subprocess (`0004e60d-dbd6…`) | evaluation → Complete (`evaluationStatusId` = COMPLETE, `evaluationCompletionDate = today()`, modified audit); reuses the standard mark-complete write + GCW sync + audit. |
+| 4 | End | End | |
+
+### 7.4 `AS_GSS_UT_returnRoundStatusDisplayConfig` (new helper)
+**Purpose:** map a status id to its round-card display config, so the panel doesn't repeat the same `a!match` four times.
+**Inputs:** `statusId` (Integer, Required).
+**Implementation:**
+```
+a!match(
+  value: ri!statusId,
+  equals: cons!AS_GSS_REF_ID_EVALUATION_STATUS_SETTING_UP,
+  then: a!map(labelKey: "tag_SetUp",     barColor: cons!AS_GSS_HEX_YELLOW_4, cardStyle: cons!AS_GSS_HEX_YELLOW_0, tagBg: cons!AS_GSM_HEX_YELLOW_1, tagText: cons!AS_GSS_HEX_YELLOW_4),
+  equals: cons!AS_GSS_REF_ID_EVALUATION_STATUS_INPROGRESS,
+  then: a!map(labelKey: "tag_InProgress", barColor: cons!AS_GSM_HEX_PURPLE_5, cardStyle: cons!AS_GSM_HEX_PURPLE_0, tagBg: cons!AS_GSM_HEX_PURPLE_1, tagText: cons!AS_GSM_HEX_PURPLE_5),
+  equals: cons!AS_GSS_REF_ID_EVALUATION_STATUS_COMPLETE,
+  then: a!map(labelKey: "tag_Complete",  barColor: cons!AS_GSS_HEX_GREEN_4,  cardStyle: cons!AS_GSS_HEX_GREEN_0,  tagBg: cons!AS_GSS_HEX_GREEN_1,  tagText: cons!AS_GSS_HEX_GREEN_4),
+  default: a!map(labelKey: "", barColor: {}, cardStyle: {}, tagBg: {}, tagText: {})
+)
+```
+**Test cases:** assertable (no query). one per status + default.
+
+### 7.5 `AS_GSS_SEC_rounds` (Rounds panel)
+**Purpose:** show one card per round (name, status tag, date range) with the state-appropriate actions.
+**Used by:** the Summary layout (right column).
+**Inputs:** `evaluationId` (Integer, Required).
+**Implementation:**
+```
+a!localVariables(
+  local!i18nData: rule!AS_GSS_CO_UT_loadBundleFromFolder(langISOCode: null),
+  local!rounds: rule!AS_GSS_QR_getRoundsForEvaluation(evaluationId: ri!evaluationId),
+  /* latest sequence — Start Round shows only on this round when it is in Set Up */
+  local!maxSequence: max(a!defaultValue(tointeger(local!rounds['recordType!{931e8145}...{d20a1017}sequence']), { 0 })),
+  a!sectionLayout(
+    showWhen: a!isNotNullOrEmpty(local!rounds),
+    contents: {
+      a!headingField(text: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_Rounds"), size: "SMALL", fontWeight: "SEMI_BOLD"),
+      a!forEach(
+        items: local!rounds,
+        expression: a!localVariables(
+          local!statusId: fv!item['recordType!{931e8145}...relationships.{029ebc2e}evaluation.fields.{4e467ee1}evaluationStatusId'],
+          local!sequence: a!defaultValue(tointeger(fv!item['recordType!{931e8145}...{d20a1017}sequence']), 0),
+          local!cfg: rule!AS_GSS_UT_returnRoundStatusDisplayConfig(statusId: local!statusId),
+          a!cardLayout(
+            shape: "ROUNDED", marginBelow: "STANDARD", showBorder: false(),
+            decorativeBarPosition: "START", decorativeBarColor: local!cfg.barColor, style: local!cfg.cardStyle,
+            contents: a!sideBySideLayout(
+              alignVertical: "TOP",
+              items: {
+                a!sideBySideItem(item: {
+                  a!sideBySideLayout(alignVertical: "MIDDLE", items: {
+                    a!sideBySideItem(width: "MINIMIZE", item: a!headingField(
+                      text: fv!item['recordType!{931e8145}...{31c08880}roundName'], size: "EXTRA_SMALL", fontWeight: "BOLD", marginBelow: "NONE"
+                    )),
+                    a!sideBySideItem(item: a!tagField(
+                      labelPosition: "COLLAPSED",
+                      tags: a!tagItem(
+                        text: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: local!cfg.labelKey),
+                        backgroundColor: local!cfg.tagBg, textColor: local!cfg.tagText
+                      )
+                    ))
+                  }),
+                  a!richTextDisplayField(labelPosition: "COLLAPSED", value: {
+                    a!richTextItem(text: rule!AS_GAM_CO_I18N_UT_displayLabel(bundle: local!i18nData, bundleKey: "lbl_RoundN", arguments: local!sequence)),
+                    char(10),
+                    a!richTextItem(text: text(fv!item['recordType!{931e8145}...{7abbf0d2}startDate'], "MMM d, yyyy") & " - " & text(fv!item['recordType!{931e8145}...{c3f17341}endDate'], "MMM d, yyyy"), color: "SECONDARY")
+                  })
+                }),
+                a!sideBySideItem(width: "MINIMIZE", item: a!recordActionField(
+                  align: "END", style: "MENU_ICON",
+                  actions: a!flatten({
+                    /* Start Round — only on the latest round when it is in Set Up */
+                    if(and(local!sequence = local!maxSequence, a!defaultValue(local!statusId, -1) = cons!AS_GSS_REF_ID_EVALUATION_STATUS_SETTING_UP),
+                       a!recordActionItem(action: 'recordType!{4db4a62e}...actions.{84ac0b39-...}startRound', identifier: fv!item['recordType!{931e8145}...{1756683f}evaluationId']), {}),
+                    /* Complete Round — only on the In Progress round */
+                    if(a!defaultValue(local!statusId, -1) = cons!AS_GSS_REF_ID_EVALUATION_STATUS_INPROGRESS,
+                       a!recordActionItem(action: 'recordType!{4db4a62e}...actions.{853cb2b7-...}completeRound', identifier: fv!item['recordType!{931e8145}...{1756683f}evaluationId']), {}),
+                    /* Edit — always */
+                    a!recordActionItem(action: 'recordType!{4db4a62e}...actions.{dbb4697d-...}edit', identifier: fv!item['recordType!{931e8145}...{1756683f}evaluationId'])
+                  })
+                ))
+              }
+            )
+          )
+        )
+      )
+    }
+  )
+)
+```
+**Notes:** the richer mockup card (per-round "N vendors advanced", completed date, chevron into completed rounds, "Setup New Round" link) is part of the deferred UI redesign (`08_…`) and layers on top of this structure.
+**Test cases (interface):** default = a multi-round family → one card per round, correct status tag; Start Round appears only on the latest Set-Up round, Complete Round only on the In-Progress round.
+
+### 7.6 Record actions
+Both related actions on `AS_GSS_Evaluation_RECORD`; both surfaced from the Rounds panel keyed to each round's `evaluationId`.
+
+| Action | Key | Process | Visibility | Context |
+| :--- | :--- | :--- | :--- | :--- |
+| **Start Round** | `startRound` | 7.2 | method = Best Value **and** `parentEvalId` not blank (a child round). (Panel further restricts to latest + Set Up.) | `evaluation`, `originalEvaluation`, `evaluationFactorsAndSubFactors` (active criteria), `originalEvaluationFactorsAndSubFactors`, `vendors`, `userAction: null`. |
+| **Complete Round** | `completeRound` | 7.3 | `not(rule!AS_GSS_UT_hasOpenCompleteEvaluationTask(evaluationId: rv!identifier))` — no open Complete-Evaluation task. (Panel restricts to In Progress.) | `evaluation` (single object). |
+
 ## Batch tracker (build order)
 1. **Data model** — §2 ✅
 2. **Family & round helpers** — §3 ✅
 3. **Start Evaluation as Round 1** — §4 ✅
 4. **Round-aware tabs** — §5 ✅
-5. **Setup New Round + clone** — §6 ✅ (wizard, vendor grid, clone builder, factor→team + factor→document carry, PM node-by-node, gated action)
+5. **Setup New Round + clone** — §6 ✅
+6. **Start / Complete round + Rounds panel** — §7 ✅ (confirm form, two wrapper PMs, status-display helper, panel, actions)
 4. **Round-aware tabs** — embeddable content + wrapper(s)
 5. **Setup New Round + clone** — wizard, duplicate, team-mapping, factor-doc-mapping
 6. **Start / Complete round + Rounds panel**
