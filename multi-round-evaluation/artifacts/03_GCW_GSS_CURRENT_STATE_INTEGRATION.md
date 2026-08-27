@@ -27,7 +27,7 @@ Unlike VM (HTTP integrations ↔ Web APIs, cross-environment, API-key auth), GCW
 - **RECORDACTION** — returns a record-action config/link the caller renders.
 - **STARTPROCESS** — returns `{processModel, processParameters}` so the caller starts a process in the target app (this is how one app writes data into the other).
 
-> **Coexisting HTTP path (status sync):** GSS *also* has an HTTP Web API `evaluationList` (`AS GSS WA GET Evaluation Status List`, backing rule `AS_GSS_WA_GET_EvaluationStatusList` `_…17688586`) and an integration `AS_GSS_INT_POST_SyncEvaluationStatusList` (`4a8a979c-…`, wired into PM `0006ef1c` "Sync Eval Status in GCW"), alongside the APPREF `syncEvalStatusInGcw`. See §5 for how these relate (and an open wiring question).
+> **Two sync mechanisms, both active and required (confirmed):** GCW integrates with GSS through **both** the APPREF→ENTRYPOINT path **and** an HTTP Web API/integration path — they are complementary, not alternatives. For status sync specifically: GSS has the APPREF `syncEvalStatusInGcw` (→ starts a GCW process), the HTTP integration `AS_GSS_INT_POST_SyncEvaluationStatusList` (`4a8a979c-…`, wired into PM `0006ef1c` "Sync Eval Status in GCW"), and the `evaluationList` Web API (`AS_GSS_WA_GET_EvaluationStatusList` `_…17688586`) that GCW pulls from. See §5. Both mechanisms must be considered in Phase 2.
 
 ---
 
@@ -98,7 +98,7 @@ GSS summary ◀─[5 relatedProcurementDetailsForEvalSummary / 9 getAwardLinksFo
 - **Wrapper:** `AS_GSS_APPREF_GCW_STARTPROCESS_syncEvalStatusInGcw(evaluationIdToSync)` → GCW entrypoint `AS_GCW_GSS_ENTRYPOINT_STARTPROCESS_syncEvaluationStatusListRecord` (`_…17809602`), which returns `{processModel: cons!AS_GCW_GSS_PM_SYNC_EVALUATION_STATUS_LIST_RECORD, processParameters:{evaluationIdToSync}}`.
 - **Effect:** GCW starts its **Sync Evaluation Status List Record** process for that `evaluationId`; GCW maintains its **own synced copy of the GSS evaluation status** (keyed by `evaluationId`), used to show source-selection status on GCW screens.
 - **How GCW gets the data:** GSS exposes the status list via the `evaluationList` Web API (`AS_GSS_WA_GET_EvaluationStatusList` `_…17688620`/`_17688586`), which returns, per `evaluationId` (or all `isActive=true` evals): `{evaluationId, evaluationStatusId, evaluationNumber, evaluationTitle}`. **This rule has no `parentEvalId` filter** (relevant to Phase 2).
-- **⚠️ Open wiring question:** two status-sync mechanisms coexist — the APPREF `syncEvalStatusInGcw` (no GSS object dependents found) and the HTTP integration `AS_GSS_INT_POST_SyncEvaluationStatusList` (`4a8a979c`, wired into PM `0006ef1c` "Sync Eval Status in GCW", reused by Start/Complete/Mark-Complete). Need to confirm which is the active path in this build (possibly APPREF is the new same-env replacement for the HTTP one). Flagged for Phase 2 / team confirmation.
+- **Both mechanisms are in use (confirmed by product owner):** the **APPREF** `syncEvalStatusInGcw` (in-JVM, starts the GCW sync process) and the **HTTP** path — integration `AS_GSS_INT_POST_SyncEvaluationStatusList` (`4a8a979c`, wired into PM `0006ef1c` "Sync Eval Status in GCW", reused by Start/Complete/Mark-Complete) + the `evaluationList` Web API that GCW pulls. Both are legitimate, complementary parts of the GCW integration and are needed. Phase 2 must assess multi-round behavior across **both** paths.
 
 ### C / getEvaluationDetailsBySolicPiid — GCW displays GSS eval status (GCW → GSS) ⭐
 - GSS entrypoint `getEvaluationDetailsBySolicPiid` (`_…16906534`) → `AS_GSS_AM_getEvaluationDetailsBySolicPiid_V1` (`_…16904747`). Queries `AS_GSS_Evaluation_RECORD` by **`evaluationNumber = solicitationPiid` AND `sourceApplication.refDataId = AM` AND `isActive = true`** (SINGLE_OBJECT). Returns `{evaluationId, solicitationPiid, title, status(refLabel), statusBranding, createdOn, evaluationLink}` (a deep link to the evaluation record).
@@ -150,7 +150,7 @@ Handlers characterized by name/description/entrypoint but not line-read this pas
 2. **Status sync by evaluationId:** flow 10 syncs a single `evaluationIdToSync`; `evaluationList` has no `parentEvalId` filter. Which round(s) get synced to GCW, and does GCW represent multiple round evals per solicitation?
 3. **Winning vendors / award creation:** `getWinningVendorAndBasicInformation(evaluationIds[])` — winners must come from the **final round**; confirm which `evaluationIds` GCW passes and whether award docs (`appianDocumentIds`) resolve to the final round's carried docs.
 4. **eval↔solic mapping:** created once for the root; do later rounds need re-mapping in GCW?
-5. **Two sync mechanisms** (APPREF vs HTTP) — resolve which is active before assessing multi-round behavior.
+5. **Two sync mechanisms, both active** (APPREF in-JVM + HTTP `evaluationList`/`SyncEvaluationStatusList`). Phase 2 must assess multi-round status sync across **both** paths (which round's status each conveys, and whether GCW ends up with multiple round evals per solicitation).
 
 ## 9. Verification appendix
 - Mechanism: `AS_GSS_APPREF_GCW_STARTPROCESS_syncEvalStatusInGcw` (`_…18001846`) — `AS_FRM_getRuleReferenceOrNoOp` pattern.
