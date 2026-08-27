@@ -461,3 +461,18 @@ Authored `artifacts/06_FEATURE_TECHNICAL_DESIGN.md` — object-by-object, standa
 **Open PO confirmations (flagged in doc):** Setup-New-Round step count (2 vs 3); Phases tab in/out; "active round" definition (Summary + VM latest-round); record-type suffix (`_SYNCEDRECORD` vs `_RecordType`).
 
 Next: PO review of `06_…`; then implement from a clean baseline in build-sequence order.
+
+## Session Log — 2026-08-27 (Feature Impact Analysis — first pass)
+
+Authored `artifacts/07_APPLICATION_IMPACT_ANALYSIS.md` — grounds the hidden-child / parent-only model into the whole GSS application (the step the POC skipped). Explored live objects via `lcp` MCP starting from the PO's example (task name + home task grid) and fanned out across task, email, record-list, consensus, document, ratings/audit, security, and integration surfaces.
+
+**CONFIRMED leaks (with code evidence):**
+- **Home "My Tasks" grid** `AS_GSS_GRD_activeTasks` (`…13241781`): the *Evaluation* column shows `task.evaluation.evaluationNumber/Title` and links `a!recordLink(AS_GSS_Evaluation_RECORD, identifier: task.evaluationId)` → for a round task, **name + link resolve to the hidden child clone**. Also an "Evaluation" user filter that would list clones.
+- **Task name** (`AS_GSS_generateEvaluationTasksForAssignee` `…15676146`): persisted `taskName = evaluationNumber & " - " & factorNumber & " - " & legalName` — bakes the **child clone's number**.
+- **Task-assignment email** (`AS_GSS_UT_emailBodyForTaskAssignment` → `…emailInstructionForTaskAssignment`): resolves `tasks.evaluation` (child) into the email; whole 32-rule email family shares the vector.
+
+**CONFIRMED-by-architecture risks:** the **Evaluations record list** (`4db4a62e`) will show clones as rows unless filtered (MCP-blocked → Designer); **Process-HQ mining** (`Evaluation_Audit`/`Field_Audit`/`Status_History`) sees each clone as a separate short-lived evaluation → distorts analytics.
+
+**Raised Q1–Q13** for the PO (identity/display, scope/aggregation, comms, record-list/security, feature-specifics). §12 lists surfaces still to inspect (record list config, dashboards, search/pickers, consensus/doc bodies, alerts, awards). Recommended fix strategy: one shared parent-identity helper + record-list filter + parent-routed emails/Web APIs, then fold Q1–Q13 resolutions into doc 06 as explicit build items.
+
+Next: PO answers Q1–Q13; complete the §12 follow-up scans; update doc 06.

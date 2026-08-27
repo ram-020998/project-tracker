@@ -33,12 +33,13 @@ Full details: **`01_FEATURE_AND_TECHNICAL_DESIGN.md`**. Live status: **`02_PROGR
 | **Feature Implementation Plan** | `artifacts/05_FEATURE_IMPLEMENTATION_PLAN.md` — **code-free build blueprint** for the whole feature (what/where/why, state transitions, build sequence, verification) + full inventory of all 63 POC package objects. Start here to implement from a clean baseline. |
 | **Feature Technical Design** | `artifacts/06_FEATURE_TECHNICAL_DESIGN.md` — **object-by-object build spec** (real optimized SAIL / node-by-node PMs / test cases), standards-compliant. 8 batches (§2–§9). The *how* to build; read after 05. |
 | **Design best-practices (GOVERNING)** | `artifacts/SOLUTIONS - Design Best Practices & Guidance 3.md` — the solution coding standard; the Technical Design conforms to it and it wins any conflict. |
+| **Feature Impact Analysis** | `artifacts/07_APPLICATION_IMPACT_ANALYSIS.md` — application-wide impact of the hidden-child model: where a child-round evaluation leaks (task grids, emails, record list, consensus, documents) or distorts aggregations (counts, Process-HQ), graded by evidence, with a Q1–Q13 open-questions register. The *what breaks in the app* companion to 05/06. |
 | **POC package object list** | `../merge-assist-v2/modifiedObjects.md` — the 63 objects changed/added in the POC (basis for docs 05/06). |
 | **UI redesign from new mockups** (DEFERRED) | `08_UI_REDESIGN_NEW_MOCKUPS.md` — per-screen change inventory from the new mockups; not started (PO-deferred) |
 | **Docs git repo** | `/Users/ramaswamy.u/repo/project-tracker` (branch `main`). These docs live under `multi-round-evaluation/`. Commit + push after every session. |
 | **The actual code (Appian objects)** | Appian **AS GSS Full Application**, accessed via the **`lcp` MCP server** — there is **no local git repo** for these objects |
 
-> ⚠️ **Doc-number disambiguation:** `05`/`06` are reused across folders. **Top-level** `05_START_EVALUATION_WI1_ANALYSIS.md` / `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` are the older **WI-1** docs. **`artifacts/`** `05_FEATURE_IMPLEMENTATION_PLAN.md` / `06_FEATURE_TECHNICAL_DESIGN.md` are the current **whole-feature rebuild** docs. Always cite the folder.
+> ⚠️ **Doc-number disambiguation:** `05`/`06`/`07` are reused across folders. **Top-level** `05_START_EVALUATION_WI1_ANALYSIS.md` / `06_START_EVALUATION_WI1_IMPLEMENTATION_PLAN.md` are the older **WI-1** docs, and top-level `07_CROSS_APP_IMPACT_RESEARCH.md` is the **external** integration inventory. **`artifacts/`** `05_FEATURE_IMPLEMENTATION_PLAN.md` / `06_FEATURE_TECHNICAL_DESIGN.md` / `07_APPLICATION_IMPACT_ANALYSIS.md` are the current **whole-feature rebuild** docs (the last being the *in-application* impact analysis). Always cite the folder.
 
 **Environment:** `gam-gss-32-innovate.appianpreview.com`
 **Application:** AS GSS Full Application · UUID `_a-0000e5bc-4a9a-8000-9bbc-011c48011c48_930416`
@@ -435,3 +436,5 @@ The build so far is a **validated POC** (hand-built, unoptimized, inconsistently
 
 ### 11.6 Next step
 PO review of `06_…`; resolve §11.4; then implement from a clean baseline in the build-sequence order (doc 06 §-order / batch tracker). The record-actions and record-view repoints remain **manual in Designer** (§10.47).
+
+**Impact analysis (new workstream):** `artifacts/07_APPLICATION_IMPACT_ANALYSIS.md` grounds the hidden-child model into the whole app — it found confirmed child-evaluation **leaks** (home My-Tasks grid evaluation column + link, persisted task names, ~32 email rules, the Evaluations record list) and **aggregation** risks (task/rating counts, Process-HQ mining). It raises **Q1–Q13** for the PO. Resolving Q1–Q13 and folding them into doc 06 as explicit build items is a prerequisite to a leak-free rebuild. First pass complete; §12 of that doc lists surfaces still to inspect.
