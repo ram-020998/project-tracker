@@ -11,7 +11,7 @@
 ### ⭐ SHIPPED (COMPLETE) — Phase 29: UX Design Stage (Mockup → grounded implementation analysis) — genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1
 
 > **Specs:** `specs/phase-29-ux-design-stage.md` (umbrella) + `phase-29-ux-design-stage/29-01..29-06`. As-built:
-> `progress/phase-29-ux-design-stage.md`. **ADR-057** (Proposed) — the grounded UX Design stage (refines ADR-056).
+> `progress/phase-29-ux-design-stage.md`. **ADR-057** (Accepted) — the grounded UX Design stage (refines ADR-056).
 >
 > **Goal.** Make the first Phase-28 plug-in stage LIVE. A user uploads a **mockup PDF** on a feature's UX Design
 > stage; Genesis produces a grounded **"UX Implementation Analysis"** — a per-screen reconciliation of what the

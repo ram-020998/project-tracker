@@ -106,7 +106,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > re-upload replaces+re-runs; intent-level (not object-level — that's Technical Design); artifact "UX
 > Implementation Analysis" (HTML + Lavish review); generalize the per-stage artifact model now (**m0015**);
 > read-only Appian. **Multi-repo** (genesis-core additive `kiro_node` images → genesis → genesis-workflows).
-> **Specs:** `specs/phase-29-ux-design-stage.md` + `29-01..29-06`; **ADR-057 (Proposed)**; progress
+> **Specs:** `specs/phase-29-ux-design-stage.md` + `29-01..29-06`; **ADR-057 (Accepted)**; progress
 > `progress/phase-29-ux-design-stage.md`.
 >
 > **LOCKED DECISIONS.** PDF-only v1 (PPTX deferred); re-upload replaces + re-runs; grounding split

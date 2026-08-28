@@ -1,7 +1,7 @@
 # Progress — Phase 29: UX Design Stage (Mockup → grounded implementation analysis)
 
 > As-built record for Phase 29. **Specs:** `specs/phase-29-ux-design-stage.md` (umbrella) +
-> `phase-29-ux-design-stage/29-01..29-06`. **ADR-057** (Proposed) — the grounded UX Design stage (refines
+> `phase-29-ux-design-stage/29-01..29-06`. **ADR-057** (Accepted) — the grounded UX Design stage (refines
 > ADR-056). Multi-repo: genesis-core (additive `kiro_node` images) + genesis (PDF render + `m0015` per-stage
 > artifact model + `ux_design` lifecycle machine + `ux_design` chat mode + API + web UX stage) +
 > genesis-workflows (the `ux-design-analysis` workflow). PDF-only v1; read-only against Appian.
@@ -112,7 +112,7 @@ by keeping the Spec test suite green + the 29-05 review + shipping the whole cha
 - Step 4a — genesis `5b02987` — `build_stage_lifecycle`(+`_service`) (reuse SPEC_TRANSITIONS, `EntityKind.STAGE`);
   `ux_design` `ChatModeProfile` + `_STEERING_UX`; `ctx.extras['pdf_render']`. genesis pytest **647**, ruff clean.
 
-**REMAINING (new session; see AGENT_ONBOARDING §"IN BUILD — RESUME HERE" for the precise plan + commands):**
+**REMAINING AT THE 29-04 CHECKPOINT (all subsequently completed — see the 29-05 + 29-06 sections below):**
 - **4b** generalized stage API in `api/features.py` + **repoint Spec onto StageStore** (D12; feature detail
   returns `stages`; add `feature_stage_artifacts_dir` to settings; keep Spec tests green).
 - **5** web: generalize `SpecWorkspace`→`StageArtifactWorkspace`, `PreviewDialog`→`AnnotatablePreviewDialog`,
