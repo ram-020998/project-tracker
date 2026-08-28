@@ -1,297 +1,179 @@
-,Type,Epic,Ticket Title,Description,Acceptance Criteria,Effort Estimate,Mockup Ref,Questions / Open Items,,
-,Task,1. Data Model & Family Resolution,Add parentEvalId to the EvaluationRound table,"Add a PARENT_EVAL_ID column to AS_GSS_EVALUATION_ROUND so the round family is resolvable from the rounds table alone (no Evaluation query). Null for the root's Round-1 row; = root evaluationId for every child round. Refresh the synced record AS_GSS_EvaluationRound_SYNCEDRECORD and add an index on (EVALUATION_ID, PARENT_EVAL_ID, SEQUENCE). Delivered as idempotent SMT scripts for MariaDB + Oracle.","AC 1: Column added and synced
+,Type,Epic,Ticket Title,Description,Acceptance Criteria,Implementation Notes,Effort Estimate,Mockup Ref,Questions / Open Items
+,Task,1. Foundational — Data Model & Shared Resolvers,Add parentEvalId to the EvaluationRound table,"Add PARENT_EVAL_ID to AS_GSS_EVALUATION_ROUND so the round family resolves from the rounds table alone (null for the root Round-1 row, = root id for child rounds). Refresh the synced record and index (EVALUATION_ID, PARENT_EVAL_ID, SEQUENCE). Idempotent SMT scripts for MariaDB + Oracle.","AC 1: Column added and synced
 Given the SMT scripts are deployed
 When a round row is written
-Then PARENT_EVAL_ID persists (null for the root Round-1 row, root id for child rounds)
-And the field is queryable via the EvaluationRound record without errors
+Then PARENT_EVAL_ID persists (null for root Round-1, root id for child rounds) and is queryable via the record
 
-AC 2: Idempotent multi-DB scripts
-Given the scripts run on the MariaDB and Oracle schemas
-When they are run twice
-Then both pass and are re-runnable without error",Small,,"Q1: Record-type suffix convention for any new records — keep GSS _SYNCEDRECORD or move to _RecordType? (onboarding Q from best-practices)
-Q2: Confirm the family key lives ONLY on the rounds table (not also on Evaluation).",,
-,Task,1. Data Model & Family Resolution,Confirm Evaluation parentEvalId + round relationship,"Verify the existing AS_GSS_Evaluation_SYNCEDRECORD.parentEvalId field and the Evaluation->round relationship are intact and correctly cascaded for the clone write path (round created via the relationship cascade, not a separate write).","AC 1: Relationship intact
-Given an evaluation clone is written with a populated round relationship
-When the write completes
-Then a matching EvaluationRound row is persisted via cascade
-
-AC 2: Root vs child
-Given a root evaluation
-When Round 1 is registered
-Then Evaluation.parentEvalId stays null and the round row sequence = 1",Small,,,,
-,Task,2. Family & Round Helper Rules,Build getRoundsForEvaluation keystone resolver,"Build AS_GSS_QR_getRoundsForEvaluation — the single family resolver used everywhere. Two queries, rounds-table-only, sequence-sorted, round-eval status joined; resolves anchor = coalesce(parentEvalId, evaluationId). Standards-compliant (AS_CO_UT_queryRecord, sort-in-query). Replaces the POC returnEvaluationRoundsForGivenEvaluation and drops its dead additionalFields/excludeParent flag.","AC 1: Resolve family from any member
+AC 2: Idempotent multi-DB
+Given the scripts run on MariaDB and Oracle
+When run twice
+Then both pass and are re-runnable without error",DB/synced-record only; no rules. Confirms the family key lives solely on the rounds table.,Small,,Q: Record-type suffix for any new records — keep _SYNCEDRECORD or move to _RecordType?
+,Task,1. Foundational — Data Model & Shared Resolvers,Build family resolution rules (shared),"Build the shared family resolver used by tabs, Rounds panel, Summary and VM. Kept as its own object because many stories depend on it.","AC 1: Resolve family from any member
 Given a root or child evaluationId
-When the rule runs
+When getRoundsForEvaluation runs
 Then it returns all rounds of the family, sequence-sorted, with round-eval status
 
 AC 2: Leaf safety
 Given an evaluation with no rounds
-When the rule runs
-Then it returns an empty result without error
-And test cases pass on the known family (root 6)",Small,,,,
-,Task,2. Family & Round Helper Rules,Build getEvaluationRoundDetails base query rule,Build AS_GSS_QR_getEvaluationRoundDetails as the single base query for a round's detail; the family resolver composes it. Standards-compliant filters/sort.,"AC 1: Returns round detail
-Given a round identifier/filters
-When the rule runs
-Then it returns the round detail fields used by the resolver and the Rounds panel
-And test cases cover populated and empty inputs",Small,,,,
-,Task,2. Family & Round Helper Rules,Build supporting round helper rules,"Build the supporting helpers: returnIdentifiersForEvaluationRounds, returnLatestChildEvaluationInSetupForGivenEvaluation, and hasOpenCompleteEvaluationTask. Each standards-compliant with unit test cases.","AC 1: Latest set-up child
-Given a family with a SETTING_UP latest round
-When returnLatestChildEvaluationInSetup runs
-Then it returns that child's evaluationId; null when none
-
-AC 2: Open-task guard
-Given a round with open Complete-Evaluation tasks
-When hasOpenCompleteEvaluationTask runs
-Then it returns true; false otherwise",Small,,,,
-,Task,2. Family & Round Helper Rules,Build parent-identity resolver helper,"Build AS_GSS_UT_returnParentEvaluationIdentity(evaluationId) -> {parentEvalId, parentEvaluationNumber, parentEvaluationTitle}, resolving coalesce(parentEvalId, evaluationId). This is the shared dependency for every hidden-child display fix (Epic 7).","AC 1: Resolve parent identity
+When it runs
+Then it returns empty without error; test cases pass on the known family (root 6)","Create AS_GSS_QR_getEvaluationRoundDetails — base query for a round's detail. Create AS_GSS_QR_getRoundsForEvaluation — keystone resolver: anchor = coalesce(parentEvalId, evaluationId); 2 queries, rounds-table-only, sequence-sorted, status-joined; composes getEvaluationRoundDetails. Standards: AS_CO_UT_queryRecord, sort-in-query.",Small,,
+,Task,1. Foundational — Data Model & Shared Resolvers,Build parent-identity resolver rule (shared),Build the shared helper that maps any evaluationId to its parent identity; consumed by every hidden-child display fix (Epic 6). Kept as its own object.,"AC 1: Resolve parent identity
 Given a child-round evaluationId
 When the rule runs
-Then it returns the parent's id, number and title
+Then it returns parentEvalId + parent evaluationNumber + parent evaluationTitle
 
 AC 2: Root passthrough
 Given a root evaluationId
-When the rule runs
-Then it returns the root's own id, number and title
-And test cases cover root and child inputs",Small,,Q1: Approve one shared helper used by all grids/columns/emails/links (vs per-interface fixes)? (doc 07 Q2),,
-,Task,2. Family & Round Helper Rules,Build round status display-config helper,Build AS_GSS_UT_returnRoundStatusDisplayConfig to de-duplicate the four repeated status->color/label match blocks used by the Rounds panel and round tags.,"AC 1: Status to display config
-Given a round-eval status id
-When the rule runs
-Then it returns the correct label + color + icon config for that status",Small,,,,
-,Story,3. Start Evaluation as Round 1,Start Evaluation Best Value modal,"Best Value only: single-screen Start Evaluation modal collecting Round 1 details (Round name default 'Initial Evaluation', start date, duration, due date) and a parent-factor multi-select (Team/Evaluators/due date, default all selected, 'N of N selected'). No vendor step, no on-spot toggle. Rebuild of AS_GSS_FM_startEvaluationBestValue.","AC 1: Modal renders on a Best Value setup eval
+When it runs
+Then it returns the root's own id/number/title; test cases cover both","Create AS_GSS_UT_returnParentEvaluationIdentity(evaluationId) -> {parentEvalId, parentEvaluationNumber, parentEvaluationTitle} using coalesce(parentEvalId, evaluationId).",Small,,Q: Approve one shared parent-identity helper used by all grids/columns/emails/links? (doc 07 Q2)
+,Story,2. Start Evaluation as Round 1,Start Evaluation Best Value form,"Best Value only: single-screen Start Evaluation modal collecting Round 1 details (round name default 'Initial Evaluation', start date, duration, due date) and a parent-factor multi-select (Team/Evaluators/due date, default all selected, live 'N of N selected'). No vendor step, no on-spot toggle. Object: AS_GSS_FM_startEvaluationBestValue.","AC 1: Modal renders
 Given a SETTING_UP Best Value evaluation
 When I open Start Evaluation
-Then the single-screen modal shows round details and the factor multi-select (all checked, live 'N of N selected')
+Then the single-screen modal shows round details + the factor multi-select (all checked, live count)
 
-AC 2: Factor selection
-Given the factor list
-When I deselect factors
-Then the count updates and only selected factors are submitted",Medium,GSS - Multiround Evaluation (1).pdf p3,,,
-,Story,3. Start Evaluation as Round 1,Register the parent evaluation as Round 1,"On submit, set the evaluation to INPROGRESS with the entered start/due dates and register the parent as Round 1 by populating the round relationship (EvaluationRound sequence=1, parentEvalId=null) via the write cascade.","AC 1: Round 1 created
-Given I submit the Start Evaluation modal
+AC 2: Output
+Given I submit
+Then the form outputs selectedFactorIds and the round detail values, and sets the eval fields for the process",Reuse the round-detail + factor-picker components from AS_GSS_FM_startNewRound. Create any small display helpers the factor card needs (factor name/number/due date) inline. No new shared rules.,Medium,GSS - Multiround Evaluation (1).pdf p3,
+,Story,2. Start Evaluation as Round 1,Start Evaluation Best Value process model (+ rules),"Rebuild the AS GSS Start Evaluation Best Value PM: registers the parent as Round 1 (via the round relationship cascade) and runs scoped task/rating/consensus generation. Clone of the standard start process minus the LPTA branch, plus a factor-scoping step. Object: the PM + its rules.","AC 1: Round 1 created
+Given the modal is submitted
 When the process completes
-Then the evaluation is INPROGRESS and a Round-1 EvaluationRound row exists (sequence=1, parentEvalId null)
+Then the eval is INPROGRESS and a Round-1 EvaluationRound row exists (sequence=1, parentEvalId null)
 
-AC 2: Round 1 shows in round-aware UI
-Given Round 1 is registered
-When I open a round-aware tab / the Rounds panel
-Then Round 1 appears",Medium,GSS - Multiround Evaluation (1).pdf p2,,,
-,Story,3. Start Evaluation as Round 1,Scoped task / rating / consensus generation,"Generate tasks, ratings and consensus only for the selected factors (+ their subfactors) and the evaluation's vendors, by scoping the factor list fed to generation.","AC 1: Scoped generation
-Given a subset of factors selected
-When Start Evaluation runs
-Then tasks = selectedFactors(+subfactors) x vendors, and ratings/consensus are scoped identically
+AC 2: Scoped generation
+Given a factor subset
+When generation runs
+Then tasks = selectedFactors(+subfactors) x vendors; ratings/consensus scoped identically; on-spot creates consensus but no tasks
 
-AC 2: On-spot variant
-Given on-spot Best Value
-When Start Evaluation runs
-Then consensus is created but no evaluation tasks",Medium,,,,
-,Story,3. Start Evaluation as Round 1,Task names reference the parent evaluation,"Generate persisted task names using the parent evaluation identity (never the hidden child clone number), per the approved naming convention.","AC 1: Parent identity in task name
-Given a round's tasks are generated
-When the task name is persisted
-Then it uses the parent evaluation number (plus 'Round N' if approved), not the child clone number",Small,,"Q1: Task-name convention — parent number only,  or parent number + 'Round N'? (doc 07 Q1)",,
-,Task,3. Start Evaluation as Round 1,Build Start Evaluation Best Value process model,"Rebuild the AS GSS Start Evaluation Best Value PM node-by-node: clone of the standard start process minus the LPTA branch, plus a Scope Selected Factors node; PVs incl. selectedFactorIds. validateDesignObject clean.","AC 1: Process validates
-Given the PM is built
-When validateDesignObject runs
-Then there are no errors and the graph matches the design (scoped generation, no LPTA branch)",Medium,,"Q1: Confirm the two async sub-process steps (GCW sync,  reqt extraction) node type given the platform Start-Process limitation (onboarding §10.47).",,
-,Task,3. Start Evaluation as Round 1,[Designer] Start Evaluation action + visibility split,"MANUAL (MCP-blocked on the Evaluation record type): create the startEvaluationBestValue record action -> the new PM, with visibility = SETTING_UP AND Best Value AND isBlank(parentEvalId); and guard the existing startEvaluation action with the Best-Value exclusion so exactly one shows.","AC 1: Exactly one action
+AC 3: Task names use parent identity
+Given tasks are generated
+Then the persisted taskName uses the parent number (per Q), never a child clone number",Create a Scope Selected Factors rule/node: filter evaluationFactorsAndSubFactors to selected criteriaId OR parentCriteriaId in selectedFactorIds. Reuse AS_GSS_generateEvaluationTasksForAssignee scoped by that list. Modify task-name construction to use parent identity (per Q). Register Round 1 by populating the round relationship on the eval Write node.,Medium,GSS - Multiround Evaluation (1).pdf p2,"Q: Task-name convention — parent number only, or parent number + 'Round N'? (doc 07 Q1)"
+,Task,2. Start Evaluation as Round 1,[Designer] Start Evaluation action + visibility split,MANUAL (MCP-blocked on the Evaluation record type): create the startEvaluationBestValue record action to the new PM and guard the existing startEvaluation action so exactly one shows.,"AC 1: Exactly one action
 Given a SETTING_UP Best Value eval
-When I view actions
-Then only Start Evaluation (Best Value) shows; for LPTA/non-Best-Value the original action shows
+Then only Start Evaluation (Best Value) shows; LPTA/non-Best-Value show the original
 
 AC 2: Root-only
 Given a child-round eval
-When I view actions
-Then Start Evaluation (Best Value) is not shown",Small,,,,
-,Story,4. Round-Aware Detail Tabs,Per-round sub-tabs on evaluation detail tabs,"Each round-aware detail tab (Factors, Teams, Consensus Reports, Documents, Task History, Ratings, Checklist Items, Evaluation History) shows one sub-tab per round, each rendering that round's content.","AC 1: Sub-tabs per round
+Then the action is not shown",Action visibility = SETTING_UP AND Best Value AND isBlank(parentEvalId). Guard existing startEvaluation with the Best-Value exclusion. Reuse existing contextExpr + selectedFactorIds.,Small,,
+,Story,3. Round-Aware Detail Tabs,Consolidated round-tab wrapper,"Build one generic wrapper that shows one sub-tab per round for every round-aware detail tab (Factors, Teams, Consensus, Documents, Task History, Ratings, Checklist Items, Evaluation History), replacing the eight _Parent wrappers. Object: AS_GSS_CPS_roundContentTabs (+ the embeddable-content edits to each tab's content interface, owned here to avoid contention).","AC 1: Sub-tabs per round
 Given a family with N rounds
 When I open a round-aware tab on the parent
-Then I see sub-tabs Round 1..N, each rendering that round's content
+Then I see Round 1..N sub-tabs each rendering that round's content
 
-AC 2: Leaf/single-round safety
+AC 2: Leaf safety
 Given a single-round evaluation
-When I open a round-aware tab
-Then it renders without error",Medium,,,,
-,Task,4. Round-Aware Detail Tabs,Build consolidated round-tab wrapper,"Build AS_GSS_CPS_roundContentTabs(evaluationId, tabType) as one generic wrapper (a!match router) replacing the eight _Parent wrappers, and eliminate returnViewRenderingConfigFor_Factors. Enforce the embeddable-content contract (strip outer HeaderContentLayout frames from each tab's content). testInterface per tabType on the known family.","AC 1: One wrapper, all tabs
-Given the wrapper and tabType router
-When each tabType is tested
-Then it renders the correct content per round with diagnostics.error null
-
-AC 2: Legacy wrappers retired
-Given the wrapper is live
-When the design is reviewed
-Then the 8 _Parent wrappers and the factors-config rule are removed",Large,,,,
-,Task,4. Round-Aware Detail Tabs,[Designer] Repoint Evaluation record views to the wrapper,MANUAL (MCP-blocked): repoint each round-aware view on AS_GSS_Evaluation_RECORD to the consolidated wrapper.,"AC 1: Views use the wrapper
+Then it renders without error (diagnostics.error null per tabType)","Build AS_GSS_CPS_roundContentTabs(evaluationId, tabType) as an a!match router; consume the family resolver. Eliminate returnViewRenderingConfigFor_Factors. Make each of the 8 content interfaces embeddable (strip outer HeaderContentLayout frame) — done in this story so no other story edits them. Retire the 8 _Parent wrappers.",Large,,
+,Task,3. Round-Aware Detail Tabs,[Designer] Repoint Evaluation record views to the wrapper,MANUAL (MCP-blocked): repoint each round-aware view on AS_GSS_Evaluation_RECORD to the consolidated wrapper.,"AC 1: Views use the wrapper
 Given the wrapper is deployed
-When each detail view is opened on a record
-Then it renders via the consolidated wrapper",Small,,,,
-,Story,5. Setup New Round & Clone,Setup New Round wizard,"Wizard to set up the next round: round name/dates, vendor down-select grid, and factor carry-forward. Creates a new child round evaluation in SETTING_UP.","AC 1: Wizard creates a round
+When each detail view opens on a record
+Then it renders via the consolidated wrapper",One-line view reference swap per round-aware view. No rules.,Small,,
+,Story,4. Setup New Round & Clone,Setup New Round wizard form (+ rules),"Wizard to set up the next round: round name/dates, vendor down-select grid, factor carry-forward, with validations. Object: AS_GSS_FM_startNewRound + its rules.","AC 1: Wizard captures a round
 Given all existing rounds are COMPLETE
-When I complete the Setup New Round wizard
-Then a new child round eval is created (SETTING_UP, sequence=max+1, parentEvalId=root)
+When I complete the wizard
+Then round details + selected vendors + carried factors are captured for the process
 
-AC 2: Down-select
-Given the vendor grid
-When I select the vendors to carry
-Then only selected vendors are carried into the new round",Large,GSS - Multiround Evaluation (1).pdf p4-8,"Q1: Setup-New-Round step count (2 vs 3 — is the resubmission-request step in)?
-Q2: Is the Phases tab in or out?",,
-,Story,5. Setup New Round & Clone,Round setup validations,"Enforce round rules: at least one vendor down-selected, round dates within the overall evaluation dates, and a maximum of 5 rounds.","AC 1: Minimum one vendor
-Given the down-select grid
-When I try to proceed with zero vendors
-Then a validation blocks me
+AC 2: Validations
+Given the wizard
+Then at least one vendor is required, round dates must sit within the evaluation window, and a 6th round is not allowed","Create the vendor down-select grid rule (active EvaluationVendor for the eval) and the factor-carry display rule. Create validation rules: dates-within-eval-window, min-one-vendor, max-5-rounds (uses family resolver for count).",Large,GSS - Multiround Evaluation (1).pdf p4-8,Q: Setup-New-Round step count (2 vs 3)? Is the Phases tab in or out?
+,Story,4. Setup New Round & Clone,Setup New Round process model (+ clone/carry rules),"Rebuild the Setup New Round PM: create the child round eval (SETTING_UP, sequence=max+1, parentEvalId=root) and carry data forward. Object: AS GSS Duplicate Evaluation For New Round PM + its clone/carry rules.","AC 1: Round created
+When the wizard is submitted
+Then a child round eval is created (SETTING_UP, sequence=max+1, parentEvalId=root)
 
-AC 2: Dates within evaluation window
-Given round start/due dates
-When a date falls outside the evaluation window
-Then save is blocked with a validation
-
-AC 3: Max 5 rounds
-Given a family already at 5 rounds
-When I open Setup New Round
-Then it is not available",Small,,,,
-,Story,5. Setup New Round & Clone,New round clones the evaluation faithfully,"When a round is created, the evaluation is cloned with the correct copy/null/reset of fields and factor->team mapping (evaluatorTeamId only).","AC 1: Clone field handling
-Given a new round is created
-When the clone is written
-Then fields are copied/nulled/reset per spec and factor->team mapping sets evaluatorTeamId correctly
-
-AC 2: Carried factors only
-Given a factor removed during setup
-When the clone is written
-Then that factor and its mappings are not carried",Medium,,,,
-,Story,5. Setup New Round & Clone,Carry vendor documents to the new round,"Copy each carried vendor's documents into the new round (correlate by vendor), preserving file/appianDocId and metadata while nulling keys/ids.","AC 1: Documents carried
-Given carried vendors with documents
-When the round is created
-Then each vendor's documents are copied to the new round with the same files and metadata",Medium,,,,
-,Story,5. Setup New Round & Clone,Carry factor-to-document mappings to the new round,"Copy the source round's active factor->document mappings onto the new round, correlating factor by factorNumber and document by appianDocId; drop mappings whose factor or document was not carried.","AC 1: Mappings carried
-Given active factor->document mappings on the source round
-When the new round is created
-Then equivalent mappings exist on the new round (factor by factorNumber, doc by appianDocId)
-
-AC 2: Reset on removal
-Given a factor or document not carried
-When mappings are built
-Then no mapping is created for it",Medium,,,,
-,Task,5. Setup New Round & Clone,Build clone + carry rules,"Build/rebuild the clone builder, updateFactorTeamMappingForDuplicatedEvaluation (merge-only), and constructFactorDocumentMappingsForNewRound, each with test cases.","AC 1: Rules validated
-Given the rules are built
-When their test cases run
-Then all pass on the known family/round data",Medium,,,,
-,Task,5. Setup New Round & Clone,Build Setup New Round process model,"Rebuild the Setup New Round PM node-by-node: build the round, write criteria (returning persisted ids into the new evaluation), then downstream steps. validateDesignObject clean.","AC 1: Process validates
-Given the PM is built
-When validateDesignObject runs
-Then there are no errors and criteria are persisted before the mapping step",Medium,,,,
-,Task,5. Setup New Round & Clone,[Designer] Factor-doc mapping write node + setupNewRound action + gating,MANUAL: add a Write Records node (System lane) after the criteria write that writes constructFactorDocumentMappingsForNewRound output; create the setupNewRound action; gate visibility to 'all rounds COMPLETE' (optional <5 cap).,"AC 1: Mappings written in-process
+AC 2: Clone integrity
+Then fields are copied/nulled/reset per spec; factor->team mapping sets evaluatorTeamId; carried vendors' documents are copied; factor->document mappings are carried (factor by factorNumber, doc by appianDocId) and dropped where factor/doc not carried","Rules to build/modify (folded here): AS_GSS_UT_duplicateEvaluationForNewRound (clone builder — copy/null/reset table); updateFactorTeamMappingForDuplicatedEvaluation (merge-only, sets evaluatorTeamId); constructFactorDocumentMappingsForNewRound (correlate factor by factorNumber, doc by appianDocId); vendor-document carry (query source docs once, map per vendor). PM writes criteria before the mapping step so new ids are resolvable.",Large,,Q: 'Active round' semantics for max/latest (doc 07 Q12).
+,Task,4. Setup New Round & Clone,[Designer] Factor-doc write node + setupNewRound action + gating,MANUAL: add a Write Records node (System lane) after the criteria write that persists the factor->document mappings; create the setupNewRound action and gate visibility.,"AC 1: Mappings written in-process
 Given the write node is added
 When Setup New Round runs
-Then factor->document mappings are persisted for the new round
+Then factor->document mappings persist for the new round
 
 AC 2: Action gating
-Given a family with an active (SETTING_UP/INPROGRESS) round
-When I view actions
-Then Setup New Round is hidden until all rounds are COMPLETE",Small,,,,
-,Story,6. Start / Complete Round & Rounds Panel,Start an already-created round,Start a set-up child round so generation runs (INPROGRESS + tasks/ratings/consensus) without creating a new round; no factor-selection step.,"AC 1: Round starts
-Given the latest round is SETTING_UP
-When I click Start Round and confirm
-Then it -> INPROGRESS and generation runs, reusing the Start-Evaluation process, with no new round created",Medium,GSS - Multiround Evaluation (1).pdf p8,,,
-,Story,6. Start / Complete Round & Rounds Panel,Complete the active round,"Complete the in-progress round (backend, no form), reusing Mark-Complete + GCW sync + audit, so the next round can be set up.","AC 1: Round completes
-Given an INPROGRESS round
-When I click Complete Round
-Then it -> COMPLETE with no form, reusing the existing mark-complete write/sync/audit",Small,,,,
-,Story,6. Start / Complete Round & Rounds Panel,Rounds panel with status and gated actions,"Rounds panel listing each round with name/sequence/status (color per status) and the correct action: Start Round only on the latest SETTING_UP round, Complete Round only on the INPROGRESS round, Edit always.","AC 1: Correct action per round
+Given any round is SETTING_UP/INPROGRESS
+Then Setup New Round is hidden until all rounds are COMPLETE (optional <5 cap)",Write node feeds constructFactorDocumentMappingsForNewRound output. Action visibility uses the family resolver statuses.,Small,,
+,Story,5. Start / Complete Round & Rounds Panel,Rounds panel section (+ status/gating rules),Rounds panel listing each round with name/sequence/status (color) and the correct action per state. Object: AS_GSS_SEC_rounds + its helper rules.,"AC 1: Correct action per round
 Given a family across statuses
-When the Rounds panel renders
 Then Start Round shows only on the latest SETTING_UP round, Complete Round only on the INPROGRESS round, Edit always
 
-AC 2: Active-round resolution
-Given multiple rounds
-When 'active round' is resolved
-Then it matches the agreed definition",Medium,GSS - Multiround Evaluation (1).pdf p9,"Q1: 'Active round' definition — max-sequence regardless of status,  or latest non-complete? (doc 07 Q12)",,
-,Task,6. Start / Complete Round & Rounds Panel,Build Start Round + Complete Round wrapper PMs,Build the two thin wrapper PMs (Start Round calls the Start-Evaluation process as a subprocess with no round creation; Complete Round has no start form and reuses Mark-Complete). validateDesignObject clean.,"AC 1: Processes validate
-Given both wrapper PMs are built
-When validateDesignObject runs
-Then there are no errors",Small,,,,
-,Task,6. Start / Complete Round & Rounds Panel,[Designer] startRound / completeRound actions,MANUAL: create the startRound and completeRound record actions with correct parentEvalId-based visibility and contextExpr.,"AC 1: Actions wired
+AC 2: Status display
+Then each card shows name/sequence/status with the right color/label","Rules folded here: returnLatestChildEvaluationInSetupForGivenEvaluation (Start Round gating); returnRoundStatusDisplayConfig (status->color/label, de-dupes 4 matches); hasOpenCompleteEvaluationTask if used for Complete gating. Consume the family resolver.",Medium,GSS - Multiround Evaluation (1).pdf p9,Q: 'Active round' definition — max-sequence vs latest non-complete? (doc 07 Q12)
+,Story,5. Start / Complete Round & Rounds Panel,Start Round form,Confirmation dialog to start an already-created round (dynamic round number + included-vendor count). Object: AS_GSS_FM_startRound.,"AC 1: Confirm dialog
+Given the latest round is SETTING_UP
+When I open Start Round
+Then I see the confirm dialog with the round number and included-vendor count
+
+AC 2: Output
+When I confirm
+Then it outputs userAction=START and the eval fields for the process",Create the round-number rule (family resolver -> sequence) and included-vendor count rule (active EvaluationVendor).,Small,GSS - Multiround Evaluation (1).pdf p8,
+,Story,5. Start / Complete Round & Rounds Panel,Start Round process model,Thin wrapper PM whose start form is the Start Round form; calls the Start-Evaluation generation process as a subprocess without creating a new round. Object: AS GSS Start Round PM.,"AC 1: Round starts
+Given the confirm dialog is submitted
+Then the round -> INPROGRESS and generation runs (reusing the Start-Evaluation process), with no new round created",No new rules; wires the form to the reused generation process. Forwards evaluation/userAction/vendors/factors.,Small,,
+,Story,5. Start / Complete Round & Rounds Panel,Complete Round process model (formless),"Formless wrapper PM that marks the active round COMPLETE, reusing Mark-Complete + GCW sync + audit. Object: AS GSS Complete Round PM.","AC 1: Round completes
+Given an INPROGRESS round
+When Complete Round runs
+Then it -> COMPLETE with no form, reusing the existing mark-complete write/sync/audit",No form. Pre-sets eval to COMPLETE and calls the existing Mark-Complete subprocess.,Small,,
+,Task,5. Start / Complete Round & Rounds Panel,[Designer] startRound / completeRound actions,MANUAL: create the startRound and completeRound record actions with parentEvalId-based visibility and contextExpr.,"AC 1: Actions wired
 Given the actions are created
-When viewed on the appropriate round state
-Then each launches its wrapper PM with the right context",Small,,,,
-,Story,7. Hidden-Child Integrity,Evaluations list shows the parent only,"Add a parentEvalId-is-null (root-only) filter to the Evaluations list (AS_GSS_GRD_EvaluationRecordList) and map any child-derived applicableEvaluationIds back to the parent, so child clones never appear as rows and the row links to the parent.","AC 1: Only parents listed
+Then each launches its wrapper PM on the correct round state with the right context",startRound visible on latest SETTING_UP child; completeRound on INPROGRESS. No rules.,Small,,
+,Story,6. Hidden-Child Integrity,Evaluations list shows the parent only,Add a parent-only filter to the Evaluations list so child clones never appear as rows and rows link to the parent. Object: AS_GSS_GRD_EvaluationRecordList.,"AC 1: Only parents listed
 Given a family with rounds
 When I open the Evaluations page
-Then only the parent appears (no child clones) and the row links to the parent
+Then only the parent appears and the row links to the parent
 
 AC 2: Evaluator scoping
 Given an evaluator assigned to round work (child ids)
-When the list renders
-Then the parent row appears once, not the child clones",Medium,,Q1: Confirm the fix approach and whether clones should also be written isActive=false as defense-in-depth (does that break the round-aware tabs which query clones?). (doc 07 Q14),,
-,Story,7. Hidden-Child Integrity,Home My Active Evaluations & counts exclude clones,"Add the parentEvalId-is-null filter to AS_GSS_BL_returnEvaluationInfoForLandingPage (home cards) and any evaluation count/KPI, so clones don't appear as cards or inflate counts. Optionally surface the current round's status on the parent card.","AC 1: Parent-only cards
+Then the parent appears once, not the child clones",Add filter parentEvalId is null. Map any child-derived applicableEvaluationIds back to parent via the family resolver. Use parent-identity for the row title/link.,Medium,,Q: Also write clones isActive=false as defense-in-depth? Does that break round-aware tabs that query clones? (doc 07 Q14)
+,Story,6. Hidden-Child Integrity,Home My Active Evaluations & counts exclude clones,Exclude child clones from the home 'My Active Evaluations' cards and any evaluation count. Object: AS_GSS_BL_returnEvaluationInfoForLandingPage (+ the activeEvaluations card display it feeds).,"AC 1: Parent-only cards
 Given a family with rounds
 When the home page loads
 Then only the parent's card appears and counts exclude clones
 
 AC 2: Current-round status (optional)
-Given the parent card
-When it renders
-Then it may show the current round's status/progress per the agreed display",Medium,,Q1: Should the family row/card show the current round's status (e.g. 'Round 3 - In Progress') or the parent's own status? (doc 07 Q15),,
-,Story,7. Hidden-Child Integrity,My Tasks grid shows parent name + parent link,"On the My Tasks home grid (AS_GSS_GRD_activeTasks) Evaluation column, resolve the display name and record link to the parent via the parent-identity helper, so a round task does not name/navigate to a hidden child.","AC 1: Parent name + link
-Given a round task on the My Tasks grid
-When the Evaluation column renders
-Then it shows the parent number/title and the record link targets the parent id
+Then the card may show the current round's status per the agreed display",Add parentEvalId-is-null filter to the landing BL rule and any count/KPI. Optionally surface current-round status via the family resolver.,Medium,,"Q: Show the current round's status on the parent card, or the parent's own status? (doc 07 Q15)"
+,Story,6. Hidden-Child Integrity,Task grids parent-aware (My Tasks + record summary),Single story owning the shared task grid: (a) My Tasks Evaluation column names/links the parent; (b) record-summary Tasks section shows the agreed scope instead of parent-only (which today misses round tasks). Object: AS_GSS_GRD_activeTasks + AS_GSS_TMG_CPS_recordSummaryActiveTasks (both edited here to avoid contention).,"AC 1: Parent name + link
+Given a round task on My Tasks
+Then the Evaluation column shows the parent number/title and the record link targets the parent id (sorting preserved)
 
-AC 2: Sorting preserved
-Given the column is repointed
-When I sort by evaluation
-Then sorting still works",Medium,,,,
-,Story,7. Hidden-Child Integrity,Record-summary tasks scoped correctly,"On the parent record's Tasks section (AS_GSS_TMG_CPS_recordSummaryActiveTasks), scope tasks per the agreed definition (family / active round / parent-only) instead of parent-only, which today misses all round tasks.","AC 1: Correct task scope
-Given a parent evaluation with round tasks
-When I view its Tasks section
-Then it shows the agreed scope (family or active round), not just the parent's own tasks",Medium,,"Q1: Parent task scope — current/active round,  whole family,  or parent-only? (doc 07 Q4)",,
-,Story,7. Hidden-Child Integrity,Notifications render parent identity,"Route every evaluation-naming notification (task assignment, reassignment, due/overdue, due-date change, consensus signature) through the parent-identity helper so subject/body/deep-links reference the parent, not the child.","AC 1: Parent identity in emails
+AC 2: Record-summary scope
+Given a parent with round tasks
+Then its Tasks section shows the agreed scope (family or active round), not just parent-only","Repoint the Evaluation column display + link through parent-identity. Adjust the record-summary wrapper to pass the family's evaluationIds (or active round) per the scope decision, using the family resolver.",Medium,,"Q: Parent task scope — current/active round, whole family, or parent-only? (doc 07 Q4)"
+,Story,6. Hidden-Child Integrity,Notifications render parent identity,Route every evaluation-naming notification through parent-identity so subject/body/deep-links reference the parent. Object: the GSS email rule cluster.,"AC 1: Parent identity in emails
 Given a notification is sent for round work
-When it is generated
-Then the subject, body and any evaluation deep-link reference the parent evaluation",Medium,,Q1: Confirm all notifications AND VM/GCW Web API payloads must render parent identity. (doc 07 Q5),,
-,Story,7. Hidden-Child Integrity,Evaluation user filters group by parent,"Where task/consensus/document grids expose an 'Evaluation' user filter, present parents only (or group children under their parent) so clones are not selectable options.","AC 1: Parent-only filter options
+Then the subject, body and any evaluation deep-link reference the parent","Modify the email rules to resolve the evaluation via parent-identity: task assignment (emailBody/Instruction/Subject ForTaskAssignment, emailBodyForEvaluationTasksAssignment, *TaskRecordAssignment), reassignment, due/overdue, due-date-change, consensus-signature.",Medium,,Q: Confirm all notifications AND Web API payloads must render parent identity. (doc 07 Q5)
+,Story,6. Hidden-Child Integrity,Evaluation user filters group by parent,"Where task/consensus/document grids expose an 'Evaluation' user filter, present parents only (or group children under parent) so clones aren't selectable. Object: the relevant record-type user filter config.","AC 1: Parent-only options
 Given an Evaluation user filter over child-keyed rows
-When the filter options render
-Then only parents are listed (or children grouped under parent)",Small,,"Q1: Parents-only,  or show rounds explicitly grouped under parent? (doc 07 Q3)",,
-,Task,7. Hidden-Child Integrity,Apply parent-identity helper to residual surfaces,"Sweep the low-traffic residuals (documents grids/exports, ratings rollups, in-app alerts, awards displays) and route any evaluation name/link through the parent-identity helper; upgrade each from VERIFY to fixed.","AC 1: Residuals covered
-Given the residual surfaces
-When each is reviewed
-Then any evaluation name/link resolves to the parent and no child leak remains",Medium,,,,
-,Task,7. Hidden-Child Integrity,Process-HQ / audit-status-history handling,"Implement the Process-HQ decision for the audit/status-history mining feeds (Evaluation_Audit, Evaluation_Field_Audit, Evaluation_Status_History): either exclude child clones from mining or stitch them to the parent case, so analytics are not distorted by per-clone lifecycles.","AC 1: Mining not distorted
+Then only parents are listed (or children grouped under parent)",Adjust the user-filter source to parents (via parentEvalId is null) or group by parent identity.,Small,,"Q: Parents-only, or rounds grouped under parent? (doc 07 Q3)"
+,Task,6. Hidden-Child Integrity,Process-HQ / audit-status-history handling,"Implement the Process-HQ decision so per-clone lifecycles don't distort mining. Objects: Evaluation_Audit, Evaluation_Field_Audit, Evaluation_Status_History feeds.","AC 1: Mining not distorted
 Given a completed multi-round family
 When Process-HQ metrics are computed
-Then child clones are handled per the decision (excluded or stitched) and cycle-time/counts are not inflated",Medium,,"Q1: Exclude child clones from mining,  or stitch them to the parent as one case? (doc 07 Q10)",,
-,Task,7. Hidden-Child Integrity,[Designer] Child-record access control,"MANUAL: per the access decision, set record-level security / navigation guard on AS_GSS_Evaluation_RECORD so a child evaluation link redirects to the parent or is blocked, and confirm no inappropriate actions are available on a child record.","AC 1: Child navigation handled
+Then clones are excluded or stitched to the parent per the decision; counts/cycle-time not inflated","Depending on the decision: add a clone-exclusion filter to the mining record sources, or stitch clone case ids to the parent.",Medium,,"Q: Exclude clones from mining, or stitch to the parent as one case? (doc 07 Q10)"
+,Task,6. Hidden-Child Integrity,[Designer] Child-record access control,MANUAL: set record-level security / navigation guard so a child evaluation link redirects to the parent or is blocked; confirm no invalid actions on a child record.,"AC 1: Child navigation handled
 Given a link to a child evaluation record
-When a user opens it
-Then they are redirected to the parent (or blocked) per the decision, with no invalid actions available",Medium,,Q1: Hard-block child records (redirect to parent) or only steer away via links? What actions are valid on a child? (doc 07 Q11),,
-,Story,8. External Integrations (VM / GCW),VM vendor updates target the latest round,"Ensure the VM vendor-update flow (AS_GSS_mapVendorUpdatesToRecord) writes to the latest round's evaluation, falling back to the parent, so vendor changes land on the active round.","AC 1: Latest-round targeting
+Then the user is redirected to the parent (or blocked) per the decision, with no invalid actions",Record-level security expression on AS_GSS_Evaluation_RECORD and/or a redirect guard. Designer-only.,Medium,,Q: Hard-block child records (redirect) or only steer via links? What actions are valid on a child? (doc 07 Q11)
+,Task,6. Hidden-Child Integrity,Residual surfaces parent-identity sweep,"Sweep low-traffic surfaces and route any evaluation name/link through parent-identity. Objects: documents grids/exports, ratings rollups, in-app alerts, awards displays.","AC 1: Residuals covered
+Given each residual surface
+Then any evaluation name/link resolves to the parent and no child leak remains",Apply parent-identity where these surfaces render an evaluation name/link. Raise follow-ups for anything structural.,Medium,,
+,Story,7. External Integrations (VM / GCW),VM vendor updates target the latest round,"Ensure the VM vendor-update flow writes to the latest round's evaluation, falling back to the parent. Object: AS_GSS_mapVendorUpdatesToRecord (+ rules).","AC 1: Latest-round targeting
 Given a VM vendor update for a multi-round family
-When the flow runs
-Then the update targets the latest round's evaluation (parent fallback), verified via testRule",Small,,Q1: 'Active/latest round' definition reused here — align with doc 07 Q12.,,
-,Story,8. External Integrations (VM / GCW),GCW status sync suppressed for child rounds,Guard the GCW status-sync entry so it is skipped when parentEvalId is populated (child round); only the parent's status transitions sync to GCW.,"AC 1: Child rounds do not sync
+Then the update targets the latest round's evaluation (parent fallback), verified via testRule",Use the family resolver to pick the latest round (per Q12); write vendor updates to that eval.,Small,,Q: 'Latest/active round' definition — align with doc 07 Q12.
+,Story,7. External Integrations (VM / GCW),GCW status sync suppressed for child rounds,Guard the GCW status-sync so only the parent's transitions sync. Object: the GCW status-sync process/entry.,"AC 1: Child rounds don't sync
 Given a child-round status change
-When the sync entry runs
-Then it is skipped
+Then the sync is skipped
 
 AC 2: Parent still syncs
 Given a parent status change
-When the sync runs
-Then GCW is updated as before",Small,,,,
-,Task,8. External Integrations (VM / GCW),Web API payloads return parent identity,Ensure VM/GCW-facing Web APIs returning evaluationId/number resolve to the parent identity.,"AC 1: Parent identity in payloads
-Given a Web API response that includes evaluation identity
-When it is built for a round-related record
-Then it returns the parent evaluationId/number",Small,,,,
-,Story,9. End-to-End Testing & Hardening,End-to-end round lifecycle on a live family,"Run the full lifecycle on a live family: Create -> Start Evaluation (Round 1) -> complete factor work -> Complete Round -> Setup New Round -> Start Round -> Complete Round -> ... -> Select Awardees, verifying no child leakage at any step and awards persisting on the parent.","AC 1: Lifecycle completes
+Then GCW updates as before",Single guard at the sync entry: skip when parentEvalId is populated.,Small,,
+,Task,7. External Integrations (VM / GCW),Web API payloads return parent identity,Ensure VM/GCW-facing Web APIs returning evaluation identity resolve to the parent. Objects: the WA-backing rules.,"AC 1: Parent identity in payloads
+Given a Web API response with evaluation identity for a round record
+Then it returns the parent evaluationId/number",Resolve identity via parent-identity in the WA-backing rules.,Small,,
+,Story,8. End-to-End Testing & Hardening,End-to-end round lifecycle on a live family,"Run the full lifecycle: Create -> Start Evaluation (Round 1) -> complete factor work -> Complete Round -> Setup New Round -> Start Round -> ... -> Select Awardees, verifying no child leakage and awards on the parent.","AC 1: Lifecycle completes
 Given a fresh Best Value evaluation
 When the full multi-round lifecycle is executed
-Then every step succeeds, the Epic 7 leak/scope checks hold, and awards persist on the parent",Large,,Q1: Awards persist on parent while reading final-round data — confirm. (doc 07 Q13),,
-,Task,9. End-to-End Testing & Hardening,Regression — LPTA & non-Best-Value unaffected,"Verify LPTA and non-Best-Value evaluations behave exactly as before (start flow, tasks, no rounds UI).","AC 1: No regression
+Then every step succeeds, the Epic 6 leak/scope checks hold, and awards persist on the parent",Manual/scripted E2E; no new objects.,Large,,Q: Awards persist on parent while reading final-round data — confirm. (doc 07 Q13)
+,Task,8. End-to-End Testing & Hardening,Regression — LPTA & non-Best-Value unaffected,"Verify LPTA and non-Best-Value evaluations behave exactly as before (start flow, tasks, no rounds UI).","AC 1: No regression
 Given an LPTA or non-Best-Value evaluation
-When it is started and worked
-Then behavior is unchanged and no rounds UI appears",Small,,,,
-,Task,9. End-to-End Testing & Hardening,Complete residual impact verification,"Read and confirm/clear the remaining low-traffic surfaces from the impact analysis (other email bodies, documents grids, ratings rollups, alerts, awards, record-level security) so no VERIFY items remain.","AC 1: No open VERIFY items
+Then behavior is unchanged and no rounds UI appears",Regression pass; no objects.,Small,,
+,Task,8. End-to-End Testing & Hardening,Complete residual impact verification,Read/confirm the remaining low-traffic surfaces from the impact analysis so no VERIFY items remain.,"AC 1: No open VERIFY items
 Given the residual list in the impact analysis
-When each surface is inspected
-Then it is confirmed safe or a follow-up ticket is raised",Small,,,,
-,Story,10. UI Redesign from New Mockups (DEFERRED),Redesign screens per new mockups,"DEFERRED (PO). Per-screen redesign from the new mockups (Summary Rounds panel restyle, Setup New Round wizard redesign, Start Evaluation form redesign). To be broken into per-screen stories when scheduled.","AC 1: Deferred
+Then each surface is confirmed safe or a follow-up ticket is raised",Inspection pass across the doc 07 §12 residuals.,Small,,
+,Story,9. UI Redesign from New Mockups (DEFERRED),Redesign screens per new mockups (deferred),"DEFERRED (PO). Per-screen redesign from the new mockups (Summary Rounds panel restyle, Setup New Round wizard, Start Evaluation form). To be broken into per-screen stories when scheduled.","AC 1: Deferred
 Given the new mockups
-When this epic is scheduled
-Then it will be broken into per-screen redesign stories",,08_UI_REDESIGN_NEW_MOCKUPS.md,"Q1: Break out per-screen now for visibility,  or keep deferred as a single placeholder?",,
+When scheduled
+Then this epic is broken into per-screen redesign stories",Per-screen; one story per interface when scheduled (respecting one-object-one-story).,,08_UI_REDESIGN_NEW_MOCKUPS.md,"Q: Break out per-screen now for visibility, or keep deferred as one placeholder?"
