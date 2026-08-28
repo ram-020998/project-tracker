@@ -8,7 +8,7 @@
 
 ## Status
 
-🎨 **29-02 (hi-fi mockup) DELIVERED — FOR REVIEW.** Coded at `/dev/ux-design` (genesis LOCAL `3ffb3ac`, no tag/push). 29-01 research delivered; ADR-057 (Proposed).
+📐 **29-03 (final design) FINAL — FOR BUILD SIGN-OFF.** `29-03-final-design.md` locks D0–D13 (headline: **reuse the Spec-page components, generalized**). 29-01 research + 29-02 mockup (`/dev/ux-design`, approved: chat-first + Preview popup) delivered; ADR-057 (Proposed, finalized wording).
 
 ## Sub-phase ledger
 
@@ -16,7 +16,7 @@
 |---|---|---|
 | 29-01 | Research & analysis | ✅ **DELIVERED — FOR REVIEW** (`29-01-findings.md`) |
 | 29-02 | Wireframes & hi-fi mockups (`/dev/ux-design`) | ✅ **DELIVERED — FOR REVIEW** (genesis LOCAL `3ffb3ac`) |
-| 29-03 | Brainstorm & finalize (+ lock ADR-057) | 📋 PLANNED |
+| 29-03 | Brainstorm & finalize (+ lock ADR-057) | ✅ **FINAL — FOR BUILD SIGN-OFF** (`29-03-final-design.md`) |
 | 29-04 | Build (core → genesis → genesis-workflows) | 📋 PLANNED |
 | 29-05 | Code review & hardening | 📋 PLANNED |
 | 29-06 | Release | 📋 PLANNED |
@@ -81,3 +81,15 @@ only — no hardcoded brand hex.** Gates: tsc clean, eslint 0 errors (18 pre-exi
 **vitest 210**, build OK; `web/static` rebuilt+committed. Dev-only mockup carries no dedicated vitest test
 (Phase-28 `FeatureWorkspaceMockups` precedent). **NEXT = user review of `/dev/ux-design` → 29-03 finalize +
 lock ADR-057.**
+
+## 29-03 — Final design (locked 2026-08-28)
+
+`specs/phase-29-ux-design-stage/29-03-final-design.md` — D0–D13 locked. **D0 (user directive): reuse the
+Spec-page components, generalized** — `SpecWorkspace`→`StageArtifactWorkspace`, `PreviewDialog`→
+`AnnotatablePreviewDialog`, `SpecBuilderPage`→`StageBuilderPage`, reused `ChatThread`, stage-scoped hooks; no
+new look-alikes; Spec keeps working (regressions green). Also locked: the 9-node `ux-design-analysis` graph +
+validators + grounded `verify` critic; genesis-kb(structure)/appian-dev(code) grounding + citation; the
+intent-level HTML doc template; **m0015 = option A** (`kb_feature_stages`, migrate Spec, `current_version`→15);
+the `ux_design` lifecycle (reuse `SPEC_TRANSITIONS`) + chat profile; explicit **Mark complete**; the additive
+`kiro_node` image seam; DPI 150 / ≤40 pages (PyMuPDF); the generalized stage API; handoff + re-upload. ADR-057
+finalized (Proposed until 29-04). **No code changed.** NEXT = user sign-off → 29-04 build.

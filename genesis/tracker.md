@@ -237,6 +237,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — 29-03 Brainstorm & finalize — ✅ FINAL, for build sign-off):**
+  `specs/phase-29-ux-design-stage/29-03-final-design.md` locks D0–D13. **D0 (user directive): reuse the
+  Spec-page components, generalized** — `SpecWorkspace`→`StageArtifactWorkspace`, `PreviewDialog`→
+  `AnnotatablePreviewDialog`, `SpecBuilderPage`→`StageBuilderPage`, reused `ChatThread`, stage-scoped hooks; no
+  new look-alikes; Spec keeps working. Locked: the 9-node `ux-design-analysis` graph + validators + grounded
+  `verify` critic; genesis-kb(structure)/appian-dev(code) grounding + citation; intent-level HTML doc template;
+  **m0015 = option A** (`kb_feature_stages`, migrate Spec, `current_version`→15); the `ux_design` lifecycle
+  (reuse SPEC_TRANSITIONS) + chat profile; explicit Mark complete; the additive `kiro_node` image seam; DPI 150
+  / ≤40 pages (PyMuPDF); the generalized stage API; handoff + re-upload. ADR-057 finalized (Proposed until
+  29-04). **No code changed.** NEXT = user sign-off → 29-04 build (core → genesis → genesis-workflows).
+
 - **2026-08-28 (Phase 29 — 29-02 mockup rev — chat-first review, per user feedback):** dropped the persistent
   side-by-side review layout. The UX Design stage now **mirrors the Spec builder**: after the run, Review is a
   **full-width completion chat** (agent walks the open questions) + an on-demand **full-screen annotatable
