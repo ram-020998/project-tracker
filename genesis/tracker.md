@@ -237,6 +237,13 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — 29-02 mockup rev — chat-first review, per user feedback):** dropped the persistent
+  side-by-side review layout. The UX Design stage now **mirrors the Spec builder**: after the run, Review is a
+  **full-width completion chat** (agent walks the open questions) + an on-demand **full-screen annotatable
+  Preview popup** of the UX Implementation Analysis (comment queue + "Send comments to chat"); Completed = the
+  same chat + a final artifact strip. genesis LOCAL `f1e9066` (no tag/push); tsc/eslint clean, vitest 210,
+  build OK, web/static rebuilt. Awaiting user review of `/dev/ux-design` → 29-03.
+
 - **2026-08-28 (Phase 29 — 29-02 Wireframes & hi-fi mockup — ✅ DELIVERED, FOR REVIEW):** coded hi-fi mockup
   of the **UX Design stage** at **`/dev/ux-design`** (`web/src/dev/mockups/UxDesignStageMockups.tsx`, dev-only) +
   `29-02-wireframes.md`. Committed **LOCAL** on genesis master (`3ffb3ac`, **no tag/push**). A State control

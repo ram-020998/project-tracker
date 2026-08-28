@@ -20,12 +20,14 @@ the stage's state:
    → synthesize → grounded verify).
 2. **Running** — a supervised-run progress panel (render ✓ → per-screen ✓ → reconcile ✓ → ground ⟳ →
    synthesize ○ → verify ○) + "Open run detail →".
-3. **Review (`in-review`)** — two panes: **left** = the draft **UX Implementation Analysis** (annotatable —
-   Overview, per-screen blocks [Spec basis · Live delta · New/Modify], a **Blind spots / ripple effects**
-   callout, and **Open Questions**); **right** = the **completion chat** walking the questions and editing the
-   doc live. Header actions: Request changes · **Mark complete**.
-4. **Completed** — the finalized doc + an artifact strip (`ux-implementation-analysis.html` v1.0 · Generated ·
-   from `mockup-v3.pdf`) with Version history / Reopen / Export .md.
+3. **Review (`in-review`)** — **chat-first, mirroring the Spec builder** (user feedback 2026-08-28: **no**
+   persistent side-by-side): a full-width **completion chat** where the agent walks the open questions, plus a
+   **Preview** button that opens a **full-screen annotatable Preview popup** of the **UX Implementation
+   Analysis** (Overview, per-screen blocks [Spec basis · Live delta · New/Modify], a **Blind spots / ripple
+   effects** callout, **Open Questions**) with a **comment queue + "Send comments to chat"**. Header action:
+   **Mark complete**.
+4. **Completed** — the same **chat screen** with a final **artifact strip** (`ux-implementation-analysis.html`
+   v1.0 · Generated · from `mockup-v3.pdf`, Export .md); **Preview** shows the finalized doc. Header: Re-upload &amp; re-run.
 5. **Stage card (all statuses)** — how the UX card reads on the feature Overview grid (not-started →
    "Upload mockup"; in-progress → "View run"; in-review → "Review analysis"; completed → "Open analysis").
 
