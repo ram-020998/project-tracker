@@ -237,6 +237,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — 29-05 Code review & hardening ✅ SHIP; LOCAL, no tag/push):** an independent
+  read-only auditor (tao-architect sub-agent) reviewed the 29-04 build across all four repos vs the 29-03
+  locked design (D0–D13) + ADRs + §7 lessons → **NO-SHIP** on one real defect, then **SHIP** after fixes.
+  **M1 (MUST, genesis a76289c):** `StageStore.reset_for_reupload` left `chat_session_id` set, so the
+  StageFinalizer skipped a re-upload's re-run finalization (stranded in-progress, serving the stale
+  analysis — violated D11); now clears chat/run/source + regression test. **S1/S2/S3/S5 (genesis-workflows
+  123b76d):** stronger D2 validators (reconcile must cite a spec_ref unless gap; screens need all 4 fields;
+  grounding must include blast_radius) + resolve_inputs dev-env/synced-app fail-fast. **S4 was a FALSE
+  finding** (reconcile() is called at startup). N1/N3 doc-accuracy applied; N2/N4/N5/N6/N7 accepted-deferred.
+  Auditor verified-correct: reducers/verify-loop reset, grounded critic (no progress-mirage), read-only
+  posture, determinism/off-loop render, additive+gated image seam, ADR-056 fidelity, m0015 + Decision-A
+  data-safety, StageFinalizer thread-safety/idempotency. Gates: genesis pytest 654 + ruff · genesis-workflows
+  validate_library (10) + ux tests 14 · web unchanged. All code LOCAL (29-06 releases the chain). NEXT = 29-06.
+
 - **2026-08-28 (Phase 29 — 29-04 Build ✅ COMPLETE; ADR-057 Accepted; LOCAL, unpushed, no tags):** built the
   UX Design stage end-to-end across four repos (all commits LOCAL — 29-06 releases the chain). The stage:
   upload a mockup PDF → the supervised **`ux-design-analysis`** workflow (9-node graph: render [PyMuPDF] →

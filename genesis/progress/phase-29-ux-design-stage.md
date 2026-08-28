@@ -18,7 +18,7 @@
 | 29-02 | Wireframes & hi-fi mockups (`/dev/ux-design`) | ✅ **DELIVERED — FOR REVIEW** (genesis LOCAL `3ffb3ac`) |
 | 29-03 | Brainstorm & finalize (+ lock ADR-057) | ✅ **FINAL — FOR BUILD SIGN-OFF** (`29-03-final-design.md`) |
 | 29-04 | Build (sdk → core → genesis → genesis-workflows) | ✅ **BUILD COMPLETE** (LOCAL; 29-06 releases) |
-| 29-05 | Code review & hardening | 📋 PLANNED |
+| 29-05 | Code review & hardening | ✅ **COMPLETE — SHIP** (M1 + S1/S2/S3/S5 fixed) |
 | 29-06 | Release | 📋 PLANNED |
 
 ## Decisions locked with the user (2026-08-28)
@@ -146,3 +146,15 @@ so 29-06 releases the whole chain **sdk → core → genesis → genesis-workflo
 
 **NEXT:** 29-05 independent code review & hardening → 29-06 coordinated release. (bible/03 codebase-map +
 ADR-057→Accepted updated in this pass.)
+
+### 29-05 — Code review & hardening COMPLETE — SHIP (2026-08-28)
+
+Independent read-only auditor (tao-architect) reviewed all four repos vs the 29-03 locked design + ADRs +
+§7 lessons → initial **NO-SHIP** on one re-upload defect. Resolved: **M1** (genesis `a76289c` —
+`reset_for_reupload` now clears chat_session_id/run_id/source_doc_path so re-upload truly replaces + a
+StageFinalizer re-run finalizes; +regression test) and **S1/S2/S3/S5** (genesis-workflows `123b76d` —
+stronger D2 validators: reconcile spec_ref rule, all screen fields, blast_radius required; resolve_inputs
+dev-env/synced-app fail-fast). S4 was a false finding (reconcile() IS called at startup). N1/N3 doc-accuracy
+applied; N2/N4/N5/N6/N7 accepted-deferred (non-blocking). Re-review = **SHIP**. Gates: genesis pytest 654 +
+ruff · genesis-workflows validate_library (10) + ux tests 14 · web unchanged. Full findings + resolution log
+in `29-05-code-review-and-hardening.md`. NEXT = 29-06 coordinated release.
