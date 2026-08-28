@@ -173,3 +173,12 @@ migrations/counts + bible/03 codebase-map + bible/04 + bible/08 §9 SHIPPED + AG
 + this progress + tracker. **PHASE 29 COMPLETE — no active phase.** Live acceptance (a real mockup PDF on a
 feature's UX Design stage with Kiro signed in + a dev-tagged env + the app synced) is user-driven /
 headless-undrivable — the manual check is in the 29-06 spec Notes.
+
+### Post-release live fixes — genesis v0.55.1 (2026-08-28, CI green #6681514)
+
+Exercising `/features/{id}/ux` on the running app surfaced two defects, both fixed + released as v0.55.1
+(genesis-only; pins unchanged): (1) **web** `StageBuilderPage` gated the workspace on mere row presence →
+a bare draft ux row (no bound chat) showed a dead "no chat session" pane; now gated on a bound completion
+chat (Upload / "analysis in progress" until finalized) — `3339141`. (2) **backend** the ADR-035 upload
+allowlist omitted `.pdf` → the mockup couldn't be provisioned; added `.pdf` + cap 10→25 MB — `f92562b`.
+Release `57011c4` / tag v0.55.1; CI green (master #6681513 + tag #6681514). +3 regression tests.

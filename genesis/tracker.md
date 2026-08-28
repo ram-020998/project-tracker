@@ -237,6 +237,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — patch genesis v0.55.1; CI green #6681514):** two live-found fixes on the shipped
+  UX Design stage, surfaced by exercising `/features/{id}/ux` on the running app. (1) **web** — `StageBuilderPage`
+  rendered the authoring workspace whenever a stage row existed, so a bare draft `ux_design` row (an upload
+  whose run hadn't finalized — no `chat_session_id`) showed a dead "This stage has no chat session" pane; now
+  gated on a **bound completion chat** → shows Upload (or "Analysis in progress" when a run is in flight) until
+  finalized. (2) **backend** — the ADR-035 upload allowlist (`RunManager._provision_files`) omitted `.pdf`, so
+  the mockup couldn't be provisioned ("file type '.pdf' not allowed"); added `.pdf` + raised the cap 10→25 MB
+  (read-only input, never executed — ADR-035 posture intact). genesis-only patch (pins unchanged). Commits
+  `3339141` (web) + `f92562b` (backend) + `57011c4` (release); tag v0.55.1 pushed, CI green (master #6681513 +
+  tag #6681514). Gates: genesis pytest 655 + ruff, web tsc/eslint0/vitest 213/build. +regression tests
+  (bare-draft→upload; in-flight→running; .pdf accepted). The workflow is installed in the running server, so
+  a fresh mockup upload now launches the ux-design-analysis run end-to-end.
+
 - **2026-08-28 (Phase 29 — 29-06 Release ✅ COMPLETE; PHASE 29 COMPLETE):** shipped the UX Design stage as a
   coordinated four-repo release, CI green. Order (ADR-019; sdk included per the flagged additive `images`):
   **kiro-agent-sdk v0.7.1** (b68438c) → **genesis-core v0.9.6** (761fda8) → **genesis v0.55.0** (0d667a2) →
