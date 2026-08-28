@@ -195,3 +195,14 @@ failures (was `except: pass`) and adds **`reconcile_stage()`** in-flight recover
 feature/stage GET, so opening the stage self-heals it without a restart. +regression test
 (`test_stage_get_self_heals_a_stranded_run`); genesis pytest 656. The stranded run was recovered live
 (stage 2 → in-review, chat `c-b8c5f0abc484`, analysis served).
+
+### Released genesis v0.56.0 + genesis-workflows v0.12.1 (2026-08-28, CI green)
+
+Post-live-testing UX + workflow-content pass, shipped together. **genesis v0.56.0** (CI master #6683358 +
+tag #6683359): global ⌘K search (applications/features/documents); run-detail display fixes (steps-authoritative
+node status → no stuck "Running" on large runs, execution counts, "Round k of N" dividers, loop re-entry,
+bordered graph canvas); single-nav feature workspace (no "Back to feature"; feature-name breadcrumb in every
+stage via a generic `:stage` route) + mockup-faithful UX empty/in-progress states; StageFinalizer hardening.
+**genesis-workflows v0.12.1** (CI master #6683423 + tag #6683424): `ux-design-analysis` v0.1.1 reframed to a
+UX/business deliverable (FB-4) — plain-language what-exists/what-changes, no object-level technical detail;
+re-pin genesis v0.56.0. Gates: genesis pytest 658, web vitest 218, workflows validate_library 10 + pytest 107.

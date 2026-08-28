@@ -239,6 +239,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (RELEASED genesis v0.56.0 + genesis-workflows v0.12.1; CI green):** shipped the recent UI +
+  search + workflow-content work. **genesis v0.56.0** (minor; release `c4ef904`, tag v0.56.0; CI master
+  #6683358 + tag #6683359): global **⌘K search** across applications/features/documents (`api/search.py`
+  `GET /search` + `CommandPalette` integration); run-detail display fixes — node status **authoritative
+  from `/steps`** (fixes a stuck "Running" on >1000-event runs), per-node **execution counts** + **"Round k
+  of N"** dividers + loop re-entry, and a **bordered dotted graph canvas**; feature stage workspace = single
+  breadcrumb nav (removed "Back to feature"; generic `:stage` route → feature name is a crumb everywhere) +
+  mockup-faithful UX empty/in-progress states; StageFinalizer hardening (v0.55.2) folded in. Pins unchanged
+  (core v0.9.6 / sdk v0.7.1 / parser v0.2.0). **genesis-workflows v0.12.1** (release `369d286`, tag v0.12.1;
+  CI master #6683423 + tag #6683424): `ux-design-analysis` **v0.1.1** reframed to a UX/business deliverable
+  (FB-4) — per-screen What-exists-today / What-changes in plain language, **no object names/UUIDs/add-modify**;
+  re-pin genesis v0.56.0 (chain consistent — clean-install + library-validate green). Gates: genesis pytest
+  658 + ruff, web vitest 218 + tsc/eslint0/build; workflows validate_library 10 + pytest 107. See §7's new
+  events-cap→steps-authoritative lesson.
+
 - **2026-08-28 (Phase 29 — patch genesis v0.55.2; CI green #6681788):** the first real live
   `ux-design-analysis` run (`r-72c0d9e55c6e`, feature 3) succeeded end-to-end — 14-page PDF, all 15 nodes
   green, grounded `verify` **ok** with `verify_rounds=1` (the critic requested one revision that then passed;

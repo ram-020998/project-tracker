@@ -242,6 +242,11 @@ genesis/genesis/
                         features/features/ActivityFeed + settings/components/MetricsSection.
                         (Overview trimmed: Active-runs + Installed-workflows sections removed.)
 
+# ── Global ⌘K search (genesis v0.56.0) ──
+genesis/genesis/api/search.py   register_search_routes: GET /search?q= → typed navigable hits across
+  applications (name/uuid) + features (name, per-app) + documents (DocumentStore.search). web: lib/api/search.ts
+  + shared/layout/CommandPalette.tsx (debounced entity search merged into the palette groups).
+
 # ── Phase 29 — UX Design stage (grounded mockup→implementation analysis; ADR-057) ──
 kiro-agent-sdk/src/kiro_agent_sdk/
   __init__.py           query/collect/collect_streaming gain an optional `images` kwarg → client.prompt(images=)
