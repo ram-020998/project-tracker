@@ -82,8 +82,11 @@ content_hash TEXT, md_export_path TEXT, row_version INT, created_at, updated_at}
 and **`kb_feature_stage_revisions`** (mirrors `kb_feature_spec_revisions`). On-disk artifacts →
 `settings.feature_stage_artifacts_dir/<stage_row_id>/`. **Migrate Spec onto it** (option A): copy each
 `kb_feature_specs` row → a `kb_feature_stages` row with `stage='spec'` (+ its revisions); repoint
-`FeatureStore`/API/lifecycle at `kb_feature_stages`; keep `kb_feature_specs` briefly as a read-through or drop
-after the data move (29-04 decides drop-vs-view — additive migration either way). `current_version` **14 → 15**;
+`FeatureStore`/API/lifecycle at `kb_feature_stages`; **DECISION A LOCKED (2026-08-28):** repoint `FeatureStore`/API/lifecycle **fully** onto `kb_feature_stages`;
+**do NOT drop `kb_feature_specs`** in a migration — leave it as a **dead table** (forward-only; protects the
+updater's rollback path; retire in a later phase). **Safe for existing users** (single-user, local): m0015
+copies their specs (+revisions) at the **offline** `genesis db upgrade`, preserving the absolute `html_path`
+pointers + `chat_session_id`; no file move, no data loss. `current_version` **14 → 15**;
 bump the `current_version==N` tests. `StageStore` reuses the `_cas_update` CAS pattern verbatim.
 
 ## D6. The `ux_design` lifecycle machine (LOCKED)

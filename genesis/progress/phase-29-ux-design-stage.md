@@ -8,7 +8,7 @@
 
 ## Status
 
-📐 **29-03 (final design) FINAL — FOR BUILD SIGN-OFF.** `29-03-final-design.md` locks D0–D13 (headline: **reuse the Spec-page components, generalized**). 29-01 research + 29-02 mockup (`/dev/ux-design`, approved: chat-first + Preview popup) delivered; ADR-057 (Proposed, finalized wording).
+⚙️ **29-04 IN PROGRESS (build) — steps 1–4a done LOCAL; 4b→7 remain (new session continues).** Design locked (D0–D13); mockup `/dev/ux-design` approved; **decision A locked** (fully repoint Spec onto StageStore). ADR-057 Proposed.
 
 ## Sub-phase ledger
 
@@ -17,7 +17,7 @@
 | 29-01 | Research & analysis | ✅ **DELIVERED — FOR REVIEW** (`29-01-findings.md`) |
 | 29-02 | Wireframes & hi-fi mockups (`/dev/ux-design`) | ✅ **DELIVERED — FOR REVIEW** (genesis LOCAL `3ffb3ac`) |
 | 29-03 | Brainstorm & finalize (+ lock ADR-057) | ✅ **FINAL — FOR BUILD SIGN-OFF** (`29-03-final-design.md`) |
-| 29-04 | Build (core → genesis → genesis-workflows) | 📋 PLANNED |
+| 29-04 | Build (core → genesis → genesis-workflows) | ⚙️ **IN PROGRESS** — steps 1–4a LOCAL; 4b→7 remain |
 | 29-05 | Code review & hardening | 📋 PLANNED |
 | 29-06 | Release | 📋 PLANNED |
 
@@ -93,3 +93,29 @@ intent-level HTML doc template; **m0015 = option A** (`kb_feature_stages`, migra
 the `ux_design` lifecycle (reuse `SPEC_TRANSITIONS`) + chat profile; explicit **Mark complete**; the additive
 `kiro_node` image seam; DPI 150 / ≤40 pages (PyMuPDF); the generalized stage API; handoff + re-upload. ADR-057
 finalized (Proposed until 29-04). **No code changed.** NEXT = user sign-off → 29-04 build.
+
+## 29-04 — Build (IN PROGRESS, 2026-08-28) — LOCAL commits, UNPUSHED, no tags
+
+**Decision A (locked 2026-08-28):** fully repoint Spec onto the generalized `kb_feature_stages`/StageStore
+model + retire `kb_feature_specs` from the code paths. **Safe for existing users** — m0015 already copies
+their specs (+revisions) at the **offline** `genesis db upgrade` (absolute `html_path` + `chat_session_id`
+preserved); the migration does **not** drop `kb_feature_specs` (dead table kept for rollback safety, retired
+later). Single-user/local + offline `db upgrade` → the only real risk is a Spec-path code regression, contained
+by keeping the Spec test suite green + the 29-05 review + shipping the whole chain together at 29-06.
+
+**DONE (LOCAL commits — do NOT re-do; UNPUSHED; 29-06 releases the chain incl. kiro-agent-sdk):**
+- Step 1 — kiro-agent-sdk `dd21b22` (images kwarg on query/collect/collect_streaming); genesis-core `c0472c4`
+  (`kiro_node(image_docs=…)` → base64 ACP image parts; AgentProvider images). sdk 93, core 83.
+- Step 2 — genesis `45aaa77` — `genesis/kb/pdf_render.py` (PyMuPDF==1.28.2 pinned; DPI 150 / ≤40 pages) +4 tests.
+- Step 3 — genesis `beb58a1` — m0015 `kb_feature_stages`(+`_revisions`) + copies Spec rows (option A) +
+  `genesis/kb/stages.py` StageStore; `current_version` → 15; bumped `current_version==N` asserts. genesis 645.
+- Step 4a — genesis `5b02987` — `build_stage_lifecycle`(+`_service`) (reuse SPEC_TRANSITIONS, `EntityKind.STAGE`);
+  `ux_design` `ChatModeProfile` + `_STEERING_UX`; `ctx.extras['pdf_render']`. genesis pytest **647**, ruff clean.
+
+**REMAINING (new session; see AGENT_ONBOARDING §"IN BUILD — RESUME HERE" for the precise plan + commands):**
+- **4b** generalized stage API in `api/features.py` + **repoint Spec onto StageStore** (D12; feature detail
+  returns `stages`; add `feature_stage_artifacts_dir` to settings; keep Spec tests green).
+- **5** web: generalize `SpecWorkspace`→`StageArtifactWorkspace`, `PreviewDialog`→`AnnotatablePreviewDialog`,
+  `SpecBuilderPage`→`StageBuilderPage`, stage-scoped hooks; flip `STAGE_DEFS.ux` + registry entry; Spec keeps working.
+- **6** genesis-workflows `ux-design-analysis` workflow (9-node D1 + validators + grounded verify critic).
+- **7** ADR-057 → Accepted; bible/03; then 29-05 review + 29-06 coordinated release.

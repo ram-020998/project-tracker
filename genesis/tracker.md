@@ -237,6 +237,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — 29-04 Build — ⚙️ IN PROGRESS; DECISION A locked; steps 1–4a done LOCAL):** began the
+  multi-repo build of the UX Design stage. **Decision A (user, 2026-08-28):** fully repoint Spec onto the
+  generalized `kb_feature_stages`/StageStore model (retire `kb_feature_specs` from code) — confirmed **safe for
+  existing users** (m0015 copies specs+revisions at the offline `genesis db upgrade`; `html_path`+`chat_session_id`
+  preserved; migration does NOT drop `kb_feature_specs` — dead table kept for rollback). **DONE (LOCAL, unpushed,
+  no tags):** kiro-agent-sdk `dd21b22` (images kwarg on query/collect); genesis-core `c0472c4` (`kiro_node`
+  `image_docs`→ACP image parts); genesis `45aaa77` (PyMuPDF render util, pinned 1.28.2), `beb58a1` (m0015
+  `kb_feature_stages`+StageStore, copies Spec rows, current_version→15), `5b02987` (`build_stage_lifecycle` reuse
+  SPEC_TRANSITIONS + `ux_design` chat profile + `pdf_render` injection). Gates: sdk 93 / core 83 / genesis pytest
+  647 + ruff clean. **REMAINING (new session):** 4b generalized stage API + Spec repoint (D12); 5 web
+  (generalize SpecWorkspace/PreviewDialog/SpecBuilderPage + flip STAGE_DEFS.ux); 6 `ux-design-analysis` workflow;
+  7 ADR-057→Accepted + bible/03 + 29-05 review + 29-06 release. **Precise resume handoff added to
+  AGENT_ONBOARDING (§"IN BUILD — RESUME HERE").** Code repos stay LOCAL until 29-06.
+
 - **2026-08-28 (Phase 29 — 29-03 Brainstorm & finalize — ✅ FINAL, for build sign-off):**
   `specs/phase-29-ux-design-stage/29-03-final-design.md` locks D0–D13. **D0 (user directive): reuse the
   Spec-page components, generalized** — `SpecWorkspace`→`StageArtifactWorkspace`, `PreviewDialog`→
