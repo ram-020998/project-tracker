@@ -1,6 +1,6 @@
 # 29-01 — Research & Analysis
 
-> **Status:** 📋 **PLANNED — NEXT (on the user's go-ahead).** · **Type:** research / docs-only (no code, no release) · **Phase:** 29 (UX Design Stage) · **Gate:** ⭐ user review of the findings + finalized design before 29-02.
+> **Status:** ✅ **DELIVERED — FOR REVIEW (2026-08-28)** — findings: `29-01-findings.md`. · **Type:** research / docs-only (no code, no release) · **Phase:** 29 (UX Design Stage) · **Gate:** ⭐ user review of the findings + finalized design before 29-02.
 
 ---
 

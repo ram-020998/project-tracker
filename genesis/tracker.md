@@ -237,6 +237,19 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — 29-01 Research & analysis — ✅ DELIVERED, FOR REVIEW):**
+  `specs/phase-29-ux-design-stage/29-01-findings.md`. Cited research (multimodal UI-analysis failure modes →
+  per-screen decomposition + grounding, not one-shot vision; generator→**grounded**-critic loops avoid the
+  "progress mirage"; **PyMuPDF** PDF→PNG, PPTX deferred) + a real current-code audit (Phase-28 stage plug-in
+  seam with no shell edits; `feature_spec` chat profile + `chat/mcp.py` already wiring genesis-kb + appian-dev;
+  `FeatureStore`/m0010 as the `m0015` template; `ArtifactKind.UX_DESIGN` + `SPEC_TRANSITIONS` already exist;
+  the two gaps = `kiro_node` image path [SDK supports it] + text-only `doc_parsing`). Finalized the 9-node
+  `ux-design-analysis` graph + validators, the genesis-kb(structure)/appian-dev(code) grounding contract +
+  per-change object-ref citation, the intent-level HTML doc template, the `m0015` `kb_feature_stages` model,
+  the `ux_design` lifecycle (reuse SPEC_TRANSITIONS) + chat profile, the additive `kiro_node` image seam, and
+  DPI ~150 / ~40-page cap. 3 non-blocking open questions (DPI/cap; Spec migration A/B; completion criteria).
+  **No genesis code changed.** NEXT = user review → 29-02 wireframes & mockups.
+
 - **2026-08-28 (Phase 29 — UX Design Stage — 📋 SPEC DRAFT):** authored the umbrella spec
   (`specs/phase-29-ux-design-stage.md`) + 6 sub-phase specs (`phase-29-ux-design-stage/29-01..29-06`: research →
   mockups[/dev/mockups] → brainstorm/finalize → build → review → release) + a progress scaffold + **ADR-057

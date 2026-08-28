@@ -8,13 +8,13 @@
 
 ## Status
 
-📋 **SPEC DRAFT — umbrella + 29-01..29-06 authored; awaiting user review, then 29-01 (research).**
+🔬 **29-01 (research & analysis) DELIVERED — FOR REVIEW.** Umbrella + 29-01..29-06 + ADR-057 (Proposed) authored.
 
 ## Sub-phase ledger
 
 | # | Sub-phase | Status |
 |---|---|---|
-| 29-01 | Research & analysis | 📋 PLANNED — **NEXT** (on go-ahead) |
+| 29-01 | Research & analysis | ✅ **DELIVERED — FOR REVIEW** (`29-01-findings.md`) |
 | 29-02 | Wireframes & hi-fi mockups (`/dev/mockups`) | 📋 PLANNED |
 | 29-03 | Brainstorm & finalize (+ lock ADR-057) | 📋 PLANNED |
 | 29-04 | Build (core → genesis → genesis-workflows) | 📋 PLANNED |
@@ -47,3 +47,22 @@
 ## As-built (filled in as sub-phases complete)
 
 _(nothing built yet — spec drafting only)_
+
+## 29-01 — Research & analysis (delivered 2026-08-28)
+
+`specs/phase-29-ux-design-stage/29-01-findings.md`. Cited external research — multimodal UI-vs-implementation
+analysis **failure modes** (models reproduce layout but miss data-binding/interaction/structure; weak
+fine-grained UI reasoning → **per-screen decomposition + grounding**, not one-shot vision), **generator→
+grounded-critic** loops (reflection reduces hallucination only when externally grounded — the "progress
+mirage" of self-graded critics → a **grounded** `verify` pass), and **PyMuPDF** as the pure-wheel PDF→PNG
+renderer (pdf2image needs poppler; PPTX has no pure-Python renderer → PDF-only v1). Current-code audit
+confirmed the exact seams: the Phase-28 stage plug-in point (STAGE_DEFS `ux` row + registry, no shell edits);
+`feature_spec` `ChatModeProfile` as the template + `chat/mcp.py` already wiring genesis-kb + appian-dev;
+`FeatureStore`/m0010 as the shape `m0015` generalizes; `ArtifactKind.UX_DESIGN` + `SPEC_TRANSITIONS` already
+present (the `ux_design` machine reuses them); the two gaps — `kiro_node` has no image path (SDK does) +
+`doc_parsing` is text-only. **Finalized design:** the 9-node `ux-design-analysis` graph + validators; the
+grounding contract (genesis-kb structure/impact via get_dependents/transitive/path/hub; appian-dev actual
+code; per-change object-ref citation); the intent-level HTML doc template; the `m0015` `kb_feature_stages`
+model (recommend migrating Spec onto it); the `ux_design` lifecycle machine (reuse SPEC_TRANSITIONS) + chat
+profile; the additive `kiro_node` image seam; DPI ~150 / ~40-page cap. **3 open questions** (DPI/cap; spec
+migration A/B; completion criteria) — none blocking. **No code changed.** NEXT = 29-02 mockups on review.
