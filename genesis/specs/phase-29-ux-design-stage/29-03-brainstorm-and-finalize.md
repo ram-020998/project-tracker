@@ -1,6 +1,6 @@
 # 29-03 — Brainstorm & Finalize
 
-> **Status:** 📋 **PLANNED** (after 29-02). · **Type:** design finalization / docs (no release) · **Phase:** 29 (UX Design Stage) · **Gate:** ⭐ user sign-off → 29-04 build unlocked.
+> **Status:** ✅ **FINAL — FOR BUILD SIGN-OFF (2026-08-28)** — locked design: `29-03-final-design.md`. · **Type:** design finalization / docs (no release) · **Phase:** 29 (UX Design Stage) · **Gate:** ⭐ user sign-off → 29-04 build unlocked.
 
 ---
 
