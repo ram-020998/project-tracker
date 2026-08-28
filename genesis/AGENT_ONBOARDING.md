@@ -84,86 +84,39 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ⭐ SHIPPED — Phase 29 (UX Design Stage) — COMPLETE · genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1 (2026-08-28, CI green)
+## ⭐ SHIPPED — Phase 29 (UX Design Stage) — COMPLETE · genesis v0.55.1 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1 (2026-08-28, CI green)
 
-> **✅ SHIPPED (2026-08-28) — Phase 29 COMPLETE (genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1; CI green — core #6680648 / genesis #6680663 / workflows #6680673). ADR-057 Accepted. The detail below is the as-built record.** Historical build notes:
+> **Phase 29 made the first Phase-28 plug-in stage LIVE: UX Design (ADR-057, Accepted).** A user uploads a
+> **mockup PDF** on a feature's UX Design stage → a supervised **`ux-design-analysis`** workflow renders the
+> pages (PyMuPDF), runs a **per-screen multimodal** analysis, grounds each screen against the feature's **Spec**
+> + the **live Appian env** (**genesis-kb** = structure/impact, **appian-dev** = actual code), and synthesizes a
+> grounded, **intent-level** **"UX Implementation Analysis"** HTML doc (per-screen delta + blind-spot/ripple +
+> open questions) behind a **grounded verification** critic → a **`StageFinalizer`** (RunManager observer) opens
+> a bound **`ux_design`** completion chat + copies `analysis.html` + moves the stage to **in-review** →
+> annotatable Lavish review + **Mark complete**.
 >
-> read THIS block first, then
-> `specs/phase-29-ux-design-stage/29-03-final-design.md` (the **LOCKED** design, D0–D13),
-> `specs/phase-29-ux-design-stage/29-01-findings.md` (the code-grounded findings), and
-> `progress/phase-29-ux-design-stage.md` — then continue **29-04 from step 4b**. The design + UX are locked
-> (approved mockup `/dev/ux-design`); this is a build-in-progress. **Reuse the Spec-page components,
-> generalized (D0) — do NOT build new look-alikes. Commit LOCAL per step; do NOT tag/push any code repo until
-> 29-06.**
-
-> **Phase 29 makes the first Phase-28 plug-in stage LIVE: UX Design.** A user uploads a **mockup PDF** on a
-> feature's UX Design stage; a supervised **`ux-design-analysis`** workflow renders the pages (PyMuPDF), runs a
-> **per-screen multimodal** analysis, grounds it against the feature's **Spec** + the **live Appian env**
-> (**genesis-kb** for structure/impact, **appian-dev** for the actual code), and synthesizes a grounded,
-> **intent-level** **"UX Implementation Analysis"** HTML doc (per-screen delta + blind-spot/ripple analysis +
-> open questions) behind a **grounded verification** critic; a bound **`ux_design` completion chat** then walks
-> the open questions + edits the doc live → Mark complete. **Locked (2026-08-28):** PDF-only v1 (PPTX deferred);
-> re-upload replaces+re-runs; intent-level (not object-level — that's Technical Design); artifact "UX
-> Implementation Analysis" (HTML + Lavish review); generalize the per-stage artifact model now (**m0015**);
-> read-only Appian. **Multi-repo** (genesis-core additive `kiro_node` images → genesis → genesis-workflows).
-> **Specs:** `specs/phase-29-ux-design-stage.md` + `29-01..29-06`; **ADR-057 (Accepted)**; progress
-> `progress/phase-29-ux-design-stage.md`.
+> **Reuses the Spec-page components GENERALIZED (D0)** — `SpecWorkspace`→`StageArtifactWorkspace`,
+> `PreviewDialog`→`AnnotatablePreviewDialog`, `SpecBuilderPage`→`StageBuilderPage`, the reused `ChatThread`, and
+> stage-scoped hooks — Spec unchanged. Spec **repointed** onto the generalized **m0015** `kb_feature_stages`/
+> StageStore (**Decision A**, data-safe: m0015 copies specs + revisions at the offline `genesis db upgrade`,
+> preserving `html_path`/`chat_session_id`; `kb_feature_specs` kept as a dead table for rollback). `current_version`
+> → **15**. **Enablers:** additive **`images` in `kiro_node`** (→ `client.prompt(images=)`, gated on
+> `promptCapabilities.image`) · **PyMuPDF** PDF→PNG (off the event loop) · a `ux_design` chat mode (`_STEERING_UX`) ·
+> the generalized `/features/{id}/stages/{stage}` API · the worker resolves the internal **managed `genesis-kb`**
+> so workflow nodes can inject it. **Read-only** against Appian (ADR-036/037; read-only allowlists).
 >
-> **LOCKED DECISIONS.** PDF-only v1 (PPTX deferred); re-upload replaces + re-runs; grounding split
-> (**genesis-kb** = structure/impact, **appian-dev** = actual code); **intent-level** output (not object-level —
-> that's Technical Design); artifact **"UX Implementation Analysis"** (HTML + annotatable Lavish review); the
-> **m0015** generalized per-`(feature, stage)` model; explicit **Mark complete**; **read-only** against Appian;
-> **D0 reuse** the Spec-page components generalized. **DECISION A (2026-08-28): fully repoint Spec onto
-> `kb_feature_stages`/StageStore + retire `kb_feature_specs` from the code paths.** Safe for existing users —
-> m0015 already copies specs (+revisions) at the **offline** `genesis db upgrade`; absolute `html_path` +
-> `chat_session_id` preserved; **do NOT drop `kb_feature_specs`** in a migration (keep it a dead table for
-> rollback; retire later).
+> **Sub-phases:** 29-01 research → 29-02 mockup (`/dev/ux-design`) → 29-03 locked design (D0–D13) → 29-04 build
+> (7 tasks + the StageFinalizer bridge) → 29-05 **independent review = SHIP** (M1 re-upload fix + D2 validator
+> hardening) → 29-06 **coordinated release**, then **v0.55.1** patch (two live fixes: the UX builder shows the
+> Upload/running entry state until a completion chat is bound; the ADR-035 upload allowlist gains `.pdf` + cap
+> 10→25 MB). **Released (ADR-019 order):** kiro-agent-sdk **v0.7.1** → genesis-core **v0.9.6** → genesis **v0.55.1**
+> → genesis-workflows **v0.12.0**, CI green (core #6680648 · genesis #6680663 + patch #6681514 · workflows
+> #6680673; sdk validated transitively). Pin chain consistent (clean-install + library-validate green).
 >
-> **DONE — LOCAL commits, UNPUSHED, NO tags (29-06 releases the whole chain incl. kiro-agent-sdk):**
-> - kiro-agent-sdk **`dd21b22`** — additive `images` kwarg on `query`/`collect`/`collect_streaming` → `client.prompt`.
-> - genesis-core **`c0472c4`** — `kiro_node(image_docs=…)` → base64 ACP image parts; `AgentProvider`/`KiroAcpProvider` images.
-> - genesis **`45aaa77`** — `genesis/kb/pdf_render.py` (`render_pdf_to_pngs`, **PyMuPDF==1.28.2** pinned; DPI 150 / ≤40 pages).
-> - genesis **`beb58a1`** — **m0015** `kb_feature_stages`(+`_revisions`) + **copies Spec rows** (option A) + `genesis/kb/stages.py` **StageStore** (CAS/revisions/`reset_for_reupload`); `current_version` **→ 15**.
-> - genesis **`5b02987`** — `domain/lifecycle.py` `build_stage_lifecycle`(+`_service`) (reuse `SPEC_TRANSITIONS`, `EntityKind.STAGE`); `chat/mode_profile.py` **`ux_design`** `ChatModeProfile` + `_STEERING_UX`; `runtime/context.py` injects `ctx.extras['pdf_render']`.
-> - Gates at checkpoint: **sdk 93 · genesis-core 83 · genesis pytest 647 + ruff clean**.
->
-> **REMAINING (in order; commit LOCAL per step; NO tag/push):**
-> - **4b — backend API (decision A).** In `genesis/api/features.py` add a **generalized stage API** over
->   `StageStore` + `build_stage_lifecycle_service`, and **repoint Spec onto it** (retire `kb_feature_specs`
->   reads/writes; FeatureStore spec methods delegate to / are replaced by StageStore; update the spec tests
->   onto the stage model — keep them green). Endpoints (29-03 **D12**): `POST /features/{id}/stages/{stage}/upload`
->   (PDF, ADR-035 multipart → `run_manager.start("ux-design-analysis", …)`; friendly **409** if the workflow
->   isn't installed), `GET …/stages/{stage}`, `GET …/stages/{stage}/artifact?annotate=&theme=&bust=` (serve
->   `html_path` via the SAME Lavish host as the spec artifact), `…/export.md`, `…/allowed` + `POST …/actions/{action}`
->   (409 on illegal/precondition; pass ctx `{has_html}`), `…/milestone`, context candidates/inject (reuse spec's),
->   `POST …/reupload` (`StageStore.reset_for_reupload` + delete the pages dir + re-launch). Feature **detail**
->   must return `stages` (`StageStore.list_for_feature`) so the Overview derives per-stage status. Add
->   **`feature_stage_artifacts_dir`** to `runtime/settings.py` (analog of `feature_specs_dir`). Repoint
->   spec-create-opens-chat + the `feature_spec` authoring save to the spec stage row's `html_path`.
-> - **5 — web.** Generalize `SpecWorkspace`→`StageArtifactWorkspace`, `PreviewDialog`→`AnnotatablePreviewDialog`,
->   `SpecBuilderPage`→`StageBuilderPage`, spec hooks→stage-scoped (`useStageAllowed`/`useApplyStageAction`/
->   `useSaveMilestone`/`useInjectContext`); flip `STAGE_DEFS.ux` `available:true` + real `deriveStatus` (reads the
->   feature detail `stages`) + a `ux` `stage-registry` entry `{Workspace, CardActions}`; UX empty state = upload PDF.
->   **Spec must keep working (D0).** Gates + rebuild/commit `web/static`. (The approved reference is the mockup at
->   `/dev/ux-design` = `web/src/dev/mockups/UxDesignStageMockups.tsx`.)
-> - **6 — workflow.** `genesis-workflows/workflows/ux-design-analysis/` — graph.py (9 nodes per D1: `resolve_inputs`
->   → `render_pages` [via `ctx.extras['pdf_render']`] → `load_spec` → `screen_inventory` [a `kiro_node(image_docs=[…])`
->   multimodal turn] → `spec_reconcile` → `live_grounding` [@genesis-kb + @appian-dev **read** allowlists] →
->   `synthesize` → `verify` [grounded critic, bounded → escalation gate] → `present`) + per-node validators
->   (D2) + save-by-reference + workflow.yaml + registry entries (read-only allowlists) + tests; `validate_library` green.
-> - **7 — close.** ADR-057 → **Accepted**; bible/03 codebase-map (new modules) + bible/01 §2 at release; progress +
->   tracker; then **29-05** independent review + **29-06** coordinated release (order: **kiro-agent-sdk → genesis-core
->   → genesis → genesis-workflows**; keep the whole pin chain consistent — §7 ResolutionImpossible lesson; bump
->   `current_version==15` tests are already done).
->
-> **ENV / GATES (§6).** venv `genesis/.venv`. genesis: `cd genesis && .venv/bin/python -m pytest -q -p no:warnings`
-> `+ ruff check genesis`. web: `cd genesis/web && npx tsc --noEmit && npx eslint . && npx vitest run && npm run build`
-> then **commit `web/static`**. genesis-core: `cd genesis-core && ../genesis/.venv/bin/python -m pytest -q` `+ ruff`.
-> kiro-agent-sdk: `cd kiro-agent-sdk && ../genesis/.venv/bin/python -m pytest -q`. genesis-workflows:
-> `../genesis/.venv/bin/python ci/validate_library.py` + `-m pytest -q workflows --ignore=workflows/_fixtures`.
-> **PyMuPDF is pinned in genesis pyproject + already installed in the venv.** Git identity
-> `git -c user.name=Genesis -c user.email=genesis@local`. **Commit LOCAL only — do NOT tag/push any code repo
-> until 29-06.** See §9.
+> **Specs:** `specs/phase-29-ux-design-stage.md` + `29-01..29-06`; as-built `progress/phase-29-ux-design-stage.md`;
+> **ADR-057** (Accepted). **Live acceptance** (a real mockup PDF → the multimodal run → grounding → completion
+> chat) is user-driven / headless-undrivable — the manual check is in the 29-06 spec Notes. **PHASE 29 COMPLETE —
+> no active phase.**
 
 ---
 
