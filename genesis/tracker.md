@@ -237,6 +237,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — UX Design Stage — 📋 SPEC DRAFT):** authored the umbrella spec
+  (`specs/phase-29-ux-design-stage.md`) + 6 sub-phase specs (`phase-29-ux-design-stage/29-01..29-06`: research →
+  mockups[/dev/mockups] → brainstorm/finalize → build → review → release) + a progress scaffold + **ADR-057
+  (Proposed)**. Makes the first Phase-28 plug-in stage LIVE: upload a **mockup PDF** on a feature's UX Design
+  stage → a supervised **`ux-design-analysis`** workflow renders pages (PyMuPDF) → **per-screen multimodal**
+  analysis → grounds against the **Spec** + live env (**genesis-kb** = structure/impact, **appian-dev** = the
+  actual code) → synthesizes a grounded, **intent-level** **"UX Implementation Analysis"** HTML doc (per-screen
+  delta + **blind-spot/ripple** analysis + open questions) behind a **grounded verification** critic → a bound
+  **`ux_design` completion chat** walks the open questions + edits the doc live → Mark complete. Locked with the
+  user: PDF-only v1 (PyMuPDF; PPTX deferred); re-upload replaces+re-runs; intent-level (not object-level);
+  artifact "UX Implementation Analysis" (HTML + Lavish); **generalize the per-stage artifact model now (m0015)**;
+  read-only Appian. **Multi-repo** (genesis-core additive `kiro_node` images → genesis render+m0015+ux
+  stage+chat+api+web → genesis-workflows workflow); `current_version` → 15. **No code changed; nothing tagged.**
+  NEXT = 29-01 research on the user's go-ahead; do not build before the 29-03 sign-off gate.
+
 - **2026-08-25 (Phase 28 — Feature Revamp — ⭐ RELEASED genesis v0.54.0 + genesis-workflows v0.11.0, CI green):**
   the Feature Workspace framework shipped (28-01 research → 28-02 mockups → 28-03 final design → 28-04 build →
   28-05 review SHIP → 28-06 release). A Feature is now a **parallel, plug-in workspace** (ADR-056, supersedes

@@ -17,7 +17,7 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-08-25 — latest SHIPPED: genesis v0.54.0 + genesis-workflows v0.11.0 + genesis-core v0.9.5 +
+> **Last refreshed: 2026-08-28 — latest SHIPPED: genesis v0.54.0 + genesis-workflows v0.11.0 + genesis-core v0.9.5 +
 > kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
@@ -83,6 +83,24 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   unless I ask, and ask before destructive actions. No code changes until you've read it and restated.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
+
+## 📋 ACTIVE (spec drafting) — Phase 29 (UX Design Stage — Mockup → grounded implementation analysis)
+
+> **Phase 29 makes the first Phase-28 plug-in stage LIVE: UX Design.** A user uploads a **mockup PDF** on a
+> feature's UX Design stage; a supervised **`ux-design-analysis`** workflow renders the pages (PyMuPDF), runs a
+> **per-screen multimodal** analysis, grounds it against the feature's **Spec** + the **live Appian env**
+> (**genesis-kb** for structure/impact, **appian-dev** for the actual code), and synthesizes a grounded,
+> **intent-level** **"UX Implementation Analysis"** HTML doc (per-screen delta + blind-spot/ripple analysis +
+> open questions) behind a **grounded verification** critic; a bound **`ux_design` completion chat** then walks
+> the open questions + edits the doc live → Mark complete. **Locked (2026-08-28):** PDF-only v1 (PPTX deferred);
+> re-upload replaces+re-runs; intent-level (not object-level — that's Technical Design); artifact "UX
+> Implementation Analysis" (HTML + Lavish review); generalize the per-stage artifact model now (**m0015**);
+> read-only Appian. **Multi-repo** (genesis-core additive `kiro_node` images → genesis → genesis-workflows).
+> **Specs:** `specs/phase-29-ux-design-stage.md` + `29-01..29-06`; **ADR-057 (Proposed)**; progress
+> `progress/phase-29-ux-design-stage.md`. **Status: SPEC DRAFT — start 29-01 on go-ahead; do NOT build before
+> the 29-03 sign-off gate.** See §9.
+
+---
 
 ## ⭐ SHIPPED — Phase 28 (Feature Revamp) — COMPLETE · genesis v0.54.0 + genesis-workflows v0.11.0 (2026-08-25, CI green)
 

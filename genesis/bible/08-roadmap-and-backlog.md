@@ -8,6 +8,43 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
+### 📋 PLANNED (spec drafting) — Phase 29: UX Design Stage (Mockup → grounded implementation analysis)
+
+> **Specs:** `specs/phase-29-ux-design-stage.md` (umbrella) + `phase-29-ux-design-stage/29-01..29-06`. As-built:
+> `progress/phase-29-ux-design-stage.md`. **ADR-057** (Proposed) — the grounded UX Design stage (refines ADR-056).
+>
+> **Goal.** Make the first Phase-28 plug-in stage LIVE. A user uploads a **mockup PDF** on a feature's UX Design
+> stage; Genesis produces a grounded **"UX Implementation Analysis"** — a per-screen reconciliation of what the
+> **mockup** shows, what the **Spec** says, and what exists in the **live Appian env** — stating what must change
+> at **intent level** + a **blind-spot/ripple** analysis + **open questions**; a bound **`ux_design` chat** then
+> walks the questions + finalizes the doc. We are NOT automating mockup *creation* (later roadmap).
+>
+> **Workflow (`ux-design-analysis`):** resolve_inputs → **render_pages** (PyMuPDF PDF→PNG) → load_spec →
+> **screen_inventory** (multimodal, per-screen) → spec_reconcile → **live_grounding** (genesis-kb structure +
+> appian-dev actual code) → **synthesize** (HTML) → **verify** (grounded critic, bounded → escalation gate) →
+> present. Reliability trio per agent (ADR-011); KB-backed blind-spot analysis; per-screen decomposition + a
+> grounded critic (research-backed: multimodal models are weak holistically; ungrounded self-critics show a
+> "progress mirage").
+>
+> **Locked with the user (2026-08-28):** PDF-only v1 (PyMuPDF; **PPTX deferred**); **re-upload replaces + re-runs**;
+> grounding split (**genesis-kb = structure**, **appian-dev = actual code**); **intent-level** output; artifact =
+> **"UX Implementation Analysis"** (HTML in the sandbox + annotatable Lavish review, reuse Phase 20/21);
+> **generalize the per-stage artifact model now (`m0015`)**; handoff = upload → supervised `ux-design-analysis`
+> run (verification escalation gate) → draft doc + completion chat; UX stage reuses the Spec lifecycle states;
+> **read-only** against Appian (ADR-036/037).
+>
+> **Enablers:** additive **image support in `kiro_node`** (SDK already has image parts, gated on
+> `promptCapabilities.image`); **`m0015`** generalized per-`(feature, stage)` artifact model + a `ux_design`
+> `LifecycleService` machine (`current_version` → 15); a **`ux_design` chat mode**; UX goes live via a
+> `STAGE_DEFS` row + a `stage-registry` entry + an inner workspace — **no shell edits**. **Multi-repo** release
+> (genesis-core → genesis → genesis-workflows; kiro-agent-sdk + genesis-appian-parser unchanged).
+>
+> **Sub-phases (linear, each gated on the prior):** 29-01 research & analysis (docs) → 29-02 wireframes +
+> mockups (`/dev/mockups`) → 29-03 brainstorm & finalize (lock ADR-057) → 29-04 build (core → genesis →
+> genesis-workflows; ADR-057 Accepted) → 29-05 code review & hardening → 29-06 coordinated release.
+>
+> **Status: SPEC DRAFT — start 29-01 on the user's go-ahead. Do NOT build before the 29-03 sign-off gate.**
+
 ### ⭐ SHIPPED (COMPLETE) — Phase 28: Feature Revamp (the Feature Workspace framework) — genesis v0.54.0 + genesis-workflows v0.11.0
 
 > **Specs:** `specs/phase-28-feature-revamp.md` (umbrella) + `phase-28-feature-revamp/28-01..28-06`. As-built:
