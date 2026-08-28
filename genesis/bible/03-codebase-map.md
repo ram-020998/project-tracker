@@ -241,6 +241,51 @@ genesis/genesis/
                         api/features.py adds GET /features/{id}/activity (lifecycle feed over m0013). Web:
                         features/features/ActivityFeed + settings/components/MetricsSection.
                         (Overview trimmed: Active-runs + Installed-workflows sections removed.)
+
+# ── Phase 29 — UX Design stage (grounded mockup→implementation analysis; ADR-057) ──
+kiro-agent-sdk/src/kiro_agent_sdk/
+  __init__.py           query/collect/collect_streaming gain an optional `images` kwarg → client.prompt(images=)
+                        (passed ONLY when present → byte-identical for image-unaware peers). Additive.
+genesis-core/genesis_core/
+  nodes/agent.py        kiro_node(image_docs=[blackboard png names]) → _load_image_parts base64→ACP image parts
+                        (missing files skipped); AgentProvider.collect/collect_streaming + KiroAcpProvider gain
+                        `images` (passed only when present; SDK gates on promptCapabilities.image). Additive.
+genesis/genesis/
+  kb/pdf_render.py      (29-04) render_pdf_to_pngs(pdf, out_dir, *, dpi=150, max_pages=40) -> [png paths]
+                        (PyMuPDF==1.28.2 pinned; PDF-only; writes NNN.png; PdfRenderError on non-pdf/empty/>max).
+  kb/stages.py          (29-04) StageStore over m0015 — the generalized per-(feature, stage) artifact repo
+                        (mirrors FeatureStore: get_or_create/get/get_for_feature/list_for_feature/set_html/
+                        set_status/set_source/set_md_export/set_chat_session [row_version CAS → StaleWriteError];
+                        add_revision/list_revisions; reset_for_reupload).
+  db/migrations/m0015_feature_stages.py  kb_feature_stages(+_revisions); copies Spec rows in as stage='spec'
+                        (Decision A); current_version → 15. kb_feature_specs kept as a dead table (rollback).
+  domain/lifecycle.py   build_stage_lifecycle / build_stage_lifecycle_service — reuse SPEC_TRANSITIONS under
+                        EntityKind.STAGE (entity id = the stage row id); the Spec stage transitions here too now.
+  chat/mode_profile.py  a `ux_design` ChatModeProfile (clone of feature_spec — read-only genesis-kb + appian-dev,
+                        sandboxed fs-write) + _STEERING_UX. (chat/store.py mode whitelist gains 'ux_design'.)
+  chat/stage_finalizer.py  (29-04) StageFinalizer — a RunManager event observer: on a `done` ux-design-analysis
+                        run it opens the ux_design completion chat, copies analysis.html into its sandbox, points
+                        the stage (html_path/chat_session_id) + moves it to in-review (idempotent; startup reconcile).
+  runtime/context.py    build_context injects ctx.extras['pdf_render'] = render_pdf_to_pngs.
+  runtime/settings.py   feature_stage_artifacts_dir (~/.genesis/feature-stage-artifacts/<stage_id>/).
+  runs/worker.py        _load_registries wraps launch_provider to resolve the internal MANAGED 'genesis-kb'
+                        (python -m genesis.mcp.kb_server) so workflow nodes can inject @genesis-kb (ADR-038 pattern).
+  api/features.py       generalized per-stage API (D12): GET stages/{stage}; upload/reupload (PDF → run-launch,
+                        friendly 409 if the workflow isn't installed); allowed + actions/{action}; milestone;
+                        context; artifact; export.md. Feature detail returns `stages`. Spec repointed onto
+                        StageStore (Decision A); the /spec/* routes kept (same rows).
+  web/src/features/features/  StageArtifactWorkspace (generalized SpecWorkspace) + AnnotatablePreviewDialog
+                        (extracted PreviewDialog) + StageBuilderPage (generalized SpecBuilderPage) + UxCardActions;
+                        stage-scoped hooks/api (stage='spec'→legacy /spec/*, else /stages/{stage}/*); STAGE_DEFS.ux
+                        flipped live. (SpecBuilderPage deleted.)
+genesis-workflows/
+  workflows/ux-design-analysis/  graph.py — 9-node graph (D1): resolve_inputs → render_pages [ctx.extras
+                        ['pdf_render'] off-loop via asyncio.to_thread] → load_spec → screen_inventory [kiro_node
+                        image_docs, multimodal] → spec_reconcile → live_grounding [@genesis-kb structure +
+                        @appian-dev code, read-only allowlists] → synthesize [analysis.html] → verify [grounded
+                        critic] → route_verify [bounded loop → synthesize, retries reset; exhausted → escalate] →
+                        present. D2 validators + the reliability trio. workflow.yaml (inputs match the upload
+                        endpoint) + tests. registry.json entry + a managed `genesis-kb` in mcp-registry.json.
 ```
 
 ---

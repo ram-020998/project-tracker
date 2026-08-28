@@ -237,6 +237,25 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — 29-04 Build ✅ COMPLETE; ADR-057 Accepted; LOCAL, unpushed, no tags):** built the
+  UX Design stage end-to-end across four repos (all commits LOCAL — 29-06 releases the chain). The stage:
+  upload a mockup PDF → the supervised **`ux-design-analysis`** workflow (9-node graph: render [PyMuPDF] →
+  per-screen multimodal inventory → spec reconcile → live grounding [@genesis-kb structure + @appian-dev
+  code] → synthesize `analysis.html` → grounded verify critic [bounded → escalate] → present) → a
+  **StageFinalizer** (RunManager observer) opens the `ux_design` completion chat, copies analysis.html into
+  its sandbox, and moves the stage to **in-review** → annotatable Lavish review + **Mark complete**. Reuses
+  the Spec-page components GENERALIZED (D0): SpecWorkspace→StageArtifactWorkspace, PreviewDialog→
+  AnnotatablePreviewDialog, SpecBuilderPage→StageBuilderPage, stage-scoped hooks; **Spec fully preserved**.
+  **Decision A:** Spec repointed onto the generalized m0015 `kb_feature_stages`/StageStore (data-safe;
+  kb_feature_specs kept for rollback). Enablers: `kiro_node` image seam (sdk `dd21b22` + core `c0472c4`),
+  PyMuPDF render, m0015, `build_stage_lifecycle`, the `ux_design` chat profile + `_STEERING_UX`, the
+  generalized `/stages/{stage}` API, the worker's managed `genesis-kb` resolution. LEDGER: genesis
+  45aaa77·beb58a1·5b02987·64b9165·6afcac6·af7703d·238c43e·885acf7·d365353·3fd6fab; genesis-workflows 1053ff2.
+  GATES: genesis pytest 653 + ruff · web tsc/eslint0/vitest 211/build · genesis-workflows validate_library
+  (10) + pytest 107 · sdk 93 · core 83. **ADR-057 → Accepted** (decision-log + bible/04); bible/03
+  codebase-map updated. **Flagged:** the sdk changed (additive `images`) → 29-06 releases sdk→core→genesis→
+  genesis-workflows. NEXT: 29-05 review → 29-06 coordinated release.
+
 - **2026-08-28 (Phase 29 — 29-04 Build — ⚙️ IN PROGRESS; DECISION A locked; steps 1–4a done LOCAL):** began the
   multi-repo build of the UX Design stage. **Decision A (user, 2026-08-28):** fully repoint Spec onto the
   generalized `kb_feature_stages`/StageStore model (retire `kb_feature_specs` from code) — confirmed **safe for

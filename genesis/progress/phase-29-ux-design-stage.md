@@ -8,7 +8,7 @@
 
 ## Status
 
-⚙️ **29-04 IN PROGRESS (build) — steps 1–4a done LOCAL; 4b→7 remain (new session continues).** Design locked (D0–D13); mockup `/dev/ux-design` approved; **decision A locked** (fully repoint Spec onto StageStore). ADR-057 Proposed.
+⚙️ **29-04 BUILD COMPLETE (all tasks 1–7 done; LOCAL, unpushed, no tags — 29-06 releases the chain).** The UX Design stage is end-to-end: upload PDF → `ux-design-analysis` run → StageFinalizer opens the `ux_design` completion chat + sets the stage in-review → annotatable review + Mark complete. **ADR-057 Accepted.** Spec fully preserved (D0).
 
 ## Sub-phase ledger
 
@@ -17,7 +17,7 @@
 | 29-01 | Research & analysis | ✅ **DELIVERED — FOR REVIEW** (`29-01-findings.md`) |
 | 29-02 | Wireframes & hi-fi mockups (`/dev/ux-design`) | ✅ **DELIVERED — FOR REVIEW** (genesis LOCAL `3ffb3ac`) |
 | 29-03 | Brainstorm & finalize (+ lock ADR-057) | ✅ **FINAL — FOR BUILD SIGN-OFF** (`29-03-final-design.md`) |
-| 29-04 | Build (core → genesis → genesis-workflows) | ⚙️ **IN PROGRESS** — steps 1–4a LOCAL; 4b→7 remain |
+| 29-04 | Build (sdk → core → genesis → genesis-workflows) | ✅ **BUILD COMPLETE** (LOCAL; 29-06 releases) |
 | 29-05 | Code review & hardening | 📋 PLANNED |
 | 29-06 | Release | 📋 PLANNED |
 
@@ -119,3 +119,30 @@ by keeping the Spec test suite green + the 29-05 review + shipping the whole cha
   `SpecBuilderPage`→`StageBuilderPage`, stage-scoped hooks; flip `STAGE_DEFS.ux` + registry entry; Spec keeps working.
 - **6** genesis-workflows `ux-design-analysis` workflow (9-node D1 + validators + grounded verify critic).
 - **7** ADR-057 → Accepted; bible/03; then 29-05 review + 29-06 coordinated release.
+
+### 29-04 — Build COMPLETE (2026-08-28) — LOCAL commits, UNPUSHED, no tags (29-06 releases the chain)
+
+Full ledger (all LOCAL): kiro-agent-sdk `dd21b22` (images kwarg) · genesis-core `c0472c4` (kiro_node
+image_docs) · genesis `45aaa77` (PyMuPDF render) → `beb58a1` (m0015 + StageStore) → `5b02987` (stage
+lifecycle + `ux_design` chat profile + `pdf_render` inject) → `64b9165` (feature_stage_artifacts_dir) →
+`6afcac6` (Spec repoint onto StageStore, **Decision A** — audit kind spec→stage; list_features/counts join
+kb_feature_stages) → `af7703d` (generalized `/features/{id}/stages/{stage}/…` API + feature detail returns
+`stages` + UX upload→run-launch, friendly 409 if uninstalled) → `238c43e` (web generalization:
+StageArtifactWorkspace / AnnotatablePreviewDialog / StageBuilderPage + stage-scoped hooks + UxCardActions +
+STAGE_DEFS.ux live; SpecBuilderPage deleted; web/static rebuilt) → `885acf7` (worker resolves the internal
+managed `genesis-kb`) → `d365353` (upload passes spec_path) → `3fd6fab` (**StageFinalizer** — run→stage
+bridge) · genesis-workflows `1053ff2` (the `ux-design-analysis` 9-node workflow + D2 validators + grounded
+verify bounded-loop + registry.json + managed genesis-kb in mcp-registry + 14 tests).
+
+**Gates (all green):** genesis pytest **653** + ruff · web tsc + eslint 0 + **vitest 211** + build ·
+genesis-workflows **validate_library PASSED (10 workflows)** + pytest **107** · sdk 93 · genesis-core 83.
+
+**Decision A (safe for existing users):** m0015 copies existing specs (+revisions) at the offline `genesis
+db upgrade`; absolute `html_path` + `chat_session_id` preserved; `kb_feature_specs` NOT dropped (dead table,
+rollback). Spec regressions all green.
+
+**Flagged deviation:** kiro-agent-sdk changed (was "unchanged" in the plan) — the additive `images` kwarg;
+so 29-06 releases the whole chain **sdk → core → genesis → genesis-workflows** (keep the pin chain consistent).
+
+**NEXT:** 29-05 independent code review & hardening → 29-06 coordinated release. (bible/03 codebase-map +
+ADR-057→Accepted updated in this pass.)
