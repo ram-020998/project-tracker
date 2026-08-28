@@ -1,6 +1,6 @@
 # 29-02 — Wireframes & Hi-Fi Mockups
 
-> **Status:** 📋 **PLANNED** (after 29-01). · **Type:** dev-only web mockups (coded at `/dev/mockups`; no production wiring, no release) · **Phase:** 29 (UX Design Stage) · **Gate:** ⭐ user review of the mockups before 29-03.
+> **Status:** ✅ **DELIVERED — FOR REVIEW (2026-08-28)** — coded at `/dev/ux-design`; notes: `29-02-wireframes.md`; genesis LOCAL `3ffb3ac`. · **Type:** dev-only web mockups (coded at `/dev/mockups`; no production wiring, no release) · **Phase:** 29 (UX Design Stage) · **Gate:** ⭐ user review of the mockups before 29-03.
 
 ---
 

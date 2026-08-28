@@ -8,14 +8,14 @@
 
 ## Status
 
-🔬 **29-01 (research & analysis) DELIVERED — FOR REVIEW.** Umbrella + 29-01..29-06 + ADR-057 (Proposed) authored.
+🎨 **29-02 (hi-fi mockup) DELIVERED — FOR REVIEW.** Coded at `/dev/ux-design` (genesis LOCAL `3ffb3ac`, no tag/push). 29-01 research delivered; ADR-057 (Proposed).
 
 ## Sub-phase ledger
 
 | # | Sub-phase | Status |
 |---|---|---|
 | 29-01 | Research & analysis | ✅ **DELIVERED — FOR REVIEW** (`29-01-findings.md`) |
-| 29-02 | Wireframes & hi-fi mockups (`/dev/mockups`) | 📋 PLANNED |
+| 29-02 | Wireframes & hi-fi mockups (`/dev/ux-design`) | ✅ **DELIVERED — FOR REVIEW** (genesis LOCAL `3ffb3ac`) |
 | 29-03 | Brainstorm & finalize (+ lock ADR-057) | 📋 PLANNED |
 | 29-04 | Build (core → genesis → genesis-workflows) | 📋 PLANNED |
 | 29-05 | Code review & hardening | 📋 PLANNED |
@@ -36,6 +36,7 @@
 - **Handoff** — upload → supervised `ux-design-analysis` run (verification escalation gate) → draft doc +
   completion chat; UX stage reuses the Spec lifecycle states (draft→in-progress→in-review→completed).
 - **Read-only against Appian** (ADR-036/037) — analysis only; no write/deploy.
+- **(resolved 2026-08-28, "your call")** render DPI ~150 / ~40-page cap; `m0015` = option A (migrate Spec onto `kb_feature_stages`); completion = explicit "Mark complete".
 
 ## Improvements baked in (research-backed)
 
@@ -66,3 +67,17 @@ code; per-change object-ref citation); the intent-level HTML doc template; the `
 model (recommend migrating Spec onto it); the `ux_design` lifecycle machine (reuse SPEC_TRANSITIONS) + chat
 profile; the additive `kiro_node` image seam; DPI ~150 / ~40-page cap. **3 open questions** (DPI/cap; spec
 migration A/B; completion criteria) — none blocking. **No code changed.** NEXT = 29-02 mockups on review.
+
+## 29-02 — Wireframes & hi-fi mockup (delivered 2026-08-28)
+
+Coded hi-fi mockup at **`/dev/ux-design`** (`web/src/dev/mockups/UxDesignStageMockups.tsx`, dev-only) +
+`29-02-wireframes.md`. Committed **LOCAL** on genesis master (`3ffb3ac`, **no tag/push**). A State control
+cycles the UX Design stage states — empty/upload (PDF dropzone + "what happens next" pipeline), running
+(supervised run progress), review (the "UX Implementation Analysis" annotatable doc pane — per-screen blocks +
+blind-spot/ripple callout + open questions — beside the completion chat), completed (finalized doc + artifact
+strip), and the stage card in all 4 statuses. Full-bleed + Expand→immersive; light/dark. Added
+Upload/Image/Sparkles/HelpCircle/FileSearch to the curated `shared/ui/icons.ts` re-export. **Tokens/primitives
+only — no hardcoded brand hex.** Gates: tsc clean, eslint 0 errors (18 pre-existing warnings elsewhere),
+**vitest 210**, build OK; `web/static` rebuilt+committed. Dev-only mockup carries no dedicated vitest test
+(Phase-28 `FeatureWorkspaceMockups` precedent). **NEXT = user review of `/dev/ux-design` → 29-03 finalize +
+lock ADR-057.**

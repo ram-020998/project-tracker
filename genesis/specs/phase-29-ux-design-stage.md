@@ -244,7 +244,14 @@ pin-chain consistent (§7 ResolutionImpossible lesson).
 
 ---
 
-## 13. Non-blocking open questions (can resolve during 29-01/29-03)
+## 13. Open questions — RESOLVED (user "your call", 2026-08-28)
+
+1. **Render DPI / page cap** — ✅ DPI **~150**, **~40-page** cap.
+2. **`m0015` shape** — ✅ option **(A)**: migrate the existing Spec onto the generalized `kb_feature_stages` model.
+3. **Completion criteria** — ✅ explicit **"Mark complete"** (mirrors Spec).
+
+<!-- original (now resolved): -->
+## 13b. (original) Non-blocking open questions (can resolve during 29-01/29-03)
 
 1. **Render DPI / page cap** — a sensible default DPI and a max-page guard for very large decks (a 29-01
    decision, tuned against a real deck).

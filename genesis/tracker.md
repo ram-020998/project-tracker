@@ -237,6 +237,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — 29-02 Wireframes & hi-fi mockup — ✅ DELIVERED, FOR REVIEW):** coded hi-fi mockup
+  of the **UX Design stage** at **`/dev/ux-design`** (`web/src/dev/mockups/UxDesignStageMockups.tsx`, dev-only) +
+  `29-02-wireframes.md`. Committed **LOCAL** on genesis master (`3ffb3ac`, **no tag/push**). A State control
+  cycles the states: empty/upload (PDF dropzone + pipeline), running (supervised run progress), **review** (the
+  annotatable **"UX Implementation Analysis"** doc — per-screen blocks + blind-spot/ripple + open questions —
+  beside the **completion chat**), completed (finalized doc + artifact strip), and the stage card in all 4
+  statuses. Full-bleed + Expand→immersive; light/dark; added Upload/Image/Sparkles/HelpCircle/FileSearch to the
+  curated icon re-export. **Tokens only, no hardcoded hex.** Gates: tsc clean, eslint 0 errors (18 pre-existing
+  warnings), **vitest 210**, build OK; web/static rebuilt+committed. **Resolved (user "your call"):** render DPI
+  ~150 / ~40-page cap; `m0015` = option A (migrate Spec onto `kb_feature_stages`); completion = explicit "Mark
+  complete". NEXT = user review of `/dev/ux-design` → 29-03 finalize + lock ADR-057.
+
 - **2026-08-28 (Phase 29 — 29-01 Research & analysis — ✅ DELIVERED, FOR REVIEW):**
   `specs/phase-29-ux-design-stage/29-01-findings.md`. Cited research (multimodal UI-analysis failure modes →
   per-screen decomposition + grounding, not one-shot vision; generator→**grounded**-critic loops avoid the
