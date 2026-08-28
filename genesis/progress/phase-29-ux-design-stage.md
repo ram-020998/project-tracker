@@ -182,3 +182,16 @@ a bare draft ux row (no bound chat) showed a dead "no chat session" pane; now ga
 chat (Upload / "analysis in progress" until finalized) — `3339141`. (2) **backend** the ADR-035 upload
 allowlist omitted `.pdf` → the mockup couldn't be provisioned; added `.pdf` + cap 10→25 MB — `f92562b`.
 Release `57011c4` / tag v0.55.1; CI green (master #6681513 + tag #6681514). +3 regression tests.
+
+### First live run + StageFinalizer hardening — genesis v0.55.2 (2026-08-28, CI green #6681788)
+
+The first real end-to-end `ux-design-analysis` run (`r-72c0d9e55c6e`, feature 3) succeeded fully: 14-page
+mockup PDF → all 15 nodes green → grounded `verify` **ok** (`verify_rounds=1` — the critic requested one
+revision that passed, proving it isn't a rubber stamp) → `analysis.html`. But the run's **stage was left
+stranded** (in-progress, no completion chat) — the app-process `StageFinalizer`'s live `run.final` was
+missed (orphaned worker / app bounce) and `reconcile()` only runs at startup. Fixed in **v0.55.2** (commit
+`0217b4e`, release `cd11281`, CI green master #6681787 + tag #6681788): the finalizer now **logs** finalize
+failures (was `except: pass`) and adds **`reconcile_stage()`** in-flight recovery wired into the
+feature/stage GET, so opening the stage self-heals it without a restart. +regression test
+(`test_stage_get_self_heals_a_stranded_run`); genesis pytest 656. The stranded run was recovered live
+(stage 2 → in-review, chat `c-b8c5f0abc484`, analysis served).

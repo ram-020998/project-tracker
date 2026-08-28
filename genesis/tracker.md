@@ -239,6 +239,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — patch genesis v0.55.2; CI green #6681788):** the first real live
+  `ux-design-analysis` run (`r-72c0d9e55c6e`, feature 3) succeeded end-to-end — 14-page PDF, all 15 nodes
+  green, grounded `verify` **ok** with `verify_rounds=1` (the critic requested one revision that then passed;
+  this also explains a user-observed "cursor jumped back / 3 nodes in progress" = the by-design bounded
+  verify→revise loop, not corruption). BUT the run's UX **stage was stranded** (in-progress, no completion
+  chat, analysis unserved): the app-process `StageFinalizer`'s live `run.final` was missed (ADR-012 orphaned
+  worker / an app bounce) and `reconcile()` only runs at startup, and every finalize error was silently
+  swallowed. **Hardening (`0217b4e` → release `cd11281`, tag v0.55.2):** (1) LOG finalize failures
+  (`log.warning`+`exc_info`, no more `except: pass`); (2) **in-flight recovery** — `reconcile_stage(stage_id)`
+  finalizes one stranded stage from durable state, called best-effort on the feature/stage GET so opening the
+  stage self-heals it without a restart (a recovery-only finalizer, NOT attached → no duplicate observer).
+  +regression test; genesis pytest 656 + ruff; web rebuilt. Backend-only patch (pins unchanged). The stranded
+  run was **recovered live** — stage 2 → in-review, chat `c-b8c5f0abc484`, analysis served. See §7's two new
+  lessons (recovery-must-not-be-startup-only + honest-failures; cursor-back = the verify loop).
+
 - **2026-08-28 (Phase 29 — patch genesis v0.55.1; CI green #6681514):** two live-found fixes on the shipped
   UX Design stage, surfaced by exercising `/features/{id}/ux` on the running app. (1) **web** — `StageBuilderPage`
   rendered the authoring workspace whenever a stage row existed, so a bare draft `ux_design` row (an upload
