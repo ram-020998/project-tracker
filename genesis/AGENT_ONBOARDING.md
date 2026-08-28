@@ -17,8 +17,8 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-08-28 — latest SHIPPED: genesis v0.54.0 + genesis-workflows v0.11.0 + genesis-core v0.9.5 +
-> kiro-agent-sdk v0.7.0 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
+> **Last refreshed: 2026-08-28 — latest SHIPPED: genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 +
+> kiro-agent-sdk v0.7.1 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
 > **⭐ SHIPPED — Phase 27 (UI/UX Revamp) — COMPLETE: genesis v0.53.0** (2026-08-24; release `fba9a94`, tag `v0.53.0`;
@@ -84,9 +84,11 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
 
-## ⚙️ IN BUILD — Phase 29 (UX Design Stage) — 29-04 IN PROGRESS · RESUME HERE (2026-08-28)
+## ⭐ SHIPPED — Phase 29 (UX Design Stage) — COMPLETE · genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1 (2026-08-28, CI green)
 
-> **A NEW AGENT continuing this work:** read THIS block first, then
+> **✅ SHIPPED (2026-08-28) — Phase 29 COMPLETE (genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1; CI green — core #6680648 / genesis #6680663 / workflows #6680673). ADR-057 Accepted. The detail below is the as-built record.** Historical build notes:
+>
+> read THIS block first, then
 > `specs/phase-29-ux-design-stage/29-03-final-design.md` (the **LOCKED** design, D0–D13),
 > `specs/phase-29-ux-design-stage/29-01-findings.md` (the code-grounded findings), and
 > `progress/phase-29-ux-design-stage.md` — then continue **29-04 from step 4b**. The design + UX are locked

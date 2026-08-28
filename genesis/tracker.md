@@ -237,6 +237,21 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-08-28 (Phase 29 — 29-06 Release ✅ COMPLETE; PHASE 29 COMPLETE):** shipped the UX Design stage as a
+  coordinated four-repo release, CI green. Order (ADR-019; sdk included per the flagged additive `images`):
+  **kiro-agent-sdk v0.7.1** (b68438c) → **genesis-core v0.9.6** (761fda8) → **genesis v0.55.0** (0d667a2) →
+  **genesis-workflows v0.12.0** (9472b66). Each dependent re-pinned to the just-released tags (pin chain
+  consistent — the clean-install + library-validate CI jobs both green prove no ResolutionImpossible). CI:
+  core #6680647/#6680648 · genesis #6680662/#6680663 · genesis-workflows #6680672/#6680673 (sdk no-CI,
+  validated transitively). `current_version` → 15 (m0015). ADR-057 **Accepted**. Docs fully updated (bible
+  00/01/03/04/08 + AGENT_ONBOARDING + decision-log + specs + progress). The stage is end-to-end: upload a
+  mockup PDF → `ux-design-analysis` run (render → per-screen multimodal → grounding [genesis-kb + appian-dev]
+  → synthesize → grounded verify) → StageFinalizer opens the `ux_design` completion chat + sets in-review →
+  annotatable review + Mark complete; Spec preserved (D0); Decision A data-safe. Gates at release: genesis
+  pytest 654 / web vitest 211 + tsc/eslint/build / genesis-workflows validate_library 10 + pytest 107 /
+  genesis-core 83 / kiro-agent-sdk 93. **Not verified (honest):** the live multimodal run + completion chat
+  are headless-undrivable — user-driven acceptance per the 29-06 spec Notes. **PHASE 29 COMPLETE — no active phase.**
+
 - **2026-08-28 (Phase 29 — 29-05 Code review & hardening ✅ SHIP; LOCAL, no tag/push):** an independent
   read-only auditor (tao-architect sub-agent) reviewed the 29-04 build across all four repos vs the 29-03
   locked design (D0–D13) + ADRs + §7 lessons → **NO-SHIP** on one real defect, then **SHIP** after fixes.

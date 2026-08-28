@@ -8,7 +8,7 @@
 
 ## Status
 
-⚙️ **29-04 BUILD COMPLETE (all tasks 1–7 done; LOCAL, unpushed, no tags — 29-06 releases the chain).** The UX Design stage is end-to-end: upload PDF → `ux-design-analysis` run → StageFinalizer opens the `ux_design` completion chat + sets the stage in-review → annotatable review + Mark complete. **ADR-057 Accepted.** Spec fully preserved (D0).
+✅ **PHASE 29 COMPLETE — RELEASED (2026-08-28).** genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1, CI green (core #6680648 / genesis #6680663 / workflows #6680673; sdk v0.7.1 transitively). The UX Design stage is end-to-end: upload PDF → `ux-design-analysis` run → StageFinalizer opens the `ux_design` completion chat + sets the stage in-review → annotatable review + Mark complete. ADR-057 Accepted; Spec fully preserved (D0); Decision A data-safe.
 
 ## Sub-phase ledger
 
@@ -19,7 +19,7 @@
 | 29-03 | Brainstorm & finalize (+ lock ADR-057) | ✅ **FINAL — FOR BUILD SIGN-OFF** (`29-03-final-design.md`) |
 | 29-04 | Build (sdk → core → genesis → genesis-workflows) | ✅ **BUILD COMPLETE** (LOCAL; 29-06 releases) |
 | 29-05 | Code review & hardening | ✅ **COMPLETE — SHIP** (M1 + S1/S2/S3/S5 fixed) |
-| 29-06 | Release | 📋 PLANNED |
+| 29-06 | Release (sdk → core → genesis → genesis-workflows) | ✅ **RELEASED** (CI green) |
 
 ## Decisions locked with the user (2026-08-28)
 
@@ -158,3 +158,18 @@ dev-env/synced-app fail-fast). S4 was a false finding (reconcile() IS called at 
 applied; N2/N4/N5/N6/N7 accepted-deferred (non-blocking). Re-review = **SHIP**. Gates: genesis pytest 654 +
 ruff · genesis-workflows validate_library (10) + ux tests 14 · web unchanged. Full findings + resolution log
 in `29-05-code-review-and-hardening.md`. NEXT = 29-06 coordinated release.
+
+### 29-06 — Release COMPLETE (2026-08-28) — CI green
+
+Coordinated four-repo release (ADR-019 order; the sdk is in the chain per the flagged additive `images`
+deviation): **kiro-agent-sdk v0.7.1** (`b68438c`) → **genesis-core v0.9.6** (`761fda8`; re-pin sdk) →
+**genesis v0.55.0** (`0d667a2`; re-pin core+sdk, bump pyproject/FastAPI/version.ts, web/static rebuilt) →
+**genesis-workflows v0.12.0** (`9472b66`; re-pin core v0.9.6 + genesis v0.55.0). CI green on all: genesis-core
+master #6680647 + tag #6680648; genesis master #6680662 + tag #6680663 (incl. clean-install → the full pinned
+chain resolves, no ResolutionImpossible); genesis-workflows master #6680672 + tag #6680673 (incl.
+library-validate). kiro-agent-sdk has no CI — validated transitively by the green genesis clean-install.
+`current_version` → 15 (m0015). ADR-057 Accepted. Docs updated (bible/00 banner + bible/01 §2 tag table/
+migrations/counts + bible/03 codebase-map + bible/04 + bible/08 §9 SHIPPED + AGENT_ONBOARDING + decision-log)
++ this progress + tracker. **PHASE 29 COMPLETE — no active phase.** Live acceptance (a real mockup PDF on a
+feature's UX Design stage with Kiro signed in + a dev-tagged env + the app synced) is user-driven /
+headless-undrivable — the manual check is in the 29-06 spec Notes.

@@ -1,6 +1,6 @@
 # 29-06 — Release
 
-> **Status:** 📋 **PLANNED** (final; after 29-05). · **Type:** coordinated multi-repo release (on the user's go-ahead) · **Phase:** 29 (UX Design Stage) · **Gate:** CI green.
+> **Status:** ✅ **COMPLETE — RELEASED (2026-08-28, CI green).** · **Type:** coordinated multi-repo release · **Phase:** 29 (UX Design Stage) · **Gate:** CI green ✅.
 
 ---
 

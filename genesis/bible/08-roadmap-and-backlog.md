@@ -8,7 +8,7 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 📋 PLANNED (spec drafting) — Phase 29: UX Design Stage (Mockup → grounded implementation analysis)
+### ⭐ SHIPPED (COMPLETE) — Phase 29: UX Design Stage (Mockup → grounded implementation analysis) — genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1
 
 > **Specs:** `specs/phase-29-ux-design-stage.md` (umbrella) + `phase-29-ux-design-stage/29-01..29-06`. As-built:
 > `progress/phase-29-ux-design-stage.md`. **ADR-057** (Proposed) — the grounded UX Design stage (refines ADR-056).
@@ -43,7 +43,7 @@
 > mockups (`/dev/mockups`) → 29-03 brainstorm & finalize (lock ADR-057) → 29-04 build (core → genesis →
 > genesis-workflows; ADR-057 Accepted) → 29-05 code review & hardening → 29-06 coordinated release.
 >
-> **Status: SPEC DRAFT — start 29-01 on the user's go-ahead. Do NOT build before the 29-03 sign-off gate.**
+> **✅ SHIPPED (2026-08-28) — PHASE 29 COMPLETE.** Released genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1 (CI green — genesis-core #6680648 / genesis #6680663 / genesis-workflows #6680673; kiro-agent-sdk v0.7.1 validated transitively). 29-01 research → 29-02 mockup (`/dev/ux-design`) → 29-03 locked design (D0–D13) → 29-04 build (all 7 tasks + the StageFinalizer bridge) → 29-05 independent review (SHIP; M1 re-upload fix + validator hardening) → 29-06 release. ADR-057 Accepted. Decision A (Spec→StageStore) data-safe. Gates: genesis pytest 654 / web vitest 211 / genesis-workflows validate_library 10 + pytest 107. Live acceptance (real mockup + Kiro + synced app) is user-driven. **No active phase.**
 
 ### ⭐ SHIPPED (COMPLETE) — Phase 28: Feature Revamp (the Feature Workspace framework) — genesis v0.54.0 + genesis-workflows v0.11.0
 

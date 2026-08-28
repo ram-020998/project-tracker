@@ -1,6 +1,6 @@
 # Phase 29 — UX Design Stage (Mockup → grounded implementation analysis)
 
-> **Status:** 📋 **DRAFT — spec only (umbrella + 29-01..29-06); awaiting review, then start 29-01 (research).** · **Author:** Genesis agent · **Date:** 2026-08-28
+> **Status:** ✅ **RELEASED — PHASE 29 COMPLETE (2026-08-28).** Shipped genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1 (CI green). · **Author:** Genesis agent · **Date:** 2026-08-28
 > **Type:** multi-repo — genesis-core (additive) + genesis (backend + web + migration) + genesis-workflows (new workflow) · **Depends on:** Phase 28 (the Feature Workspace framework; ADR-056), Phase 20/21 (Features & Specs + the `feature_spec` chat authoring; ADR-042/043/044/045), Phase 25-01 (`LifecycleService`/`domain/`; ADR-050), Phase 16 (the internal `genesis-kb` MCP + the managed-native `appian-dev` MCP; ADR-036/037/038), Phase 15 (run-launch file attachments; ADR-035), Phase 27 (design language; ADR-055).
 
 ---
