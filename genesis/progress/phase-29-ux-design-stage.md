@@ -206,3 +206,11 @@ stage via a generic `:stage` route) + mockup-faithful UX empty/in-progress state
 **genesis-workflows v0.12.1** (CI master #6683423 + tag #6683424): `ux-design-analysis` v0.1.1 reframed to a
 UX/business deliverable (FB-4) — plain-language what-exists/what-changes, no object-level technical detail;
 re-pin genesis v0.56.0. Gates: genesis pytest 658, web vitest 218, workflows validate_library 10 + pytest 107.
+
+### Re-upload & re-run UI wired — genesis v0.56.1 (2026-09-01, CI green #6703666)
+
+D11 (re-upload replaces + re-runs) was implemented at the backend (`/stages/ux_design/reupload` +
+`reset_for_reupload`) + hook (`useUploadMockup(reupload)`) but never got a UI trigger, so it was unreachable
+once an analysis existed. Added `ReuploadMockupButton` (pick new PDF → confirm → `/reupload` → relaunch;
+feature detail refetches → animated "Analyzing…"), wired into the UX stage workspace header + Overview card.
+UI-only; web vitest 219 + regression test. Release `c8997e1` / tag v0.56.1.

@@ -239,6 +239,16 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-01 (RELEASED genesis v0.56.1; CI green #6703666):** wired the UX Design **Re-upload & re-run**
+  control (Phase 29 D11). The capability existed in the backend (`POST …/stages/ux_design/reupload` →
+  `StageStore.reset_for_reupload` [clears chat/run/source + revisions + deletes renders] → relaunch) and the
+  `useUploadMockup(reupload)` hook, but **no UI exposed it** once an analysis existed — so it was unreachable
+  from the app (only via direct API). Added a shared `ReuploadMockupButton` (pick a new PDF → confirm it
+  replaces the current analysis + completion chat → `/reupload`; the feature detail refetches → the stage
+  flips to the animated "Analyzing…" state), wired into the UX stage **workspace header** + the **Overview
+  stage card**. UI-only (backend/hook unchanged). Release `c8997e1`, tag v0.56.1 (CI master #6703665 + tag
+  #6703666). Gates: web tsc/eslint0/vitest 219/build; +regression test.
+
 - **2026-08-28 (RELEASED genesis v0.56.0 + genesis-workflows v0.12.1; CI green):** shipped the recent UI +
   search + workflow-content work. **genesis v0.56.0** (minor; release `c4ef904`, tag v0.56.0; CI master
   #6683358 + tag #6683359): global **⌘K search** across applications/features/documents (`api/search.py`
