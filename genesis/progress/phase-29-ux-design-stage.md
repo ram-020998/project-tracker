@@ -214,3 +214,11 @@ D11 (re-upload replaces + re-runs) was implemented at the backend (`/stages/ux_d
 once an analysis existed. Added `ReuploadMockupButton` (pick new PDF → confirm → `/reupload` → relaunch;
 feature detail refetches → animated "Analyzing…"), wired into the UX stage workspace header + Overview card.
 UI-only; web vitest 219 + regression test. Release `c8997e1` / tag v0.56.1.
+
+### Re-upload finalize correctness — genesis v0.56.2 (2026-09-01, CI green #6703718)
+
+A stuck re-upload run (`r-282a4894adc2`) was orphaned by a serve restart mid-`live_grounding` (ADR-012
+pause=kill); cancelled it. That exposed a stale-run finalize bug: after `reset_for_reupload`, the reconcile
+sweep finalized the stage from the OLD superseded done run (resurrecting the prior analysis + blocking the
+new run). Fixed: `_finalize` only finalizes a stage from its currently-bound `run_id`. +regression test.
+Operational lesson recorded: never restart serve while a run is active. Release `651fb83` / tag v0.56.2.

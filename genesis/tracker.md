@@ -239,6 +239,18 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-01 (RELEASED genesis v0.56.2; CI green #6703718) — re-upload finalize correctness + an orphaned-run
+  post-mortem.** Checking a stuck run (`r-282a4894adc2`, the user's re-upload) found it **orphaned**: I had
+  restarted `genesis serve` (to ship the v0.56.1 re-upload button) while it was mid-`live_grounding`, which
+  killed its worker (ADR-012 pause=kill) — dead 8 s after its last event, no `run.final`. Cancelled it. That
+  also exposed a **stale-run finalize bug**: the re-upload reset the stage, then the restart's startup
+  `reconcile()` finalized the stage from the OLD (still-done) run `r-72c0d9e55c6e`, resurrecting the previous
+  analysis + a new chat and leaving a mismatched state — and on a *successful* re-upload it would clobber the
+  new analysis. **Fix (v0.56.2, release `651fb83`, tag #6703718):** `StageFinalizer._finalize` no-ops unless
+  the stage's current `run_id` == the run being finalized. +regression test; genesis pytest 659 + ruff.
+  **Operational lesson (bible §7): never restart serve while a run is active.** The stale in-review state on
+  feature 3's ux stage self-heals on the next re-upload (reset rebinds to the fresh run).
+
 - **2026-09-01 (RELEASED genesis v0.56.1; CI green #6703666):** wired the UX Design **Re-upload & re-run**
   control (Phase 29 D11). The capability existed in the backend (`POST …/stages/ux_design/reupload` →
   `StageStore.reset_for_reupload` [clears chat/run/source + revisions + deletes renders] → relaunch) and the
