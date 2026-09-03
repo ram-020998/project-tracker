@@ -239,6 +239,17 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-03 — Phase 30: 30-05 BUILT (UX refinements; local, unreleased, frontend-only).** Two user-requested
+  fixes. **(A) Clickable stage cards:** the whole card is now the click target (an accessible stretched-link
+  overlay button); removed the standalone Open/Details button from `StageCard` + all three CardActions (they
+  keep only their distinct actions — Create/Upload/Start/Locked/View/Re-upload/Re-run). Not-available + gated
+  (locked) cards are NOT navigable. **(B) Openable artifacts:** the Artifacts tab lists EVERY generated stage
+  artifact (Spec/UX/Technical Design) + linked reference docs, each clickable — generated → a read-only
+  rendered preview (stage artifact route, annotate=0); reference → the Document Library viewer; accessible
+  (a real focusable name button per row; jest-axe green). **Gates:** web tsc + eslint(0) + vitest **224**
+  (+1) + build; web/static committed. Committed LOCAL on genesis master (no tag/push until 30-07). Next:
+  30-06 (independent review + dry-run) on the user's go-ahead.
+
 - **2026-09-03 — Phase 30: 30-04 BUILT (platform; local, unreleased).** Wired the Technical Design stage into
   genesis. **Backend:** JSON `/stages/{stage}/start` + `/rerun` (Technical Design; optional comment, no file)
   with the **ADR-056 prerequisite gate** (Spec + UX artifacts must be in-review/completed → 409) + friendly

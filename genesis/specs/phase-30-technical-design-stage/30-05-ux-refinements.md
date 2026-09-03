@@ -1,6 +1,6 @@
 # 30-05 — UX refinements (clickable stage cards + openable artifacts)
 
-> **Status:** 📋 DRAFT. Gate: independent review = SHIP. · Part of Phase 30. Repo: **genesis** (web-only). Two small, user-requested fixes folded into this phase.
+> **Status:** ✅ BUILT LOCALLY (2026-09-03; genesis master, unreleased; frontend-only) — gates green: web tsc + eslint(0) + vitest 224 + build (jest-axe clean); web/static committed. Gate: independent review = SHIP (30-06). · Part of Phase 30. Repo: **genesis** (web-only). Two small, user-requested fixes folded into this phase.
 
 ## Change A — the stage card itself is clickable (drop the "Open" button)
 
