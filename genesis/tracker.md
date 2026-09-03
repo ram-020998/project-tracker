@@ -239,6 +239,28 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-03 — RELEASED genesis v0.58.0 + genesis-workflows v0.14.0 (post-Phase-30 fixes), CI green
+  (genesis #6727262 / workflows #6727270).** Driven by the first real live Technical Design run
+  (`r-4567cd05bcca`). **genesis v0.58.0:** run-detail workflow-graph REVAMP — elkjs layered LR + orthogonal
+  edge routing (back-edges pre-reversed so validator/gate layering stays correct; custom ELK-routed edges
+  → no line cuts through a node), executed path drawn **green** with per-edge **×N** traversal counts (new
+  `GET /runs/{id}/transitions` + `fold_transitions`), minimap removed, idle edges recoloured visible;
+  run-detail **perf** (Inspector fetches only the selected node's events via `/events?node=`; graph status
+  from `/steps`, no per-SSE-tick fold of the whole log; SSE streams only while active) — fixes graph
+  lag/stall on large agent-heavy runs; **honest partial credit provenance** (ADR-032 — a timed-out turn's
+  missing metering is flagged, not shown as complete); `worker._snapshot` reports a terminal status for a
+  completed graph → an **approved escalation finalizes** (was stranded 'running'); `index.html` served
+  **no-cache**. **genesis-workflows v0.14.0:** `technical-design-analysis` **v0.2.0** — the single
+  big-emission `assemble` agent turn (timed out on ~12 workstreams → truncated doc + no metering, the root
+  of BOTH the malformed doc AND the credit under-count) split into a bounded `synthesize` agent + a
+  **deterministic program `assemble`** (stitches the validated per-workstream blocks + consolidated Open
+  Questions); stronger validators + a `cleanup` node (tool-output scratch only). Recovered the stranded
+  run `r-4567cd05bcca` (regenerated a correct doc deterministically; TD stage 3 → in-review). Gates:
+  genesis pytest **667** + ruff + web tsc/eslint(0)/vitest **224**/build; genesis-workflows
+  **validate_library 11 + pytest 133**. genesis-core/sdk/parser unchanged. Live-acceptance of a fresh TD
+  run remains user-driven. Verified the run-graph render via headless Chrome (CDP): monotonic layered
+  pipeline, 0 node overlaps, 0 edges through a non-endpoint node.
+
 - **2026-09-03 — RELEASED Phase 30 (Technical Design Stage) — genesis v0.57.0 + genesis-workflows v0.13.0, CI
   green (genesis #6725001 / workflows #6725004). PHASE 30 COMPLETE.** The third feature stage goes live (ADR-058
   Accepted + an ADR-056 **prerequisite** amendment): once the Spec + UX artifacts exist, Start (optional comment,

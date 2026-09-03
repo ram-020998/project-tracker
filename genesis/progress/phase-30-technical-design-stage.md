@@ -82,3 +82,31 @@ the agent turns are not. Run it on the box now serving v0.57.0 with the v0.13.0 
 
 - Auto-flag a Technical Design as **stale** when the Spec/UX change after it exists (currently re-run is manual).
 - The **Feature Breakdown** stage (the fourth/last reserved stage) — the next candidate.
+
+## Post-ship fixes — genesis v0.58.0 + genesis-workflows v0.14.0 (2026-09-03)
+
+The first real live Technical Design run (`r-4567cd05bcca`, 12 workstreams) surfaced several issues, all fixed
+(CI green — genesis #6727262 / workflows #6727270):
+
+- **Root cause of a malformed doc AND the credit under-count (239 vs ~400):** the single `assemble` agent turn
+  was asked to re-emit all ~12 workstream blocks (~195 KB in → ~55 KB out) as one document; it hit
+  `turn_timeout` (~428 s), which truncated the HTML (dropped WS7, duplicated WS10–12, multiple `</body>`) and
+  meant Kiro never sent final `meteringUsage` (those ~160 credits are honestly `unavailable`, ADR-032).
+  **Fix (technical-design-analysis v0.2.0):** split into a bounded **`synthesize`** agent (cross-cutting
+  Overview + Complex Designs only — small, reliable) + a **deterministic program `assemble`** that stitches
+  the already-`v_design`-validated per-workstream blocks (each exactly once, in build order) + a
+  programmatically-consolidated global Open Questions. Stronger `check_design`/`check_doc` + `check_synthesis`.
+- **`cleanup` node** on both terminal paths deletes only the tool-output scratch (`_toolcalls/` + saved dumps).
+- **Approved-escalation finalize bug:** `runs/worker._snapshot` now reports a terminal `done` for a completed
+  graph (no next / no interrupt) — an approved escalation had left the run stranded `running`, so its stage
+  never finalized. Recovered the stranded run (regenerated a correct doc via the new deterministic assembler;
+  TD stage 3 → in-review with its completion chat).
+- **Run-detail graph revamp:** elkjs layered LR + orthogonal edge routing (back-edges pre-reversed so
+  validator/gate layering stays correct; custom ELK-routed edges → no line through a node), executed path
+  **green** with per-edge **×N** counts (new `GET /runs/{id}/transitions`), minimap removed, idle edges
+  recoloured to a visible slate. Verified via headless Chrome (CDP): monotonic pipeline, 0 node overlaps, 0
+  edges through a non-endpoint node.
+- **Run-detail perf:** the Inspector fetches only the selected node's events (`/events?node=`); the graph
+  derives status from `/steps` (no per-SSE-tick fold of the whole event log); SSE streams only while active.
+  Fixes the lag/stall on a large agent-heavy run (60 k+ events).
+- **Honest partial credit provenance** + `index.html` served `no-cache` (reloads pick up the latest bundle).
