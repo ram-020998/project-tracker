@@ -1,6 +1,6 @@
 # 30-04 — Platform build (genesis)
 
-> **Status:** ✅ BUILT LOCALLY (2026-09-03; genesis master, unreleased) — gates green: genesis pytest 664 + ruff; web tsc + eslint(0) + vitest 223 + build; web/static committed. Gate: independent review = SHIP (30-06). · Part of Phase 30. Repo: **genesis** (backend + web; **no migration**).
+> **Status:** ✅ BUILT LOCALLY (2026-09-03; genesis master, SHIPPED in 30-07 — genesis v0.57.0 + genesis-workflows v0.13.0) — gates green: genesis pytest 664 + ruff; web tsc + eslint(0) + vitest 223 + build; web/static committed. Gate: independent review = SHIP (30-06) ✅ done; RELEASED (30-07). · Part of Phase 30. Repo: **genesis** (backend + web; **no migration**).
 
 ## Purpose
 
