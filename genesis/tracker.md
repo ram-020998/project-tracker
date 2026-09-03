@@ -239,6 +239,20 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-03 — Phase 30: 30-04 BUILT (platform; local, unreleased).** Wired the Technical Design stage into
+  genesis. **Backend:** JSON `/stages/{stage}/start` + `/rerun` (Technical Design; optional comment, no file)
+  with the **ADR-056 prerequisite gate** (Spec + UX artifacts must be in-review/completed → 409) + friendly
+  409 when the workflow isn't installed; guarded upload/reupload to ux_design; **generalized `StageFinalizer`
+  to a workflow→stage binding registry** (one finalizer serves ux-design-analysis + technical-design-analysis;
+  the v0.55.2 recovery + v0.56.2 bound-run guard preserved); a **`technical_design` ChatModeProfile** +
+  `_STEERING_TD` (the only new agent prompt) + store whitelist. **Web:** flipped `STAGE_DEFS.design` live +
+  `requires:["spec","ux"]` + `deriveAvailability` gating; a `design` registry entry; the TD entry state
+  (blocked / comment+Start / running, reusing the in-progress pattern) + `TechnicalDesignCardActions`
+  (Locked/Start/Open+View+Re-run) + `RerunTechnicalDesignButton`; start/rerun api + `useStartStage` hook.
+  **Gates green:** genesis pytest **664** (+5) + ruff; web tsc + eslint(0) + vitest **223** (+4) + build;
+  web/static committed. Committed LOCAL on genesis master (no tag/push until 30-07). Next: 30-05 (the two UX
+  refinements) on the user's go-ahead.
+
 - **2026-09-03 — Phase 30: 30-03 BUILT (workflow; local, unreleased).** Built the `technical-design-analysis`
   workflow in genesis-workflows (`graph.py` + `workflow.yaml` + 19 tests + registry entry): plan (functional
   workstreams) → per-workstream **existing-state grounding** loop (genesis-kb + appian-dev, read-only) →
