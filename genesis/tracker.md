@@ -239,6 +239,15 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-03 — Phase 30: 30-03 BUILT (workflow; local, unreleased).** Built the `technical-design-analysis`
+  workflow in genesis-workflows (`graph.py` + `workflow.yaml` + 19 tests + registry entry): plan (functional
+  workstreams) → per-workstream **existing-state grounding** loop (genesis-kb + appian-dev, read-only) →
+  per-workstream **design drafting** loop → **agent assemble** (coherence pass) → **grounded verify** critic
+  (bounded → escalate) → present. Reliability trio on every agent; two queue-pop loops with per-iteration
+  retry reset (§7 code-review-loop lesson); no genesis-core/SDK change. **Gates green:** validate_library 11 +
+  ruff clean + workflows pytest **126** (107→126, +19). Committed LOCAL on genesis-workflows master
+  (no tag/push until 30-07). Next: 30-04 (platform build) on the user's go-ahead.
+
 - **2026-09-03 — Phase 30: 30-01 + 30-02 EXECUTED (docs; awaiting review).** Wrote `30-01-findings.md` (the
   verbatim study of the 5 example TDs → the locked reader-first output skeleton + applied research + the
   finalized node graph) and landed the ADRs in `reference/decision-log.md`: **ADR-058 (Proposed)** — the

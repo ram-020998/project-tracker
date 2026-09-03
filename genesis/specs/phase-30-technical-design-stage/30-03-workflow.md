@@ -1,6 +1,6 @@
 # 30-03 — The `technical-design-analysis` workflow (genesis-workflows)
 
-> **Status:** 📋 DRAFT. Gate: independent review = SHIP. · Part of Phase 30. Repo: **genesis-workflows**.
+> **Status:** ✅ BUILT LOCALLY (2026-09-03; genesis-workflows master, unreleased) — gates green: validate_library 11 + ruff + workflows pytest 126 (19 new). Gate: independent review = SHIP (30-06). · Part of Phase 30. Repo: **genesis-workflows**.
 
 ## Purpose
 
