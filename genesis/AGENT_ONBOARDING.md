@@ -17,7 +17,7 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-09-01 — latest SHIPPED: genesis v0.56.2 + genesis-workflows v0.12.1 + genesis-core v0.9.6 +
+> **Last refreshed: 2026-09-03 — latest SHIPPED: genesis v0.57.0 + genesis-workflows v0.13.0 + genesis-core v0.9.6 +
 > kiro-agent-sdk v0.7.1 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**
@@ -83,6 +83,33 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   unless I ask, and ask before destructive actions. No code changes until you've read it and restated.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
+
+## ⭐ SHIPPED — Phase 30 (Technical Design Stage) — COMPLETE · genesis v0.57.0 + genesis-workflows v0.13.0 (2026-09-03, CI green)
+
+> **Phase 30 made the THIRD feature stage live: Technical Design (ADR-058, Accepted) — and the first stage that
+> depends on its predecessors.** Once the **Spec + UX Design** artifacts exist (in-review/completed), the user opens
+> the Technical Design card, provides an optional **comment**, and clicks **Start** → a supervised
+> **`technical-design-analysis`** run ("Technical Design Preparation"): plan the work into **functional workstreams**
+> → per-workstream **existing-state grounding** against the live app (structure via **genesis-kb**, actual code via
+> **appian-dev**, read-only) → per-workstream **design drafting** → an **agent assemble** (coherence) → a **grounded
+> verify** critic (bounded → escalate) → present. A **`technical_design` completion chat** finalizes it via the same
+> annotatable review (only the steering prompt changed). The doc is **object-level + code-grounded** (the inverse of
+> ADR-057's intent-level UX doc), organized by workstream for readability; every change names a real object or is
+> marked NEW; the agent never assumes — blind spots become Open Questions.
+>
+> **Amends ADR-056** — a stage MAY declare **prerequisites** (`StageDescriptor.requires`): TD requires Spec + UX,
+> enforced UI (locked card) + backend (409). **Reuses the Phase-29 surface wholesale** (m0015 StageStore, the stage
+> components, the StageFinalizer — now a **workflow→stage binding registry** serving both workflows); **no migration**,
+> **genesis + genesis-workflows only** (no core/SDK). Also folded in **two UX refinements**: the whole **stage card is
+> clickable** (no Open button, all stages; locked/not-available cards not navigable) and **artifacts are openable**
+> (generated → read-only preview; reference → the Document Library viewer). **Released:** genesis **v0.57.0**
+> (`0878b13`) + genesis-workflows **v0.13.0** (`ae1181c`), CI green — genesis **#6725001** / workflows **#6725004**.
+> Gates: genesis pytest **665** + ruff; web **vitest 224** + build; workflows **validate_library 11 + pytest 126**.
+> Specs: `specs/phase-30-technical-design-stage.md` (+ `30-01..30-07`, `30-01-findings.md`); **ADR-058** (Accepted).
+> **Live acceptance** (a real Kiro run → the completion chat) is user-driven / headless-undrivable. **PHASE 30
+> COMPLETE — no active phase.**
+
+---
 
 ## ⭐ SHIPPED — Phase 29 (UX Design Stage) — COMPLETE · genesis v0.55.1 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1 (2026-08-28, CI green)
 

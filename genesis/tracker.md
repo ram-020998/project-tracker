@@ -239,6 +239,22 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-03 — RELEASED Phase 30 (Technical Design Stage) — genesis v0.57.0 + genesis-workflows v0.13.0, CI
+  green (genesis #6725001 / workflows #6725004). PHASE 30 COMPLETE.** The third feature stage goes live (ADR-058
+  Accepted + an ADR-056 **prerequisite** amendment): once the Spec + UX artifacts exist, Start (optional comment,
+  no file) → the **`technical-design-analysis`** workflow (plan by functional workstream → per-workstream
+  existing-state grounding [genesis-kb + appian-dev, read-only] → per-workstream design drafting → agent
+  assemble → grounded verify critic → present) → a **`technical_design`** completion chat via the same
+  annotatable review. Object-level + code-grounded (each change names a real object or is marked NEW; blind
+  spots → Open Questions). Reuses the Phase-29 surface (m0015 StageStore, the stage components, the
+  **StageFinalizer generalized to a workflow→stage binding registry**); **no migration; genesis +
+  genesis-workflows only** (core/SDK unchanged). Prerequisite gating enforced frontend (`deriveAvailability`
+  locked card) + backend (start 409). **UX refinements (30-05):** clickable stage cards (no Open button) +
+  openable artifacts. Releases: genesis `0878b13`/v0.57.0 + genesis-workflows `ae1181c`/v0.13.0. `genesis
+  install` + serve restarted (v0.57.0, no active run). Gates: genesis pytest **665** + ruff; web **vitest 224**
+  + build; workflows **validate_library 11 + pytest 126**. Live acceptance (real Kiro run) is user-driven. As-built:
+  `progress/phase-30-technical-design-stage.md`. **No active phase** (Feature Breakdown is the next candidate).
+
 - **2026-09-03 — Phase 30: 30-06 REVIEW + HARDENING DONE (local, gates green).** Critical review pass across
   the workflow + platform + web against the 30-06 checklist. Found + fixed **2 issues**: (1) `/stages/
   technical_design/start` now 409s when the stage is **already finalized** (chat bound), not just when a run

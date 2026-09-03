@@ -1,6 +1,6 @@
 # 30-07 — Coordinated release (Technical Design stage)
 
-> **Status:** 📋 DRAFT. Gate: CI green. · Part of Phase 30.
+> **Status:** ✅ SHIPPED (2026-09-03) — genesis v0.57.0 (`0878b13`) + genesis-workflows v0.13.0 (`ae1181c`), CI green (genesis #6725001 / workflows #6725004). Docs updated; project-tracker pushed. PHASE 30 COMPLETE. · Part of Phase 30.
 
 ## Purpose
 

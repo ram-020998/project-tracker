@@ -8,6 +8,18 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
+### ⭐ SHIPPED (COMPLETE) — Phase 30: Technical Design Stage (Spec + UX → grounded technical design) — genesis v0.57.0 + genesis-workflows v0.13.0
+
+> **Specs:** `specs/phase-30-technical-design-stage.md` (umbrella) + `phase-30-technical-design-stage/30-01..30-07` + `30-01-findings.md`. As-built: `progress/phase-30-technical-design-stage.md`. **ADR-058** (Accepted) — the grounded, workstream-decomposed Technical Design stage — + an **ADR-056 amendment** (a stage MAY declare prerequisites).
+>
+> **Goal.** Make the THIRD feature stage live, and the first that **depends on** its predecessors. Once the **Spec + UX Design** artifacts exist (in-review/completed), the user Starts (optional comment, no file) → a supervised **`technical-design-analysis`** run produces a reader-first, **object-level, code-grounded** Technical Design; a bound **`technical_design` completion chat** finalizes it via the same annotatable review.
+>
+> **Workflow (`technical-design-analysis`):** plan into **functional workstreams** → per-workstream **existing-state grounding** loop (`@genesis-kb` structure + `@appian-dev` code, read-only) → per-workstream **design drafting** loop → **agent `assemble`** (coherence) → **grounded `verify`** critic (bounded → escalate) → present. Reliability trio per agent; two queue-pop loops with per-iteration retry reset; `recursion_limit` 300. Each change names a real object or is marked **NEW**; the agent never assumes — blind spots become Open Questions (the inverse of ADR-057's intent-level UX doc). Research-backed (hierarchical decomposition + map-reduce + externally-grounded critic — `30-01-findings.md`).
+>
+> **Platform (genesis):** JSON `/stages/technical_design/start`+`/rerun` (prerequisite-gated → 409; friendly 409 when uninstalled); the **generalized `StageFinalizer`** (a workflow→stage `_BINDINGS` registry serving both workflows; bound-run + stage-match + idempotency guards); the **`technical_design` `ChatModeProfile`** + `_STEERING_TD`; web `STAGE_DEFS.design` live + `deriveAvailability` gating + the comment/Start entry + `TechnicalDesignCardActions`/`RerunTechnicalDesignButton`. **Prerequisite gating** enforced frontend (locked card/blocked workspace) AND backend. **Reuses the Phase-29 surface wholesale**; **no migration**; **genesis + genesis-workflows only**. **UX refinements (30-05):** clickable stage cards (no Open button; locked/not-available not navigable) + openable artifacts (generated → read-only preview; reference → Document Library viewer).
+>
+> **✅ SHIPPED (2026-09-03) — PHASE 30 COMPLETE.** genesis **v0.57.0** (`0878b13`) + genesis-workflows **v0.13.0** (`ae1181c`), CI green — genesis **#6725001** / workflows **#6725004**. 30-06 review found + fixed 2 issues (a TD-start guard for an already-finalized stage; a finalizer stage-match guard). Gates: genesis pytest **665** + ruff; web **vitest 224** + build; genesis-workflows **validate_library 11 + pytest 126**. `genesis install` + serve restarted to v0.57.0. **Live acceptance** (a real Kiro run → the completion chat) is user-driven / headless-undrivable. **No active phase** — Feature Breakdown is the next candidate (not started unless asked).
+
 ### ⭐ SHIPPED (COMPLETE) — Phase 29: UX Design Stage (Mockup → grounded implementation analysis) — genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1
 
 > **Specs:** `specs/phase-29-ux-design-stage.md` (umbrella) + `phase-29-ux-design-stage/29-01..29-06`. As-built:
