@@ -92,10 +92,10 @@ genesis/genesis/
             awaiting_input:paused|done|failed|cancelled; TERMINAL set), eventlog.py (EventLog — durable
             run_events; append/list/last_seq/latest/purge/count/aggregate_tool_calls; **aggregate_credits/
             run_credits/credits_provenance via json_extract over agent.result — Phase 11**), steps.py
-            (fold_steps → per-node summary incl. credits/context_pct), events.py (Event +
+            (fold_steps → per-node summary incl. credits/context_pct/executions; **fold_transitions → per-edge traversal counts + per-node executions folded from the node.completed sequence — the executed-path fold for the run graph, v0.58.0**), events.py (Event +
             single canonical EventBus — legacy dual bus removed in spec 04), validation.py, worker.py
             (SUBPROCESS entry; ops run|resume|get_state|update_state|fork; emits JSONL; sets the
-            LangGraph `recursion_limit` from `META.execution.recursion_limit`, default 150 — 12-01), supervisor.py,
+            LangGraph `recursion_limit` from `META.execution.recursion_limit`, default 150 — 12-01; **`_snapshot` reports a TERMINAL status for a completed graph (no next / no interrupt) so a `gate → END` path — e.g. an approved escalation — finalizes instead of stranding the run 'running', v0.58.0**), supervisor.py,
             manager.py (RunManager: start/pause/resume/cancel/respond/patch_state/fork/list/wait; writes
             canonical events to EventLog + fans out on cbus; `_CANONICAL_CUSTOM` persists agent.result &c
             with node+full payload; pending_gate [durable + checkpoint cold path]; log_events; steps).
@@ -142,7 +142,7 @@ genesis/genesis/
             config/mcp-servers CRUD(+tools+allowlist+test), config/clis CRUD; **config/environments(+/{label}/dev + /dev/check, 16-08 §2.0); config/native-mcp (GET status) + config/native-mcp/{id}/install|rollback (POST, 16-08 Stage B)**; **applications(+/available) + applications/{uuid}(+/sync +/sync-status +/objects(+/{uuid}) +/bundles(+/{id})) + DELETE (16-04)**; **config/native-cli (GET status) + config/native-cli/{id}/install|rollback + config/gws/auth (GET) + config/gws/auth/login(+/state) + config/gws/auth/logout (Phase 19); documents/upload + documents/gdrive + documents/{id}/link (POST/DELETE) + documents/{id}/sync + documents/sync + applications/{uuid}/documents/sync + GET documents(+?app_uuid) + documents/search + documents/{id} + DELETE documents/{id} + documents/{id}/tables (v0.51.1 — per-sheet spreadsheet grid) (Phase 19)**; **applications/{uuid}/features + features/{id}(+PATCH/DELETE) + features/{id}/spec (POST create-opens-a-feature_spec-chat / GET) + features/{id}/spec/context (GET candidates / POST inject-as-./context/-files) + features/{id}/spec/milestone + features/{id}/spec/status + features/{id}/spec/{artifact,sdk.js,export.md} (Phase 20)**; config/retention/{plan,apply};
             artifacts/usage; home (metrics incl. **total_credits + credits_provenance**); runs (POST/GET),
             runs/{id}(+gate), runs/{id}/state (GET/PATCH), pause|resume|cancel|respond|fork,
-            runs/{id}/artifacts(+/{name}(?mode)+/download), runs/{id}/events(?after,kinds,node)+/steps,
+            runs/{id}/artifacts(+/{name}(?mode)+/download), runs/{id}/events(?after,kinds,node)+/steps+**/transitions [v0.58.0 executed-path fold: per-edge traversal counts]**,
             runs/{id}/events/stream (canonical SSE); **chat/sessions CRUD + chat/sessions/{id}/messages
             (SSE turn) + /cancel (Phase 10); chat/sessions/{id}/mode + /notifications + GET/PUT config/copilot
             + chat/actions + resolve-permission (Phase 13 copilot); skills (GET/POST author/DELETE) +
@@ -188,6 +188,7 @@ genesis/genesis/
             Credits (Phase 11): shared/ui `formatCredits` + `CreditBadge` + `Coins`; Overview "Credits
             Used" KPI (replaced Tool-Calls); run-detail TelemetryStrip Credits stat + per-node + header
             run-total; chat per-message credit footer (in the ResultChip's old position).
+            **Run graph (v0.58.0 revamp): features/run-detail/graph/{layout.ts [**elkjs** layered LR + orthogonal edge routing; back-edges pre-reversed by DFS so validator/gate layering stays correct; deterministic longest-path fallback], ElkEdge.tsx [draws ELK's routed poly-line so no line cuts through a node — executed edges GREEN + a ×N traversal-count pill, running pulses, idle dashed slate], RunGraph.tsx [async ELK layout, no minimap], NodeCard.tsx}. The executed path + counts come from `useRunTransitions` (`GET /runs/{id}/transitions`). PERF: the Inspector fetches only the selected node's events via `useRunNodeEvents` (`/events?node=`), the graph derives status from `/steps` (no per-SSE-tick fold of the whole event log), and `useRunStream` streams only while active + refreshes `/steps` on transitions — fixes graph lag on large agent-heavy runs. Credit badge shows honest `partial` provenance when an agent turn ran but didn't meter (ADR-032).**
 
 genesis-workflows/
   registry.json (catalog + genesis_core_major=1), mcp-registry.json (REAL internal images:

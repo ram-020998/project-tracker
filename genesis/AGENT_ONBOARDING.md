@@ -108,6 +108,8 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 > Specs: `specs/phase-30-technical-design-stage.md` (+ `30-01..30-07`, `30-01-findings.md`); **ADR-058** (Accepted).
 > **Live acceptance** (a real Kiro run → the completion chat) is user-driven / headless-undrivable. **PHASE 30
 > COMPLETE — no active phase.**
+>
+> **▸ Post-ship — genesis v0.58.0 + genesis-workflows v0.14.0 (CI green — genesis #6727262 / workflows #6727270).** From the first real live TD run (`r-4567cd05bcca`): the `assemble` agent turn **timed out** on a ~12-workstream doc → truncated HTML + no metering (the 239-vs-~400 credit gap) → **redesigned** to a bounded `synthesize` agent + a **deterministic program `assemble`** (technical-design-analysis **v0.2.0**) + a `cleanup` node; `worker._snapshot` fix so an **approved escalation finalizes** (was stranded 'running'); run-detail **graph revamp** (elkjs layered LR + orthogonal routing, executed path GREEN + ×N counts, `/runs/{id}/transitions`) + **perf** (per-node events + /steps-driven graph) + honest partial credit provenance + no-cache `index.html`. Gates: genesis pytest **667** + web vitest **224**; workflows validate_library **11** + pytest **133**.
 
 ---
 
