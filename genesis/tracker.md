@@ -239,6 +239,24 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-03 — Phase 30 (Technical Design stage) SPEC DRAFTED (awaiting review).** After a full requirements
+  conversation, wrote the umbrella `specs/phase-30-technical-design-stage.md` + 7 child specs (30-01 research &
+  format study → 30-02 ADR & finalize → 30-03 workflow → 30-04 platform build → 30-05 UX refinements → 30-06
+  review → 30-07 release). **Design:** a Feature's **Technical Design** stage consumes the finalized Spec + UX
+  Implementation Analysis (+ an optional comment) and produces a reader-first, **object-level, code-grounded**
+  Technical Design HTML via a new `technical-design-analysis` workflow — plan (functional workstreams) →
+  per-workstream **existing-state grounding** (map) → per-workstream **design drafting** (map) → assemble
+  (reduce) → **grounded verify** critic (bounded → escalate) → present; then a `technical_design` completion
+  chat finalizes it via the same annotatable review (only the steering prompt changes). Grounded live via
+  genesis-kb (structure) + appian-dev (actual code), **read-only** (ADR-036/037). **New ADR-058** + an
+  **ADR-056 amendment** (a stage MAY declare prerequisites — TD requires Spec + UX artifacts at in-review/
+  completed). Reuses the Phase-29 generalized surface wholesale (m0015 StageStore, StageArtifactWorkspace,
+  AnnotatablePreviewDialog, StageBuilderPage, StageFinalizer [generalized to a workflow→stage binding
+  registry]); **no migration, genesis + genesis-workflows only** (no core/SDK). Two user-requested UX fixes
+  folded in (30-05): clickable stage cards (drop the Open button, all stages) + openable artifacts (view like
+  the Document Library). Example-doc authority: `/Users/ramaswamy.u/Documents/GSS/technical-design-examples`
+  (5 real GSS/PSC TDs). **No code yet — awaiting user review of the specs.**
+
 - **2026-09-01 (RELEASED genesis v0.56.2; CI green #6703718) — re-upload finalize correctness + an orphaned-run
   post-mortem.** Checking a stuck run (`r-282a4894adc2`, the user's re-upload) found it **orphaned**: I had
   restarted `genesis serve` (to ship the v0.56.1 re-upload button) while it was mid-`live_grounding`, which
