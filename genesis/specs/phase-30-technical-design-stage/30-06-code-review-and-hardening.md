@@ -1,6 +1,6 @@
 # 30-06 — Code review & hardening (Technical Design stage)
 
-> **Status:** 📋 DRAFT. Gate: review clean. · Part of Phase 30.
+> **Status:** ✅ DONE (2026-09-03) — review pass complete, 2 hardening fixes applied, all gates green. (The independent sub-agent auditor hung on a grep; substituted a rigorous critical self-review + full gate sweep — see the note.) Live dry-run remains user-driven (headless-undrivable). Gate: review clean. · Part of Phase 30.
 
 ## Purpose
 

@@ -239,6 +239,22 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-03 — Phase 30: 30-06 REVIEW + HARDENING DONE (local, gates green).** Critical review pass across
+  the workflow + platform + web against the 30-06 checklist. Found + fixed **2 issues**: (1) `/stages/
+  technical_design/start` now 409s when the stage is **already finalized** (chat bound), not just when a run
+  is in flight — a second start on a finalized stage would otherwise launch a run the StageFinalizer skips
+  (idempotency) and strand it; (2) `StageFinalizer._finalize` adds a **defensive stage-match guard** (the
+  run's stage_id row `stage` must equal the binding's stage — no cross-finalization). +regression test.
+  Checklist otherwise clean: read-only allowlists (no write/deploy tools); reliability trio on every agent +
+  per-iteration retry reset in both loops; prerequisite gating enforced backend (409 + resolve_inputs) AND
+  frontend (deriveAvailability) in agreement; the binding registry serves both workflows with the bound-run +
+  idempotency guards preserved; clickable-card overlay is a11y-clean (jest-axe). **Gates:** genesis pytest
+  **665** + ruff; workflows validate_library **11** + pytest **126**; web vitest **224** + build.
+  **NOTE:** the independent sub-agent auditor hung on a grep call, so this was a rigorous self-review — a
+  truly independent audit can still be re-run later. **Live dry-run (real Kiro + synced app) is user-driven /
+  headless-undrivable** — the manual check is in the 30-06 spec. Committed LOCAL on genesis. Next: 30-07
+  (coordinated release) on the user's go-ahead.
+
 - **2026-09-03 — Phase 30: 30-05 BUILT (UX refinements; local, unreleased, frontend-only).** Two user-requested
   fixes. **(A) Clickable stage cards:** the whole card is now the click target (an accessible stretched-link
   overlay button); removed the standalone Open/Details button from `StageCard` + all three CardActions (they
