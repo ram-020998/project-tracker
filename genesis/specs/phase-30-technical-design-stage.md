@@ -1,6 +1,6 @@
 # Phase 30 — Technical Design Stage (Spec + UX → grounded technical design)
 
-> **Status:** 📋 **SPEC DRAFT (2026-09-03).** Awaiting review, then build. · **Author:** Genesis agent
+> **Status:** ✅ **SHIPPED — PHASE 30 COMPLETE (2026-09-03).** genesis v0.57.0 (`0878b13`) + genesis-workflows v0.13.0 (`ae1181c`), CI green (genesis #6725001 / workflows #6725004). ADR-058 Accepted (+ the ADR-056 prerequisite amendment). As-built: `progress/phase-30-technical-design-stage.md`. · **Author:** Genesis agent
 > **Type:** multi-repo — **genesis** (backend + web; no migration — reuses m0015) + **genesis-workflows** (new workflow). genesis-core / kiro-agent-sdk / genesis-appian-parser **unchanged**. · **Depends on:** Phase 29 (the UX Design stage + the generalized per-stage artifact model m0015, the `StageArtifactWorkspace`/`AnnotatablePreviewDialog`/`StageBuilderPage` reuse surface, the `StageFinalizer` run→stage bridge, the `ux_design` chat mode; ADR-057), Phase 28 (the Feature Workspace framework; ADR-056), Phase 20/21 (Features & Specs + the annotatable chat authoring; ADR-042/043/044/045), Phase 25-01 (`LifecycleService`/`domain/`; ADR-050), Phase 16 (`genesis-kb` + the managed-native `appian-dev` MCP; ADR-036/037/038).
 
 ---

@@ -1,6 +1,6 @@
 # 30-01 — Research & format study (Technical Design stage)
 
-> **Status:** 📋 DRAFT. **Docs only.** Gate: ⭐ user review. · Part of Phase 30 (`../phase-30-technical-design-stage.md`).
+> **Status:** ✅ DONE (2026-09-03) — executed; deliverable in `30-01-findings.md`. Phase 30 SHIPPED (genesis v0.57.0 + genesis-workflows v0.13.0). · Part of Phase 30 (`../phase-30-technical-design-stage.md`).
 
 ## Purpose
 

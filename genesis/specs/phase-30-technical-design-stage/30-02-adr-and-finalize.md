@@ -1,6 +1,6 @@
 # 30-02 — ADR & finalize (Technical Design stage)
 
-> **Status:** 📋 DRAFT. **Docs only.** Gate: ⭐ user sign-off → build. · Part of Phase 30.
+> **Status:** ✅ DONE (2026-09-03) — design locked; ADR-058 (+ ADR-056 amendment) Accepted in `reference/decision-log.md` + `bible/04`. Phase 30 SHIPPED (genesis v0.57.0 + genesis-workflows v0.13.0). · Part of Phase 30.
 
 ## Purpose
 
