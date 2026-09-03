@@ -239,6 +239,13 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-03 — Phase 30: 30-01 + 30-02 EXECUTED (docs; awaiting review).** Wrote `30-01-findings.md` (the
+  verbatim study of the 5 example TDs → the locked reader-first output skeleton + applied research + the
+  finalized node graph) and landed the ADRs in `reference/decision-log.md`: **ADR-058 (Proposed)** — the
+  grounded, workstream-decomposed Technical Design stage — and an **ADR-056 amendment** (a stage may declare
+  prerequisites). User decisions folded in: **assemble = an agent** coherence pass; the start **comment is
+  optional**. Next: 30-03 (the `technical-design-analysis` workflow) on the user's go-ahead. No code yet.
+
 - **2026-09-03 — Phase 30 (Technical Design stage) SPEC DRAFTED (awaiting review).** After a full requirements
   conversation, wrote the umbrella `specs/phase-30-technical-design-stage.md` + 7 child specs (30-01 research &
   format study → 30-02 ADR & finalize → 30-03 workflow → 30-04 platform build → 30-05 UX refinements → 30-06

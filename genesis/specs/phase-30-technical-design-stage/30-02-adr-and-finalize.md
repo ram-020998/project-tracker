@@ -26,7 +26,7 @@ START → resolve_inputs → load_inputs → plan_sections →[v_plan]→
   count (e.g. ≤ 12) + the total via the worker `recursion_limit` (from META).
 - **Grounding split (D3, as UX):** `@genesis-kb` = structure/deps/blast-radius; `@appian-dev` = read the
   actual code. Read-only namespaced allowlists. Save-by-reference for bulk output.
-- **`assemble`:** decide program vs light-agent coherence pass against a real dry-run (umbrella §14.1).
+- **`assemble`:** an **agent** node (reliability trio) — a coherence pass stitching the per-workstream HTML blocks into one reader-first document (dedup, consistent headings/ordering, the global Complex Designs + Open Questions roll-up), not a mechanical concat (locked 2026-09-03).
 
 ## B. Validators (deterministic)
 

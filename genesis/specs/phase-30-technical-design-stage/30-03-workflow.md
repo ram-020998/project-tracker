@@ -37,7 +37,7 @@ draft_section (loop) →[v_design]→ assemble →[v_doc]→ verify →[v_verify
   the loop node's retry counter each iteration.
 - **Agents (reliability trio each):** `plan_sections` (mcp=[]), `analyze_section` (genesis-kb+appian-dev),
   `draft_section` (mcp=[] — designs off the accumulated grounding; may re-query if a gap is found — 30-06
-  decides whether draft gets live tools), `assemble` (mcp=[] or program), `verify` (genesis-kb+appian-dev,
+  decides whether draft gets live tools), `assemble` (agent, mcp=[] — coherence pass), `verify` (genesis-kb+appian-dev,
   grounded critic).
 
 ## Prompts (intent — finalized against a dry-run in 30-06)
@@ -56,8 +56,7 @@ draft_section (loop) →[v_design]→ assemble →[v_doc]→ verify →[v_verify
   Record Changes, Process Changes, UI Changes, Expression Rule Changes, Integrations. Each change MUST name a
   real existing object (from the existing-state analysis) or be marked **NEW**. Add a Complex designs note and
   numbered Open Questions for anything you are unsure of — do NOT assume. Output the workstream's HTML block."
-- **`assemble`** — compose the blocks into the full `technical-design.html` per the 30-01 skeleton (Overview +
-  per-workstream sections + global Complex Designs + Open Questions); reader-first.
+- **`assemble`** (agent) — stitch the per-workstream blocks into the full `technical-design.html` per the 30-01 skeleton (Overview + per-workstream sections + global Complex Designs + Open Questions): a coherence pass (dedup, consistent headings/ordering, the global roll-up), reader-first — not a mechanical concat.
 - **`verify`** — "Grounded critic. Re-check `technical-design.html` against the SPEC + UX + EXISTING-STATE and
   spot-check the live app (@genesis-kb/@appian-dev). Flag: ungrounded/assumed changes, object names that don't
   exist (and aren't marked NEW), missing change-groups, missing per-workstream/global sections, and Open

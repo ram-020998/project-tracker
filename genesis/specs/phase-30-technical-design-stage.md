@@ -147,11 +147,10 @@ each) do judgment. **Per-workstream decomposition** and a **grounded verificatio
    changes**, **process-model changes**, **UI changes**, **expression-rule changes**, **integrations**, and
    **complex designs** — each change naming a real existing object or marked **NEW**. Append to
    `design_sections.json`. Validator: required change-groups present or explicitly "none"; grounded.
-6. **`assemble`** (agent OR program) — compose the per-workstream drafts into a single reader-first
+6. **`assemble`** (agent) — a coherence pass that stitches the per-workstream drafts into a single reader-first
    **`technical-design.html`**: `<h1>` feature + "Technical Design"; `<h2>Overview</h2>`; one `<h2>` per
    workstream (Objective → What exists today → What changes [grouped, with tables] → Complex designs → Open
-   Questions); then a global `<h2>Complex Designs</h2>` + `<h2>Open Questions</h2>`. (Assemble-as-program if
-   the per-section HTML is already well-formed; assemble-as-agent if a coherence pass helps — 30-03 decision.)
+   Questions); then a global `<h2>Complex Designs</h2>` + `<h2>Open Questions</h2>`. It is an **agent** node (reliability trio): dedup, consistent headings/ordering, and the global roll-up — NOT a mechanical concat (locked with the user 2026-09-03).)
 7. **`verify`** (agent, **grounded critic**) — re-read the HTML against spec + UX + `existing_state.json` and
    spot-check the live app: flag ungrounded assumptions, object names that don't exist (unless NEW), missing
    change-groups, and confirm the Open Questions genuinely capture blind spots (the agent must **not assume**).
@@ -288,8 +287,4 @@ section in the doc.
 
 ## 14. Open questions
 
-None blocking (all resolved with the user 2026-09-03). Non-blocking, resolvable in 30-02/30-03:
-1. **Assemble as program vs agent** (§5.6) — whether the per-workstream HTML is concatenated by a program node
-   or passed through a light agent coherence pass. Decide in 30-03 against a real dry-run.
-2. **Comment default** — treated as **optional** (start allowed with an empty comment) unless the user says
-   otherwise.
+None blocking — all resolved with the user (2026-09-03): **`assemble` is an agent** coherence pass (not a program concat); the start **comment is optional** (empty accepted).
