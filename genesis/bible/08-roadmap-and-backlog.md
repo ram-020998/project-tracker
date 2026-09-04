@@ -8,6 +8,20 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
+### 📝 SPECS DRAFTED (build gated on go-ahead) — Phase 31: Feature Breakdown Stage (Spec + UX + Technical Design → grounded, Jira-ready backlog)
+
+> **Specs:** `specs/phase-31-feature-breakdown-stage.md` (umbrella) + `phase-31-feature-breakdown-stage/31-01..31-07` + `31-01-findings.md`. **ADR-059** (Proposed). **No code yet — specs only; implementation is gated on the user's go-ahead after spec review.**
+>
+> **Goal.** Make the FOURTH and final feature stage live: turn the finished **Spec + UX Design + Technical Design** into the developer-executable **backlog** (epics + stories/tasks) a team grooms + imports into Jira. Once all three prior artifacts exist, the user opens the stage, optionally types **notes** + attaches **up to 3 supporting docs** (transcript/spike/etc.), and clicks **Start** → a supervised **`feature-breakdown-analysis`** run.
+>
+> **Workflow (`feature-breakdown-analysis`):** `plan_epics` (epics = the Technical Design's **functional workstreams**, 1:1) → per-epic **story/task breakdown** loop (`break_epic`, MAP; Appian rules — form vs process-model split, entry-point splitting, Story=FE-testable / Task=not-FE-verifiable, **Gherkin** AC, one-line TD-anchored Dev Notes, nice-to-have flagging) → **deterministic `assemble`** (a PROGRAM node: `backlog.json` + a reader-first, Lavish-safe `breakdown.html` — `<details>` cards grouped by epic + a CSS-only card↔table toggle + the embedded canonical JSON) → **grounded verify** critic (coverage vs Spec + every TD "What changes"; bounded → escalate) → present → cleanup. Reliability trio per agent; read-only genesis-kb + appian-dev (light spot-check — the TD is already grounded).
+>
+> **Platform (genesis):** three-way prerequisite gating (`requires:["spec","ux","technical_design"]`, frontend `deriveAvailability` + backend 409); a **multipart** start (notes + ≤3 files, ADR-035) + re-run; a `feature_breakdown` StageFinalizer binding + chat mode (`_STEERING_FB`); web `STAGE_DEFS.breakdown` live + the notes-and-dropzone entry state + an **Export** button. **No migration** (m0015 reused); genesis + genesis-workflows only.
+>
+> **Jira export:** `GET …/stages/feature_breakdown/export.csv` — deterministic, from the embedded canonical JSON, the `spec-to-backlog` skill's column contract (Issue ID · Issue Type · Summary · Description · Parent ID · Acceptance Criteria · Labels), **create-new-epics** via Issue ID → Parent ID, no custom-field columns; built with the already-pinned `openpyxl`/`csv` (no new dep). Methodology from the `spec-to-backlog` Kiro skill (analysis core + JSON + Jira mapping ONLY — its Lucid/Sheets/REST renderers dropped); format from the four GSS example breakdowns.
+>
+> **Sub-phases:** 31-01 research/format study (DONE — `31-01-findings.md`) → 31-02 ADR & finalize (DONE — ADR-059 drafted) → 31-03 workflow → 31-04 platform build → 31-05 Jira-importable export → 31-06 code review & hardening (incl. **Lavish-annotation compatibility** of the interactive HTML — the one spike-worthy risk) → 31-07 release. **No active build until the user says go.**
+
 ### ⭐ SHIPPED (COMPLETE) — Phase 30: Technical Design Stage (Spec + UX → grounded technical design) — genesis v0.57.0 + genesis-workflows v0.13.0
 
 > **Specs:** `specs/phase-30-technical-design-stage.md` (umbrella) + `phase-30-technical-design-stage/30-01..30-07` + `30-01-findings.md`. As-built: `progress/phase-30-technical-design-stage.md`. **ADR-058** (Accepted) — the grounded, workstream-decomposed Technical Design stage — + an **ADR-056 amendment** (a stage MAY declare prerequisites).

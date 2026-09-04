@@ -239,6 +239,24 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-04 — Phase 31 (Feature Breakdown Stage) SPECS DRAFTED (project-tracker only; no code).** Investigated
+  the `spec-to-backlog` Kiro skill (cloned; extracted its analysis methodology + `Backlog_JSON` contract + Jira
+  column mapping — dropped the Lucid/Sheets/REST renderers + gws/Lucid fetching) and the four GSS example
+  breakdowns (`~/Documents/GSS/breakdown-examples` — real fields, the **form vs process-model** split,
+  entry-point granularity, **Story vs Task**, Gherkin AC), then designed + locked (with the user) the Feature
+  Breakdown stage: workflow **`feature-breakdown-analysis`** (epics = the Technical Design's functional
+  workstreams → per-epic story/task breakdown [Appian rules; Story=FE-testable / Task=not-FE-verifiable;
+  **Gherkin** AC; **no** points; one-line TD-anchored Dev Notes] → **deterministic assemble** [backlog.json + a
+  Lavish-safe `breakdown.html` — `<details>` cards + CSS-only table toggle + embedded canonical JSON] →
+  **grounded verify** critic → present → cleanup); three-way prerequisite gating
+  (`requires:["spec","ux","technical_design"]`); a **multipart** start (notes + ≤3 uploaded docs, ADR-035); a
+  **Jira-importable CSV export** (create-new-epics via Issue ID → Parent ID; `openpyxl`/`csv`, no new dep); reuses
+  the Phase-29/30 surface (m0015 StageStore, the stage components, the StageFinalizer binding registry + a
+  `feature_breakdown` chat mode); **no migration; genesis + genesis-workflows only**. Wrote the umbrella spec +
+  7 child specs (`31-01..31-07`) + `31-01-findings.md`, drafted **ADR-059 (Proposed)** in `reference/decision-log.md`,
+  and added a `bible/08` §9 roadmap block + a README phases row. **Implementation is gated on the user's go-ahead
+  after reviewing the specs** (per §8 — planning task, no build yet).
+
 - **2026-09-03 — RELEASED genesis v0.58.0 + genesis-workflows v0.14.0 (post-Phase-30 fixes), CI green
   (genesis #6727262 / workflows #6727270).** Driven by the first real live Technical Design run
   (`r-4567cd05bcca`). **genesis v0.58.0:** run-detail workflow-graph REVAMP — elkjs layered LR + orthogonal
