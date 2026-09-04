@@ -1,6 +1,6 @@
 # Phase 33 — The Workbench (a per-application Kanban execution board)
 
-> **Status:** 🟡 **SPECS DRAFTED (2026-09-04)** — awaiting user sign-off to build. ADR-061 **Proposed**. Umbrella + `phase-33-workbench/33-01..33-05`. · **Author:** Genesis agent
+> **Status:** ✅ **SHIPPED — PHASE 33 COMPLETE (2026-09-04)** · genesis v0.61.0, CI green. ADR-061 **Accepted**. As-built: `progress/phase-33-workbench.md`. Umbrella + `phase-33-workbench/33-01..33-05`. · **Author:** Genesis agent
 > **Type:** single-repo — **genesis** (backend + web) + **one migration (m0017)** + **one new web dep (`@dnd-kit`)**. genesis-core / kiro-agent-sdk / genesis-workflows / genesis-appian-parser **unchanged**. · **Depends on:** Phase 32 (finalized stories — `kb_stories`/`kb_epics` + `StoryStore` + the forward-compat `status` column; ADR-060), Phase 28 (the Feature Workspace framework + the reserved story-execution plug-point; ADR-056), Phase 25-01 (`LifecycleService` + `STORY_STAGE_TRANSITIONS` + the `Story`/`Stage` domain; ADR-050 + m0013 audit) + 25-08 (`row_version` CAS; m0014), Phase 24-02/27 (the primary-nav / app-shell; ADR-049), Phase 16/20 (applications + features; the app→feature→story linkage).
 
 ---

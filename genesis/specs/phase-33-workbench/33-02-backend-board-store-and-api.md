@@ -1,6 +1,6 @@
 # 33-02 — Backend: the board store + the Workbench API
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 33. Repo: **genesis** (backend + m0017). · **Depends on:** 33-01 (locked schema/contract), ADR-060 (`StoryStore`), ADR-050 (`LifecycleState`/domain), m0014 (`row_version`).
+> **Status:** ✅ SHIPPED (genesis v0.61.0). · Part of Phase 33. Repo: **genesis** (backend + m0017). · **Depends on:** 33-01 (locked schema/contract), ADR-060 (`StoryStore`), ADR-050 (`LifecycleState`/domain), m0014 (`row_version`).
 
 ## Purpose
 

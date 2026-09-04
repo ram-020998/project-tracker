@@ -358,3 +358,40 @@ genesis/genesis/
   web/src/features/run-detail/  graph UX fixes (v0.60.0): RunGraph refresh Panel + path legend + edge paint-order
                         (drop per-edge zIndex so the ×N label stays above), NodeCard standard icons, hooks
                         useRunStream also invalidates /transitions (live executed path).
+
+# ── Phase 33 — The Workbench (per-application Kanban execution board; ADR-061) ──
+genesis/genesis/
+  db/migrations/m0017_workbench.py  workbench_boards (curated app→board registry; app_uuid UNIQUE FK→
+                        kb_applications ON DELETE CASCADE) + kb_board_cards (board_id FK→workbench_boards +
+                        story_id FK→kb_stories, both CASCADE; board_position; UNIQUE(board_id,story_id); NO lane
+                        column — lane = kb_stories.status); current_version → 17.
+  domain/enums.py       LifecycleState += TO_DO('to-do') + DESIGN_REVIEW('design-review') → the 8 Workbench lanes.
+  domain/transitions.py STORY_STAGE_TRANSITIONS reconciled to the 8-lane order (deployment after verification;
+                        forward-compat, NOT enforced on a board drag — ADR-061) + STORY_LANES (the canonical
+                        lane order + valid-lane set); exported from domain/__init__.
+  kb/boards.py          BoardStore (exported from kb/__init__ + BoardExistsError/WorkbenchNotFoundError):
+                        list_boards (per-lane counts) / available_applications (tracked, no board yet) /
+                        add_board(409 dup, 400 untracked) / remove_board / get_board (lanes=STORY_LANES + cards;
+                        card = story fields + lane=status + board_position + epic_title + feature_id/name +
+                        row_version) / importable (finalized + app-owned + not-carded, grouped feature→epic) /
+                        import_stories (batch → To Do, idempotent skips, one tx) / move_card (row_version CAS) /
+                        reorder_lane (bulk: set each card's board_position=index + status=lane, one tx — intra-lane
+                        order + cross-lane status) / remove_card. KbStore.untrack_application also drops the board.
+  api/workbench.py      register_workbench_routes(app, settings) — GET /workbench/boards · GET /workbench/
+                        applications/available · POST/DELETE /workbench/boards[/{app_uuid}] · GET .../{app_uuid}
+                        [+ /importable] · POST .../cards {story_ids} · PATCH .../cards/{story_id} (move, CAS→409) ·
+                        PATCH .../lanes/{lane} {story_ids} (reorder) · DELETE .../cards/{story_id}. Registered in
+                        api/app.py. 409/404/400 mapping.
+  web/src/features/workbench/  WorkbenchPage (renders ONLY the active board — app name + Remove board + BoardPage;
+                        empty-state add when no boards; the board NAV lives in the sidebar) · BoardPage (@dnd-kit
+                        multiple-containers Kanban: a per-lane id mirror synced from the server [never mid-drag],
+                        onDragOver relocates between lanes, onDragEnd finalizes the index + persists via
+                        useReorderLane; DragOverlay; search + Type/Epic/Label filters + Import) · BoardColumn
+                        (droppable + SortableContext; bordered lane panel) · StoryCard (useSortable; grip drag,
+                        body click → drawer; line-clamp title) + StoryCardFace (overlay body) · ImportStoriesDialog ·
+                        AddApplicationsDialog · BoardCardDrawer · lanes.ts (labels/tones) · epic-tone.ts ·
+                        hooks/api/types.
+  web/src/shared/layout/Sidebar.tsx  WorkbenchNav — the Workbench row + a `+` (AddApplicationsDialog) + one
+                        **sub-tab per board** (→ /workbench/:appUuid) from useBoards. (The one sanctioned shell edit.)
+  web/src/shared/layout/nav.ts  PRIMARY_NAV += Workbench (SquareKanban) after Home. router.tsx + breadcrumbs.ts:
+                        /workbench[/:appUuid].

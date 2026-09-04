@@ -1,6 +1,6 @@
 # 33-01 — Data model & ADR (lock the schema, the lane model + contracts)
 
-> **Status:** 🟡 DRAFTED — docs only; gate = user sign-off → build. · Part of Phase 33. Repo: **genesis** (planning). · **Depends on:** ADR-060 (`kb_stories`/`StoryStore` + the `status` seam), ADR-050/25-11 (the `Story`/`Stage` domain + `STORY_STAGE_TRANSITIONS`), m0014 (`row_version`), ADR-042 (app→feature cascade), ADR-049 (nav).
+> **Status:** ✅ SHIPPED (genesis v0.61.0). · Part of Phase 33. Repo: **genesis** (planning). · **Depends on:** ADR-060 (`kb_stories`/`StoryStore` + the `status` seam), ADR-050/25-11 (the `Story`/`Stage` domain + `STORY_STAGE_TRANSITIONS`), m0014 (`row_version`), ADR-042 (app→feature cascade), ADR-049 (nav).
 
 ## Purpose
 

@@ -1,6 +1,6 @@
 # 33-05 — Release
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 33. Repo: **genesis** (single repo + m0017 + `@dnd-kit`). · Gate: CI green.
+> **Status:** ✅ SHIPPED (genesis v0.61.0). · Part of Phase 33. Repo: **genesis** (single repo + m0017 + `@dnd-kit`). · Gate: CI green.
 
 ## Purpose
 

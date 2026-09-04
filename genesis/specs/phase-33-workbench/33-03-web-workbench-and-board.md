@@ -1,6 +1,6 @@
 # 33-03 — Web: the Workbench nav, landing, board (dnd-kit), import & drawer
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 33. Repo: **genesis/web**. · **Depends on:** 33-02 (the `/api/workbench` API), ADR-060 (the Phase-32 story detail + `Select` + epic-tone/badges), ADR-049/27 (nav + app shell).
+> **Status:** ✅ SHIPPED (genesis v0.61.0). · Part of Phase 33. Repo: **genesis/web**. · **Depends on:** 33-02 (the `/api/workbench` API), ADR-060 (the Phase-32 story detail + `Select` + epic-tone/badges), ADR-049/27 (nav + app shell).
 
 ## Purpose
 
