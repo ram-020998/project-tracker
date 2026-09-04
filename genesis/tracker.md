@@ -239,6 +239,8 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-04 — genesis v0.59.1 (patch): fix the Feature Breakdown Export crash + validated the first live run.** The Export action used `<Button asChild><a>…</a></Button>`, but `Button` always renders a `{loading && <Loader2/>}` sibling inside its `Slot`, so Radix `React.Children.only` threw the moment the breakdown stage went in-review and the card rendered Export (first-ever `<Button asChild>` use → never exercised; §7). Fixed to a plain ghost `Button` that downloads via a temporary `<a download>`; + a regression test rendering the in-review `BreakdownCardActions`. Also exercised the first real live run (`r-d18b37366f3e`, Multi Round Evaluations): 12 epics (= the TD's workstreams) / 73 items (31 stories + 42 tasks), every Story with Gherkin AC, and the grounded coverage critic flagged 5 real missing-scope items — stopped mid-revise at the user's request + finalized the stage from the round-1 artifact via the app's reconcile path (completion chat c-5b49bf3ea5a0); the Jira CSV export = 85 rows with valid Issue ID → Parent ID linkage. Gates: web tsc/eslint0/vitest 227/build; genesis pytest 678 + ruff. genesis-workflows unchanged (v0.15.0).
+
 - **2026-09-04 — RELEASED Phase 31 (Feature Breakdown Stage) — genesis v0.59.0 + genesis-workflows v0.15.0, CI
   green (genesis #6735324 / workflows #6735326). PHASE 31 COMPLETE.** The FOURTH feature stage goes live
   (ADR-059 Accepted): once Spec + UX + Technical Design exist, Start (optional notes + up to 3 supporting docs,
