@@ -1,6 +1,6 @@
 # 34-07 — Release (coordinated genesis + genesis-workflows)
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 34. Repos: genesis + genesis-workflows. · **Depends on:** 34-06 clean. **GATED on the user's go-ahead.**
+> **Status:** ✅ SHIPPED (genesis v0.62.0 + genesis-workflows v0.16.0). · Part of Phase 34. Repos: genesis + genesis-workflows. · **Depends on:** 34-06 clean. **GATED on the user's go-ahead.**
 
 ## Purpose
 

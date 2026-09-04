@@ -395,3 +395,47 @@ genesis/genesis/
                         **sub-tab per board** (→ /workbench/:appUuid) from useBoards. (The one sanctioned shell edit.)
   web/src/shared/layout/nav.ts  PRIMARY_NAV += Workbench (SquareKanban) after Home. router.tsx + breadcrumbs.ts:
                         /workbench[/:appUuid].
+
+# ── Phase 34 — Design Lane Automation (Workbench Design + Design Review; ADR-062) ──
+genesis/genesis/
+  db/migrations/m0018_story_stages.py  kb_story_stages (per-(story, stage) artifact — story_id FK→kb_stories
+                        ON DELETE CASCADE; stage='design'; status; html_path; content_hash; chat_session_id;
+                        run_id; row_version; UNIQUE(story_id,stage)) + kb_story_stage_revisions;
+                        current_version → 18. The story-grain analog of m0015.
+  kb/story_stages.py    StoryStageStore (mirrors StageStore; exported from kb/__init__): get/get_for_story/
+                        get_or_create/set_html/set_status/set_source/set_chat_session/add_revision/
+                        list_revisions/reset_for_rerun (re-run updates in place). VALID_STAGES=('design',).
+  kb/stories.py         StoryStore.get_status/set_status (the story-lane lifecycle accessor, row_version CAS).
+  kb/boards.py          board card DTO += design_story_stage_id / design_run_id / design_chat_session_id /
+                        design_status + design_run_status (LEFT JOIN kb_story_stages[stage='design'] + the
+                        runs table — running/failed is authoritative from durable state).
+  domain/lifecycle.py   build_story_lifecycle(_service) — the STORY kind over STORY_STAGE_TRANSITIONS; the
+                        finalizer drives the audited design--submit-->design-review edge (m0013).
+  runtime/settings.py   story_stage_artifacts_dir (~/.genesis/story-stage-artifacts/<story_stage_id>/).
+  chat/story_design_finalizer.py  StoryDesignFinalizer — a RunManager observer bound to story-design-analysis:
+                        on run.final{done} opens the story_design completion chat, copies design.html into the
+                        sandbox, binds it to the story-stage row, sets in-review, and advances the story lane
+                        design→design-review (audited). Bound-run guard + idempotency + reconcile_story_stage
+                        (on-read recovery) + startup reconcile. Attached in api/app.py.
+  chat/mode_profile.py  a 'story_design' ChatModeProfile (clone of technical_design) + _STEERING_STORY_DESIGN;
+                        chat/store.py mode whitelist gains 'story_design'.
+  api/workbench.py      register_workbench_routes(api, settings, *, run_manager, config, story_finalizer):
+                        POST .../cards/{story_id}/design/start (move to Design + snapshot the feature's Spec/UX/
+                        Technical-Design + launch/re-run story-design-analysis + bind the run; fail-fast 409) ·
+                        GET .../design/artifact (Genesis-themed + Lavish-injected) · GET /workbench/design-sdk.js.
+                        Reuses the features Lavish helpers (_theme_style/_SDK_PATH/_placeholder_html).
+  web/src/features/workbench/  BoardPage (drag into Design → StartDesignDialog [Yes=start/re-run, No=just move];
+                        pointer-first collisionDetection so every lane accepts a drop + highlights; a design-review
+                        card click routes to the full page) · StoryCard (running=locked + run link / failed=light-red
+                        + run link; isDesignRunning/isDesignFailed in types/workbench.ts) · StoryDesignWorkspace
+                        (reused ChatThread + AnnotatablePreviewDialog bound to the story_design chat + design
+                        artifact) · StoryCardPage (route /workbench/:appUuid/cards/:storyId) · hooks.useStartDesign
+                        · lib/api/workbench startDesign/designArtifactUrl. router + breadcrumbs: the card route.
+genesis-workflows/
+  workflows/story-design-analysis/  graph.py — resolve_inputs → load_inputs → gather_context →[v_context]→
+                        plan_objects →[v_plan]→ start_objects → next_object →(object) design_object
+                        [@genesis-kb+@appian-dev RO] →[v_object]→ advance_object → next_object └─(done)→
+                        synthesize →[v_synth]→ assemble (DETERMINISTIC design.html) → verify [grounded critic]
+                        →[v_verify]→ route_verify →(ok) present → cleanup; (revise ≤2)/(exhausted→escalate).
+                        Object-level + code; process models per-node. workflow.yaml + registry.json (12 workflows).
+                        **design-doc removed.**

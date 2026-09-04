@@ -17,7 +17,7 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-09-04 — latest SHIPPED: genesis v0.61.0 + genesis-workflows v0.15.0 — **Phase 33 The Workbench COMPLETE** (a per-application Kanban board over finalized stories — curated boards as left-sidebar sub-tabs, batched import → To Do, drag across 8 lanes + intra-lane reorder; m0017; ADR-061). Prior: **Phase 32 Finalize Stories** (m0016; ADR-060) + genesis-core v0.9.6 +
+> **Last refreshed: 2026-09-04 — latest SHIPPED: genesis v0.62.0 + genesis-workflows v0.16.0 — **Phase 34 Design Lane Automation COMPLETE** (the first Workbench per-lane automation — drag a ticket into **Design** → a grounded `story-design-analysis` run writes an object-level, code-level design → the card auto-advances to **Design Review** for a chat + annotatable review; m0018; ADR-062; removed the superseded `design-doc`). Prior: **Phase 33 The Workbench COMPLETE** (a per-application Kanban board over finalized stories — curated boards as left-sidebar sub-tabs, batched import → To Do, drag across 8 lanes + intra-lane reorder; m0017; ADR-061). Prior: **Phase 32 Finalize Stories** (m0016; ADR-060) + genesis-core v0.9.6 +
 > kiro-agent-sdk v0.7.1 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**

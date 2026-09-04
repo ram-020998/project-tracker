@@ -1,6 +1,6 @@
 # 34-01 — Data model & ADR (per-story artifact store, the automation model, ADR-062)
 
-> **Status:** 🟡 DRAFTED — docs only; gate = user sign-off → build. · Part of Phase 34. Repo: **genesis** (planning). · **Depends on:** ADR-061 (the Workbench board + `kb_stories.status` lanes), ADR-057 (m0015 `kb_feature_stages`/`StageStore` — the model this mirrors), ADR-050/25-08 (`LifecycleService` + m0013 audit + `row_version`), ADR-058 (the grounded design workflow shape).
+> **Status:** ✅ SHIPPED (genesis v0.62.0 + genesis-workflows v0.16.0). · Part of Phase 34. Repo: **genesis** (planning). · **Depends on:** ADR-061 (the Workbench board + `kb_stories.status` lanes), ADR-057 (m0015 `kb_feature_stages`/`StageStore` — the model this mirrors), ADR-050/25-08 (`LifecycleService` + m0013 audit + `row_version`), ADR-058 (the grounded design workflow shape).
 
 ## Purpose
 

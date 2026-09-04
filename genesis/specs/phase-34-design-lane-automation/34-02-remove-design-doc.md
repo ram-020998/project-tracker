@@ -1,6 +1,6 @@
 # 34-02 — Remove the `design-doc` workflow
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 34. Repos: **genesis-workflows** (delete) + **genesis** (uninstall + scrub). · **Depends on:** 34-01.
+> **Status:** ✅ SHIPPED (genesis v0.62.0 + genesis-workflows v0.16.0). · Part of Phase 34. Repos: **genesis-workflows** (delete) + **genesis** (uninstall + scrub). · **Depends on:** 34-01.
 
 ## Purpose
 

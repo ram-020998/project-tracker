@@ -1,6 +1,6 @@
 # 34-05 — Web: drag-into-Design confirm, card run states, the Design Review workspace
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 34. Repo: **genesis/web**. · **Depends on:** 34-04 (endpoints + card DTO), ADR-057 (`StageArtifactWorkspace`/`AnnotatablePreviewDialog`/`StageBuilderPage` — reused), ADR-061 (the Workbench board).
+> **Status:** ✅ SHIPPED (genesis v0.62.0 + genesis-workflows v0.16.0). · Part of Phase 34. Repo: **genesis/web**. · **Depends on:** 34-04 (endpoints + card DTO), ADR-057 (`StageArtifactWorkspace`/`AnnotatablePreviewDialog`/`StageBuilderPage` — reused), ADR-061 (the Workbench board).
 
 ## Purpose
 

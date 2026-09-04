@@ -1,6 +1,6 @@
 # 34-04 — Backend: per-story store, design-start, the finalizer
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 34. Repo: **genesis**. · **Depends on:** 34-01 (m0018 + contracts), 34-03 (the workflow), ADR-057/058 (`StageFinalizer` + `_launch_td`/`_current_stage_html`), ADR-050 (`LifecycleService` + m0013).
+> **Status:** ✅ SHIPPED (genesis v0.62.0 + genesis-workflows v0.16.0). · Part of Phase 34. Repo: **genesis**. · **Depends on:** 34-01 (m0018 + contracts), 34-03 (the workflow), ADR-057/058 (`StageFinalizer` + `_launch_td`/`_current_stage_html`), ADR-050 (`LifecycleService` + m0013).
 
 ## Purpose
 

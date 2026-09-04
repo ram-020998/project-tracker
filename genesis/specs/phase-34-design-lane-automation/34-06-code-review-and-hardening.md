@@ -1,6 +1,6 @@
 # 34-06 — Code review & hardening
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 34. Repos: genesis + genesis-workflows. · **Depends on:** 34-02..34-05.
+> **Status:** ✅ SHIPPED (genesis v0.62.0 + genesis-workflows v0.16.0). · Part of Phase 34. Repos: genesis + genesis-workflows. · **Depends on:** 34-02..34-05.
 
 ## Purpose
 

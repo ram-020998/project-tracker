@@ -1,6 +1,6 @@
 # 34-03 — The `story-design-analysis` workflow ("Appian Ticket Design")
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 34. Repo: **genesis-workflows**. · **Depends on:** 34-01 (I/O contract), ADR-058 (`technical-design-analysis` — the template), ADR-011 (reliability trio), ADR-036/037 (read-only grounding), ADR-057 (grounding split genesis-kb=structure / appian-dev=code).
+> **Status:** ✅ SHIPPED (genesis v0.62.0 + genesis-workflows v0.16.0). · Part of Phase 34. Repo: **genesis-workflows**. · **Depends on:** 34-01 (I/O contract), ADR-058 (`technical-design-analysis` — the template), ADR-011 (reliability trio), ADR-036/037 (read-only grounding), ADR-057 (grounding split genesis-kb=structure / appian-dev=code).
 
 ## Purpose
 
