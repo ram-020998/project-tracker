@@ -1,6 +1,6 @@
 # Phase 32 — Finalize Stories (Feature Breakdown → first-class, editable Story records)
 
-> **Status:** 🟡 **SPECS DRAFTED (2026-09-04)** — awaiting user sign-off to build. ADR-060 **Proposed**. Umbrella + `phase-32-finalize-stories/32-01..32-05`. · **Author:** Genesis agent
+> **Status:** ✅ **SHIPPED — PHASE 32 COMPLETE (2026-09-04)** · genesis v0.60.0, CI green. ADR-060 **Accepted**. As-built: `progress/phase-32-finalize-stories.md`. Umbrella + `phase-32-finalize-stories/32-01..32-05`. · **Author:** Genesis agent
 > **Type:** single-repo — **genesis** (backend + web) + **one migration (m0016)**. genesis-core / kiro-agent-sdk / genesis-workflows / genesis-appian-parser **unchanged**. · **Depends on:** Phase 31 (the Feature Breakdown stage — its canonical `backlog.json` embedded in `breakdown.html` is this phase's input; `_parse_embedded_backlog`; ADR-059), Phase 28 (the Feature Workspace framework + the **reserved Stories tab slot**; ADR-056), Phase 25-01 (`LifecycleService`/`domain/` — the reserved `Story`/`Stage` entities + `STORY_STAGE_TRANSITIONS`; ADR-050 + m0013 audit) + 25-08 (`row_version` optimistic-lock CAS; m0014), Phase 20/21 (Features & the `FeatureStore`/feature-detail surface; ADR-042/044).
 
 ---

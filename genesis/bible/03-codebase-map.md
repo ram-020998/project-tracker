@@ -326,3 +326,35 @@ genesis-workflows/
                         current_epic); MAX_EPICS 15; recursion_limit 300; validators enforce Gherkin AC on
                         Stories (Task AC optional) + single-well-formed-HTML + embedded-JSON round-trip.
                         workflow.yaml + tests + registry.json (12 workflows).
+
+# ── Phase 32 — Finalize Stories (the finalized backlog; ADR-060) ──
+genesis/genesis/
+  db/migrations/m0016_stories.py  kb_epics + kb_stories (+ kb_features.stories_finalized_at); current_version → 16.
+                        kb_epics(feature_id FK CASCADE, key, title, description, workstream, position); kb_stories
+                        (feature_id FK CASCADE, epic_id FK SET NULL, key, title, story_type, category, appian_part,
+                        description, acceptance_criteria[JSON], dev_note_ref, questions[JSON], labels[JSON],
+                        status[default 'design', not surfaced], position, row_version).
+  kb/stories.py         StoryStore — finalize(feature_id, backlog) [one tx: insert epics+stories + stamp the
+                        one-time marker; AlreadyFinalizedError]; list_for_feature/list_epics/get_story;
+                        create/update(row_version CAS→StaleWriteError)/delete_story; epic_id validated to feature.
+  domain/entities.py    Story promoted to live (full fields) + Epic added (ADR-060); Stage stays reserved (25-11).
+  domain/errors.py      + AlreadyFinalizedError (→ 409).
+  api/features.py       POST /features/{id}/stages/breakdown/finalize (parse embedded backlog via
+                        _parse_embedded_backlog + _current_stage_html, run backlog.json fallback; 409 unless the
+                        breakdown is completed + not finalized; 422 on empty) + story CRUD routes
+                        (GET/POST /features/{id}/stories, GET/PATCH/DELETE /stories/{story_id}); StoryCreate/StoryUpdate
+                        models; feature detail already exposes stories_finalized_at (SELECT *).
+  web/src/features/features/  StoriesTab (FinalizeStoriesControl [header; disabled→enabled+warning-dialog→
+                        "finalized ✓" badge] + StoriesGrid [Epic·Type·Title colored tags, search + Type/Epic
+                        Select filters, epic-grouped sort, client pagination, whole-row click] + AddStoryDialog) +
+                        StoryForm (shared; Select for type/category/parent-epic) + StoryDetailPage (routed
+                        …/stories/:storyId — modern two-column read + Edit + Delete). FeaturePage: header
+                        Finalize control (replaces Back-to-application), Stories tab live, tab seeded from the URL
+                        (…/stories opens the grid). types/api/hooks/query-keys for stories.
+  web/src/shared/ui/select.tsx  Select — a themed single-select on Radix DropdownMenu (accessible, portaled,
+                        app-styled) replacing native <select> in the Stories + Runs filters + the StoryForm.
+  web/src/app/router.tsx  + …/features/:featureId/stories (grid) + …/stories/:storyId (StoryDetailPage).
+  web/src/shared/layout/breadcrumbs.ts  + Stories + story-detail route patterns (trail: App / Feature / Stories).
+  web/src/features/run-detail/  graph UX fixes (v0.60.0): RunGraph refresh Panel + path legend + edge paint-order
+                        (drop per-edge zIndex so the ×N label stays above), NodeCard standard icons, hooks
+                        useRunStream also invalidates /transitions (live executed path).

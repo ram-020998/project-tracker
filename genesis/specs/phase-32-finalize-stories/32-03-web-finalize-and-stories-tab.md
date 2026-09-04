@@ -1,6 +1,6 @@
 # 32-03 — Web: Finalize Stories + Stories tab grid + routed detail/edit
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 32. Repo: **genesis** (web). · Gate: independent review = SHIP.
+> **Status:** ✅ SHIPPED (genesis v0.60.0). · Part of Phase 32. Repo: **genesis** (web). · Gate: independent review = SHIP.
 
 ## Purpose
 

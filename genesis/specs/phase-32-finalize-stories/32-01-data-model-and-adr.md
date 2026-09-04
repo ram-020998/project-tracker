@@ -1,6 +1,6 @@
 # 32-01 — Data model & ADR (lock the schema + contracts)
 
-> **Status:** 🟡 DRAFTED — docs only; gate = user sign-off → build. · Part of Phase 32. Repo: **genesis** (planning). · **Depends on:** ADR-059 (the canonical backlog), ADR-050/25-11 (the `Story`/`Stage` domain), m0014 (`row_version`).
+> **Status:** ✅ SHIPPED (genesis v0.60.0). · Part of Phase 32. Repo: **genesis** (planning). · **Depends on:** ADR-059 (the canonical backlog), ADR-050/25-11 (the `Story`/`Stage` domain), m0014 (`row_version`).
 
 ## Purpose
 

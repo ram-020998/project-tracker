@@ -1,6 +1,6 @@
 # 32-05 — Release
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 32. Repo: **genesis** (single repo + m0016). · Gate: CI green.
+> **Status:** ✅ SHIPPED (genesis v0.60.0). · Part of Phase 32. Repo: **genesis** (single repo + m0016). · Gate: CI green.
 
 ## Purpose
 

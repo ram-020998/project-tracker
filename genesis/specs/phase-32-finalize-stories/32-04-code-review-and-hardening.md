@@ -1,6 +1,6 @@
 # 32-04 — Code review & hardening
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 32. Repo: **genesis**. · Gate: review clean.
+> **Status:** ✅ SHIPPED (genesis v0.60.0). · Part of Phase 32. Repo: **genesis**. · Gate: review clean.
 
 ## Purpose
 

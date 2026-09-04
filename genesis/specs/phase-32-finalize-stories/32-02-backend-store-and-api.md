@@ -1,6 +1,6 @@
 # 32-02 — Backend: migration + StoryStore + finalize + CRUD
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 32. Repo: **genesis** (backend + **m0016**). · Gate: independent review = SHIP.
+> **Status:** ✅ SHIPPED (genesis v0.60.0). · Part of Phase 32. Repo: **genesis** (backend + **m0016**). · Gate: independent review = SHIP.
 
 ## Purpose
 
