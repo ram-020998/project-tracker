@@ -296,3 +296,33 @@ genesis-workflows/
 
 ---
 
+# ── Phase 31 — Feature Breakdown stage (grounded, Jira-ready backlog; ADR-059) ──
+genesis/genesis/
+  api/features.py       (31-04/05) _fb_prereqs_ready (three-way: spec+ux_design+technical_design in-review/
+                        completed) + _launch_breakdown (snapshots the 3 artifacts + files={"doc1..3"} uploads →
+                        run feature-breakdown-analysis) + _read_uploads (≤3) + multipart POST /features/{id}/
+                        stages/breakdown/start + /rerun (registered BEFORE the generic /stages/{stage}/start so
+                        the literal 'breakdown' route wins) + _STAGE_ARTIFACT_FILE['breakdown']='breakdown.html'.
+                        **Jira export:** GET /features/{id}/stages/breakdown/export.csv → _parse_embedded_backlog
+                        (reads <script id=genesis-backlog> from the current breakdown.html) → _backlog_to_jira_rows
+                        (Issue ID → Parent ID; create-new-epics) → _backlog_csv (stdlib csv).
+  chat/stage_finalizer.py  _BINDINGS += 'feature-breakdown-analysis' → _Binding(stage='breakdown',
+                        artifact='breakdown.html', chat_mode='feature_breakdown', seed=_seed_fb).
+  chat/mode_profile.py  a 'feature_breakdown' ChatModeProfile (read-only KB/live + sandboxed fs-write) +
+                        _STEERING_FB (refine the backlog; keep the embedded canonical JSON in sync).
+  chat/store.py         set_mode whitelist gains 'feature_breakdown'.
+  web/src/features/features/  stages.ts STAGE_DEFS.breakdown available:true + requires:["spec","ux","design"];
+                        stage-registry breakdown → {StageBuilderPage, BreakdownCardActions}; StageBuilderPage
+                        BreakdownEntry (notes + ≤3 dropzone + Start; blocked/running states) + RerunBreakdownButton;
+                        BreakdownCardActions (Locked/Start/View/Export/Re-run); lib/api startBreakdown (multipart)
+                        + exportCsvUrlFor + useStartBreakdown. NO shell edits (ADR-056 plug-in invariant).
+genesis-workflows/
+  workflows/feature-breakdown-analysis/  graph.py — resolve_inputs → load_inputs → plan_epics →[v_epics]→
+                        start_breakdown → next_epic →(break) break_epic [genesis-kb+appian-dev, read-only]
+                        →[v_stories]→ advance_epic → next_epic └─(done)→ assemble (DETERMINISTIC: backlog.json +
+                        Lavish-safe breakdown.html w/ embedded JSON; self-checks check_backlog+check_html) →
+                        verify [grounded coverage critic] →[v_verify]→ route_verify →(ok) present → cleanup → END;
+                        (revise, bounded 2) → next_epic; (exhausted) → escalate. FBState(epics/break_queue/
+                        current_epic); MAX_EPICS 15; recursion_limit 300; validators enforce Gherkin AC on
+                        Stories (Task AC optional) + single-well-formed-HTML + embedded-JSON round-trip.
+                        workflow.yaml + tests + registry.json (12 workflows).

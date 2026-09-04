@@ -1,6 +1,6 @@
 # 31-06 — Code review & hardening
 
-> **Status:** 📝 PLANNED — not started (gated on 31-03/31-04/31-05). · Part of Phase 31.
+> **Status:** ✅ DONE (2026-09-04) — review + Lavish-compat hardening applied. · Part of Phase 31.
 
 ## Purpose
 

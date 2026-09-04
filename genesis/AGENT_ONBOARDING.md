@@ -17,7 +17,7 @@
 > After reading, briefly **restate** the architecture + current state + the non-negotiables, then do the work the human
 > gives you following the loop in `bible/07-working-on-tasks-and-agreements.md` (§8). **This document assigns no task.**
 >
-> **Last refreshed: 2026-09-03 — latest SHIPPED: genesis v0.58.0 + genesis-workflows v0.14.0 + genesis-core v0.9.6 +
+> **Last refreshed: 2026-09-04 — latest SHIPPED: genesis v0.59.0 + genesis-workflows v0.15.0 + genesis-core v0.9.6 +
 > kiro-agent-sdk v0.7.1 + genesis-appian-parser v0.2.0.** (genesis v0.52.0 + genesis-workflows v0.10.0 = the
 > **Phase 26 — Agentic Memory Layer** release, 26-01..26-08, ADR-053/054 Accepted, CI green — Phase 26 COMPLETE.)
 > **Latest patch: genesis v0.52.1 — the `/memory` graph view redesigned as a dark d3-force "constellation" (UI only, no API/DB change).**

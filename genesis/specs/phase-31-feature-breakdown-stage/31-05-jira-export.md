@@ -1,6 +1,6 @@
 # 31-05 — Jira-importable export (CSV from the canonical backlog)
 
-> **Status:** 📝 PLANNED — not started (build gated on the user's go-ahead after spec review). · Part of Phase 31. Repo: **genesis** (backend + a web Export button).
+> **Status:** ✅ SHIPPED (2026-09-04; genesis v0.59.0 + genesis-workflows v0.15.0, CI green). · Part of Phase 31. Repo: **genesis** (backend + a web Export button).
 
 ## Purpose
 

@@ -8,9 +8,9 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 📝 SPECS DRAFTED (build gated on go-ahead) — Phase 31: Feature Breakdown Stage (Spec + UX + Technical Design → grounded, Jira-ready backlog)
+### ⭐ SHIPPED (COMPLETE) — Phase 31: Feature Breakdown Stage (Spec + UX + Technical Design → grounded, Jira-ready backlog) — genesis v0.59.0 + genesis-workflows v0.15.0
 
-> **Specs:** `specs/phase-31-feature-breakdown-stage.md` (umbrella) + `phase-31-feature-breakdown-stage/31-01..31-07` + `31-01-findings.md`. **ADR-059** (Proposed). **No code yet — specs only; implementation is gated on the user's go-ahead after spec review.**
+> **Specs:** `specs/phase-31-feature-breakdown-stage.md` (umbrella) + `phase-31-feature-breakdown-stage/31-01..31-07` + `31-01-findings.md`. **ADR-059** (Accepted). **✅ SHIPPED (2026-09-04) — PHASE 31 COMPLETE.** genesis **v0.59.0** + genesis-workflows **v0.15.0**, CI green (genesis #6735324 / workflows #6735326). 31-03 workflow → 31-04 platform (backend + web) → 31-05 Jira-importable CSV export → 31-06 review + Lavish-compat hardening (a light paper-bg fix + a deterministic Lavish-injection test) → 31-07 release. No migration (m0015 reused); genesis + genesis-workflows only. Gates: genesis pytest **678** + ruff; web tsc/eslint0/vitest **226**/build; genesis-workflows validate_library **12** + pytest **176**. `genesis install` picked up the workflow. **Live acceptance** (a real feature → Start with notes + a transcript → the run → completion chat → export → Jira import) is user-driven / headless-undrivable. **No active phase.**
 >
 > **Goal.** Make the FOURTH and final feature stage live: turn the finished **Spec + UX Design + Technical Design** into the developer-executable **backlog** (epics + stories/tasks) a team grooms + imports into Jira. Once all three prior artifacts exist, the user opens the stage, optionally types **notes** + attaches **up to 3 supporting docs** (transcript/spike/etc.), and clicks **Start** → a supervised **`feature-breakdown-analysis`** run.
 >

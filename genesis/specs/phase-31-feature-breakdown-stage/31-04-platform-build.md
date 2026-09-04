@@ -1,6 +1,6 @@
 # 31-04 — Platform build (genesis backend + web)
 
-> **Status:** 📝 PLANNED — not started (build gated on the user's go-ahead after spec review). · Part of Phase 31. Repo: **genesis** (backend + web; no migration — reuses m0015).
+> **Status:** ✅ SHIPPED (2026-09-04; genesis v0.59.0 + genesis-workflows v0.15.0, CI green). · Part of Phase 31. Repo: **genesis** (backend + web; no migration — reuses m0015).
 
 ## Purpose
 

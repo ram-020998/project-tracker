@@ -1,6 +1,6 @@
 # 31-07 — Release
 
-> **Status:** 📝 PLANNED — not started (gated on 31-06). · Part of Phase 31.
+> **Status:** ✅ SHIPPED (2026-09-04; genesis v0.59.0 + genesis-workflows v0.15.0, CI green — genesis #6735324 / workflows #6735326). · Part of Phase 31.
 
 ## Purpose
 

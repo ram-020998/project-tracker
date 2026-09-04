@@ -239,6 +239,33 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 ## 6. Status log
 
+- **2026-09-04 — RELEASED Phase 31 (Feature Breakdown Stage) — genesis v0.59.0 + genesis-workflows v0.15.0, CI
+  green (genesis #6735324 / workflows #6735326). PHASE 31 COMPLETE.** The FOURTH feature stage goes live
+  (ADR-059 Accepted): once Spec + UX + Technical Design exist, Start (optional notes + up to 3 supporting docs,
+  ADR-035) → the **`feature-breakdown-analysis`** workflow — `plan_epics` (epics = the Technical Design's
+  functional workstreams, 1:1) → per-epic **`break_epic`** loop (Appian rules: form → one story, process model
+  → separate story, split by entry point; **Story** = front-end-testable with **Gherkin** AC / **Task** =
+  backend/data-model/appref/process-only, not FE-verifiable; a one-line TD-anchored dev note — the TD holds the
+  object detail) → a **deterministic program `assemble`** (canonical `backlog.json` + a **Lavish-safe**
+  `breakdown.html`: summary header + `<details>` story cards grouped by epic + a **CSS-only** card/table toggle
+  + the backlog embedded in `<script id=genesis-backlog>`) → a **grounded coverage `verify`** critic (bounded →
+  escalate) → present → cleanup. A bound **`feature_breakdown`** completion chat refines it via the same
+  annotatable review; a **Jira-importable CSV export** (`GET /stages/breakdown/export.csv` — deterministic from
+  the embedded canonical JSON; Issue ID → Parent ID, **create-new-epics**, no custom-field columns; stdlib
+  `csv`, no new dep) downloads epics + stories/tasks with Gherkin AC. Backend: three-way prerequisite gate
+  (`_fb_prereqs_ready` → 409), multipart start/rerun, the StageFinalizer `_BINDINGS` binding, the chat mode +
+  `_STEERING_FB`, the export endpoint. Web: `STAGE_DEFS.breakdown` live + `requires:[spec,ux,design]` + a
+  notes/dropzone entry + `BreakdownCardActions`/`RerunBreakdownButton` + Export (no shell edits — the ADR-056
+  plug-in invariant held). **No migration** (m0015 reused); genesis + genesis-workflows only. 31-06 review found
+  + fixed a Lavish readability issue (the served artifact iframe sets only `color-scheme`, no body bg → gave
+  `breakdown.html` a light paper background) + added a deterministic Lavish-injection test (the SDK injects
+  cleanly, the embedded backlog JSON survives → the export is unaffected by annotation). Methodology from the
+  `spec-to-backlog` Kiro skill (analysis core + JSON + Jira column contract only); format from the four GSS
+  example breakdowns. Gates: genesis pytest **678** + ruff; web tsc/eslint0/vitest **226**/build (web/static
+  committed); genesis-workflows validate_library **12** + pytest **176**. genesis-core/sdk/parser unchanged.
+  `genesis install` picked up the workflow. As-built: `progress/phase-31-feature-breakdown-stage.md`. Live
+  acceptance (real Kiro run → completion chat → export → Jira import) is user-driven / headless-undrivable.
+
 - **2026-09-04 — Phase 31 (Feature Breakdown Stage) SPECS DRAFTED (project-tracker only; no code).** Investigated
   the `spec-to-backlog` Kiro skill (cloned; extracted its analysis methodology + `Backlog_JSON` contract + Jira
   column mapping — dropped the Lucid/Sheets/REST renderers + gws/Lucid fetching) and the four GSS example
