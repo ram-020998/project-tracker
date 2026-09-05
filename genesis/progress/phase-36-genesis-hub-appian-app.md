@@ -1,6 +1,6 @@
-# Phase 36 — The Genesis Hub Appian Application — AS-BUILT (IN PROGRESS)
+# Phase 36 — The Genesis Hub Appian Application — AS-BUILT (✅ COMPLETE)
 
-> **Status: 🔨 BUILD IN PROGRESS (2026-09-05).** ADR-064. Appian-side build in the team dev environment,
+> **Status: ✅ COMPLETE + LIVE-VALIDATED (2026-09-05).** ADR-064. Appian-side build in the team dev environment,
 > executed by a write-capable Dev-MCP agent (NOT genesis — genesis stays read-only per ADR-036/037). This doc
 > is the durable record of what has been created so a new session can continue. **DONE: the isolated app +
 > data model (11 record types + 13 relationships) + record-level security + 7 constants + the FULL API SURFACE

@@ -1,8 +1,11 @@
 # 36-08 — Remaining work to close Phase 36
 
-> **Status:** 🔨 OPEN — the Genesis Hub app + its **full API surface are BUILT and (blob-put) verified** in the
-> dev env. This doc is the punch-list to finish Phase 36. · Part of Phase 36 (ADR-064). · **As-built + every
-> UUID + the urlAlias↔path map:** `progress/phase-36-genesis-hub-appian-app.md` (READ FIRST).
+> **Status:** ✅ **CLOSED (2026-09-05) — Phase 36 COMPLETE.** The Genesis Hub app + all 11 Web APIs + the
+> frozen contract are built and **live-validated** end-to-end; the two user/admin items (blob-put `documentId`
+> activity-chain, `GH_activity_clear` add-to-app + security) are DONE. Remaining sub-items below are **optional
+> portability** (an installable package `.zip` export) — the dev-env Hub is the live Collaboration Hub (ADR-063).
+> · Part of Phase 36 (ADR-064). · **As-built:** `progress/phase-36-genesis-hub-appian-app.md`; contract:
+> `contract/` (genesis-hub-api.md + fixtures + deployment-runbook.md).
 
 ## Where we are (done)
 - **App / security / storage / config:** `Genesis Hub` (prefix GH, appUuid `_a-0000f058-fed5-8000-9bfc-011c48011c48_27312`) + groups (`GH Administrators`/`GH Users`/`GH Service Accounts`) + blob folders (`GH KB Blobs`/`GH Artifact Blobs`) + 7 constants (+ `GH_PM_STORE_BLOB`). 
