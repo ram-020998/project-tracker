@@ -184,6 +184,20 @@ columns. Order and count are preserved exactly (36-01 §2.0).
 
 ---
 
+## 4a. Read-after-write consistency (IMPORTANT for the provider)
+
+Record reads (`GET /records/...`, `GET /records/{kind}`, `GET /changes`, `GET /blobs/.../versions`,
+`GET /activity/{kind}`) are served from the record type's **synced replica**, which is **eventually
+consistent** — after a `PUT`/`POST` commits, the new/updated row may not appear in a `GET` for some seconds
+(observed >15s in the dev env; the write itself is durable immediately). **The Genesis provider MUST NOT
+re-`GET` a record immediately after a `PUT` and expect the new value.** Instead:
+- Trust the **`PUT` response** (`{status, version}`) as authoritative for the just-written version — use it to
+  advance the local `base_version`; do not round-trip to confirm.
+- Treat `GET`/list/`changes` as an eventually-consistent mirror (poll with backoff if you must observe a
+  specific just-written change; the `36-06` harness retries reads for this reason).
+- Writes are strongly consistent + atomic (the entity + its change-log row — and, for story, its items —
+  commit in one batch); only the *read* path lags.
+
 ## 5. Datetime + encoding conventions
 
 - **Datetimes** are Appian `a!toJson` datetime encodings (ISO-8601, e.g. `"2026-09-05T18:00:00Z"`). Genesis

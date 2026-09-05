@@ -102,6 +102,21 @@ id `124db86f-842f-47da-800f-2f2e86b5afe3` · kind `2a27811a-f52a-48c8-ae77-1eb99
 **Web APIs (11):** GH_meta · GH_records_upsert · GH_records_get · GH_records_list · GH_changes · GH_activity_set · GH_activity_clear · GH_activity_list · GH_blobs_put · GH_blobs_get · GH_blobs_versions.
 **Process model:** GH Convert Base 64 To Document (+ constant GH_PM_STORE_BLOB).
 
+## ✅ 36-06 CONTRACT VALIDATION — live round-trip against the dev env (2026-09-05, service-account API key)
+**PASS — the contract behaves correctly for every endpoint** (driven by `/tmp/gh_validate2.py`; evidence in the DB + direct curls):
+- All **7 write kinds** upsert with correct base-version CAS: create → `201 {status:created, version:0}`, update → `200 {status:updated, version:1}`; verified in the source tables (GH Team `v2-team-…` v0→v1, GH Feature unicode preserved, GH Change Log rows for every kind incl. updates).
+- **CAS conflict** (stale `base_version`) → `409 {error:"conflict", current_version}` ✓.
+- **Story items** delete-then-insert replacement ✓ (DB shows only the updated AC; originals removed) — the chained `a!deleteRecords(onSuccess: a!writeRecords(...))` works.
+- **Unicode/whitespace lossless** end-to-end (`café 東京 🚀🔥`, blank line + trailing tab) ✓.
+- **Reads** (`records_get`/`records_list`/`blobs_versions`/`activity_list`) return correct data once synced ✓ (direct curl 200s); **`/meta`**, **`/changes`**, **blob put→`201`/dedup→`200`**, **activity set→`200`** ✓.
+
+### ⚠️ CRITICAL SAIL LESSON (Web API writes) — do NOT regress
+`a!writeRecords`/`a!deleteRecords` are **smart services** that only execute when they are the **terminal** expression of the Web API (or chained via another smart service's `onSuccess`). A write captured in a `local!` and merely referenced (`index({local!w, …}, N, null)`) **does not reliably execute** and yields a **500** even though nothing looks wrong. Also, `onSuccess`/`onError` **must be a FRESH `a!httpResponse(...)`** (per Appian docs: "created with a!httpResponse()"), **not** `a!update(ri!onSuccess, "body", …)` — the latter produces a non-HttpResponse and returns 500 while the write still commits. `GH_appendChangeLog` was refactored to **return a GH Change Log record** written in the SAME `a!writeRecords` batch (atomic). `GH_casUpsert` (v6) + `GH_activity_set` now follow this. **Read-after-write is eventually consistent** (record-type synced replica lags the DB by >15s) — trust the PUT response's `version`; don't immediately re-GET (contract §4a).
+
+### Remaining (2 items)
+- **`GH_activity_clear` (DELETE)** — not creatable via MCP: the `activity_clear` urlAlias is held by an **orphaned** object from a prior partial create (`createWebApi` → 500 "could not execute statement"; the alias unique-constraint). **Create it in Designer** from `/tmp/gh_webapi/GH_activity_clear.sail` (guarded + terminal delete), or delete the orphan then I recreate. (All other 10 Web APIs work.)
+- **`GH_blobs_put` `documentId`** — still the placeholder `0`; wire the activity-chained `GH_PM_STORE_BLOB` call (runbook §5) so blob **GET** returns real bytes (put/dedup/versions already pass).
+
 ## Key decisions / deviations recorded
 - Reused auto `GH Users` as the read/all-users group (not a separate "GH All Users").
 - Blob folders under the Artifacts folder (KC-root createFolder 403'd).
