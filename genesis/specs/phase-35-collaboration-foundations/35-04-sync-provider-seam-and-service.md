@@ -32,10 +32,19 @@ mechanism is exercised end-to-end **without Appian** — the seam the Appian pro
 5. **Settings additions** (`runtime/settings.py`): `collab_enabled` / `collab_provider` / `collab_hub_*` config
    (env + persisted), all defaulting to disabled.
 
+**Lossless-sync invariant (MANDATORY):** the entity↔record mapping MUST be **lossless in both directions** — no
+field truncated, dropped, or reordered. Where a shape differs between local (JSON) and a provider (normalized —
+the Appian Hub in Phase 36/37), the mapping explodes/reassembles **exactly** (content, order, count,
+empty-vs-null, unicode). The `LocalHubProvider` mirrors the same normalization the Appian Hub uses (so the
+round-trip test catches fidelity bugs here, before Appian). This invariant is enforced by the round-trip tests
+below + in 38-02 + the 36-06 harness (one shared adversarial fixture set).
+
 ## Tests
 
 - Round-trip: publish a record/blob to the `LocalHubProvider` → a **second `CollaborationService` instance**
   (separate local DB, same Hub dir) `pull`s it → the mirror row matches; local-only columns stay null.
+- **Round-trip fidelity (no data loss):** a record carrying a **> 4000-char text**, **a long list**, **unicode**,
+  an **empty list**, and a **null** field round-trips **byte-for-byte** through publish→pull.
 - Content-hash **dedup**: re-publishing an identical blob is a no-op (no new version).
 - **CAS/conflict**: two publishes off the same `base_version` → the second raises the stale-conflict error
   (notify-then-apply); no silent overwrite.
