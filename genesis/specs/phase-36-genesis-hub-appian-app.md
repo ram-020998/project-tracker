@@ -35,9 +35,9 @@ Phase 37's Genesis-side provider can be written against a stable target.
    owner/team tags + a per-record **version**: **Team**, **Membership**, **Feature**, **Epic**, **Story**,
    **BoardState** (a story's lane/status on an app's board), and **StageArtifact metadata** (per-`(entity,
    stage)`: status, content hash, blob reference, provenance, consumed-upstream-versions).
-3. **A document/blob store** using **document-management record types**: the gzipped **KB blobs** (one per app,
-   versioned, content-hash-deduped, keep-last-N) and the published **stage-artifact bytes** (spec/UX/TD/
-   breakdown/design HTML), with **version history**.
+3. **A document/blob store** using **Appian Documents (native version history) indexed by a `GH Blob Version`
+   record type**: the gzipped **KB blobs** (one per app, versioned, content-hash-deduped, keep-last-N) and the
+   published **stage-artifact bytes** (spec/UX/TD/breakdown/design HTML), with **version history**.
 4. **The Web API surface** Genesis calls: per-entity **upsert (with base-version CAS)** + **list/get**, a
    **change-manifest / `changes_since(cursor)`** feed, **blob upload/download + list-versions**, **advisory-lock
    markers** (set/clear/list "in-progress by X"), and **teams/membership** CRUD — all JSON, authenticated by the
@@ -70,9 +70,9 @@ against the Phase-35 local provider.**
    optimistic-CAS the Genesis side already models (`row_version`); a stale upsert returns **409**.
 5. **Open visibility** for now — records carry `owner_username` + `team_uuid` **tags** but the APIs do not
    enforce per-team filtering yet (a future seam).
-6. **KB + artifacts are blobs** (document-management record types with versioning + content-hash dedup +
-   keep-last-N), **not** normalized records — Genesis queries its own local KB (the "materialized read cache"
-   decision); the Hub only stores/serves the blob.
+6. **KB + artifacts are blobs** (Appian Documents + a `GH Blob Version` index; native versioning + content-hash
+   dedup + keep-last-N), **not** normalized records — Genesis queries its own local KB (the "materialized read
+   cache" decision); the Hub only stores/serves the blob.
 7. **Shared memory is out of scope** (deferred future phase) — no memory record types this phase.
 
 ---
@@ -105,7 +105,7 @@ stub + contract fixtures).
 ## 5. Record & document model — full inventory + field tables in 36-01
 
 The Hub is a full Appian application. **36-01 is the master build reference** — it names **every object** (the
-`Genesis Hub` app + groups + service account + folders + constants + **10 record types** + relationships +
+`Genesis Hub` app + groups + service account + folders + constants + **11 record types** + relationships +
 helper expression rules + **~12 Web APIs**) in **dependency order**, with **complete field tables**, and the
 Appian-skill conventions the building agent must follow (PK `id` Integer; `sync_uuid` unique; relationships both
 sides; no USER fields — attribution is Text; sourced UUIDs). Summary (full detail in 36-01 §2):
@@ -137,17 +137,19 @@ sides; no USER fields — attribution is Text; sourced UUIDs). Summary (full det
 
 All JSON, service-account-authenticated, `/genesis-hub/...` (exact base per Appian Web API conventions):
 
-- `PUT  /records/{kind}/{sync_uuid}` — upsert with `If-Match`/`base_version` → **409** on version conflict.
+- `GET  /meta` — `{contract_version, server_time}` (health + version check).
+- `PUT  /records/{kind}/{sync_uuid}` — upsert with `base_version` → **409** on version conflict. `kind` ∈
+  {team, membership, feature, epic, story, board_state, stage_artifact} — **team + membership are ordinary
+  `records` kinds** (no dedicated `/teams` endpoints; Genesis's `upsert_team`/`list_teams` map here).
 - `GET  /records/{kind}` (list; pagination + `?since=`) · `GET /records/{kind}/{sync_uuid}` (get).
 - `POST /blobs/{kind}/{key}` — upload a blob version (content-hash dedup → no-op if identical) ·
   `GET /blobs/{kind}/{key}` (latest) · `GET /blobs/{kind}/{key}/versions`.
 - `GET  /changes?cursor=` — the change manifest (`[{kind, sync_uuid, version, updated_at, published_by}]`,
-  `next_cursor`).
+  `next_cursor`, `contract_version`).
 - `POST /activity` / `DELETE /activity/{kind}/{sync_uuid}` / `GET /activity/{kind}` — advisory markers (TTL).
-- `POST /teams` · `GET /teams` · `POST /memberships` · `GET /teams/{team_uuid}/memberships`.
 
 Contract details (status codes, error shapes, the 409↔`HubConflict` mapping, auth header, pagination) are
-frozen in **36-01** and checked into genesis as the reference for 37.
+frozen in **36-01 §3** and checked into genesis as the reference for 37.
 
 ---
 
@@ -173,7 +175,7 @@ frozen in **36-01** and checked into genesis as the reference for 37.
 |---|---|---|---|
 | **36-01** | App architecture, **frozen API contract** & **ADR-064** | The full record/document model + the Web-API contract (shapes, status codes, 409 CAS, pagination, auth) frozen + checked into genesis (`specs/.../contract/` or a `reference/` doc) + contract fixtures; the isolation rule; **draft ADR-064.** **Docs only.** | ⭐ user sign-off → build |
 | **36-02** | Record types & data model | The Dev-MCP agent builds the Team/Membership/Feature/Epic/Story/BoardState/StageArtifact-metadata record types (UUID keys, version, attribution/owner/team fields, relationships) on the RDBMS data source. | contract-conformant |
-| **36-03** | Document management & blob store | The KbBlob + ArtifactBlob document-management record types (versioned; content-hash dedup; keep-last-N retention). | contract-conformant |
+| **36-03** | Documents & blob store | Appian **Documents** (native versioning) in the KB/Artifact blob folders + the **`GH Blob Version`** index (content-hash dedup; keep-last-N retention). | contract-conformant |
 | **36-04** | Web APIs | The JSON endpoints per §6 (records upsert/list/get + CAS/409; blobs up/down/versions; changes manifest; activity; teams/memberships), service-account auth, allowed-origins/CSRF. | contract-conformant |
 | **36-05** | Packaging, security & deployment | The service account + permissions; the installable Appian **package** (export) + a documented install/upgrade procedure into a team's dev env; the isolation guidance. | deployable |
 | **36-06** | Contract validation & review | Run the shared **contract-test harness** (the 36-01 fixtures) against the deployed app; independent review of correctness/security; fix gaps. | contract green |
