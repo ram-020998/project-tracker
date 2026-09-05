@@ -2,8 +2,13 @@
 
 > **Status: 🔨 BUILD IN PROGRESS (2026-09-05).** ADR-064. Appian-side build in the team dev environment,
 > executed by a write-capable Dev-MCP agent (NOT genesis — genesis stays read-only per ADR-036/037). This doc
-> is the durable record of what has been created so a new session can continue. **Data model + security are
-> COMPLETE; the Web-API/expression-rule logic layer + contract doc + packaging remain.**
+> is the durable record of what has been created so a new session can continue. **DONE: the isolated app +
+> data model (11 record types + 13 relationships) + record-level security + 7 constants + the FULL API SURFACE
+> — 11 Web APIs + 11 helper expression rules + the base64 blob store (via the user's `GH Convert Base 64 To
+> Document` process). `GH_blobs_put` was verified working end-to-end (201 new + 200 dedup). All objects confirmed
+> associated with the Genesis Hub app.** REMAINING (see `36-08-remaining-work.md`): wire the blob-put
+> `documentId` (activity-chain), the frozen contract doc + fixtures, packaging + service-account provisioning,
+> and end-to-end contract validation (36-06) → hand-off (36-07).
 
 ## Environment / identity
 - **Appian env:** `https://merge-assist-dev.appianpreview.com` (Appian **26.6**). MCP: `lcp-mcp-server` (authenticated; `listApplications` returns 7 apps incl. "AS GSS Full Application").
