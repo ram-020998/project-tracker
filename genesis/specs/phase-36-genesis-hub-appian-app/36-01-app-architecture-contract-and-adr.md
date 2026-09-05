@@ -35,6 +35,17 @@ The building agent MUST follow the installed **Appian skill** (`~/.kiro/skills/a
   (the caller's canonical Genesis/Appian **username string** carried in the request payload), NOT as an Appian
   USER field — so we avoid the `SYSTEM_RECORD_TYPE_USER` relationship requirement and correctly represent that
   the **service account** is the actual Appian writer while the *logical* author is payload-supplied.
+- **⚠️ Synced record types cap EVERY text field at 4000 characters — there is NO CLOB/long-text.** So: (a) all
+  large content (the KB blob + artifact HTML) is stored as **Appian Documents**, never record columns (36-03) —
+  unaffected; (b) single free-text fields (`description`, `devNoteRef`) are **`Text` bounded to ≤ 4000** — they
+  are short summaries (the substantive content lives in the artifact Document), and Genesis validates/caps them
+  before publish; (c) **variable-length lists** (`acceptance_criteria`, `questions`, `labels`) are **normalized
+  into a child record type `GH Story Item`** (one row per item, each `text` ≤ 4000) — **NOT** a JSON string
+  column. **The Genesis-side local model is NOT changed** (SQLite has no such limit — it keeps its JSON columns);
+  the **sync payload carries the arrays**, and the Appian **Web API explodes them into `GH Story Item` rows on
+  write + reassembles them into arrays on read** — so the 4000-char normalization is entirely an Appian-Hub
+  internal concern (§2.5b, 36-04). Tiny JSON that is reliably < 4000 (e.g. `upstream_versions` = `{"spec":3}`)
+  may stay a bounded `Text` field.
 
 ---
 
@@ -52,8 +63,8 @@ The building agent MUST follow the installed **Appian skill** (`~/.kiro/skills/a
 | 4 | Constant | `GH_CONTRACT_VERSION` (Text, e.g. `"1.0"`) | The API contract version returned by `/meta` + `/changes`. |
 | 4 | Constant | `GH_BLOB_KEEP_LAST_N` (Integer, e.g. `10`) | Blob retention (keep last N versions). |
 | 4 | Constant | `GH_FOLDER_KB_BLOBS`, `GH_FOLDER_ARTIFACT_BLOBS` (Folder) | Target folders for blob documents. |
-| 5 | **Record types** (9) | `GH Team`, `GH Membership`, `GH Feature`, `GH Epic`, `GH Story`, `GH Board State`, `GH Stage Artifact`, `GH Blob Version`, `GH Change Log`, `GH Activity` | The shared entities + the blob-version index + the change manifest + advisory markers (full field tables in §2). |
-| 6 | Record type relationships | Feature↔Epic, Feature↔Story, Epic↔Story, Feature↔StageArtifact (both sides each) | Queryability + admin views (§2.11). |
+| 5 | **Record types** (11) | `GH Team`, `GH Membership`, `GH Feature`, `GH Epic`, `GH Story`, **`GH Story Item`** (normalized AC/questions/labels — child of Story), `GH Board State`, `GH Stage Artifact`, `GH Blob Version`, `GH Change Log`, `GH Activity` | The shared entities + the normalized story-item child + the blob-version index + the change manifest + advisory markers (full field tables in §2). |
+| 6 | Record type relationships | Feature↔Epic, Feature↔Story, Epic↔Story, Feature↔StageArtifact, **Story↔StoryItem**, Team↔Membership (both sides each) | Queryability + admin views (§2.11). |
 | 7 | **Expression rules** (helpers) | `GH_isServiceCaller`, `GH_casUpsert`, `GH_appendChangeLog`, `GH_changesSince`, `GH_blobDedupAndStore`, `GH_pruneBlobVersions`, `GH_recordToJson`, `GH_errorResponse` | The reusable logic the Web APIs delegate to (§4 in 36-04). |
 | 8 | Interfaces (OPTIONAL) | `GH_adminDashboard`, `GH_teamsView`, `GH_featuresView` | Admin visibility only — not required by the contract. |
 | 12 | **Web APIs** (12) | `GH_records_upsert`, `GH_records_list`, `GH_records_get`, `GH_blobs_put`, `GH_blobs_get`, `GH_blobs_versions`, `GH_changes`, `GH_activity_set`, `GH_activity_clear`, `GH_activity_list`, `GH_meta` (+ optional `GH_records_delete`) | The HTTP/JSON surface Genesis calls (§3 contract; §4 in 36-04 for each object's logic). |
@@ -72,7 +83,9 @@ convenience.
 PK **`id`** (Integer, identity); **`syncUuid`** (Text, **unique index**) = the Genesis `sync_uuid`; **`version`**
 (Integer, default 0) = the optimistic-CAS counter; and audit **`createdBy`/`modifiedBy`** (Text usernames),
 **`createdAt`/`updatedAt`** ("Date and Time"). Types are Appian field types (Text / Integer / "Date and Time" /
-Boolean). Long/JSON payloads are **Text (CLOB)**. Column names are `snake_case`; field names `camelCase`.
+Boolean). **There is NO CLOB — every `Text` field is bounded ≤ 4000 chars (synced-record-type limit); large
+content is a Document (36-03) and variable-length lists are normalized into `GH Story Item` (§2.5b), never a
+JSON string column.** Column names are `snake_case`; field names `camelCase`.
 
 ### 2.1 `GH Team` — table `gh_team`
 | field (column) | type | notes |
@@ -103,7 +116,7 @@ Boolean). Long/JSON payloads are **Text (CLOB)**. Column names are `snake_case`;
 | syncUuid (sync_uuid) | Text | **unique** |
 | appUuid (app_uuid) | Text | the Appian app the feature belongs to |
 | name (name) | Text | |
-| description (description) | Text (CLOB) | |
+| description (description) | Text (≤4000) | summary; capped by Genesis on publish |
 | ownerUsername (owner_username) | Text | forward-compat visibility tag |
 | teamUuid (team_uuid) | Text | forward-compat visibility tag |
 | version / createdBy / modifiedBy / createdAt / updatedAt | Integer / Text / Text / DateTime / DateTime | |
@@ -116,7 +129,7 @@ Boolean). Long/JSON payloads are **Text (CLOB)**. Column names are `snake_case`;
 | featureSyncUuid (feature_sync_uuid) | Text | → `GH Feature.syncUuid` |
 | key (backlog_key) | Text | provenance ("epic-1") |
 | title (title) | Text | |
-| description (description) | Text (CLOB) | |
+| description (description) | Text (≤4000) | summary; capped by Genesis on publish |
 | workstream (workstream) | Text | |
 | position (position) | Integer | |
 | version / createdBy / modifiedBy / createdAt / updatedAt | | |
@@ -133,15 +146,36 @@ Boolean). Long/JSON payloads are **Text (CLOB)**. Column names are `snake_case`;
 | storyType (story_type) | Text | 'Story' | 'Task' |
 | category (category) | Text | 'core' | 'nice-to-have' |
 | appianPart (appian_part) | Text | |
-| description (description) | Text (CLOB) | |
-| acceptanceCriteria (acceptance_criteria) | Text (CLOB) | JSON array |
-| devNoteRef (dev_note_ref) | Text | |
-| questions (questions) | Text (CLOB) | JSON array |
-| labels (labels) | Text (CLOB) | JSON array |
+| description (description) | Text (≤4000) | summary; capped by Genesis on publish |
+| devNoteRef (dev_note_ref) | Text (≤4000) | one-line TD pointer |
 | status (status) | Text | the board **lane** |
 | position (position) | Integer | |
 | ownerUsername / teamUuid | Text | visibility tags |
 | version / createdBy / modifiedBy / createdAt / updatedAt | | |
+
+> **`acceptanceCriteria`, `questions`, `labels` are NOT columns** on `GH Story` (each is a variable-length list
+> that can exceed 4000 chars). They are **normalized into `GH Story Item`** child rows (§2.5b). Genesis sends
+> them as **arrays** in the story upsert payload; the `GH_records_upsert` Web API **explodes** them into
+> `GH Story Item` rows on write and **reassembles** them into arrays on read (36-04). The Genesis local model
+> keeps its JSON columns unchanged.
+
+### 2.5b `GH Story Item` — table `gh_story_item` (normalizes the story's variable-length lists; keeps every value ≤ 4000)
+| field | type | notes |
+|---|---|---|
+| id | Integer | PK |
+| syncUuid (sync_uuid) | Text | **unique** (child row id; client-generated by Genesis) |
+| storySyncUuid (story_sync_uuid) | Text | → `GH Story.syncUuid` |
+| itemType (item_type) | Text | 'ac' | 'question' | 'label' |
+| text (text) | Text (≤4000) | one AC line / question / label (each item is short — well under 4000) |
+| position (position) | Integer | order within its `itemType` |
+| version / createdAt / updatedAt | | |
+| **unique** (story_sync_uuid, item_type, position) | | |
+
+> Written atomically **with** the parent story (not an independently-synced `kind`): `GH_records_upsert`
+> for `kind='story'` replaces the story's `GH Story Item` rows (delete-for-story + insert current) in the same
+> operation; `GH_records_get`/`GH_records_list` for `kind='story'` reassembles them into the
+> `acceptance_criteria`/`questions`/`labels` arrays. The change log records a `'story'` change (children are an
+> implementation detail of the story).
 
 ### 2.6 `GH Board State` — table `gh_board_state`
 | field | type | notes |
@@ -165,7 +199,7 @@ Boolean). Long/JSON payloads are **Text (CLOB)**. Column names are `snake_case`;
 | status (status) | Text | draft→in-progress→in-review→completed |
 | contentHash (content_hash) | Text | of the current artifact bytes |
 | blobKey (blob_key) | Text | → `GH Blob Version.blobKey` (kind='artifact') |
-| upstreamVersions (upstream_versions) | Text (CLOB) | JSON, e.g. `{"spec":3}` (the staleness signal) |
+| upstreamVersions (upstream_versions) | Text (≤4000) | small JSON, e.g. `{"spec":3}` (the staleness signal; well under 4000) |
 | publishedBy (published_by) | Text | |
 | publishedAt (published_at) | DateTime | |
 | version / createdAt / updatedAt | | |
@@ -208,7 +242,8 @@ Boolean). Long/JSON payloads are **Text (CLOB)**. Column names are `snake_case`;
 ### 2.11 Relationships (both sides — skill: `relationship-patterns.md`)
 Join on the `syncUuid` fields (not `id`): **GH Feature 1—* GH Epic** (`feature.syncUuid` ↔ `epic.featureSyncUuid`),
 **GH Feature 1—* GH Story**, **GH Epic 1—* GH Story**, **GH Feature 1—* GH Stage Artifact** (parentKind='feature'),
-**GH Story 1—* GH Stage Artifact** (parentKind='story'), **GH Team 1—* GH Membership**. Each declared with the
+**GH Story 1—* GH Stage Artifact** (parentKind='story'), **GH Story 1—* GH Story Item** (`story.syncUuid` ↔
+`storyItem.storySyncUuid`), **GH Team 1—* GH Membership**. Each declared with the
 MANY_TO_ONE **and** the ONE_TO_MANY reverse. (Relationships are for admin views/queryability; the APIs also work
 via field filters — but declare both sides per the skill to avoid the one-sided-relationship failure mode.)
 

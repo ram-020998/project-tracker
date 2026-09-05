@@ -14,6 +14,12 @@ feature; pull materializes them locally.
    `epic_sync_uuid`, key, title, story_type, category, appian_part, description, acceptance_criteria,
    dev_note_ref, questions, labels, `status` [the lane], position; owner/team/provenance); base-version CAS.
    Publish trigger = **Finalize Stories** (Phase 32) + on story edit (create/update/delete).
+   - **Lists stay arrays in the payload; the local model is unchanged.** `acceptance_criteria`/`questions`/
+     `labels` are sent as JSON **arrays** in the story payload (Genesis keeps its local SQLite JSON columns as-is
+     — **no local normalization / migration**). The **Appian Hub** normalizes them into `GH Story Item` child
+     rows to satisfy the 4000-char synced-record-type limit, and reassembles them into arrays on read (Phase 36
+     §2.5b / 36-04) — transparent to Genesis. Genesis caps single-text fields (`description`, `dev_note_ref`) at
+     ≤ 4000 before publish (they are summaries; the substantive content is the artifact Document).
 2. **Pull** — materialize/refresh the mirror epics + stories under the feature (map global `sync_uuid` → local
    row); auto for the shared read-only Stories view; notify-then-apply if this user has an unpublished local
    edit to the same story.
