@@ -113,9 +113,9 @@ id `124db86f-842f-47da-800f-2f2e86b5afe3` · kind `2a27811a-f52a-48c8-ae77-1eb99
 ### ⚠️ CRITICAL SAIL LESSON (Web API writes) — do NOT regress
 `a!writeRecords`/`a!deleteRecords` are **smart services** that only execute when they are the **terminal** expression of the Web API (or chained via another smart service's `onSuccess`). A write captured in a `local!` and merely referenced (`index({local!w, …}, N, null)`) **does not reliably execute** and yields a **500** even though nothing looks wrong. Also, `onSuccess`/`onError` **must be a FRESH `a!httpResponse(...)`** (per Appian docs: "created with a!httpResponse()"), **not** `a!update(ri!onSuccess, "body", …)` — the latter produces a non-HttpResponse and returns 500 while the write still commits. `GH_appendChangeLog` was refactored to **return a GH Change Log record** written in the SAME `a!writeRecords` batch (atomic). `GH_casUpsert` (v6) + `GH_activity_set` now follow this. **Read-after-write is eventually consistent** (record-type synced replica lags the DB by >15s) — trust the PUT response's `version`; don't immediately re-GET (contract §4a).
 
-### Remaining (2 items)
+### Remaining (1 item)
 - **`GH_activity_clear` (DELETE)** — not creatable via MCP: the `activity_clear` urlAlias is held by an **orphaned** object from a prior partial create (`createWebApi` → 500 "could not execute statement"; the alias unique-constraint). **Create it in Designer** from `/tmp/gh_webapi/GH_activity_clear.sail` (guarded + terminal delete), or delete the orphan then I recreate. (All other 10 Web APIs work.)
-- **`GH_blobs_put` `documentId`** — still the placeholder `0`; wire the activity-chained `GH_PM_STORE_BLOB` call (runbook §5) so blob **GET** returns real bytes (put/dedup/versions already pass).
+- ✅ **`GH_blobs_put` `documentId`** — WIRED by the user + verified (2026-09-05): `GET /blobs_get/kb/<key>` returns the real document bytes as base64, decoding byte-for-byte with `sha256(decoded)==content_hash`. Full blob path (put 201 / dedup 200 / versions / GET lossless) green.
 
 ## Key decisions / deviations recorded
 - Reused auto `GH Users` as the read/all-users group (not a separate "GH All Users").
