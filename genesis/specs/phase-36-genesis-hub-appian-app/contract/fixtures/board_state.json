@@ -1,0 +1,21 @@
+{
+  "kind": "board_state",
+  "path": "/records/board_state/4cc1cf5e-f22e-4d49-b854-07829c1beb11",
+  "put_request": {
+    "sync_uuid": "4cc1cf5e-f22e-4d49-b854-07829c1beb11",
+    "app_uuid": "_a-0000abcd-0000-8000-0000-abc123abc123_1001",
+    "story_sync_uuid": "0ebb514f-fd0f-49f7-88ec-a933813858be",
+    "status": "design-review",
+    "base_version": 4,
+    "modified_by": "ramaswamy.u"
+  },
+  "get_response": {
+    "sync_uuid": "4cc1cf5e-f22e-4d49-b854-07829c1beb11",
+    "app_uuid": "_a-0000abcd-0000-8000-0000-abc123abc123_1001",
+    "story_sync_uuid": "0ebb514f-fd0f-49f7-88ec-a933813858be",
+    "status": "design-review",
+    "version": 5,
+    "modified_by": "ramaswamy.u",
+    "updated_at": "2026-09-05T18:00:00Z"
+  }
+}

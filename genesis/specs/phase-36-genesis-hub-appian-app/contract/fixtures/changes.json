@@ -1,0 +1,13 @@
+{
+  "endpoint": "GET /changes?cursor=0&limit=500",
+  "response": {
+    "changes": [
+      { "kind": "feature", "sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead", "version": 3, "updated_at": "2026-09-05T18:00:00Z", "published_by": "ramaswamy.u" },
+      { "kind": "story", "sync_uuid": "0ebb514f-fd0f-49f7-88ec-a933813858be", "version": 1, "updated_at": "2026-09-05T18:00:05Z", "published_by": "ramaswamy.u" },
+      { "kind": "blob", "sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead:technical_design", "version": 1, "updated_at": "2026-09-05T18:00:10Z", "published_by": "ramaswamy.u" }
+    ],
+    "next_cursor": 3,
+    "contract_version": "1.0.0"
+  },
+  "empty_page_note": "When no rows with id > cursor exist, changes = [] and next_cursor = the input cursor."
+}

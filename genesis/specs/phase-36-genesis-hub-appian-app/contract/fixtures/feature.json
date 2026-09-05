@@ -1,0 +1,27 @@
+{
+  "kind": "feature",
+  "path": "/records/feature/ce089835-d693-4351-a707-b0b25bd28ead",
+  "put_request": {
+    "sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+    "app_uuid": "_a-0000abcd-0000-8000-0000-abc123abc123_1001",
+    "name": "Collaborative SDLC",
+    "description": "Multi-paragraph summary with unicode — café, naïve, Москва, 東京, 🚀🔥.\n\nSecond paragraph preserves the blank line above and this trailing tab.\t\nBullets:\n- one\n- two\n- three",
+    "owner_username": "ramaswamy.u",
+    "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "base_version": 2,
+    "modified_by": "ramaswamy.u"
+  },
+  "get_response": {
+    "sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+    "app_uuid": "_a-0000abcd-0000-8000-0000-abc123abc123_1001",
+    "name": "Collaborative SDLC",
+    "description": "Multi-paragraph summary with unicode — café, naïve, Москва, 東京, 🚀🔥.\n\nSecond paragraph preserves the blank line above and this trailing tab.\t\nBullets:\n- one\n- two\n- three",
+    "owner_username": "ramaswamy.u",
+    "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "version": 3,
+    "created_by": "ramaswamy.u",
+    "modified_by": "ramaswamy.u",
+    "created_at": "2026-09-01T10:00:00Z",
+    "updated_at": "2026-09-05T18:00:00Z"
+  }
+}

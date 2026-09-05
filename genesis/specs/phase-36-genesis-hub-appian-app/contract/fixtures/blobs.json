@@ -1,0 +1,41 @@
+{
+  "put_new": {
+    "endpoint": "POST /blobs/artifact/ce089835-d693-4351-a707-b0b25bd28ead:technical_design",
+    "request": {
+      "base64": "SGVsbG8sIEdlbmVzaXMgSHViISDwn5qAIGxvc3NsZXNzIHVuaWNvZGUgdGVzdA==",
+      "content_hash": "834dc384a44d3a08a1454cb21068e9923d173ea31c9a9214accb08e318688fa4",
+      "published_by": "ramaswamy.u"
+    },
+    "response_status": 201,
+    "response": { "status": "new", "version": 1 }
+  },
+  "put_unchanged": {
+    "endpoint": "POST /blobs/artifact/ce089835-d693-4351-a707-b0b25bd28ead:technical_design",
+    "note": "Same content_hash as the latest -> dedup, no new document.",
+    "request": {
+      "base64": "SGVsbG8sIEdlbmVzaXMgSHViISDwn5qAIGxvc3NsZXNzIHVuaWNvZGUgdGVzdA==",
+      "content_hash": "834dc384a44d3a08a1454cb21068e9923d173ea31c9a9214accb08e318688fa4",
+      "published_by": "ramaswamy.u"
+    },
+    "response_status": 200,
+    "response": { "status": "unchanged", "version": 1 }
+  },
+  "get_latest": {
+    "endpoint": "GET /blobs/artifact/ce089835-d693-4351-a707-b0b25bd28ead:technical_design",
+    "response_status": 200,
+    "response": {
+      "base64": "SGVsbG8sIEdlbmVzaXMgSHViISDwn5qAIGxvc3NsZXNzIHVuaWNvZGUgdGVzdA==",
+      "content_hash": "834dc384a44d3a08a1454cb21068e9923d173ea31c9a9214accb08e318688fa4",
+      "version": 1
+    }
+  },
+  "versions": {
+    "endpoint": "GET /blobs/artifact/ce089835-d693-4351-a707-b0b25bd28ead:technical_design/versions",
+    "response_status": 200,
+    "response": {
+      "versions": [
+        { "version": 1, "content_hash": "834dc384a44d3a08a1454cb21068e9923d173ea31c9a9214accb08e318688fa4", "size": 64, "published_by": "ramaswamy.u", "created_at": "2026-09-05T18:00:10Z" }
+      ]
+    }
+  }
+}

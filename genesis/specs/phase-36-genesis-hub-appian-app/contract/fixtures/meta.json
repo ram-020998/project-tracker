@@ -1,0 +1,7 @@
+{
+  "endpoint": "GET /meta",
+  "response": {
+    "contract_version": "1.0.0",
+    "server_time": "2026-09-05T18:30:00Z"
+  }
+}

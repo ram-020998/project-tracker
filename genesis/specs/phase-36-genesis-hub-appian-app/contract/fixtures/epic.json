@@ -1,0 +1,29 @@
+{
+  "kind": "epic",
+  "path": "/records/epic/db39730a-34eb-47a4-8d1e-d611e390614e",
+  "put_request": {
+    "sync_uuid": "db39730a-34eb-47a4-8d1e-d611e390614e",
+    "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+    "key": "epic-1",
+    "title": "Publish/Pull substrate",
+    "description": "Everything needed to publish a feature and its stage artifacts to the Hub.",
+    "workstream": "Sync transport",
+    "position": 0,
+    "base_version": null,
+    "created_by": "ramaswamy.u"
+  },
+  "get_response": {
+    "sync_uuid": "db39730a-34eb-47a4-8d1e-d611e390614e",
+    "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+    "key": "epic-1",
+    "title": "Publish/Pull substrate",
+    "description": "Everything needed to publish a feature and its stage artifacts to the Hub.",
+    "workstream": "Sync transport",
+    "position": 0,
+    "version": 0,
+    "created_by": "ramaswamy.u",
+    "modified_by": "ramaswamy.u",
+    "created_at": "2026-09-05T18:00:00Z",
+    "updated_at": "2026-09-05T18:00:00Z"
+  }
+}

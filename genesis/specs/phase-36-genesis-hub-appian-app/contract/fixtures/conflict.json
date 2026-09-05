@@ -1,0 +1,16 @@
+{
+  "endpoint": "PUT /records/{kind}/{syncUuid}",
+  "scenario": "stale base_version — current.version (5) != base_version (3)",
+  "request": {
+    "sync_uuid": "0ebb514f-fd0f-49f7-88ec-a933813858be",
+    "title": "stale write",
+    "base_version": 3,
+    "modified_by": "someone.else"
+  },
+  "response_status": 409,
+  "response": {
+    "error": "conflict",
+    "current_version": 5
+  },
+  "genesis_mapping": "AppianHubProvider maps 409 -> HubConflict(current_version) -> notify-then-apply."
+}

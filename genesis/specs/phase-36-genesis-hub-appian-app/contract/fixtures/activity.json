@@ -1,0 +1,22 @@
+{
+  "set": {
+    "endpoint": "POST /activity",
+    "request": { "kind": "story", "sync_uuid": "0ebb514f-fd0f-49f7-88ec-a933813858be", "username": "ramaswamy.u", "ttl_seconds": 900 },
+    "response_status": 200,
+    "response": { "status": "ok" }
+  },
+  "list": {
+    "endpoint": "GET /activity/story",
+    "response_status": 200,
+    "response": {
+      "markers": [
+        { "kind": "story", "sync_uuid": "0ebb514f-fd0f-49f7-88ec-a933813858be", "username": "ramaswamy.u", "set_at": "2026-09-05T18:00:00Z", "expires_at": "2026-09-05T18:15:00Z" }
+      ]
+    }
+  },
+  "clear": {
+    "endpoint": "DELETE /activity/story/0ebb514f-fd0f-49f7-88ec-a933813858be",
+    "response_status": 200,
+    "response": { "status": "cleared" }
+  }
+}

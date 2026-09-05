@@ -1,0 +1,18 @@
+{
+  "kind": "team",
+  "path": "/records/team/1d745740-0da2-48bd-89e5-9f32a69cc569",
+  "put_request": {
+    "sync_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "title": "Platform Guild — Ünïcode ✓ 🚀",
+    "base_version": null,
+    "created_by": "ramaswamy.u"
+  },
+  "get_response": {
+    "sync_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "title": "Platform Guild — Ünïcode ✓ 🚀",
+    "version": 0,
+    "created_by": "ramaswamy.u",
+    "created_at": "2026-09-05T18:00:00Z",
+    "updated_at": "2026-09-05T18:00:00Z"
+  }
+}

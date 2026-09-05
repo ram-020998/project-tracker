@@ -1,0 +1,22 @@
+{
+  "kind": "membership",
+  "path": "/records/membership/156c9424-563b-43ca-a832-90ad263e6260",
+  "put_request": {
+    "sync_uuid": "156c9424-563b-43ca-a832-90ad263e6260",
+    "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "username": "ramaswamy.u",
+    "name": "Ramaswamy U.",
+    "email": "ramaswamy.u@example.com",
+    "joined_at": "2026-09-01T09:00:00Z",
+    "base_version": null
+  },
+  "get_response": {
+    "sync_uuid": "156c9424-563b-43ca-a832-90ad263e6260",
+    "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "username": "ramaswamy.u",
+    "name": "Ramaswamy U.",
+    "email": "ramaswamy.u@example.com",
+    "joined_at": "2026-09-01T09:00:00Z",
+    "version": 0
+  }
+}

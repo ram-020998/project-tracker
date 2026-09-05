@@ -1,0 +1,58 @@
+{
+  "kind": "story",
+  "path": "/records/story/0ebb514f-fd0f-49f7-88ec-a933813858be",
+  "notes": "Adversarial: many AC (order preserved), EMPTY questions array (must stay []), unicode labels, null epic_sync_uuid.",
+  "put_request": {
+    "sync_uuid": "0ebb514f-fd0f-49f7-88ec-a933813858be",
+    "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+    "epic_sync_uuid": null,
+    "key": "story-7",
+    "title": "As a user I can publish a feature",
+    "story_type": "Story",
+    "category": "core",
+    "appian_part": null,
+    "description": "Publish gathers the feature + its published stage artifacts and PUTs them with base_version CAS.",
+    "dev_note_ref": "TD §4.2 — AppianHubProvider.publish_feature",
+    "status": "to-do",
+    "position": 6,
+    "owner_username": "ramaswamy.u",
+    "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "base_version": 0,
+    "modified_by": "ramaswamy.u",
+    "acceptance_criteria": [
+      "Given a completed feature, When I click Publish, Then a PUT /records/feature is sent with base_version.",
+      "Given a 409 conflict, When publish returns, Then Genesis surfaces notify-then-apply.",
+      "Given unicode content (東京 🚀), When published, Then it round-trips byte-for-byte."
+    ],
+    "questions": [],
+    "labels": ["sync", "publish", "priorité-élevée"]
+  },
+  "get_response": {
+    "sync_uuid": "0ebb514f-fd0f-49f7-88ec-a933813858be",
+    "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+    "epic_sync_uuid": null,
+    "key": "story-7",
+    "title": "As a user I can publish a feature",
+    "story_type": "Story",
+    "category": "core",
+    "appian_part": null,
+    "description": "Publish gathers the feature + its published stage artifacts and PUTs them with base_version CAS.",
+    "dev_note_ref": "TD §4.2 — AppianHubProvider.publish_feature",
+    "status": "to-do",
+    "position": 6,
+    "owner_username": "ramaswamy.u",
+    "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "version": 1,
+    "created_by": "ramaswamy.u",
+    "modified_by": "ramaswamy.u",
+    "created_at": "2026-09-04T12:00:00Z",
+    "updated_at": "2026-09-05T18:00:00Z",
+    "acceptance_criteria": [
+      "Given a completed feature, When I click Publish, Then a PUT /records/feature is sent with base_version.",
+      "Given a 409 conflict, When publish returns, Then Genesis surfaces notify-then-apply.",
+      "Given unicode content (東京 🚀), When published, Then it round-trips byte-for-byte."
+    ],
+    "questions": [],
+    "labels": ["sync", "publish", "priorité-élevée"]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "kind": "stage_artifact",
+  "path": "/records/stage_artifact/bafef139-13c0-48af-94c2-a05ae28f63ce",
+  "notes": "upstream_versions is a small JSON string (stored in a Long Text field); blob_key ties to POST /blobs/artifact/<parent>:<stage>.",
+  "put_request": {
+    "sync_uuid": "bafef139-13c0-48af-94c2-a05ae28f63ce",
+    "parent_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+    "parent_kind": "feature",
+    "stage": "technical_design",
+    "status": "completed",
+    "content_hash": "9f2c8e1a7b3d4c5e6f70819a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e",
+    "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:technical_design",
+    "upstream_versions": "{\"spec\":3,\"ux_design\":2}",
+    "published_by": "ramaswamy.u",
+    "published_at": "2026-09-05T17:45:00Z",
+    "base_version": null
+  },
+  "get_response": {
+    "sync_uuid": "bafef139-13c0-48af-94c2-a05ae28f63ce",
+    "parent_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+    "parent_kind": "feature",
+    "stage": "technical_design",
+    "status": "completed",
+    "content_hash": "9f2c8e1a7b3d4c5e6f70819a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e",
+    "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:technical_design",
+    "upstream_versions": "{\"spec\":3,\"ux_design\":2}",
+    "published_by": "ramaswamy.u",
+    "published_at": "2026-09-05T17:45:00Z",
+    "version": 0,
+    "created_at": "2026-09-05T18:00:00Z",
+    "updated_at": "2026-09-05T18:00:00Z"
+  }
+}
