@@ -11,20 +11,22 @@
 
 ## 0. What's in the app (packaged inventory)
 
-- **11 record types** (DATABASE-backed on `jdbc/Appian`): GH Team, GH Membership, GH Feature, GH Epic,
-  GH Story, GH Story Item, GH Board State, GH Stage Artifact, GH Blob Version, GH Change Log, GH Activity
-  (13 relationships; record-level security below).
+- **12 record types** (DATABASE-backed on `jdbc/Appian`): the 11 contract/data-model types — GH Team, GH Membership,
+  GH Feature, GH Epic, GH Story, GH Story Item, GH Board State, GH Stage Artifact, GH Blob Version, GH Change Log,
+  GH Activity (13 relationships; record-level security below) — **plus `GH Blob Version Document`** (a document-management
+  record type the user added to physically store/relate the blob Documents; not a contract entity).
 - **11 Web APIs:** GH_meta, GH_records_upsert, GH_records_get, GH_records_list, GH_changes, GH_activity_set,
   GH_activity_clear, GH_activity_list, GH_blobs_put, GH_blobs_get, GH_blobs_versions (aliases per
   `genesis-hub-api.md` §1.1).
 - **12 expression rules:** GH_isServiceCaller, GH_errorResponse, GH_appendChangeLog, GH_changesSince,
   GH_recordToJson, GH_casUpsert, GH_reassembleStoryItems, GH_queryRecords, GH_blobLatest, GH_pruneBlobVersions,
   GH_recordBlobVersion, GH_convertDocumentToBase64String.
-- **1 process model:** `GH Convert Base 64 To Document` (plugin `com.nttdata.plugins.MoreDocumentTools.
-  base64StringToDocument`) — the base64→Appian-Document converter the blob store uses.
-- **7 constants** (GH_GROUP_*, GH_CONTRACT_VERSION="1.0.0", GH_BLOB_KEEP_LAST_N=10, GH_FOLDER_*, GH_PM_STORE_BLOB)
-  + **2 folders** (GH KB Blobs, GH Artifact Blobs) + **3 groups** (GH Administrators, GH Users, GH Service
-  Accounts).
+- **2 process models:** `GH Convert Base 64 To Document` (plugin `com.nttdata.plugins.MoreDocumentTools.base64StringToDocument`
+  — the base64→Appian-Document converter) **and `GH Store Blob`** (the user's blob-write model that `GH_blobs_put`
+  activity-chains to create the Document + return its `documentId`). **`GH_PM_STORE_BLOB` → `GH Store Blob`** (uuid `0003f059-2a54-8000-fb95-7f0000014e7a`).
+- **9 constants** (GH_GROUP_ALL_USERS/ADMINS/SERVICE, GH_CONTRACT_VERSION="1.0.0", GH_BLOB_KEEP_LAST_N=10,
+  GH_FOLDER_KB_BLOBS, GH_FOLDER_ARTIFACT_BLOBS, GH_ARTIFACTS_FOLDER, GH_PM_STORE_BLOB) + **2 blob folders**
+  (GH KB Blobs, GH Artifact Blobs, under GH Artifacts) + **3 groups** (GH Administrators, GH Users, GH Service Accounts).
 
 ## 1. Security model (as-built)
 
@@ -54,9 +56,10 @@
 
 > There is no MCP tool to export an application package — do this in Appian Designer.
 
-1. In Designer, open the **Genesis Hub** application → **Export** → include: the 11 record types (+ their
-   data-source/table objects), the 11 Web APIs, the 12 expression rules, the `GH Convert Base 64 To Document`
-   process model, the 7 constants, the 2 folders, the 3 group references, (optional) admin interfaces.
+1. In Designer, open the **Genesis Hub** application → **Export** → include: the **12 record types** (+ their
+   data-source/table objects; incl. `GH Blob Version Document`), the **11 Web APIs**, the **12 expression rules**,
+   **both process models** (`GH Convert Base 64 To Document` + `GH Store Blob`), the **9 constants**, the **2 blob
+   folders**, the **3 group references**, (optional) admin interfaces.
 2. Export as a **versioned package** (`.zip`) — stamp the package name/notes with an **app version** + the
    **`contract_version` = "1.0.0"** it satisfies.
 3. Store the package + this runbook + `genesis-hub-api.md` together (the deployment bundle).

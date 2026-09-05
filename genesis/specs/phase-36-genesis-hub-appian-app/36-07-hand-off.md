@@ -5,7 +5,7 @@
 ## Outcome — Phase 36 COMPLETE
 
 The `Genesis Hub` Appian application is fully built in the team dev env and **validated end-to-end** with the
-shared service-account API key: 11 record types + 13 relationships + record-level security + 7 constants + the
+shared service-account API key: 11 record types + 13 relationships + record-level security + 9 constants + the
 base64 blob store + **11 Web APIs + 12 helper expression rules**. The **frozen contract v1.0.0 + 12 fixtures +
 deployment runbook** are checked into genesis at `specs/phase-36-genesis-hub-appian-app/contract/`. ADR-064 →
 **Accepted**; bible (`00`/`01`/`04`/`08`), `AGENT_ONBOARDING.md`, `tracker.md` §6, and the progress as-built are

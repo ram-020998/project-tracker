@@ -3,12 +3,22 @@
 > **Status: ✅ COMPLETE + LIVE-VALIDATED (2026-09-05).** ADR-064. Appian-side build in the team dev environment,
 > executed by a write-capable Dev-MCP agent (NOT genesis — genesis stays read-only per ADR-036/037). This doc
 > is the durable record of what has been created so a new session can continue. **DONE: the isolated app +
-> data model (11 record types + 13 relationships) + record-level security + 7 constants + the FULL API SURFACE
+> data model (11 record types + 13 relationships) + record-level security + 9 constants + the FULL API SURFACE
 > — 11 Web APIs + 11 helper expression rules + the base64 blob store (via the user's `GH Convert Base 64 To
 > Document` process). `GH_blobs_put` was verified working end-to-end (201 new + 200 dedup). All objects confirmed
 > associated with the Genesis Hub app.** REMAINING (see `36-08-remaining-work.md`): wire the blob-put
 > `documentId` (activity-chain), the frozen contract doc + fixtures, packaging + service-account provisioning,
 > and end-to-end contract validation (36-06) → hand-off (36-07).
+
+## 🔎 AUDITED LIVE APP INVENTORY (2026-09-05 — verified via listApplicationObjects)
+The Genesis Hub app contains (all associated with the app — export-complete):
+- **12 record types** = the **11 contract/data-model types** (Team, Membership, Feature, Epic, Story, Story Item, Board State, Stage Artifact, Blob Version, Change Log, Activity; 13 relationships; record-level security) **+ `GH Blob Version Document`** (uuid `cc2dcf51-bea2-4432-baad-1d88777b5d2a`) — a document-management RT the user added to store/relate the blob Documents (not a contract entity; `GH Blob Version` gained 2 relationships → `GH Blob Version Document` + → built-in `Document`).
+- **12 expression rules** — the 11 GH helpers + the user's `GH_convertDocumentToBase64String`. (`GH_errorResponse` `_a-…27482` + `GH_blobLatest` `_a-…27582` were **added to the app on 2026-09-05** — they had been created but not associated due to a parallel-create race; without this an export would have omitted them and broken the Web APIs.)
+- **11 Web APIs** — meta, records upsert/get/list, changes, activity set/list/clear, blobs put/get/versions.
+- **2 process models** — `GH Convert Base 64 To Document` (`0002f059-…`) + `GH Store Blob` (`0003f059-…`); **`GH_PM_STORE_BLOB` → `GH Store Blob`**.
+- **9 constants** — GH_GROUP_ALL_USERS/ADMINS/SERVICE, GH_CONTRACT_VERSION="1.0.0", GH_BLOB_KEEP_LAST_N=10, GH_FOLDER_KB_BLOBS, GH_FOLDER_ARTIFACT_BLOBS, GH_ARTIFACTS_FOLDER, GH_PM_STORE_BLOB.
+- **3 groups** (GH Administrators/Users/Service Accounts) + **blob folders** GH KB Blobs / GH Artifact Blobs (under GH Artifacts).
+> The frozen **contract** describes the **11 contract record types** (7 write kinds + Story Item + Blob Version + Change Log + Activity); the blob-document RT + `GH Store Blob` PM are internal blob-store plumbing.
 
 ## Environment / identity
 - **Appian env:** `https://merge-assist-dev.appianpreview.com` (Appian **26.6**). MCP: `lcp-mcp-server` (authenticated; `listApplications` returns 7 apps incl. "AS GSS Full Application").
@@ -100,7 +110,7 @@ id `124db86f-842f-47da-800f-2f2e86b5afe3` · kind `2a27811a-f52a-48c8-ae77-1eb99
 ## Full built inventory (36-04/03)
 **Expression rules (11 + user's 1):** GH_isServiceCaller · GH_errorResponse · GH_appendChangeLog · GH_changesSince · GH_recordToJson(v2) · GH_casUpsert · GH_reassembleStoryItems · GH_queryRecords · GH_blobLatest · GH_pruneBlobVersions · GH_recordBlobVersion (+ user's GH_convertDocumentToBase64String).
 **Web APIs (11):** GH_meta · GH_records_upsert · GH_records_get · GH_records_list · GH_changes · GH_activity_set · GH_activity_clear · GH_activity_list · GH_blobs_put · GH_blobs_get · GH_blobs_versions.
-**Process model:** GH Convert Base 64 To Document (+ constant GH_PM_STORE_BLOB).
+**Process models (2):** `GH Convert Base 64 To Document` (base64→Document converter) + `GH Store Blob` (the user's blob-write model). **`GH_PM_STORE_BLOB` → `GH Store Blob`** (uuid `0003f059-2a54-8000-fb95-7f0000014e7a`).
 
 ## ✅ 36-06 CONTRACT VALIDATION — live round-trip against the dev env (2026-09-05, service-account API key)
 **PASS — the contract behaves correctly for every endpoint** (driven by `/tmp/gh_validate2.py`; evidence in the DB + direct curls):

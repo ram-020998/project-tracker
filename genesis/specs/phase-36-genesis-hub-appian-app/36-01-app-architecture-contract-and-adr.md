@@ -1,6 +1,6 @@
 # 36-01 — App architecture, object inventory, data model & the frozen API contract (ADR-064)
 
-> **Status:** 🔨 BUILD IN PROGRESS — object inventory + data model built; the frozen contract doc + fixtures still to be written (see progress/phase-36-genesis-hub-appian-app.md). · Part of Phase 36. Repo: **genesis** (this contract doc + the fixtures are checked in here; the Appian objects are built by the Dev-MCP agent). · **Depends on:** 35-01 (the `SyncProvider` Protocol + entity payload model this contract must satisfy), ADR-048 (service-account creds), the installed **Appian skill** (`~/.kiro/skills/appian/`).
+> **Status:** ✅ **COMPLETE (2026-09-05)** — object inventory + data model built **and the frozen contract doc + fixtures written + live-validated** (`contract/genesis-hub-api.md` + `contract/fixtures/*.json` + `contract/deployment-runbook.md`; see progress/phase-36-genesis-hub-appian-app.md). · Part of Phase 36. Repo: **genesis** (this contract doc + the fixtures are checked in here; the Appian objects are built by the Dev-MCP agent). · **Depends on:** 35-01 (the `SyncProvider` Protocol + entity payload model this contract must satisfy), ADR-048 (service-account creds), the installed **Appian skill** (`~/.kiro/skills/appian/`).
 
 ## Purpose
 

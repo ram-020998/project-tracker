@@ -8,7 +8,7 @@
 > `contract/` (genesis-hub-api.md + fixtures + deployment-runbook.md).
 
 ## Where we are (done)
-- **App / security / storage / config:** `Genesis Hub` (prefix GH, appUuid `_a-0000f058-fed5-8000-9bfc-011c48011c48_27312`) + groups (`GH Administrators`/`GH Users`/`GH Service Accounts`) + blob folders (`GH KB Blobs`/`GH Artifact Blobs`) + 7 constants (+ `GH_PM_STORE_BLOB`). 
+- **App / security / storage / config:** `Genesis Hub` (prefix GH, appUuid `_a-0000f058-fed5-8000-9bfc-011c48011c48_27312`) + groups (`GH Administrators`/`GH Users`/`GH Service Accounts`) + blob folders (`GH KB Blobs`/`GH Artifact Blobs`) + 9 constants (+ `GH_PM_STORE_BLOB`). 
 - **Data model (36-02):** 11 record types + 13 relationships + record-level security (data_steward = `GH Service Accounts`). COMPLETE.
 - **Logic + API (36-04/03):** **11 helper expression rules** + **11 Web APIs** + the **base64 blob store** (the user's `GH Convert Base 64 To Document` process + `GH_convertDocumentToBase64String`). All associated with the app. **`GH_blobs_put` verified end-to-end** (201 new + 200 content-hash dedup).
 
