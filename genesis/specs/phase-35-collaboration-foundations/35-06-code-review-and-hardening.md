@@ -1,6 +1,6 @@
 # 35-06 — Code review & hardening
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 35. Repo: **genesis**. · **Depends on:** 35-02..35-05.
+> **Status:** ✅ SHIPPED (genesis v0.63.0). · Part of Phase 35. Repo: **genesis**. · **Depends on:** 35-02..35-05.
 
 ## Purpose
 

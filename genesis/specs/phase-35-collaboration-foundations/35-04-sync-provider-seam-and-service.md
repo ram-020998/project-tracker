@@ -1,6 +1,6 @@
 # 35-04 — The `SyncProvider` seam, `CollaborationService` & the local provider
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 35. Repo: **genesis** (backend). · **Depends on:** 35-01 (the Protocol + service contract), 35-02 (`sync_uuid` + `collab_sync_state`). ADR-051/052 (the provider-interface precedent).
+> **Status:** ✅ SHIPPED (genesis v0.63.0). · Part of Phase 35. Repo: **genesis** (backend). · **Depends on:** 35-01 (the Protocol + service contract), 35-02 (`sync_uuid` + `collab_sync_state`). ADR-051/052 (the provider-interface precedent).
 
 ## Purpose
 

@@ -439,3 +439,39 @@ genesis-workflows/
                         →[v_verify]→ route_verify →(ok) present → cleanup; (revise ≤2)/(exhausted→escalate).
                         Object-level + code; process models per-node. workflow.yaml + registry.json (12 workflows).
                         **design-doc removed.**
+
+# ── Phase 35 — Collaboration Foundations & Identity (local-first → shared Hub; ADR-063) ──
+genesis/genesis/
+  db/migrations/m0019_collab.py   sync_uuid (+ backfill + UNIQUE) on kb_features/kb_feature_stages/kb_epics/
+                        kb_stories/workbench_boards/kb_board_cards; row_version on the 4 lacking it; owner/team/
+                        provenance cols (owner_username/team_uuid/published_by/published_at/published_version) on
+                        kb_features/kb_stories/workbench_boards; upstream_versions_json on the stage tables;
+                        collab_identity/collab_teams/collab_memberships/collab_sync_state local tables. Additive +
+                        idempotent (guarded ADD COLUMN + IF NOT EXISTS). current_version → 19.
+  collab/               (ADR-063) provider.py (SyncProvider Protocol [runtime_checkable] + DTOs Record/BlobRef/
+                        Change/Activity/PutResult/Team/Membership + HubConflict — the transport seam, no Appian);
+                        providers/local.py (LocalHubProvider — file-backed emulator under settings.collab_hub_dir:
+                        records w/ base-version CAS→HubConflict, content-hash blob dedup, changelog.jsonl manifest,
+                        activity TTL, teams/memberships; the test double); service.py (CollaborationService —
+                        publish/pull over an injected provider; _BINDINGS kind→table [feature this phase], _LOCAL_ONLY
+                        no-leak payload, provenance/version stamping, collab_sync_state cursor, advisory heartbeat,
+                        is_enabled opt-in gate; content_hash=sha256); identity.py (Identity + IdentityStore over
+                        collab_identity + local team cache; current_user(); canonical_username(settings) →
+                        appian_username | memory_owner_username | "local", defensive); __init__.py
+                        (build_sync_provider(settings) → SyncProvider|None — None unless collab_enabled + provider
+                        ∈ {local}); providers/__init__.py.
+  runtime/settings.py   + collab_enabled/collab_provider/collab_hub_url (env GENESIS_COLLAB_*) + collab_hub_dir property.
+  runtime/preflight.py  + an optional "Collaboration identity" item (only when a Hub provider is configured).
+  api/collab.py         register_collab_routes(api, settings, *, collab): GET /collab/config; GET/PUT /collab/identity;
+                        GET/POST /collab/teams; POST /collab/teams/{uuid}/join; PUT /collab/active-team;
+                        GET /collab/teams/{uuid}/members. Teams gated 409 when disabled; identity always works.
+  api/app.py            build_sync_provider(settings) → CollaborationService on app.state.collab + register_collab_routes.
+  chat/stage_finalizer.py · chat/story_design_finalizer.py · api/features.py   actor=canonical_username(...) threaded
+                        into every LifecycleService.transition (m0013 audit rows now attributed). api/system.py ·
+                        runtime/memory_jobs.py · chat/mcp.py · api/memory.py — memory owner derives from canonical_username.
+  scripts/acceptance/phase-35-collab-acceptance.py   the live-acceptance check (local provider, two instances).
+genesis/web/src/
+  types/collab.ts · lib/api/collab.ts (collabApi) · lib/query/keys.ts (qk.collab) · features/collab/
+  {hooks.ts, CollaborationSection.tsx [Settings→Collaboration: Hub status/opt-in + identity form + team mgmt],
+  OnboardingDialog.tsx [first-run, gated on enabled && !identity_set]} · features/settings/SettingsPage.tsx
+  (+ "collaboration" tab) · shared/layout/AppShell.tsx (mounts OnboardingDialog) · shared/ui/icons.ts (+ Users).

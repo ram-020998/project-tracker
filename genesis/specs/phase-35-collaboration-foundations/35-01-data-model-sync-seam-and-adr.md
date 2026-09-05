@@ -1,6 +1,6 @@
 # 35-01 — Data model, the sync seam & ADR-063
 
-> **Status:** 🟡 DRAFTED — docs only; gate = user sign-off → build. · Part of Phase 35. Repo: **genesis** (planning). · **Depends on:** ADR-026 (amended here), ADR-030 (DB-agnostic repos), ADR-051/052 (the provider-interface precedent), ADR-050/25-08 (`LifecycleService` + m0013 `actor` + `row_version`), ADR-053 (memory scope), ADR-060/061 (the entities that will sync).
+> **Status:** ✅ SHIPPED (genesis v0.63.0). · Part of Phase 35. Repo: **genesis** (planning). · **Depends on:** ADR-026 (amended here), ADR-030 (DB-agnostic repos), ADR-051/052 (the provider-interface precedent), ADR-050/25-08 (`LifecycleService` + m0013 `actor` + `row_version`), ADR-053 (memory scope), ADR-060/061 (the entities that will sync).
 
 ## Purpose
 

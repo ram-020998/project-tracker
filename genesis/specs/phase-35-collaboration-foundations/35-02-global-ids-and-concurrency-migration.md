@@ -1,6 +1,6 @@
 # 35-02 — Global identifiers & concurrency migration (m0019)
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 35. Repo: **genesis** (backend + migration). · **Depends on:** 35-01 (locked m0019 schema).
+> **Status:** ✅ SHIPPED (genesis v0.63.0). · Part of Phase 35. Repo: **genesis** (backend + migration). · **Depends on:** 35-01 (locked m0019 schema).
 
 ## Purpose
 

@@ -1,6 +1,6 @@
 # 35-05 — Web: onboarding + the Settings identity/team page + Hub-config
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 35. Repo: **genesis/web**. · **Depends on:** 35-03 (identity/team + onboarding endpoints), 35-04 (the opt-in gate + provider). ADR-027 (design language), ADR-028 (`/api` client), ADR-049 (Settings IA).
+> **Status:** ✅ SHIPPED (genesis v0.63.0). · Part of Phase 35. Repo: **genesis/web**. · **Depends on:** 35-03 (identity/team + onboarding endpoints), 35-04 (the opt-in gate + provider). ADR-027 (design language), ADR-028 (`/api` client), ADR-049 (Settings IA).
 
 ## Purpose
 

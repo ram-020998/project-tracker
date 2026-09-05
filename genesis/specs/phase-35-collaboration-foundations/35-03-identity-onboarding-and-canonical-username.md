@@ -1,6 +1,6 @@
 # 35-03 — Identity, onboarding & the canonical username
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 35. Repo: **genesis** (backend). · **Depends on:** 35-02 (`collab_*` tables), 35-04 (the `SyncProvider` seam — for team CRUD; may land in parallel, both gate on 35-01). ADR-050 (`LifecycleService.actor`), ADR-053 (`memory_owner_username`).
+> **Status:** ✅ SHIPPED (genesis v0.63.0). · Part of Phase 35. Repo: **genesis** (backend). · **Depends on:** 35-02 (`collab_*` tables), 35-04 (the `SyncProvider` seam — for team CRUD; may land in parallel, both gate on 35-01). ADR-050 (`LifecycleService.actor`), ADR-053 (`memory_owner_username`).
 
 ## Purpose
 

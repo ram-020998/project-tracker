@@ -1,6 +1,6 @@
 # 35-07 — Release
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 35. Repo: **genesis**. · **Depends on:** 35-06 (review clean). ADR-019 (release protocol).
+> **Status:** ✅ SHIPPED (genesis v0.63.0). · Part of Phase 35. Repo: **genesis**. · **Depends on:** 35-06 (review clean). ADR-019 (release protocol).
 
 ## Purpose
 
