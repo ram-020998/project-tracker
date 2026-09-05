@@ -1,6 +1,6 @@
 # 36-02 — Record types & data model (Appian build)
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 36. **Built by the Dev-MCP agent** (Appian-side). · **Depends on:** 36-01 (the full field tables + inventory). · **Skill refs (load first):** `record-types.md`, `data-modeling.md`, `relationship-patterns.md`, `field-types.md`, `security.md`, `tools-mcp.md`.
+> **Status:** ✅ BUILT (2026-09-05) — 11 record types + 13 relationships + record-level security created in the dev env; UUIDs in progress/phase-36-genesis-hub-appian-app.md. · Part of Phase 36. **Built by the Dev-MCP agent** (Appian-side). · **Depends on:** 36-01 (the full field tables + inventory). · **Skill refs (load first):** `record-types.md`, `data-modeling.md`, `relationship-patterns.md`, `field-types.md`, `security.md`, `tools-mcp.md`.
 
 ## Purpose
 
