@@ -26,9 +26,9 @@
   `meta`(GET)→/meta · `records`(PUT)→/records/{kind}/{syncUuid} · `records_get`(GET)→/records/{kind}/{syncUuid} · `records_list`(GET)→/records/{kind} · `changes`(GET)→/changes · `activity`(POST)→/activity · `activity_clear`(DELETE)→/activity/{kind}/{syncUuid} · `activity_list`(GET)→/activity/{kind} · `blobs`(POST)→/blobs/{kind}/{key} · `blobs_get`(GET)→/blobs/{kind}/{key} · `blobs_versions`(GET)→/blobs/{kind}/{key}/versions.
 - **Contract shapes to codify** (as built): upsert body = the record payload (snake_case) + `base_version`; actor = payload `modified_by`|`created_by`. Conflict → `409 {error:"conflict", current_version}`. Create → `201`, update → `200`, both `{status, version}`. Blob put body = `{base64, content_hash, published_by}` → `200 {status:"unchanged",version}` | `201 {status:"new",version}`. Blob get → `{base64, content_hash, version}`. `/changes` → `{changes:[{kind,sync_uuid,version,updated_at,published_by}], next_cursor, contract_version}`. Story upsert carries `acceptance_criteria`/`questions`/`labels` arrays (exploded to `GH Story Item`, reassembled on get/list).
 
-### D. Packaging & deployment (36-05; me + admin)
-- Export the `Genesis Hub` app as an installable package; write the install/upgrade runbook.
-- Note the **Appian Web API max request-body size** on the target 26.6 env — this is the real **2 MB blob** gate (a config check, not a code limit; the converter/plugin are size-linear).
+### D. Packaging & deployment (36-05; me + admin) — RUNBOOK ✅ DONE (2026-09-05); export = admin step
+- ✅ `contract/deployment-runbook.md` — the concrete as-built deploy/security/upgrade runbook: packaged inventory, security grants, **service-account provisioning**, **CSRF/allowed-origins** for the write verbs, the **blob-put `documentId` activity-chain** wiring step, the **Web API max request-body size** (the real 2 MB gate), install/upgrade steps, and a per-env checklist.
+- ⬜ **[ADMIN]** Export the `Genesis Hub` app as a versioned `.zip` in Appian Designer (no MCP export tool) — stamp app version + `contract_version="1.0.0"`.
 
 ### E. Contract validation (36-06; needs the API key)
 - End-to-end round-trips per kind: `PUT records/{kind}/{syncUuid}` → `GET records_get/...` → **byte-identical** (incl. story array reassembly); stale `base_version` → **409**; `GET changes` cursor paging; activity set/list/clear; a **2 MB blob** put/get (validates the request-size limit + the doc round-trip).
