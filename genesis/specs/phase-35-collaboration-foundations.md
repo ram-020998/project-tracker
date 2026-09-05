@@ -224,7 +224,7 @@ onboarding + a Settings identity/team page + the opt-in feature flag. **No Appia
 
 ## 9. ADR
 
-- **ADR-063 (PROPOSED — this phase): The Genesis Collaboration Hub — local-first with selective centralization.**
+- **ADR-063 (ACCEPTED — Phase 35, shipped genesis v0.63.0): The Genesis Collaboration Hub — local-first with selective centralization.**
   Genesis stays a **local-first single-user app** (ADR-026) but gains an **opt-in** capability to **selectively
   centralize a defined subset of data** (application KB, features + published stage artifacts, stories/epics,
   boards; **not** chat/runs/catalog/documents/personal-memory) to a shared **Collaboration Hub**, via a
