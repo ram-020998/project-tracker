@@ -63,27 +63,22 @@ id(PK=cursor) `cb086be9-928d-4029-9b8b-22200bf3589e` · kind `40f98808-f300-4da7
 ### GH Activity — rt `c8b98356-4de5-4a67-bcfc-5520f54c2a99` (GH_ACTIVITY)
 id `124db86f-842f-47da-800f-2f2e86b5afe3` · kind `2a27811a-f52a-48c8-ae77-1eb9952cb92c` · syncUuid `9e503975-d121-4211-8a88-6af0e7d41b1d` · username `be2b028a-70b4-4a7e-9543-22e7cdbea6fe` · setAt `7df5a3ef-32db-4e9e-8aca-026f532a3b2c` · expiresAt `34269471-38b0-40aa-9286-2d8ba896d665`
 
-## 🔨 IN PROGRESS — 36-04 (constants ✅ / expression rules 6 of 8 / Web APIs 6 of 12)
-**Expression rules created (6 of 8):**
+## 🔨 IN PROGRESS — 36-04 (constants ✅ / expression rules 8 built / Web APIs 8 of 11 — NON-BLOB CONTRACT COMPLETE)
+**Expression rules built (8 — the 6 planned + 2 helpers):**
 - **GH_isServiceCaller()** `_a-...27478` · **GH_errorResponse(code,message)** `_a-...27482` · **GH_appendChangeLog(kind,syncUuid,version,actor)** `_a-...27491` · **GH_changesSince(cursor,limit)** `_a-...27497`.
-- **GH_recordToJson(kind:Text, record:Any Type)** `_a-...27503` — `a!match(ri!kind)` projects a queried row → the contract snake_case map for all 7 kinds. Validated with a real GH Team row testInput.
-- **GH_casUpsert(kind, syncUuid, payload:Any, baseVersion:Integer, actor)** `_a-...27509` — the capstone CAS write. `a!match(kind)` per-kind dispatch: query current by syncUuid → CAS (`found and currentVersion<>baseVersion` → `{status:"conflict",current_version}`) → `a!writeRecords` (`id:null`=insert, `version=coalesce(baseVersion,-1)+1`, audit per kind, `createdBy/createdAt` preserved on update via `a!defaultValue`) → `GH_appendChangeLog` → `{status:created|updated, version}`. **Story** also replaces `GH Story Item` (query existing → `a!deleteRecords` → `a!writeRecords` from `acceptance_criteria`/`questions`/`labels`, synthesized child `syncUuid=<story>:<itemType>:<pos>`). Payload keys read via `index(ri!payload,"key",null)` (NOT `['key']` — single quotes = identifier ref, not string). Side-effect locals referenced via `index({local!w, local!log, <map>}, 3, null)` to satisfy the unused-local design gate. Validated (feature create path); **design-time eval does NOT commit writes** (GH Feature + GH Change Log confirmed empty after).
+- **GH_recordToJson(kind, record:Any)** `_a-...27503` (v2) — 7-kind projection; **story branch folds in reassembled acceptance_criteria/questions/labels** via GH_reassembleStoryItems (single source; get/list need no merge).
+- **GH_casUpsert(kind, syncUuid, payload:Any, baseVersion, actor)** `_a-...27509` — the CAS capstone (7-kind dispatch, conflict/created/updated, story-item explode).
+- **GH_reassembleStoryItems(storySyncUuid)** `_a-...27520` (v2, null-safe applyWhen) — rebuilds the 3 arrays from GH Story Item (position-ordered, empty stays empty).
+- **GH_queryRecords(kind, syncUuid, limit)** `_a-...27526` — per-kind query (all fields); syncUuid filters to one (get) / null = paged list. Powers get + list.
 
-**Web APIs created (6 of 12):**
-- **GH_meta** (GET `meta`) `7186c6e1-…` — `{contract_version, server_time}`.
-- **GH_records_upsert** (PUT `records`) `8e153f45-…` — kind/syncUuid from `http!request.pathSegments[1..2]`, body via `a!fromJson(http!request.body)`, `rule!GH_casUpsert` → 409 conflict / 201 created / 200 updated; invalid kind → 400. **Proves `http!request.pathSegments` + `.body` resolve in createWebApi.**
-- **GH_changes** (GET `changes`) `04b736b4-…` — `?cursor=&limit=` via `http!request.queryParameters` → `rule!GH_changesSince` + `contract_version`.
-- **GH_activity_set** (POST `activity`) `74dd3ba2-…` — upsert marker (query existing → writeRecords; `expiresAt=now()+ttl/86400.0`).
-- **GH_activity_clear** (DELETE `activity_clear`) `c2786542-…` — query by kind+syncUuid → `a!deleteRecords`.
-- **GH_activity_list** (GET `activity_list`) `d5771f58-…` — markers where `expiresAt>now()`.
-  NOTE urlAliases can't collide, so activity clear/list use `activity_clear`/`activity_list` (not path-nested under `activity`); Genesis's provider maps its DELETE/GET `/activity/...` to these aliases. Confirm the final alias↔contract-path mapping in the contract doc.
+**Web APIs built (8 of 11):** GH_meta (GET `meta`) · GH_records_upsert (PUT `records`, CAS 409/201/200) · GH_records_get (GET `records_get`, 404) · GH_records_list (GET `records_list`) · GH_changes (GET `changes`) · GH_activity_set (POST `activity`) · GH_activity_clear (DELETE `activity_clear`) · GH_activity_list (GET `activity_list`). **The records + changes + activity + meta contract paths are fully built + validated.** Remaining: the 3 blob Web APIs.
+  - urlAlias uniqueness: aliases can't collide, so get/list/clear use `records_get`/`records_list`/`activity_clear`; the Genesis provider maps contract paths → these aliases (finalize in the contract doc).
 
-**ALL SAIL PATTERNS PROVEN in this env (de-risked — reuse verbatim):**
-- **UUID-qualified refs are the correct form** for MCP create/validate: `'recordType!{rtUuid}GH Name'` and `'recordType!{rtUuid}GH Name.fields.{fieldUuid}fieldName'` (single quotes + `{uuid}` braces, name incl. spaces). `a!queryRecordType`/`a!writeRecords`/`a!deleteRecords` all validate with these.
-- **`http!request`** confirmed live via GH_records_upsert: `.pathSegments` (list, 1-indexed after the urlAlias), `.body` (JSON text → `a!fromJson` → Map; read keys via `index(map,"key",null)`), `.queryParameters` (Map). Web APIs are `requestBodyType:NONE` and read `http!request.body` directly.
-- **Dictionary key access = `index(map,"key",null)` or `map.key`** — NEVER `map['key']` (single quotes = identifier reference → "Unresolved reference").
-- **Unused-local design gate is BLOCKING for MCP** — reference every side-effecting write local (e.g. `index({local!w, local!log, result}, 3, null)`), or it fails create with "Unused Local Variables".
-- **Validation:** design-time eval does NOT commit `a!writeRecords`/`a!deleteRecords` (verified). Use `createExpressionRule`/`createWebApi` testInputs for `ri!`/`http!`/`a!toJson` bodies.
+**ALL SAIL PATTERNS PROVEN (reuse verbatim):**
+- UUID-qualified refs (`'recordType!{rtUuid}GH Name.fields.{fieldUuid}f'`) for query/write/delete + record-constructor writes.
+- `http!request` live: `.pathSegments` (1-indexed after urlAlias), `.body`→`a!fromJson`→Map, `.queryParameters`.
+- Dict access = `index(map,"key",null)` (NOT `['key']` = identifier ref). Side-effect write locals MUST be referenced (unused-local gate blocks) — pattern `index({local!w, local!log, result}, 3, null)`. Null `ri!`/filter values under validation → use `applyWhen`/`a!defaultValue`. Design-time eval does NOT commit writes (tables verified empty).
+- **Blob Document mechanism FOUND:** no bytes→Document function exists, but **`Generate Text` smart service (`internal.texttemplatemerge601`, UNATTENDED)** writes arbitrary text to a Document. Store the **base64 string as a text Document** (both kb + artifact); read the doc text back on GET. Needs a small **`GH_storeBlob` process model** (Start → Generate Text[content=base64, folder=cons!GH_FOLDER_*, name=`<key>-v<version>`] → End returns documentId). **DECISION for the blob path:** `a!startProcess` in a Web API is async — either (a) verify `a!startProcess(...).pv.documentId` returns synchronously when the process is fully synchronous (Generate Text is), or (b) make `POST /blobs` async (202 + the process does dedup/insert/prune). Prefer (a) if the sync-pv works; else (b).
 
 ## ⬜ REMAINING (do next)
 0. **All core mechanisms PROVEN** (reuse verbatim): `a!queryRecordType` + `a!writeRecords` (record-constructor) + **`a!deleteRecords`** (validated — parse/discovery clean; only the `serviceContext` eval artifact) + `a!match`/`a!map`/`a!fromJson`/`a!toJson`/`a!httpResponse` + `createWebApi`/`createExpressionRule` with testInputs.
