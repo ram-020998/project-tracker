@@ -120,11 +120,13 @@ sides; no USER fields — attribution is Text; sourced UUIDs). Summary (full det
   `version`, `content_hash`, `document_id`, `size`, `published_by`) — content-hash dedup + keep-last-N.
 - **Machinery record types:** **GH Change Log** (the append-only manifest feed — `id` = the `/changes` cursor)
   and **GH Activity** (advisory "in-progress by X" markers with a TTL).
-- **4000-char limit (Appian synced record types):** there is **no CLOB** — every `Text` field is bounded ≤ 4000.
-  Large content (the KB blob + artifact HTML) is stored as **Appian Documents** (unaffected); a story's
-  variable-length lists (`acceptance_criteria`/`questions`/`labels`) are **normalized into a child record type
-  `GH Story Item`** (one row per item). **The Genesis-side local model is NOT changed** (SQLite keeps its JSON
-  columns) — the sync payload carries arrays, and the Web API explodes/reassembles them (36-01 §2.5b / 36-04).
+- **Text sizing (Appian synced record types):** three sizes — `Text` (255) / `Long Text` (4000) / `Extra Long
+  Text` (64000, max 3 per record type). Large content (the KB blob + artifact HTML) is stored as **Appian
+  Documents** (unaffected); genuinely-long free text (`description`, `GH Story Item.text`) uses **`Extra Long
+  Text`**; a story's variable-length lists (`acceptance_criteria`/`questions`/`labels`) are **normalized into a
+  child record type `GH Story Item`** (variable-*count*, so normalization is the right model). **The Genesis-side
+  local model is NOT changed** (SQLite keeps its JSON columns) — the sync payload carries arrays/full text, and
+  the Web API explodes/reassembles them (36-01 §2.5b / 36-04). Nothing truncates (§2.0).
 - **Attribution is Text** (`created_by`/`modified_by`/`owner_username`/`published_by` = the caller's canonical
   username from the request payload; the actual Appian writer is the shared service account) — **no USER
   fields**.

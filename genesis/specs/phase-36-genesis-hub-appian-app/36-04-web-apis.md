@@ -29,13 +29,12 @@ the bodies.
 | `GH_blobDedupAndStore(kind, key, bytesB64, contentHash, actor)` | → map `{status, version}` | latest `GH Blob Version` for the key; if `contentHash` equal → `{status:"unchanged", version}`; else create/upload the Document (36-03) + insert the `GH Blob Version` row (`version=latest+1`) + `GH_appendChangeLog('blob', key, version, actor)` + `GH_pruneBlobVersions(kind,key)` → `{status:"new", version}`. |
 | `GH_pruneBlobVersions(kind, key)` | → (deletes) | delete `GH Blob Version` rows (+ their Documents) beyond `GH_BLOB_KEEP_LAST_N` for the key. |
 | `GH_recordToJson(kind, record)` | → map | project a record type row → the contract's JSON field names (camel/snake per the contract). |
-| `GH_writeText(parentKind, parentSyncUuid, fieldName, value)` | → Text | if `len(value) ≤ 4000` → store inline, delete any `GH Text Chunk` for the field; else → write ordered `GH Text Chunk` slices (each ≤4000) + inline sentinel. **Never truncates** (§2.0/§2.5c). |
-| `GH_readText(parentKind, parentSyncUuid, fieldName, inline)` | → Text | if chunks exist → `joinarray(slices ordered by chunk_no, "")` (exact); else the inline value. |
 
-**Lossless (§2.0) — MANDATORY:** every write goes through `GH_writeText` for overflow-capable single-text
-fields and explodes list fields into `GH Story Item`; every read reassembles via `GH_readText` + `GH Story Item`
-so the response reproduces the input **exactly** (content/order/count/empty-vs-null/unicode). No field is ever
-truncated or dropped. The 36-06 harness proves round-trip fidelity with adversarial fixtures.
+**Lossless (§2.0) — MANDATORY:** text fields are **sized** to hold their content (`description` +
+`GH Story Item.text` → `Extra Long Text` 64000; medium → `Long Text` 4000; codes → `Text` 255) so nothing
+truncates; list fields explode into `GH Story Item` on write and reassemble on read. Every read reproduces the
+input **exactly** (content/order/count/empty-vs-null/unicode). No field is truncated or dropped. The 36-06
+harness proves round-trip fidelity with adversarial fixtures.
 
 ## C. Web API objects (skill: Web-API guidance; each returns `a!httpResponse`)
 

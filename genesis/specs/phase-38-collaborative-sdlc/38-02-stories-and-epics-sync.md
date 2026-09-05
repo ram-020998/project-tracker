@@ -18,9 +18,9 @@ feature; pull materializes them locally.
      `labels` are sent as JSON **arrays** in the story payload (Genesis keeps its local SQLite JSON columns as-is
      — **no local normalization / migration**). The **Appian Hub** normalizes them into `GH Story Item` child
      rows to satisfy the 4000-char synced-record-type limit, and reassembles them into arrays on read (Phase 36
-     §2.5b / 36-04) — transparent to Genesis. Single text fields (`description`, `dev_note_ref`) are sent in
-     full; if one exceeds 4000 the Hub stores it as ordered `GH Text Chunk` rows and reassembles it on read —
-     **never truncated** (Phase 36 §2.0/§2.5c). **The sync is lossless in both directions.**
+     §2.5b / 36-04) — transparent to Genesis. Single text fields (`description`) are sent in full; the Hub
+     column is **`Extra Long Text` (64000)**, so any realistic value is stored **without truncation** (Phase 36
+     §2.0). **The sync is lossless in both directions.**
 2. **Pull** — materialize/refresh the mirror epics + stories under the feature (map global `sync_uuid` → local
    row); auto for the shared read-only Stories view; notify-then-apply if this user has an unpublished local
    edit to the same story.
@@ -31,9 +31,9 @@ feature; pull materializes them locally.
 
 - Finalize → epics/stories on the (fake) Hub; pull on a second instance → same backlog under the feature; edit
   → re-publish → pull reflects it; a delete propagates; CAS conflict → notify. ruff clean.
-- **MANDATORY round-trip fidelity test (no data loss):** for a story with a **> 4000-char description**, **many
-  long AC**, **unicode**, **empty `labels`**, and a **null `epic`**, assert `local → payload → Hub (records +
-  GH Story Item + GH Text Chunk) → payload → local` reproduces every field **exactly** (content, order, count,
+- **MANDATORY round-trip fidelity test (no data loss):** for a story with a **long (multi-KB) description**,
+  **many long AC**, **unicode/emoji**, **empty `labels`**, and a **null `epic`**, assert `local → payload → Hub
+  (records + GH Story Item) → payload → local` reproduces every field **exactly** (content, order, count,
   empty-vs-null). This test is a release gate.
 
 ## Deliverable

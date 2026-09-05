@@ -7,8 +7,8 @@
 Build the **11 record types** (§2 of 36-01) on the Hub data source, with exact fields/types/keys, the
 relationships (both sides), and record-level security — the backing data for the Web APIs. **Follow the Appian
 skill's record-type conventions exactly** (PK `id` Integer; `syncUuid` unique; relationships both sides; no USER
-fields — attribution is Text; **no CLOB — every `Text` field ≤ 4000, variable-length lists normalized into
-`GH Story Item`**; UUIDs sourced from the environment, never fabricated).
+fields — attribution is Text; **text uses `Text` (255) / `Long Text` (4000) / `Extra Long Text` (64000, max 3
+per record type), sized so nothing truncates; variable-length lists normalized into `GH Story Item`**; UUIDs sourced from the environment, never fabricated).
 
 ## Build order (dependency-safe)
 
@@ -19,9 +19,9 @@ fields — attribution is Text; **no CLOB — every `Text` field ≤ 4000, varia
    entities, mirror the same structure.)
 2. **Record types (create in this order):** `GH Team` → `GH Membership` → `GH Feature` → `GH Epic` → `GH Story`
    → **`GH Story Item`** → `GH Board State` → `GH Stage Artifact` → `GH Blob Version` → `GH Change Log` →
-   `GH Activity`. For each: map every field to its column with the Appian field type from §2 (**Text [≤ 4000] /
-   Integer / "Date and Time" / Boolean — there is NO CLOB**); set the PK to `id`; **do not** add USER fields
-   (attribution stays Text).
+   `GH Activity`. For each: map every field to its column with the Appian field type from §2 (**`Text` [255] /
+   `Long Text` [4000] / `Extra Long Text` [64000, max 3 per record type] / Integer / "Date and Time" / Boolean**);
+   set the PK to `id`; **do not** add USER fields (attribution stays Text).
    **After each `createRecordType`, capture the returned record-type UUID + field UUIDs** (the Web APIs +
    expression rules in 36-04 need the UUID-qualified `'recordType!{uuid}...fields.{fieldUuid}...'` references —
    sourced, never fabricated).

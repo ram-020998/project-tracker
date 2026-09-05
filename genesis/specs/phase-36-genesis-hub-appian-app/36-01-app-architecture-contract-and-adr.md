@@ -35,19 +35,21 @@ The building agent MUST follow the installed **Appian skill** (`~/.kiro/skills/a
   (the caller's canonical Genesis/Appian **username string** carried in the request payload), NOT as an Appian
   USER field — so we avoid the `SYSTEM_RECORD_TYPE_USER` relationship requirement and correctly represent that
   the **service account** is the actual Appian writer while the *logical* author is payload-supplied.
-- **⚠️ Synced record types cap EVERY text field at 4000 characters — there is NO CLOB/long-text.** So: (a) all
-  large content (the KB blob + artifact HTML) is stored as **Appian Documents**, never record columns (36-03) —
-  unaffected; (b) single free-text fields (`description`, `devNoteRef`) map to a **`Text` column ≤ 4000**, and
-  **any value exceeding 4000 is stored losslessly as ordered `GH Text Chunk` rows (concatenated on read) — it is
-  NEVER truncated** (§2.0 / §2.5c); (c) **variable-length lists** (`acceptance_criteria`, `questions`, `labels`)
-  are **normalized into a child record type `GH Story Item`** (one row per item, each `text` ≤ 4000) — **NOT** a
-  JSON string column. **The Genesis-side local model is NOT changed** (SQLite has no such limit — it keeps its
-  JSON columns); the **sync payload carries the arrays / full text**, and the Appian **Web API explodes/chunks on
-  write + reassembles on read** — so the 4000-char normalization is entirely an Appian-Hub internal concern
-  (§2.5b/§2.5c, 36-04) and is **lossless** (§2.0). Tiny JSON that is reliably < 4000 (e.g. `upstream_versions` =
-  `{"spec":3}`) may stay a bounded `Text` field. *(Design lever, noted not chosen: making these record types
-  **non-synced** [source-backed] would avoid the 4000 limit but forfeit data-fabric sync/Smart-Search — we keep
-  them synced + normalized.)*
+- **⚠️ Synced record types have THREE text sizes (Appian data-sync limits, verified in the 26.x docs — text
+  beyond a field's size is truncated on sync, and limits are in BYTES so an emoji counts as 4):**
+  **`Text` = 255** · **`Long Text` = 4000** · **`Extra Long Text` = 64000** — and a synced record type may have
+  **at most 3 `Extra Long Text` fields**. So: (a) all large content (the KB blob + artifact HTML) is stored as
+  **Appian Documents**, never record columns (36-03) — unaffected; (b) genuinely-long single free-text fields
+  (`description`) use **`Extra Long Text` (64000)** — ample for any realistic summary; each record type uses ≤ 1
+  (well within the 3-field budget); (c) **variable-length lists** (`acceptance_criteria`, `questions`, `labels`)
+  are **normalized into a child record type `GH Story Item`** (one row per item) — because they are
+  variable-*count* (not just long), normalization is the right model regardless of the char limit; each item's
+  `text` uses `Extra Long Text` (64000) for headroom. **The Genesis-side local model is NOT changed** (SQLite
+  keeps its JSON columns); the **sync payload carries the arrays / full text**, and the Appian **Web API
+  explodes lists into `GH Story Item` on write + reassembles on read** — an Appian-Hub-internal concern
+  (§2.5b, 36-04), **lossless** (§2.0). Sensible sizing per field: keys/uuids/hashes/statuses/types → `Text`
+  (255); `dev_note_ref`/`title`/`upstream_versions` → `Long Text` (4000); `description` + `GH Story Item.text` →
+  `Extra Long Text` (64000).
 
 ---
 
@@ -65,7 +67,7 @@ The building agent MUST follow the installed **Appian skill** (`~/.kiro/skills/a
 | 4 | Constant | `GH_CONTRACT_VERSION` (Text, e.g. `"1.0"`) | The API contract version returned by `/meta` + `/changes`. |
 | 4 | Constant | `GH_BLOB_KEEP_LAST_N` (Integer, e.g. `10`) | Blob retention (keep last N versions). |
 | 4 | Constant | `GH_FOLDER_KB_BLOBS`, `GH_FOLDER_ARTIFACT_BLOBS` (Folder) | Target folders for blob documents. |
-| 5 | **Record types** (12) | `GH Team`, `GH Membership`, `GH Feature`, `GH Epic`, `GH Story`, **`GH Story Item`** (normalized AC/questions/labels — child of Story), **`GH Text Chunk`** (lossless overflow for any single text > 4000), `GH Board State`, `GH Stage Artifact`, `GH Blob Version`, `GH Change Log`, `GH Activity` | The shared entities + the normalized story-item child + the long-text overflow child + the blob-version index + the change manifest + advisory markers (full field tables in §2). |
+| 5 | **Record types** (11) | `GH Team`, `GH Membership`, `GH Feature`, `GH Epic`, `GH Story`, **`GH Story Item`** (normalized AC/questions/labels — child of Story), `GH Board State`, `GH Stage Artifact`, `GH Blob Version`, `GH Change Log`, `GH Activity` | The shared entities + the normalized story-item child + the blob-version index + the change manifest + advisory markers (full field tables in §2). |
 | 6 | Record type relationships | Feature↔Epic, Feature↔Story, Epic↔Story, Feature↔StageArtifact, **Story↔StoryItem**, Team↔Membership (both sides each) | Queryability + admin views (§2.11). |
 | 7 | **Expression rules** (helpers) | `GH_isServiceCaller`, `GH_casUpsert`, `GH_appendChangeLog`, `GH_changesSince`, `GH_blobDedupAndStore`, `GH_pruneBlobVersions`, `GH_recordToJson`, `GH_errorResponse` | The reusable logic the Web APIs delegate to (§4 in 36-04). |
 | 8 | Interfaces (OPTIONAL) | `GH_adminDashboard`, `GH_teamsView`, `GH_featuresView` | Admin visibility only — not required by the contract. |
@@ -85,25 +87,28 @@ convenience.
 PK **`id`** (Integer, identity); **`syncUuid`** (Text, **unique index**) = the Genesis `sync_uuid`; **`version`**
 (Integer, default 0) = the optimistic-CAS counter; and audit **`createdBy`/`modifiedBy`** (Text usernames),
 **`createdAt`/`updatedAt`** ("Date and Time"). Types are Appian field types (Text / Integer / "Date and Time" /
-Boolean). **There is NO CLOB — every `Text` field is bounded ≤ 4000 chars (synced-record-type limit); large
-content is a Document (36-03) and variable-length lists are normalized into `GH Story Item` (§2.5b), never a
-JSON string column.** Column names are `snake_case`; field names `camelCase`.
+Boolean). **Text fields use one of the three synced sizes — `Text` (255) / `Long Text` (4000) / `Extra Long
+Text` (64000), max 3 `Extra Long Text` per record type; sized per field so nothing truncates** (large content is
+a Document, 36-03; variable-length lists are normalized into `GH Story Item`, §2.5b — never a JSON string
+column). Column names are `snake_case`; field names `camelCase`.
 
 ### 2.0 Data integrity — LOSSLESS, order-preserving sync (no truncation, no drop) — MANDATORY
 
 The publish/pull mapping between the Genesis local model (JSON) and the Hub (normalized) **MUST be lossless in
 both directions.** Concretely:
-- **No text is ever truncated.** A `Text` column is ≤ 4000, but any value that exceeds 4000 is stored as
-  **ordered `GH Text Chunk` rows** (§2.5c) and reassembled by **exact concatenation** on read. There is no
-  silent cap.
+- **No text is truncated.** Each text field is sized to hold its content — genuinely-long free text
+  (`description`, `GH Story Item.text`) uses **`Extra Long Text` (64000 bytes)**, ample for any realistic value;
+  medium text uses `Long Text` (4000); short codes use `Text` (255). (Limits are **bytes** — a value with
+  multibyte characters/emojis must fit in bytes; a >64000-byte value is out of scope and belongs in an artifact
+  Document, not a field.)
 - **Lists are preserved exactly** — `acceptance_criteria`/`questions`/`labels` → `GH Story Item` rows keep
   **content + order** (`position`) + **count** (including an **empty list** → zero rows, distinct from a missing
   field); reassembled to the identical array.
-- **Round-trip fidelity is a hard gate:** for every synced kind, `local → publish payload → Hub records/chunks →
+- **Round-trip fidelity is a hard gate:** for every synced kind, `local → publish payload → Hub records →
   pull payload → local` must reproduce the original **byte-for-byte** at the field level (unicode, whitespace,
   ordering, empty-vs-null all preserved). Enforced by a **round-trip fidelity test** on the Genesis side (38-02)
-  and the contract harness (36-06) using adversarial fixtures (a > 4000-char description, many/long AC, unicode,
-  empty arrays, nulls).
+  and the contract harness (36-06) using adversarial fixtures (a long multi-KB description, many/long AC,
+  unicode/emoji, empty arrays, nulls).
 - **Deletes propagate** (a removed story/AC item is removed on pull — tombstone/soft-delete per the contract),
   so pull does not silently retain stale data.
 
@@ -136,7 +141,7 @@ both directions.** Concretely:
 | syncUuid (sync_uuid) | Text | **unique** |
 | appUuid (app_uuid) | Text | the Appian app the feature belongs to |
 | name (name) | Text | |
-| description (description) | Text (≤4000) | summary; if > 4000, overflow → `GH Text Chunk` (never truncated, §2.5c) |
+| description (description) | Extra Long Text (64000) | summary; ample headroom, never truncated (§2.0); 1 of the ≤3 Extra-Long-Text budget |
 | ownerUsername (owner_username) | Text | forward-compat visibility tag |
 | teamUuid (team_uuid) | Text | forward-compat visibility tag |
 | version / createdBy / modifiedBy / createdAt / updatedAt | Integer / Text / Text / DateTime / DateTime | |
@@ -149,7 +154,7 @@ both directions.** Concretely:
 | featureSyncUuid (feature_sync_uuid) | Text | → `GH Feature.syncUuid` |
 | key (backlog_key) | Text | provenance ("epic-1") |
 | title (title) | Text | |
-| description (description) | Text (≤4000) | summary; if > 4000, overflow → `GH Text Chunk` (never truncated, §2.5c) |
+| description (description) | Extra Long Text (64000) | summary; ample headroom, never truncated (§2.0); 1 of the ≤3 Extra-Long-Text budget |
 | workstream (workstream) | Text | |
 | position (position) | Integer | |
 | version / createdBy / modifiedBy / createdAt / updatedAt | | |
@@ -166,8 +171,8 @@ both directions.** Concretely:
 | storyType (story_type) | Text | 'Story' | 'Task' |
 | category (category) | Text | 'core' | 'nice-to-have' |
 | appianPart (appian_part) | Text | |
-| description (description) | Text (≤4000) | summary; if > 4000, overflow → `GH Text Chunk` (never truncated, §2.5c) |
-| devNoteRef (dev_note_ref) | Text (≤4000) | one-line TD pointer |
+| description (description) | Extra Long Text (64000) | summary; ample headroom, never truncated (§2.0); 1 of the ≤3 Extra-Long-Text budget |
+| devNoteRef (dev_note_ref) | Long Text (4000) | one-line TD pointer |
 | status (status) | Text | the board **lane** |
 | position (position) | Integer | |
 | ownerUsername / teamUuid | Text | visibility tags |
@@ -179,14 +184,14 @@ both directions.** Concretely:
 > `GH Story Item` rows on write and **reassembles** them into arrays on read (36-04). The Genesis local model
 > keeps its JSON columns unchanged.
 
-### 2.5b `GH Story Item` — table `gh_story_item` (normalizes the story's variable-length lists; keeps every value ≤ 4000)
+### 2.5b `GH Story Item` — table `gh_story_item` (normalizes the story's variable-length lists — one row per item)
 | field | type | notes |
 |---|---|---|
 | id | Integer | PK |
 | syncUuid (sync_uuid) | Text | **unique** (child row id; client-generated by Genesis) |
 | storySyncUuid (story_sync_uuid) | Text | → `GH Story.syncUuid` |
 | itemType (item_type) | Text | 'ac' | 'question' | 'label' |
-| text (text) | Text (≤4000) | one AC line / question / label (each item is short — well under 4000) |
+| text (text) | Extra Long Text (64000) | one AC line / question / label (Extra Long Text for headroom; 1 of the ≤3-per-record-type budget) |
 | position (position) | Integer | order within its `itemType` |
 | version / createdAt / updatedAt | | |
 | **unique** (story_sync_uuid, item_type, position) | | |
@@ -196,24 +201,6 @@ both directions.** Concretely:
 > operation; `GH_records_get`/`GH_records_list` for `kind='story'` reassembles them into the
 > `acceptance_criteria`/`questions`/`labels` arrays. The change log records a `'story'` change (children are an
 > implementation detail of the story).
-
-### 2.5c `GH Text Chunk` — table `gh_text_chunk` (lossless overflow for ANY single text field > 4000; never truncate)
-| field | type | notes |
-|---|---|---|
-| id | Integer | PK |
-| syncUuid (sync_uuid) | Text | **unique** (chunk row id) |
-| parentKind (parent_kind) | Text | 'feature' | 'epic' | 'story' | 'story_item' (polymorphic — like Stage Artifact) |
-| parentSyncUuid (parent_sync_uuid) | Text | the owning record's `syncUuid` |
-| fieldName (field_name) | Text | e.g. 'description' |
-| chunkNo (chunk_no) | Integer | 0-based order |
-| text (text) | Text (≤4000) | one 4000-char slice of the value |
-| **unique** (parent_kind, parent_sync_uuid, field_name, chunk_no) | | |
-
-> Used **only when** a single text value exceeds 4000. On write, the value is split into ordered ≤4000 slices;
-> the inline column stores a sentinel (empty) + the presence of chunks signals overflow. On read, if chunks
-> exist for `(record, field)`, the value = **`joinarray(slices ordered by chunk_no, "")`** (raw concatenation,
-> no delimiter → exact). This guarantees **no truncation for any length** (the §2.0 invariant). Most
-> descriptions fit inline (≤4000) and use **zero** chunk rows.
 
 ### 2.6 `GH Board State` — table `gh_board_state`
 | field | type | notes |
@@ -237,7 +224,7 @@ both directions.** Concretely:
 | status (status) | Text | draft→in-progress→in-review→completed |
 | contentHash (content_hash) | Text | of the current artifact bytes |
 | blobKey (blob_key) | Text | → `GH Blob Version.blobKey` (kind='artifact') |
-| upstreamVersions (upstream_versions) | Text (≤4000) | small JSON, e.g. `{"spec":3}` (the staleness signal; well under 4000) |
+| upstreamVersions (upstream_versions) | Long Text (4000) | small JSON, e.g. `{"spec":3}` (well within 4000) |
 | publishedBy (published_by) | Text | |
 | publishedAt (published_at) | DateTime | |
 | version / createdAt / updatedAt | | |
