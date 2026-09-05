@@ -102,25 +102,27 @@ stub + contract fixtures).
 
 ---
 
-## 5. Record & document model — finalized in 36-01
+## 5. Record & document model — full inventory + field tables in 36-01
 
-UUID-keyed record types (all carry `sync_uuid` [text, unique], `version` [int], `created_by`, `modified_by`,
-`created_at`, `updated_at`; the top-level ones also `owner_username`, `team_uuid`):
+The Hub is a full Appian application. **36-01 is the master build reference** — it names **every object** (the
+`Genesis Hub` app + groups + service account + folders + constants + **10 record types** + relationships +
+helper expression rules + **~12 Web APIs**) in **dependency order**, with **complete field tables**, and the
+Appian-skill conventions the building agent must follow (PK `id` Integer; `sync_uuid` unique; relationships both
+sides; no USER fields — attribution is Text; sourced UUIDs). Summary (full detail in 36-01 §2):
 
-- **Team** (`team_uuid`, `title`) · **Membership** (`team_uuid`, `username`, `name`, `email`, `joined_at`).
-- **Feature** (`sync_uuid`, `app_uuid`, `name`, `description`).
-- **Epic** (`sync_uuid`, `feature_sync_uuid`, `key`, `title`, `description`, `workstream`, `position`).
-- **Story** (`sync_uuid`, `feature_sync_uuid`, `epic_sync_uuid`, `key`, `title`, `story_type`, `category`,
-  `appian_part`, `description`, `acceptance_criteria`, `dev_note_ref`, `questions`, `labels`, `status` [the
-  board lane], `position`).
-- **BoardState** — a story's lane on an app's board (`app_uuid`, `story_sync_uuid`, `status`) — membership +
-  lane are shared; **in-lane ordering is NOT stored** (local, per Phase-35 decision).
-- **StageArtifact** metadata (`sync_uuid`, `parent_sync_uuid` [feature or story], `parent_kind`, `stage`,
-  `status`, `content_hash`, `blob_ref`, `published_by`, `upstream_versions_json`).
-
-Document-management record types for the blobs: **KbBlob** (`app_uuid`, version, content_hash, gzip payload) and
-**ArtifactBlob** (`parent_sync_uuid`, `stage`, version, content_hash, HTML payload). References (`blob_ref`) link
-the metadata record → the current blob version. Exact fields/relationships/keys locked in 36-01.
+- **Shared entities** (UUID-keyed; each carries `syncUuid` unique + `version` + `createdBy`/`modifiedBy`/
+  `createdAt`/`updatedAt`; top-level ones also `ownerUsername`/`teamUuid`): **GH Team**, **GH Membership**,
+  **GH Feature**, **GH Epic**, **GH Story**, **GH Board State** (`app_uuid`, `story_sync_uuid`, `status` — lane
+  only; in-lane ordering NOT stored), **GH Stage Artifact** (metadata: stage/status/`content_hash`/`blob_key`/
+  `upstream_versions`/provenance).
+- **Blob store** (36-03): the bytes are **Appian Documents** (native version history) in `GH KB Blobs` /
+  `GH Artifact Blobs` folders, **indexed** by the **GH Blob Version** record type (`blob_kind`, `blob_key`,
+  `version`, `content_hash`, `document_id`, `size`, `published_by`) — content-hash dedup + keep-last-N.
+- **Machinery record types:** **GH Change Log** (the append-only manifest feed — `id` = the `/changes` cursor)
+  and **GH Activity** (advisory "in-progress by X" markers with a TTL).
+- **Attribution is Text** (`created_by`/`modified_by`/`owner_username`/`published_by` = the caller's canonical
+  username from the request payload; the actual Appian writer is the shared service account) — **no USER
+  fields**.
 
 ---
 
