@@ -44,3 +44,18 @@ appending `/suite/webapi` in `_resolve_hub_base_url` (+ a test asserting the der
 - Enablement of the env master still requires a `serve` restart with `GENESIS_COLLAB_ENABLED=1` +
   `GENESIS_COLLAB_PROVIDER=appian` (the deployment-level switch). The Settings toggle is the runtime control.
 - `collab_hub_url` remains a fallback only for a deployment with no dev-tagged env.
+
+## v0.66.2 — stage_artifact contract fix (first live publish 400)
+The first real publish of a completed feature stage to the live Hub returned
+`PUT /records/feature_stage/<uuid> → 400: invalid kind or missing syncUuid`. The `CollaborationService`
+entity binding sent **kind `feature_stage`** + a `feature_sync_uuid` parent + an artifact blob keyed by the
+stage's sync_uuid, but the frozen Hub contract (36-01 §2.1) has **kind `stage_artifact`** with
+`parent_sync_uuid` + `parent_kind`, a renamed `upstream_versions` field, and an artifact blob keyed
+`<parent_sync_uuid>:<stage>` with that `blob_key` carried on the record. The permissive `LocalHubProvider`
+accepted the wrong shape, so all Phase-38 tests/acceptance passed — the mismatch only surfaced on the live
+Appian call. **Fix:** remapped the stage binding (`kind`/`parent_kind`/`rename_out`/`blob_key`+`content_hash`
+on the record; pull reverses the rename + fetches the blob by `<parent>:<stage>`), updated the SDLC tests to
+the contract shape, and added a guard test that every `_BINDINGS` kind is a real contract record kind.
+**Live-verified:** `publish_feature_stage → PUT stage_artifact → created v0` against `merge-assist-dev`.
+See bible §7. Backend pytest **782**.
+
