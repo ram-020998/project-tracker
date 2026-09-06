@@ -546,3 +546,24 @@ genesis/web/src/
                            the cached opt-in config; in-lane reorders stay local).
   lib/api/collab.ts · types/collab.ts · lib/query/keys.ts  publish*/pull/activity/adopt* client + PublishResult/
                            PullResult/ActivityMarker/AdoptionCounts + qk.collab.activity/adoptPreview.
+
+
+# ── ADR-065 — Two-toggle collaboration enablement (Settings switch + Hub availability; genesis v0.66.0/v0.66.1) ──
+genesis/genesis/
+  collab/config.py         CollabConfigStore over ~/.genesis/collab.json (settings.collab_config_path) via
+                           genesis_core.util.atomic_json — {ui_enabled (default False), hub_app_uuid}. No migration.
+  collab/__init__.py        build_sync_provider('appian') derives base_url via _resolve_hub_base_url =
+                           dev_environment().url + "/suite/webapi" (collab_hub_url is the no-dev-env fallback).
+  collab/service.py         is_enabled() = provider is not None AND _ui_enabled() (reads collab.json); hub_configured()
+                           (env master only); _hub_app_uuid() (config wins over the env fallback); _require() gates on
+                           is_enabled(); is_hub_app() reads the persisted UUID.
+  collab/providers/appian.py  AppianHubProvider.base_url property (exposes the Web-API prefix for the status display).
+  api/collab.py             GET /collab/availability (env_enabled + Hub reachable → can_enable) + PUT /collab/config
+                           (409 unless env master + reachable) + extended GET /collab/config (enabled/env_enabled/
+                           ui_enabled/available/hub_app_uuid/hub_url).
+  runtime/settings.py       collab_config_path property (~/.genesis/collab.json).
+genesis/web/src/
+  features/collab/CollaborationSection.tsx  HubStatusCard = a Switch toggle (availability-guarded) + Hub-app-UUID field
+                           + fixed copy. features/collab/hooks.ts (useCollabAvailability + useSetCollabConfig);
+  lib/api/collab.ts (availability + setConfig); types/collab.ts (CollabConfig +env_enabled/ui_enabled/available/
+                           hub_app_uuid + CollabAvailability + CollabConfigInput); lib/query/keys.ts (collab.availability).
