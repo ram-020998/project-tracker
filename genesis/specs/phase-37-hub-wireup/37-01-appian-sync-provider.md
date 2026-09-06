@@ -1,6 +1,6 @@
 # 37-01 — The Appian `SyncProvider`
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 37. Repo: **genesis**. · **Depends on:** Phase 35 (`SyncProvider` Protocol + `build_sync_provider`), Phase 36 (the frozen contract + fixtures), ADR-048 (service-account creds).
+> **Status:** ✅ SHIPPED (genesis v0.64.0). · Part of Phase 37. Repo: **genesis**. · **Depends on:** Phase 35 (`SyncProvider` Protocol + `build_sync_provider`), Phase 36 (the frozen contract + fixtures), ADR-048 (service-account creds).
 
 ## Purpose
 

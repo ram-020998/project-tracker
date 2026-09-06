@@ -1,6 +1,6 @@
 # 37-03 — Identity/teams live
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 37. Repo: **genesis**. · **Depends on:** 37-01 (Appian provider), Phase 35 (identity/teams model + onboarding + Settings page against the mock).
+> **Status:** ✅ SHIPPED (genesis v0.64.0). · Part of Phase 37. Repo: **genesis**. · **Depends on:** 37-01 (Appian provider), Phase 35 (identity/teams model + onboarding + Settings page against the mock).
 
 ## Purpose
 

@@ -1,6 +1,6 @@
 # 37-02 — KB sharing (pull-first blob sync)
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 37. Repo: **genesis**. · **Depends on:** 37-01 (the Appian provider), the `KbStore.apply` baseline path + the `sync-application`/`api/applications.py` refresh flow, ADR-047 (scheduler).
+> **Status:** ✅ SHIPPED (genesis v0.64.0). · Part of Phase 37. Repo: **genesis**. · **Depends on:** 37-01 (the Appian provider), the `KbStore.apply` baseline path + the `sync-application`/`api/applications.py` refresh flow, ADR-047 (scheduler).
 
 ## Purpose
 

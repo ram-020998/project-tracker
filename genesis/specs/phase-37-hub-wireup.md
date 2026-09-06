@@ -1,6 +1,6 @@
 # Phase 37 — Hub Wire-up: the Appian provider, KB sharing & live identity/teams
 
-> **Status:** 🟡 **SPECS DRAFTED (2026-09-05)** — awaiting user sign-off to build. Umbrella + `phase-37-hub-wireup/37-01..37-06`. · **Author:** Genesis agent
+> **Status:** ✅ **SHIPPED (2026-09-06) — genesis v0.64.0** (42e610e, tag v0.64.0). Umbrella + `phase-37-hub-wireup/37-01..37-06`. · **Author:** Genesis agent
 > **Type:** single-repo — **genesis** (a new `AppianHubProvider` implementing the Phase-36 contract; KB publish/pull; identity/teams wired live; the sync-UX foundation). No migration (Phase 35's m0019 stands). genesis-core / SDK / workflows / parser **unchanged**. · **Depends on:** **Phase 35** (the `SyncProvider` seam + `CollaborationService` + identity/teams model + `sync_uuid`/provenance/`collab_*` tables + the opt-in gate; ADR-063) **and Phase 36** (the deployed Genesis Hub Appian app + its **frozen API contract + fixtures**; ADR-064), ADR-048 (per-env Appian creds → the Hub service-account key), ADR-047 (the scheduler that can run periodic pulls), the KB `KbStore.apply` baseline path + the `sync-application` refresh flow.
 >
 > **Third of four phases** (35 → 36 → **37 Hub wire-up** → 38 Collaborative SDLC). This phase takes the whole

@@ -1,6 +1,6 @@
 # 37-05 — Code review & hardening
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 37. Repo: **genesis**. · **Depends on:** 37-01..37-04.
+> **Status:** ✅ SHIPPED (genesis v0.64.0). · Part of Phase 37. Repo: **genesis**. · **Depends on:** 37-01..37-04.
 
 ## Review checklist
 

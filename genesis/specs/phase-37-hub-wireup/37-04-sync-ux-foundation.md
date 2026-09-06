@@ -1,6 +1,6 @@
 # 37-04 — Sync-UX foundation
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 37. Repo: **genesis/web** (+ thin backend). · **Depends on:** 37-01 (provider), 37-02 (KB pull), the `CollaborationService` change-manifest + `collab_sync_state`.
+> **Status:** ✅ SHIPPED (genesis v0.64.0). · Part of Phase 37. Repo: **genesis/web** (+ thin backend). · **Depends on:** 37-01 (provider), 37-02 (KB pull), the `CollaborationService` change-manifest + `collab_sync_state`.
 
 ## Purpose
 

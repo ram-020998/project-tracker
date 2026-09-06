@@ -475,3 +475,40 @@ genesis/web/src/
   {hooks.ts, CollaborationSection.tsx [Settings→Collaboration: Hub status/opt-in + identity form + team mgmt],
   OnboardingDialog.tsx [first-run, gated on enabled && !identity_set]} · features/settings/SettingsPage.tsx
   (+ "collaboration" tab) · shared/layout/AppShell.tsx (mounts OnboardingDialog) · shared/ui/icons.ts (+ Users).
+
+
+# ── Phase 37 — Hub Wire-up (AppianHubProvider + KB sharing + identity/teams + sync-UX; genesis v0.64.0) ──
+genesis/genesis/
+  collab/provider.py       + HubTransportError / HubAuthError (transport-neutral, beside HubConflict; re-exported
+                           from genesis.collab so the API can map them to 503/401).
+  collab/providers/appian.py  AppianHubProvider(SyncProvider) — every Protocol method over the frozen Phase-36
+                           contract v1.0.0: urlAlias map (§1.1); put_record (base-version → 409 HubConflict);
+                           get/list_records; put_blob (dedup 200 / new 201) / get_blob (latest) / list_blob_versions
+                           (re-sorted ascending so [-1]==latest); changes_since (drains pages); set/clear/list_activity;
+                           teams/memberships as generic 'records' kinds (deterministic uuid5 membership key);
+                           injectable transport (default requests + retry/backoff on 5xx/429; key never logged);
+                           is_available() pings /meta + warns on contract_version mismatch. Reads are
+                           eventually-consistent (trusts the PUT version, never re-GETs — contract §4a).
+  collab/__init__.py       build_sync_provider('appian') resolves the Hub key from the ADR-048 dev-env
+                           SecretProvider scope (APPIAN_API_KEY); re-exports NotOnboardedError + the transport errors.
+  collab/service.py        publish_kb / pull_kb_if_newer (pull-first, collab_sync_state kind='kb:<app_uuid>' version
+                           marker; content-hash dedup; Hub-app exclusion via settings.collab_hub_app_uuid) +
+                           is_onboarded/require_onboarded + NotOnboardedError (onboarding-before-first-publish gate;
+                           attribution) + is_available/changes_since (sync-UX) + a KB blob helper.
+  kb/store.py              KbStore.hydrate_from_blob + _close_all_current — SCD-2 replace-current in ONE tx (close all
+                           current → baseline-open the pulled snapshot → recompute bundles → mark business-map stale →
+                           record a 'hub-pull' sync). Blocking → callers use asyncio.to_thread.
+  kb/blob.py               serialize_result / deserialize_result — the gzipped code-free KB blob (result.json shape;
+                           gzip mtime=0 for a stable content_hash; a _ResultShim decoupled from the parser dataclasses).
+  api/applications.py      POST /applications/{uuid}/pull (pull-first) + /publish (deliberate refresh→publish); Hub app
+                           excluded from add; onboarding + HubTransport/HubAuth → 409/401/503.
+  api/collab.py            GET /collab/status (enabled+available) + GET /collab/changes?cursor= (manifest; degrades to
+                           empty when disabled/unreachable → the poll no-ops).
+  runtime/sync_jobs.py     + kb-hub-pull scheduled job (off by default; pull-first every tracked app; asyncio.to_thread).
+  api/app.py               collab_service is constructed BEFORE the applications + scheduler wiring so all three share it.
+  scripts/acceptance/phase-37-hub-acceptance.py  the headless live-acceptance harness (two instances over a local hub).
+genesis/web/src/
+  features/collab/HubStatus.tsx   <HubStatus> — live reachability (offline-first) + Check-for-updates; nothing when disabled.
+  features/collab/StalenessBadge.tsx + staleness.ts  <StalenessBadge> + pure isStale (notify-then-apply; never auto-overwrites).
+  features/collab/hooks.ts        useHubStatus / useHubChanges (refetchInterval polls) + useSyncNow.
+  lib/api/collab.ts · types/collab.ts · lib/query/keys.ts  status()/changes() + HubStatusInfo/HubChange(Response) + qk.collab.status/changes.
