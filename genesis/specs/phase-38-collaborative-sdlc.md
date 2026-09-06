@@ -1,6 +1,6 @@
 # Phase 38 — Collaborative SDLC: features, stories, boards & the collaboration UX
 
-> **Status:** 🟡 **SPECS DRAFTED (2026-09-05)** — awaiting user sign-off to build. Umbrella + `phase-38-collaborative-sdlc/38-01..38-07`. · **Author:** Genesis agent
+> **Status:** ✅ **SHIPPED (2026-09-06) — genesis v0.65.0** (394f29e, tag v0.65.0). Umbrella + `phase-38-collaborative-sdlc/38-01..38-07`. · **Author:** Genesis agent
 > **Type:** single-repo — **genesis** (per-entity publish/pull for features + published stage artifacts, stories/epics, boards; the collaboration UX; the adoption bulk-publish). No migration (Phase 35's m0019 stands; artifacts already carry `sync_uuid`/provenance). genesis-core / SDK / workflows / parser **unchanged**. · **Depends on:** **Phase 37** (the live `AppianHubProvider` + `CollaborationService` + the sync-UX foundation [poll/Sync-now/notify-then-apply/offline] + live identity/teams), **Phase 35** (`sync_uuid`/provenance/`upstream_versions` columns + the publish/pull service + the advisory-lock model), Phase 36 (the Hub record types for Feature/Epic/Story/BoardState/StageArtifact + ArtifactBlob), and the existing entity stores (`FeatureStore`/`StageStore`/`StoryStore`/`BoardStore`) + the finalizers + lifecycle.
 >
 > **Fourth of four phases** (35 → 36 → 37 → **38 Collaborative SDLC**). This phase completes the feature: the

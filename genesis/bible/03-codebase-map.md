@@ -512,3 +512,37 @@ genesis/web/src/
   features/collab/StalenessBadge.tsx + staleness.ts  <StalenessBadge> + pure isStale (notify-then-apply; never auto-overwrites).
   features/collab/hooks.ts        useHubStatus / useHubChanges (refetchInterval polls) + useSyncNow.
   lib/api/collab.ts · types/collab.ts · lib/query/keys.ts  status()/changes() + HubStatusInfo/HubChange(Response) + qk.collab.status/changes.
+
+
+# ── Phase 38 — Collaborative SDLC (features/stories/boards publish-pull + UX + adoption; genesis v0.65.0) ──
+genesis/genesis/
+  collab/service.py        per-entity publish/pull over the Phase-37 provider (no migration):
+                           _ParentRef (local int FK ↔ parent sync_uuid; optional for nullable epic) +
+                           _EntityBinding(parents/json_cols/blob_kind/html_col); _BINDINGS feature/feature_stage/
+                           epic/story. publish_feature_stage[+_by_kind] (publish-on-complete, artifact bytes,
+                           lazy feature); publish_feature_backlog (Finalize — ALWAYS republishes the feature so
+                           stories_finalized_at propagates) + publish_epic/publish_story + publish_deletion
+                           (tombstone); publish_board_move/publish_board_state + reconcile_board_membership +
+                           pull_boards (seeds per-story board_state CAS cursor); adoption_preview/adopt_publish
+                           (idempotent, never automatic). _map_out (drop _LOCAL_ONLY + parent FK→sync_uuid +
+                           json_cols→arrays); _upsert_local (read-only mirror: parent resolve w/ skip-retry,
+                           arrays→JSON text, tombstone delete, artifact bytes → puller's disk); version tracked
+                           via published_version col (features/stories/boards) else collab_sync_state cursor.
+  api/collab_sync.py       register_collab_sync_routes (wired in app.py): POST /collab/publish/stage/{id} +
+                           /publish/feature/{fid}/stage/{stage} + /publish/backlog/{fid} + /publish/story/{id} +
+                           /publish/board-move + /publish/deletion; POST /collab/pull (pull_all + pull_boards);
+                           GET/POST/DELETE /collab/activity/{kind}[/{su}]; GET /collab/adopt/preview + POST
+                           /collab/adopt. Hub error mapping: NotOnboarded/publish-on-complete/HubConflict→409,
+                           HubAuth→401, HubTransport→503, KeyError→404; disabled→409; advisory/adopt-preview→empty.
+  scripts/acceptance/phase-38-collaborative-sdlc-acceptance.py  headless full-SDLC hand-off (2 instances / local hub).
+genesis/web/src/
+  features/collab/SdlcControls.tsx  <PublishToTeamButton> (publish-on-complete + opt-in gated) + <PublishedBy> +
+                           <AdvisoryMarker> + <AdoptionSummary> (+ SdlcControls.test.tsx, jest-axe).
+  features/collab/hooks.ts  usePublishStage{featureId,stage}/usePublishBacklog/usePublishBoardMove/usePull/
+                           useActivity/useSetActivity/useClearActivity/useAdoptPreview/useAdopt.
+  features/collab/CollaborationSection.tsx  + Sync-now + AdoptionCard (two-step confirm).
+  features/features/StageArtifactWorkspace.tsx  mounts <PublishToTeamButton> in the action bar (all 4 stages).
+  features/workbench/{hooks.ts,BoardPage.tsx}  a cross-lane move auto-publishes only the crossed card (gated on
+                           the cached opt-in config; in-lane reorders stay local).
+  lib/api/collab.ts · types/collab.ts · lib/query/keys.ts  publish*/pull/activity/adopt* client + PublishResult/
+                           PullResult/ActivityMarker/AdoptionCounts + qk.collab.activity/adoptPreview.

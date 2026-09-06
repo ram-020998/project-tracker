@@ -1,6 +1,6 @@
 # 38-01 — Features + published stage artifacts sync
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 38. Repo: **genesis**. · **Depends on:** Phase 37 (`CollaborationService` + `AppianHubProvider`), Phase 35 (`sync_uuid`/provenance/`upstream_versions`), `FeatureStore`/`StageStore`, Phase 36 (Feature/StageArtifact records + ArtifactBlob).
+> **Status:** ✅ SHIPPED (genesis v0.65.0). · Part of Phase 38. Repo: **genesis**. · **Depends on:** Phase 37 (`CollaborationService` + `AppianHubProvider`), Phase 35 (`sync_uuid`/provenance/`upstream_versions`), `FeatureStore`/`StageStore`, Phase 36 (Feature/StageArtifact records + ArtifactBlob).
 
 ## Purpose
 

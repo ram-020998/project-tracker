@@ -1,6 +1,6 @@
 # 38-03 — Boards sync
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-02 (stories the board is over), `BoardStore`, Phase 36 (BoardState record).
+> **Status:** ✅ SHIPPED (genesis v0.65.0). · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-02 (stories the board is over), `BoardStore`, Phase 36 (BoardState record).
 
 ## Purpose
 

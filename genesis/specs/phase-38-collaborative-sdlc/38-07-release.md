@@ -1,6 +1,6 @@
 # 38-07 — Release
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-06. ADR-019.
+> **Status:** ✅ SHIPPED (genesis v0.65.0). · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-06. ADR-019.
 
 ## Release steps (ADR-019)
 

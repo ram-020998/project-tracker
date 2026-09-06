@@ -1,6 +1,6 @@
 # 38-06 — Code review & hardening
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-01..38-05.
+> **Status:** ✅ SHIPPED (genesis v0.65.0). · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-01..38-05.
 
 ## Review checklist
 

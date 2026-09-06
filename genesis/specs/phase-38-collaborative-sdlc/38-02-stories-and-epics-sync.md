@@ -1,6 +1,6 @@
 # 38-02 — Stories & epics sync
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-01 (the feature mapping stories reference), `StoryStore`, Phase 36 (Epic/Story records).
+> **Status:** ✅ SHIPPED (genesis v0.65.0). · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-01 (the feature mapping stories reference), `StoryStore`, Phase 36 (Epic/Story records).
 
 ## Purpose
 

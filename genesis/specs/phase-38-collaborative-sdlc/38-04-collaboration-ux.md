@@ -1,6 +1,6 @@
 # 38-04 — Collaboration UX
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 38. Repo: **genesis/web** (+ thin backend). · **Depends on:** 38-01/38-02/38-03 (the entity mappings), Phase 37 (the sync-UX foundation: poll / Sync-now / `<StalenessBadge>` / `<HubStatus>` / notify-then-apply).
+> **Status:** ✅ SHIPPED (genesis v0.65.0). · Part of Phase 38. Repo: **genesis/web** (+ thin backend). · **Depends on:** 38-01/38-02/38-03 (the entity mappings), Phase 37 (the sync-UX foundation: poll / Sync-now / `<StalenessBadge>` / `<HubStatus>` / notify-then-apply).
 
 ## Purpose
 

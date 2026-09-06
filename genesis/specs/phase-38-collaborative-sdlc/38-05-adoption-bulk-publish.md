@@ -1,6 +1,6 @@
 # 38-05 — Adoption (one-time bulk publish of existing completed work)
 
-> **Status:** 🟡 DRAFTED. · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-01/38-02/38-03 (the publish mappings).
+> **Status:** ✅ SHIPPED (genesis v0.65.0). · Part of Phase 38. Repo: **genesis**. · **Depends on:** 38-01/38-02/38-03 (the publish mappings).
 
 ## Purpose
 
