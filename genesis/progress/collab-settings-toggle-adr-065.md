@@ -59,3 +59,32 @@ the contract shape, and added a guard test that every `_BINDINGS` kind is a real
 **Live-verified:** `publish_feature_stage → PUT stage_artifact → created v0` against `merge-assist-dev`.
 See bible §7. Backend pytest **782**.
 
+
+## v0.66.3–v0.66.5 — collaboration puller-fidelity fixes
+Making a **second instance** (a "new user") actually *see* pulled work exposed a cascade — all masked by the
+permissive `LocalHubProvider` (it echoes the full published payload, so tests + headless acceptance passed;
+the real Appian Hub stores only its contract fields).
+
+- **v0.66.3 (backend):** `pull_all` **crashed** — `NOT NULL constraint failed: kb_feature_stages.title` (the
+  Hub `stage_artifact` record has no `title`). `_upsert_local` now fills every NOT-NULL-no-default local
+  column absent from the mirror payload (`title` ← a nice stage label, `*_at` ← now) via `_required_cols`.
+  Separately, pulled features **never populated the Workbench board** — auto-membership needs
+  `kb_features.stories_finalized_at IS NOT NULL`, but the Hub `feature` record drops it; `pull_boards` now
+  **derives** it (`_stamp_pulled_finalized` — a pulled feature that has stories was finalized upstream).
+- **v0.66.4 (web):** completed pulled stages showed **"Start the stage"** — `StageBuilderPage` gated the
+  workspace on `chat_session_id`, but a pulled mirror has the artifact with **no local chat** (chat/run stay
+  local, ADR-063). Added a third branch: a completed/in-review chat-less stage renders **read-only**
+  (`PulledStageView` — the artifact via `artifactUrlFor` annotate=0 + a "shared by your team" banner + Export).
+- **v0.66.5 (backend):** the derived stage `title` maps to a human label (`_STAGE_LABELS`:
+  spec→Spec, ux_design→UX Design, technical_design→Technical Design, breakdown→Feature Breakdown).
+
+**No Hub change needed.** A per-entity probe (`_map_out` payload keys vs the frozen contract fields) confirmed
+the only genuinely-dropped, non-attribution fields are `feature.stories_finalized_at` + `stage_artifact.title`
+— both correctly derived puller-side. `published_by` is not a loss (the Hub stores it as
+`created_by`/`modified_by`; `_to_record` recovers it). The mirrors are read-only, so derived values never flow
+back to the Hub.
+
+**Verified live:** userb (a second instance on :8761 via `genesis-fleet`) pulled 1 feature / 12 epics / **72
+stories** / 4 stage artifacts + **72 Workbench board cards**, and each stage opens read-only. Gates: backend
+pytest **784** + ruff; web tsc/eslint 0 / **vitest 263** / build. Regression tests added: title-less
+`stage_artifact` pull, board-populate-after-pull, and the read-only pulled-stage view. See bible §7.
