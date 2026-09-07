@@ -88,3 +88,22 @@ back to the Hub.
 stories** / 4 stage artifacts + **72 Workbench board cards**, and each stage opens read-only. Gates: backend
 pytest **784** + ruff; web tsc/eslint 0 / **vitest 263** / build. Regression tests added: title-less
 `stage_artifact` pull, board-populate-after-pull, and the read-only pulled-stage view. See bible §7.
+
+## v0.67.0 — collaboration auto-pull
+A puller only pulled via Settings → Collaboration → **"Sync now"**, so a teammate's board move / feature +
+story updates didn't reflect until a manual sync (the 30s `useHubChanges` poll only updated the
+"updates available" indicator; it never auto-applied). Diagnosed live: a card moved to Implementation on
+main published correctly (Hub story + BoardState both `implementation`) but userb kept the old lane until
+pulled.
+
+**`useAutoPull`** (in `features/collab/hooks.ts`, mounted once via `CollabAutoPull` in `AppShell`) pulls
+automatically on **app load**, **every route change** (board / features / stories / stage), a **30s
+interval**, and **window refocus / tab-visible**. It is **throttled** (min 8s between real pulls + an
+in-flight guard so rapid navigation never spams the Hub), **gated** on collaboration `enabled` +
+`available`, and **quiet on error** (no toast every interval when the Hub blips). After each pull it
+invalidates the `applications`/`features`/`workbench`/`collab` queries so every surface refreshes. Safe to
+auto-apply — pulled entities are **read-only mirrors** on this instance (no local draft to clobber;
+notify-then-apply only matters on the author). `usePull` gained a `{ quiet }` option for the background
+driver. Tests: `useAutoPull` auto-pulls when enabled+available, and no-ops when disabled. web **vitest 265**.
+Both fleet instances restarted on v0.67.0 so teammate moves now reflect within ~30s (or on navigation) with
+no manual step.
