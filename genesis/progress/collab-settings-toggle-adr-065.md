@@ -107,3 +107,26 @@ notify-then-apply only matters on the author). `usePull` gained a `{ quiet }` op
 driver. Tests: `useAutoPull` auto-pulls when enabled+available, and no-ops when disabled. web **vitest 265**.
 Both fleet instances restarted on v0.67.0 so teammate moves now reflect within ~30s (or on navigation) with
 no manual step.
+
+## v0.67.1 — auto-pull latency fix (board-aware + event-driven)
+Board moves were slow to appear on a second instance ("multiple refreshes"). **Measured the root cause
+before changing anything** — a live probe published a Story from main and polled the Hub: the change was
+visible via `/collab/changes` (the manifest the pull walks) **and** `get_record` in **~0.9s**. So there is
+**no Appian replica lag** on this path (read-your-writes) — the earlier eventual-consistency hypothesis was
+wrong. userb's config was fully enabled/available; the delay was the **frontend auto-pull cadence**: a flat
+**30s** interval (and auto-pull is a foreground driver — the backend has no background pull loop; the
+`kb-hub-pull` scheduler is KB-only and off by default).
+
+**Fix** (`web/src/features/collab/hooks.ts::useAutoPull`, mounted once via `CollabAutoPull`):
+- **Board-aware interval** — **10s** while a Workbench board route (`/workbench/:appUuid`) is open, **30s**
+  otherwise (`BOARD_ROUTE` test on `location.pathname`).
+- **Event-driven** — the interval runs a cheap `GET /collab/changes` poll and issues a real `pull` **only
+  when the Hub change cursor advances** since last seen (`seenCursorRef`); the first poll just seeds the
+  cursor. No pull-write/DB churn on an idle tick.
+- **Force pull on app load / window reload** (bypasses the 8s throttle) + a throttled pull on every route
+  change; refocus / tab-visible also trigger the change-driven check.
+
+Net: with the Hub read at ~0.9s, a teammate board move reflects within **~10s** on the board, or instantly
+on reload/navigation. `useAutoPull` gained injectable `{ boardMs, idleMs, throttleMs }` for testing. Tests:
+the existing mount-pull + disabled-noop, plus a new **event-driven** test (a second `/changes` page with a
+new change → a second pull). web **vitest 266**; tsc/eslint clean. Both fleet instances restarted on v0.67.1.
