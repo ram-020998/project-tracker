@@ -130,3 +130,32 @@ Net: with the Hub read at ~0.9s, a teammate board move reflects within **~10s** 
 on reload/navigation. `useAutoPull` gained injectable `{ boardMs, idleMs, throttleMs }` for testing. Tests:
 the existing mount-pull + disabled-noop, plus a new **event-driven** test (a second `/changes` page with a
 new change → a second pull). web **vitest 266**; tsc/eslint clean. Both fleet instances restarted on v0.67.1.
+
+## v0.68.0 — backend auto-pull loop (browser-independent) + sticky board header
+v0.67.1 tightened the frontend interval but board moves still lagged. **Measured the real cause** from
+userb's request log: with the Hub read-your-writes at ~0.9s, a passive puller made **1 request in 45s** —
+browsers **throttle/pause background-tab timers** (~1 poll/min for a hidden tab), and auto-pull was a
+foreground-tab driver. No frontend interval can beat that when userb sits in a background tab.
+
+**Fix — move the pull cadence to the backend:**
+- `CollaborationService.autopull_tick()` — change-gated: checks the Hub change manifest against a persisted
+  `autopull` cursor and runs `pull_all()` + `pull_boards()` only when it advances (or on the first tick);
+  no-op when disabled.
+- `runtime/collab_autopull.py::CollabAutoPuller` — an always-on asyncio task (10s) started in the app
+  lifespan (`_start_collab_autopull` / `_stop_collab_autopull`), gated live on `is_enabled()` (ADR-065 —
+  the toggle flips without a restart), ticking **off the event loop** via `asyncio.to_thread` (the §7
+  blocking-write-deadlock lesson). Keeps a puller synced regardless of any browser tab.
+- web: `useBoard` gained a 10s local `refetchInterval` (a cheap local read; React Query pauses it while
+  hidden and refetches on focus) so an open board reflects the backend-synced local data.
+
+**Verified live:** with **no browser open**, userb's local story lane flipped `to-do → code-review` ~10s
+after a `publish_board_move` from main — the backend loop alone.
+
+**Sticky board header (UI):** `WorkbenchPage` is now a full-height flex column with the app-name row fixed;
+`BoardPage`'s toolbar/filters row is `shrink-0` and the board region is `flex-1 min-h-0` (horizontal lane
+scroll); each `BoardColumn` fills height with a `shrink-0` lane heading and an `overflow-y-auto` card body.
+So the app name, filters, and lane headings stay fixed while the cards scroll.
+
+Tests: `tests/test_collab_sdlc.py` +2 (`test_autopull_tick_is_change_gated_and_applies`,
+`test_autopull_tick_noop_when_disabled`) → backend pytest **786**; web **vitest 266**; ruff/tsc/eslint clean.
+Both fleet instances restarted on v0.68.0.

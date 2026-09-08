@@ -567,3 +567,20 @@ genesis/web/src/
                            + fixed copy. features/collab/hooks.ts (useCollabAvailability + useSetCollabConfig);
   lib/api/collab.ts (availability + setConfig); types/collab.ts (CollabConfig +env_enabled/ui_enabled/available/
                            hub_app_uuid + CollabAvailability + CollabConfigInput); lib/query/keys.ts (collab.availability).
+
+
+# ── Collaboration auto-pull: frontend driver (v0.67.0/1) + backend loop (v0.68.0) + sticky board ──
+genesis/genesis/
+  collab/service.py          autopull_tick() — change-gated backend pull (persisted `autopull` cursor;
+                             pull_all+pull_boards only when the Hub manifest advances; no-op when disabled).
+  runtime/collab_autopull.py CollabAutoPuller — an always-on asyncio loop (10s) started in the app lifespan
+                             (api/app.py `_start/_stop_collab_autopull`), gated live on is_enabled(), ticking
+                             off the event loop (asyncio.to_thread). Keeps a puller synced regardless of any
+                             browser tab (browsers throttle background-tab timers — the frontend driver alone
+                             is unreliable for a passive second instance).
+genesis/web/src/
+  features/collab/hooks.ts   useAutoPull (foreground driver: board-aware 10s/30s interval + event-driven pull
+                             on manifest advance + force-pull on load/reload) + CollabAutoPull (mounted in
+                             AppShell). features/workbench/hooks.ts useBoard gains a 10s local refetchInterval.
+  features/workbench/{WorkbenchPage,BoardPage,BoardColumn}.tsx  full-height flex layout → the app name +
+                             filters + lane headings stay fixed while each lane's card body scrolls (sticky header).
