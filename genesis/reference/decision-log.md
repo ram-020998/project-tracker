@@ -1337,3 +1337,13 @@ frictionless. Implemented in `runtime/launcher.py` + the `serve`/`up` CLI handle
 - **Context:** ADR-063 shipped a single env-only opt-in. Users needed to enable/disable from the UI and, critically, be prevented from enabling when the Hub app isn't deployed/reachable (so a mis-timed enable can't break publish/pull). The env master alone couldn't express "reachable → safe to turn on".
 - **Alternatives:** (a) env-only (ADR-063) — no in-app control, no availability guard; (b) a per-Appian-application toggle — rejected (the user wanted a single Genesis-level switch); (c) auto-enable when the Hub is reachable — rejected (enablement must be explicit).
 - **Consequences:** `is_enabled()` = provider-built AND `ui_enabled`; `_require()` gates all publish/pull (Settings toggle is live, no restart). Genesis-only, shipped v0.66.0; **v0.66.1** fixed the derived Hub base to include the `/suite/webapi` Web-API mount. See bible §5 ADR-065.
+
+
+## Amendment (2026-09-09, genesis v0.69.0) — explicit Workbench board membership (amends ADR-061/063/064)
+Board membership moved from **derived** (`reconcile_board_membership` carded every finalized story of the app;
+the v0.68.0 backend auto-pull loop re-ran it continuously) to **explicit + shared**: a new
+`kb_stories.on_board` flag (migration m0020, `current_version`→20) set on Import / cleared on remove, carried
+in the story sync payload; reconcile cards only `on_board=1`. Finalized/new stories default to status `to-do`
+(board entry lane), not `design`. The Genesis Hub `GH Story` record type + Web APIs gain an additive
+`on_board` (0/1) field so membership syncs to teammates (round-trip verified). Deferred: puller-side
+remove-propagation (delete a card when a teammate clears `on_board`). See bible/04 amendment + tracker §6.

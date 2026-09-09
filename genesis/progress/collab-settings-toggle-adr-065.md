@@ -159,3 +159,29 @@ So the app name, filters, and lane headings stay fixed while the cards scroll.
 Tests: `tests/test_collab_sdlc.py` +2 (`test_autopull_tick_is_change_gated_and_applies`,
 `test_autopull_tick_noop_when_disabled`) → backend pytest **786**; web **vitest 266**; ruff/tsc/eslint clean.
 Both fleet instances restarted on v0.68.0.
+
+## v0.69.0 — Workbench board fixes (explicit membership + to-do default + drag guard)
+Live-reported: importing ~6 stories of a newly-finalized feature onto a board showed **all 50**, most stuck
+in **Design**, and moves to To Do wouldn't stick. Three compounding causes (see bible §7):
+1. **Derived membership** — `reconcile_board_membership` carded *every finalized story of the app*, and the
+   v0.68.0 backend auto-pull loop re-ran it every ~10s (continuously re-adding).
+2. Finalized stories **defaulted to status `design`** (ADR-060 stage start); a card's lane = its status → they
+   landed in Design, not the To Do entry lane.
+3. The v0.68.0 **10s board `refetchInterval`** raced the optimistic drag (the `items` mirror resynced from a
+   background refetch mid-move) → moves flickered/reverted.
+
+**Fixes:**
+- **Fix 1** — `StoryStore.finalize()` + `create_story()` default status **`to-do`**.
+- **Fix 2** — explicit, shared membership: **m0020** `kb_stories.on_board` (backfilled=1 for currently-carded
+  stories; rides the story sync payload). `import_stories` sets it, `remove_card` clears it,
+  `reconcile_board_membership` cards only `on_board=1`. Frontend `useImportCards`/`useRemoveCard` publish the
+  affected stories. **Hub (user-owned):** `GH Story` + records upsert/get/list Web APIs gained an additive
+  `on_board` (0/1) field — round-trip verified end-to-end (main import→publish→userb pull: on_board 1 and 0
+  both sync; Appian returns a JSON boolean, coerced to int).
+- **Fix 3** — the board mirror resync is gated on `!reorder.isPending` (+ `!dragging`).
+- Also folded in the sticky/shared-scroll board header.
+
+`current_version` 19→20. Gates: backend pytest **787** + ruff; web tsc/eslint 0 / **vitest 266**; CI green
+(v0.69.0 #6766607). Both fleet instances restarted; remediated main's board (flipped the stuck Document
+Builder cards to To Do). **Deferred:** puller-side remove-propagation (reconcile also deleting a card when a
+teammate clears `on_board`).

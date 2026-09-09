@@ -584,3 +584,23 @@ genesis/web/src/
                              AppShell). features/workbench/hooks.ts useBoard gains a 10s local refetchInterval.
   features/workbench/{WorkbenchPage,BoardPage,BoardColumn}.tsx  full-height flex layout → the app name +
                              filters + lane headings stay fixed while each lane's card body scrolls (sticky header).
+
+
+# ── v0.69.0 — Workbench board fixes (explicit membership + to-do default + drag guard) ──
+genesis/genesis/
+  db/migrations/m0020_story_on_board.py  kb_stories.on_board INTEGER NOT NULL DEFAULT 0 — the explicit,
+                        SHARED board-membership flag (rides the story sync payload). Backfill: on_board=1 for
+                        every currently-carded story (preserve existing boards). current_version → 20.
+  kb/stories.py         finalize() + create_story() default status 'to-do' (the board entry lane), not 'design'.
+  kb/boards.py          import_stories() sets on_board=1 (+ status 'to-do'); remove_card() clears on_board=0.
+  collab/service.py     reconcile_board_membership() cards ONLY stories with on_board=1 (was: every finalized
+                        story of the app). on_board rides the story payload (to_payload/_upsert_local — a plain
+                        shared column, so it publishes + pulls automatically).
+genesis/web/src/features/workbench/
+  hooks.ts              useImportCards / useRemoveCard publish the affected stories (propagate on_board). useBoard
+                        keeps the 10s refetchInterval.
+  BoardPage.tsx         the lane-mirror resync is guarded on `!draggingRef.current && !reorder.isPending` — the
+                        10s background refetch no longer clobbers an optimistic move mid-persist (Fix 3).
+  BoardColumn.tsx / BoardPage.tsx  one shared scroll container + sticky lane headings (all lanes scroll together).
+# Hub (Appian, user-owned): GH Story record type + records upsert/get/list Web APIs carry an `on_board` (0/1)
+# field (JSON key `on_board`) — an ADDITIVE extension to the frozen Phase-36 contract (round-trip verified).
