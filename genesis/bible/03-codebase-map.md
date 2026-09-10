@@ -604,3 +604,31 @@ genesis/web/src/features/workbench/
   BoardColumn.tsx / BoardPage.tsx  one shared scroll container + sticky lane headings (all lanes scroll together).
 # Hub (Appian, user-owned): GH Story record type + records upsert/get/list Web APIs carry an `on_board` (0/1)
 # field (JSON key `on_board`) — an ADDITIVE extension to the frozen Phase-36 contract (round-trip verified).
+
+
+# ── Phase 39 — Run inspection & node observability (BUILT 39-01..39-06, PRE-RELEASE; ADR-066 Proposed) ──
+# Committed LOCALLY (unpushed) across three repos; no DB migration; 39-07 releases core→genesis→workflows.
+genesis-core/genesis_core/
+  nodes/agent.py   kiro_node writes each turn's rendered prompt to a blackboard file `_prompts/<node>-p<pass>[-i<idx>]-a<attempt>-<ms>.txt`
+                   + emits `agent.prompt` {prompt_ref, model, mcp, tools(effective), image_docs, iteration, attempt};
+                   adds attempt+iteration to agent.result. POINTER-ONLY (prompt bytes never inlined — ADR-010/018).
+  state.py         PlatformState gains a reserved `_iteration` channel {pass,item_label,item_index} (last-writer),
+                   stamped by workflow loop/heal program nodes so kiro_node can label each turn.
+genesis/genesis/
+  runs/manager.py  `agent.prompt` ∈ _CANONICAL_CUSTOM (persisted to run_events); node_iterations(run_id, node).
+  runs/steps.py    fold_iterations(events) — per-node per-turn fold: agent turns delimited by agent.prompt→agent.result
+                   (a has_agent guard attaches a trailing node.completed delta to the just-closed turn, never a spurious
+                   program turn); a program/validator node = one turn per node.completed.
+  api/run_routes.py  GET /runs/{id}/nodes/{node}/iterations (guarded).
+  web/src/features/run-detail/  Inspector.tsx = single-click SUMMARY (node description + per-execution metrics:
+                   Turns/credits/tool-calls/time) + View-details → components/NodeIterationsDialog.tsx = the adaptive
+                   Pass›Item›Attempt turn explorer (renders only the dimensions that occurred; lazy prompt fetch via
+                   prompt_ref; per-turn Conversation = node events sliced to [seq_start,seq_end]). types/event.ts
+                   NodeTurn/NodeIterations; lib/api/runs.ts nodeIterations; hooks.ts useNodeIterations;
+                   lib/query/keys.ts runs.nodeIterations; types/catalog.ts GraphNode.description (loader.graph_of passes it through).
+  web/src/dev/mockups/RunInspectionMockups.tsx  /dev/run-inspection hi-fi mockup (5 adaptive shapes).
+genesis-workflows/  a `description` on EVERY graph node of all 12 workflows (175 nodes); the 4 analysis workflows
+                   stamp state._iteration in their loop drivers (feature-breakdown _next_epic=epic; technical-design
+                   _next_analysis/_next_draft=workstream; story-design _next_object=object; pass=verify-round; + re-stamp
+                   pass on the revise branch of _route_verify); ci/validate_library.py WARNS (non-fatal) on a graph node
+                   missing a description.
