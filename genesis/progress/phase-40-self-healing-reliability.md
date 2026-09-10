@@ -27,7 +27,7 @@ The **second reliability tier** beside the ADR-011 per-node trio: where the trio
 - CI green: genesis-core #6781318 (v0.9.7); genesis (v0.70.0) + genesis-workflows (v0.17.0) — see tracker §6 for pipeline ids.
 
 ## Release
-ADR-019 order: **genesis-core v0.9.7 → genesis v0.70.0 (re-pin core) → genesis-workflows v0.17.0 (re-pin core + genesis — the whole chain, ResolutionImpossible lesson).** No DB migration. Released together with Phase 39. **Live acceptance** (a real failing analysis run → a small failure fixed by one heal turn; a large one → one guided restart → escalate) is user-observed. **PHASE 40 COMPLETE.**
+ADR-019 order: **genesis-core v0.9.7 → genesis v0.70.0 (re-pin core) → genesis-workflows v0.17.0 (re-pin core + genesis — the whole chain, ResolutionImpossible lesson).** No DB migration. Released together with Phase 39. **Deployed to the running fleet:** `gsm provision --all --no-mcp --no-env --force` reinstalled the **v0.17.0** library into both instances (main :8760 + userb :8761) from the local checkout; the catalog on both confirms the healing workflow versions are live (feature-breakdown 0.2.0 / technical-design 0.3.0 / story-design 0.2.0 / ux-design 0.2.0). **Live acceptance** (a real failing analysis run → a small failure fixed by one heal turn; a large one → one guided restart → escalate) is user-observed. **PHASE 40 COMPLETE.**
 
 ## Out of scope (future)
 More than 1 heal / 1 restart (bounded by design); healing the non-analysis workflows (no grounded-artifact verify tier); auto-tuning the blast-radius threshold from telemetry; multi-artifact cross-workflow healing.
