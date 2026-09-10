@@ -1,6 +1,6 @@
-# Phase 39 — Run Inspection & Node Observability — AS-BUILT (🟢 BUILT 39-01..39-06; ⏳ 39-07 release pending)
+# Phase 39 — Run Inspection & Node Observability — AS-BUILT (✅ SHIPPED)
 
-> **Status (2026-09-10):** 39-01 → 39-06 **built + independently reviewed + all gates green**, committed **LOCALLY on `master` of each code repo (UNPUSHED, no tag)**. **39-07 (coordinated release) is NOT done** — no version bump, no tag, no push, no doc "shipped" stamp yet. The fleet was restarted so both instances **run the new code locally** for live testing. **Next session: pick up at 39-07.** Umbrella: `../specs/phase-39-run-inspection-observability.md`. ADR-066 (Proposed).
+> **Status (2026-09-10):** ✅ **SHIPPED** — genesis-core **v0.9.7** + genesis **v0.70.0** + genesis-workflows **v0.17.0** (released together with Phase 40). 39-01 → 39-06 built + independently reviewed; **39-07 released**. ADR-066 **Accepted**. Umbrella: `../specs/phase-39-run-inspection-observability.md`.
 
 ## What shipped into the local build
 
@@ -30,5 +30,5 @@
 - **genesis-workflows:** `4317e13` → `ba0856c` → `8ff3628` (39-05) → `ed72b16` (39-06 M1).
 - **project-tracker (pushed):** specs `7236f96` + findings `fc95a97`.
 
-## 39-07 — remaining (next session)
-Release order (ADR-019): **genesis-core vX.Y.Z → genesis vX.Y.0 (re-pin core) → genesis-workflows vX.Y.0 (re-pin genesis)**. Bump the 3 genesis version anchors (`pyproject.toml`, `web/src/version.ts`, `genesis/api/app.py`); tag + push each; verify CI via `glab`. **No DB migration.** Then flip **ADR-066 → Accepted**, and complete the Definition-of-Done doc sweep at the released versions (bible §2 version/test-counts, §3 map already staged here, §4 ADR-066, §7 any lesson; tracker §6 → SHIPPED; this progress doc → COMPLETE; onboarding banner + Last-refreshed). **Live acceptance** (drill a real agent run's turns) is user-observed.
+## 39-07 — coordinated release ✅
+Released in ADR-019 order **genesis-core v0.9.7 → genesis v0.70.0 (re-pin core) → genesis-workflows v0.17.0**, together with Phase 40. No DB migration. ADR-066 → Accepted. Bumped the 3 genesis anchors (`pyproject.toml`, `web/src/version.ts`, `genesis/api/app.py`) + rebuilt `web/static`. CI green (genesis-core #6781318; genesis + workflows — see tracker §6). Fleet restarted onto the released code. **Live acceptance** (drill a real agent run's turns) is user-observed. **PHASE 39 COMPLETE.**

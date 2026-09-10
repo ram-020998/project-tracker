@@ -102,3 +102,39 @@ CI checks `META` ≡ `workflow.yaml` (drift fails the build).
 - ❌ A write/deploy step with no approval gate.
 - ❌ Chaining agent nodes with no program validation between them ("telephone game").
 - ❌ Over-gating: pausing on steps that are not (a) author approvals, (b) escalations, or (c) pre-mutation — this creates approver fatigue (violates `auto_approve` default).
+
+
+## Self-healing (the second reliability tier — `attach_healing`, ADR-067)
+
+Beyond the mandatory per-node reliability trio (`attach_reliability`, ADR-011), a workflow that assembles an
+**artifact** and validates it with a grounded critic SHOULD use **`attach_healing`** (genesis-core) instead of
+a hand-wired `verify → route → revise` loop. It replaces the wasteful "a verify failure re-does the whole
+workflow" (credit-safety, ADR-032) with a bounded, cost-aware heal:
+
+```
+attach_healing(g, *, verify, heal, reassemble, restart_target, nxt, gate, retry_max,
+               max_heal=1, max_restart=1)          # bounds come from META.healing
+```
+
+wires `verify(agent) → verify_route → {ok → nxt | not-ok → heal(agent) → heal_route → {patch → reassemble →
+verify | one guided restart → restart_target | budgets spent → gate}}`, wrapping **both** `verify` and `heal`
+with the trio. Author contract:
+
+- **`verify`** emits a **`VerificationReport`** `{ok, summary, fixes:[{target_id, issue, reason, evidence,
+  suggested_change, severity}]}` — each fix keyed to a **stable artifact item id** (e.g. `story-N-M`,
+  `section-N`, `object-N`, `screen-N`). Give your granular blocks stable ids so fixes are addressable.
+- **`heal`** (full context: sources + current artifact + the report) emits a **`HealDecision`**
+  `{mode:"patch"|"restart", rationale, patches:[corrected items with id] | guidance}`. `patch` = local blast
+  radius (correct only the flagged items); `restart` = structural (re-do from the plan).
+- **`reassemble`** (a deterministic program you supply) merges the healer's `patches` into your granular
+  aggregate **by id** (only the flagged items change) and re-renders the artifact → re-verify.
+- **Carry-forward guidance convention:** on a restart, `attach_healing` writes `state["_healing"]["guidance"]`;
+  the **restart-target's agent prompts read it via `read_guidance(state)`** (mirrors the trio's
+  `state["_validation"][v]["message"]` self-correction) and prepend a "CARRY-FORWARD GUIDANCE" block only when
+  non-empty. On a non-restart run it is empty (no stale injection).
+- **`META.healing {max_heal, max_restart}`** (default `{1, 1}`) bounds the ladder; add `heal.json` to
+  `META.artifacts` and declare the `verify/v_verify/verify_route/heal/v_heal/heal_route/reassemble` nodes +
+  their edges in the `workflow.yaml` `graph:` topology (the run-detail graph renders them).
+- **Credit-safety (do not regress):** the budget counters live in the reserved `_healing` state channel, which
+  MUST be a **per-key-merge** reducer (never whole-dict last-writer) so a restart can't erase `heals_used` and
+  loop forever. The ladder always terminates at the HITL escalation gate. See bible §7.

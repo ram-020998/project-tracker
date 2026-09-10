@@ -606,8 +606,8 @@ genesis/web/src/features/workbench/
 # field (JSON key `on_board`) — an ADDITIVE extension to the frozen Phase-36 contract (round-trip verified).
 
 
-# ── Phase 39 — Run inspection & node observability (BUILT 39-01..39-06, PRE-RELEASE; ADR-066 Proposed) ──
-# Committed LOCALLY (unpushed) across three repos; no DB migration; 39-07 releases core→genesis→workflows.
+# ── Phase 39 — Run inspection & node observability (SHIPPED genesis v0.70.0 + genesis-core v0.9.7; ADR-066 Accepted) ──
+# Additive; no DB migration. Released core→genesis→workflows.
 genesis-core/genesis_core/
   nodes/agent.py   kiro_node writes each turn's rendered prompt to a blackboard file `_prompts/<node>-p<pass>[-i<idx>]-a<attempt>-<ms>.txt`
                    + emits `agent.prompt` {prompt_ref, model, mcp, tools(effective), image_docs, iteration, attempt};
@@ -632,3 +632,35 @@ genesis-workflows/  a `description` on EVERY graph node of all 12 workflows (175
                    _next_analysis/_next_draft=workstream; story-design _next_object=object; pass=verify-round; + re-stamp
                    pass on the revise branch of _route_verify); ci/validate_library.py WARNS (non-fatal) on a graph node
                    missing a description.
+
+
+# ── Phase 40 — Self-Healing Reliability: the second reliability tier (SHIPPED genesis-core v0.9.7 + genesis-workflows v0.17.0; ADR-067 Accepted) ──
+# Additive; CORE_MAJOR unchanged; no DB migration. genesis needs NO code change (the run-detail graph renders
+# the new heal/reassemble nodes from the workflow topology). Released core→genesis→workflows.
+genesis-core/genesis_core/
+  nodes/healing.py   attach_healing(g, *, verify, heal, reassemble, restart_target, nxt, gate, retry_max,
+                     max_heal=1, max_restart=1, verdict_artifact="verify.json", heal_artifact="heal.json",
+                     guidance_key="_healing", verify_check=check_verification_report, heal_check=check_heal_decision)
+                     — the SECOND reliability tier (beside attach_reliability). Wires verify(agent,trio)→
+                     verify_route→{ok→nxt | not-ok→heal(agent,trio)→heal_route→{patch(heals_used<max_heal)→
+                     reassemble→verify | one guided restart(restarts_used<max_restart)→set guidance+pass→
+                     restart_target | budgets spent→gate}}. Wraps BOTH verify+heal with attach_reliability
+                     (ADR-011). Emits verify.result / heal.decision{mode} / heal.applied / workflow.restart{pass}.
+                     healing_bounds(META)→(max_heal,max_restart); read_guidance(state)→carry-forward guidance.
+  contracts.py       VerificationReport{ok,summary,fixes:[Fix]} / Fix{target_id,issue,reason,evidence,
+                     suggested_change,severity} / HealDecision{mode:patch|restart,rationale,guidance,patches}
+                     typed helpers + parse_* + check_verification_report / check_heal_decision (CheckFn shape,
+                     the "stub hid the contract" lesson). VALID_SEVERITIES / VALID_HEAL_MODES.
+  state.py           PlatformState gains a reserved `_healing` channel Annotated[dict, _merge] (shallow per-key
+                     merge — a patch's {heals_used:n+1} and a restart's {restarts_used:n+1,guidance} preserve
+                     each other, so the budget can't be clobbered → the ladder is provably bounded).
+  __init__.py        re-exports attach_healing/healing_bounds/read_guidance + the contracts + check_* .
+genesis-workflows/   all four analysis workflows adopt attach_healing (verify→VerificationReport; a heal agent;
+                     a deterministic _reassemble that merges the healer's corrected items into the granular
+                     aggregate by id + re-renders; guidance injected into the restart-target's prompts; retired
+                     MAX_VERIFY_ROUNDS/route_verify/_pick_verify/check_verify; META.healing {1,1}; workflow.yaml
+                     graph += heal/v_heal/heal_route/verify_route/reassemble + heal.json):
+  feature-breakdown-analysis v0.2.0  _apply_patches parses story-N-M/epic-N in epic_stories.json; restart→plan_epics.
+  technical-design-analysis  v0.3.0  section-N ids on the rendered workstream blocks; patches design_sections.json; restart→plan_sections.
+  story-design-analysis      v0.2.0  object-N ids; patches design_objects.json; restart→plan_objects.
+  ux-design-analysis         v0.2.0  synthesize wraps screens in <section id="screen-N">; heal regex-patches analysis.html (full-doc fallback); restart→screen_inventory.
