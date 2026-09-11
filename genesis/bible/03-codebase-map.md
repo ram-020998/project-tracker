@@ -432,13 +432,18 @@ genesis/genesis/
                         artifact) · StoryCardPage (route /workbench/:appUuid/cards/:storyId) · hooks.useStartDesign
                         · lib/api/workbench startDesign/designArtifactUrl. router + breadcrumbs: the card route.
 genesis-workflows/
-  workflows/story-design-analysis/  graph.py — resolve_inputs → load_inputs → gather_context →[v_context]→
-                        plan_objects →[v_plan]→ start_objects → next_object →(object) design_object
-                        [@genesis-kb+@appian-dev RO] →[v_object]→ advance_object → next_object └─(done)→
-                        synthesize →[v_synth]→ assemble (DETERMINISTIC design.html) → verify [grounded critic]
-                        →[v_verify]→ route_verify →(ok) present → cleanup; (revise ≤2)/(exhausted→escalate).
-                        Object-level + code; process models per-node. workflow.yaml + registry.json (12 workflows).
-                        **design-doc removed.**
+  workflows/story-design-analysis/  graph.py (v0.3.0, ADR-062 amendment — SINGLE-CONTEXT design): resolve_inputs
+                        → load_inputs → research [grounded, ONE turn: mine Spec/UX/TD + @genesis-kb/@appian-dev
+                        RO → research.json implementation plan] →[v_research]→ design [ONE turn, mcp=[], FULL
+                        context → design_body.html; lean impl-plan: per object what-exists/what-changes/
+                        what-to-build + targeted code only where it matters; process models described, not
+                        dumped] →[v_design]→ render [DETERMINISTIC wrap → one well-formed, script-free,
+                        Lavish-safe design.html] → verify [grounded critic → VerificationReport] →[v_verify]→
+                        verify_route →(ok) present → cleanup; (revise ≤MAX_VERIFY_ROUNDS=2: re-author `design`
+                        with the critic's fixes as carry-forward guidance + reset retries[design]=0) /
+                        (exhausted → escalate). Removed the per-object loop (plan_objects/design_object×N/
+                        synthesize/assemble) + attach_healing (it broke cross-object coherence — each object was
+                        its own turn). workflow.yaml + registry.json (12 workflows). **design-doc removed.**
 
 # ── Phase 35 — Collaboration Foundations & Identity (local-first → shared Hub; ADR-063) ──
 genesis/genesis/
@@ -662,5 +667,6 @@ genesis-workflows/   all four analysis workflows adopt attach_healing (verify→
                      graph += heal/v_heal/heal_route/verify_route/reassemble + heal.json):
   feature-breakdown-analysis v0.2.0  _apply_patches parses story-N-M/epic-N in epic_stories.json; restart→plan_epics.
   technical-design-analysis  v0.3.0  section-N ids on the rendered workstream blocks; patches design_sections.json; restart→plan_sections.
-  story-design-analysis      v0.2.0  object-N ids; patches design_objects.json; restart→plan_objects.
+  story-design-analysis      (was v0.2.0) — DROPPED attach_healing in v0.3.0 (single-context design, ADR-062
+                             amendment): no per-object blocks to patch → a plain bounded verify→revise loop.
   ux-design-analysis         v0.2.0  synthesize wraps screens in <section id="screen-N">; heal regex-patches analysis.html (full-doc fallback); restart→screen_inventory.
