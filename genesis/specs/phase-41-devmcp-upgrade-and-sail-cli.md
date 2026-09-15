@@ -1,11 +1,14 @@
 # Spec — Dev MCP 26.6.90 upgrade + SAIL CLI installation
 
-> **Status:** 📝 DRAFT — awaiting user review (no build until approved). · **Created:** 2026-09-15
-> · **Candidate phase:** Phase 41 (number to confirm). · **Repos:** genesis + genesis-workflows
-> (genesis-core / kiro-agent-sdk / genesis-appian-parser **unchanged**).
-> **ADRs touched:** ADR-038 (managed-native MCP), ADR-040 (managed-native CLI), ADR-048 (env-scoped
-> Appian creds), ADR-036/037 (read-only Dev MCP / code-free KB). **Deferred:** browser-based SSO auth →
-> `specs/backlog/devmcp-browser-sso-auth.md`.
+> **Status:** ✅ SHIPPED — genesis v0.72.0 + genesis-workflows v0.19.0 (2026-09-15). · **Phase 41.**
+> · **Repos:** genesis + genesis-workflows (genesis-core / kiro-agent-sdk / genesis-appian-parser
+> **unchanged**). **ADRs touched:** ADR-038, ADR-040, ADR-048, ADR-036/037. **Deferred:** browser-based
+> SSO auth → `specs/backlog/devmcp-browser-sso-auth.md`.
+>
+> **Locked decisions (2026-09-15):** (1) **Phase 41**; (2) **add** the 5 new read tools to the allowlist;
+> (3) **remove `lcp_api_path` end-to-end**; (4) SAIL install version **derived from `BUILD-INFO.txt`**
+> (`build_timestamp`); basic auth only (browser deferred); SAIL install-from-bundle in ONE action,
+> full managed-CLI plumbing, no consumer wired yet.
 
 ## 1. Goal
 Adopt the new **Appian Dev MCP `26.6.90`** bundle in Genesis using **HTTP basic auth only**, and — from
