@@ -6,7 +6,7 @@
 
 ---
 
-## 2. Current state (as of genesis v0.70.0)
+## 2. Current state (as of genesis v0.72.3)
 
 > **⭐ SHIPPED — Phase 39 Run Inspection & Node Observability (genesis v0.70.0, ADR-066 Accepted):** the run-detail node experience is rebuilt into **single-click summary (a new authored node `description` + per-execution metrics) + a large adaptive turn-explorer modal** (Pass › Item › Attempt › Turn) exposing per iteration the exact **prompt / artifacts / conversation / output / credits+timing**. genesis-core captures the prompt as a **blackboard-file pointer** (`agent.prompt`, bytes never inlined) + a reserved `_iteration` channel; genesis adds `fold_iterations` + `GET /runs/{id}/nodes/{node}/iterations` + `GraphNode.description` (no DB migration); genesis-workflows describes all 175 graph nodes + stamps `_iteration` in the 4 analysis workflows. New-runs-only capture. See §3 map (Phase-39 block) + `progress/phase-39-run-inspection-observability.md`. **⭐ SHIPPED alongside it — Phase 40 Self-Healing Reliability (genesis-core v0.9.7 + genesis-workflows v0.17.0, ADR-067 Accepted):** a genesis-core **`attach_healing`** second reliability tier — `verify` (grounded critic → `VerificationReport`) → `heal` (agent judges blast radius) → **patch the flagged items in place → re-verify** | **one guided restart** with carry-forward guidance → **escalate**, bounded `META.healing {max_heal:1,max_restart:1}` (credit-safety, ADR-032); a reserved `_healing` channel + `VerificationReport`/`HealDecision` contracts; **all four analysis workflows adopt it** (feature-breakdown 0.2.0 / technical-design 0.3.0 / story-design 0.2.0 / ux-design 0.2.0), replacing the wasteful full-redo-on-verify-failure. See §3 (Phase-40 block) + `progress/phase-40-self-healing-reliability.md`.
 
