@@ -86,10 +86,41 @@ relaxes ADR-038's read-only allowlist for this one write-scoped entry.
   but a setup step — like `genesis install` for the workflow library). Fold into the 42-09 deploy/live-acceptance notes.
 - **Gates:** genesis-core pytest **96** (+5) + ruff clean; genesis pytest **806** (+3) + ruff clean; `validate_library` 12.
 
+## 42-04 — The `story-implementation` workflow ("Ticket Implementation") · ✅ BUILT (local; independent review = SHIP)
+
+**Repo:** genesis-workflows (local `7d152fd`; **unpushed**, no tag). Genesis's FIRST write-capable workflow (ADR-068);
+reuses `attach_healing` (ADR-067), the reliability trio (ADR-011), `appian-dev-write` (42-02), workflow-node skills (42-03).
+
+- **Graph:** `resolve_inputs → load_inputs → reverify_design →(gap) escalate_reverify(PROCEED_ANYWAY|SEND_BACK) →
+  prepare_rollback → implement → verify → [attach_healing: verify→heal→{patch→reassemble→re-verify | 1 guided restart of
+  implement | escalate}] → author_wiki → persist_wiki (off-loop) → render_report → present → cleanup`. Reliability trio on
+  every agent; `attach_healing` bounded `{max_heal:1, max_restart:1}` (`META.healing`); `recursion_limit` 250.
+- **Write-safety (the headline):** `appian-dev-write` (+ the `appian`/`appian-object-generation` skills) injected **only** on
+  `implement` + `heal` (`NODE_MCP`/`NODE_TOOLS`); every other node read-only; `author_wiki` has `mcp=[]`. **No node has any
+  `delete*` tool**; the graph `WRITE_TOOLS` **equals** the appian-dev-write registry allowlist (60, zero delete — a guard test);
+  the implement/heal prompts carry the deprecate-in-description rule; `check_implementation` **rejects `action=="deleted"`** and
+  requires a terminal status per object (triple defense).
+- **Fail-safe reverify gate:** only `PROCEED_ANYWAY` proceeds to writes; ambiguous / missing / reject / `SEND_BACK` → send back
+  to Design Review (`present_sendback` writes a `send_back` marker the finalizer reads). Never auto-writes on an unclear decision.
+- **Off-loop DB write:** `persist_wiki` is a **raw async node** using `asyncio.to_thread` (the §7 deadlock lesson — like
+  sync-application's `write_kb`), and **degrades gracefully** until `ctx.extras['object_wiki']` is wired (42-06): `wiki.json`
+  always remains in the blackboard. The `StoryImplementationFinalizer` does **not** persist the wiki → no double-persist.
+- **Deterministic:** `render_report` builds `implementation-report.html` from `implementation.json` + `verify.json`; `cleanup`
+  preserves every declared artifact (rollback / report / implementation / wiki / result).
+- **Independent review = SHIP** (sub-agent auditor): all 10 dimensions verified (no-delete triple-guard, write isolation,
+  attach_healing wiring, fail-safe gate, off-loop persist, parity/catalog, tests, gates). No MUST-FIX.
+- **Carry-forward SHOULD-FIX:** (a) `completeTask` / data / security writes in the allowlist are broader than pure
+  design-object create/update — 42-08 to reconsider `completeTask` (Q11-locked, all non-delete). (b) **Wiki entry idempotency on
+  a full workflow re-launch** — `ObjectWikiStore.append_entry` should dedupe by (story, object) in 42-06 (within a single run
+  persist_wiki runs exactly once, so no in-run double-append).
+- **Gates:** `validate_library` **13** (reliability trio + META↔yaml parity + catalog all green for the new workflow);
+  `pytest -q workflows` **212** (+28: 24 workflow + the 4 registry guards from 42-02).
+
 ## Next
 
-42-04 — the `story-implementation` workflow (genesis-workflows): `resolve_inputs → load_inputs → reverify_design →
-escalate? → prepare_rollback → implement → verify → [attach_healing] → author_wiki → render_report → present → cleanup`;
-reliability trio per agent; the escalation gate; `appian-dev-write` (42-02) + skills (42-03) injected only on implement/heal;
-the no-`delete*` guard extended to the workflow's effective node tool sets. Then 42-05 backend (incl. the send-back
-`(IMPLEMENTATION,"send-back")→DESIGN_REVIEW` transition edge — pending the user's action-name nod).
+42-05 — platform backend (genesis): **m0021** (`wiki_object_pages` + `wiki_object_entries`; `current_version` 20→21) +
+`ObjectWikiStore`; `StoryStageStore.VALID_STAGES += 'implementation'`; the implementation-start endpoint (move + launch,
+fail-fast); the `StoryImplementationFinalizer` (done → code-review audited; send-back → design-review; on-read recovery); the
+read-only review-surface API; the board-card implementation-run DTO fields; bump every `current_version == 20` test. **Includes
+the send-back transition edge `(IMPLEMENTATION,"send-back")→DESIGN_REVIEW`** (surfaced in 42-01 verification) — I'll confirm the
+action name with the user at 42-05 start.
