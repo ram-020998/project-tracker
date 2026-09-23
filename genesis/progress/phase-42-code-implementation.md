@@ -61,7 +61,35 @@ relaxes ADR-038's read-only allowlist for this one write-scoped entry.
   applied; (b) deferred to 42-08.
 - **Gates:** `validate_library` = 12 workflows; `pytest -q workflows` = **188 passed** (184 + 4). ruff n/a (JSON + test).
 
+## 42-03 — Workflow-node skill provisioning (ADR-069, option B) · ✅ BUILT (local; independent review = SHIP)
+
+**Repos:** genesis-core (local `4d7b3d3`) + genesis (local `1148545` + `4efbeb3`); **unpushed**, no tag. Option **B**
+(the genesis-core primitive) chosen by the user. Implements ADR-069 (extends ADR-034 skills beyond chat).
+
+- **genesis-core** `kiro_node(skills=[...])` (additive; `CORE_MAJOR` unchanged = 1): before the turn, `_provision_skills`
+  copies each declared skill's directory into the run's **`<cwd>/.kiro/skills/<id>/`** (kiro-cli auto-discovers it), so a
+  workflow node runs WITH the skill deterministically — not relying on the host's global `~/.kiro/skills`. Source resolved
+  via **`ctx.extras['skill_source'](id) -> path|None`**. **Fail-fast** if the provisioner is unwired or a declared skill is
+  unresolvable (never silently run without the domain rules — the "workflow not installed" 409 lesson). **Never sets
+  `KIRO_HOME`** (§7); **path-traversal-safe** (`_SKILL_ID_RE`); writes only into the disposable run workspace; idempotent
+  (`copytree(dirs_exist_ok=True)`) across reliability retries. `skills=None` (the common case) is a byte-identical no-op.
+- **genesis** `build_context` wires **`ctx.extras['skill_source']`** — searches the managed `settings.skills_dir` first, then
+  the global `~/.kiro/skills` (where the global `appian` skill lives); returns None if absent (core fails fast). Defensive
+  unsafe-id guard (review S1). Genesis owns the source policy; core does the copy.
+- **Skill sources (verified):** `appian` → global `~/.kiro/skills/appian` (present); `appian-object-generation` → a
+  genesis-workflows **library** skill, installed into the managed `~/.genesis/.kiro/skills` via `SkillInstaller`. The per-node
+  declaration (`appian` on implement/verify/heal; `appian-object-generation` on implement) lands in **42-04** (the workflow).
+- **Independent review = SHIP** (sub-agent auditor): additive/behavior-preserving, both fail-fast paths, no `KIRO_HOME`,
+  traversal-safe, idempotent, resolver correct, all gates green. Applied SHOULD-FIX S1 (defensive resolver id validation).
+- **⚠️ Deploy prerequisite (review S2):** for a live `story-implementation` run, `appian-object-generation` must be installed
+  into the managed skills workspace (or present in `~/.kiro/skills`); otherwise the implement node fails fast at launch (correct,
+  but a setup step — like `genesis install` for the workflow library). Fold into the 42-09 deploy/live-acceptance notes.
+- **Gates:** genesis-core pytest **96** (+5) + ruff clean; genesis pytest **806** (+3) + ruff clean; `validate_library` 12.
+
 ## Next
 
-42-03 — workflow-node skill provisioning (ADR-069): inject the `appian` skill into implement/verify/heal and
-`appian-object-generation` into implement; recommend the genesis-core `kiro_node(skills=…)` primitive (option B).
+42-04 — the `story-implementation` workflow (genesis-workflows): `resolve_inputs → load_inputs → reverify_design →
+escalate? → prepare_rollback → implement → verify → [attach_healing] → author_wiki → render_report → present → cleanup`;
+reliability trio per agent; the escalation gate; `appian-dev-write` (42-02) + skills (42-03) injected only on implement/heal;
+the no-`delete*` guard extended to the workflow's effective node tool sets. Then 42-05 backend (incl. the send-back
+`(IMPLEMENTATION,"send-back")→DESIGN_REVIEW` transition edge — pending the user's action-name nod).
