@@ -8,9 +8,9 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 🟡 SPEC-DRAFTED (awaiting build sign-off) — Phase 43: The Unified Story Workspace
+### ✅ SHIPPED — Phase 43: The Unified Story Workspace
 
-> **Status:** 🟡 **DRAFTED — specs only.** genesis-only (web + a thin, board-independent read endpoint); **no migration**. Specs: umbrella `specs/phase-43-unified-story-workspace.md` + `phase-43-unified-story-workspace/43-01..43-05`. **New ADR-071 (Proposed)** — amends the *presentation* of ADR-060/061/062/068 (their data/artifacts unchanged). **Analysis + specs only — no code changed. Build begins only after user sign-off at 43-01.**
+> **Status:** ✅ **SHIPPED 2026-09-24 — genesis v0.74.0, CI green. PHASE 43 COMPLETE.** genesis-only (web + a thin, board-independent read endpoint); **no migration** (DB stays v21). **ADR-071 Accepted.** Specs: umbrella `specs/phase-43-unified-story-workspace.md` + `phase-43-unified-story-workspace/43-01..43-05`; as-built `progress/phase-43-unified-story-workspace.md`. Gates: genesis pytest **844**; web **vitest 286** + build. Amends the *presentation* of ADR-060/061/062/068 (their data/artifacts unchanged).
 >
 > **Why.** Opening a story today gives a **different screen depending on where you click and the card's lane** — the feature `StoryDetailPage` (details, no documents), the board `BoardCardDrawer` (details, no documents), or the lane-routed `StoryCardPage` → `StoryDesignWorkspace` (design chat) | `ImplementationReviewWorkspace` (implementation report/rollback/objects). Three disjoint surfaces, each showing a slice, chosen by `BoardPage.openCardView` lane branching; there is no single place to see everything about a story, and the look-and-feel changes as the card advances.
 >
