@@ -200,10 +200,41 @@ for the separate write-capable Appian agent). Implements ADR-070; reuses the ADR
   publish helpers) + extended `test_binding_kinds_match_the_hub_contract` to the two additive kinds (the §7
   "stub hid the contract" guard). **genesis pytest 836** + ruff clean.
 
+## 42-07 — Web: drag confirm + card run-states + the read-only review surface · ✅ BUILT (local; independent review = SHIP)
+
+**Repo:** genesis (local `4010000`; **unpushed**, no tag). Frontend-only; mirrors the Phase-34 design-lane web.
+
+- **Drag-into-Implementation confirm** (`BoardPage.tsx`): dragging a card into `implementation` from another
+  lane opens a `StartImplementationDialog` (the **single blanket approval**, Q1) whose copy makes explicit it
+  **writes every object change to the live dev environment**. Yes → `useStartImplementation` (POST
+  `…/implementation/start`); No/dismiss → just move (revert the optimistic mirror). An intra-lane reorder
+  never triggers it.
+- **Card run-states** (`StoryCard.tsx` + `types/workbench.ts`): a running implementation **locks** the card
+  (non-draggable) + shows "Implementation running" + a run link; a failed run paints it light-red + shows the
+  run link (reuses the Phase-34 states; `isImplementationRunning` covers pending/running/awaiting_input:*,
+  `isImplementationFailed` covers failed/cancelled).
+- **Read-only review surface** (`ImplementationReviewWorkspace.tsx`, on the existing
+  `/workbench/:app/cards/:id` route via `StoryCardPage`): reachable from a card in **Implementation OR Code
+  Review** (Q16). Shows the per-object result table (name/type/action/version/status), the deterministic
+  implementation report in a **sandboxed (`sandbox=""`, no-script, XSS-safe) iframe**, and the rollback
+  document via `MarkdownView` — **no chat, no Lavish, no editing**. Running → running panel; failed-without-
+  report → failed panel + run link. `useImplementationReport` is disabled while the run is active.
+- **Plumbing:** `types/workbench.ts` (implementation fields + helpers + `ImplementationReport`/`ImplObject`);
+  `lib/api/workbench.ts` (`startImplementation` + `implementationReport`); `lib/query/keys.ts` (the report
+  key); `hooks.ts` (`useStartImplementation` mirroring `useStartDesign` + `useImplementationReport`).
+- **Independent review = SHIP** (sub-agent auditor): all 6 dimensions verified — drag-confirm parity + informed
+  approval, card lock, read-only + sandboxed-iframe (no XSS), api/hooks/keys correct, jest-axe, gates, and the
+  **stale-bundle guard clean** (`git status -- web/static` empty after a fresh build). No MUST-FIX / SHOULD-FIX.
+- **Gates:** eslint **0 errors** (20 pre-existing warnings), `tsc` clean, **vitest 276 passed** (37 files;
+  +13 workbench incl. the review-surface render/running/axe + the impl run-state helpers), `npm run build` OK;
+  `web/static` rebuilt + committed.
+
 ## Next
 
-42-07 — web: the drag-into-Implementation confirm (`StartImplementationDialog`) → `POST …/implementation/start`;
-card **running/locked/failed** states + a run link (reuse the Phase-34 pattern); the **read-only review surface**
-(implementation report + rollback doc + per-object result) reachable from a card in **Implementation** or
-**Code Review** (drawer or routed page; no chat, no Lavish); types/api/hooks/query-keys + jest-axe on the new
-surface; rebuild + **commit `web/static`** (the stale-bundle guard).
+42-08 — code review & hardening: an independent review of the whole write-safety posture (no-delete guarantee;
+fail-fast prereqs; the finalizer bound-run guard + on-read recovery + audited transitions; single-agent +
+healing; wiki append-only + local-first publish/pull; the Lavish-free read surface; a11y/dark-parity/no-hardcoded-hex);
+apply SHOULD-FIX items — **reconsider `completeTask` in the `appian-dev-write` allowlist** (42-02/04), the
+**report-endpoint lane gate** (42-05), and **`persist_wiki` attribution** (`author_username`/`story_sync_uuid`
+populated from the run inputs; 42-06); write the live-acceptance notes (throwaway/sandbox app; the
+`appian-object-generation` managed-skills install prerequisite from 42-03).
