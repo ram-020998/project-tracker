@@ -1,0 +1,42 @@
+{
+  "kind": "wiki_entry",
+  "path": "/records/wiki_entry/7c1e2d3a-4b5c-6d7e-8f90-a1b2c3d4e5f6",
+  "notes": "Append-only change entry parented on its page via page_sync_uuid (+ constant parent_kind). is_bugfix is 0/1; story_sync_uuid may be null; business/technical are Extra Long Text. An entry publishes once; a re-publish is a normal base_version CAS.",
+  "put_request": {
+    "sync_uuid": "7c1e2d3a-4b5c-6d7e-8f90-a1b2c3d4e5f6",
+    "page_sync_uuid": "3f2b9c10-8a4d-4e7f-9b21-0c5d6e7f8091",
+    "parent_kind": "wiki_page",
+    "change_kind": "updated",
+    "business_description": "Vendors are now scored for risk so buyers can prioritise reviews — 東京 🚀.",
+    "technical_description": "Added a decimal `score` field + a computed rule bl_gss_vendorScore; no rows deleted.",
+    "story_key": "GAMS-42",
+    "story_sync_uuid": null,
+    "is_bugfix": 0,
+    "change_reason": "Story GAMS-42 — add vendor risk scoring.",
+    "object_version": "v3",
+    "author_username": "ramaswamy.u",
+    "created_at": "2026-09-24T10:05:00Z",
+    "base_version": null,
+    "published_by": "ramaswamy.u",
+    "published_at": "2026-09-24T10:05:00Z"
+  },
+  "get_response": {
+    "sync_uuid": "7c1e2d3a-4b5c-6d7e-8f90-a1b2c3d4e5f6",
+    "page_sync_uuid": "3f2b9c10-8a4d-4e7f-9b21-0c5d6e7f8091",
+    "parent_kind": "wiki_page",
+    "change_kind": "updated",
+    "business_description": "Vendors are now scored for risk so buyers can prioritise reviews — 東京 🚀.",
+    "technical_description": "Added a decimal `score` field + a computed rule bl_gss_vendorScore; no rows deleted.",
+    "story_key": "GAMS-42",
+    "story_sync_uuid": null,
+    "is_bugfix": 0,
+    "change_reason": "Story GAMS-42 — add vendor risk scoring.",
+    "object_version": "v3",
+    "author_username": "ramaswamy.u",
+    "created_at": "2026-09-24T10:05:00Z",
+    "version": 0,
+    "published_by": "ramaswamy.u",
+    "published_at": "2026-09-24T10:05:00Z",
+    "updated_at": "2026-09-24T10:05:00Z"
+  }
+}

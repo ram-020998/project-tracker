@@ -161,14 +161,49 @@ reuses `attach_healing` (ADR-067), the reliability trio (ADR-011), `appian-dev-w
 - **Gates:** genesis **pytest 829** (+ the m0021 bumps + `test_object_wiki.py` + `test_story_implementation.py`)
   + ruff clean; fresh-DB migrate → v21 with the wiki tables verified.
 
+## 42-06 — Object Wiki: collaboration bindings + the Genesis Hub record type · ✅ BUILT (local; independent review = SHIP)
+
+**Repos:** genesis (local `1b6e8f0`; **unpushed**, no tag) + the Genesis Hub contract addition (docs, pushed —
+for the separate write-capable Appian agent). Implements ADR-070; reuses the ADR-063 collab substrate.
+
+- **Collab bindings (`collab/service.py`):** added `wiki_page` + `wiki_entry` to `_BINDINGS`. `wiki_page` →
+  `wiki_object_pages`, **no parent** (round-trips on the global `app_uuid`, like `feature`). `wiki_entry` →
+  `wiki_object_entries`, **append-only**, parented on its page via a single `_ParentRef(page_id →
+  page_sync_uuid, parent_kind="wiki_page")` — the exact cross-machine resolution `stage_artifact`/`story` use
+  (publish page first; a pull skips an entry until its page is present, then retries). The optional
+  `story_sync_uuid` rides as a plain shared column. **No-leak:** the machine-local `latest_entry_id` page
+  pointer was added to `_LOCAL_ONLY`, so it is excluded from both publish and pull (a pulled mirror's pointer
+  stays NULL — never a dangling id); `id`/`row_version`/`published_*` were already excluded. New helpers
+  `publish_object_wiki_page(page_id)` (page then its entries) + `publish_object_wiki(app_uuid)`. Both providers
+  are already generic over `kind`, so **no provider change** was needed.
+- **`build_context` wiring (`runtime/context.py`):** `ctx.extras['object_wiki'] = ObjectWikiStore(db_path)`
+  (signatures match the 42-04 `persist_wiki` calls exactly) + `ctx.extras['object_wiki_publish']` — a
+  best-effort, **offline-tolerant** callable that lazily builds a `CollaborationService` (via
+  `build_sync_provider`) and **no-ops unless enabled + available + onboarded**, and **never raises**. This
+  **activates** the 42-04 workflow's `persist_wiki` node (which degraded gracefully until now). **Local-first,
+  no hard Hub dependency (Q14):** the local wiki write always succeeds; publishing is opt-in.
+- **Genesis Hub contract addition** (`specs/phase-36-genesis-hub-appian-app/contract/object-wiki-contract-addition.md`
+  + fixtures `object_wiki_page.json` / `object_wiki_entry.json`): **additive to the frozen v1.0.0 contract**
+  (ADR-064 amendment, like the v0.69.0 `on_board` field). Two new record kinds `wiki_page` + `wiki_entry`
+  served by the **existing generic** `/records/{kind}` + `/changes` endpoints — **no new Web API**. Field
+  tables = the m0021 columns minus `latest_entry_id`; `business_description`/`technical_description` are
+  Extra-Long Text (2 of the ≤3 budget); **no blobs** (descriptions are inline). Built Appian-side by the
+  separate agent; a live round-trip is appended to the 36-06 harness.
+- **Independent review = SHIP** (sub-agent auditor): all 8 dimensions verified (bindings reuse the proven
+  mechanism, no-leak incl. no other leaking int columns, exact persist_wiki contract match, best-effort +
+  onboarded-guarded + worker-safe lazy import, additive contract + self-consistent fixtures, the extended
+  binding guard, gates). No MUST-FIX. SHOULD-FIX (pre-existing in the 42-04 workflow, deferred to 42-08): the
+  `persist_wiki` node passes `author_username=None`/`story_sync_uuid=None` + an unused `envs` local — populate
+  attribution/story-linkage from the run inputs later.
+- **Tests:** `tests/test_object_wiki_collab.py` (LocalHubProvider two-instance round-trip incl. unicode; the
+  append-only entry skips until its page is present; the no-leak of `latest_entry_id`/`id`/`row_version`; the
+  publish helpers) + extended `test_binding_kinds_match_the_hub_contract` to the two additive kinds (the §7
+  "stub hid the contract" guard). **genesis pytest 836** + ruff clean.
+
 ## Next
 
-42-06 — Object Wiki collaboration bindings + the Genesis Hub record type: add `wiki_page` + `wiki_entry` to
-`CollaborationService._BINDINGS` (`wiki_page` parented on the global `app_uuid`; `wiki_entry` parented on
-`wiki_page` via `_ParentRef`, append-only) with publish/pull + autopull integration; **wire
-`ctx.extras['object_wiki']` (+ an `object_wiki_publish` callable) in `build_context`** so the workflow's
-`persist_wiki` node activates (it degrades gracefully today); freeze the **Genesis Hub `GH Object Wiki
-Page`/`GH Object Wiki Entry` record-type contract addition** (+ fixtures) in
-`specs/phase-36-genesis-hub-appian-app/contract/` for the separate write-capable Appian agent (ADR-064
-additive); the binding guard test (every `_BINDINGS` kind is a real contract kind) + a LocalHubProvider
-round-trip.
+42-07 — web: the drag-into-Implementation confirm (`StartImplementationDialog`) → `POST …/implementation/start`;
+card **running/locked/failed** states + a run link (reuse the Phase-34 pattern); the **read-only review surface**
+(implementation report + rollback doc + per-object result) reachable from a card in **Implementation** or
+**Code Review** (drawer or routed page; no chat, no Lavish); types/api/hooks/query-keys + jest-axe on the new
+surface; rebuild + **commit `web/static`** (the stale-bundle guard).

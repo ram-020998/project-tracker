@@ -1,0 +1,32 @@
+{
+  "kind": "wiki_page",
+  "path": "/records/wiki_page/3f2b9c10-8a4d-4e7f-9b21-0c5d6e7f8091",
+  "notes": "One page per Appian object, keyed on the global app_uuid (no parent record). The local latest_entry_id pointer is NOT sent (machine-local). current_summary is the newest entry's business description.",
+  "put_request": {
+    "sync_uuid": "3f2b9c10-8a4d-4e7f-9b21-0c5d6e7f8091",
+    "app_uuid": "_a-0000abcd-1234-8000-9bfc-011c48011c48_00001",
+    "object_uuid": "_a-0000rt00-vend-8000-9bfc-011c48011c48_54321",
+    "object_type": "RecordType",
+    "object_name": "AS_GSS_R_VENDOR",
+    "current_summary": "Tracks vendors and their risk score — café 🎉 (unicode round-trips).",
+    "owner_username": "ramaswamy.u",
+    "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "base_version": null,
+    "modified_by": "ramaswamy.u"
+  },
+  "get_response": {
+    "sync_uuid": "3f2b9c10-8a4d-4e7f-9b21-0c5d6e7f8091",
+    "app_uuid": "_a-0000abcd-1234-8000-9bfc-011c48011c48_00001",
+    "object_uuid": "_a-0000rt00-vend-8000-9bfc-011c48011c48_54321",
+    "object_type": "RecordType",
+    "object_name": "AS_GSS_R_VENDOR",
+    "current_summary": "Tracks vendors and their risk score — café 🎉 (unicode round-trips).",
+    "owner_username": "ramaswamy.u",
+    "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+    "version": 0,
+    "created_by": "ramaswamy.u",
+    "modified_by": "ramaswamy.u",
+    "created_at": "2026-09-24T10:00:00Z",
+    "updated_at": "2026-09-24T10:00:00Z"
+  }
+}
