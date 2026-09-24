@@ -140,3 +140,82 @@ id `124db86f-842f-47da-800f-2f2e86b5afe3` · kind `2a27811a-f52a-48c8-ae77-1eb99
 - Load `~/.kiro/skills/appian/SKILL.md` first, then for 36-04: `tools-mcp.md`, `expressions.md`/`expression-rules.md`, `write-records-patterns.md`, `query-record-type-patterns.md`, `function-reference.md` + `sail-verification-checkpoint.md` (Step 4), `validation-checkpoint.md` (Step 7B), and the Web-API guidance. **Every SAIL body → Step-4 verify + `validateExpression` retry loop (or `a!localVariables` wrap for ri!/toJson) before create; `testRule` after.**
 - **Never fabricate UUIDs** — use the table above (or re-fetch via `getRecordType`/`listRecordTypeFields`).
 - Deletions require the skill's `confirmation-patterns.md` Universal Workflow 1 (10 steps) + user confirmation.
+
+---
+
+## ✅ OBJECT WIKI ADDITION (ADR-070 / Phase 42-06) — BUILT + LIVE-VALIDATED (2026-09-24)
+
+Additive, backward-compatible extension of the frozen v1.0.0 contract: two new record kinds
+(`wiki_page`, `wiki_entry`) served by the **existing** generic `/records/{kind}` + `/changes` endpoints.
+Spec: `specs/phase-36-genesis-hub-appian-app/contract/object-wiki-contract-addition.md` (+ fixtures
+`object_wiki_page.json`, `object_wiki_entry.json`). Built by the write-capable Dev-MCP agent; genesis stays
+read-only. **18/18 live harness green** (`/tmp/gh/wiki_harness.py`, driven as the `kiroDeveloper` GH Service
+Account over the real Web APIs), 7 existing kinds still passing.
+
+### New record types (DATABASE, `jdbc/Appian`; PK `id` INTEGER; `syncUuid` unique)
+
+**GH Object Wiki Page** — rt `29ede62a-36af-4980-9019-2c651727e0d9` · table `wiki_object_pages` · mirrors the
+`feature` attribution model (server-managed created/modified). Fields:
+`id 754a49b7-bcd7-4c69-9993-5e8a3e665e78` (PK) · `syncUuid 220cae5f-065e-47e1-9e27-263de3a3b369` (unique) ·
+`appUuid 62404209-154c-4753-86c5-72ec73259e31` · `objectUuid 77e4ae91-0453-43b3-85e3-7b8fed4d34a6` ·
+`objectType 62330d54-e6f9-41a3-bfc5-9aaace6292e6` · `objectName 30a2b685-b344-4fba-acc5-5a441ca3d2a3` ·
+`currentSummary ed6f0e50-3559-4d53-85f0-6cfcc08b914b` (Long, VARCHAR 4000) ·
+`ownerUsername ba9fcdc7-0723-4070-94d9-d8b3ac7fe353` · `teamUuid 33b40d39-7cc9-438d-8ce1-bc0e2fe94a18` ·
+`version bf209cbf-0f53-4aa1-90fb-bdf3fb75d2af` · `createdBy de6dbe6f-f20c-479c-bbe5-905197af8c63` ·
+`modifiedBy 371bb8d0-6e34-42c0-8296-72c8bb10f639` · `createdAt 081241c6-0d9f-4c8c-bded-8d10ec226fe2` ·
+`updatedAt f720e2a5-b70a-4dda-8461-053bcd685351`.
+
+**GH Object Wiki Entry** — rt `c9a367bb-fbd0-4ca6-8c84-6358dee73cb5` · table `wiki_object_entries` ·
+append-only; mirrors the `stage_artifact` model (publishedBy/publishedAt) **plus** `createdAt` preserved from
+payload. 2 Extra-Long fields (≤3 budget). Fields:
+`id bcf46c35-bf72-4f9e-b468-3672845dc247` (PK) · `syncUuid 5d4ea9eb-f2ad-4e56-952c-5c0d965461f9` (unique) ·
+`pageSyncUuid 70e53c07-6477-4e0d-bbdf-7a2c8b8cc617` · `parentKind a945b2b4-8fd1-462b-b04c-4a9b98b675ec`
+(const `"wiki_page"`) · `changeKind b9233134-9d03-4dc8-927b-aaf76b88c3a4` ·
+`businessDescription 99f75cf0-aaad-4b65-9ef4-b678bde4ef51` (Extra-Long) ·
+`technicalDescription 4c6670c2-197b-46c9-acbb-2ffea4098993` (Extra-Long) ·
+`storyKey 74f3193a-1b51-4b12-98a3-93999db708dc` · `storySyncUuid 4f6a6c3f-d2d7-4b21-9d1a-f4dfa3b47487`
+(nullable) · `isBugfix 7d378fee-f9a5-4f30-b607-976acbc90e78` (INTEGER 0/1) ·
+`changeReason ec1fbe30-8c97-490f-9a2c-2fc6692d7046` (Long, VARCHAR 4000) ·
+`objectVersion fee2c99e-06b3-4423-83a1-72323702318a` · `authorUsername 570b0009-15bb-4b13-8635-5b53e2162baa` ·
+`createdAt d747118d-793d-4b3e-b6f3-a34723a7c538` (payload-preserved) ·
+`version 8bcec6d7-d318-4e78-91fd-0b8f62c8d0fe` · `publishedBy f88c1728-3c8b-46fb-9113-b74f17d3df20` ·
+`publishedAt ade17967-a0c8-43c0-ae4b-963c2134c29f` · `updatedAt b7092a0e-9ffd-4f86-aeab-ba1db8ebb63c`.
+
+**Relationship (both sides):** `GH Object Wiki Entry.page` (MANY_TO_ONE, rel
+`88f29644-0824-4892-b07b-15466eba1b9f`, `pageSyncUuid`→Page.`syncUuid`) ↔ `GH Object Wiki Page.entries`
+(ONE_TO_MANY, rel `f29672c9-7778-498a-8041-1ae3e193c4b1`, CASCADING).
+**Security (both):** administrator+editor=`GH Administrators` `_e-…458`, viewer=`GH Users` `_e-…460`,
+data_steward=`GH Service Accounts` `_e-…462` — mirrors GH Stage Artifact. Both associated with the app.
+
+### Backing rules extended (additive kind-branches inserted before `default`; 7 existing branches untouched)
+- **GH_casUpsert** `_a-…27509` → **v10**: `wiki_page` (feature-shaped: createdBy=coalesce(existing,actor),
+  modifiedBy=actor, createdAt=coalesce(existing,now()), updatedAt=now()); `wiki_entry` (stage_artifact-shaped:
+  publishedBy=coalesce(payload.published_by,actor), publishedAt=coalesce(payload.published_at,now()),
+  updatedAt=now()) **plus** createdAt=coalesce(payload.created_at, existing, now()). Both append a `GH Change
+  Log` row in the same `a!writeRecords` batch; version=coalesce(base,-1)+1; 409 CAS on stale base_version.
+- **GH_recordToJson** `_a-…27503` → **v4**: `wiki_page` (13 keys), `wiki_entry` (17 keys) snake_case projections.
+- **GH_queryRecords** `_a-…27526` → **v4**: `wiki_page`/`wiki_entry` query branches (all projected fields,
+  `applyWhen` syncUuid filter for get vs list).
+- Unchanged: `GH_appendChangeLog`, `GH_changesSince`, `GH_isServiceCaller`, `GH_errorResponse`,
+  `GH_reassembleStoryItems`, and all 11 Web APIs' logic except the one kind-list edit below.
+
+### Deviation (flagged) — one Web API kind-list edit
+`GH_records_upsert` (Web API `8e153f45-c413-4eb4-be0f-4e722130fc2d`, PUT `/records`) carried its **own inline
+kind allow-list** (separate from `GH_casUpsert`'s dispatch) that rejected unknown kinds with
+`400 {"error":"invalid kind or missing syncUuid"}`. `"wiki_page"`/`"wiki_entry"` were **added to that list**
+(done in Designer by the app owner, since MCP `getWebApi` cannot read/write a Web API's SAIL body). This is
+**additive** (2 kinds appended to an allow-list) — **no new Web API object** was created, and no other Web API
+was changed. The read Web APIs (`GH_records_get`, `GH_records_list`) have no kind guard and needed no change.
+
+### Live validation evidence (2026-09-24, `wiki_harness.py`, 18/18)
+- `wiki_page`: PUT create→`201 {created,v0}`; GET byte-for-byte (unicode `café 🎉`; created_at/updated_at
+  server-set); PUT base_version 0→`200 {updated,v1}`; stale base_version→`409 {conflict, current_version:1}`.
+- `wiki_entry`: PUT create→`201 {created,v0}`; GET byte-for-byte (unicode `東京 🚀`; `created_at`
+  `2026-09-24T10:05:00Z` and `published_at` preserved from payload; `is_bugfix` 0; `parent_kind` `"wiki_page"`).
+- `/changes` emits both kinds; `contract_version` `1.0.0`. Unauthenticated GET→`401`.
+- Regression: `story` arrays reassembled (AC order, empty `questions` `[]`, unicode labels, null epic);
+  `stage_artifact` byte-for-byte. Existing kinds intact.
+- Note: a null TEXT field reads back as `""` (established Appian behavior — verified identical on existing
+  `story.epic_sync_uuid` / `appian_part`), so a null `story_sync_uuid` round-trips as `""` consistently.
+- Validation rows cleaned up (both tables empty). The `GH Change Log` rows emitted during validation remain
+  (append-only feed; monotonic cursor — harmless).

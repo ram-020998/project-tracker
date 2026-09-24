@@ -1,5 +1,19 @@
 # Genesis Hub API — Object Wiki addition (ADR-070, Phase 42-06)
 
+> **BUILD STATUS:** ✅ **BUILT + LIVE-VALIDATED on the dev-env Hub (2026-09-24).** Both kinds are served by the
+> existing generic endpoints; the 36-06 harness extension is **18/18 green** (byte-for-byte round-trip for
+> `wiki_page` + `wiki_entry`, CAS 409, `/changes` emission, auth 401) with the 7 existing kinds still passing
+> (story arrays + stage_artifact byte-for-byte). As-built record types: **GH Object Wiki Page**
+> `29ede62a-36af-4980-9019-2c651727e0d9` (table `wiki_object_pages`), **GH Object Wiki Entry**
+> `c9a367bb-fbd0-4ca6-8c84-6358dee73cb5` (table `wiki_object_entries`). Backing rules extended (additive
+> kind-branches): `GH_casUpsert` v10, `GH_recordToJson` v4, `GH_queryRecords` v4. **One deviation from "no Web
+> API edits":** the `GH_records_upsert` Web API carried its own inline kind allow-list (separate from
+> `GH_casUpsert`), so `"wiki_page"`/`"wiki_entry"` were added to it — additive only, **no new Web API object**.
+> Notes: `created_at`/`updated_at` on `wiki_page` are server-set (record kind); `wiki_entry.created_at` +
+> `published_at` are preserved byte-for-byte from the payload; a null `story_sync_uuid` reads back as `""`
+> (established Appian null-text behavior, identical to existing kinds' null text fields). See
+> `progress/phase-36-genesis-hub-appian-app.md` for the full as-built field/rule UUIDs.
+>
 > **Status:** 🟢 FROZEN ADDITION to the v1.0.0 contract — **additive, backward-compatible** (ADR-064
 > amendment, exactly like the v0.69.0 `on_board` field addition). It introduces **two new record kinds**
 > served by the **existing generic** `/records/{kind}` + `/changes` endpoints — **NO new Web API object is
