@@ -1,6 +1,6 @@
 # Phase 43 — The Unified Story Workspace (one consistent, consolidated story view)
 
-> **Status:** 🟡 **DRAFTED — specs only; awaiting build go-ahead.** · **Author:** Genesis agent · Created 2026-09-24.
+> **Status:** ✅ **SHIPPED — genesis v0.74.0 (2026-09-24), CI green. PHASE 43 COMPLETE.** · **Author:** Genesis agent · Created 2026-09-24. As-built: `progress/phase-43-unified-story-workspace.md`.
 > Umbrella + `phase-43-unified-story-workspace/43-01..43-05`. **New ADR:** **ADR-071** (the unified Story Workspace) — **amends the story-view surfaces** established by ADR-060 (StoryDetailPage), ADR-061 (the board card drawer), ADR-062 (the Design Review workspace routing) and ADR-068 (the implementation review surface).
 > **Type:** genesis-only — **web** (a single Story Workspace page + a documents-viewer chrome; removes the board drawer + the split routes) + a **thin backend** (one consolidated, board-independent read endpoint + relaxing the board/lane scoping on the artifact reads). **No migration.** genesis-core / genesis-workflows / kiro-agent-sdk / genesis-appian-parser **unchanged**.
 > **Depends on:** Phase 32 (Finalize Stories — `kb_epics`/`kb_stories`, `StoryStore`, the Stories tab + `StoryDetailPage`; ADR-060), Phase 33 (the Workbench board + `BoardCard` DTO + the drawer; ADR-061), Phase 34 (the Design/Design-Review automation — `kb_story_stages`/`StoryStageStore`, `design.html`, the bound `story_design` chat, `StoryDesignWorkspace`; ADR-062), Phase 42 (the Implementation lane — the `implementation` story-stage, the report/rollback/objects artifacts, `ImplementationReviewWorkspace`, the `implementation/report` endpoint; ADR-068).
@@ -142,7 +142,7 @@ So a story's information is scattered across three disjoint surfaces, each showi
 
 ---
 
-## 9. ADR-071 (Proposed) — the unified Story Workspace
+## 9. ADR-071 (Accepted) — the unified Story Workspace
 
 A single canonical story page + a consolidated, board-independent read path replace the drawer + the split lane-based routes; a documents-viewer chrome renders the story's stage artifacts (Design / Implementation report / Objects modified / Rollback) by type on stage-aware tabs; the design is chat-editable (in a new browser tab) only in Design/Design-Review, read-only afterward. Amends ADR-060/061/062/068's story-view surfaces (their data/artifacts are unchanged; only the *presentation* is unified). Mirrored in `reference/decision-log.md`; full text into `bible/04` on Accept.
 
