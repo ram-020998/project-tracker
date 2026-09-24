@@ -279,12 +279,20 @@ on a **throwaway/sandbox app + story**, reviewed object-by-object:
 6. **Lane:** the card lands in **Code Review** (or returns to **Design Review** on a send-back). A failed run
    leaves it in Implementation (light-red + run link).
 
-## Next
+## 42-09 — Coordinated release · ✅ SHIPPED (2026-09-24) — PHASE 42 COMPLETE
 
-42-09 — coordinated release (**awaiting the user's explicit go-ahead to push/tag**): tag + push in ADR-019 order
-genesis-core → genesis → genesis-workflows (genesis-core moves because 42-03 added the `kiro_node(skills=)`
-primitive); the **Appian Genesis Hub** `GH Object Wiki Page`/`Entry` record types built + live-validated by the
-separate write-capable agent (additive to the ADR-064 contract; no genesis tag); flip **ADR-068/069/070 →
-Accepted** (decision-log + bible §5); update bible §2/§3/§4/§8 + tracker + this progress doc + the stamps; CI
-green (clean-install DB → **v21** + `validate_library`); **verify the release commit contains EVERY changed
-file before tagging** (the recurring §7 lesson).
+**Released in ADR-019 order** (genesis-core → genesis → genesis-workflows), CI green on all three:
+- **genesis-core v0.9.8** — commit `e5c99ca`, tag `v0.9.8` (the `kiro_node(skills=)` primitive; `CORE_MAJOR` unchanged = 1). CI ✅.
+- **genesis v0.73.0** — commit `b9f287a0`, tag `v0.73.0` (pins genesis-core v0.9.8; the whole Phase-42 backend + web + the `""`→None optional-parent pull hardening). CI ✅.
+- **genesis-workflows v0.20.0** — commit `00e2c2c`, tag `v0.20.0` (pins genesis-core v0.9.8 + genesis v0.73.0; the `story-implementation` workflow + `appian-dev-write`). CI ✅.
+- **Appian Genesis Hub** — `GH Object Wiki Page` (rt `29ede62a…`) + `GH Object Wiki Entry` (rt `c9a367bb…`) built + **live-validated** by the separate write-capable agent (additive to the ADR-064 contract v1.0.0; 18/18 harness green incl. the 7 existing kinds; no genesis tag).
+- **ADR-068/069/070 → Accepted** (`reference/decision-log.md`). Hub contract trait recorded: a null TEXT field reads back as `""` — the 42-09 `""`→None pull hardening makes an optional parent (e.g. an epic-less story) robust to it (+regression test).
+- **The `""`→None hardening** (42-09): `CollaborationService._upsert_local` normalizes a blank optional-parent sync_uuid to None so a live-Hub null-as-empty parent isn't a lookup miss that skips the pull. No wiki impact (its `story_sync_uuid` is a plain column); fixes the pre-existing Phase-37/38 epic-less-story pull.
+
+**Release gates (green):** genesis pytest **838** + ruff; genesis-core pytest **96** + ruff; genesis-workflows `validate_library` **13** + pytest **213**; web **vitest 276** + tsc + build (stale-bundle guard clean); fresh DB → **v21**; the release commits contain every changed file (§7).
+
+**Docs:** bible §2 (tag table + a Phase-42 SHIPPED block) / §9 (roadmap → SHIPPED) + the ADR flips + tracker §6 + the onboarding stamps + README + this doc.
+
+**⚠️ First live acceptance is still pending** and MUST be on a throwaway/sandbox app + story (the headless-undrivable procedure in the 42-08 entry above): a real drag → confirm → the write-capable run creates/updates the objects in the dev env (verify object-by-object; no deletes; rollback doc validated by hand; the Object Wiki published to the Hub), landing in Code Review. Deploy prereqs: the workflows library installed + the `appian-object-generation` skill present in the managed workspace + collaboration enabled/onboarded for the wiki to publish.
+
+**PHASE 42 COMPLETE — no active phase.**
