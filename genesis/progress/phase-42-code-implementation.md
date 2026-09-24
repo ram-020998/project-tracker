@@ -229,12 +229,62 @@ for the separate write-capable Appian agent). Implements ADR-070; reuses the ADR
   +13 workbench incl. the review-surface render/running/axe + the impl run-state helpers), `npm run build` OK;
   `web/static` rebuilt + committed.
 
+## 42-08 — Code review & hardening · ✅ DONE (local; whole-phase review = SHIP-WITH-MUST-FIX, MUST-FIX applied)
+
+**Repos:** genesis-workflows (local `d5b4c19`) + genesis (local `ecb8e0c`); **unpushed**, no tag.
+
+- **Independent whole-phase write-safety review** (sub-agent auditor) across all three repos against the 42-08
+  §1 checklist. Verdict **SHIP-WITH-MUST-FIX**; every gate green at review time (genesis pytest 836, genesis-core
+  96, genesis-workflows validate_library 13 + pytest 212, web tsc + vitest 276, fresh DB → v21). All checklist
+  items PASS: no-delete triple-guard, write isolation, single-blanket-approval, fail-fast prereqs, finalizer
+  correctness (bound-run + lane-guard + audited transitions; result.json contract matches), reliability trio +
+  attach_healing {1,1}, migration, wiki append-only + no-leak + no-code-stored, skills fail-fast, KB honesty,
+  web read-only + sandboxed iframe.
+- **MUST-FIX applied — least-privilege write surface (60 → 55):** the review found the allowlist granted 5
+  writes that are **not design-object authoring** and exceed the Q11 "object types (create/update; no delete)"
+  scope — **removed** `completeTask` (runtime task instance), `insertRecordData`/`updateRecordData` (business
+  row data), `addGroupMembers`/`removeGroupMember` (security principals). Updated `mcp-registry.json` (+ note),
+  the graph `WRITE_TOOLS`, the pinned guard test (**55**) + a new `test_write_allowlist_excludes_non_authoring…`
+  guard, and the workflow `WRITE_TOOLS` count. The retained 55 only author/configure/deploy design objects
+  (incl. `updateObjectSecurity`, portal publish, document content — all object-lifecycle, not runtime/data).
+- **SHOULD-FIX applied:** (a) **report-endpoint lane gate** — `GET …/implementation/report` is now scoped to
+  the **Implementation + Code Review** lanes (Q16); any other lane 404s (the rollback doc stays local/temporary).
+  (b) **persist_wiki attribution** — `build_context` exposes `ctx.extras['actor']` (canonical username,
+  offline-safe) and `start_implementation` carries the story's `sync_uuid`; the workflow's `_persist_wiki_sync`
+  now stamps each Object-Wiki entry's `author_username` + `story_sync_uuid` (were NULL) and drops an unused
+  local. (c) refreshed the stale `workbench.py` module docstring (it now hosts the write-capable lane).
+  NICE-TO-HAVE (keyless-story dedupe) is a non-issue — design stories always carry a key.
+- **Gates (post-hardening):** genesis-workflows `validate_library` **13** + pytest **213** (+1 guard); genesis
+  pytest **837** (+1 lane-gate test) + ruff clean; genesis-core ruff clean (untouched in 42-08); web unchanged.
+
+### Live-acceptance procedure (headless-undrivable — user-driven, the 42-09 pre-release gate)
+
+Because this is Genesis's first capability that **writes to a customer Appian env**, the first live run MUST be
+on a **throwaway/sandbox app + story**, reviewed object-by-object:
+
+1. **Deploy prerequisites:** install the workflows library into the target instance (`genesis install --from
+   ../genesis-workflows`); ensure the **`appian-object-generation`** skill is installed into the managed skills
+   workspace (or present in `~/.kiro/skills`) — otherwise the implement node fails fast at launch (42-03 S2);
+   a **dev-tagged environment** with basic-auth creds (ADR-048); the target app **synced** into the KB; the
+   story has a **completed Design** + its feature a **Technical Design**.
+2. **Run:** drag a design-reviewed ticket **Design Review → Implementation** → confirm the dialog (it states it
+   writes to the dev env). Watch the card lock + "Implementation running".
+3. **Verify in Appian:** the objects named in `implementation.json` exist + open cleanly; **no deletes** (a
+   retired object shows "deprecated by Genesis — <ticket>" in its description). Confirm the reverify escalation
+   behaves (a design/TD mismatch → proceed/send-back).
+4. **Rollback doc:** open the read-only review surface; **validate the rollback document by hand** (current code
+   + object version per UPDATE'd object; NEW → "delete to roll back") before trusting it at scale.
+5. **Object Wiki:** confirm the local entries (business + technical descriptions, author, story link) and — if
+   collaboration is enabled — that they published to the Hub.
+6. **Lane:** the card lands in **Code Review** (or returns to **Design Review** on a send-back). A failed run
+   leaves it in Implementation (light-red + run link).
+
 ## Next
 
-42-08 — code review & hardening: an independent review of the whole write-safety posture (no-delete guarantee;
-fail-fast prereqs; the finalizer bound-run guard + on-read recovery + audited transitions; single-agent +
-healing; wiki append-only + local-first publish/pull; the Lavish-free read surface; a11y/dark-parity/no-hardcoded-hex);
-apply SHOULD-FIX items — **reconsider `completeTask` in the `appian-dev-write` allowlist** (42-02/04), the
-**report-endpoint lane gate** (42-05), and **`persist_wiki` attribution** (`author_username`/`story_sync_uuid`
-populated from the run inputs; 42-06); write the live-acceptance notes (throwaway/sandbox app; the
-`appian-object-generation` managed-skills install prerequisite from 42-03).
+42-09 — coordinated release (**awaiting the user's explicit go-ahead to push/tag**): tag + push in ADR-019 order
+genesis-core → genesis → genesis-workflows (genesis-core moves because 42-03 added the `kiro_node(skills=)`
+primitive); the **Appian Genesis Hub** `GH Object Wiki Page`/`Entry` record types built + live-validated by the
+separate write-capable agent (additive to the ADR-064 contract; no genesis tag); flip **ADR-068/069/070 →
+Accepted** (decision-log + bible §5); update bible §2/§3/§4/§8 + tracker + this progress doc + the stamps; CI
+green (clean-install DB → **v21** + `validate_library`); **verify the release commit contains EVERY changed
+file before tagging** (the recurring §7 lesson).
