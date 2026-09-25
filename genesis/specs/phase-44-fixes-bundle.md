@@ -1,6 +1,6 @@
 # Phase 44 — Workbench, SDLC & Workspace Fixes (12-issue bundle)
 
-> **Status:** 🟡 **DRAFTED — spec only; awaiting build go-ahead.** · **Author:** Genesis agent · Created 2026-09-25.
+> **Status:** ✅ **SHIPPED — genesis v0.75.0 (2026-09-25), CI green. PHASE 44 COMPLETE.** · **Author:** Genesis agent · Created 2026-09-25. As-built: `progress/phase-44-fixes-bundle.md`.
 > **Scope:** **genesis-only** (web + backend). **One migration** (`m0022`, `current_version` 21 → 22) for the
 > story-identifier sequence (fix 3); every other fix is code-only. genesis-core / kiro-agent-sdk /
 > genesis-workflows / genesis-appian-parser **unchanged**. **No Genesis Hub (Appian) change** (fix 3's story
