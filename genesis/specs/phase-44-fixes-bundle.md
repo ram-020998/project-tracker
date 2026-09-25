@@ -295,7 +295,7 @@ Each fix: **Symptom → Root cause (evidence) → Fix (files/functions) → Test
   breaks the hardcoded head assertions" lesson).
 - No other table changes. Fixes 4/5/8/9 are code-only; the story `key` column already exists.
 
-## 5. ADR-072 (Proposed) — Global human-readable story identifier
+## 5. ADR-072 (Accepted) — Global human-readable story identifier
 
 - **Decision.** Finalized (and manually-added) stories receive a **globally unique, monotonic, human-readable
   identifier** `GNS_<6-digit>` (`GNS_000001`), allocated at write time from a durable counter
