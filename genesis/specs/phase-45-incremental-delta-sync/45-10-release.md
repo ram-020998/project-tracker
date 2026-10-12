@@ -17,7 +17,8 @@ genesis-core, kiro-agent-sdk and the Genesis Hub are unchanged.
 
 - Host: install the 26.6.110 bundle (Settings → MCP or `genesis mcp install-native appian-dev <bundle>`).
 - `gsm provision --all --no-mcp --no-env --force` (new workflows library), `gsm restart --all`.
-- Designate `main` for scheduled syncs (umbrella Q2).
+- Designate **`main`** for scheduled syncs (umbrella Q2): Settings → General → Application sync → "Run scheduled
+  syncs on this machine" on `main` only; `userb` stays off and auto-pulls.
 
 ## 3. Docs
 

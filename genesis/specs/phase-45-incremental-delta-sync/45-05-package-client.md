@@ -12,7 +12,9 @@ class DevMcpSession:           # sync facade; runs its own event loop in a worke
     def call(self, tool: str, args: dict, *, timeout: float = 120) -> Any   # parsed JSON; raises DevMcpToolError
 ```
 
-- Spec + env resolved exactly like `available_applications` (merged registry → dev-tagged env + env-scoped creds).
+- Spec + env resolved exactly like `available_applications` (merged registry → dev-tagged env + env-scoped creds),
+  from the **`appian-dev-packages`** entry for the package client and `appian-dev` for read-only listing. The registry
+  allowlist caps agents only (ACP trust); direct calls rely on the client's own `ALLOWED_TOOLS` below.
 - `DevMcpToolError(kind, message)` with `kind` from `classify_tool_error` (45-02).
 - Never logs resolved env values.
 - Blocking — workflow nodes call it via `asyncio.to_thread` (the §7 event-loop lesson).

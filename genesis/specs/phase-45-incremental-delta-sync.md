@@ -37,7 +37,7 @@ scheduled syncing with a user-configurable schedule, and keeps the Hub KB curren
 
 | # | Decision |
 |---|---|
-| D1 | **Environment writes:** a new ADR (ADR-073) sanctions **package management** as the only non-design-object write. It goes through one **Genesis package client called by workflow code only — never by an agent**. The client allows only package tools and refuses to delete any package not named `genesis-delta-*`. |
+| D1 | **Environment writes:** a new ADR (ADR-073) sanctions **package management** as the only non-design-object write. This phase uses it from **Genesis workflow code only** via one package client that allows only package tools and refuses to delete any package not named `genesis-delta-*`. The package tools also get their **own registry entry `appian-dev-packages`** (confirmed 2026-10-12) so a future agent node can be granted them explicitly; **no agent or chat is granted it in this phase**. |
 | D2 | Delta sync uses a **temporary `genesis-delta-<utc-timestamp>` package**, deleted at the end of every run (success or failure), plus a **leftover sweep** at the start of each run. |
 | D3 | **Implementation packages are deferred** (backlog `implementation-packages.md`): one package per story, named `GNS_000123 – <story title>`, sharing the same client + ADR. |
 | D4 | **Deletions are ignored by delta syncs**; only a full sync removes deleted objects. |
@@ -156,16 +156,17 @@ Skills, KC root folders, the Application — weekly full); per-app schedules; au
 | Two machines publish concurrently | Whole-snapshot uploads + content-hash dedup; designated machine (D11) |
 | Editing schedules lost on restart | m0023 `user_modified` + `ensure_defaults` fix (45-07) |
 
-## 12. Open questions (to confirm before 45-02)
+## 12. Resolved questions (confirmed with the user, 2026-10-12)
 
-- **Q1 — package tools have no registry entry.** D1 originally proposed a separate `appian-dev-packages` registry
-  entry. Since the tools are called only by Genesis code over a direct session (not injected into any agent), I
-  propose **no registry entry at all**: the allowlist lives in the client code, so no agent or chat can ever be granted
-  them. `listObjects` still joins the read-only `appian-dev` allowlist. Confirm.
-- **Q2 — enabling on existing installs.** Existing installs persist `application-sync` as disabled. m0023 would replace
-  it with the new enabled default. But with collaboration on (both fleet instances today), "run on this machine"
-  defaults **off**, so **no machine would run the schedule until someone turns it on**. Confirm: auto-enable via
-  m0023, and should `main` be the designated machine on our fleet?
-- **Q3 — derived graph fields are updated in place** (inbound/outbound counts, hub, orphan, bundled flags on
-  unchanged objects) instead of SCD-2 versioning them, so unchanged objects don't get a new version on every delta.
-  Confirm.
+- **Q1 — registry entry:** the package tools get a **separate registry entry `appian-dev-packages`** (managed-native
+  ref to the same `appian-dev` binary + env, `mode: read-write`), so future agents can be granted them explicitly.
+  Agent-facing allowlist = `listPackages, getPackage, createPackage, updatePackage, addPackageObjects,
+  removePackageObjects` — **`deletePackage` and the DB-script tools are deliberately excluded**, so an agent could never
+  delete a package. The Genesis client (45-05) resolves its launch spec from this entry but enforces its own allowlist
+  (which includes `deletePackage`, guarded to `genesis-delta-*`) because direct calls are not subject to the ACP trust
+  cap. No workflow node or chat injects the entry in this phase. `listObjects` joins the read-only `appian-dev`
+  allowlist.
+- **Q2 — enabling:** m0023 auto-enables the new `application-sync` default (unless `user_modified`). On our fleet,
+  **`main` is the designated machine** (`run_on_this_machine = true`, set at deploy, 45-10); `userb` auto-pulls.
+- **Q3 — derived fields** (inbound/outbound counts, hub, orphan, bundled flags) are **updated in place** on current
+  rows, not SCD-2 versioned.
