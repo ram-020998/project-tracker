@@ -1,6 +1,6 @@
 # Phase 45 — Incremental Delta Sync — progress (as-built)
 
-> Spec: `specs/phase-45-incremental-delta-sync.md` (+ `45-01..45-10`). ADR-073/074 **Proposed**.
+> Spec: `specs/phase-45-incremental-delta-sync.md` (+ `45-01..45-10`). ADR-073/074 **Accepted 2026-10-13** (Proposed during the build). **✅ SHIPPED 2026-10-13** — genesis-appian-parser v0.3.0, genesis v0.76.0, genesis-workflows v0.21.0.
 > Build started 2026-10-13 on the user's go-ahead. All code commits are **local only** (no push/tag until the 45-10
 > release go-ahead).
 
