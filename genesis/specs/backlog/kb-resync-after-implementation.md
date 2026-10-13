@@ -2,6 +2,8 @@
 
 > **Status:** 📝 BACKLOG (not scheduled). · Created 2026-09-23 (Phase 42 spin-off, Q-C). · Depends on Phase 42 (the implementation lane writes objects to the dev env).
 
+> **Phase 45 note (2026-10-12):** Phase 45 (`specs/phase-45-incremental-delta-sync.md`) makes the refresh **incremental** (seconds, a small package of only the changed objects) instead of a full re-export, and re-enables a configurable scheduled sync. Auto-triggering it after an implementation run becomes cheap; this item stays backlog and should build on the Phase-45 `mode="auto"` sync.
+
 ## Context
 After `story-implementation` writes/updates objects in the dev-tagged environment, the **local KB is stale** — it still reflects the pre-implementation state until a sync runs. **Delta sync already exists** (Phase 16-07 / Phase 23: `sync-application mode=delta` — a full re-export → parse → diff → write-only-changes, surfaced as the app-detail **Refresh** action + the scheduled `application-sync` job). What is **not** built is *auto-triggering* it at the end of an implementation run.
 
