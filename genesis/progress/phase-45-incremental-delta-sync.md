@@ -14,8 +14,9 @@
 | 45-04 KB merge + m0023 | ✅ built; fleet DBs at v23 | genesis `d93420e`, `9d4beb3` | SHIP |
 | 45-05 package client | ✅ built + live-verified | genesis `61b048b`, `eac555d` | SHIP |
 | 45-06 sync workflow | ✅ built | genesis-workflows `f05ea97`, `c591a5b` · genesis `3714215` | SHIP |
-| 45-07 scheduler + settings | ⏳ next | | |
-| 45-08 … 45-10 | pending | | |
+| 45-07 scheduler + settings | ✅ built (not yet live) | genesis `dad4433`, `9a2afa8` | SHIP |
+| 45-08 collaboration | ⏳ next | | |
+| 45-09 … 45-10 | pending | | |
 
 ## 45-02 — Adopt Dev MCP 26.6.110 (2026-10-13)
 
@@ -156,3 +157,19 @@ paging no-progress guard, timed-out-request follow-up test; NIT: stderr task can
 **Evidence:** workflows pytest **233** + validate 13; genesis pytest **896** + ruff. Offline real-parser run
 (vendored export): baseline 2,620/10,617/174 → incremental of 25 changed (176-object delta package, deleted) →
 KB unchanged. Review **SHIP** (SHOULD: document why `covered_until` advances past skipped objects — done in `c591a5b`).
+
+## 45-07 — Scheduler, sync settings, Settings card, Refresh / Full sync (2026-10-13)
+
+**genesis `dad4433` + `9a2afa8` (local; the fleet has not been restarted onto it).**
+- Scheduler: `interval_window` (expanded to fixed slots → restart-safe, no double fire), `validate_schedule`,
+  `Scheduler.run_now` (does not move `last_fired_slot`).
+- `ensure_defaults`: user edits (`user_modified`) are never overwritten; the new `application-sync` default
+  (enabled, every 4 h 08:00–20:00 IST weekdays, options) is adopted once by a pre-45 row.
+- Handler: collaboration on + not the designated machine → skipped; installed workflow without incremental →
+  skipped; else mode auto + the configured thresholds; summary counts kinds.
+- API: `GET/PUT /api/system/sync-settings`, `POST /api/system/sync-settings/run-now`.
+- Web: Settings → General **Application sync** card (frequency modes, weekdays, time zone, full-sync cadence,
+  advanced thresholds, designated-machine switch when collaboration is on, status + per-app table, Run now);
+  application page **Refresh** = `auto` + **Full sync** (confirm); Syncs tab kinds / changed / fallback / skipped / Hub version.
+
+**Evidence:** genesis pytest **915** + ruff; web vitest **298**, tsc, eslint 0 errors, build committed. Review **SHIP**.
