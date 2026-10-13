@@ -9,7 +9,7 @@
 | Sub-phase | Status | Commits (local) | Review |
 |---|---|---|---|
 | 45-01 findings | ✅ done (2026-10-12) | docs only | — |
-| 45-02 Dev MCP 26.6.110 | ✅ built + host bundle installed; live plugin check blocked (DNS) | genesis `22c0988` · genesis-workflows `4e6f1ef` | SHIP |
+| 45-02 Dev MCP 26.6.110 | ✅ built + host bundle installed; live acceptance ✅ 2026-10-13 | genesis `22c0988` · genesis-workflows `4e6f1ef` | SHIP |
 | 45-03 parser v0.3.0 | ✅ built | genesis-appian-parser `2835ff4`, `dfb316c` | SHIP |
 | 45-04 KB merge + m0023 | ✅ built; fleet DBs at v23 | genesis `d93420e`, `9d4beb3` | SHIP |
 | 45-05 package client | ⏳ next | | |
@@ -50,6 +50,12 @@ appian-dev **`0.1.0+665da294`** (active; BUILD-INFO `mcp_src_sha e84174719e61709
 instance. Local `tools/list` = **200 tools**, incl. `listObjects` and all 11 package tools; every tool on the
 `appian-dev`, `appian-dev-write` and `appian-dev-packages` allowlists exists on the server.
 
+**Live acceptance ✅ (2026-10-13, after the dev env came back from maintenance):** `dev_mcp.version_info` →
+match=True, plugin 26.6.110, plugin_sha == server_sha == `e84174719e61709c`; `GET /api/config/devmcp/version` → match
+true on **both** main :8760 and userb :8761; `GET /config/environments/dev/check?live=true` ok on both; `listObjects`
+(AS GSS, `lastModifiedFrom=2026-10-01`) returned 1 item (a GROUP, `lastModifiedOn "2026-10-12 09:25:45.027"`) from the
+host state and from userb's state dir. Note: userb first returned 401 on `/meta` + `listApplications` — a stale userb
+dev-env password, fixed by the user in userb's Settings; not a code issue. History of the block:
 **Not yet verified (blocked):** the live plugin comparison. `merge-assist-dev.appianpreview.com` does not resolve
 from this machine right now (DNS `Errno 8`; same symptom as run `r-d58d41ce124c`), so `getDevMcpVersionInfo` reports
 the plugin as unreachable (`match = null`). The server half is confirmed (`e8417471…`, which equals the plugin sha
