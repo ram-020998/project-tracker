@@ -70,3 +70,30 @@ Builds the **same shape** as a full `KbParseResult` serialization (`kb/blob.seri
   current (the 45-01 simulation as a test).
 - `export_snapshot` determinism (two calls → identical bytes) + round-trip.
 - m0023 idempotency + head-version assertions.
+
+## 7. As built (2026-10-13, genesis `d93420e`, local) — deviations from §1–§5
+
+- **m0023 is schema-only** (`kb_syncs.details_json`, `scheduled_jobs.options_json`, `scheduled_jobs.user_modified`).
+  The `application-sync` default adoption (enabled, every 4 h 08:00–20:00 IST weekdays) moves to
+  `ScheduleStore.ensure_defaults` in **45-07**: adopt the new default once for rows whose `options_json` IS NULL
+  and `user_modified = 0`. Reason: a migration data step would be overwritten by today's `ensure_defaults` on the
+  next boot (it rewrites `schedule_json` every boot) and would enable a schedule kind (`interval_window`) the
+  current scheduler doesn't understand if a DB reached v23 before 45-07's code.
+- **Guards (defense in depth for the 45-01 finding):** `apply(mode='full'|'delta'|'baseline')` refuses a result
+  that carries `stats.incremental`; `apply(mode='incremental')` refuses a result without it.
+- **Full mode refreshes unchanged objects in place** (`metadata_json`, `is_entry_point`, `entry_point_kind`,
+  `is_orphan`) — required by 45-03 §6 (new stub metadata, and derived counts drift as the rest of the app changes).
+  `mode='delta'` is an alias of `'full'`.
+- **Bundles:** replaced wholesale; if `skipped_entry_points`/`incomplete_flow_bundles` is non-empty the existing
+  bundles that weren't rebuilt are kept (`_recompute_bundles(keep_unrebuilt=True)`).
+- **`export_snapshot` order:** objects in **KB row order** (not uuid-sorted) — deterministic for a given KB and it
+  preserves the parse order a teammate's `hydrate_from_blob` reproduces (name-collision order matters to the
+  parser); edges sorted by (source, target, type); bundles by `bundle_id`; members by uuid; no timestamps.
+- Also: `update_sync_details(sync_id, details)` (shallow merge — for `published_version`, 45-08); `list_syncs`
+  rows gain `details`; `KbStore.FULL_KINDS = ("baseline", "full", "delta")`.
+
+**Evidence:** `tests/test_kb_incremental.py` (10) incl. the real-parser regression (vendored export: baseline →
+40 changed + `delta_roots` → incremental merge → identical objects/edges/bundles, zero new versions). On a sqlite
+backup copy of the live KB (never the live DB): full refresh of AS GSS with parser 0.3.0 → 2,929 / 19,009 / 230;
+then an incremental merge of a 262-object delta package → **2,929 / 19,009 / 230** (parse 4.6 s, apply 0.5 s).
+genesis pytest 879, ruff clean; fresh DB → v23.

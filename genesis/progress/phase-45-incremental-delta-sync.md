@@ -11,8 +11,9 @@
 | 45-01 findings | ✅ done (2026-10-12) | docs only | — |
 | 45-02 Dev MCP 26.6.110 | ✅ built + host bundle installed; live plugin check blocked (DNS) | genesis `22c0988` · genesis-workflows `4e6f1ef` | SHIP |
 | 45-03 parser v0.3.0 | ✅ built | genesis-appian-parser `2835ff4`, `dfb316c` | SHIP |
-| 45-04 KB merge | ⏳ next | | |
-| 45-05 … 45-10 | pending | | |
+| 45-04 KB merge + m0023 | ✅ built; fleet DBs at v23 | genesis `d93420e`, `9d4beb3` | SHIP |
+| 45-05 package client | ⏳ next | | |
+| 45-06 … 45-10 | pending | | |
 
 ## 45-02 — Adopt Dev MCP 26.6.110 (2026-10-13)
 
@@ -81,3 +82,27 @@ Parser pytest **48**; genesis pytest **869** and genesis-workflows sync-applicat
   45-04 must refresh `metadata_json` in place for unchanged objects on full syncs.
 - `known_objects` must be passed in KB row order (cross-type name collisions are order-sensitive).
 - Bundle member order varies with `PYTHONHASHSEED` (pre-existing) → `export_snapshot` must sort.
+
+## 45-04 — KB: m0023, incremental merge, snapshot (2026-10-13)
+
+**genesis `d93420e` + `9d4beb3` (local).**
+- **m0023** (schema only; DB → v23): `kb_syncs.details_json`, `scheduled_jobs.options_json`,
+  `scheduled_jobs.user_modified`. The schedule-default adoption moved to `ensure_defaults` (45-07) — see 45-04 §7.
+- `KbStore.apply(mode='incremental')` → `_apply_incremental`: package objects (open / close+open / refresh in place),
+  their outgoing edges only, **never closes an object**, bundles replaced (kept when the package was incomplete),
+  whole-app derived fields in place, business map stale only on a real change.
+- Guards: `full`/`delta`/`baseline` refuse a partial (`stats.incremental`) result; `incremental` requires one.
+  `delta` = alias of `full`; full mode now refreshes unchanged objects' derived metadata in place.
+- `known_context(app)` (parser `KnownObject`/`KnownEdge`, KB row order), `export_snapshot(app)` (deterministic
+  `serialize_result` dict; byte-identical across calls and after a hydrate on another DB — reviewer-verified),
+  `last_successful_sync(app, kinds=)`, `finish_sync(details=)`, `update_sync_details`, `list_syncs[].details`.
+
+**Evidence:** `tests/test_kb_incremental.py` (10) incl. a real-parser end-to-end regression; on a backup copy of
+the live KB, an incremental merge of a 262-object AS GSS delta package left **2,929 objects / 19,009 edges /
+230 bundles** unchanged (apply 0.5 s). genesis pytest **879** + ruff; workflows **219**; fresh DB → v23.
+Review: **SHIP** (SHOULD: the genesis → parser pin must move to v0.3.0 at 45-10 — `known_context` imports
+0.3.0 symbols; works locally via the editable install).
+
+**Fleet:** both instances restarted (no running runs; one gated run, which resumes from its checkpoint) → both DBs
+migrated to **v23** (schema-only, backward compatible). Done to remove the hazard of the running servers' workers
+(which load the working tree) writing `details_json` into a v22 DB.
