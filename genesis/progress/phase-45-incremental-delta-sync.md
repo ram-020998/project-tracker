@@ -16,7 +16,7 @@
 | 45-06 sync workflow | ✅ built | genesis-workflows `f05ea97`, `c591a5b` · genesis `3714215` | SHIP |
 | 45-07 scheduler + settings | ✅ built (not yet live) | genesis `dad4433`, `9a2afa8` | SHIP |
 | 45-08 collaboration | ✅ built (not yet live) | genesis `2b686fc`, `1a1b275` · genesis-workflows `ca7ece8` | SHIP |
-| 45-09 review + acceptance | 🔄 whole-phase review ✅ SHIP; live acceptance awaiting go-ahead | genesis-workflows `80f84f1` (NIT) | SHIP |
+| 45-09 review + acceptance | ✅ review SHIP + live acceptance 1–8 passed | genesis-workflows `80f84f1` · genesis `0867f49` (F1) | SHIP |
 | 45-10 release | pending (needs go-ahead) | | |
 
 ## 45-02 — Adopt Dev MCP 26.6.110 (2026-10-13)
@@ -209,3 +209,17 @@ to be FULL (parser_version rule); ADR-073/074 → Accepted + bible chunks + back
 
 **Live acceptance (45-09 §3): not started — needs the user's go-ahead** (fleet re-provision + restart, live KB writes,
 Hub publishes, temp genesis-delta packages; step 5 needs a human edit in Appian).
+
+## 45-09 — Live acceptance (2026-10-13) — all 8 steps passed
+
+Fleet re-provisioned (sync-application 0.3.0) + restarted. AS GSS: first Refresh = **full** (older-parser rule),
+2,763 → 2,782 objects; then an **empty** incremental (10 s); Full sync (0 removed); after the user's edit of
+`AS_GSS_API_RESPONSE_STATUS_CODE_400`, a Refresh synced **exactly that constant** (incremental, 1 changed, delta
+package deleted). Hub KB v1 → v3, each hydrated on userb within ~20–25 s (diff-based). Schedule: main (designated) ran
+once per app, userb skipped. Killed worker → leftover package swept (`older_than_minutes=0`). Renamed bundle dir →
+clear errors. `listPackages` → 0 after every step. Details + run ids: 45-09 spec §5.
+
+Findings: **F1** live Hub emits no `blob` change rows → fixed (`0867f49`, 60 s KB poll); **F2** a Decision's
+`versionKey` changes its hash every export (parser follow-up); **F3** RU Sandbox no longer exists in the env
+(untrack pending the user); **F4** incremental build is slower than a full export (addPackageObjects ≈0.3–1.1 s per
+object × ~220 roots) — design follow-up.
