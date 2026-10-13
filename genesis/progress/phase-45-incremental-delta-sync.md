@@ -10,8 +10,9 @@
 |---|---|---|---|
 | 45-01 findings | ✅ done (2026-10-12) | docs only | — |
 | 45-02 Dev MCP 26.6.110 | ✅ built + host bundle installed; live plugin check blocked (DNS) | genesis `22c0988` · genesis-workflows `4e6f1ef` | SHIP |
-| 45-03 parser | ⏳ next | | |
-| 45-04 … 45-10 | pending | | |
+| 45-03 parser v0.3.0 | ✅ built | genesis-appian-parser `2835ff4`, `dfb316c` | SHIP |
+| 45-04 KB merge | ⏳ next | | |
+| 45-05 … 45-10 | pending | | |
 
 ## 45-02 — Adopt Dev MCP 26.6.110 (2026-10-13)
 
@@ -53,3 +54,30 @@ from this machine right now (DNS `Errno 8`; same symptom as run `r-d58d41ce124c`
 the plugin as unreachable (`match = null`). The server half is confirmed (`e8417471…`, which equals the plugin sha
 recorded on 2026-10-12). Re-check once the network is back: Settings → MCP → appian-dev shows "Matches…", and
 `listObjects` works from both fleet instances (after `gsm restart --all` picks up the working tree).
+
+## 45-03 — Parser: KB-aware incremental parse (2026-10-13)
+
+**genesis-appian-parser `2835ff4` + `dfb316c` → v0.3.0 (local; not tagged).**
+- `parse(zip, known_objects=[KnownObject], known_edges=[KnownEdge])`: package objects + their outgoing edges only
+  (references resolve against package + KB stubs); whole-app bundles, orphans and derived fields;
+  `stats.derived` (every object) + `stats.incremental` (`package_objects`, `known_objects`,
+  `edges_resolved_external`, `skipped_entry_points`, `incomplete_flow_bundles`).
+- `delta_roots(known_objects)` — what every delta package must contain besides the changed objects: entry points,
+  all Process Models / Sites / Web APIs / Control Panels, Record Types with actions or views, label-bundle Documents.
+- `KbBundle.root_uuid` now set (was always None).
+- New code-free metadata: Document `filename`, CDT `table`, Data Store `entities`, Constant `data_store_entity_uuid`.
+- `DependencyAnalyzer.analyze(lookup_objects=)`, `BundleCoordinator.build_all_v3(entry_filter=)` (additive).
+- `ruff==0.15.20` pinned; `__version__` fixed (was a stale "0.1.0").
+
+**Evidence:** the equivalence oracle (`tests/test_incremental.py`, 13 tests incl. brand-new objects) passes on the
+vendored fixture **and** on the real AS GSS export: edges recall = precision = 1.0; **230/230 bundles identical**
+(flows + key objects included); `stats.derived` identical for all 2,929 objects. Full mode is identical to v0.2.0
+(fixed `PYTHONHASHSEED`) except `root_uuid` and the new metadata keys — confirmed independently by the reviewer.
+Parser pytest **48**; genesis pytest **869** and genesis-workflows sync-application **20** unaffected.
+
+**Design refinements found while building** (recorded in `45-03` §6; they change 45-04/45-06):
+- Delta packages use `delta_roots` (AS GSS: 224 roots ≈ 2.0 MB with 60 changed objects; full export 8.05 MB).
+- A KB built by parser < 0.3.0 lacks the new stub metadata → **the first sync after the upgrade must be full**;
+  45-04 must refresh `metadata_json` in place for unchanged objects on full syncs.
+- `known_objects` must be passed in KB row order (cross-type name collisions are order-sensitive).
+- Bundle member order varies with `PYTHONHASHSEED` (pre-existing) → `export_snapshot` must sort.

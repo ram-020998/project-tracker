@@ -73,3 +73,36 @@ When `known_objects` is given (**incremental mode**), the result has these seman
 ## 5. Release
 
 `v0.3.0` (minor, additive). genesis re-pins it in 45-10.
+
+## 6. As built (2026-10-13, genesis-appian-parser `2835ff4`, v0.3.0 local) — findings that refined the design
+
+The equivalence oracle (`tests/test_incremental.py`, 3 random 60-object samples + the roots) is **exact** on both
+the vendored fixture (2,620 objects) and the real AS GSS export (2,929 objects / 19,009 edges / 230 bundles): edges
+recall = precision = 1.0, **230/230 bundles identical** (incl. flows + key objects), `stats.derived` identical for
+every object, package objects' metadata + `diff_hash` identical. Full mode (`known_objects=None`) is
+byte-identical to v0.2.0 except `root_uuid` and the new metadata keys (checked with a fixed `PYTHONHASHSEED`).
+Getting there required four refinements to §2–§3:
+
+1. **Roots are broader than "entry points" → `delta_roots(known_objects)`** (new public helper). A delta package
+   must also contain every Process Model (a bundle's flow embeds each PM's node graph; a stub has none), every Site /
+   Web API / Control Panel, every Record Type with actions or views (an action's title + a view's expression are
+   code, absent from the stub — and an action's `ep.uuid` is its target PM, so the RT itself is often *not*
+   flagged `is_entry_point`), and every **label-bundle Document** (`.properties` content resolves record-action
+   titles via `LabelBundleResolver`). AS GSS: 224 roots ≈ 2.0 MB compressed with 60 changed objects (full 8.05 MB).
+   **45-06 uses `delta_roots`** instead of "is_entry_point".
+2. **Stub metadata additions (code-free):** Document `filename`, CDT/Data Type `table`, Data Store `entities`,
+   Constant `data_store_entity_uuid` — needed for flow `writes` resolution (constant → entity → CDT → table) and
+   label-document detection. **Consequence: a KB built by parser < 0.3.0 lacks them → the first sync after the
+   upgrade must be a full sync** (45-06 records `parser_version` in `kb_syncs.details_json` and falls back to full
+   when the last full sync used an older parser minor; 45-04 must refresh `metadata_json` in place for unchanged
+   objects on full syncs, otherwise unchanged Documents never gain `filename`).
+3. **Order matters on a cross-type name collision** (e.g. an Interface and a Process Model with the same name —
+   name lookups are last-writer-wins). `known_objects` must be passed in the KB's row order (≈ the last full
+   parse's order); the parser places each package object at its stub's position and new objects last.
+4. **Stub-defined entry points are never rebuilt** (`stats.incremental.skipped_entry_points`) and bundles whose flow
+   contains a stub PM are reported (`incomplete_flow_bundles`); with `delta_roots` both are empty. 45-04 keeps the
+   KB's existing bundles when either list is non-empty.
+
+Also found: bundle member order (and flow subprocess order) depends on Python set iteration → varies with
+`PYTHONHASHSEED` across processes (pre-existing, v0.2.0 too). 45-04's `export_snapshot` must sort members.
+Also pinned `ruff==0.15.20` (CI runs `ruff check .`; bible §7).
