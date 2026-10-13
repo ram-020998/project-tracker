@@ -92,7 +92,7 @@
 > `sync-application` **`mode=delta`** (a full re-export → parse → diff the DB → write only the changes; **not** an env
 > delta-patch) with auto-pick baseline↔delta + a per-app already-running **409** guard + a web **Refresh** action. **(2)** a
 > backend **scheduler** (`runtime/scheduler.py` 60s tick + pure `due_slot`; `runtime/schedule_store.py` over **m0012
-> `scheduled_jobs`**; `runtime/sync_jobs.py`) runs **`application-sync`** (all tracked apps, 07:00 IST weekdays, **serialized**
+> `scheduled_jobs`**; `runtime/sync_jobs.py`) runs **`application-sync`** (all tracked apps, 07:00 IST weekdays — **(Superseded by Phase 45 / ADR-074, genesis v0.76.0: `application-sync` is now enabled by default every 4 h 08:00–20:00 IST weekdays, user-configurable in Settings → General, incremental with full fallbacks.)** — **serialized**
 > — Appian export is one-at-a-time/409) + **`document-library-sync`** (`scope=library`, 08/12/16/20 IST weekdays), TZ/weekday/
 > daytime-aware + restart-safe, preflight-skips (no dev env / no gws); read-only `GET /api/system/schedules`. Backend-fixed now,
 > user-configurable later. See §9's Phase-23 block + `progress/phase-23-scheduled-and-full-package-syncs.md`.**

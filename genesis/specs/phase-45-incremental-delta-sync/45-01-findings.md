@@ -89,5 +89,5 @@ The exported package zip has **no `application/` XML** (top level: `META-INF`, `
 
 ## 7. ADRs drafted
 
-- **ADR-073 (Proposed)** — Environment package management (the only non-design-object write).
-- **ADR-074 (Proposed)** — Incremental, package-scoped KB sync.
+- **ADR-073 (Proposed; Accepted 2026-10-13)** — Environment package management (the only non-design-object write).
+- **ADR-074 (Proposed; Accepted 2026-10-13)** — Incremental, package-scoped KB sync.

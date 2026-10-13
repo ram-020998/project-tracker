@@ -16,4 +16,4 @@ At the end of a successful `story-implementation` run (after `author_wiki`, befo
 
 ## Open questions
 - Trigger point (per-implementation vs a debounced batch); whether it blocks the card's move to Code Review (probably not — fire-and-forget).
-- Interaction with the scheduler (avoid double-syncing around 07:00 IST).
+- Interaction with the scheduler (avoid double-syncing with the scheduled `application-sync` — since Phase 45 every 4 h 08:00–20:00 IST weekdays by default, user-configurable; the per-app already-running guard skips overlaps).

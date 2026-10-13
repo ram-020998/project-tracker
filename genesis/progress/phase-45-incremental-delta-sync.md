@@ -239,3 +239,16 @@ object × ~220 roots) — design follow-up.
 - **Docs:** ADR-073/074 Accepted (decision-log + bible/04); bible/00 + index banner, 01 (state + tag table), 03 (map),
   06 (5 lessons), 08 §9 SHIPPED; README row; all Phase-45 spec statuses SHIPPED; backlog notes (phase-16-deferred
   §1.3 delivered; kb-resync-after-implementation).
+
+## Documentation audit (2026-10-13, after the release)
+
+An independent audit of project-tracker + the code-repo docs found 17 stale/inconsistent items; all fixed:
+bible/01 (migration range m0001–m0023, dependency chain core v0.9.8 / parser v0.3.0 / workflows → genesis v0.76.0,
+parser pin, current test counts 923/298/236, genesis row v0.64.0–v0.76.0 entries), bible/03 (application-sync schedule),
+bible/04 + decision-log (ADR-047 marked amended by ADR-074), bible/08 + umbrella spec + README (leftover "Proposed" /
+draft-era sentences), tracker (Status header, §3 pointer to phases 27–45, §3a pointer to progress logs, a §6 SHIPPED
+entry, the 10-12 draft entry marked superseded, Phase-23 schedule notes), bible/00 + bible/08 Phase-23 notes,
+backlog `kb-resync-after-implementation.md` (schedule), 45-01 findings (ADRs Accepted), AGENT_ONBOARDING (parser
+"then" qualifier). Code repos: genesis README status (v0.76.0) + `docs/INSTALL.md` "Appian application sync" section
+(`7d12b59`); sync-application README (Appian calls incl. temporary packages, Dev MCP via the platform client, tests,
+live acceptance) (genesis-workflows `2d75b56`).

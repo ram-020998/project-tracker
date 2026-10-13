@@ -1118,7 +1118,7 @@ indicator, clear/compact, and image attachments — in **both** the main chat an
 
 ## ADR-047 — Genesis runs fixed, backend-defined scheduled maintenance syncs (Phase 23)
 
-- **Status.** ACCEPTED — SHIPPED (Phase 23, genesis v0.48.0, CI green #6588951; migration m0012).
+- **Status.** ACCEPTED — SHIPPED (Phase 23, genesis v0.48.0, CI green #6588951; migration m0012). **Amended by ADR-074 (Phase 45, genesis v0.76.0):** the schedule is user-configurable (Settings → General, m0023) and enabled by default every 4 h 08:00–20:00 IST weekdays; `refresh`/auto is an incremental sync with full fallbacks (legacy `delta` = full); collaboration → designated machine only. The fixed 07:00 / `delta` details below are historical.
 - **Context.** The Appian application sync was **not re-runnable** (the API rejected any non-baseline mode; re-running
   baseline errored), and a **true incremental delta** needs an Appian changed-objects API Genesis doesn't have — yet the KB +
   Document Library must stay fresh **daily**. Two needs: (1) a re-runnable **full-package refresh** of an application; (2)

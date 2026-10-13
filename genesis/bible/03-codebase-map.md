@@ -73,7 +73,7 @@ genesis/genesis/
             **Scheduling (Phase 23): scheduler.py (pure `due_slot` + a 60s asyncio tick engine — jobs as
             background tasks, handler-gated, mark-before-work, restart-safe within-day; started/stopped in the app
             lifespan); schedule_store.py (ScheduleStore over m0012 `scheduled_jobs`); sync_jobs.py (DEFAULT_JOBS +
-            register_sync_jobs → `application-sync` [all apps, 07:00 IST wkdays, serialized] + `document-library-sync`
+            register_sync_jobs → `application-sync` [all apps, serialized; Phase 45: `interval_window` every 4 h 08:00–20:00 IST wkdays, enabled, user-configurable via `/system/sync-settings`, designated-machine + old-library skips — was 07:00 IST, disabled] + `document-library-sync`
             [scope=library, 08/12/16/20 IST wkdays], preflight-skips).** **memory_jobs.py (Phase 26-06): DEFAULT_MEMORY_JOBS
             + register_memory_jobs → `memory-consolidation` [nightly 02:00 IST] + `memory-maintenance` [weekly Sun 03:00 IST,
             via `due_slot`'s `days` filter], preflight-skips (no Kiro / not installed / no new sessions); threads

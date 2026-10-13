@@ -1,7 +1,7 @@
 # Phase 45 — Incremental Delta Sync (package-scoped KB refresh + configurable schedule)
 
 > **Status:** ✅ **SHIPPED 2026-10-13** — genesis-appian-parser v0.3.0 · genesis v0.76.0 · genesis-workflows v0.21.0 (CI green; ADR-073/074 Accepted; live-accepted). Each sub-spec has an as-built section. (Drafted 2026-10-12.) · **Author:** Genesis agent · Created 2026-10-12.
-> Sub-specs: `phase-45-incremental-delta-sync/45-01..45-10`. Findings: `45-01-findings.md`. New ADRs (Proposed):
+> Sub-specs: `phase-45-incremental-delta-sync/45-01..45-10`. Findings: `45-01-findings.md`. New ADRs (**Accepted** 2026-10-13):
 > **ADR-073** (environment package management) + **ADR-074** (incremental, package-scoped KB sync).
 > Backlog spin-off: `backlog/implementation-packages.md`.
 
