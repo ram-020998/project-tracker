@@ -15,8 +15,9 @@
 | 45-05 package client | ✅ built + live-verified | genesis `61b048b`, `eac555d` | SHIP |
 | 45-06 sync workflow | ✅ built | genesis-workflows `f05ea97`, `c591a5b` · genesis `3714215` | SHIP |
 | 45-07 scheduler + settings | ✅ built (not yet live) | genesis `dad4433`, `9a2afa8` | SHIP |
-| 45-08 collaboration | ⏳ next | | |
-| 45-09 … 45-10 | pending | | |
+| 45-08 collaboration | ✅ built (not yet live) | genesis `2b686fc`, `1a1b275` · genesis-workflows `ca7ece8` | SHIP |
+| 45-09 review + acceptance | ⏳ next | | |
+| 45-10 release | pending (needs go-ahead) | | |
 
 ## 45-02 — Adopt Dev MCP 26.6.110 (2026-10-13)
 
@@ -173,3 +174,19 @@ KB unchanged. Review **SHIP** (SHOULD: document why `covered_until` advances pas
   application page **Refresh** = `auto` + **Full sync** (confirm); Syncs tab kinds / changed / fallback / skipped / Hub version.
 
 **Evidence:** genesis pytest **915** + ruff; web vitest **298**, tsc, eslint 0 errors, build committed. Review **SHIP**.
+
+## 45-08 — Collaboration: snapshot publish, KB auto-pull, designated machine (2026-10-13)
+
+**genesis `2b686fc` + `1a1b275`, genesis-workflows `ca7ece8` (local; not live — no fleet restart / re-provision).**
+- `ctx.extras["kb_publish"](app)` → best-effort snapshot publish (`export_snapshot`, dedup); the workflow's
+  `publish_hub` node runs after every successful sync (incl. empty) and records `published_version`.
+- Manual **Publish** now sends the snapshot (the partial-result hazard is gone; `_latest_result_json` removed).
+- `autopull_tick(kb_store, is_syncing=)`: a Hub `blob` change for a tracked app → `pull_kb_if_newer`; deferred while
+  a local sync runs (persisted pending set). The publisher never re-pulls its own version.
+- **Found:** the LocalHubProvider emitted blob change rows as kind `kb`/`artifact`; the contract says `blob` — fixed.
+- **Added:** repeat hydrates are a full-mode diff (no whole-app SCD-2 copy per pull); `hub-pull` rows are not
+  incremental anchors (the listing uses this machine's own last sync).
+- Status: `last_published_version` per app; card text for the designated machine.
+
+**Evidence:** genesis pytest **922** (+6 two-instance tests on the LocalHubProvider: an incremental sync on A reaches
+B in ONE tick with identical objects/edges/bundles); workflows pytest +3; web 298 + build. Review **SHIP**.
