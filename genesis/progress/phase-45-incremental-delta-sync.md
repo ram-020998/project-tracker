@@ -16,7 +16,7 @@
 | 45-06 sync workflow | ✅ built | genesis-workflows `f05ea97`, `c591a5b` · genesis `3714215` | SHIP |
 | 45-07 scheduler + settings | ✅ built (not yet live) | genesis `dad4433`, `9a2afa8` | SHIP |
 | 45-08 collaboration | ✅ built (not yet live) | genesis `2b686fc`, `1a1b275` · genesis-workflows `ca7ece8` | SHIP |
-| 45-09 review + acceptance | ⏳ next | | |
+| 45-09 review + acceptance | 🔄 whole-phase review ✅ SHIP; live acceptance awaiting go-ahead | genesis-workflows `80f84f1` (NIT) | SHIP |
 | 45-10 release | pending (needs go-ahead) | | |
 
 ## 45-02 — Adopt Dev MCP 26.6.110 (2026-10-13)
@@ -190,3 +190,22 @@ KB unchanged. Review **SHIP** (SHOULD: document why `covered_until` advances pas
 
 **Evidence:** genesis pytest **922** (+6 two-instance tests on the LocalHubProvider: an incremental sync on A reaches
 B in ONE tick with identical objects/edges/bundles); workflows pytest +3; web 298 + build. Review **SHIP**.
+
+## 45-09 — Whole-phase review (2026-10-13)
+
+Independent whole-phase review of 45-02..45-08 = **SHIP** (no MUST-FIX). Verified across sub-phases: the
+environment-write boundary (no agent/chat path to package tools; every workflow path deletes its package), KB
+integrity end-to-end, version skew handled in both directions (new genesis + old library; new library + incapable
+platform), scheduler + collaboration, error mapping, §7 lessons; all three trees clean.
+NIT-1 fixed in genesis-workflows `80f84f1` (an incremental merge that removed objects is never marked succeeded).
+
+Gates: parser pytest + ruff; genesis **922** + ruff + fresh DB v23; web tsc + eslint 0 errors + vitest **298**;
+workflows validate 13 + pytest **236**.
+
+**Release checklist (45-10, from the review):** re-pin genesis → parser v0.3.0, bump genesis 0.76.0 (+ version.ts +
+static); genesis-workflows 0.21.0 re-pinning genesis v0.76.0 (+ core v0.9.8); order parser → genesis → workflows;
+`gsm provision --all --no-mcp --no-env --force` + restart; `main` = designated machine; expect the FIRST sync per app
+to be FULL (parser_version rule); ADR-073/074 → Accepted + bible chunks + backlog notes + status rows.
+
+**Live acceptance (45-09 §3): not started — needs the user's go-ahead** (fleet re-provision + restart, live KB writes,
+Hub publishes, temp genesis-delta packages; step 5 needs a human edit in Appian).
