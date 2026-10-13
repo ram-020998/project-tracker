@@ -13,8 +13,9 @@
 | 45-03 parser v0.3.0 | ✅ built | genesis-appian-parser `2835ff4`, `dfb316c` | SHIP |
 | 45-04 KB merge + m0023 | ✅ built; fleet DBs at v23 | genesis `d93420e`, `9d4beb3` | SHIP |
 | 45-05 package client | ✅ built + live-verified | genesis `61b048b`, `eac555d` | SHIP |
-| 45-06 sync workflow | ⏳ next | | |
-| 45-07 … 45-10 | pending | | |
+| 45-06 sync workflow | ✅ built | genesis-workflows `f05ea97`, `c591a5b` · genesis `3714215` | SHIP |
+| 45-07 scheduler + settings | ⏳ next | | |
+| 45-08 … 45-10 | pending | | |
 
 ## 45-02 — Adopt Dev MCP 26.6.110 (2026-10-13)
 
@@ -134,3 +135,24 @@ deleted in `finally`; `listPackages` → **0** `genesis-delta-*` afterwards.
 **Evidence:** `tests/test_dev_packages.py` (15; fake stdio server with the real shapes incl. batch poisoning);
 genesis pytest **894** + ruff. Review: **SHIP** (SHOULDs fixed in `eac555d`: no double count on uuid-less errors,
 paging no-progress guard, timed-out-request follow-up test; NIT: stderr task cancelled).
+
+## 45-06 — sync-application v0.3.0 + ApplicationSyncService modes (2026-10-13)
+
+**genesis-workflows `f05ea97` + `c591a5b`, genesis `3714215` (local).**
+- Modes `auto` (default; `refresh`) · `baseline` · `full` (legacy `delta`) · `incremental`; `options`
+  `{full_every_days, max_changed, max_changed_pct}`.
+- Graph: `resolve_inputs → plan_sync →{export_package | build_delta_package | record_empty_sync}` → v_export →
+  parse (KB-aware for incremental) → write_kb → v_kb → present. Every delta package is deleted in `finally`;
+  an export retry rebuilds its own package.
+- Full instead of incremental when: no full sync / older-parser KB (`details.parser_version`) / last full ≥
+  `full_every_days` (auto only) / too many changes / Dev MCP unreachable / platform lacks the package client.
+  Dev MCP `version_mismatch` / `auth` → terminal error.
+- `details`: `covered_until` (instant before export/listing), `parser_version`, `sync_kind`, `fallback_reason`,
+  `changed_count`, `package_name`, `skipped_*`, `export_warnings`.
+- genesis `ApplicationSyncService.resolve_mode` → `auto|baseline|full|incremental`, **adapted to the installed
+  workflow's mode enum** (library 0.20.0 / sync-application 0.2.3 → `delta`), so the fleet keeps working until
+  re-provisioning at 45-10.
+
+**Evidence:** workflows pytest **233** + validate 13; genesis pytest **896** + ruff. Offline real-parser run
+(vendored export): baseline 2,620/10,617/174 → incremental of 25 changed (176-object delta package, deleted) →
+KB unchanged. Review **SHIP** (SHOULD: document why `covered_until` advances past skipped objects — done in `c591a5b`).
