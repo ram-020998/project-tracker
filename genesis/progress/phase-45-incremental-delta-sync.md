@@ -12,8 +12,9 @@
 | 45-02 Dev MCP 26.6.110 | ✅ built + host bundle installed; live acceptance ✅ 2026-10-13 | genesis `22c0988` · genesis-workflows `4e6f1ef` | SHIP |
 | 45-03 parser v0.3.0 | ✅ built | genesis-appian-parser `2835ff4`, `dfb316c` | SHIP |
 | 45-04 KB merge + m0023 | ✅ built; fleet DBs at v23 | genesis `d93420e`, `9d4beb3` | SHIP |
-| 45-05 package client | ⏳ next | | |
-| 45-06 … 45-10 | pending | | |
+| 45-05 package client | ✅ built + live-verified | genesis `61b048b`, `eac555d` | SHIP |
+| 45-06 sync workflow | ⏳ next | | |
+| 45-07 … 45-10 | pending | | |
 
 ## 45-02 — Adopt Dev MCP 26.6.110 (2026-10-13)
 
@@ -79,7 +80,7 @@ recorded on 2026-10-12). Re-check once the network is back: Settings → MCP →
 **Evidence:** the equivalence oracle (`tests/test_incremental.py`, 13 tests incl. brand-new objects) passes on the
 vendored fixture **and** on the real AS GSS export: edges recall = precision = 1.0; **230/230 bundles identical**
 (flows + key objects included); `stats.derived` identical for all 2,929 objects. Full mode is identical to v0.2.0
-(fixed `PYTHONHASHSEED`) except `root_uuid` and the new metadata keys — confirmed independently by the reviewer.
+(fixed `PYTHONeac555dSEED`) except `root_uuid` and the new metadata keys — confirmed independently by the reviewer.
 Parser pytest **48**; genesis pytest **869** and genesis-workflows sync-application **20** unaffected.
 
 **Design refinements found while building** (recorded in `45-03` §6; they change 45-04/45-06):
@@ -87,7 +88,7 @@ Parser pytest **48**; genesis pytest **869** and genesis-workflows sync-applicat
 - A KB built by parser < 0.3.0 lacks the new stub metadata → **the first sync after the upgrade must be full**;
   45-04 must refresh `metadata_json` in place for unchanged objects on full syncs.
 - `known_objects` must be passed in KB row order (cross-type name collisions are order-sensitive).
-- Bundle member order varies with `PYTHONHASHSEED` (pre-existing) → `export_snapshot` must sort.
+- Bundle member order varies with `PYTHONeac555dSEED` (pre-existing) → `export_snapshot` must sort.
 
 ## 45-04 — KB: m0023, incremental merge, snapshot (2026-10-13)
 
@@ -112,3 +113,24 @@ Review: **SHIP** (SHOULD: the genesis → parser pin must move to v0.3.0 at 45-1
 **Fleet:** both instances restarted (no running runs; one gated run, which resumes from its checkpoint) → both DBs
 migrated to **v23** (schema-only, backward compatible). Done to remove the hazard of the running servers' workers
 (which load the working tree) writing `details_json` into a v22 DB.
+
+## 45-05 — Dev MCP session + package client (2026-10-13)
+
+**genesis `61b048b` + `eac555d` (local).**
+- `kb/dev_mcp.py`: `DevMcpToolError(kind)`, `tool_result_data`, **`DevMcpSession`** — one stdio process + one
+  handshake for many `tools/call`; private event loop in a daemon thread (safe from `asyncio.to_thread`); stderr
+  drained; 8 MiB lines; timeouts → `kind="unreachable"`; env values never in messages.
+- `kb/dev_packages.py` (new): **`DevMcpPackages`** — hard-coded `ALLOWED_TOOLS`, `DELTA_PREFIX`, `list_changed`
+  (day-before date window + exact `lastModifiedOn > after`, dedupe), `create_delta_package` → `{uuid, name}`,
+  `add_objects` (batches of 50; **bisects a poisoned batch**; `skipped` for non-package types), `get_package`,
+  `delete_delta_package` (always re-reads the name), `sweep_leftovers`, `package_type` (listObjects/package/KB types).
+- `ctx.extras["devmcp_packages"]` = `lambda: open_packages(mcp)`; spec = `appian-dev-packages`, else `appian-dev`.
+
+**Live findings (merge-assist-dev, AS GSS):** `addPackageObjects`' `failed` is a count, errors are in `errors[]`;
+**one unresolvable uuid fails its whole batch** (→ bisection: 22 changed + 1 bogus → 22 added, 1 error, 7 calls);
+`QUERY_RULE` is rejected (alias kept). Session open 1.2 s; `list_changed` 22 objects in 3.0 s. Every temp package was
+deleted in `finally`; `listPackages` → **0** `genesis-delta-*` afterwards.
+
+**Evidence:** `tests/test_dev_packages.py` (15; fake stdio server with the real shapes incl. batch poisoning);
+genesis pytest **894** + ruff. Review: **SHIP** (SHOULDs fixed in `eac555d`: no double count on uuid-less errors,
+paging no-progress guard, timed-out-request follow-up test; NIT: stderr task cancelled).
