@@ -1,6 +1,6 @@
 # 45-03 — Parser: KB-aware incremental parse (genesis-appian-parser v0.3.0)
 
-> **Status:** 🟡 DRAFTED. Repo: **genesis-appian-parser**. Implements the parser half of **ADR-074**.
+> **Status:** ✅ SHIPPED 2026-10-13 (see the as-built section). Repo: **genesis-appian-parser**. Implements the parser half of **ADR-074**.
 > Parent: `specs/phase-45-incremental-delta-sync.md`. Evidence: `45-01-findings.md` §5.
 
 ## 1. Problem

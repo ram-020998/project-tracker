@@ -1,6 +1,6 @@
 # 45-08 — Collaboration: publish after every sync, KB auto-pull, designated machine
 
-> **Status:** 🟡 DRAFTED. Repo: **genesis** (+ the `publish_hub` node in genesis-workflows, 45-06). Refines ADR-063.
+> **Status:** ✅ SHIPPED 2026-10-13 (see the as-built section). Repo: **genesis** (+ the `publish_hub` node in genesis-workflows, 45-06). Refines ADR-063.
 > No Hub change (existing blob API + contract). Parent: `specs/phase-45-incremental-delta-sync.md`.
 
 ## 1. Publish the snapshot after every successful sync

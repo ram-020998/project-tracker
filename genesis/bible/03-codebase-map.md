@@ -670,3 +670,42 @@ genesis-workflows/   all four analysis workflows adopt attach_healing (verify→
   story-design-analysis      (was v0.2.0) — DROPPED attach_healing in v0.3.0 (single-context design, ADR-062
                              amendment): no per-object blocks to patch → a plain bounded verify→revise loop.
   ux-design-analysis         v0.2.0  synthesize wraps screens in <section id="screen-N">; heal regex-patches analysis.html (full-doc fallback); restart→screen_inventory.
+
+**Phase 45 — Incremental Delta Sync (genesis-appian-parser v0.3.0 · genesis v0.76.0 · genesis-workflows v0.21.0):**
+```
+genesis-appian-parser/
+  api.py               parse(source, *, known_objects=, known_edges=) — KB-aware incremental parse (objects/edges =
+                       package only; bundles + stats.derived whole-app; stats.incremental{…skipped_entry_points,
+                       incomplete_flow_bundles}); delta_roots(known_objects); _stub(KnownObject).
+  result.py            KnownObject / KnownEdge (the KB reference context); KbBundle.root_uuid now populated.
+  diff_hash.py         Decision a!decisiondesigner_cache versionKey blanked for hashing (per-export random key).
+genesis/
+  db/migrations/m0023_incremental_sync.py   kb_syncs.details_json; scheduled_jobs.options_json + user_modified (DB v23).
+  kb/dev_mcp.py        + classify_tool_error / parse_version_info / version_info (26.6.105+ version gate);
+                       DevMcpSession (one stdio process + handshake, many tools/call; private loop thread);
+                       DevMcpToolError(kind); tool_result_data.
+  kb/dev_packages.py   DevMcpPackages (ADR-073: ALLOWED_TOOLS, DELTA_PREFIX, list_changed, create_delta_package,
+                       add_objects [batches of 50, bisects a poisoned batch], get/list/delete_delta_package [re-read
+                       guard], sweep_leftovers); package_type(); resolve_spec + open_packages (ctx factory).
+  kb/store.py          apply(mode='incremental') → _apply_incremental + _apply_derived; partial-result guards;
+                       full-mode _refresh_object_in_place; known_context; export_snapshot; last_successful_sync
+                       (FULL_KINDS); finish_sync(details=) + update_sync_details; hydrate_from_blob diff path.
+  runtime/context.py   ctx.extras['devmcp_packages'] (factory) + ['kb_publish'] (best-effort snapshot publish).
+  runtime/scheduler.py schedule_times (interval_window) + validate_schedule + Scheduler.run_now / is_running.
+  runtime/schedule_store.py  ScheduledJob.options/user_modified; ensure_defaults one-time adoption; update_settings.
+  runtime/sync_jobs.py APP_SYNC_DEFAULT_OPTIONS; designated-machine + old-library skips; kinds summary.
+  runtime/collab_autopull.py + collab/service.py  autopull_tick(kb_store, is_syncing=) → KB pulls on Hub blob changes
+                       + a 60 s KB-version poll; deferred pulls persisted (autopull:kb-pending).
+  services/application_sync.py  resolve_mode → auto|baseline|full|incremental, adapted to the installed enum;
+                       supports_incremental; start_sync(options=).
+  api/schedules.py     GET/PUT /system/sync-settings + POST /system/sync-settings/run-now.
+  api/config_routes.py GET /config/devmcp/version; dev check ?live=true.
+  web/src/features/settings/components/ApplicationSyncSection.tsx (+ syncSchedule.ts)  Settings → General card.
+  web/src/features/settings/components/mcp/DevMcpVersionBanner.tsx  plugin/bundle mismatch banner.
+  web/src/features/applications/{ApplicationDetail.tsx, syncLabels.ts}  Refresh (auto) + Full sync; Syncs tab details.
+genesis-workflows/
+  workflows/sync-application v0.3.0  resolve_inputs → plan_sync → {export_package | build_delta_package |
+                       record_empty_sync} → v_export → parse_package → v_parse → write_kb → v_kb → publish_hub → present.
+  mcp-registry.json    appian-dev += listObjects; appian-dev-packages (package tools, no delete; injected by nothing).
+```
+

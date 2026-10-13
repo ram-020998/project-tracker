@@ -17,7 +17,7 @@
 | 45-07 scheduler + settings | ✅ built (not yet live) | genesis `dad4433`, `9a2afa8` | SHIP |
 | 45-08 collaboration | ✅ built (not yet live) | genesis `2b686fc`, `1a1b275` · genesis-workflows `ca7ece8` | SHIP |
 | 45-09 review + acceptance | ✅ review SHIP + live acceptance 1–8 passed | genesis-workflows `80f84f1` · genesis `0867f49` (F1) | SHIP |
-| 45-10 release | pending (needs go-ahead) | | |
+| 45-10 release | ✅ SHIPPED 2026-10-13 | parser `v0.3.0` · genesis `v0.76.0` · genesis-workflows `v0.21.0` | CI green |
 
 ## 45-02 — Adopt Dev MCP 26.6.110 (2026-10-13)
 
@@ -223,3 +223,19 @@ Findings: **F1** live Hub emits no `blob` change rows → fixed (`0867f49`, 60 s
 `versionKey` changes its hash every export (parser follow-up); **F3** RU Sandbox no longer exists in the env
 (untrack pending the user); **F4** incremental build is slower than a full export (addPackageObjects ≈0.3–1.1 s per
 object × ~220 roots) — design follow-up.
+
+## Post-acceptance fixes + 45-10 release (2026-10-13) — PHASE 45 COMPLETE
+
+- **F3:** RU Sandbox (gone from the env) untracked on main (user-approved).
+- **F2:** genesis-appian-parser `10e412a` — the Decision diff hash ignores Appian's per-export `versionKey`
+  (`tests/test_diff_hash.py`; the two real AS GSS exports from 45-09 now hash identically — the test FAILS without the fix).
+- **F4:** backlog spec `specs/backlog/incremental-sync-performance.md` (only add the roots of affected bundles; oracle
+  check required).
+- **Release (ADR-019 order), CI green:** genesis-appian-parser **v0.3.0** (#7059369) → genesis **v0.76.0** `a19b7cf`
+  (re-pins parser v0.3.0; #7059384 master + #7059385 tag: genesis + frontend + clean-install) → genesis-workflows
+  **v0.21.0** `e98b39c` (re-pins genesis v0.76.0 + core v0.9.8; #7059427 + #7059428).
+- **Deploy:** fleet re-provisioned + restarted → both instances genesis 0.76.0 + sync-application 0.3.0; `main`
+  designated for scheduled syncs (every 4 h), userb auto-pulls.
+- **Docs:** ADR-073/074 Accepted (decision-log + bible/04); bible/00 + index banner, 01 (state + tag table), 03 (map),
+  06 (5 lessons), 08 §9 SHIPPED; README row; all Phase-45 spec statuses SHIPPED; backlog notes (phase-16-deferred
+  §1.3 delivered; kb-resync-after-implementation).

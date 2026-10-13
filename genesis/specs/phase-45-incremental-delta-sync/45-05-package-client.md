@@ -1,6 +1,6 @@
 # 45-05 — Dev MCP session client + package client
 
-> **Status:** 🟡 DRAFTED. Repo: **genesis**. Implements **ADR-073**. Parent: `specs/phase-45-incremental-delta-sync.md`.
+> **Status:** ✅ SHIPPED 2026-10-13 (see the as-built section). Repo: **genesis**. Implements **ADR-073**. Parent: `specs/phase-45-incremental-delta-sync.md`.
 
 ## 1. `DevMcpSession` (`genesis/kb/dev_mcp.py`)
 

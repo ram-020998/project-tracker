@@ -66,7 +66,7 @@
 
 ### 1.3 — 16-07 · True incremental delta (the changed-objects API path)  **(DEFERRED after Option A)**
 
-> **➜ Now specified as Phase 45 (2026-10-12):** Dev MCP 26.6.110 `listObjects` + package tools provide the changed-objects path (list changed → temporary package → export → KB-aware parse → incremental merge). See `specs/phase-45-incremental-delta-sync.md` + ADR-074. The text below is the original deferral record.
+> **✅ DELIVERED by Phase 45 (2026-10-13; genesis v0.76.0 + genesis-workflows v0.21.0 + parser v0.3.0):** incremental sync is live (`sync-application` mode `auto`/`incremental`); deletions are still only picked up by the weekly/forced full sync (D2). Speed follow-up: `specs/backlog/incremental-sync-performance.md`. **➜ Originally specified as Phase 45 (2026-10-12):** Dev MCP 26.6.110 `listObjects` + package tools provide the changed-objects path (list changed → temporary package → export → KB-aware parse → incremental merge). See `specs/phase-45-incremental-delta-sync.md` + ADR-074. The text below is the original deferral record.
 - **Option A ships now** (re-export + `KbStore.apply(mode='delta')`) — see the 16-07 spec / progress. The items below
   are the *incremental optimization* deferred for later.
 - **What:** a **new Appian "changed-objects" API** so a delta exports only what changed in `[start, end]` instead of a

@@ -1,6 +1,6 @@
 # 45-09 — Review, hardening & live acceptance
 
-> **Status:** 🟡 DRAFTED. Repos: all. Parent: `specs/phase-45-incremental-delta-sync.md`.
+> **Status:** ✅ SHIPPED 2026-10-13 (see the as-built section). Repos: all. Parent: `specs/phase-45-incremental-delta-sync.md`.
 
 ## 1. Independent review (sub-agent)
 

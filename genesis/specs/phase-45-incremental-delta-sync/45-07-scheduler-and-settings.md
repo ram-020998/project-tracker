@@ -1,6 +1,6 @@
 # 45-07 — Scheduler, sync settings API, Settings card, Refresh / Full sync
 
-> **Status:** 🟡 DRAFTED. Repo: **genesis** (backend + web). Amends **ADR-047**. Parent: `specs/phase-45-incremental-delta-sync.md`.
+> **Status:** ✅ SHIPPED 2026-10-13 (see the as-built section). Repo: **genesis** (backend + web). Amends **ADR-047**. Parent: `specs/phase-45-incremental-delta-sync.md`.
 
 ## 1. Scheduler
 

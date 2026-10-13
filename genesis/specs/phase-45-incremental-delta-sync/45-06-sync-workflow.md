@@ -1,6 +1,6 @@
 # 45-06 — `sync-application` v0.3.0: the incremental path
 
-> **Status:** 🟡 DRAFTED. Repos: **genesis-workflows** (workflow) + **genesis** (`ApplicationSyncService`).
+> **Status:** ✅ SHIPPED 2026-10-13 (see the as-built section). Repos: **genesis-workflows** (workflow) + **genesis** (`ApplicationSyncService`).
 > Implements **ADR-074** (workflow). Parent: `specs/phase-45-incremental-delta-sync.md`.
 
 ## 1. Inputs (`inputs_schema`)

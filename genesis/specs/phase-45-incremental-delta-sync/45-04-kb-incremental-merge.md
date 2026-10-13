@@ -1,6 +1,6 @@
 # 45-04 — KB: m0023, incremental merge, snapshot export
 
-> **Status:** 🟡 DRAFTED. Repo: **genesis**. Implements the KB half of **ADR-074**.
+> **Status:** ✅ SHIPPED 2026-10-13 (see the as-built section). Repo: **genesis**. Implements the KB half of **ADR-074**.
 > Parent: `specs/phase-45-incremental-delta-sync.md`.
 
 ## 1. Migration m0023 (`current_version` 22 → 23)
