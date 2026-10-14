@@ -64,10 +64,10 @@ Genesis code change, no release, no tag**.
 | Sub-spec | Status |
 |---|---|
 | 01 data model reference | ✅ |
-| 02 relationships | ✅ live (verify) |
+| 02 relationships | ✅ live + verified (story 73 shows 3 wiki objects) |
 | 03 helper rules | ✅ |
 | 04 shared components | ✅ |
-| 05 record views | ⬜ |
+| 05 record views | ✅ |
 | 06 Home + Applications | ⬜ |
 | 07 Features + Board | ⬜ |
 | 08 Stories + Wiki + Team | ⬜ |

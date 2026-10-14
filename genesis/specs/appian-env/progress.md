@@ -59,6 +59,16 @@ comment, question-circle, external-link, eye, download, arrow-right, calendar, e
   `GH_UI_devSmokeView` interface `_a-0000f08b-d302-8000-9c31-011c48011c48_29632` — renders a target and prints `SMOKE <target> chars=N expect=a=Y,b=N` (pipe-separated expectText). Use it instead of raw testInterface (which dumps 50 KB trees). Add new targets to `gen/GH_UI_devSmokeView.full.tpl` as pages are built.
 - SAIL generator: `/Users/ramaswamy.u/appian-dev/genesis-hub-site/gen/refs.py` (`@RT(S)`, `@F(S.feature.name)` macros → full UUID refs); templates `gen/*.tpl` → `../*.sail`.
 
+- `GH_UI_WikiPageSummaryView` `_a-0000f08b-d302-8000-9c31-011c48011c48_29638` ✅ wired to GH Object Wiki Page summary (RT v7), title = objectName, news/related-actions hidden.
+  Evidence: page 5 smoke → objectName, CREATED, UPDATED, story-1-1 link, "Technical details", RECORD TYPE all Y (128 ms); id 99999 → "Object not found" Y.
+  Fix during build: a `sectionLayout` is NOT allowed inside a `sideBySideItem` (runtime error) — moved below the sideBySide inside the card.
+- `GH_UI_FeatureSummaryView` `_a-0000f08b-d302-8000-9c31-011c48011c48_29644` ✅ wired to GH Feature summary (RT v8), title = name, news/related-actions hidden.
+  Evidence: feature 1 (Multi Round Evaluations) → name, Completed, "Open Spec document", "Open UX Design document", "% done", epic-1 all Y (1.3 s, ~346 KB tree);
+  feature 2 (Document Builder) renders (968 ms) incl. "Not started" stages.
+  Stage docs via `GH_UI_latestBlobs` + `a!documentDownloadLink` (download). The inline HTML preview (risk 00 §8.1) was NOT added — download-only for now.
+  "Objects changed" KPI = count of wiki entries via `WE.story.featureSyncUuid` relationship filter (fetchTotalCount).
+- **Sub-spec 05 ✅ DONE.** Note: `updateInterface` echoes the whole expression back — prefer getting it right on create.
+
 ## 2026-10-14 — Session 1 (discovery + specs)
 **Done**
 - Onboarded to Genesis (bible); loaded the Appian skill + references (tools-mcp, sites, record-summary-views, function/component
