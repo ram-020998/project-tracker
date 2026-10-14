@@ -34,7 +34,8 @@ position 176ae0b5-b95a-4d33-9561-a50877149b64 | ownerUsername 801ae4a3-f1f7-4629
 version 23dcbd62-723d-4ed1-bfa5-5c941d3a0c66 | onBoard 8b5104c6-e8e7-49f9-b8ad-c20bdfa3f6a0 (BOOL) | createdBy 9d8ccc6b-336c-470c-91c5-b33e65b13377
 modifiedBy 76f76460-5d59-4b2d-846c-170997a4523d | createdAt 80403c59-90e1-4cf8-b498-7fe54e34809a | updatedAt 09b91765-84f9-4807-841b-b1c625fef74e
 rels: feature 3afd6eaf-cec8-43f9-9d46-75279fcd0dd2 (N:1), epic 151d5a24-3fdb-46dc-a9de-ecc186c4a903 (N:1),
-      storyItems 9dcd602e-5139-46b8-9a6a-627ff2f69c2d (1:N), stageArtifacts aae1d96c-aea9-4e12-9838-316043cff750 (1:N)
+      storyItems 9dcd602e-5139-46b8-9a6a-627ff2f69c2d (1:N), stageArtifacts aae1d96c-aea9-4e12-9838-316043cff750 (1:N),
+      wikiEntries b79fea99-9d9d-4906-bc24-aa010a822fc4 (1:N, added 2026-10-14 — see §A)
 
 ## GH Epic `f023ee8d-e941-4554-b6b1-a8689c9cd6f4`
 id 6f79ad1a-3e28-4c2b-86ac-5fd2e668b5c6 | syncUuid db39730a-34eb-47a4-8d1e-d611e390614e | featureSyncUuid f8958879-85de-4491-b00b-d8163b27fa16
@@ -72,7 +73,7 @@ technicalDescription 4c6670c2-197b-46c9-acbb-2ffea4098993 (XL) | storyKey 74f319
 isBugfix 7d378fee-f9a5-4f30-b607-976acbc90e78 (INT) | changeReason ec1fbe30-8c97-490f-9a2c-2fc6692d7046 | objectVersion fee2c99e-06b3-4423-83a1-72323702318a
 authorUsername 570b0009-15bb-4b13-8635-5b53e2162baa | createdAt d747118d-793d-4b3e-b6f3-a34723a7c538 | version 8bcec6d7-d318-4e78-91fd-0b8f62c8d0fe
 publishedBy f88c1728-3c8b-46fb-9113-b74f17d3df20 | publishedAt ade17967-a0c8-43c0-ae4b-963c2134c29f | updatedAt b7092a0e-9ffd-4f86-aeab-ba1db8ebb63c
-rels: page 88f29644-0824-4892-b07b-15466eba1b9f (N:1)  [NOTE: no relationship to GH Story — join on storySyncUuid manually]
+rels: page 88f29644-0824-4892-b07b-15466eba1b9f (N:1), story 5e33bdce-5007-4bb9-807a-c099712088cf (N:1, added 2026-10-14 — see §A)
 
 ## GH Board State `cd472522-5be5-4129-bd74-fce457f6cd08`
 id 472073f7-d280-4180-96d6-5260ab638c8b | syncUuid 4cc1cf5e-f22e-4d49-b854-07829c1beb11 | appUuid 323886ba-7e50-4674-9ca1-8ca05de5a459

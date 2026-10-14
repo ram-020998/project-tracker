@@ -18,7 +18,7 @@ Header: `GH_UI_PageHeader(title:"Genesis Hub", subtitle:"Everything your team ha
 | Team members | COUNT GH Membership.id; hint "{teams} team(s)" | — |
 (Site pages cannot be deep-linked from SAIL reliably; leave KPI links off, or use `a!recordLink` without identifier to open a record list only if a list is configured — not required.)
 
-**Row 2 (columns WIDE_PLUS | MEDIUM_PLUS):**
+**Row 2 (columns `AUTO` | `MEDIUM_PLUS`):**
 - Left card **"Feature pipeline"**: one row per feature (query all features with `stageArtifacts` related fields + per-feature story counts via a grouped aggregation `featureSyncUuid` × `status`): feature name (link → Feature view) · `GH_UI_StageTracker(compact: true)` · mini progress bar (% done) · "n stories".
 - Right card **"Stories by lane"**: `a!columnChartField` or `a!barChartField` with categories = lane labels in `GH_UI_lanes()` order, one series "Stories", data = grouped COUNT by status mapped onto lanes (missing lanes = 0); use `a!chartCustomColorScheme`? — a single series takes one colour; acceptable: brand colour. Alternative that shows lane colours: a list of 8 rows (lane pill + count + thin progress bar). **Recommended: the 8-row list** (prettier, uses lane colours).
 

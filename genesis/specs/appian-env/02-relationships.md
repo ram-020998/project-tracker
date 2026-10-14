@@ -11,7 +11,7 @@ Done live with `addRecordTypeRelationship` (user approved, decision D3):
    Relationship UUID **`b79fea99-9d9d-4906-bc24-aa010a822fc4`**. Stored as CASCADING by the server (see 01 §A — harmless; optionally flip to Non-cascading in Designer).
 
 **Verification still to do (first thing in sub-spec 05):** query a story that has wiki entries
-(story syncUuid `27dde3a9-17c3-4d63-9d5f-d78269ea8a91`, key `story-1-1`) with
+(find one first: `listRecordData` on GH Object Wiki Entry → take a non-null `storySyncUuid`, e.g. the one with storyKey `story-1-1`; then look up that story's `id`) with
 `a!queryRecordByIdentifier` including `…relationships.{b79fea99…}wikiEntries.fields.{…}changeKind` and confirm rows return.
 Also confirm the Hub Web APIs still work after the change: call `GET /records/story/<syncUuid>` via Genesis
 (`/api/collab/pull` on a running Genesis instance, or the Phase-36 contract harness) — expect 200, unchanged shape.

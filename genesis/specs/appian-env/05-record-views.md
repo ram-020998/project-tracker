@@ -28,7 +28,7 @@ relatedRecordData: storyItems sort position asc limit 250; wikiEntries sort crea
 Layout:
 - **Header** (`GH_UI_PageHeader`): key (e.g. `story-3-1` / `GNS_000123`) small, title H1, tags: storyType, lane (lane colours), appianPart, category; meta right: "Feature: <name>" link → Feature view, "Epic: <title>".
 - **Lane progress strip**: the 8 lanes as a horizontal stepper (milestone-like) with the story's lane highlighted and earlier lanes ✓ (index order from `GH_UI_lanes()`).
-- Columns (WIDE_PLUS main / MEDIUM side, stackWhen TABLET):
+- Columns (main `AUTO` / side `MEDIUM_PLUS`, `stackWhen: {"PHONE","TABLET_PORTRAIT"}`; check valid columnLayout widths in columns-layout-instructions.md before coding):
   - Main:
     - **User story** card: description rendered as 3 lines with "As a / I want / So that" bolded (split on `char(10)`; bold the leading phrase if the line starts with it).
     - **Acceptance criteria** card: items with itemType = AC value (VERIFY — 01 §C) ordered by position; each criterion rendered with Gherkin keywords (`Given`, `When`, `Then`, `And`, `But`) bolded in brand colour at line starts; numbered.
@@ -62,5 +62,5 @@ Layout:
 - Side: Details (objectUuid full, appUuid full, owner, team, created by/at, modified by, syncUuid).
 
 ## 5. Verification for this sub-spec
-- `testInterface` each view with a real `record` (pass `{"record": {"<id field name>": <id>}}` or the identifier input) — ids: Feature 1 and 2; Story 1 (no wiki) and the story with syncUuid `27dde3a9-17c3-4d63-9d5f-d78269ea8a91` (has wiki entries); Wiki Page 5.
+- `testInterface` each view with a real `record` (pass `{"record": {"<id field name>": <id>}}` or the identifier input) — ids: Feature 1 and 2; Story 1 (no wiki) and a story that has wiki entries (find it via a wiki entry's `storySyncUuid`, see 02); Wiki Page 5.
 - Open a record view URL in a browser (manual check) and confirm the header, tabs and links render.
