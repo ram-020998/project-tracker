@@ -1,5 +1,19 @@
 # Genesis Hub Site — progress log (append-only; newest at top)
 
+## 2026-10-14 — Session 2b (user feedback: Applications drill-down)
+**Request:** Applications page = basic cards only; clicking a card goes *inside* the app with tabs **Overview | Features | Stories**.
+**Design:** in-page drill-down (local `selected` app UUID) — no new record type (decision D1 still holds). URL does not change; "‹ All applications" link returns to the list.
+**Created:**
+| Object | UUID | Purpose |
+|---|---|---|
+| GH_UI_AppOverviewTab (interface, input appUuid) | `_a-0000f08b-d302-8000-9c31-011c48011c48_29731` | 5 KPIs, delivery progress (all 8 lanes), Object Wiki objects (links), KB snapshot grid |
+| GH_UI_FeatureCards (interface, inputs appUuid, showAppFilter) | `_a-0000f08b-d302-8000-9c31-011c48011c48_29721` | feature cards + search (+ app filter when appUuid null) |
+| GH_UI_StoryGrid (interface, inputs appUuid, showAppFilter) | `_a-0000f08b-d302-8000-9c31-011c48011c48_29727` | record-backed story grid + filters, app fixed when appUuid set |
+**Updated:** GH_UI_ApplicationsPage v2 (list of basic cards → tabLayout detail, highlight `#0284C7`); GH_UI_FeaturesPage v2 and GH_UI_StoriesPage v2 now just header + the shared component (one source for both places).
+**Evidence:** smoke — Applications list (App …930416, Open application, stories, done; KB history no longer on the list = intended); AppOverview 6/6; AppFeatures (both features, search; app filter hidden = intended); AppStories 4/4;
+Features + Stories pages unchanged output after refactor. validateExpression on the full tabLayout detail branch → no errors. validateDesignObject clean on all 4 changed/new objects. Read-only grep → 0.
+Old page templates kept as `gen/GH_UI_FeaturesPage.v1.tpl` / `GH_UI_StoriesPage.v1.tpl` for reference.
+
 ## 2026-10-14 — Session 2 (implementation)
 **Health check:** app had 0 sites, 1 interface (`GH_BlobVersionDocumentSummary`), 12 `GH_*` API rules, no `GH_UI_*` objects.
 **Data finding:** Story Item AC itemType = **`ac`** (others `question`, `label`) — recorded in 01 §C.
