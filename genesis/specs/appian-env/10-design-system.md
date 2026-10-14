@@ -64,3 +64,14 @@ Stage status color: `completed` success · `in-review` warning · `in-progress` 
 - Accessibility: every grid `rowHeader`; icons have `altText`/caption; collapsible sections set `labelHeadingTag`;
   link text is meaningful (not "click here").
 - Read-only: inputs allowed ONLY for filters/search (local variables); no buttons with submit.
+
+## 6. Site branding (manual — the Dev MCP site API exposes no colour fields)
+Set in Appian Designer → site `GH Genesis Hub` → Branding/Appearance. Recommended **"Indigo Night"**:
+| Setting | Hex | Why |
+|---|---|---|
+| Header / navigation (sidebar) background | `#1E1B4B` | deep indigo-950 — premium, high contrast with white nav text |
+| Selected page / tab background | `#4F46E5` | brand indigo-600, same as every page header stamp |
+| Accent colour | `#4F46E5` | links, focus, default controls — makes every link in the pages match the brand |
+| Loading bar | `#A5B4FC` | indigo-300, visible on the dark sidebar |
+Alternative "Clean Light": navigation `#FFFFFF`, selected `#EEF2FF`, accent `#4F46E5`, loading bar `#4F46E5`.
+Page content background is already `#F8FAFC` (set in every headerContentLayout), which suits both.
