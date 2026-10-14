@@ -10,8 +10,8 @@
 |---|---|---|---|
 | 46-01 findings | ✅ done (2026-10-14) | docs only | — |
 | 46-02 clause model | ✅ built (2026-10-14) | genesis `196e78d` | SHIP |
-| 46-03 story↔spec links | ⏳ next | — | — |
-| 46-04 CR lifecycle | — | — | — |
+| 46-03 story↔spec links | ✅ built (2026-10-14) | genesis `0d8622e` · genesis-workflows `da0bb91` | SHIP |
+| 46-04 CR lifecycle | ⏳ next | — | — |
 | 46-05 impact analysis | — | — | — |
 | 46-06 apply / discard | — | — | — |
 | 46-08 story answers / history / badges | — | — | — |
@@ -64,3 +64,53 @@
   reworded re-anchors 500/500 IDs in ~95 ms.
 - Not verified: a live agent turn in a running `genesis serve` (the server needs a restart to load the hook; no restart
   done — the fleet is not updated mid-phase).
+
+## 46-03 — story ↔ spec links (genesis `0d8622e` · genesis-workflows `da0bb91`)
+
+**What was built**
+- **m0024** (`current_version` 23 → 24) with the **whole phase's DDL** from 46-04 §3: `kb_stories.spec_refs` /
+  `answers` / `change_log`, `chat_messages.meta_json`, `kb_spec_change_requests` + the one-open-CR-per-spec partial
+  unique index (+ a feature index). Every `current_version == 23` assertion bumped; the synthetic next-migration test
+  moved to v25.
+- `genesis/kb/spec_changes.py` (new, pure): `is_traceable(backlog, stories)` (46-03 §7), `make_spec_refs` (link
+  records `{clause_id, fingerprint, origin, linked_at}`; unknown IDs dropped and returned), `build_coverage` (per clause:
+  items + `suspect` + `via_section`; a section ref covers every clause under it, through sub-sections; a direct link
+  wins over a section link for the same item), `coverage_counts`, `backlog_items` / `story_items`.
+- `StoryStore`: `finalize(…, spec_refs_for=)`; **the workstream fix** (`workstreamRef` → `kb_epics.workstream`, was
+  always NULL); `spec_refs` is a JSON field on create/update/read.
+- `StageStore.set_upstream_versions` — the breakdown row now records `{"spec": {revision_no, content_hash}}`.
+- Breakdown launch: normalizes the spec, snapshots it, writes `spec_clauses.json`
+  (`{revision_no, content_hash, clauses}`; `revision_no` = the latest revision when byte-identical to the snapshot,
+  else null) and passes `spec_clauses_path` **only when the installed `feature-breakdown-analysis` declares it**
+  (`run_manager.loader.meta_of`; a malformed workflow.yaml is logged and treated as an older library).
+- Finalize: a traceable backlog's `clauseRefs` become `spec_refs` with the fingerprint from the launch-time clause map
+  when its `content_hash` matches `backlog.specRevision` (else the current spec); unknown refs are reported as
+  `dropped_refs`. A legacy backlog stores no refs and the response has no `dropped_refs`.
+- `GET /features/{id}/spec/coverage?revision=working|<n>` → `{revision, traceable, mode, clauses, uncovered}`
+  (stories once finalized; backlog when the breakdown is completed; else / legacy → none). The spec preview overlay
+  now shows a story-count badge per clause (hollow "no story" when uncovered) whenever coverage mode isn't none.
+- Manual `spec_refs` on story create/update (clause IDs or `{clause_id, origin}`), validated against the current
+  spec clause map (400 on unknown IDs; origin defaults to `manual`).
+- Collaboration: the three new story columns are **local-only** (`_LOCAL_ONLY`) until 46-09 maps them onto the Hub
+  contract, so the frozen contract never receives unknown fields.
+- `_STEERING_FB`: keep each story's `clauseRefs` in the embedded JSON; give added/split stories their clause IDs.
+- **genesis-workflows `feature-breakdown-analysis` 0.3.0** (registry + workflow.yaml parity): optional
+  `spec_clauses_path`; with a map, `spec.txt` is clause-tagged, `break_epic` asks for `clauseRefs`, `check_stories`
+  rejects missing/unknown refs (listing them), the coverage critic gets the list of uncovered requirement clauses,
+  the backlog carries `clauseRefs` (deduped, unknown dropped) + `specRevision`, and each story card shows
+  "Spec: §…". Without a map the run is byte-identical to 0.2.0 (prompts, `backlog.json`, `breakdown.html` — checked
+  against the previous source).
+
+**Deviations / notes**
+- m0024 carries all of Phase 46's schema now (unreleased; one migration per phase) instead of growing per sub-phase.
+- Section headings in the clause-tagged spec text use the heading depth (`3` → `##`, `3.2` → `###`); the 46-03 §3
+  example shows `## 3.2`.
+- Coverage uses the working copy until 46-04 introduces the consumer version.
+- The preview overlay parses the clause map twice per serve (coverage + labels); fine at current sizes.
+
+**Evidence**
+- genesis pytest **974** (+15 `tests/test_spec_links.py`) + ruff clean; genesis-workflows `validate_library` **13** +
+  pytest **250** (+7 traced-path tests in the breakdown suite).
+- Independent review = **SHIP**; findings folded in (O(1) coverage dedup + direct-over-section precedence, YAML errors
+  on the declared-input check, a comment on the CAS-free setter). Coverage of 500 clauses × 200 stories < 1 s (test).
+- Not verified live: a real breakdown run with the clause map (needs the fleet updated + a Kiro run).
