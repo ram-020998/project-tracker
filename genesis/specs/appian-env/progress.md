@@ -1,5 +1,13 @@
 # Genesis Hub Site — progress log (append-only; newest at top)
 
+## 2026-10-14 — Session 2c (user feedback: Board inside the application)
+- New **GH_UI_StoryBoard** (interface, input appUuid) `_a-0000f08b-d302-8000-9c31-011c48011c48_29755` — the 8-lane Kanban body; appUuid scopes the
+  feature dropdown and the stories (`S.feature.appUuid = appUuid` filter); null = all apps.
+- GH_UI_BoardPage v2 = header + `GH_UI_StoryBoard(appUuid: null)`; GH_UI_ApplicationsPage v3 adds a 4th tab **Board** → `GH_UI_StoryBoard(appUuid: selected)`.
+- Evidence: validateDesignObject clean (StoryBoard, Applications page); smoke AppBoard 5/5 (lanes, show-more, feature filter) 1.6 s — tree is smaller than the
+  global Board (266,788 vs 271,274 chars) because a story under a non-app feature is excluded = scoping works; global Board smoke 5/5 unchanged.
+- The top-level Board site page is kept (all applications). Old template kept as `gen/GH_UI_BoardPage.v1.tpl`.
+
 ## 2026-10-14 — Session 2b (user feedback: Applications drill-down)
 **Request:** Applications page = basic cards only; clicking a card goes *inside* the app with tabs **Overview | Features | Stories**.
 **Design:** in-page drill-down (local `selected` app UUID) — no new record type (decision D1 still holds). URL does not change; "‹ All applications" link returns to the list.
