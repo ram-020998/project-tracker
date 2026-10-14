@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟡 SPEC-DRAFTED, partially started (2026-10-14). Sub-spec 02 (relationships) is DONE live; everything else is TODO. |
+| **Status** | ✅ BUILT & LIVE (2026-10-14) — site `GH Genesis Hub` at `/suite/sites/genesis-hub`. All sub-specs 02–09 done; manual browser review by the user pending. See `progress.md`. |
 | **Where it is built** | Appian env **merge-assist-dev.appianpreview.com** (Appian 26.6), app **Genesis Hub** (prefix `GH`, appUuid `_a-0000f058-fed5-8000-9bfc-011c48011c48_27312`) |
 | **How it is built** | Directly in Appian with the **Appian Dev MCP write tools** (`createExpressionRule`, `createInterface`, `addRecordTypeView`, `createSite`, …) by an agent session — **NOT** through Genesis code. No genesis / genesis-workflows / genesis-core change, no release, no tag. |
 | **Mandatory skill** | `/Users/ramaswamy.u/appian-dev/.kiro/skills/appian/SKILL.md` (load before ANY Appian MCP call; follow its loading strategy + Step 4A/4B verification + `validateExpression` retry loop + `testInterface`). |
@@ -67,13 +67,13 @@ Record views (not site pages; reached via a!recordLink):
 |---|---|---|---|
 | 01 | `01-data-model-reference.md` | every RT/field/relationship UUID + real data values + gotchas | ✅ reference |
 | 02 | `02-relationships.md` | wiki entry ↔ story relationships | ✅ DONE (live) |
-| 03 | `03-helper-rules.md` | `GH_UI_*` expression rules: labels, colors, normalizers, formatters, shared queries | ⬜ TODO |
-| 04 | `04-shared-components.md` | `GH_UI_*` component interfaces: page header, KPI card, tag, empty state, stage tracker, lane progress, story card, section card | ⬜ TODO |
-| 05 | `05-record-views.md` | 3 summary views + title expressions + `addRecordTypeView` | ⬜ TODO |
-| 06 | `06-pages-home-applications.md` | Home + Applications pages | ⬜ TODO |
-| 07 | `07-pages-features-board.md` | Features + Board pages | ⬜ TODO |
-| 08 | `08-pages-stories-wiki-team.md` | Stories + Object Wiki + Team pages | ⬜ TODO |
-| 09 | `09-site-security-and-verification.md` | create the site, security, end-to-end verification, docs | ⬜ TODO |
+| 03 | `03-helper-rules.md` | `GH_UI_*` expression rules: labels, colors, normalizers, formatters, shared queries | ✅ DONE |
+| 04 | `04-shared-components.md` | `GH_UI_*` component interfaces: page header, KPI card, tag, empty state, stage tracker, lane progress, story card, section card | ✅ DONE |
+| 05 | `05-record-views.md` | 3 summary views + title expressions + `addRecordTypeView` | ✅ DONE |
+| 06 | `06-pages-home-applications.md` | Home + Applications pages | ✅ DONE |
+| 07 | `07-pages-features-board.md` | Features + Board pages | ✅ DONE |
+| 08 | `08-pages-stories-wiki-team.md` | Stories + Object Wiki + Team pages | ✅ DONE |
+| 09 | `09-site-security-and-verification.md` | create the site, security, end-to-end verification, docs | ✅ DONE |
 | — | `10-design-system.md` | visual language every interface must follow | reference |
 | — | `progress.md` | running build log — UPDATE after every object you create | living |
 

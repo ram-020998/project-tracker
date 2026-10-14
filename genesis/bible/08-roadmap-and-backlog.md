@@ -8,6 +8,9 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
+### ✅ SHIPPED — Genesis Hub read-only Appian site (Appian-side only, 2026-10-14)
+A polished, strictly read-only Appian site over the Genesis Hub app (`/suite/sites/genesis-hub`, GH Users): Home, Applications, Features, Board, Stories, Object Wiki, Team + Feature/Story/Wiki Page record views. Built in merge-assist-dev with Dev MCP — no Genesis repo change, no tag. Spec, UUIDs and evidence: `specs/appian-env/` (start at `AGENT_ONBOARDING.md`).
+
 ### ✅ SHIPPED — Phase 45: Incremental Delta Sync
 
 > **Status:** ✅ **SHIPPED 2026-10-13 — genesis-appian-parser v0.3.0 → genesis v0.76.0 → genesis-workflows v0.21.0; CI green — parser #7059369, genesis #7059384 (master) + #7059385 (v0.76.0 tag: genesis + frontend + clean-install), genesis-workflows #7059427 + #7059428 (v0.21.0). PHASE 45 COMPLETE; ADR-073/074 Accepted; live-accepted on merge-assist-dev (8/8 steps, 45-09 §5).** Built sub-phase by sub-phase (45-02..45-09, each independently reviewed = SHIP) — as-built in `progress/phase-45-incremental-delta-sync.md`; live findings F1 (live Hub has no blob change rows → KB-version poll), F2 (Decision versionKey hash → parser fix), F3 (RU Sandbox untracked), F4 (incremental build slower than a full export → `specs/backlog/incremental-sync-performance.md`). Multi-repo: genesis-appian-parser v0.3.0 → genesis (m0023, DB → v23) → genesis-workflows; no Hub change. Spec: `specs/phase-45-incremental-delta-sync.md` (+ `45-01..45-10`, findings `45-01-findings.md`). **New ADRs (Accepted 2026-10-13):** ADR-073 (environment package management — the only non-design-object write, Genesis code only, never agents; delete guard on `genesis-delta-*`) + ADR-074 (incremental, package-scoped KB sync). Backlog spin-off: `specs/backlog/implementation-packages.md`.

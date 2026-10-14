@@ -50,6 +50,12 @@ Genesis code change, no release, no tag**.
 - Never query inside `a!forEach` per row — query once (aggregations/`in` filters) and join in memory.
 
 ## 5. Where to start (next session)
+> **STATUS 2026-10-14: the site is BUILT and LIVE** — https://merge-assist-dev.appianpreview.com/suite/sites/genesis-hub
+> (site uuid `b2a3e7ef-8e92-4d86-9af8-f658cca5a33b`). All objects are listed with UUIDs + evidence in `progress.md`.
+> Remaining: the user's manual browser review, then any visual polish they ask for. To change an interface: edit `gen/<Name>.tpl`,
+> run `python3 refs.py <Name>` in `/Users/ramaswamy.u/appian-dev/genesis-hub-site/gen`, then `updateInterface(uuid, expressionFilePath)`,
+> and smoke-test with `GH_UI_devSmokeView` (target + pipe-separated expectText). The steps below are the original plan, kept for reference.
+
 1. Read §3 docs 1–4.
 2. Quick health check: `getApplication(appUuid)`; `listApplicationObjects(appUuid, ["sites","interfaces","expressionRules"])`
    — confirm only `GH_BlobVersionDocumentSummary` exists among interfaces and no `GH_UI_*` objects yet (otherwise resume from `progress.md`).
@@ -71,4 +77,4 @@ Genesis code change, no release, no tag**.
 | 06 Home + Applications | ✅ |
 | 07 Features + Board | ✅ |
 | 08 Stories + Wiki + Team | ✅ |
-| 09 site + security + verification + docs | ⬜ |
+| 09 site + security + verification + docs | ✅ (manual browser check pending) |

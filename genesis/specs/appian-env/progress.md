@@ -82,6 +82,19 @@ comment, question-circle, external-link, eye, download, arrow-right, calendar, e
 Extra data rules: `GH_UI_storyLaneCounts` `_a-0000f08b-d302-8000-9c31-011c48011c48_29658` (feature×lane aggregation), `GH_UI_allArtifacts` `_a-0000f08b-d302-8000-9c31-011c48011c48_29662` (all artifacts + latest doc id).
 Board layout decision: 8 AUTO columns, DENSE, stacked below TABLET_LANDSCAPE, cap 25 cards/lane with show-more; non-standard lanes in an "Other lanes" card (D2). Visual check in browser still pending.
 
+### Sub-spec 09 — site, security, verification ✅ (manual browser check pending)
+- **Site `GH Genesis Hub`** uuid **`b2a3e7ef-8e92-4d86-9af8-f658cca5a33b`**, displayName "Genesis Hub", web address `genesis-hub`, layout **SIDEBAR**, 7 pages in order:
+  Home(f015) · Applications(f1b2) · Features(f005 star — f0ae swapped for consistency with the star feature icon) · Board(f0db) · Stories(f03a) · Object Wiki(f02d) · Team(f0c0).
+  URL: https://merge-assist-dev.appianpreview.com/suite/sites/genesis-hub
+- **Security (D4):** `getObjectSecurity(site)` → administrator = GH Administrators, viewer = **GH Users**, editor none (app default security applied on create — no update needed).
+  Interfaces/rules inherit GH Rules and Constants (viewer GH Users, admin GH Administrators) — verified on GH_UI_HomePage. Record types already grant GH Users viewer (Phase 36).
+- **validateDesignObject = 0 errors / 0 warnings** on: site, all 7 pages, 3 views, StageTracker, StoryCard, latestBlobs, allArtifacts.
+- **Read-only audit:** grep over every `GH_UI_*.sail` for `a!writeRecords|a!deleteRecords|a!startProcess|a!writeToDataStoreEntity|recordActions|a!recordActionItem|a!buttonWidget|submit:|a!submitLink|a!startProcessLink` → **0 matches**. Only inputs are local-variable filters/search + show-more dynamicLinks.
+- **Hub contract unaffected:** no `GH_*` API rule, Web API, constant, record field or record-type security was modified. Record-type edits were additive only (summary views, title expressions, hide News/Related Actions).
+- **Pending (manual — needs a browser):** open the site as a plain GH Users member; check visuals (esp. 8-lane Board width), record view navigation, and that "Open document" downloads the stage HTML.
+
+**Files:** SAIL sources `/Users/ramaswamy.u/appian-dev/genesis-hub-site/*.sail`; templates + ref generator `gen/` (`python3 refs.py <Name>` → `../<Name>.sail`, then createInterface/updateInterface with that path).
+
 ## 2026-10-14 — Session 1 (discovery + specs)
 **Done**
 - Onboarded to Genesis (bible); loaded the Appian skill + references (tools-mcp, sites, record-summary-views, function/component
