@@ -65,7 +65,7 @@ Genesis code change, no release, no tag**.
 |---|---|
 | 01 data model reference | ✅ |
 | 02 relationships | ✅ live (verify) |
-| 03 helper rules | ⬜ |
+| 03 helper rules | ✅ |
 | 04 shared components | ⬜ |
 | 05 record views | ⬜ |
 | 06 Home + Applications | ⬜ |

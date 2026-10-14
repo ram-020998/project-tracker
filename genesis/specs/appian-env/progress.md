@@ -1,5 +1,34 @@
 # Genesis Hub Site — progress log (append-only; newest at top)
 
+## 2026-10-14 — Session 2 (implementation)
+**Health check:** app had 0 sites, 1 interface (`GH_BlobVersionDocumentSummary`), 12 `GH_*` API rules, no `GH_UI_*` objects.
+**Data finding:** Story Item AC itemType = **`ac`** (others `question`, `label`) — recorded in 01 §C.
+**Finding:** blob version numbers are independent of stage-artifact `version` (e.g. spec artifact v3 → blob v1). Show the artifact version; use the blob only for the document.
+
+### Sub-spec 03 — helper rules ✅ (all in GH Rules and Constants)
+| Rule | UUID | Tests |
+|---|---|---|
+| GH_UI_lanes | `_a-0000f08b-d302-8000-9c31-011c48011c48_29457` | validated on create |
+| GH_UI_stages | `_a-0000f08b-d302-8000-9c31-011c48011c48_29453` | validated on create |
+| GH_UI_laneLabel | `_a-0000f08b-d302-8000-9c31-011c48011c48_29479` | 4/4 pass |
+| GH_UI_laneColor | `_a-0000f08b-d302-8000-9c31-011c48011c48_29484` | validated (testInputs done) |
+| GH_UI_stageLabel | `_a-0000f08b-d302-8000-9c31-011c48011c48_29475` | validated |
+| GH_UI_stageStatusColor | `_a-0000f08b-d302-8000-9c31-011c48011c48_29496` | validated |
+| GH_UI_stageStatusLabel (extra) | `_a-0000f08b-d302-8000-9c31-011c48011c48_29471` | validated |
+| GH_UI_storyTypeColor | `_a-0000f08b-d302-8000-9c31-011c48011c48_29509` | validated |
+| GH_UI_changeKindColor | `_a-0000f08b-d302-8000-9c31-011c48011c48_29500` | validated |
+| GH_UI_objectTypeNormalize | `_a-0000f08b-d302-8000-9c31-011c48011c48_29504` | 6/6 pass |
+| GH_UI_objectTypeIcon | `_a-0000f08b-d302-8000-9c31-011c48011c48_29535` | validated |
+| GH_UI_objectTypeColor | `_a-0000f08b-d302-8000-9c31-011c48011c48_29531` | validated |
+| GH_UI_formatDateTime | `_a-0000f08b-d302-8000-9c31-011c48011c48_29488` | 3/3 pass ("Sep 6, 2026 6:03 PM") |
+| GH_UI_shortUuid | `_a-0000f08b-d302-8000-9c31-011c48011c48_29465` | 4/4 pass |
+| GH_UI_fileSize | `_a-0000f08b-d302-8000-9c31-011c48011c48_29492` | 5/5 pass |
+| GH_UI_latestBlobs (replaces planned GH_UI_latestArtifactDoc) | `_a-0000f08b-d302-8000-9c31-011c48011c48_29560` | testRule: 2 keys → 2 latest docs (5249, 5245), unknown key skipped, 15 ms |
+
+Signatures: laneColor/stageStatusColor/storyTypeColor/changeKindColor/objectTypeColor take `(value, soft Boolean)`.
+`GH_UI_latestBlobs(blobKind Text, blobKeys List of Text)` → List of Map {blobKey, documentId, version, size, publishedBy, createdAt}.
+`GH_UI_formatDateTime(value, withTime)` — withTime defaults to true. SAIL sources: `/Users/ramaswamy.u/appian-dev/genesis-hub-site/*.sail`.
+
 ## 2026-10-14 — Session 1 (discovery + specs)
 **Done**
 - Onboarded to Genesis (bible); loaded the Appian skill + references (tools-mcp, sites, record-summary-views, function/component
