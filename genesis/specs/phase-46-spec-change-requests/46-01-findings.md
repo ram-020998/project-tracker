@@ -6,7 +6,7 @@
 >
 > This document records **everything** that was researched and decided before the spec was written: the problem
 > as the user stated it, how Genesis works today (code-grounded), how other products solve the problem, the
-> technical building blocks, the three options considered, and every decision taken in the three rounds of
+> technical building blocks, the three options considered, and every decision taken in the four rounds of
 > discussion (2026-10-14). The sub-specs (46-02 … 46-11) implement what is decided here.
 
 ---
@@ -260,7 +260,16 @@ Agreed design points (assistant's restatement, accepted):
   lists **CR-01 … CR-n** with status, author, dates and a link to each document — this list **replaces** the
   separate change-history tab proposed in round 1.
 
-### 5.5 Settled flow
+### 5.5 Round 4 — existing stories (2026-10-14, after the spec set was drafted)
+
+- **D19.** *"We don't have to take care of existing stories. We can leave them as they are. We will only start fresh
+  after this implementation."* → No backfill or AI linking of stories created before Phase 46; the planned
+  `spec-story-linking` workflow, the "Link stories to the spec" action and suggested (confidence-scored) links are
+  **dropped**. Traceability and change requests apply to **traceable** features — breakdowns produced after the
+  release. Legacy features keep today's behaviour (Reopen after the breakdown, no coverage badges). A legacy feature
+  whose breakdown is not finalized becomes traceable by re-running the breakdown. (46-03 §7.)
+
+### 5.6 Settled flow
 
 ```
 Completed ──Initiate change request──▶ Under change (CR-03; chat divider; context files)
@@ -283,12 +292,12 @@ story questions get answers.
 | Clause numbers | Shown by Genesis in the preview margin, **computed** from document order at render time; never stored in the HTML (IDs stay hidden). |
 | New stories | Same epic as the story they follow up (or the epic the agent proposes); status **To Do**; on the board if the followed-up story is on the board (or, for a brand-new story, if any story of the feature is on the board). |
 | Removed requirements | Affected stories are flagged; default **no change**; the user may ask to update or remove a To Do / Design story. |
-| Existing features (stories finalized before Phase 46) | A one-time **"Link stories to the spec"** action (AI, confidence shown) plus a safety net: Analyze impact also considers unlinked stories for the changed clauses. |
+| ~~Existing features~~ | ~~One-time "Link stories to the spec" action~~ — **dropped by D19** (existing stories left as they are). |
 | CR title | Optional one-line "What's changing?" when initiating. |
 
 ---
 
-## 7. What Phase 46 changes vs today
+## 7. What Phase 46 changes vs today (for traceable features — 46-03 §7)
 
 | Today | Phase 46 |
 |---|---|

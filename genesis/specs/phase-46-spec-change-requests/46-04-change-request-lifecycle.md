@@ -31,8 +31,9 @@ gains `"under-change"`. `SPEC_TRANSITIONS` (`genesis/domain/transitions.py`) bec
   stages because `is_spec` is false and `downstream_locked` defaults to false.
 - **ctx computation** — one helper `_stage_ctx(row)` used by **both** `/spec/actions/{a}` and
   `/stages/{stage}/actions/{a}` (and their `allowed` endpoints):
-  `has_html`, `is_spec = row.stage == "spec"`, `downstream_locked = is_spec and (breakdown.status == "completed" or
-  feature.stories_finalized_at is not null)`, `via_change_request = False`. Only the CR service (§5, 46-06) calls
+  `has_html`, `is_spec = row.stage == "spec"`, `downstream_locked = is_spec and is_traceable(feature) and
+  (breakdown.status == "completed" or feature.stories_finalized_at is not null)` (`is_traceable`: 46-03 §7 — a legacy
+  feature is never locked and keeps Reopen), `via_change_request = False`. Only the CR service (§5, 46-06) calls
   `transition(..., ctx={…, "via_change_request": True})`.
 - **Precondition-aware `allowed`.** `LifecycleService.allowed(kind, id, ctx=None)` (additive): when `ctx` is given,
   actions whose precondition fails are left out. The `allowed` endpoints pass ctx, so a locked spec offers no

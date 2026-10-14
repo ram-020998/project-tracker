@@ -29,8 +29,7 @@
   (pull writes the bytes to the puller's `dir_path` and sets a read-only mirror). Local-only columns:
   `dir_path`, `analysis_id`, `analyzed_at`, `analyzed_spec_hash` (added to `_LOCAL_ONLY` or a per-binding exclude).
 - **Publish points** (all opt-in-gated, best-effort, reported): Apply and Discard (46-06 §5, §7); answering /
-  editing / reopening a question (the same `publish_story` path as a story edit); confirming/removing a suggested
-  spec ref; the link-stories finalizer (one `publish_feature_backlog`-style batch for the touched stories).
+  editing / reopening a question (the same `publish_story` path as a story edit).
 - **Conflict merge for stories** (a teammate edited the same story between our Apply and our publish):
   on `HubConflict`, GET the Hub record, merge, re-PUT once with its `base_version`:
   - fields the CR changed → ours; other scalar fields → theirs;

@@ -16,11 +16,11 @@ A reviewer that did not build the phase checks, with file:line evidence:
 5. **ID stability** — the normalizer never edits text or non-`data-cid` attributes (golden test), is idempotent, and
    never reuses an ID.
 6. **Old libraries** — genesis with the v0.21.0 workflow library: breakdown launches without `spec_clauses_path`,
-   "Link stories to the spec" hidden, story design launches unaffected.
+   the feature stays legacy (Reopen, no badges), story design launches unaffected.
 7. **Collab** — strict `LocalHubProvider` rejects unknown kinds/item types; open-CR data is never published; the
    conflict merge never drops a CR change.
 8. **ADR conformance** — ADR-001 (no orchestration in chat; the deterministic workflow for linking), ADR-011 (trio on
-   every agent node of `spec-story-linking`), ADR-012 (no workflow import in genesis; parity test instead),
+   every breakdown agent node, unchanged), ADR-012 (no workflow import in genesis; parity test instead),
    ADR-031/045 (the chat proposes, Apply commits), ADR-050 (all status changes through `LifecycleService`),
    ADR-063/064 (additive contract), ADR-037 (no code stored).
 9. **UX** — every disabled control explains why; every dialog says what will happen; jest-axe clean.
@@ -36,8 +36,8 @@ genesis-workflows: `validate_library` + pytest (incl. the backlog-renderer parit
 
 | # | Step | Expected |
 |---|---|---|
-| 1 | Open an existing finalized feature on `main` | Spec shows **Initiate change request**, not Reopen; "Link stories to the spec" banner |
-| 2 | Link stories to the spec | Run completes; badges appear; ≥ 90% of stories have a confirmed ref (user spot-check) |
+| 1 | Open an existing (legacy) finalized feature on `main` | Exactly today's behaviour: Reopen, no CR controls, no badges |
+| 2 | New feature: spec → UX → TD → breakdown → finalize | Breakdown cards show "Spec: §…"; every story has spec refs; spec preview shows coverage badges and **Initiate change request** |
 | 3 | Initiate CR-01 ("Accept LEI") | Status *Under change · CR-01*; chat divider; Save milestone hidden |
 | 4 | Start a story design on `main` for a story of this feature | The run's `spec_path` snapshot equals revision N (not the working copy) |
 | 5 | Edit 2 clauses, add 1, reword 1 cosmetically, move 1 | Normalizer keeps IDs (check `GET …/spec/clauses`) |

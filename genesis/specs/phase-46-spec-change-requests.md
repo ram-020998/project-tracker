@@ -55,6 +55,7 @@ stories, the breakdown, the UX Design and the Technical Design silently drift fr
 | D16 | **UX Design and Technical Design** show "Spec changed since this was produced (CR-n)" after an applied CR. |
 | D17 | **Additive Hub fields** are allowed; **story questions get answers**. |
 | D18 | No "raise change request from a story" button. |
+| D19 | **Existing stories are left as they are.** No backfill/linking of stories created before Phase 46; traceability and change requests apply only to breakdowns produced after this release (a *traceable* feature). Legacy features keep today's behaviour (Reopen). |
 
 ## 4. Current state (code-grounded — full detail in `46-01-findings.md` §2)
 
@@ -105,7 +106,7 @@ CR-03:  Analyze impact ─▶ diff(base revision, working copy) ─▶ impact-in
 | Building block | Sub-spec |
 |---|---|
 | Clause model: `data-cid` IDs, post-turn normalizer + ID repair, fingerprints, labels, clause map, preview overlay | 46-02 |
-| Story↔clause links: breakdown `clauseRefs`, finalize → `spec_refs`, coverage API, workstream bug fix, "Link stories to the spec" for existing features | 46-03 |
+| Story↔clause links: breakdown `clauseRefs`, finalize → `spec_refs`, coverage API, workstream bug fix, traceable vs legacy features | 46-03 |
 | CR lifecycle: `under-change` status + transitions, CR table, open/discard/list endpoints, consumer isolation, agent-visible chat notes, CR context files | 46-04 |
 | Impact analysis: deterministic diff, `impact-input.json`, the plan schema + validator, the CR document renderer, staleness | 46-05 |
 | Apply and discard: the transactional apply, backlog mode (re-render `breakdown.html`), freezing, publishing | 46-06 |
@@ -121,7 +122,7 @@ Additive + idempotent (guarded `ADD COLUMN`, `CREATE TABLE/INDEX IF NOT EXISTS`)
 
 | Change | Purpose |
 |---|---|
-| `kb_stories.spec_refs TEXT` (JSON array) | the clauses a story implements: `{clause_id, fingerprint, origin, confidence, confirmed, linked_at}` |
+| `kb_stories.spec_refs TEXT` (JSON array) | the clauses a story implements: `{clause_id, fingerprint, origin, linked_at}` |
 | `kb_stories.answers TEXT` (JSON array) | answered questions: `{question, answer, answered_by, answered_at, source, cr_no}` |
 | `kb_stories.change_log TEXT` (JSON array) | the CRs that affected the story: `{cr_no, cr_sync_uuid, decision, summary, clause_ids, at, by, …}` |
 | `kb_spec_change_requests` (new table) | one row per CR: number, status (`open`/`applied`/`discarded`), base/result revision, analysis state, file paths, counts, `sync_uuid`, `row_version` |
@@ -141,7 +142,8 @@ Files: CR working files live in the spec chat sandbox under `./cr/CR-03/`; froze
 | `under-change` | `apply-change` | `completed` | called by the CR apply service only |
 | `under-change` | `discard-change` | `completed` | called by the CR discard service only |
 
-`downstream_locked` = the feature's breakdown stage is `completed` **or** `kb_features.stories_finalized_at` is set.
+`downstream_locked` = the feature is traceable **and** (its breakdown stage is `completed` **or** `kb_features.stories_finalized_at` is set).
+`downstream_locked` applies only to **traceable** features (46-03 §7); a legacy feature keeps Reopen.
 `LifecycleService.allowed()` becomes precondition-aware so the UI never shows an action that would fail.
 
 ## 9. API surface (detail in the sub-specs)
@@ -150,7 +152,6 @@ Files: CR working files live in the spec chat sandbox under `./cr/CR-03/`; froze
 |---|---|---|
 | `GET /features/{id}/spec/clauses?revision=` | clause map (IDs, labels, kinds, fingerprints, text) | 46-02 |
 | `GET /features/{id}/spec/coverage` | per clause: linked stories / backlog items; uncovered clauses | 46-03 |
-| `POST /features/{id}/spec/link-stories` | start the "Link stories to the spec" run for existing features | 46-03 |
 | `GET /features/{id}/change-requests` | list CRs | 46-04 |
 | `POST /features/{id}/change-requests` | initiate a CR (`{title?}`) | 46-04 |
 | `GET /features/{id}/change-requests/{cr_no}` | CR detail (status, staleness, plan validation, counts) | 46-04/05 |
@@ -169,11 +170,11 @@ Files: CR working files live in the spec chat sandbox under `./cr/CR-03/`; froze
 |---|---|---|
 | **46-01** | docs | Findings + decisions + ADR-075/076 drafted (this set) |
 | **46-02** | genesis | Clause model: steering rules, `kb/spec_clauses.py` (extract, normalize, repair, fingerprint, label), post-turn normalizer hook, clause-map API, preview overlay data |
-| **46-03** | genesis-workflows, genesis | `feature-breakdown-analysis` v0.3.0 (`spec_clauses_path` input, clause-tagged spec text, `clauseRefs`, validator + coverage critic); finalize → `spec_refs`; `workstreamRef` fix; coverage API; `spec-story-linking` workflow + "Link stories to the spec" |
+| **46-03** | genesis-workflows, genesis | `feature-breakdown-analysis` v0.3.0 (`spec_clauses_path` input, clause-tagged spec text, `clauseRefs`, validator + coverage critic); finalize → `spec_refs`; `workstreamRef` fix; coverage API; `is_traceable` (legacy features unchanged) |
 | **46-04** | genesis | m0024; `under-change` + transitions + precondition-aware `allowed`; `SpecChangeStore`; open/list/get/discard endpoints; consumer isolation; agent-visible chat notes; CR context files + divider |
 | **46-05** | genesis | `kb/spec_diff.py`; analyze endpoint → `impact-input.json`; plan schema + validator; CR document renderer + endpoints; staleness |
 | **46-06** | genesis (+ genesis-workflows parity test) | `SpecChangeService.apply/discard`; backlog mode with `kb/backlog_doc.py` (renderer port) + parity test; freezing; publish hooks |
-| **46-07** | genesis (web) | Spec workspace CR controls + banner; preview tabs; CR list; coverage overlay + popover; apply/discard dialogs; link-stories banner |
+| **46-07** | genesis (web) | Spec workspace CR controls + banner; preview tabs; CR list; coverage overlay + popover; apply/discard dialogs |
 | **46-08** | genesis (+ genesis-workflows prompts) | Story answers API + UI; story spec references + change history UI; design-out-of-date flag + re-run; UX/TD "spec changed" badges; answers passed to story design/implementation |
 | **46-09** | genesis + Hub | `spec_change_request` record kind + document blob; `GH Story Item` `item_type` += `spec_ref`, `answer`, `change`; bindings; advisory marker; contract addition + fixtures |
 | **46-10** | all | Independent review + hardening + live acceptance |
@@ -185,15 +186,14 @@ build can run in parallel once 46-04/46-08 freeze the field shapes).
 ## 11. Release plan
 
 ADR-019 order: **genesis v0.77.0** (m0024 → DB **v24**) → **genesis-workflows v0.22.0** (re-pins genesis v0.77.0;
-`feature-breakdown-analysis` 0.3.0, `spec-story-linking` 0.1.0 new, `story-design-analysis` / `story-implementation`
-prompt additions). genesis-core, kiro-agent-sdk and the parser are unchanged. The Hub additions (46-09) are built and
+`feature-breakdown-analysis` 0.3.0, `story-design-analysis` / `story-implementation` prompt additions). genesis-core, kiro-agent-sdk and the parser are unchanged. The Hub additions (46-09) are built and
 live-validated **before** the genesis release. genesis tolerates an older installed workflow library: it passes
-`spec_clauses_path` only when the installed `feature-breakdown-analysis` declares it, and hides "Link stories to the
-spec" when `spec-story-linking` is not installed.
+`spec_clauses_path` only when the installed `feature-breakdown-analysis` declares it (an older library produces
+legacy, untraced breakdowns).
 
 ## 12. Scope
 
-**In:** everything in §3 and §10. **Out (deferred):** CRs on UX Design / Technical Design / the breakdown document
+**In:** everything in §3 and §10. **Out:** linking or backfilling stories created before Phase 46 (D19). **Deferred:** CRs on UX Design / Technical Design / the breakdown document
 itself; automatic re-run of story designs; partial apply (apply some decisions, keep the CR open); multiple
 concurrent CRs on one spec; Jira push of CR changes; per-clause comments/threads; clause-level links from UX/TD
 artifacts; enforcing the lane rule on manual story edits outside a CR.
@@ -206,8 +206,9 @@ artifacts; enforcing the lane rule on manual story edits outside a CR.
 | Q2 | Clause numbers are **computed** at render and shown in the preview margin (`§3.2-1`); never stored in the HTML. |
 | Q3 | New stories: epic = the followed-up story's epic (or the agent's proposal); status **To Do**; on the board if the followed-up story is (or, for a brand-new story, if any story of the feature is). |
 | Q4 | Removed clauses: affected stories flagged, default **no change**; the user may ask to update or **remove** a To Do / Design story. |
-| Q5 | Existing features get a one-time "Link stories to the spec" action (AI with confidence); Analyze impact also checks unlinked stories. |
-| Q6 | A CR title ("What's changing?") is optional. |
+| Q5 | A CR title ("What's changing?") is optional. |
+
+*(Former default "link existing stories with a one-time AI action" was dropped: existing stories are left as they are, D19.)*
 
 ## 14. Risks
 

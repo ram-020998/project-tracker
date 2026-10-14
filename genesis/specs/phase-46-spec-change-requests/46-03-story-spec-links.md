@@ -1,14 +1,17 @@
-# 46-03 — Story ↔ spec links (breakdown capture, finalize, coverage, existing features)
+# 46-03 — Story ↔ spec links (breakdown capture, finalize, coverage)
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repos: **genesis-workflows** (`feature-breakdown-analysis` 0.3.0, new
-> `spec-story-linking` 0.1.0) + **genesis**. Implements the link half of **ADR-075**.
+> **Status:** 🟡 DRAFTED 2026-10-14 (revised the same day: no backfill of existing stories). Repos:
+> **genesis-workflows** (`feature-breakdown-analysis` 0.3.0) + **genesis**. Implements the link half of **ADR-075**.
 > Parent: `specs/phase-46-spec-change-requests.md`. Depends on 46-02 (clause map) and 46-04 §3 (m0024 columns).
 
 ## 1. Goal
 
 Every story (and every backlog item before finalize) records **which spec clauses it implements**, captured at the
-moment the breakdown creates it — the most reliable link there is (46-01 §3.1 lesson 2). Existing features whose
-stories pre-date Phase 46 get links through a one-time, confidence-scored AI action.
+moment the breakdown creates it — the most reliable link there is (46-01 §3.1 lesson 2).
+
+**Existing stories are left as they are (user decision, 2026-10-14 — 46-01 §5.6).** Stories and breakdowns created
+before Phase 46 get no links and no backfill; traceability and change requests start with breakdowns produced after
+this release. §7 defines how such legacy features behave.
 
 ## 2. The link record
 
@@ -17,9 +20,7 @@ Stored on `kb_stories.spec_refs` (JSON array, m0024) and, before finalize, as `c
 ```json
 { "clause_id": "c-9f2a1c0b",
   "fingerprint": "3c1e0d9b77a2f410",   // the clause fingerprint when the link was made or last cleared
-  "origin": "breakdown",               // breakdown | backfill | cr | manual
-  "confidence": null,                  // null for breakdown/cr/manual; 0..1 for backfill suggestions
-  "confirmed": true,                   // false only for low-confidence backfill suggestions
+  "origin": "breakdown",               // breakdown | cr | manual
   "linked_at": "2026-10-14T09:20:11Z" }
 ```
 
@@ -59,7 +60,7 @@ Backward compatible: every change below activates only when the new optional inp
 
 `StoryStore.finalize` (`genesis/kb/stories.py`):
 - **Bug fix:** epic `workstream` = `epic.get("workstreamRef") or epic.get("workstream")` (today always NULL).
-- For each story: `spec_refs` = one record per `clauseRefs` entry with `origin:"breakdown"`, `confirmed:true`,
+- For each story: `spec_refs` = one record per `clauseRefs` entry with `origin:"breakdown"`,
   `fingerprint` = the clause's fingerprint **in the spec revision recorded in `backlog.specRevision`** (falling
   back to the current consumer spec version, 46-04 §6); refs whose ID is unknown in that map are dropped and
   reported in the finalize response (`dropped_refs`).
@@ -74,60 +75,43 @@ Backward compatible: every change below activates only when the new optional inp
 { "mode": "stories",            // stories (finalized) | backlog (breakdown completed, not finalized) | none
   "clauses": [ { "clause_id": "c-9f2a1c0b", "label": "§3.2-1", "kind": "clause",
                  "items": [ { "story_id": 41, "key": "GNS_000041", "title": "…", "status": "to-do",
-                              "confirmed": true, "suspect": false } ] } ],
-  "uncovered": ["c-77aa0e12"],   // requirement clauses with no item (sections excluded)
-  "unlinked_items": 12 }          // stories/backlog items with no refs at all (pre-Phase-46)
+                              "suspect": false } ] } ],
+  "uncovered": ["c-77aa0e12"] }  // requirement clauses with no item (sections excluded)
 ```
 
 - `mode=backlog` reads `clauseRefs` from the breakdown's embedded backlog (`_parse_embedded_backlog`).
+- `mode=none` for a legacy (untraced) feature (§7) — the preview then shows clause labels but no badges.
 - A section-level ref counts as covering every clause in the section.
 - Used by the preview overlay (46-02 §11) and the coverage popover (46-07 §6).
 
-## 7. Existing features — "Link stories to the spec"
+## 7. Legacy features (breakdown produced before Phase 46)
 
-For features finalized (or broken down) before Phase 46, `spec_refs` / `clauseRefs` are empty.
+A feature is **traceable** when its breakdown's embedded backlog carries `specRevision` (written only by
+`feature-breakdown-analysis` ≥ 0.3.0 run with a clause map, §3), or when any of its stories has a non-empty
+`spec_refs`. Helper: `is_traceable(feature_id)` in `genesis/kb/spec_changes.py`.
 
-### 7.1 The `spec-story-linking` workflow (genesis-workflows, new, 0.1.0)
+| | Traceable feature | Legacy feature |
+|---|---|---|
+| Spec lifecycle after the breakdown | Initiate change request (46-04 §2) | **Unchanged** — Reopen as today |
+| Coverage badges in the preview | yes | no (labels only; `coverage.mode = none`) |
+| Story "From the spec" card (46-08 §3) | yes | hidden |
+| Clause IDs in the spec | yes | yes (the normalizer runs for every spec; harmless) |
 
-Deterministic LangGraph graph; every agent node wears the ADR-011 trio.
-
-```
-resolve_inputs → load_inputs → next_batch ─(batch)→ link_batch [agent, no MCP] → v_links → advance → next_batch
-                                          └─(done)→ assemble [program: links.json] → present → cleanup
-```
-
-- **Inputs:** `feature_id`, `spec_clauses_path` (clause map), `items_path` (JSON written by genesis: stories or
-  backlog items `{id, key, title, description, acceptance_criteria, epic_title}`), `mode` (`stories`|`backlog`).
-- **Batching:** one batch per epic (max 25 items per batch; larger epics split).
-- **`link_batch` prompt:** the clause-tagged spec text + the batch; output per item
-  `{item_id, refs: [{clause_id, confidence 0..1, reason}]}`; "only link a clause the item genuinely implements;
-  confidence < 0.5 means leave it out".
-- **`v_links`:** every item of the batch present once; every clause ID exists; confidence in [0,1].
-- **Output:** `links.json` = all items' refs.
-
-### 7.2 genesis
-
-- `POST /features/{id}/spec/link-stories` → normalizes the spec, writes the inputs, starts the run (409 if not
-  installed / no stories or backlog / a linking run is already active). Response `{run_id}`.
-- `SpecLinkFinalizer` (RunManager observer, same pattern + guards as `StageFinalizer`: bound-run check, idempotent,
-  on-read recovery, failures logged) applies `links.json` on `run.final{done}`:
-  - `confidence ≥ 0.8` → `confirmed:true`; `0.5 ≤ confidence < 0.8` → `confirmed:false` (a **suggested** link);
-  - `origin:"backfill"`; fingerprint = the clause's current fingerprint; existing refs are kept (union);
-  - backlog mode writes `clauseRefs` into the embedded backlog via the 46-06 §6 backlog writer.
-- The coverage API reports `unlinked_items`; the spec workspace shows the banner (46-07 §8) while it is > 0 and no
-  linking run has completed for this feature.
-- Suggested links appear dashed in the coverage popover and on the story (46-08 §3) with **Confirm** / **Remove**.
+A legacy feature whose breakdown is **not finalized** becomes traceable by **re-running the breakdown** (the re-run
+reads the clause map); a finalized legacy feature stays legacy. No AI backfill, no confidence scores, no suggested
+links.
 
 ## 8. Tests
 
 - Workflow: clause-tagged `spec.txt`; validator accepts valid refs, rejects unknown/missing refs with the list;
   backlog carries `clauseRefs` + `specRevision`; without `spec_clauses_path` the graph is byte-for-byte today's
-  behaviour (golden run); `spec-story-linking` full-graph run with a fake agent.
+  behaviour (golden run).
 - genesis: launch passes the input only when declared; finalize writes `spec_refs` + `workstream`; unknown refs
-  dropped + reported; coverage API in both modes; section refs; `SpecLinkFinalizer` idempotency + threshold rules.
+  dropped + reported; coverage API in all three modes; section refs; `is_traceable` (backlog marker, story refs,
+  legacy).
 
 ## 9. Acceptance
 
-On a fresh feature: the breakdown cards show "Spec: §…" lines; after finalize every story has ≥ 1 confirmed ref;
-the spec preview shows a badge per clause and hollow badges for uncovered clauses. On an existing finalized feature:
-"Link stories to the spec" completes and ≥ 90% of stories get ≥ 1 confirmed ref (spot-checked by the user).
+On a fresh feature: the breakdown cards show "Spec: §…" lines; after finalize every story has ≥ 1 ref; the spec
+preview shows a badge per clause and hollow badges for uncovered clauses. An existing (legacy) feature behaves
+exactly as before.

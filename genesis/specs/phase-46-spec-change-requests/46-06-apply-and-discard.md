@@ -43,7 +43,7 @@ Normalize the working `spec.html` (46-02) → `final_html`, `final_map`. Then **
    `answered_by = canonical_username`, `answered_at = now`. If no open question matches, append the answer with the
    plan's question text anyway and list it under `answers_unmatched` in the apply report — never fail Apply for it.
 3. **New stories:** `create_story` semantics inside the same transaction (`GNS_` key from `kb_sequences`), status
-   `to-do`; `epic_id` from the plan; `spec_refs` = the story's `clause_ids` (`origin:"cr"`, `confirmed:true`);
+   `to-do`; `epic_id` from the plan; `spec_refs` = the story's `clause_ids` (`origin:"cr"`);
    **board membership:** `on_board = 1` if the followed-up story is on its board, or — for a story with no
    `follow_up_of` — if any story of the feature is on the board (umbrella Q3); a story with `on_board = 1` also gets a
    `kb_board_cards` row at the end of the To Do lane (as Import does); a feature with no board → `on_board = 0`.

@@ -87,18 +87,17 @@ in the list as *Discarded*." Buttons **Discard CR-03** (destructive tone) / Canc
 ## 7. Clause numbers and coverage in the spec preview
 
 - The served spec shows clause labels in the left margin and a badge in the right margin (46-02 §11): filled with the
-  number of stories (or backlog items), **hollow "no story"** when uncovered, dashed when only suggested links exist.
+  number of stories (or backlog items), **hollow "no story"** when uncovered. Legacy features (46-03 §7) show labels
+  only, no badges.
 - Clicking a badge posts `genesis:clause` to the host; `ClauseCoveragePopover` (anchored near the dialog's
-  right edge) lists the items: key, title, lane chip, a "suggested" tag where applicable; each row links to the
+  right edge) lists the items: key, title, lane chip; each row links to the
   Story Workspace (`/applications/:app/stories/:id?from=feature`) in a new tab. Uses `GET …/spec/coverage`.
 - Toolbar inside the preview: a **Coverage** toggle (default on when items exist) to hide/show the margin badges.
 
-## 8. "Link stories to the spec" banner (existing features)
+## 8. Legacy features
 
-Shown in the spec workspace when `coverage.unlinked_items > 0` and the `spec-story-linking` workflow is installed:
-"**12 stories aren't linked to the spec yet.** Link them so spec changes can find the stories they affect."
-Button **Link stories to the spec** → `POST …/spec/link-stories` → a run link ("Linking… view run") → on
-completion the banner disappears and the coverage badges appear. Not shown while a CR is open.
+Features whose breakdown pre-dates Phase 46 (46-03 §7) look and behave exactly as today: Reopen after the breakdown,
+no CR controls, no coverage badges, no "From the spec" card on stories. Nothing prompts the user to link them.
 
 ## 9. Change requests list (`ChangeRequestsPanel`)
 
@@ -120,11 +119,11 @@ complete, spec changes go through change requests."
 
 `lib/api/features.ts` (or `changeRequests.ts`): `listChangeRequests`, `getChangeRequest`, `initiateChangeRequest`,
 `analyzeChangeRequest`, `applyChangeRequest`, `discardChangeRequest`, `crDocumentUrlFor`, `crExportUrlFor`,
-`specCoverage`, `specClauses`, `linkStories`. `lib/query/keys.ts`: `qk.features.changeRequests(featureId)`,
+`specCoverage`, `specClauses`. `lib/query/keys.ts`: `qk.features.changeRequests(featureId)`,
 `qk.features.changeRequest(featureId, crNo)`, `qk.features.specCoverage(featureId)`. Hooks in
 `features/features/hooks.ts`: `useChangeRequests`, `useChangeRequest` (polls every 5 s while a chat turn is
 streaming), `useInitiateChangeRequest`, `useAnalyzeChangeRequest`, `useApplyChangeRequest`,
-`useDiscardChangeRequest`, `useSpecCoverage`, `useLinkStories`. Mutations invalidate the spec, its `allowed`, the CR
+`useDiscardChangeRequest`, `useSpecCoverage`. Mutations invalidate the spec, its `allowed`, the CR
 queries, coverage, and the feature's stories.
 
 ## 12. Tests (Vitest + RTL + MSW + jest-axe)
@@ -132,7 +131,7 @@ queries, coverage, and the feature's stories.
 Toolbar per state (§2 table); Initiate dialog; banner per analysis state incl. disabled tooltips; Analyze →
 `no_changes` toast vs chat send; Apply dialog summary + locked-story checkboxes gate the button + 409 blocker list;
 Discard dialog; preview tabs (single-document back-compat, annotation message names the document); coverage popover
-from a `genesis:clause` message; link-stories banner visibility; CR list; chat divider rendering; feature card chip;
+from a `genesis:clause` message; legacy feature (no CR controls, no badges); CR list; chat divider rendering; feature card chip;
 jest-axe on the workspace in Under change, the three dialogs, the drawer and the popover.
 
 ## 13. Acceptance (manual, live)

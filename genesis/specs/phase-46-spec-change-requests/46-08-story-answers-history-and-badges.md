@@ -38,12 +38,12 @@ by **index** (the UI knows it); CR answers address it by **normalized text** (th
 ## 3. Spec references on the story
 
 **UI — Story Workspace Overview**, a **"From the spec"** card:
-- one chip per `spec_refs` entry: label (`§3.2-1`, from the consumer clause map) + the clause text on hover; dashed
-  chip with **Confirm** / **Remove** for a suggested (unconfirmed backfill) ref; a muted "removed from the spec" chip
-  when the clause no longer exists;
+- one chip per `spec_refs` entry: label (`§3.2-1`, from the consumer clause map) + the clause text on hover; a muted
+  "removed from the spec" chip when the clause no longer exists;
 - clicking a chip opens the spec preview scrolled to that clause (`#cid` fragment — the preview script scrolls to
   `[data-cid=…]` and highlights it);
-- empty state: "Not linked to the spec yet" (+ the link-stories hint when the feature has the banner, 46-07 §8).
+- empty state (a story added manually without refs): "Not linked to the spec"; the card is hidden on legacy features
+  (46-03 §7).
 - `GET /features/{fid}/stories/{sid}` returns `spec_refs` enriched with `{label, text, exists}` resolved against the
   consumer clause map (no extra request).
 
@@ -109,7 +109,7 @@ entry's `at`.
 ## 8. Tests
 
 Answer / edit / reopen endpoints (CAS, index bounds, `canonical_username`); `_JSON_FIELDS` round-trip; spec-ref
-enrichment (exists / removed / suggested); change_log rendering incl. follow-up links; not-applied callout + board
+enrichment (exists / removed); change_log rendering incl. follow-up links; not-applied callout + board
 icon conditions; design-rerun resolution rule; `upstream_versions_json` written by each launcher; badge derivation
 (recorded version, legacy fallback, breakdown suppression, backlog-mode reconcile); `spec-reviewed` endpoint; the two
 workflow prompt additions (golden prompt text with and without the new keys); jest-axe on the new cards, callout and

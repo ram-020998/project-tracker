@@ -49,13 +49,12 @@ the document renders a word-level diff of them (§7).
 
 **Stories mode** (stories finalized). For each `modified` / `removed` clause (and each `modified` section): every
 story with a `spec_refs` entry on that clause ID — or on its section ID (a *broad* link) — is affected. Each affected
-story is included once, listing all its matched clause IDs and `match ∈ {linked, suggested, broad}`
-(`suggested` = an unconfirmed backfill ref).
+story is included once, listing all its matched clause IDs and `match ∈ {linked, broad}`.
 
 Also included:
-- **Unlinked stories** (no `spec_refs` at all) as `unlinked_candidates` — the agent decides whether any of them is
-  affected (the safety net for pre-Phase-46 stories, umbrella Q5). Capped at 200; text truncated (title, first 600
-  chars of description, AC).
+- Stories with **no** `spec_refs` (e.g. added manually without refs) are not considered — on a traceable feature every
+  breakdown and CR story has refs, and manual stories can be given refs (46-03 §5). CRs exist only on traceable
+  features (46-03 §7).
 - **Added clauses** with no story → `new_clauses`.
 - `formatting` and `moved` changes are listed (for the document) but produce no affected items.
 
@@ -87,8 +86,6 @@ Per affected story the program also computes:
                  "dev_note_ref": "…", "labels": [], "lane": "to-do", "lane_group": "editable",
                  "design_state": "none", "implementation_state": "none", "row_version": 3,
                  "matched_clause_ids": ["c-9f2a1c0b"], "match": "linked"} ],
-  "unlinked_candidates": [ {"story_id": 77, "key": "GNS_000077", "title": "…", "description": "…",
-                            "acceptance_criteria": ["…"], "lane": "to-do", "lane_group": "editable"} ],
   "new_clauses": [ {"clause_id": "c-77aa0e12", "label": "§6.4-1", "section_path": ["6 Notifications"],
                     "text": "Notify the relationship manager by email when …"} ],
   "epics": [ {"id": 3, "key": "epic-2", "title": "…"} ],
@@ -165,7 +162,7 @@ Errors block Apply; warnings are shown only.
 | # | Rule | Level |
 |---|---|---|
 | V1 | JSON parses; `schema == "genesis.cr-plan/1"`; `analysis_id` matches the CR | error |
-| V2 | **Completeness:** every `affected` item has **exactly one** decision; no decision for an item not in `affected` or `unlinked_candidates`; no duplicates | error |
+| V2 | **Completeness:** every `affected` item has **exactly one** decision; no decision for an item not in `affected`; no duplicates | error |
 | V3 | Story/backlog IDs belong to the feature; `follow_up_of` / `epic_id` / `epic_key` exist in the feature (epics are fixed — no new epics) | error |
 | V4 | **Lane rule:** a `locked` item with `decision != no_change`, or with `answer_questions`, requires `user_requested: true` (and its rationale should quote the request — warning if it doesn't look like a quote) | error / warning |
 | V5 | `changes` keys ⊆ `rules.editable_fields`; values have the right types; `story_type ∈ Story|Task`; `category ∈ core|nice-to-have` | error |
@@ -217,7 +214,7 @@ annotations quote meaningful targets.
 ## 10. Tests
 
 `spec_diff` classification table (each row, incl. moved vs modified, formatting-only, section rename); affected-item
-selection (linked, broad, suggested, unlinked candidates, backlog mode); lane groups and run states; impact-input
+selection (linked, broad, backlog mode); lane groups and run states; impact-input
 golden file; every validator rule (V1–V12) with a failing and passing case; renderer golden HTML for an open, an
 applied and a discarded CR; staleness transitions (edit after analysis → stale; re-analyze → none → plan → current);
 analyze endpoint guards (no open CR, spec unchanged, chat busy).
