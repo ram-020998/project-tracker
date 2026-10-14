@@ -199,7 +199,9 @@ itself; automatic re-run of story designs; partial apply (apply some decisions, 
 concurrent CRs on one spec; Jira push of CR changes; per-clause comments/threads; clause-level links from UX/TD
 artifacts; enforcing the lane rule on manual story edits outside a CR.
 
-## 13. Defaults to confirm at build sign-off (chosen by the assistant — `46-01-findings.md` §6)
+## 13. Defaults — ✅ confirmed by the user 2026-10-14 (all five as written; asked one by one)
+
+*(Heading was "Defaults to confirm at build sign-off (chosen by the assistant — `46-01-findings.md` §6)".)*
 
 | # | Default |
 |---|---|

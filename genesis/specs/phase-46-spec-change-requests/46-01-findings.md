@@ -284,7 +284,18 @@ story questions get answers.
 
 ---
 
-## 6. Defaults chosen by the assistant (not yet explicitly confirmed — listed in the umbrella §13)
+### 5.7 Round 5 — the defaults (2026-10-14, after 46-02 was built)
+
+Asked one question at a time; the user chose the default (option A) for each:
+- **Q1** — CRs replace Reopen once the breakdown is *completed* or the stories are *finalized* (in review keeps Reopen). Rejected: finalized-only; any breakdown state.
+- **Q2** — clause numbers computed and shown only in the preview margin, never stored. Rejected: an added "copy reference" action; numbers written into the text.
+- **Q3** — a new story goes into the followed-up story's epic (else the agent's proposed epic), status To Do, on the board if the followed-up story is (a brand-new story: if any story of the feature is), positioned after the followed-up story. Rejected: never auto-board; a per-story board checkbox in Apply.
+- **Q4** — removed clauses: affected stories flagged, default no change; update or (To Do / Design only) remove when the user asks. Rejected: default update; mark obsolete instead of deleting.
+- **Q5** — the CR title is optional (blank shows as CR-n; Analyze impact may suggest one). Rejected: required; required before Apply.
+
+## 6. Defaults chosen by the assistant — ✅ confirmed by the user 2026-10-14 (umbrella §13 Q1–Q5, each answered "A" = the default as written)
+
+*(Heading was "not yet explicitly confirmed"; the confirmation round is recorded in §5.7.)*
 
 | Topic | Default in this spec |
 |---|---|

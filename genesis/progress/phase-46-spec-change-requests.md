@@ -2,7 +2,7 @@
 
 > Spec: `specs/phase-46-spec-change-requests.md` (+ `46-01..46-11`). ADR-075/076 **Proposed** (Accepted at the 46-11 release).
 > Build started 2026-10-14 on the user's go-ahead. Code commits are **local only** (no push/tag until the 46-11 release
-> go-ahead). The umbrella §13 defaults (Q1–Q5) are still to be confirmed; nothing built so far depends on them.
+> go-ahead). The umbrella §13 defaults (Q1–Q5) were confirmed by the user on 2026-10-14, all as written (findings §5.7).
 
 ## Ledger
 
