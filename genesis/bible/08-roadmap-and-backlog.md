@@ -8,6 +8,14 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
+### 🟡 SPEC-DRAFTED — Phase 46: Spec Change Requests & Story Traceability (awaiting build sign-off)
+
+> **Status:** 🟡 **SPEC-DRAFTED 2026-10-14 — no code changed; build begins only after the user's go-ahead.** Spec: `specs/phase-46-spec-change-requests.md` (+ `46-01..46-11`; findings with the research and every decision: `46-01-findings.md`). **New ADRs (Proposed):** ADR-075 (spec clause model + story↔spec traceability) + ADR-076 (spec change requests). Repos: genesis (m0024 → DB v24; v0.77.0) → genesis-workflows (v0.22.0: `feature-breakdown-analysis` 0.3.0 `clauseRefs`, new `spec-story-linking`, story design/implementation prompt additions) + additive Genesis Hub fields (built by the separate Appian agent).
+>
+> **What.** Spec sections/clauses get hidden program-maintained `data-cid` IDs (repaired after every chat turn); the breakdown records which clauses each story implements (`spec_refs` with fingerprints); the spec preview shows per-clause story coverage. Once the breakdown is complete, a spec changes only through a numbered **change request** driven from the spec's existing chat: **Initiate change request** (spec → *Under change*, CR-n divider in the chat) → edit in chat → **Analyze impact** (program diff + linked stories → the agent writes a structured plan → Genesis renders the **"CR-n Impact Analysis"** document) → refine in chat → **Apply changes** (one transaction: stories updated/created/removed, change history, new spec revision, spec *Completed*) or **Discard change request**. Stories in Design Review or later are never touched unless the user explicitly asks. While a CR is open, downstream runs read the last completed revision. Backlog mode updates the breakdown when stories aren't finalized. Story questions get answers; UX/TD show "spec changed (CR-n)".
+>
+> **Locked with the user 2026-10-14** (three rounds — Option B; the chat-driven CR flow; button names Analyze impact / Apply changes; straight to Completed; Discard; backlog mode; one chat per spec; lane rule; no raise-from-story; UX/TD badges; Hub fields + answers; one impact-analysis document per CR). Defaults still to confirm at build sign-off: umbrella §13 (Q1–Q6).
+
 ### ✅ SHIPPED — Genesis Hub read-only Appian site (Appian-side only, 2026-10-14)
 A polished, strictly read-only Appian site over the Genesis Hub app (`/suite/sites/genesis-hub`, GH Users): Home, Applications, Features, Board, Stories, Object Wiki, Team + Feature/Story/Wiki Page record views. Built in merge-assist-dev with Dev MCP — no Genesis repo change, no tag. Spec, UUIDs and evidence: `specs/appian-env/` (start at `AGENT_ONBOARDING.md`).
 
