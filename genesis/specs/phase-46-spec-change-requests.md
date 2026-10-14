@@ -17,7 +17,8 @@ stories, the breakdown, the UX Design and the Technical Design silently drift fr
 
 ## 2. Goal
 
-1. **Traceability.** Every section and requirement clause of a spec has a stable hidden ID. Every story records the
+1. **Traceability** (for features whose breakdown runs after this release — existing stories are left as they are,
+   D19). Every section and requirement clause of a spec has a stable hidden ID. Every story records the
    clauses it implements (captured when the breakdown creates it). The spec preview shows how many stories cover
    each clause and which clauses no story covers.
 2. **Change requests (CRs).** After the breakdown is done, the spec is changed only through a numbered change request

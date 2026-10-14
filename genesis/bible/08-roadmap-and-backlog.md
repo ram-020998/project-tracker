@@ -835,7 +835,7 @@ auto-fetch source** (2026-08-05); commit/push approved — 16-01/16-02/16-03 + 1
   secrets); **rotate the shared `GITLAB_PUSH_TOKEN`** + refresh the expired Artifactory npm token; the
   `lcp` MCP image placeholder (`<lcp-image>`) in `mcp-registry.json`.
 
-**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-10-13 there is NO active phase — Phases 1–45 are shipped; the Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
+**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-10-14 there is NO active build — Phases 1–45 are shipped; Phase 46 is SPEC-DRAFTED and awaits the user's build go-ahead (top of §9). The Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
 human's go-ahead — specs are pushed and 16-01/16-02 are shipped + CI-green; continue in the build order per §9's Phase-16
 block. This does not authorize starting any phase *beyond* 16 or any `specs/backlog/` work.)
 

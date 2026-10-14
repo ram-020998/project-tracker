@@ -1,7 +1,7 @@
 # 46-03 — Story ↔ spec links (breakdown capture, finalize, coverage)
 
 > **Status:** 🟡 DRAFTED 2026-10-14 (revised the same day: no backfill of existing stories). Repos:
-> **genesis-workflows** (`feature-breakdown-analysis` 0.3.0) + **genesis**. Implements the link half of **ADR-075**.
+> **genesis-workflows** (`feature-breakdown-analysis` 0.3.0) + **genesis**. Implements the link half of **ADR-075**. Decisions D1, D19 (umbrella §3).
 > Parent: `specs/phase-46-spec-change-requests.md`. Depends on 46-02 (clause map) and 46-04 §3 (m0024 columns).
 
 ## 1. Goal
