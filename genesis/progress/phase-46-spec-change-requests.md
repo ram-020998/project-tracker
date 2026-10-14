@@ -11,8 +11,8 @@
 | 46-01 findings | ✅ done (2026-10-14) | docs only | — |
 | 46-02 clause model | ✅ built (2026-10-14) | genesis `196e78d` | SHIP |
 | 46-03 story↔spec links | ✅ built (2026-10-14) | genesis `0d8622e` · genesis-workflows `da0bb91` | SHIP |
-| 46-04 CR lifecycle | ⏳ next | — | — |
-| 46-05 impact analysis | — | — | — |
+| 46-04 CR lifecycle | ✅ built (2026-10-14) | genesis `b8a9fc8` | SHIP |
+| 46-05 impact analysis | ⏳ next | — | — |
 | 46-06 apply / discard | — | — | — |
 | 46-08 story answers / history / badges | — | — | — |
 | 46-07 web | — | — | — |
@@ -114,3 +114,70 @@
 - Independent review = **SHIP**; findings folded in (O(1) coverage dedup + direct-over-section precedence, YAML errors
   on the declared-input check, a comment on the CAS-free setter). Coverage of 500 clauses × 200 stories < 1 s (test).
 - Not verified live: a real breakdown run with the clause map (needs the fleet updated + a Kiro run).
+
+## 46-04 — change-request lifecycle (genesis `b8a9fc8`)
+
+**What was built**
+- **Domain:** `LifecycleState.UNDER_CHANGE`; `SPEC_TRANSITIONS` += `completed –initiate-change→ under-change`,
+  `under-change –apply-change|discard-change→ completed`; preconditions: `reopen` needs *not* `downstream_locked`,
+  `initiate-change` needs `is_spec ∧ downstream_locked ∧ via_change_request`, apply/discard need `via_change_request`
+  (reasons per 46-04 §2.1). `LifecycleService.allowed(…, ctx=)` is precondition-aware (also used for the
+  `IllegalTransitionError` allowed list). `transition(…, conn=)` writes the status and the m0013 audit row on the
+  caller's transaction (`StageStore.set_status(conn=)`, `LifecycleAuditStore.record(conn=)`).
+- **`downstream_locked`** = a *traceable* feature (46-03 §7) whose breakdown is completed or whose stories are
+  finalized. Legacy features are never locked and keep Reopen. Computed by `SpecChangeService.stage_ctx`, used by
+  both `/spec/*` and `/stages/{stage}/*` action + allowed endpoints.
+- **`SpecChangeStore`** (`kb/spec_changes.py`): create (`cr_no = max + 1`, one open CR per spec via the m0024 partial
+  index → `OpenChangeRequestExistsError`), get / get_by_no / get_open / list, set_analysis, set_summary, close
+  (open-only CAS); `cr_label` (`CR-01`, `CR-100`).
+- **`services/stage_artifacts.py`** (new): the one shared resolver — `current_stage_html` (working copy: sandbox
+  first) and `consumer_stage_html` (a spec `under-change` → the CR's frozen `base.html`, then the base revision
+  file, then `html_path`) + `write_revision`. `api/features.py` and `api/workbench.py` both use it (the duplicated
+  resolver is gone).
+- **`services/spec_change.py`** (new) `SpecChangeService`:
+  - **Initiate** (`POST /features/{id}/change-requests {title?}`): guards (spec completed, locked, owns a chat
+    session, chat not streaming, no open CR) → normalize → baseline milestone "Baseline for CR-n" when the working
+    copy differs from the latest revision → frozen `base.html` + sandbox `./cr/CR-n/` (`instructions.md` per 46-04 §8,
+    `base-spec.html`, `context/ux-design.html`, `context/technical-design.html`, earlier CR documents) → **one
+    transaction**: CR row + audited `initiate-change` → the `cr-divider` agent note. Mode = stories when finalized,
+    else backlog. Any failure removes the files it created and leaves the spec `completed`.
+  - **Discard** (`POST …/{cr_no}/discard`; 46-06 §7 built here by agreement): restore the sandbox `spec.html` and
+    `working/last-normalized.html` to `base.html` byte-for-byte → **one transaction**: CR `discarded` + audited
+    `discard-change` → `cr-discarded` note. A failed transaction puts the edited working copy back.
+  - **List / detail** (`GET …/change-requests[/{cr_no}]`); detail carries `analysis.state = none` (46-05 fills it),
+    `can_apply = false`.
+  - Initiate/discard are serialized per spec (in-process lock); leftover CR directories are refused, never reused.
+- **Guards while under change:** both spec milestone routes 409; the deprecated `PATCH /spec/status` 409s for
+  `under-change` (and refuses to leave `completed` while locked); Finalize Stories 409; the breakdown milestone 409
+  during a backlog-mode CR; generic CR actions 409 (precondition). Prerequisite checks count `under-change` as
+  present (`StageStore.PRESENT_STATUSES`). Export .md filename `spec-<id>-working-copy-CR-n.md`.
+- **Consumer isolation (D11):** UX / TD / breakdown launches, the Workbench story-design launch, and the
+  clauses / coverage defaults read the consumer version (default revision = the CR's base revision while under
+  change; `revision=working` still available). The chat preview keeps the working copy.
+- **Chat:** `chat_messages.meta_json` round-trips (`ChatMessageRecord.meta`; the chat API returns `meta` without
+  `agent_text`); `ChatManager.enqueue_agent_note(visible, agent_text, kind, meta)` — queued on a running client and
+  prepended as `Genesis: …` to its next non-command turn, otherwise replayed by the cold-start preamble (system
+  messages now replay as `Genesis:` lines with their agent text); queued notes are dropped when the client closes
+  (the replay carries them). **Add context now uses it** (the transcript-only defect, 46-01 §2.4, is fixed for every
+  stage).
+
+**Deviations / notes**
+- `submit`'s has-HTML precondition does **not** filter `allowed(ctx=)` (`SPEC_FILTERING_PRECONDITIONS` = the lock/CR
+  rows only): the web doesn't refetch `allowed` after a chat turn writes the artifact, so hiding *Submit for review*
+  would strand it; the 409 still explains why.
+- The baseline milestone revision is written before the CR transaction and is kept if that transaction fails (it is a
+  plain snapshot of the working copy).
+- The advisory "spec under change" marker (46-04 §5.1 step 8) moves to 46-09 with the rest of the collaboration work.
+- Discard was built here (umbrella ledger) instead of 46-06; freezing a *Discarded* CR document follows in 46-06 once
+  the 46-05 renderer exists.
+- No web change yet (46-07): an `under-change` spec shows a raw status label in today's UI until then.
+- 46-09 note: its `spec_change_request` binding names `html_col="document_path"`, but the table has `dir_path`.
+
+**Evidence**
+- genesis pytest **994** (+20 `tests/test_change_requests.py`) + ruff clean. The racing-initiate test fails 3/3 with
+  the per-spec lock removed and passes with it.
+- Independent review = **SHIP**; findings folded in (racing initiates could delete the winner's CR files → per-spec
+  lock + no reuse of leftover directories; ctx computed once outside the transaction; stores threaded through the
+  resolver; an end-to-end Workbench story-design isolation test; hoisted import).
+- Not verified live: a real chat turn receiving an agent note in a running `genesis serve` (the fleet is not
+  restarted mid-phase).
