@@ -29,6 +29,24 @@ Signatures: laneColor/stageStatusColor/storyTypeColor/changeKindColor/objectType
 `GH_UI_latestBlobs(blobKind Text, blobKeys List of Text)` → List of Map {blobKey, documentId, version, size, publishedBy, createdAt}.
 `GH_UI_formatDateTime(value, withTime)` — withTime defaults to true. SAIL sources: `/Users/ramaswamy.u/appian-dev/genesis-hub-site/*.sail`.
 
+### Sub-spec 04 — shared components ✅
+| Interface | UUID | Inputs | Evidence |
+|---|---|---|---|
+| GH_UI_PageHeader | `_a-0000f08b-d302-8000-9c31-011c48011c48_29570` | title, subtitle, eyebrow, icon, color, meta(Any) | created w/ testInputs; testInterface OK (ContentLayout, 75 ms) |
+| GH_UI_KpiCard | `_a-0000f08b-d302-8000-9c31-011c48011c48_29576` | label, value, icon, color, softColor, hint | testInterface OK |
+| GH_UI_TagList | `_a-0000f08b-d302-8000-9c31-011c48011c48_29584` | tags (Map list {text,color,soft,tooltip}), label | testInterface OK (empty → nothing) |
+| GH_UI_EmptyState | `_a-0000f08b-d302-8000-9c31-011c48011c48_29580` | icon, title, message | testInterface OK (null defaults) |
+| GH_UI_LabelValue | `_a-0000f08b-d302-8000-9c31-011c48011c48_29566` | label, value (Text) | testInterface OK (null → "—") |
+| GH_UI_StageTracker | `_a-0000f08b-d302-8000-9c31-011c48011c48_29600` | artifacts (Map list {stage,status,version,publishedBy,publishedAt,documentId}), compact | full + compact modes OK; with-data branch evaluated at create |
+| GH_UI_LaneProgress | `_a-0000f08b-d302-8000-9c31-011c48011c48_29596` | counts (Map list {status,count}), showLegend, showAllLanes | empty branch OK; data branch evaluated at create |
+| GH_UI_StoryCard | `_a-0000f08b-d302-8000-9c31-011c48011c48_29608` | story (Map {id,backlogKey,title,storyType,appianPart,status,epicTitle,featureName}), showLane | null branch OK; card links to GH Story record |
+
+**Learnings:** `a!richTextDisplayField` has NO `numberOfLines` param on this env (rejected). Icon aliases verified valid by validateExpression:
+file-text-o, paint-brush, sitemap, list, database, desktop, code, thumb-tack, table, plug, globe, users, user, cube, cubes, star, flag, check-square-o,
+columns, book, cloud-upload, circle, check-circle, clock-o, history, tag, bug, folder-open, rocket, th-large, layer-group, bolt, inbox, bar-chart, tasks,
+comment, question-circle, external-link, eye, download, arrow-right, calendar, envelope, info-circle, search, filter, code-fork, shield, dot-circle-o.
+**INVALID:** `chart-bar`. Validation does catch bad icons (control test). `testInterface` ignores maxResponseSizeBytes (returns the full tree) — use sparingly.
+
 ## 2026-10-14 — Session 1 (discovery + specs)
 **Done**
 - Onboarded to Genesis (bible); loaded the Appian skill + references (tools-mcp, sites, record-summary-views, function/component
