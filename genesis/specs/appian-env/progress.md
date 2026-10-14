@@ -47,6 +47,18 @@ columns, book, cloud-upload, circle, check-circle, clock-o, history, tag, bug, f
 comment, question-circle, external-link, eye, download, arrow-right, calendar, envelope, info-circle, search, filter, code-fork, shield, dot-circle-o.
 **INVALID:** `chart-bar`. Validation does catch bad icons (control test). `testInterface` ignores maxResponseSizeBytes (returns the full tree) — use sparingly.
 
+### Sub-spec 05 — record views (in progress)
+- **Deviation:** views take input **`identifier` (Number (Integer))** and are wired as `rule!GH_UI_XSummaryView(identifier: rv!identifier)` (simpler + testable), instead of a `record` input.
+- **Bootstrap:** `a!recordLink` to a record type with NO summary view fails validation. Feature + Wiki Page had no views, so a placeholder Summary view was added to each first (Feature RT v6, Wiki Page RT v5), then replaced by the real interface.
+- GH Story already had a Summary view in RULES mode with an empty UI; it was converted to EXPRESSION `=true()` + the new interface (RT v9→v10).
+- `GH_UI_richLines` `_a-0000f08b-d302-8000-9c31-011c48011c48_29614` (extra helper): bolds leading Gherkin/user-story keywords per line.
+- `GH_UI_StorySummaryView` `_a-0000f08b-d302-8000-9c31-011c48011c48_29620` ✅ wired to GH Story summary; title = `backlogKey · title`; hideNewsView + hideRelatedActionsView.
+  Evidence: story 1 renders (5 AC with Gherkin bolding, 4 questions, label, dev note, "Objects changed (0)" empty state);
+  story **73** (`27dde3a9…`, story-1-1) smoke → `Objects changed (3)=Y, AS_GSS=Y, CREATED=Y` — **sub-spec 02 relationship `WE.story` verified**.
+- Test helpers (read-only, not in the site): `GH_UI_devSmokeTest` rule `_a-0000f08b-d302-8000-9c31-011c48011c48_29626` (target `storyIdBySync` → find story id by syncUuid);
+  `GH_UI_devSmokeView` interface `_a-0000f08b-d302-8000-9c31-011c48011c48_29632` — renders a target and prints `SMOKE <target> chars=N expect=a=Y,b=N` (pipe-separated expectText). Use it instead of raw testInterface (which dumps 50 KB trees). Add new targets to `gen/GH_UI_devSmokeView.full.tpl` as pages are built.
+- SAIL generator: `/Users/ramaswamy.u/appian-dev/genesis-hub-site/gen/refs.py` (`@RT(S)`, `@F(S.feature.name)` macros → full UUID refs); templates `gen/*.tpl` → `../*.sail`.
+
 ## 2026-10-14 — Session 1 (discovery + specs)
 **Done**
 - Onboarded to Genesis (bible); loaded the Appian skill + references (tools-mcp, sites, record-summary-views, function/component
