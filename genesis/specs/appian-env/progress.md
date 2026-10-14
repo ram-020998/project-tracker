@@ -69,6 +69,19 @@ comment, question-circle, external-link, eye, download, arrow-right, calendar, e
   "Objects changed" KPI = count of wiki entries via `WE.story.featureSyncUuid` relationship filter (fetchTotalCount).
 - **Sub-spec 05 ✅ DONE.** Note: `updateInterface` echoes the whole expression back — prefer getting it right on create.
 
+### Sub-specs 06–08 — page interfaces ✅ (all smoke-tested with real data via GH_UI_devSmokeView; diagnostics.error = null)
+| Page | UUID | Smoke evidence |
+|---|---|---|
+| GH_UI_HomePage | `_a-0000f08b-d302-8000-9c31-011c48011c48_29670` | 9/9 expected strings (KPIs, both features, Stories by lane, activity feed, wiki changes), 378 ms |
+| GH_UI_ApplicationsPage | `_a-0000f08b-d302-8000-9c31-011c48011c48_29680` | App …930416, KB snapshot history, features; "Other key" branch not hit (no non-app keys in data now), 1.8 s |
+| GH_UI_FeaturesPage | `_a-0000f08b-d302-8000-9c31-011c48011c48_29686` | both features, % done, epics, Open feature, 2.2 s |
+| GH_UI_BoardPage | `_a-0000f08b-d302-8000-9c31-011c48011c48_29691` | TO DO / CODE REVIEW / DONE lanes, "+N more" (Done has 72 > cap 25), 1.9 s |
+| GH_UI_StoriesPage | `_a-0000f08b-d302-8000-9c31-011c48011c48_29710` | record-backed grid (showSearchBox), % done, 2.0 s |
+| GH_UI_ObjectWikiPage | `_a-0000f08b-d302-8000-9c31-011c48011c48_29702` | KPIs incl. BUG FIXES, AS_GSS objects, RECORD TYPE, 1.4 s |
+| GH_UI_TeamPage | `_a-0000f08b-d302-8000-9c31-011c48011c48_29698` | Source Selection, King Arthur, admin.user, "2 members", updates published, 0.9 s |
+Extra data rules: `GH_UI_storyLaneCounts` `_a-0000f08b-d302-8000-9c31-011c48011c48_29658` (feature×lane aggregation), `GH_UI_allArtifacts` `_a-0000f08b-d302-8000-9c31-011c48011c48_29662` (all artifacts + latest doc id).
+Board layout decision: 8 AUTO columns, DENSE, stacked below TABLET_LANDSCAPE, cap 25 cards/lane with show-more; non-standard lanes in an "Other lanes" card (D2). Visual check in browser still pending.
+
 ## 2026-10-14 — Session 1 (discovery + specs)
 **Done**
 - Onboarded to Genesis (bible); loaded the Appian skill + references (tools-mcp, sites, record-summary-views, function/component

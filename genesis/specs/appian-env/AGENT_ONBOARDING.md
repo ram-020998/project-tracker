@@ -68,7 +68,7 @@ Genesis code change, no release, no tag**.
 | 03 helper rules | ✅ |
 | 04 shared components | ✅ |
 | 05 record views | ✅ |
-| 06 Home + Applications | ⬜ |
-| 07 Features + Board | ⬜ |
-| 08 Stories + Wiki + Team | ⬜ |
+| 06 Home + Applications | ✅ |
+| 07 Features + Board | ✅ |
+| 08 Stories + Wiki + Team | ✅ |
 | 09 site + security + verification + docs | ⬜ |
