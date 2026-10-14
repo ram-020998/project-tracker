@@ -8,7 +8,9 @@
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 🟡 SPEC-DRAFTED — Phase 46: Spec Change Requests & Story Traceability (awaiting build sign-off)
+### 🧱 BUILDING — Phase 46: Spec Change Requests & Story Traceability (build started 2026-10-14; heading was "SPEC-DRAFTED — awaiting build sign-off")
+
+> **Build progress:** go-ahead given 2026-10-14. **46-02 clause model ✅ built** (genesis `196e78d`, local; review SHIP). Next 46-03. Ledger + as-built: `progress/phase-46-spec-change-requests.md`. Code stays local until the 46-11 release.
 
 > **Status:** 🟡 **SPEC-DRAFTED 2026-10-14 — no code changed; build begins only after the user's go-ahead.** Spec: `specs/phase-46-spec-change-requests.md` (+ `46-01..46-11`; findings with the research and every decision: `46-01-findings.md`). **New ADRs (Proposed):** ADR-075 (spec clause model + story↔spec traceability) + ADR-076 (spec change requests). Repos: genesis (m0024 → DB v24; v0.77.0) → genesis-workflows (v0.22.0: `feature-breakdown-analysis` 0.3.0 `clauseRefs`, story design/implementation prompt additions; the planned `spec-story-linking` backfill workflow was dropped the same day — existing stories are left as they are) + additive Genesis Hub fields (built by the separate Appian agent).
 >
