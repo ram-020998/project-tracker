@@ -570,7 +570,7 @@
 > (via `genesis-kb`/`KbStore` — no env round-trip), emits a versioned **`BusinessModel v1`** persisted in **m0008
 > `kb_business_maps`** (code-free, point-in-time, stale-on-sync); the web renders A+B on the existing **@xyflow/react +
 > dagre** stack with focus+context linking. **Specs:** `specs/phase-17-business-application-map.md` (umbrella) +
-> `phase-17-business-application-map/business-model-contract.md` + `17-01..17-06`; **ADR-039** (Proposed). **Release chain
+> `phase-17-business-application-map/business-model-contract.md` + `17-01..17-06`; **ADR-039** (Proposed at drafting; **Accepted** — shipped, see below). **Release chain
 > when built:** genesis (m0008 + KbStore + evidence extractor + API + web) → genesis-workflows (workflow + catalog);
 > genesis-core likely unchanged. **Backend (17-01 persistence/m0008 + 17-02 evidence pack + 17-04 API) SHIPPED in
 > genesis v0.35.0; the deterministic `generate-business-map` workflow (17-03) SHIPPED in genesis-workflows v0.9.0
@@ -587,7 +587,9 @@
 > as a coherent business story with no technical vocabulary. **PHASE 17 COMPLETE.** (Optional future polish: richer
 > golden-fixture harness; per-value-stream layout tuning.)**
 
-### ⭐ ACTIVE (IN PROGRESS — planning complete + pushed; 16-01/16-02/16-03/16-04/16-08 + **16-05 (server + chat)** shipped, **16-05b (workflow cutover) + 16-07 next**) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
+### ✅ CLOSED (historical heading kept below; remaining items in `specs/backlog/phase-16-deferred.md`) — was: ⭐ ACTIVE (IN PROGRESS — planning complete + pushed; 16-01/16-02/16-03/16-04/16-08 + **16-05 (server + chat)** shipped, **16-05b (workflow cutover) + 16-07 next**) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
+
+> **(Historical — Phase 16 is closed. What it left open is tracked in `specs/backlog/phase-16-deferred.md`: 16-06 versioning [externally gated] and 16-05b [`erd-generation` still uses `appian-atlas`; `design-doc` was removed in Phase 34]. The true incremental delta [§1.3] was delivered by Phase 45. Current state: `bible/01`; no active phase.)**
 
 > **Handoff for the next session:** planning is complete AND implementation is under way. Read
 > `specs/phase-16-appian-knowledge-base.md` (umbrella) + `phase-16-appian-knowledge-base/16-01..16-08` +
@@ -822,7 +824,7 @@ auto-fetch source** (2026-08-05); commit/push approved — 16-01/16-02/16-03 + 1
   secrets); **rotate the shared `GITLAB_PUSH_TOKEN`** + refresh the expired Artifactory npm token; the
   `lcp` MCP image placeholder (`<lcp-image>`) in `mcp-registry.json`.
 
-**Do not start backlog or a *new* phase unless explicitly asked.** (Phase 16 is **actively being implemented** with the
+**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-10-13 there is NO active phase — Phases 1–45 are shipped; the Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
 human's go-ahead — specs are pushed and 16-01/16-02 are shipped + CI-green; continue in the build order per §9's Phase-16
 block. This does not authorize starting any phase *beyond* 16 or any `specs/backlog/` work.)
 

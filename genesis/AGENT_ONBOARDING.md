@@ -47,7 +47,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
      - bible/01-current-state.md             (repos/tags, tests, what works)
      - bible/02-architecture.md              (mental model)
      - bible/03-codebase-map.md              (where code lives)
-     - bible/04-adrs-and-constraints.md      (ADR-001..054 — non-negotiable)
+     - bible/04-adrs-and-constraints.md      (ADR-001..074 — non-negotiable)
      - bible/05-dev-loop-and-release.md      (env, tests, release, CI)
      - bible/06-hard-won-lessons.md          (do-not-regress bugs)
      - bible/07-working-on-tasks-and-agreements.md (the work loop + working agreements)
@@ -83,6 +83,8 @@ Onboard to the Genesis project by reading its bible before doing anything else.
   unless I ask, and ask before destructive actions. No code changes until you've read it and restated.
   
   Both point at the index, which itself enforces the read-all rule — so even the short one will pull the whole bible.
+
+> **Note:** the Phase 26–30 blocks below are kept as the historical release banners of those phases (their "no active phase" / "remaining" lines describe the state at the time). For the CURRENT state read the "Last refreshed" line above and `bible/01-current-state.md`.
 
 ## ⭐ SHIPPED — Phase 30 (Technical Design Stage) — COMPLETE · genesis v0.57.0 + genesis-workflows v0.13.0 (2026-09-03, CI green)
 
@@ -213,7 +215,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 >
 > **Resolved:** the `/memory` d3 constellation is now token-driven (27-09) — no hardcoded-dark surfaces remain.
 > **Deferred:** system banners get deeper polish in **27-11**; memory-graph keyboard-nav is a known a11y follow-up (27-11).
-> Remaining phases: **27-10** Catalog/Settings/Overview · **27-11** polish + a11y/responsive + dark-parity + release.
+> *(Historical — written mid-Phase 27; Phase 27 shipped in v0.53.0 and every phase through 45 has shipped since. There is no active phase.)* Remaining phases: **27-10** Catalog/Settings/Overview · **27-11** polish + a11y/responsive + dark-parity + release.
 > **Do NOT start other new-phase/backlog work unless the human asks.**
 
 > **Phase-26 backlog / deferred follow-ups (NOT started — pick up only if asked):** the 26-05 internal-server
@@ -239,7 +241,7 @@ Onboard to the Genesis project by reading its bible before doing anything else.
 | 1 | [`bible/01-current-state.md`](./bible/01-current-state.md) | §2 | **Current state** — the five-repo tag table, dependency chain, test counts, milestones, and "what works today". *Changes every release.* |
 | 2 | [`bible/02-architecture.md`](./bible/02-architecture.md) | §3 | **Architecture / mental model** — layered design (agents never orchestrate), the reliability trio, state/blackboard rule, subprocess-worker execution, the SQLite data plane, HITL modes, release/versioning. |
 | 3 | [`bible/03-codebase-map.md`](./bible/03-codebase-map.md) | §4 | **Codebase map** — where every module lives across genesis-core / genesis / genesis-workflows / kiro-agent-sdk / genesis-appian-parser. |
-| 4 | [`bible/04-adrs-and-constraints.md`](./bible/04-adrs-and-constraints.md) | §5 | **Non-negotiable constraints** — ADR-001..054 + key implementation contracts. **Do not violate; flag + confirm if a task requires it.** |
+| 4 | [`bible/04-adrs-and-constraints.md`](./bible/04-adrs-and-constraints.md) | §5 | **Non-negotiable constraints** — ADR-001..074 + key implementation contracts. **Do not violate; flag + confirm if a task requires it.** |
 | 5 | [`bible/05-dev-loop-and-release.md`](./bible/05-dev-loop-and-release.md) | §6 | **Environment, dev loop, release, CI** — the venv, how to run tests/app, the versioning/tag/push protocol, CI, npm/gitignore gotchas. |
 | 6 | [`bible/06-hard-won-lessons.md`](./bible/06-hard-won-lessons.md) | §7 | **Hard-won lessons** — concrete bugs + root causes you must not regress. *Grows often.* |
 | 7 | [`bible/07-working-on-tasks-and-agreements.md`](./bible/07-working-on-tasks-and-agreements.md) | §8 + §10 | **The work loop** (understand→verify→scope→test→gates→release→document→report) + the **working agreements** (honest pushback, ask before destructive actions, keep scope tight). |

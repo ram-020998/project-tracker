@@ -13,8 +13,8 @@
 > **Shipped for context (NOT deferred):** 16-01 parser (`genesis-appian-parser` v0.1.0), 16-02 schema + `KbStore`
 > (m0007, genesis v0.28.0), 16-03 `sync-application` **baseline** (genesis v0.29.1 + genesis-workflows v0.8.2), 16-08
 > native Dev/DevOps MCP (genesis-core v0.9.1 + genesis v0.31.1 + genesis-workflows v0.8.4), 16-04 Applications surface
-> (genesis v0.32.0), 16-05 **`genesis-kb` MCP server + chat cutover** (genesis v0.33.0). **In progress:** 16-07 delta
-> **Option A** (re-export + delta-merge). See `progress/phase-16-0*` for as-builts.
+> (genesis v0.32.0), 16-05 **`genesis-kb` MCP server + chat cutover** (genesis v0.33.0). **In progress (at the time):** 16-07 delta
+> **Option A** (re-export + delta-merge) — since shipped (genesis-workflows v0.8.5); the true incremental delta (§1.3) shipped in Phase 45. See `progress/phase-16-0*` for as-builts.
 
 ---
 

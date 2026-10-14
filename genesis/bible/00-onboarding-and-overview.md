@@ -32,7 +32,7 @@
 > platform capability: **run-launch file attachments** (`format:"file"` inputs → `POST /api/runs/upload` →
 > blackboard provisioning; **ADR-035**). genesis-workflows **v0.7.0** + genesis **v0.27.0** (core + sdk
 > unchanged). Only remaining item is manual live-acceptance vs. real kiro-cli (can't be driven headlessly).
-> **ACTIVE EFFORT — Phase 16 (Appian Knowledge Base / "Atlas-into-Genesis") is IN PROGRESS (planning complete + pushed;
+> **(Historical — Phase 16 is closed. What it left open is tracked in `specs/backlog/phase-16-deferred.md`: 16-06 versioning [externally gated] and 16-05b [`erd-generation` still uses `appian-atlas`; `design-doc` was removed in Phase 34]. The true incremental delta [§1.3] was delivered by Phase 45. Current state: `bible/01`; no active phase.)** **ACTIVE EFFORT [as of Phase 16] — Phase 16 (Appian Knowledge Base / "Atlas-into-Genesis") is IN PROGRESS (planning complete + pushed;
 > implementation under way).** Bring the Appian KB *inside* Genesis: a Genesis-native parser + a code-free temporal
 > KB in `genesis.db` + an Applications page + a sync workflow + a read-only `genesis-kb` MCP, with all *environment*
 > calls routed through the managed native **Dev MCP / DevOps MCP** (Atlas & Jarvis retired as services). Full spec set
@@ -130,7 +130,7 @@ the Chat `/` palette (or auto-activated by description).
 2. `tracker.md` — the master record. **Read §6 STATUS LOG top-down** (it is the running history and
    the source of truth for "what is done"); §2 has the locked decisions Q1–Q14; §3 is the phase index.
 3. `specs/00-architecture-overview.md` — layers, domain model, node taxonomy, state/blackboard rule.
-4. `reference/decision-log.md` — **ADR-001…034** (the "why"). Every non-negotiable lives here.
+4. `reference/decision-log.md` — **ADR-001…074** (the "why"; this list item was written at ADR-034 — later ADRs are summarized in `bible/04`). Every non-negotiable lives here.
    (Recent: ADR-031 Chat is read-only; ADR-032 credits are REAL metered data; ADR-033 **Accepted** —
    the Chat copilot may operate runs at the run-management layer, human-confirmed (Phase 13, shipped);
    ADR-034 **Accepted** — Skills as first-class standalone activities, chat-invoked + filesystem-provisioned
@@ -148,11 +148,11 @@ the Chat `/` palette (or auto-activated by description).
    `phase-12-code-review-workflow.md`, `phase-13-copilot-orchestrator.md` (+ `phase-13-.../13-01..06`),
    `phase-14-skills-in-chat.md` (+ `phase-14-skills-in-chat/14-01..14-05`)**, and **`phase-15-design-doc-workflow.md`
    (15-01..15-05)** are all **shipped**. **`phase-16-appian-knowledge-base.md` (+ `phase-16-appian-knowledge-base/
-   16-01..16-08` + `genesis-kb-tool-contracts.md`) is the ACTIVE effort — specs pushed; **16-01/16-02/16-03/16-04/16-08
-   shipped, 16-05 next** — read it (and §9's Phase-16 block) before touching this area.** `specs/backlog/` holds
+   16-01..16-08` + `genesis-kb-tool-contracts.md`) was the ACTIVE effort when this list was written — specs pushed; **16-01/16-02/16-03/16-04/16-08
+   shipped, 16-05 next** — read it (and §9's Phase-16 block) before touching this area.** **(Since then: every phase through 45 has shipped — see `README.md`'s phase table for each phase's spec, and `specs/backlog/` for deferred work.)** `specs/backlog/` holds
    deferred work (the skill-migration program + `phase-15-followup-fixes.md`).
-8. `progress/` — the as-built record, one file per phase/item (`phase-01..16-*`; newest:
-   `phase-16-04-applications-surface.md`, `phase-16-08-native-mcp.md`). Read the one(s)
+8. `progress/` — the as-built record, one file per phase/item (`phase-01..45-*`; newest:
+   `phase-45-incremental-delta-sync.md`; this item originally listed the Phase-16 docs `phase-16-04-applications-surface.md`, `phase-16-08-native-mcp.md`). Read the one(s)
    relevant to the area you're touching; they cite commits, tags, CI pipelines, and decisions.
 9. `spike/` — time-boxed feasibility probes (throwaway code, durable findings). Read the relevant one before
    building on its area (e.g. `spike/2026-07-16-kiro-skills-in-acp-and-chat.md` proves Kiro Skills over ACP for
