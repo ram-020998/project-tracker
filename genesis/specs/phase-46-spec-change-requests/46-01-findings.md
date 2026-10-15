@@ -326,6 +326,20 @@ assistant's 11 other proposals. Full text: `46-08-story-answers-history-and-badg
 - **Q3 — story workflow inputs → A:** pass answers, spec clauses **and the open questions** (marked unresolved).
   Rejected: answers + spec clauses only.
 
+### 5.11 Round 9 — 46-07 build decisions (2026-10-15)
+
+Asked one question at a time before building 46-07; the user chose option A for all three. Full text:
+`46-07-web-experience.md` §14.
+- **Q1 — small additive backend reads → A:** add them in 46-07 (lock/open-CR state on `/spec/allowed`; locked
+  confirmations, next revision and chat busy on the CR detail; the activity CR label; `coverage=0` on the preview) so
+  the UI renders from durable state; recorded as a deviation from "web-only". Rejected: client-side inference.
+- **Q2 — a closed CR from the list → A:** `/spec/artifact?revision=<n>`; an applied CR opens its frozen document +
+  the spec revision it produced (read-only tabs); a discarded CR its document only. Rejected: the document only.
+- **Q3 — proposals 1–14 → A:** all accepted as written (toolbar per state, Initiate wording, banner from the detail
+  with 5 s polling while busy, Analyze/ask texts, Apply/Discard dialogs, preview tabs with tagged comments, coverage
+  switch + popover from `revision=working`, CR drawer, Overview chip from the latest applied CR, Activity text, chat
+  dividers, pulled mirrors → 46-09, the backend additions).
+
 ## 6. Defaults chosen by the assistant — ✅ confirmed by the user 2026-10-14 (umbrella §13 Q1–Q5, each answered "A" = the default as written)
 
 *(Heading was "not yet explicitly confirmed"; the confirmation round is recorded in §5.7.)*

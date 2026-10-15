@@ -141,3 +141,55 @@ On a finalized feature: Initiate CR-01 → edit two clauses and add one in the c
 lists the right stories with sensible defaults → change one decision in the chat → the document updates → Apply →
 stories updated/created, document frozen, spec revision +1, coverage badges updated; Discard on a second CR restores
 the spec exactly.
+
+## 14. Build decisions (2026-10-15, asked one at a time before the build; these win over §2–§13 where they differ)
+
+- **Q1 — small additive backend reads → A:** 46-07 adds them (with pytest) so the UI renders from durable state
+  instead of inferring it; recorded as a deviation from "web-only". Rejected: web-only inference (lock = "Reopen is
+  missing", busy = matching blocker text).
+- **Q2 — a closed CR opened from the list → A:** `/spec/artifact` gains `revision=<n>` (labels + coverage computed
+  for that revision). An applied CR opens with two read-only, non-annotatable tabs: **CR-n Impact Analysis** (frozen)
+  and **Spec rev N**; a discarded CR (no revision produced) opens its document tab only. Rejected: the frozen CR
+  document only.
+- **Q3 — proposals 1–14 → A (all accepted):**
+  1. Toolbar — locked Completed: **Initiate change request** (primary) · Change requests (n) · Export .md · Publish ·
+     Preview, Save milestone hidden; Under change: badge "Under change · CR-n" (warning) · Change requests (n) ·
+     Export .md · Preview, Save milestone + Publish hidden; legacy features unchanged; "Change requests (n)" hidden
+     while the count is 0 and the spec isn't locked.
+  2. Initiate dialog — "Start change request CR-0n" (n = the highest existing number + 1); generic wording ("developers
+     keep working from the current spec revision"); the banner then shows the real base revision.
+  3. Banner — driven by the CR detail (`analysis.state` + validation + `chat_busy`); "Analyzing…" while our own turn
+     streams or while `chat_busy`; the detail polls every 5 s while busy and refetches when the turn ends; every
+     disabled button carries a tooltip with its blocker.
+  4. Analyze impact — `no_changes` → toast "No spec changes since CR-n opened"; else the chat sends "Analyze impact
+     for CR-n." through the normal send path; the two "ask the agent" buttons send §4's texts (+ the validation
+     errors listed).
+  5. Apply dialog — summary from `counts.plan`, the next revision number, and "UX Design / Technical Design will be
+     marked spec changed" for each stage that exists; one checkbox per locked story needing confirmation (Apply
+     disabled until all are ticked); 409 `blockers` listed with "Analyze impact again"; 409 `apply_failed` shows its
+     message; success → toast + invalidate the spec, its allowed actions, the CR queries, coverage, stories and the
+     feature detail.
+  6. Discard dialog — §5 text, destructive-tone button.
+  7. Preview tabs — a `documents[]` prop (a single document → no tab strip, so existing callers are unchanged); while
+     a CR is open: Spec (working copy) + CR-n Impact Analysis, both annotatable; each queued comment is tagged with its
+     tab and the `[CR-n Impact Analysis]` prefix appears only when there are several tabs; Refresh reloads the current
+     tab.
+  8. Coverage — a "Coverage" switch in the preview (default on when coverage exists) via the new `coverage=0`
+     option; the popover opens only on a `genesis:clause` message whose source is the spec iframe, reads
+     `/spec/coverage?revision=working`, is a small `role=dialog` panel inside the preview (Esc closes); rows link to
+     the Story Workspace in a new tab, or show backlog items without a link.
+  9. CR list — the existing `Drawer`, newest first, §9 columns; counts from the stored `summary`, "rev 6 → 7" from
+     the base/result revisions; a row opens the preview (Q2).
+  10. Overview chip — "CR-n open" (warning) when one is open, else "Last change: CR-n · 12 Oct" for the latest
+      **applied** CR (neutral); discarded CRs don't count as a change.
+  11. Activity — "ram opened CR-03" / "ram applied CR-03" / "ram discarded CR-03" from a CR label the activity
+      endpoint adds (Q1).
+  12. Chat dividers — `meta` on the web `ChatMessage` type; the four `meta.kind` values render a full-width divider
+      with the visible text + "Open CR-n" (in the spec workspace it opens the preview on the CR tab; elsewhere the CR
+      document in a new tab); `context` and other system messages keep `SystemNudge`.
+  13. Pulled mirrors — no CR controls in 46-07; the read-only CR list + the "under change by …" marker go to 46-09.
+  14. Backend additions (Q1 + Q2): `/spec/allowed` + `change_requests {downstream_locked, open, count}`; the CR
+      detail + `locked_confirmations`, `next_revision_no`, `chat_busy`; the activity CR label (initiate events matched
+      to CRs by number, apply/discard events by close time — each is written in the same transaction as its CR);
+      `coverage=0` and `revision=<n>` on `/spec/artifact`. All additive, with pytest.
+

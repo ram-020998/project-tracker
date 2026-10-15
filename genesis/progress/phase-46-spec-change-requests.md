@@ -15,7 +15,7 @@
 | 46-05 impact analysis | ✅ built (2026-10-15) | genesis `297fd2b` | NEEDS_FIXES → fixed → SHIP |
 | 46-06 apply / discard | ✅ built (2026-10-15) | genesis `1b31489` · genesis-workflows `7d8e92d` | SHIP (tests folded in) |
 | 46-08 story answers / history / badges | ✅ built (2026-10-15) | genesis `e0d0e3e` · genesis-workflows `e20d66e` | SHIP (NITs folded in) |
-| 46-07 web | ⏳ next | — | — |
+| 46-07 web | 🧱 building (decisions recorded 2026-10-15) | — | — |
 | 46-09 collaboration / Hub | — | — | — |
 | 46-10 review + acceptance | — | — | — |
 | 46-11 release | — | — | — |
@@ -361,3 +361,11 @@ removed-clause chips, legacy features hide the spec card, answer-only history fr
   story reads skip the clause map without spec links) folded in; 2, 3, 5 recorded above.
 - Not verified live: the Story Workspace cards / board icon / stage banner in a running `genesis serve`, and a real
   story-design run with the new ticket block (the fleet is not updated mid-phase).
+
+## 46-07 — web experience (building)
+
+**Decisions recorded before the build (2026-10-15)** — full text in `specs/.../46-07-web-experience.md` §14
+(findings §5.11): Q1 = A (small additive backend reads so the UI renders from durable state — a deviation from
+"web-only"); Q2 = A (`/spec/artifact?revision=<n>`; an applied CR opens its frozen document + the revision it
+produced); Q3 = A (proposals 1–14 accepted; pulled-mirror CR controls move to 46-09).
+
