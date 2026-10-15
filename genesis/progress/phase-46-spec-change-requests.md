@@ -12,8 +12,8 @@
 | 46-02 clause model | ✅ built (2026-10-14) | genesis `196e78d` | SHIP |
 | 46-03 story↔spec links | ✅ built (2026-10-14) | genesis `0d8622e` · genesis-workflows `da0bb91` | SHIP |
 | 46-04 CR lifecycle | ✅ built (2026-10-14) | genesis `b8a9fc8` | SHIP |
-| 46-05 impact analysis | 🧱 building (decisions recorded 2026-10-15) | — | — |
-| 46-06 apply / discard | — | — | — |
+| 46-05 impact analysis | ✅ built (2026-10-15) | genesis `297fd2b` | NEEDS_FIXES → fixed → SHIP |
+| 46-06 apply / discard | ⏳ next | — | — |
 | 46-08 story answers / history / badges | — | — | — |
 | 46-07 web | — | — | — |
 | 46-09 collaboration / Hub | — | — | — |
@@ -182,7 +182,7 @@
 - Not verified live: a real chat turn receiving an agent note in a running `genesis serve` (the fleet is not
   restarted mid-phase).
 
-## 46-05 — impact analysis (building)
+## 46-05 — impact analysis (genesis `297fd2b`)
 
 **Decisions recorded before the build (2026-10-15)** — full text in `specs/.../46-05-impact-analysis.md` §11
 (findings §5.8): Q1 = A (new clauses list *candidate* stories; the plan may update a candidate only to attach the
@@ -191,3 +191,51 @@ revision with no story changes); refinements 3–16 accepted (LCS-stable positio
 run-state mapping, the staleness order, a pure `validate_plan`, V6 = the breakdown's Gherkin rule, `breakdown_hash`
 in the impact input, the awaiting-plan document, `can_apply` from A1–A4, **Discard freezes the CR document in
 46-05**, analyze guards + a no-op `no_changes`, the single `cr-analyzed` note, an optional `title_suggestion`).
+
+**What was built**
+- **`kb/spec_diff.py`** (new, pure): `diff_specs(base_map, working_map)` → unchanged / moved / formatting / modified
+  (`moved` flag) / added / removed per block, sections included; position = a per-section LCS of the common IDs (one
+  insertion moves nothing); `SpecDiff.identical`; `ancestors()`.
+- **`kb/spec_impact.py`** (new, pure): `story_item` / `backlog_item`, `build_impact_input` → the
+  `genesis.cr-impact-input/1` document: `changes`, `ignored_changes` (formatting/moved), `affected` (linked = the
+  clause; broad = any ancestor section — removed clauses use the base ancestry; a modified heading affects only
+  direct links), `new_clauses` with `candidates` (Q1; an affected item is never a candidate), `candidates`
+  (`for_clause_ids`), `epics`, `counts`, `rules` (`item_key`, editable fields), `breakdown_hash` in backlog mode.
+- `StoryStageStore.run_states_for_feature` + `run_state()` (refinement 5).
+- **`kb/cr_plan.py`** (new, pure): `load_plan` (defensive: fenced JSON, garbage, non-object), `validate_plan`
+  V1–V12 (each finding = `{rule, item, message}`; candidates may only `update` with `add_spec_refs` ⊆ their new
+  clauses; V6 = the breakdown's `_GHERKIN`, on the story as it would be after the change), `plan_counts`.
+- **`kb/cr_document.py`** (new, pure): the script-free, Lavish-safe "CR-n Impact Analysis" document — header + status
+  chip (draft / awaiting the plan / out of date / Applied / Discarded), summary counts, validation box, spec changes
+  with word-level `<del>`/`<ins>`, affected stories grouped by clause (per-field before/after), existing stories
+  taking new clauses, new stories, removed requirements, uncovered requirements, apply-report footer; unique stable
+  ids (`cr-clause-*`, `cr-story-*`, `cr-new-*`); everything HTML-escaped. `placeholder_document` before the first
+  analysis.
+- **`SpecChangeService`**: `analyze` (per-spec lock; 409 when the CR isn't open / the spec isn't under change / no
+  chat / chat busy; normalize → diff → `no_changes` (writes nothing) or the impact input written to the frozen dir
+  (authoritative) + the sandbox (agent copy) + `plan-format.md`, the previous plan archived as `plan.<n>.json`,
+  `set_analysis`, one `cr-analyzed` agent note); `analysis` (none → stale-by-hash → awaiting_plan →
+  stale-by-analysis_id → current, with validation + counts); `plan`; `document` (live while open, frozen once
+  closed); `detail` → `can_apply` / `apply_blockers` from A1–A4; **Discard freezes `plan.json` + the Discarded
+  `document.html`** (and copies it into the sandbox so the next CR's agent can read it). `instructions.md` now
+  points at `plan-format.md` and the candidate rule.
+- **API** (`api/change_requests.py`): `POST …/{cr_no}/analyze`, `GET …/{cr_no}/plan`, `GET …/{cr_no}/document`
+  (`annotate=1` → the existing Lavish injection; else theme only), `GET …/{cr_no}/export.md`
+  (`CR-n-impact-analysis.md`). `api/features.py` wires stories, `StoryStageStore` and the backlog + breakdown hash.
+
+**Deviations / notes**
+- A garbage `plan.json` reads as `current` with a V1 error (the banner says "fix the plan"), not `awaiting_plan`.
+- `impact-input.json` lives in both the frozen dir (program-owned, the one validation reads) and the sandbox (for
+  the agent); `plan-format.md` (the schema) is written next to it at every analysis.
+- A missing `base.html` makes `analyze` refuse (500 `base_missing`) but never breaks the read endpoints (validation
+  reports V1).
+- No web change (46-07). Apply (A5–A8 + the transaction) is 46-06.
+
+**Evidence**
+- genesis pytest **1035** (+41: `test_spec_diff.py` 8, `test_cr_impact_plan.py` 17, `test_cr_document.py` 5,
+  `test_cr_analyze.py` 11) + ruff clean.
+- Independent review = **NEEDS_FIXES** → fixed → focused re-review **SHIP**: an affected story could also be a
+  candidate (duplicate document ids + a double "to update" count) → candidates skip affected items; a plan without
+  `analysis_id` now reads as stale; a missing `base.html` degrades reads instead of a 500 — each with a regression
+  test.
+- Not verified live: a real agent turn writing `plan.json` from `impact-input.json` (needs the fleet updated).
