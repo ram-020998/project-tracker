@@ -16,8 +16,8 @@
 | 46-06 apply / discard | ✅ built (2026-10-15) | genesis `1b31489` · genesis-workflows `7d8e92d` | SHIP (tests folded in) |
 | 46-08 story answers / history / badges | ✅ built (2026-10-15) | genesis `e0d0e3e` · genesis-workflows `e20d66e` | SHIP (NITs folded in) |
 | 46-07 web | ✅ built (2026-10-15) | genesis `a5cd09a` | NEEDS_FIXES → fixed → SHIP |
-| 46-09 collaboration / Hub | 🟡 genesis side ✅ built (2026-10-15); Hub side with the Appian agent (pending its report) | genesis `d4c39b4` | SHIP (fixes folded in) → re-review SHIP |
-| 46-10 review + acceptance | — | — | — |
+| 46-09 collaboration / Hub | ✅ built (2026-10-15) — genesis side + Hub addition live-validated 41/41 | genesis `d4c39b4`, `cb49b3b` · Hub: project-tracker `894c7f2`, `b9c3b3f` | SHIP (fixes folded in) → re-review SHIP |
+| 46-10 review + acceptance | ⏳ next | — | — |
 | 46-11 release | — | — | — |
 
 ## 46-02 — the spec clause model (genesis `196e78d`)
@@ -417,7 +417,7 @@ produced); Q3 = A (proposals 1–14 accepted; pulled-mirror CR controls move to 
 - Not verified live: the whole flow in a running `genesis serve` with a real agent (§13 acceptance — Initiate → edit →
   Analyze → plan → Apply / Discard); the fleet is not updated mid-phase.
 
-## 46-09 — collaboration and the Hub (genesis side `d4c39b4`; Hub side pending)
+## 46-09 — collaboration and the Hub (genesis `d4c39b4` + `cb49b3b`; Hub addition 41/41)
 
 **2026-10-15 — contract frozen, Hub build handed off.** `contract/spec-change-contract-addition.md` + fixtures
 `story_with_trace.json` (three steps: all arrays, an old-Genesis edit omitting the new keys, `[]` clearing) and
@@ -466,6 +466,19 @@ server-side), Q2 = A (the conflict merge is also written locally), Q3 = A (propo
   GH_reassembleStoryItems v3 + GH_payloadText; the user appended `spec_change_request` to the `GH_records_upsert` kind
   list. The 3 failures = `opened_at` / `closed_at` not byte-for-byte (`a!fromJson` date conversion) → 46-09 §11 Q4 = A:
   a second Designer edit (`rawBody`), then a re-run to 41/41. Fixture corrected: a null `summary` reads back `""`.
+- **Hub side final (project-tracker `b9c3b3f`): 41/41** — CR checks 10/10 (all 21 keys byte-for-byte incl.
+  `2026-10-14T10:00:00.123456+00:00`; discarded `result_revision_no` null; null title / summary `""`), story fixture
+  9/9, blob 7/7 (incl. ~1 MB), activity 3/3 (24 h TTL), regression 12/12; validation rows cleaned up; `contract_version`
+  1.0.0. Two Web API edits made by the user in Designer: the `spec_change_request` kind-list append and
+  `rawBody: http!request.body` on the `GH_casUpsert` call. Genesis needed no change for the report (it always sends
+  all six story arrays and never sends JSON null for them; `""` text and null integers are handled).
+- **Known issue (pre-existing, Hub-wide, recorded in the Phase 36 docs with a backlog fix):** any text field whose
+  WHOLE value looks like a date / date-time is converted by `a!fromJson` on every kind except the CR's title /
+  `opened_at` / `closed_at` (e.g. a story titled `2026-10-14` reads back `10/14/2026`). Genesis trace elements are JSON
+  objects and unaffected; the fix touches every kind's code and needs its own approval + regression.
+- **Open security finding (the user's call):** `GH_isServiceCaller` returns `true()` — any authenticated Appian user can
+  write to the Hub. Restoring the group check needs the account Genesis uses in `GH Service Accounts` first.
+- Informational: the Hub writes no blob change rows (known, ADR-074).
 - The two-instance live check moves to 46-10.
 
 **Evidence**
