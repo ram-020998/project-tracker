@@ -48,7 +48,6 @@ genesis-workflows: `validate_library` + pytest (incl. the backlog-renderer parit
 | 10 | On `userb` | Updated/created stories pulled; CR-01 in the list with its document; stories show change history |
 | 11 | Answer a question on `userb` | Appears on `main` after auto-pull; next design run prompt contains it |
 | 12 | Initiate CR-02, edit, Discard | Spec restored byte-for-byte; no story changed; CR-02 *Discarded* in the list on both machines |
-| 13 | ⏭️ skipped (user decision, 2026-10-15) | A backlog-mode CR (breakdown completed, not finalized) was not run live; covered by `tests/test_cr_apply.py::test_backlog_mode_apply` and the genesis-workflows renderer parity test (byte-identical `breakdown.html`). |
 | 13 | A feature with a completed breakdown, not finalized: CR → Apply | `breakdown.html` re-rendered with the reconciled backlog; Finalize then carries `spec_refs` |
 
 Record evidence (run ids, revision numbers, screenshots of the document) in 46-10 §4 "As run".
@@ -94,6 +93,7 @@ Record evidence (run ids, revision numbers, screenshots of the document) in 46-1
 | 10 | ✅ (Playwright on `userb`) | Pulled: 19 stories (GNS_000001/7 updated with 4000, GNS_000019 created, change logs), CR-01 `applied` rev 2 with its document on `userb`'s disk; the pulled spec view shows "Change requests (1)" → drawer "rev 1 → 2 · 3 updated · 1 created" → the frozen document; the Story Workspace shows the Change history card. |
 | 11 | ✅ | On `userb`, answered GNS_000013's question in the Story Workspace → `publish: published`; on `main` the answer arrived by auto-pull (≤ 2 min; `published_version` 1); a design run for GNS_000013 (`r-6545274053db`, cancelled after the prompt was checked) has `answered_questions:` with it + `spec_clauses_this_story_implements:` in the ticket block. |
 | 12 | ✅ | CR-02 initiated, one chat edit (4000 → 6000), Discard via the dialog ("The spec goes back to revision 2. No stories change.") → working copy sha identical to before CR-02, no story row_version changed, spec `completed`, revisions [1, 2]; `userb` shows CR-02 `discarded`; marker cleared. |
+| 13 | ⏭️ skipped (user decision, 2026-10-15) | A backlog-mode CR (breakdown completed, not finalized) was not run live; covered by `tests/test_cr_apply.py::test_backlog_mode_apply` and the genesis-workflows renderer parity test (byte-identical `breakdown.html`). |
 
 **Findings so far:** F1 Finalize doesn't publish the backlog (pre-existing, `usePublishBacklog` unused); F2 own-record pull echo (fixed, genesis `0e371de`); F3 a cancelled run is reported `failed` ("worker exited abnormally", pre-existing); F4 the Hub's leftover validation rows (`bafef139…`, GH Story 120) pin the `stage_artifact` / `story` pull cursors at 459 since 2026-09-24 — harmless after F2 but every pull re-fetches them (Appian agent to delete, with the user's OK); F5 the pull's `applied` lists include already-known versions (cosmetic); F6 the sidebar still says v0.76.0 on the unreleased build (cosmetic, fixed by the 46-11 bump).
 
