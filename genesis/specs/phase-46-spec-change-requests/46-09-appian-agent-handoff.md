@@ -2,7 +2,8 @@
 
 > Written 2026-10-15 so the Hub-side half of 46-09 can be built **in parallel** with the genesis-side bindings.
 > The normative spec is `specs/phase-36-genesis-hub-appian-app/contract/spec-change-contract-addition.md` (+ the two
-> fixtures). This file is the agent prompt + checklist. Paste the block below into the Appian agent's session.
+> fixtures). **Use the full, self-contained prompt in `46-09-appian-agent-prompt.md`**; the short block below is a
+> summary of it, plus the checklist.
 
 ```text
 You are the write-capable Dev-MCP agent that built and owns the Genesis Hub Appian application (Phase 36, ADR-064)
