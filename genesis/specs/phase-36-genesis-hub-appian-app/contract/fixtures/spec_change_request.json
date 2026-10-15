@@ -1,7 +1,7 @@
 {
   "kind": "spec_change_request",
   "path": "/records/spec_change_request/5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
-  "notes": "Phase 46-09 addition. Only applied/discarded CRs are published. opened_at/closed_at are payload-preserved TEXT (exact strings, incl. microseconds + offset). summary is a small JSON object as opaque text. result_revision_no is null on a discarded CR and must read back null (an Integer null). A null title reads back \"\" (established behaviour). The frozen document is an artifact blob keyed <feature_sync_uuid>:cr-<nn>.",
+  "notes": "Phase 46-09 addition. Only applied/discarded CRs are published. opened_at/closed_at are payload-preserved TEXT (exact strings, incl. microseconds + offset). summary is a small JSON object as opaque text. result_revision_no is null on a discarded CR and must read back null (an Integer null). A null title or summary reads back \"\" (established behaviour, live-validated 2026-10-15). The frozen document is an artifact blob keyed <feature_sync_uuid>:cr-<nn>.",
   "applied": {
     "put_request": {
       "sync_uuid": "5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
@@ -158,7 +158,7 @@
       "base_revision_no": 7,
       "base_content_hash": "3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081920",
       "result_revision_no": null,
-      "summary": null,
+      "summary": "",
       "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:cr-04",
       "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
       "published_by": "ramaswamy.u",

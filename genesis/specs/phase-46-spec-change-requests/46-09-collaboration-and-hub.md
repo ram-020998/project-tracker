@@ -163,4 +163,14 @@ removals from the web, on Apply and on Finalize only), so "the same path as a st
   10. Tests: round trips of the six arrays incl. caps; CR publish/pull with the blob; local-only exclusions; every
       merge rule; the strict emulator; fixture conformance; marker set/refresh/clear; puller list / coverage / badge;
       web with jest-axe.
+- **Q4 (2026-10-15, after the Hub build reported 38/41) — exact timestamp strings → A:** the user adds
+  `rawBody: http!request.body` to the `rule!GH_casUpsert(…)` call in `GH_records_upsert` (Designer; the rule side is
+  deployed + regression 21/21), so `opened_at` / `closed_at` round-trip byte-for-byte (`a!fromJson` otherwise turns
+  date-looking strings into datetimes, dropping the offset and sub-second digits). Rejected: amend the contract to
+  compare instants (Genesis copes either way — the badge parses instants; the list only displays them).
+  Also from the Hub report: a null `summary` reads back `""` (fixture corrected); `result_revision_no` null reads back
+  null; a story PUT without an original array clears it (Genesis always sends all six); `GH_isServiceCaller` returns
+  `true()` — any Appian user can write (flagged security finding, the user's call); the Hub writes no blob change rows
+  (known, ADR-074); any date-looking text field is mangled on every kind (pre-existing — to check whether `rawBody`
+  fixes it, else backlog).
 

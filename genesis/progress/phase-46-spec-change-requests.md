@@ -461,7 +461,12 @@ server-side), Q2 = A (the conflict merge is also written locally), Q3 = A (propo
   the CR's `closed_*` / `summary_json` are mapped back to NULL.
 - A colliding pulled CR (same feature + number as a local one) is skipped and logged; it still counts as handled so
   the cursor advances.
-- Not done until the Appian agent reports: the live Hub round trip, and the two-instance live check (moved to 46-10).
+- **Hub side (Appian agent, project-tracker `894c7f2`):** built + live-validated **38/41** — GH Spec Change Request
+  `a0fc6f95-…`, story trace item types, GH_casUpsert v12 / GH_recordToJson v5 / GH_queryRecords v5 /
+  GH_reassembleStoryItems v3 + GH_payloadText; the user appended `spec_change_request` to the `GH_records_upsert` kind
+  list. The 3 failures = `opened_at` / `closed_at` not byte-for-byte (`a!fromJson` date conversion) → 46-09 §11 Q4 = A:
+  a second Designer edit (`rawBody`), then a re-run to 41/41. Fixture corrected: a null `summary` reads back `""`.
+- The two-instance live check moves to 46-10.
 
 **Evidence**
 - genesis pytest **1103** (+17: `tests/test_collab_trace.py`; `test_collab`, `test_collab_sdlc`, `test_cr_apply`,
