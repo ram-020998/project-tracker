@@ -218,3 +218,55 @@ selection (linked, broad, backlog mode); lane groups and run states; impact-inpu
 golden file; every validator rule (V1–V12) with a failing and passing case; renderer golden HTML for an open, an
 applied and a discarded CR; staleness transitions (edit after analysis → stale; re-analyze → none → plan → current);
 analyze endpoint guards (no open CR, spec unchanged, chat busy).
+
+## 11. Build decisions (2026-10-15, before the build — recorded with the user)
+
+Asked one question at a time; the user chose option A for both. The other points (gaps 3–16) were proposed by the
+assistant at the 46-05 restatement and accepted by the user ("Yes") without change. They refine §2–§9 above; where
+they differ, this section wins.
+
+**Q1 — attaching a new clause to an existing story → A (candidates).** Each `new_clauses` entry carries
+`candidates`: the stories (backlog items in backlog mode) linked to any *other* clause of the same section (direct
+or via a section ref), with the same fields as an `affected` item (lane, `lane_group`, run states, `row_version`).
+The plan may hold an `update` decision for a candidate **only to attach new clauses** (`add_spec_refs` ⊆ the new
+clause IDs it is a candidate for; `changes` / `answer_questions` allowed as for any update). V2 becomes: every
+`affected` item has exactly one decision; a decision may target an affected item **or** a candidate; nothing else;
+no duplicates. V8 counts a candidate update's `add_spec_refs` as covering the clause. The lane rule (V4), run-state
+rules (V10/V11) and Apply's `row_version` check (46-06 A5) apply to candidates too. Rejected: B (section-linked
+stories auto-affected — rare, since links are clause-level); C (new clauses only via new stories / no story needed).
+
+**Q2 — a CR that only reformats or moves clauses → A.** `no_changes` is returned only when the working copy has
+**no differences at all** from the base (identical clause maps: IDs, fingerprints, order, sections). A
+formatting/moved-only CR is analyzed normally: `affected` is empty, the agent writes a plan with no decisions (a
+summary only), and Apply saves the spec as a new revision without touching a story. Rejected: B (formatting/moves =
+no change → only Discard possible, edits lost); C (Genesis writes the empty plan itself — breaks D8, the agent is
+the only plan author).
+
+**Accepted refinements (gaps 3–16):**
+3. **Position** = index among the clauses present in **both** versions within the section (LCS-stable), so one
+   insertion does not mark later siblings `moved`.
+4. **Broad link** = a ref to **any ancestor section** of the changed clause (as coverage does). A modified heading
+   affects only stories linked directly to that section. Removed clauses use the **base** map's ancestry.
+5. **Run states:** `pending | running | awaiting_input*` → `running`; `done` → `done`; `failed | cancelled` →
+   `failed`; no story stage / no run → `none`.
+6. **Staleness order:** no `analysis_id` → `none`; working hash ≠ `analyzed_spec_hash` → `stale`; no `plan.json` →
+   `awaiting_plan`; plan `analysis_id` ≠ the CR's → `stale`; else `current` (validation reported alongside).
+7. `validate_plan` stays **pure**: `validate_plan(plan, impact_input, *, story_ids, base_map, working_map)` —
+   `story_ids` = every story id of the feature (for `follow_up_of`), not a db handle.
+8. **V6** duplicates the breakdown's rule (`(?is)\bgiven\b.*\bwhen\b.*\bthen\b` per criterion; a Story needs
+   ≥ 1), applied to the story **as it would be after** the change (no workflow import, ADR-012).
+9. The impact builder parses `kb_stories.answers` itself; `StoryStore` gains it in 46-08.
+10. The breakdown's content hash at analysis (for 46-06 A8) is recorded in `impact-input.json`
+    (`breakdown_hash`), not a new column.
+11. The document shows the "No analysis yet" placeholder only **before the first analysis**; while awaiting the
+    plan it renders the computed facts with each item marked "awaiting the agent's plan".
+12. CR detail computes `can_apply` / `apply_blockers` now from A1–A4 (CR open + spec under change, chat idle,
+    analysis `current`, plan valid). A5–A8 run inside Apply (46-06).
+13. **Discard freezes the CR document** with status *Discarded* (when an analysis exists) — built in 46-05 now that
+    the renderer exists (46-04 had deferred it).
+14. **Analyze guards:** runs under the per-spec lock; 409 when the CR is not open / the spec is not under change /
+    the chat is busy. `no_changes` returns 200 and writes nothing (no files, no analysis id, no note).
+15. **The single analysis note:** a `cr-analyzed` divider ("Impact analysis for CR-03 — N stories affected, M new
+    clauses") whose hidden agent text says: read `impact-input.json`, write `plan.json`, carry forward decisions
+    from `plan.<n>.json`.
+16. The plan may carry an optional `title_suggestion` (Q5) — shown in the document only; never auto-applied.

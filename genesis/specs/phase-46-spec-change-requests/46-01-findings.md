@@ -293,6 +293,17 @@ Asked one question at a time; the user chose the default (option A) for each:
 - **Q4** — removed clauses: affected stories flagged, default no change; update or (To Do / Design only) remove when the user asks. Rejected: default update; mark obsolete instead of deleting.
 - **Q5** — the CR title is optional (blank shows as CR-n; Analyze impact may suggest one). Rejected: required; required before Apply.
 
+### 5.8 Round 6 — 46-05 build decisions (2026-10-15)
+
+Asked one question at a time before building 46-05; the user chose option A for both and accepted the assistant's
+14 other refinements. Full text: `46-05-impact-analysis.md` §11.
+- **Q1 — attach a new clause to an existing story → A:** each new clause lists *candidate* stories (linked to
+  other clauses of its section); the plan may `update` a candidate only to attach the new clause; lane/run/CAS rules
+  apply. Rejected: section-linked stories auto-affected; new stories only.
+- **Q2 — formatting/moved-only CRs → A:** `no_changes` only when nothing differs at all; such a CR is analyzed with
+  an empty `affected` list, an agent-written decision-less plan, and Apply saves the revision without story changes.
+  Rejected: treat as no change (Discard only); Genesis writes the empty plan itself.
+
 ## 6. Defaults chosen by the assistant — ✅ confirmed by the user 2026-10-14 (umbrella §13 Q1–Q5, each answered "A" = the default as written)
 
 *(Heading was "not yet explicitly confirmed"; the confirmation round is recorded in §5.7.)*

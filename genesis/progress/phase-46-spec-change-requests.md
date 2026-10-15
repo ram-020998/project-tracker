@@ -12,7 +12,7 @@
 | 46-02 clause model | ✅ built (2026-10-14) | genesis `196e78d` | SHIP |
 | 46-03 story↔spec links | ✅ built (2026-10-14) | genesis `0d8622e` · genesis-workflows `da0bb91` | SHIP |
 | 46-04 CR lifecycle | ✅ built (2026-10-14) | genesis `b8a9fc8` | SHIP |
-| 46-05 impact analysis | ⏳ next | — | — |
+| 46-05 impact analysis | 🧱 building (decisions recorded 2026-10-15) | — | — |
 | 46-06 apply / discard | — | — | — |
 | 46-08 story answers / history / badges | — | — | — |
 | 46-07 web | — | — | — |
@@ -181,3 +181,13 @@
   resolver; an end-to-end Workbench story-design isolation test; hoisted import).
 - Not verified live: a real chat turn receiving an agent note in a running `genesis serve` (the fleet is not
   restarted mid-phase).
+
+## 46-05 — impact analysis (building)
+
+**Decisions recorded before the build (2026-10-15)** — full text in `specs/.../46-05-impact-analysis.md` §11
+(findings §5.8): Q1 = A (new clauses list *candidate* stories; the plan may update a candidate only to attach the
+new clause); Q2 = A (`no_changes` only when nothing differs; formatting/moved-only CRs are analyzed and applied as a
+revision with no story changes); refinements 3–16 accepted (LCS-stable positions, ancestor-section broad links, the
+run-state mapping, the staleness order, a pure `validate_plan`, V6 = the breakdown's Gherkin rule, `breakdown_hash`
+in the impact input, the awaiting-plan document, `can_apply` from A1–A4, **Discard freezes the CR document in
+46-05**, analyze guards + a no-op `no_changes`, the single `cr-analyzed` note, an optional `title_suggestion`).
