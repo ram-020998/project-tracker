@@ -15,8 +15,8 @@
 | 46-05 impact analysis | ✅ built (2026-10-15) | genesis `297fd2b` | NEEDS_FIXES → fixed → SHIP |
 | 46-06 apply / discard | ✅ built (2026-10-15) | genesis `1b31489` · genesis-workflows `7d8e92d` | SHIP (tests folded in) |
 | 46-08 story answers / history / badges | ✅ built (2026-10-15) | genesis `e0d0e3e` · genesis-workflows `e20d66e` | SHIP (NITs folded in) |
-| 46-07 web | 🧱 building (decisions recorded 2026-10-15) | — | — |
-| 46-09 collaboration / Hub | — | — | — |
+| 46-07 web | ✅ built (2026-10-15) | genesis `a5cd09a` | NEEDS_FIXES → fixed → SHIP |
+| 46-09 collaboration / Hub | ⏳ next | — | — |
 | 46-10 review + acceptance | — | — | — |
 | 46-11 release | — | — | — |
 
@@ -362,10 +362,58 @@ removed-clause chips, legacy features hide the spec card, answer-only history fr
 - Not verified live: the Story Workspace cards / board icon / stage banner in a running `genesis serve`, and a real
   story-design run with the new ticket block (the fleet is not updated mid-phase).
 
-## 46-07 — web experience (building)
+## 46-07 — web experience (genesis `a5cd09a`)
 
 **Decisions recorded before the build (2026-10-15)** — full text in `specs/.../46-07-web-experience.md` §14
 (findings §5.11): Q1 = A (small additive backend reads so the UI renders from durable state — a deviation from
 "web-only"); Q2 = A (`/spec/artifact?revision=<n>`; an applied CR opens its frozen document + the revision it
 produced); Q3 = A (proposals 1–14 accepted; pulled-mirror CR controls move to 46-09).
+
+**What was built**
+- **Backend reads (Q1/Q2, additive):** `GET /spec/allowed` + `change_requests {downstream_locked, open, count}`; the CR
+  detail + `chat_busy`, `next_revision_no` and `locked_confirmations` (`SpecChangeService.locked_confirmations` — the
+  A7 rule: Design Review+ items whose decision isn't `no_change` or that record answers; sending exactly those ids
+  passes Apply); the activity feed's `cr_label` on initiate/apply/discard-change; `GET /spec/artifact` + `coverage=0`
+  (badges off, labels kept) and `revision=<n>` (400/404 as for `/spec/clauses`).
+- **Web plumbing:** the CR / analysis / coverage types, `under-change` in the spec + stage status maps (and the
+  prerequisite check), the API client, `qk.features.changeRequests / changeRequest / specCoverage` keys, hooks
+  (`useChangeRequests`, `useChangeRequest` polling every 5 s while busy, initiate / analyze / apply / discard with one
+  invalidation set, `useSpecCoverage`, `crErr`, `crBlockers`), `ChatMessage.meta`.
+- **Spec workspace:** the toolbar per state (locked Completed → **Initiate change request** replaces Reopen, Save
+  milestone hidden; Under change → "Under change · CR-n", no Save milestone / Publish; legacy unchanged; "Change
+  requests (n)"); `ChangeRequestBanner` (none / analyzing / awaiting plan / ready / errors / stale, every disabled
+  button with its reason, Analyze → `no_changes` toast or the visible chat message, ask-plan / ask-fix texts);
+  `InitiateChangeRequestDialog`, `ApplyChangesDialog` (summary, one checkbox per locked confirmation gating Apply,
+  the 409 blocker list, `apply_failed`), `DiscardChangeRequestDialog`, `ChangeRequestsPanel` (drawer).
+- **Preview (`AnnotatablePreviewDialog`):** `documents[]` tabs (a single document = no tab strip; existing callers
+  unchanged), comments tagged with their tab (`> [CR-03 Impact Analysis] "…"`), a closed applied CR → its frozen
+  document + "Spec rev N" (read-only, no coverage badges), a discarded CR → its document; a **Coverage** switch; a
+  `ClauseCoveragePanel` opened only by a `genesis:clause` message from the dialog's own iframe (`c-` + 8 hex), rows
+  linking to the Story Workspace in a new tab.
+- **Elsewhere:** chat dividers for `cr-divider | cr-analyzed | cr-applied | cr-discarded` (`chat/cr-divider.ts`) with
+  "Open CR-n"; `ChatThread.onStreamingChange`; the Overview spec-card chip ("CR-03 open" / "Last change: CR-02 ·
+  date", discarded ignored); Activity text ("ram applied CR-03"). `web/static` rebuilt.
+
+**Deviations / notes**
+- 46-07 is no longer web-only: the small additive reads above (Q1 / Q2).
+- The divider's "Open CR-n" link appears only where the host can open the preview (the spec workspace). CR notes are
+  only posted to the spec chat, which only the spec workspace renders (stage chats are excluded from the Chat page),
+  so no surface loses the link (review SHOULD-FIX 2, accepted as a deviation by the re-review).
+- The spec preview's coverage is fetched only for a locked (traceable) spec; a legacy feature shows labels only.
+- The activity `cr_label` is derived from the audit order (k-th initiate = k-th CR; apply/discard close the CR opened
+  by the latest initiate) — exact because every CR transition is audited in the CR's own transaction.
+- The Initiate dialog uses generic wording ("the current spec revision"); the banner shows the real base revision.
+- Pulled read-only mirrors get no CR controls yet (46-09).
+
+**Evidence**
+- genesis pytest **1086** (+5 `tests/test_cr_web_reads.py`; the `/spec/allowed` assertion in `test_features_api`
+  extended) + ruff clean; web tsc clean, eslint 0 errors (19 pre-existing warnings), vitest **329** (+20:
+  `ChangeRequestFlow.test.tsx` 16 with jest-axe on the workspace under change, the three dialogs, the drawer, the
+  banner and the popover; `cr-flow.test.ts` 4), build committed.
+- Independent review = **NEEDS_FIXES** → fixed → focused re-review **SHIP**: the popover doubled the "§" of clause
+  labels (hidden by a stub label without "§" — the fixture now uses the real shape, and the test fails on the old
+  code); NITs folded in (preview dialog description, the banner refetch effect, no coverage badges on a closed
+  revision tab).
+- Not verified live: the whole flow in a running `genesis serve` with a real agent (§13 acceptance — Initiate → edit →
+  Analyze → plan → Apply / Discard); the fleet is not updated mid-phase.
 
