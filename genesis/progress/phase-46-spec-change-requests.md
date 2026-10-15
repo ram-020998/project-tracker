@@ -14,7 +14,7 @@
 | 46-04 CR lifecycle | ✅ built (2026-10-14) | genesis `b8a9fc8` | SHIP |
 | 46-05 impact analysis | ✅ built (2026-10-15) | genesis `297fd2b` | NEEDS_FIXES → fixed → SHIP |
 | 46-06 apply / discard | ✅ built (2026-10-15) | genesis `1b31489` · genesis-workflows `7d8e92d` | SHIP (tests folded in) |
-| 46-08 story answers / history / badges | ⏳ next | — | — |
+| 46-08 story answers / history / badges | 🧱 building (decisions recorded 2026-10-15) | — | — |
 | 46-07 web | — | — | — |
 | 46-09 collaboration / Hub | — | — | — |
 | 46-10 review + acceptance | — | — | — |
@@ -302,3 +302,14 @@ shift, `on_board` only with a board, `blockers` in the 409).
   candidate update) folded in as tests; NITs recorded above.
 - Not verified live: an Apply in a running `genesis serve` with a real agent-written plan, and publishing against
   the live Hub (fleet not updated mid-phase).
+
+## 46-08 — story answers, spec references, history, badges (building)
+
+**Decisions recorded before the build (2026-10-15)** — full text in `specs/.../46-08-story-answers-history-and-badges.md`
+§9 (findings §5.10): Q1 = A (`needs_design_rerun` for CR-updated stories with a done design in Design **or Design
+Review** — amends 46-06); Q2 = A (a "From the spec" chip opens the read-only spec in a new tab, scrolled to and
+highlighting the clause); Q3 = A (the story workflows also receive the open questions, marked unresolved); proposals
+1–10 and 14 accepted (index vs text answers, 3,000-char answer cap, validated `answers` PATCH keeping provenance,
+enrichment in both story reads, server-side design-rerun resolution from `runs.created_at` in both board reads,
+always-sent story keys, the null-revision badge fallback + `spec-reviewed` scope + badge in both stage reads,
+removed-clause chips, legacy features hide the spec card, answer-only history from `answers`, 46-07/46-08 web split).

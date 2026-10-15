@@ -315,6 +315,17 @@ Asked one question at a time before building 46-06; the user chose option A for 
 - **Q2 — answers on locked stories → A:** the Apply confirmation (A7) also covers locked stories that keep
   `no_change` but get answers (matches V4). Rejected: A7 as written (update/remove only).
 
+### 5.10 Round 8 — 46-08 build decisions (2026-10-15)
+
+Asked one question at a time before building 46-08; the user chose option A for all three and accepted the
+assistant's 11 other proposals. Full text: `46-08-story-answers-history-and-badges.md` §9.
+- **Q1 — "re-run design" scope → A:** every CR-updated story whose design is done, in Design **or Design Review**
+  (amends the built 46-06 rule, which only covered the Design lane). Rejected: Design lane only; any lane.
+- **Q2 — a "From the spec" chip → A:** opens the read-only spec in a new tab scrolled to + highlighting the clause.
+  Rejected: open the spec workspace preview (depends on 46-07); a popover only.
+- **Q3 — story workflow inputs → A:** pass answers, spec clauses **and the open questions** (marked unresolved).
+  Rejected: answers + spec clauses only.
+
 ## 6. Defaults chosen by the assistant — ✅ confirmed by the user 2026-10-14 (umbrella §13 Q1–Q5, each answered "A" = the default as written)
 
 *(Heading was "not yet explicitly confirmed"; the confirmation round is recorded in §5.7.)*
