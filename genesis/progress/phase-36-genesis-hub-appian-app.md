@@ -222,7 +222,7 @@ was changed. The read Web APIs (`GH_records_get`, `GH_records_list`) have no kin
 
 ---
 
-## 🟡 SPEC CHANGE REQUEST ADDITION (Phase 46-09) — BUILT + LIVE-VALIDATED (2026-10-15) — 38/41, 1 open item
+## ✅ SPEC CHANGE REQUEST ADDITION (Phase 46-09) — BUILT + LIVE-VALIDATED (2026-10-15) — 41/41
 
 Spec: `specs/phase-36-genesis-hub-appian-app/contract/spec-change-contract-addition.md`. Fixtures:
 `story_with_trace.json` and `spec_change_request.json`. This is an additive, backward-compatible addition to
@@ -313,9 +313,11 @@ data_steward = GH Service Accounts `_e-…462`. This mirrors GH Stage Artifact. 
   - Tested with `testRule`: both JSON separator styles, an explicit `null`, and decoy keys inside strings.
 - Unchanged: GH_appendChangeLog, GH_changesSince, the blob rules, GH_isServiceCaller, GH_errorResponse.
 
-### Web API edit
-Only `GH_records_upsert` `8e153f45-…` changed, and only by `"spec_change_request"` appended to its inline kind list.
-The app owner made the edit in Designer on 2026-10-15. No other Web API changed and no new Web API was created.
+### Web API edits (both additive, both made by the app owner in Designer on 2026-10-15; the MCP cannot edit Web API bodies)
+Only `GH_records_upsert` `8e153f45-…` changed:
+1. `"spec_change_request"` appended to its inline kind list, the same additive edit the Object Wiki needed.
+2. **⚠️ Deviation, approved by the owner:** the argument `rawBody: http!request.body` added to its
+   `rule!GH_casUpsert(…)` call. Nothing else changed, and no other Web API changed or was created.
 
 ### Item types
 `GH Story Item.itemType` has no constant, check or validation list anywhere: it is free TEXT, and the only places
@@ -323,27 +325,46 @@ that enumerate values are the casUpsert and reassemble branches above. The allow
 `ac | question | label | spec_ref | answer | change`. `text` stays Extra Long (LONGVARCHAR 65535 bytes), so no field
 changed.
 
-### ⚠️ OPEN ITEM (deviation from the spec): `opened_at` / `closed_at` are not byte-for-byte
+### ⚠️ Deviation → RESOLVED: exact timestamp strings needed the raw request body
 **Constraint:** `GH_records_upsert` parses the body with `a!fromJson`. Per the docs and confirmed live, it
-**auto-casts any string in a supported ISO date/datetime format** to Date / Date and Time *before* any rule sees
-the payload. The offset is normalised to UTC, and sub-second precision is lost (`.123456` → `.120`,
-`.987654` → `.990`). The original string cannot be recovered inside a rule.
+**converts any string in a supported ISO date/datetime format** into a date or datetime *before* any rule sees
+the payload. The offset is normalised to UTC and sub-second precision is lost (`.123456` → `.120`), so the
+original string can't be recovered inside a rule.
 
-| Stage | `"2026-10-14T10:00:00.123456+00:00"` reads back as |
+| Stage | `"2026-10-14T10:00:00.123456+00:00"` read back as |
 |---|---|
-| Before any fix (cast datetime written into TEXT) | `10/14/2026 10:00 AM GMT+00:00` |
-| Now (GH_payloadText fallback) | `2026-10-14T10:00:00.120Z` |
+| First run | `10/14/2026 10:00 AM GMT+00:00` (a converted datetime written into TEXT) |
+| GH_payloadText fallback only | `2026-10-14T10:00:00.120Z` |
+| **After Web API edit 2 (`rawBody`)** | **`2026-10-14T10:00:00.123456+00:00`**, exact |
 
-**Proposed resolution (needs owner approval — a second Web API edit):** in `GH_records_upsert`'s call to
-`rule!GH_casUpsert(…)`, add the argument `rawBody: http!request.body`. Nothing else changes. The rule side is
-already deployed and tested, and once the edit is in, `cr.*.get_byte_for_byte` should pass with the exact strings.
-The alternative is a contract amendment: accept ISO-8601 UTC with ms and have Genesis compare instants.
-**Latent, pre-existing, same cause:** any text field of any kind whose whole value looks like an ISO date or
-datetime is cast. For example, a story title `"2026-10-14"` used to be stored as `10/14/2026`, and an array
-element that is a bare ISO string would be cast too. Genesis's trace elements are JSON objects (`{…}`), so they
-are safe.
+GH_casUpsert v12 sends the CR's `title` / `opened_at` / `closed_at` through GH_payloadText, which copies the exact
+string from `rawBody`. Callers that don't pass `rawBody` fall back to the ISO form.
 
-### Live validation evidence (2026-10-15, `/tmp/gh46/harness.py`) — 38/41
+### ⚠️ KNOWN ISSUE (pre-existing, not fixed): date-looking text on the other kinds
+Verified live after edit 2. **`rawBody` does not help the other kinds**: only the three CR fields above read from
+it, and every other kind's text fields still use the converted payload.
+
+| Kind / field | Sent | Read back |
+|---|---|---|
+| story `title` | `2026-10-14` | `10/14/2026` |
+| story `dev_note_ref` | `2026-10-14T10:00:00.123456+00:00` | `10/14/2026 10:00 AM GMT+00:00` |
+| story `labels` element | `["2026-10-14","ok"]` | `["10/14/2026","ok"]` |
+| team `title` | `2026-10-14` | `10/14/2026` |
+| feature `name` | `2026-10-14T09:00:00Z` | `10/14/2026 9:00 AM GMT+00:00` |
+| feature `description` | `2026-10-14` | `10/14/2026` |
+| spec_change_request `title` | `2026-10-14` | `2026-10-14` (exact) |
+
+The affected values are text fields or list elements whose **whole** value looks like a date or date-time.
+Genesis's trace elements (`{…}` JSON) and normal text are unaffected; DATETIME fields are dates by design.
+
+**Backlog — proposed fix:** "Hub: route every text field of every kind through GH_payloadText (rawBody is now
+available), plus raw-body parsing for date-like list elements." Scalar fields are safe to fix that way:
+- a date-looking value never contains JSON escapes, so it is copied exactly from the raw body;
+- an escaped value is never converted, so the parsed value is already correct.
+
+That fix touches every existing kind branch, so it is a separate, approved change with a full regression run.
+
+### Live validation evidence (2026-10-15, `/tmp/gh46/harness.py`, final run after Web API edit 2) — 41/41
 | Area | Result | Evidence |
 |---|---|---|
 | `story_with_trace.json` step 1 PUT/GET | 2/2 ✅ | 201 v0. All six arrays match byte-for-byte (unicode, `\"`, `\\`, `\n`), with `questions: []` and `epic_sync_uuid`/`appian_part` `""`. |
@@ -353,21 +374,29 @@ are safe.
 | `/changes` | 1/1 ✅ | story rows have versions exactly `[0,1,2]` |
 | List carries the new keys | 1/1 ✅ | `records_list/story` records include `spec_refs`/`answers`/`change_log` |
 | CR applied: create / update / stale | 3/3 ✅ | 201 v0; 200 v1; 409 `current_version: 1` |
-| CR GET byte-for-byte (applied, update, discarded) | **0/3 ⚠️** | Every other key matches exactly: unicode title, `summary` JSON text, `published_at` `2026-10-15T09:30:05Z`, hashes, blob_key. **Only `opened_at`/`closed_at` differ** (see the open item). |
+| CR GET byte-for-byte (applied, update, discarded) | 3/3 ✅ | All 21 keys exact, including `opened_at` `2026-10-14T10:00:00.123456+00:00` and `closed_at` `2026-10-15T09:30:00.000001+00:00`. Also exact: the unicode title, the `summary` JSON text, `published_at` `2026-10-15T09:30:05Z`, the hashes and `blob_key`. |
 | CR discarded | 2/2 ✅ | 201. **`result_revision_no: null`** (DB NULL, JSON `null`, not 0). `title` null → `""`; **`summary` null → `""`** (the fixture says `null`). |
 | CR `/changes` + list | 2/2 ✅ | `kind: "spec_change_request"` rows v0, v1 (applied) and v0 (discarded); list returns both |
 | Blob at `…:cr-03` | 5/5 ✅ | sha256 self-check; 201 `{new,1}` → 200 `{unchanged,1}` → GET with identical base64 and `content_hash`, v1; versions `[1]` |
 | Blob ~1 MB (971,096 bytes; 1,294,796 base64 characters) | 2/2 ✅ | 201, and GET returns identical bytes and sha256 |
 | Activity | 3/3 ✅ | `ttl_seconds: 86400` → 200; marker `expires_at − set_at` = 86400 s; clear 200 |
-| Regression | 12/12 ✅ | meta 1.0.0; unauthenticated 401 (GET meta and PUT records); unknown kind 400; team, membership, feature, epic, story (AC order, `questions: []`, unicode labels, new arrays `[]`), board_state, stage_artifact, wiki_page and wiki_entry all round-trip. Re-run 21/21 on casUpsert v12. |
+| Regression | 12/12 ✅ | meta 1.0.0; unauthenticated 401 (GET meta and PUT records); unknown kind 400; team, membership, feature, epic, story (AC order, `questions: []`, unicode labels, new arrays `[]`), board_state, stage_artifact, wiki_page and wiki_entry all round-trip. All of these also passed 21/21 before edit 2, and pass again in the final run. |
 | (report) absent-key probe | — | An absent original key clears that type. `spec_refs: null` clears like `[]`. Absent `answers`/`change_log` are kept. |
 | (informational) blob `/changes` row | ✗ pre-existing | no `blob` rows have ever been written (see above) |
 
-Read-after-write lag was about 1.5 s throughout this run.
+Read-after-write lag was about 1.5 s throughout.
 
 ### Cleanup
-Removed all validation rows: 5 GH Story rows, 29 GH Story Item rows, 2 rows each of team, membership, feature, epic,
-board_state, stage_artifact, wiki_page and wiki_entry, 9 GH Spec Change Request rows (CR table empty again),
-2 GH Blob Version rows, and their 2 Documents in GH Artifact Blobs. The activity marker was cleared. A final
-sweep confirmed all 29 validation keys return 404. GH Change Log rows remain, as an append-only feed with a
-monotonic cursor.
+All validation rows from every run were removed:
+
+| Record type | Rows removed |
+|---|---|
+| GH Story | 9 |
+| GH Story Item | 50 |
+| GH Spec Change Request | 13 (the CR table is empty) |
+| GH Team, GH Feature | 4 each |
+| GH Membership, GH Epic, GH Board State, GH Stage Artifact, GH Object Wiki Page, GH Object Wiki Entry | 3 each |
+| GH Blob Version | 4, plus their 4 Documents in GH Artifact Blobs |
+
+The activity markers were cleared. Final sweeps confirmed every validation key (records and blobs) returns 404.
+GH Change Log rows remain, as an append-only feed with a monotonic cursor.
