@@ -1,6 +1,6 @@
 # 46-06 — Apply changes and Discard change request
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repos: **genesis** (+ a parity test in **genesis-workflows**). Implements the
+> **Status:** ✅ BUILT + SHIPPED (genesis v0.77.0 / genesis-workflows v0.22.0, 2026-10-15; as-built in `progress/phase-46-spec-change-requests.md`) — drafted 2026-10-14. Repos: **genesis** (+ a parity test in **genesis-workflows**). Implements the
 > commit half of **ADR-076**. Parent: `specs/phase-46-spec-change-requests.md`. Decisions D7, D8, D12–D14.
 
 ## 1. Goal

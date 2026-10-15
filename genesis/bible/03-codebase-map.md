@@ -709,3 +709,48 @@ genesis-workflows/
   mcp-registry.json    appian-dev += listObjects; appian-dev-packages (package tools, no delete; injected by nothing).
 ```
 
+**Phase 46 — Spec Change Requests & Story Traceability (genesis v0.77.0 · genesis-workflows v0.22.0 · Hub addition):**
+```
+genesis/
+  db/migrations/m0024_spec_change_requests.py  kb_stories.spec_refs/answers/change_log, chat_messages.meta_json,
+                       kb_spec_change_requests (+ one-open-CR-per-spec partial index) (DB v24).
+  kb/spec_clauses.py   block extraction, normalize_text/fingerprint/formatting_key, labels, normalize_spec (keep →
+                       re-anchor → mint; start-tag edits only), clause_map, overlay_labels (+ coverage badges, the
+                       genesis:clause click script, the #c-… focus script).
+  services/spec_clauses.py  SpecClauseService — normalizes the sandbox spec.html (post-turn hook + milestones),
+                       working/last-normalized.html + clause-registry.json, revision_html, reset_working.
+  kb/spec_changes.py   is_traceable, make_spec_refs, build_coverage/coverage_counts, story/backlog items,
+                       SpecChangeStore (cr_no = max+1, one open CR, close CAS), cr_label.
+  kb/spec_diff.py      diff_specs → unchanged/moved/formatting/modified/added/removed (per-section LCS positions).
+  kb/spec_impact.py    build_impact_input (genesis.cr-impact-input/1: changes, affected, new_clauses + candidates).
+  kb/cr_plan.py        load_plan, validate_plan V1–V12, plan_counts.
+  kb/cr_document.py    the script-free "CR-n Impact Analysis" document (live / Applied / Discarded).
+  kb/cr_apply.py       link refresh/add/remove, move_answers, change_entry (CLAUSE_CAP 40), apply_backlog.
+  kb/backlog_doc.py    render_breakdown — the breakdown renderer port (parity-tested in genesis-workflows).
+  kb/story_trace.py    answers (answer/edit/reopen, ANSWER_MAX 3000), enrich_refs, workflow_story_fields,
+                       story_flags (design_rerun / not_applied), stage_spec_changed (the UX/TD/breakdown badge).
+  services/stage_artifacts.py  current_stage_html / consumer_stage_html (base revision while under change),
+                       write_revision, consumer_spec_map.
+  services/spec_change.py  SpecChangeService — stage_ctx/downstream_locked, initiate, analyze, analysis state,
+                       plan, document, detail (can_apply, apply_blockers, locked_confirmations, next_revision_no,
+                       chat_busy), apply (A1–A8 + one transaction + post-commit publish), discard, the Hub marker.
+  api/change_requests.py  /features/{id}/change-requests[/{n}[/analyze|/plan|/document|/export.md|/apply|/discard]].
+  api/features.py      /spec/clauses, /spec/coverage, /spec/allowed (+ change_requests), /spec/artifact
+                       (labels, coverage=0, revision=<n>), story answers routes, spec-reviewed, the activity cr_label.
+  chat/                ChatMessageRecord.meta + ChatManager.enqueue_agent_note (CR dividers; Add context fixed).
+  collab/service.py    story trace arrays (compact JSON elements, ELEMENT_MAX 4000), spec_change_request binding,
+                       publish_story_merging, publish_change_request, _known_version (no re-apply of a held version).
+  collab/story_merge.py  merge_story (the 46-09 §2 conflict rules).
+  collab/providers/local.py  STRICT emulator: CONTRACT_KINDS, string story arrays, absent-key rules, null text → "".
+  web/src/features/features/{ChangeRequestFlow.tsx, cr-flow.ts, SpecChangedBanner.tsx, PulledChangeRequests.tsx,
+                       AnnotatablePreviewDialog.tsx (tabs, coverage popover), StageArtifactWorkspace.tsx (CR toolbar)}
+  web/src/features/workbench/{StoryTraceCards.tsx, story-trace.ts, StoryCard.tsx (spec-changed icon)}
+  web/src/features/chat/{ChatThread.tsx (CR dividers, onStreamingChange), cr-divider.ts}
+genesis-workflows/
+  feature-breakdown-analysis 0.3.0  optional spec_clauses_path → clause-tagged spec, clauseRefs + specRevision,
+                       uncovered-clause critic input; renderer parity test vs genesis.kb.backlog_doc.
+  story-design-analysis 0.3.1 / story-implementation 0.1.1  ticket block: answered questions, open questions
+                       (unresolved), spec clauses this story implements.
+Genesis Hub (Appian):  GH Spec Change Request (kind spec_change_request), GH Story Item item types
+                       spec_ref / answer / change; GH_records_upsert passes rawBody (contract/spec-change-contract-addition.md).
+```

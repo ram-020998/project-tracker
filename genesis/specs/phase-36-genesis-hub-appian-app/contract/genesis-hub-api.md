@@ -54,6 +54,8 @@ The Genesis provider maps each logical contract path to the concrete `urlAlias` 
 
 ## 2. Kinds and the canonical record shapes
 
+> **Additive extensions (each backward-compatible, `contract_version` stays 1.0.0):** [`object-wiki-contract-addition.md`](object-wiki-contract-addition.md) (`wiki_page`, `wiki_entry` — Phase 42) and [`spec-change-contract-addition.md`](spec-change-contract-addition.md) (`spec_change_request` + the story arrays `spec_refs` / `answers` / `change_log` — Phase 46, live-validated 41/41).
+
 `{kind}` ∈ **`team` · `membership` · `feature` · `epic` · `story` · `board_state` · `stage_artifact`** (7 record
 kinds). `blob` is a separate change-log kind (not a records kind). All record JSON keys are **snake_case**.
 

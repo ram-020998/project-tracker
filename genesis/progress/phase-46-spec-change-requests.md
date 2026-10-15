@@ -1,6 +1,6 @@
 # Phase 46 — Spec Change Requests & Story Traceability — progress (as-built)
 
-> Spec: `specs/phase-46-spec-change-requests.md` (+ `46-01..46-11`). ADR-075/076 **Proposed** (Accepted at the 46-11 release).
+> Spec: `specs/phase-46-spec-change-requests.md` (+ `46-01..46-11`). ADR-075/076 **Accepted** (2026-10-15, at the 46-11 release). ✅ **SHIPPED 2026-10-15 — genesis v0.77.0 → genesis-workflows v0.22.0 (+ the Genesis Hub contract addition, live-validated 41/41); CI green — genesis {{GCI}} (master) + {{GCIT}} (v0.77.0 tag), genesis-workflows {{WCI}} + {{WCIT}} (v0.22.0); ADR-075/076 Accepted; m0024 → DB v24**.
 > Build started 2026-10-14 on the user's go-ahead. Code commits are **local only** (no push/tag until the 46-11 release
 > go-ahead). The umbrella §13 defaults (Q1–Q5) were confirmed by the user on 2026-10-14, all as written (findings §5.7).
 
@@ -17,8 +17,8 @@
 | 46-08 story answers / history / badges | ✅ built (2026-10-15) | genesis `e0d0e3e` · genesis-workflows `e20d66e` | SHIP (NITs folded in) |
 | 46-07 web | ✅ built (2026-10-15) | genesis `a5cd09a` | NEEDS_FIXES → fixed → SHIP |
 | 46-09 collaboration / Hub | ✅ built (2026-10-15) — genesis side + Hub addition live-validated 41/41 | genesis `d4c39b4`, `cb49b3b` · Hub: project-tracker `894c7f2`, `b9c3b3f` | SHIP (fixes folded in) → re-review SHIP |
-| 46-10 review + acceptance | 🧱 gates + whole-phase review ✅ (2026-10-15); live acceptance waits for the fleet go-ahead | genesis `9aa01b0` | whole-phase SHIP (9/9 invariants) |
-| 46-11 release | — | — | — |
+| 46-10 review + acceptance | ✅ done (2026-10-15) — gates, whole-phase review, live acceptance steps 1–12 (13 skipped by the user) | genesis `9aa01b0`, `0e371de` (fix) | whole-phase SHIP (9/9 invariants) |
+| 46-11 release | ✅ shipped (2026-10-15) | genesis v0.77.0 `{{GREL}}` · genesis-workflows v0.22.0 `{{WREL}}` | CI {{GCI}} / {{GCIT}} · {{WCI}} / {{WCIT}} |
 
 ## 46-02 — the spec clause model (genesis `196e78d`)
 
@@ -489,3 +489,23 @@ server-side), Q2 = A (the conflict merge is also written locally), Q3 = A (propo
   the cr_no collision skip, derived created-story fields) → focused re-review **SHIP**.
 - Not verified live: publishing / pulling against the real Hub (needs the Appian addition) and two fleet instances.
 
+## 46-10 — review, hardening and live acceptance (genesis `9aa01b0` + `0e371de`)
+
+- **Gates + whole-phase review:** see `specs/.../46-10-review-and-acceptance.md` §4.1 — all green; independent review SHIP,
+  9/9 invariants PASS. Hardening: the strict emulator clears an absent original story array like the live Hub.
+- **Fleet update (user go-ahead):** both DBs backed up (`~/Genesis/backups/phase46-pre-v24-20261015-171825/`), library
+  `e20d66e` provisioned, both instances restarted on the local checkout → DB v24.
+- **Live acceptance (Playwright on both instances, evidence in §4.3):** steps 1–12 ✅; step 13 (backlog-mode CR) skipped
+  by the user's decision (hermetic `test_cr_apply.py::test_backlog_mode_apply` + the renderer parity test cover it).
+- **Bug found and fixed:** the pull re-applied `main`'s own published spec record (a cursor pinned since 2026-09-24 by a
+  leftover Hub row) and flipped `under-change` → `completed`; genesis `0e371de` makes a pull skip any version the machine
+  already holds (regression test fails on the old code). `main` repaired with one guarded row update (user-approved).
+- **Findings** (→ `specs/backlog/phase-46-follow-ups.md`): F1 Finalize doesn't publish the backlog (pre-existing);
+  F3 a cancelled run is reported `failed`; F4 leftover Hub validation rows pin cursors; F5/F6 cosmetic.
+
+## 46-11 — release (genesis v0.77.0 `{{GREL}}` · genesis-workflows v0.22.0 `{{WREL}}`)
+
+- genesis v0.77.0: version bumped (`pyproject`, `create_app`, `web/src/version.ts`), README + INSTALL notes, `web/static`
+  rebuilt; tagged + pushed; CI {{GCI}} (master) + {{GCIT}} (tag: genesis + frontend + clean-install) green.
+- genesis-workflows v0.22.0: genesis pin → v0.77.0, the parity test no longer skips; tagged + pushed; CI {{WCI}} + {{WCIT}}.
+- Deploy: fleet restarted on v0.77.0 (both report 0.77.0; catalog lists feature-breakdown-analysis 0.3.0; DB v24).

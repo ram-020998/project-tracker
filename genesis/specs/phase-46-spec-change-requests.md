@@ -1,6 +1,6 @@
 # Phase 46 — Spec Change Requests & Story Traceability
 
-> **Status:** 🟡 **SPEC-DRAFTED 2026-10-14 — awaiting build sign-off. No code changed.** · **Author:** Genesis agent.
+> **Status:** ✅ **SHIPPED 2026-10-15 — genesis v0.77.0 → genesis-workflows v0.22.0 (+ the Genesis Hub contract addition, live-validated 41/41); CI green — genesis {{GCI}} (master) + {{GCIT}} (v0.77.0 tag), genesis-workflows {{WCI}} + {{WCIT}} (v0.22.0); ADR-075/076 Accepted; m0024 → DB v24** (spec-drafted 2026-10-14; as-built: `progress/phase-46-spec-change-requests.md`). · **Author:** Genesis agent.
 > Sub-specs: `phase-46-spec-change-requests/46-01..46-11`. Findings (research + every decision):
 > `46-01-findings.md`. New ADRs (**Proposed**): **ADR-075** (spec clause model + story↔spec trace links) and
 > **ADR-076** (spec change requests). Repos: **genesis**, **genesis-workflows**, and the **Genesis Hub** Appian app

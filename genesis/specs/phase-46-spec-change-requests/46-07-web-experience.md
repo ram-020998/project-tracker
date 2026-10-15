@@ -1,6 +1,6 @@
 # 46-07 — Web experience (spec workspace, CR flow, preview tabs, coverage)
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repo: **genesis** (`web/`). Parent: `specs/phase-46-spec-change-requests.md`.
+> **Status:** ✅ BUILT + SHIPPED (genesis v0.77.0 / genesis-workflows v0.22.0, 2026-10-15; as-built in `progress/phase-46-spec-change-requests.md`) — drafted 2026-10-14. Repo: **genesis** (`web/`). Parent: `specs/phase-46-spec-change-requests.md`.
 > Decisions D3–D7, D10, D12, D14–D16, D19 (umbrella §3).
 > Story-side UI (answers, references, history, badges) is in 46-08. Follows ADR-055 (design language, tokens, no
 > hard-coded brand hex) and ADR-028 (typed client, `/api` prefix centrally); every new interactive surface gets a

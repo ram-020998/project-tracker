@@ -1,6 +1,6 @@
 # 46-01 — Findings: spec ↔ story traceability and spec change requests
 
-> **Status:** 🟡 DRAFTED 2026-10-14 (research + decisions locked with the user; no code changed).
+> **Status:** ✅ DONE — drafted 2026-10-14 (research + decisions locked with the user); build decisions appended through §5.12; shipped in genesis v0.77.0 (2026-10-15).
 > Parent: `specs/phase-46-spec-change-requests.md`. Proposed ADRs: **ADR-075** (spec clause model + story↔spec
 > trace links) and **ADR-076** (spec change requests).
 >

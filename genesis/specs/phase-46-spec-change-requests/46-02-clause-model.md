@@ -1,6 +1,6 @@
 # 46-02 — The spec clause model (stable IDs, repair, fingerprints, labels)
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repo: **genesis**. Implements the clause half of **ADR-075**.
+> **Status:** ✅ BUILT + SHIPPED (genesis v0.77.0 / genesis-workflows v0.22.0, 2026-10-15; as-built in `progress/phase-46-spec-change-requests.md`) — drafted 2026-10-14. Repo: **genesis**. Implements the clause half of **ADR-075**.
 > Parent: `specs/phase-46-spec-change-requests.md`. Decision D1 (umbrella §3). Findings: `46-01-findings.md` §3.2.
 
 ## 1. Goal

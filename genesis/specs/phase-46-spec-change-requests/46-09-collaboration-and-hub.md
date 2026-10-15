@@ -1,6 +1,6 @@
 # 46-09 — Collaboration and the Genesis Hub contract addition
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repos: **genesis** (collab bindings) + the **Genesis Hub** Appian app (built and
+> **Status:** ✅ BUILT + SHIPPED (genesis v0.77.0 / genesis-workflows v0.22.0, 2026-10-15; as-built in `progress/phase-46-spec-change-requests.md`) — drafted 2026-10-14. Repos: **genesis** (collab bindings) + the **Genesis Hub** Appian app (built and
 > live-validated by the separate write-capable Dev-MCP agent — genesis stays read-only against Appian, ADR-036/037).
 > Parent: `specs/phase-46-spec-change-requests.md`. Additive to the frozen ADR-064 contract v1.0.0, exactly like the
 > v0.69.0 `on_board` field and the Phase-42 Object Wiki addition.

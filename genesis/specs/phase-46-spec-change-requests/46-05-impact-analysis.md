@@ -1,6 +1,6 @@
 # 46-05 — Analyze impact: the diff, the impact input, the plan and the CR document
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repo: **genesis**. Implements the analysis half of **ADR-076**.
+> **Status:** ✅ BUILT + SHIPPED (genesis v0.77.0 / genesis-workflows v0.22.0, 2026-10-15; as-built in `progress/phase-46-spec-change-requests.md`) — drafted 2026-10-14. Repo: **genesis**. Implements the analysis half of **ADR-076**.
 > Parent: `specs/phase-46-spec-change-requests.md`. Decisions D6, D8–D10, D13–D15.
 
 ## 1. Goal

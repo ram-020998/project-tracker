@@ -1,6 +1,6 @@
 # 46-04 — Change-request lifecycle, data model, chat behaviour and consumer isolation
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repo: **genesis**. Implements the lifecycle half of **ADR-076**.
+> **Status:** ✅ BUILT + SHIPPED (genesis v0.77.0 / genesis-workflows v0.22.0, 2026-10-15; as-built in `progress/phase-46-spec-change-requests.md`) — drafted 2026-10-14. Repo: **genesis**. Implements the lifecycle half of **ADR-076**.
 > Parent: `specs/phase-46-spec-change-requests.md`. Decisions D2–D5 and D11 (umbrella §3).
 
 ## 1. Goal

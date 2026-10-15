@@ -1,6 +1,6 @@
 # 46-11 — Release
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repos: genesis, genesis-workflows (+ the Hub additions, already live from 46-09).
+> **Status:** ✅ BUILT + SHIPPED (genesis v0.77.0 / genesis-workflows v0.22.0, 2026-10-15; as-built in `progress/phase-46-spec-change-requests.md`) — drafted 2026-10-14. Repos: genesis, genesis-workflows (+ the Hub additions, already live from 46-09).
 > Parent: `specs/phase-46-spec-change-requests.md`. Release only after the user's go-ahead.
 
 ## 1. Order (ADR-019)
@@ -27,3 +27,12 @@ tests, "what works"), `bible/03` (new modules: `kb/spec_clauses.py`, `kb/spec_di
 `kb/cr_document.py`, `kb/backlog_doc.py`, `services/spec_change.py`, the CR API, web components),
 `bible/06` (lessons from the build), `bible/08` §9 (SHIPPED), banners in `AGENT_ONBOARDING.md` + `bible/00`, README
 phase row, `tracker.md` §6, `progress/phase-46-spec-change-requests.md` (as-built), every sub-spec's as-built section.
+
+## 4. As run (2026-10-15, on the user's go-ahead)
+1. Hub: the 46-09 addition built + live-validated 41/41 (`progress/phase-36-genesis-hub-appian-app.md`).
+2. genesis **v0.77.0** — release commit `{{GREL}}`, tag `v0.77.0`; CI {{GCI}} (master) + {{GCIT}} (tag) green.
+3. genesis-workflows **v0.22.0** — release commit `{{WREL}}`, tag `v0.22.0` (genesis pin v0.77.0; the parity test runs
+   unconditionally); CI {{WCI}} + {{WCIT}} green.
+4. Deploy: fleet restarted, both instances report 0.77.0, catalog lists feature-breakdown-analysis 0.3.0, DB v24.
+5. Docs: decision log (ADR-075/076 Accepted + as built), bible 00/01/03/04/05/06/08, `AGENT_ONBOARDING.md`, README,
+   `tracker.md` §6, the progress doc, every sub-spec status, the Phase 36 contract index, the backlog file.

@@ -1,6 +1,6 @@
 # 46-08 — Story answers, spec references, change history, and "spec changed" badges
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repos: **genesis** (API + web) + **genesis-workflows** (story design /
+> **Status:** ✅ BUILT + SHIPPED (genesis v0.77.0 / genesis-workflows v0.22.0, 2026-10-15; as-built in `progress/phase-46-spec-change-requests.md`) — drafted 2026-10-14. Repos: **genesis** (API + web) + **genesis-workflows** (story design /
 > implementation prompts). Parent: `specs/phase-46-spec-change-requests.md`. Decisions D16, D17.
 
 ## 1. Goal

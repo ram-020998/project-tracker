@@ -1,6 +1,6 @@
 # 46-10 — Review, hardening and live acceptance
 
-> **Status:** 🟡 DRAFTED 2026-10-14. Repos: all. Parent: `specs/phase-46-spec-change-requests.md`.
+> **Status:** ✅ BUILT + SHIPPED (genesis v0.77.0 / genesis-workflows v0.22.0, 2026-10-15; as-built in `progress/phase-46-spec-change-requests.md`) — drafted 2026-10-14. Repos: all. Parent: `specs/phase-46-spec-change-requests.md`.
 
 ## 1. Independent review (sub-agent, read-only)
 
@@ -48,6 +48,7 @@ genesis-workflows: `validate_library` + pytest (incl. the backlog-renderer parit
 | 10 | On `userb` | Updated/created stories pulled; CR-01 in the list with its document; stories show change history |
 | 11 | Answer a question on `userb` | Appears on `main` after auto-pull; next design run prompt contains it |
 | 12 | Initiate CR-02, edit, Discard | Spec restored byte-for-byte; no story changed; CR-02 *Discarded* in the list on both machines |
+| 13 | ⏭️ skipped (user decision, 2026-10-15) | A backlog-mode CR (breakdown completed, not finalized) was not run live; covered by `tests/test_cr_apply.py::test_backlog_mode_apply` and the genesis-workflows renderer parity test (byte-identical `breakdown.html`). |
 | 13 | A feature with a completed breakdown, not finalized: CR → Apply | `breakdown.html` re-rendered with the reconciled backlog; Finalize then carries `spec_refs` |
 
 Record evidence (run ids, revision numbers, screenshots of the document) in 46-10 §4 "As run".
@@ -96,3 +97,6 @@ Record evidence (run ids, revision numbers, screenshots of the document) in 46-1
 
 **Findings so far:** F1 Finalize doesn't publish the backlog (pre-existing, `usePublishBacklog` unused); F2 own-record pull echo (fixed, genesis `0e371de`); F3 a cancelled run is reported `failed` ("worker exited abnormally", pre-existing); F4 the Hub's leftover validation rows (`bafef139…`, GH Story 120) pin the `stage_artifact` / `story` pull cursors at 459 since 2026-09-24 — harmless after F2 but every pull re-fetches them (Appian agent to delete, with the user's OK); F5 the pull's `applied` lists include already-known versions (cosmetic); F6 the sidebar still says v0.76.0 on the unreleased build (cosmetic, fixed by the 46-11 bump).
 
+### 4.4 Outcome
+Phase 46 accepted for release by the user on 2026-10-15 (steps 1–12 ✅, step 13 skipped). Fix found during acceptance:
+genesis `0e371de`. Open findings → `specs/backlog/phase-46-follow-ups.md`.
