@@ -14,8 +14,8 @@
 | 46-04 CR lifecycle | ✅ built (2026-10-14) | genesis `b8a9fc8` | SHIP |
 | 46-05 impact analysis | ✅ built (2026-10-15) | genesis `297fd2b` | NEEDS_FIXES → fixed → SHIP |
 | 46-06 apply / discard | ✅ built (2026-10-15) | genesis `1b31489` · genesis-workflows `7d8e92d` | SHIP (tests folded in) |
-| 46-08 story answers / history / badges | 🧱 building (decisions recorded 2026-10-15) | — | — |
-| 46-07 web | — | — | — |
+| 46-08 story answers / history / badges | ✅ built (2026-10-15) | genesis `e0d0e3e` · genesis-workflows `e20d66e` | SHIP (NITs folded in) |
+| 46-07 web | ⏳ next | — | — |
 | 46-09 collaboration / Hub | — | — | — |
 | 46-10 review + acceptance | — | — | — |
 | 46-11 release | — | — | — |
@@ -303,7 +303,7 @@ shift, `on_board` only with a board, `blockers` in the 409).
 - Not verified live: an Apply in a running `genesis serve` with a real agent-written plan, and publishing against
   the live Hub (fleet not updated mid-phase).
 
-## 46-08 — story answers, spec references, history, badges (building)
+## 46-08 — story answers, spec references, history, badges (genesis `e0d0e3e` · genesis-workflows `e20d66e`)
 
 **Decisions recorded before the build (2026-10-15)** — full text in `specs/.../46-08-story-answers-history-and-badges.md`
 §9 (findings §5.10): Q1 = A (`needs_design_rerun` for CR-updated stories with a done design in Design **or Design
@@ -313,3 +313,51 @@ highlighting the clause); Q3 = A (the story workflows also receive the open ques
 enrichment in both story reads, server-side design-rerun resolution from `runs.created_at` in both board reads,
 always-sent story keys, the null-revision badge fallback + `spec-reviewed` scope + badge in both stage reads,
 removed-clause chips, legacy features hide the spec card, answer-only history from `answers`, 46-07/46-08 web split).
+
+**What was built**
+- **`kb/story_trace.py`** (new, pure): answer / edit / reopen a question (`AnswerError` → 400; answers ≤ 3,000
+  chars), `validate_answers` for a story PATCH (an entry matching an existing one keeps its provenance; anything
+  else becomes a manual answer by the caller), `enrich_refs` (`{label, text, exists, kind}` from the consumer clause
+  map), `spec_clauses` / `workflow_story_fields`, `story_flags` (latest change-log entry: `design_rerun` until a
+  design run *starts* after it, `not_applied` while past Design) and `stage_spec_changed` (recorded revision, else
+  the time rule; never the spec; the breakdown not after Finalize). `services/stage_artifacts.consumer_spec_map`.
+- **API** (`api/features.py`): `POST /features/{fid}/stories/{sid}/answers`, `PATCH …/answers/{i}`,
+  `DELETE …/answers/{i}?row_version=` (row_version CAS → 409, `canonical_username`); `PATCH` story accepts
+  `answers`; every story response (list, get, create, patch, answer ops) carries enriched `spec_refs`;
+  `spec_changed` on every stage in `GET /features/{id}` **and** `GET …/stages/{stage}`; `POST …/stages/{stage}/
+  spec-reviewed` (UX / TD / breakdown; 400 for the spec) stores the latest spec revision + hash + reviewer; the UX
+  and TD launches now record the consumed spec version (`upstream_versions_json`).
+- **Workbench:** the board card DTO carries `spec_flags` (`kb/boards._card_dict` → both `get_board` and
+  `get_card`, from the latest design run's `runs.created_at`); the Story Workspace read returns enriched refs,
+  `flags` and `context.traceable`; the design and implementation launches add `answers`, the open `questions` and
+  `spec_clauses` to the `story` dict.
+- **Q1:** Apply flags `needs_design_rerun` for CR-updated stories with a done design in Design **or Design Review**
+  (`services/spec_change.py`).
+- **Q2:** the served spec carries a small script that scrolls to and highlights `#c-xxxxxxxx` (only that pattern).
+- **Web:** Story Workspace Overview — Open questions (Answer), Answered questions (Edit answer / Reopen question;
+  CR answers link to the CR document), "From the spec" chips (new tab at the clause; muted "removed from the spec";
+  hidden on legacy features), Change history (newest first, follow-ups, re-run tag), the not-applied notice (Dismiss
+  stored in the browser); Design tab re-run banner (Re-run design, or "move it into Design" without a board card);
+  board-card "spec changed" icon; `SpecChangedBanner` under the stage workspace header (with the stage's Re-run
+  control, View CR-n, Mark as reviewed) and compact on the Overview stage card. `web/static` rebuilt.
+- **genesis-workflows:** `story-design-analysis` 0.3.1 and `story-implementation` 0.1.1 list answered questions,
+  open questions (marked unresolved) and the spec clauses in the ticket block; without the keys the prompt is
+  byte-identical (golden test).
+
+**Deviations / notes**
+- Editing a CR-recorded answer keeps `source: cr` + `cr_no` (the CR link stays) and records the editor as
+  `answered_by` / `answered_at`; the card shows both (review NIT).
+- The compact stage-card banner offers View CR-n + Mark as reviewed only; the stage's Re-run control is in the card
+  actions right below it (the full banner in the stage workspace reuses the Re-run control).
+- The badge compares revision numbers only (the recorded content hash is kept for the record); a stage launched
+  from an unsaved working copy uses the time rule.
+- Manual answers are not published until 46-09 (the story columns are still local-only).
+
+**Evidence**
+- genesis pytest **1081** (+27 `tests/test_story_trace.py`, incl. the Q1 regression for Design Review) + ruff
+  clean; web tsc clean, eslint 0 errors (19 pre-existing warnings), vitest **309** (+11, jest-axe on the new cards,
+  notice, banner and icon), build committed; genesis-workflows `validate_library` **13** + pytest **256** (+4).
+- Independent review = **SHIP** (no MUST/SHOULD); NITs 1 (edited CR answer shows its editor, + test) and 4 (single
+  story reads skip the clause map without spec links) folded in; 2, 3, 5 recorded above.
+- Not verified live: the Story Workspace cards / board icon / stage banner in a running `genesis serve`, and a real
+  story-design run with the new ticket block (the fleet is not updated mid-phase).
