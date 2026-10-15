@@ -13,8 +13,8 @@
 | 46-03 story↔spec links | ✅ built (2026-10-14) | genesis `0d8622e` · genesis-workflows `da0bb91` | SHIP |
 | 46-04 CR lifecycle | ✅ built (2026-10-14) | genesis `b8a9fc8` | SHIP |
 | 46-05 impact analysis | ✅ built (2026-10-15) | genesis `297fd2b` | NEEDS_FIXES → fixed → SHIP |
-| 46-06 apply / discard | 🧱 building (decisions recorded 2026-10-15) | — | — |
-| 46-08 story answers / history / badges | — | — | — |
+| 46-06 apply / discard | ✅ built (2026-10-15) | genesis `1b31489` · genesis-workflows `7d8e92d` | SHIP (tests folded in) |
+| 46-08 story answers / history / badges | ⏳ next | — | — |
 | 46-07 web | — | — | — |
 | 46-09 collaboration / Hub | — | — | — |
 | 46-10 review + acceptance | — | — | — |
@@ -240,7 +240,7 @@ in the impact input, the awaiting-plan document, `can_apply` from A1–A4, **Dis
   test.
 - Not verified live: a real agent turn writing `plan.json` from `impact-input.json` (needs the fleet updated).
 
-## 46-06 — apply and discard (building)
+## 46-06 — apply and discard (genesis `1b31489` · genesis-workflows `7d8e92d`)
 
 **Decisions recorded before the build (2026-10-15)** — full text in `specs/.../46-06-apply-and-discard.md` §10
 (findings §5.9): Q1 = A (Apply publishes what existing bindings support — spec stage, updated/created stories,
@@ -250,3 +250,55 @@ with revision files removed on rollback, `answers`/`change_log` JSON fields now,
 formatting-only fingerprint refresh, candidates in A5 + change_log, summary = rationale ≤ 500 chars, guarded sandbox
 write-back, backlog re-render replaces `breakdown.html`, parity test `importorskip` until 46-11, feature-wide position
 shift, `on_board` only with a board, `blockers` in the 409).
+
+**What was built**
+- **Stores (conn-aware, additive):** `StageStore.add_revision / set_html / set_upstream_versions(conn=)` +
+  `next_revision_no`; `StoryStore.create_story(after_story_id=, conn=)` (position shift after the followed-up story;
+  `on_board` / `answers` / `change_log` on create), `update_story(conn=)`, `delete_story(conn=)`, `snapshot()`;
+  `_JSON_FIELDS` += `answers`, `change_log`; Finalize carries backlog items' `answers`. `BoardStore.board_id_for` +
+  `append_to_todo(conn=)`.
+- **`kb/cr_apply.py`** (new, pure): link refresh (modified + formatting-only clauses), link add/remove
+  (`origin: "cr"`), answers moved by normalized question text (unmatched kept + reported), `change_log` entries
+  (summary = rationale ≤ 500), and `apply_backlog` (backlog mode: updates, `clauseRefs`, answers, removals, new
+  `story-<epic>-<max+1>` items after `follow_up_of`, `specRevision`).
+- **`kb/backlog_doc.py`** (new): `render_breakdown` — the workflow's renderer copied verbatim (`_DOC_STYLE`, `_esc`,
+  `_fmt_ac`, `_assign_ids`, `_story_card_html`, `_table_html`, `_build_document`).
+- **`SpecChangeService.apply`** (`POST …/{cr_no}/apply {confirm_locked_story_ids}`), under the per-spec lock:
+  - pre-checks A1–A8 → 409 `apply_blocked` + `blockers`; A7's confirmation set = locked items whose decision is not
+    `no_change` **or** that record answers (Q2); A5 checks affected items **and** candidates against the frozen
+    impact input; the working copy and `plan.json` are read once and exactly those bytes are validated, applied and
+    frozen;
+  - **one transaction**: spec revision N+1 (file removed on rollback) + `set_html`; stories mode — new follow-up
+    stories (GNS_ key, epic of the followed-up story, positioned after it, `on_board` + a To Do card only when the
+    app has a board), updates (fields, links, fingerprints, answers), removals (full snapshot first), fingerprint
+    refresh on unmentioned stories, `change_log` (`updated | created | unchanged | not_applied`, `follow_ups`,
+    `follow_up_of`, `needs_design_rerun`); backlog mode — the reconciled backlog re-rendered, a breakdown revision
+    "CR-n", the breakdown's consumed spec revision set to N+1; then the CR row (applied + summary) and the audited
+    `apply-change`. Any exception rolls back everything → 409 `apply_failed`; the CR stays open;
+  - after the commit (best-effort, every miss in `warnings`): the latest files, frozen `result.html` / `plan.json`
+    / `apply-report.json` / the *Applied* `document.html` (real keys, no validation box), the breakdown chat's
+    `breakdown.html`, a guarded sandbox check (a concurrent chat edit is left alone), the `cr-applied` note, and
+    publishing (Q1: spec stage, updated/created stories, tombstones, the breakdown in backlog mode; `HubConflict` →
+    pending, no pull).
+- `api/app.py` passes the collaboration service to the features routes.
+- **genesis-workflows:** a parity test in `feature-breakdown-analysis` — `render_breakdown == _build_document` over
+  five backlogs (incl. unicode / `</script>` / empty epics / the traced path with labels) **and** byte-identical
+  source of every ported function; `importorskip` until 46-11 re-pins genesis.
+
+**Deviations / notes**
+- A locked story that keeps `no_change` but records a confirmed answer gets `change_log` decision `unchanged`
+  (it was answered, not left behind); a plain locked `no_change` is `not_applied`.
+- Stories whose only change is a fingerprint refresh or an answer are not published until 46-09 (the new story
+  columns are local-only until then anyway).
+- The stage's "latest" file is written right after the commit (best-effort); the revision file — the durable
+  record — is written inside the transaction block.
+- A leftover `revisions/N+1.html` refuses Apply with a 500 `stale_files` (never overwritten, never deleted).
+- Discard needed no change in 46-06 (built in 46-04, frozen document in 46-05); its Hub publish is 46-09.
+
+**Evidence**
+- genesis pytest **1054** (+19 `tests/test_cr_apply.py`) + ruff clean; genesis-workflows `validate_library` **13** +
+  pytest **252** (+1 parity test, ran locally against the editable genesis).
+- Independent review = **SHIP**; its SHOULD-FIX (three unasserted paths — `not_applied`, `needs_design_rerun`, the
+  candidate update) folded in as tests; NITs recorded above.
+- Not verified live: an Apply in a running `genesis serve` with a real agent-written plan, and publishing against
+  the live Hub (fleet not updated mid-phase).
