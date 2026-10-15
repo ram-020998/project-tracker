@@ -51,3 +51,21 @@ genesis-workflows: `validate_library` + pytest (incl. the backlog-renderer parit
 | 13 | A feature with a completed breakdown, not finalized: CR → Apply | `breakdown.html` re-rendered with the reconciled backlog; Finalize then carries `spec_refs` |
 
 Record evidence (run ids, revision numbers, screenshots of the document) in 46-10 §4 "As run".
+
+## 4. As run
+
+### 4.1 Gates + whole-phase review (2026-10-15, no fleet change)
+- genesis pytest **1104** + ruff clean; web tsc clean, eslint 0 errors (19 pre-existing warnings), vitest **332**,
+  `npm run build` byte-identical to the committed `web/static`; genesis-workflows `validate_library` **13** + pytest
+  **256** (the backlog-renderer parity test ran — not skipped — against the local genesis); a fresh DB migrates to
+  **v24**.
+- Hardening: the strict `LocalHubProvider` now also clears an ABSENT original story array (`acceptance_criteria` /
+  `questions` / `labels`) like the live Hub (46-09 Hub report); a test asserts Genesis always sends all six arrays
+  (genesis `9aa01b0`).
+- Independent whole-phase review = **SHIP**, all 9 invariants of §1 **PASS** with file:line evidence (targeted suite
+  205 passed); cross-sub-phase checks clear (a pulled spec can't offer CR actions; the fragment / overlay scripts accept
+  only `c-` + 8 hex; CR dirs and blob keys are built from integers + uuids; CR numbering after a pull). Two NITs, both
+  already-recorded deviations (best-effort "latest" file after Apply; the emulator tweak).
+
+### 4.2 Live acceptance (§3) — waiting for the user's go-ahead to update the fleet
+

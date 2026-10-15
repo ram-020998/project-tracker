@@ -17,7 +17,7 @@
 | 46-08 story answers / history / badges | ✅ built (2026-10-15) | genesis `e0d0e3e` · genesis-workflows `e20d66e` | SHIP (NITs folded in) |
 | 46-07 web | ✅ built (2026-10-15) | genesis `a5cd09a` | NEEDS_FIXES → fixed → SHIP |
 | 46-09 collaboration / Hub | ✅ built (2026-10-15) — genesis side + Hub addition live-validated 41/41 | genesis `d4c39b4`, `cb49b3b` · Hub: project-tracker `894c7f2`, `b9c3b3f` | SHIP (fixes folded in) → re-review SHIP |
-| 46-10 review + acceptance | ⏳ next | — | — |
+| 46-10 review + acceptance | 🧱 gates + whole-phase review ✅ (2026-10-15); live acceptance waits for the fleet go-ahead | genesis `9aa01b0` | whole-phase SHIP (9/9 invariants) |
 | 46-11 release | — | — | — |
 
 ## 46-02 — the spec clause model (genesis `196e78d`)
