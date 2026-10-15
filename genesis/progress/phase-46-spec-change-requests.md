@@ -16,7 +16,7 @@
 | 46-06 apply / discard | ✅ built (2026-10-15) | genesis `1b31489` · genesis-workflows `7d8e92d` | SHIP (tests folded in) |
 | 46-08 story answers / history / badges | ✅ built (2026-10-15) | genesis `e0d0e3e` · genesis-workflows `e20d66e` | SHIP (NITs folded in) |
 | 46-07 web | ✅ built (2026-10-15) | genesis `a5cd09a` | NEEDS_FIXES → fixed → SHIP |
-| 46-09 collaboration / Hub | 🧱 building — contract frozen + Hub build with the Appian agent; genesis side decisions recorded (2026-10-15) | — | — |
+| 46-09 collaboration / Hub | 🟡 genesis side ✅ built (2026-10-15); Hub side with the Appian agent (pending its report) | genesis `d4c39b4` | SHIP (fixes folded in) → re-review SHIP |
 | 46-10 review + acceptance | — | — | — |
 | 46-11 release | — | — | — |
 
@@ -417,7 +417,7 @@ produced); Q3 = A (proposals 1–14 accepted; pulled-mirror CR controls move to 
 - Not verified live: the whole flow in a running `genesis serve` with a real agent (§13 acceptance — Initiate → edit →
   Analyze → plan → Apply / Discard); the fleet is not updated mid-phase.
 
-## 46-09 — collaboration and the Hub (in progress)
+## 46-09 — collaboration and the Hub (genesis side `d4c39b4`; Hub side pending)
 
 **2026-10-15 — contract frozen, Hub build handed off.** `contract/spec-change-contract-addition.md` + fixtures
 `story_with_trace.json` (three steps: all arrays, an old-Genesis edit omitting the new keys, `[]` clearing) and
@@ -426,4 +426,48 @@ the Appian agent's brief is `specs/phase-46-spec-change-requests/46-09-appian-ag
 are in 46-09 §10 (absent key preserves; Text timestamps; `base_content_hash`; attribution fields; `dir_path`).
 **2026-10-15 — genesis-side decisions recorded** (46-09 §11, findings §5.12): Q1 = A (manual answers auto-publish
 server-side), Q2 = A (the conflict merge is also written locally), Q3 = A (proposals 1–10). Building.
+
+**What was built (genesis side)**
+- **Story trace arrays on the wire:** `spec_refs` / `answers` / `change_log` are shared (removed from `_LOCAL_ONLY`):
+  each element travels as a compact JSON string (`separators=(",", ":")`, `ensure_ascii=False`) and is parsed back on
+  pull; an unreadable element is dropped and logged (`log.error`); an absent key leaves the local column alone.
+  Elements > 4,000 characters fail the publish (`ElementTooLargeError`); `change_log` entries cap clause ids/labels at
+  40 (+ "+N more").
+- **`spec_change_request` binding** (`kb_spec_change_requests`): parent = feature; `summary_json` ↔ `summary`; the
+  frozen `<dir_path>/document.html` as the artifact blob `<feature_sync_uuid>:cr-<nn>`; open CRs refused; local-only
+  `stage_id`, `dir_path`, `analysis_*`, `created_at` / `updated_at`. Pull resolves the puller's spec stage (skips +
+  retries until it exists), derives `dir_path` under it, writes the document; null-text `""` → NULL for
+  `closed_by` / `closed_at` / `summary_json`; a number already held by a local CR is skipped (logged), never overwritten.
+- **Conflict merge** (`collab/story_merge.py` + `CollaborationService.publish_story_merging`): on `HubConflict` GET →
+  merge (fields the operation changed = ours; answers / change_log union by identity sorted by time; spec_refs union
+  ours-wins; questions theirs − answered + ours added; `union=False` for answer operations) → written locally (CAS)
+  → re-PUT once with the Hub's version; a second conflict propagates → "pending".
+- **Publish points:** Apply publishes the spec stage, every story in the new `report.touched` (incl. answers-only,
+  link-refresh-only and follow-up-only stories) with merging, tombstones, the breakdown (backlog mode) and the CR
+  record — after the document is frozen; Discard publishes the record (`publish` in its response); answer / edit /
+  reopen auto-publish server-side (`publish: {status: published|pending|error}`; absent when collaboration is off).
+- **Marker:** Initiate sets `stage_artifact` / the spec stage's sync_uuid (24 h, onboarded only), Analyze refreshes,
+  Apply / Discard clear — best-effort.
+- **Strict `LocalHubProvider`:** `CONTRACT_KINDS` only (`ContractViolation` otherwise), story arrays must be string
+  lists, absent trace keys keep the stored rows, reads always include the trace arrays, and null text reads back as
+  `""` (`NULL_TEXT_FIELDS`) like the live Hub.
+- **Web (puller):** `PulledChangeRequests.tsx` — `SpecUnderChangeMarker` (someone else's marker on this spec, only with
+  collaboration on) on the pulled spec view and the Overview spec card; a read-only "Change requests (n)" drawer whose
+  rows open the frozen document (no annotation). `web/static` rebuilt.
+
+**Deviations / notes**
+- The contract fixtures are vendored into `tests/fixtures/hub_contract/` (like the 36-01 ones).
+- Pulled story text fields keep the live Hub's `""` for null (pre-existing behaviour, now also in the emulator); only
+  the CR's `closed_*` / `summary_json` are mapped back to NULL.
+- A colliding pulled CR (same feature + number as a local one) is skipped and logged; it still counts as handled so
+  the cursor advances.
+- Not done until the Appian agent reports: the live Hub round trip, and the two-instance live check (moved to 46-10).
+
+**Evidence**
+- genesis pytest **1103** (+17: `tests/test_collab_trace.py`; `test_collab`, `test_collab_sdlc`, `test_cr_apply`,
+  `test_spec_links` updated to the 46-09 rules) + ruff clean; web tsc clean, eslint 0 errors (19 pre-existing
+  warnings), vitest **332** (+3 `PulledChangeRequests.test.tsx` with jest-axe), build committed.
+- Independent review = **SHIP** (SHOULD-FIX: the emulator didn't return null text as `""` → emulated + tests; NITs:
+  the cr_no collision skip, derived created-story fields) → focused re-review **SHIP**.
+- Not verified live: publishing / pulling against the real Hub (needs the Appian addition) and two fleet instances.
 
