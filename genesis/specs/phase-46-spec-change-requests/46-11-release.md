@@ -30,9 +30,9 @@ phase row, `tracker.md` §6, `progress/phase-46-spec-change-requests.md` (as-bui
 
 ## 4. As run (2026-10-15, on the user's go-ahead)
 1. Hub: the 46-09 addition built + live-validated 41/41 (`progress/phase-36-genesis-hub-appian-app.md`).
-2. genesis **v0.77.0** — release commit `{{GREL}}`, tag `v0.77.0`; CI {{GCI}} (master) + {{GCIT}} (tag) green.
-3. genesis-workflows **v0.22.0** — release commit `{{WREL}}`, tag `v0.22.0` (genesis pin v0.77.0; the parity test runs
-   unconditionally); CI {{WCI}} + {{WCIT}} green.
-4. Deploy: fleet restarted, both instances report 0.77.0, catalog lists feature-breakdown-analysis 0.3.0, DB v24.
+2. genesis **v0.77.0** — release commit `d6ee6cd`, tag `v0.77.0`; CI #7087827 (master) + #7087831 (tag) green — jobs genesis, frontend, clean-install all success; pytest 1105, vitest 332.
+3. genesis-workflows **v0.22.0** — release commit `a19153a`, tag `v0.22.0` (genesis pin v0.77.0; the parity test runs
+   unconditionally); CI #7087975 + #7087976 green.
+4. Deploy: no active runs on :8760 / :8761 → `gsm provision --all --no-mcp --no-env --force` → `gsm restart` both; both report 0.77.0 (`/openapi.json`), the catalog lists feature-breakdown-analysis 0.3.0 / story-design-analysis 0.3.1 / story-implementation 0.1.1, a fresh DB migrates to v24.
 5. Docs: decision log (ADR-075/076 Accepted + as built), bible 00/01/03/04/05/06/08, `AGENT_ONBOARDING.md`, README,
    `tracker.md` §6, the progress doc, every sub-spec status, the Phase 36 contract index, the backlog file.
