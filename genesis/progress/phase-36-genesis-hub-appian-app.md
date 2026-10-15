@@ -219,3 +219,155 @@ was changed. The read Web APIs (`GH_records_get`, `GH_records_list`) have no kin
   `story.epic_sync_uuid` / `appian_part`), so a null `story_sync_uuid` round-trips as `""` consistently.
 - Validation rows cleaned up (both tables empty). The `GH Change Log` rows emitted during validation remain
   (append-only feed; monotonic cursor — harmless).
+
+---
+
+## 🟡 SPEC CHANGE REQUEST ADDITION (Phase 46-09) — BUILT + LIVE-VALIDATED (2026-10-15) — 38/41, 1 open item
+
+Spec: `specs/phase-36-genesis-hub-appian-app/contract/spec-change-contract-addition.md`. Fixtures:
+`story_with_trace.json` and `spec_change_request.json`. This is an additive, backward-compatible addition to
+contract v1.0.0, and `contract_version` stays `"1.0.0"`. The write-capable Dev-MCP agent built it; Genesis stays
+read-only. It was validated by `/tmp/gh46/harness.py`, which calls the real Web APIs with basic auth as the
+MCP's configured Appian user `kiroDeveloper`.
+
+### Live state found before building (differences from this record — ⚠️ = flagged finding)
+- **⚠️ `GH_isServiceCaller` (v2) is now `true()`.** The `a!isUserMemberOfGroup(loggedInUser(), cons!GH_GROUP_SERVICE)`
+  check is commented out, so any authenticated Appian user can call every Hub Web API. Unauthenticated calls still
+  get 401, but from the platform, not from `GH_errorResponse`. The harness user `kiroDeveloper` is **not** in
+  GH Service Accounts and still gets in. Not changed here; the app owner should decide whether to restore the check.
+- **Existing absent-key behaviour (unchanged):** the story branch used to delete *every* GH Story Item row of the
+  story and re-insert from `acceptance_criteria`/`questions`/`labels` via `a!defaultValue(index(payload,key,null),{})`.
+  So an **absent original key clears that type, the same as `[]`**. A live probe confirmed this: after a PUT
+  without the three keys, all three read back `[]`. The delete-all had to become type-scoped, otherwise it would
+  also have wiped the new types.
+- The MCP still cannot read or write Web API bodies. A probe confirmed `GH_records_upsert` rejected the new kind
+  with 400 until the Designer edit.
+- The blob rules and Web APIs do not validate the key's suffix: `<feature>:cr-03` worked unchanged.
+- **⚠️ Pre-existing: the live Hub has never written a `blob` change-log row** (0 of 753 rows). `/changes` has no
+  rows for blob publishes, contrary to contract §3.6, and ADR-074 already notes it. Not caused or changed here.
+- Pre-existing leftovers not from this run, left alone: GH Story id 120 (`0ebb514f-…`, 2026-09-24) and
+  GH Stage Artifact id 5 (`bafef139-…`).
+
+### New record type — GH Spec Change Request `a0fc6f95-aa70-4ad8-9ffd-a609d3198a84` (table `GH_SPEC_CHANGE_REQUEST`, `jdbc/Appian`)
+Field UUIDs:
+- `id` `87826307-102f-4a46-8087-8d73db5b13e8` (PK)
+- `syncUuid` `b16cd93f-47ba-4bdb-b2dc-f9df7c47057e` (255, unique)
+- `featureSyncUuid` `86e5e1b1-93f3-4d53-a5d3-ef5740f07453`
+- `crNo` `25053795-195e-449f-89f9-f4b0352e9d4b` (INT)
+- `title` `4a709615-e5a2-4443-b305-5792b808b9d7` (4000)
+- `status` `767c5b49-44a3-4d3a-ad06-68f596216e4c`
+- `mode` `fa8c4711-8d58-439a-9f33-868ef25030cc`
+- `openedBy` `36fa46a3-664d-4425-b5f7-1b342d6ab33e`
+- `openedAt` `84664de1-2a0f-413b-a7be-1bcbc4ea0ab8` (TEXT 255)
+- `closedBy` `5159e55a-b343-4a2d-84c8-631190b7119b`
+- `closedAt` `ce3da31e-a078-4dce-be09-27dd0ea91a69` (TEXT 255)
+- `baseRevisionNo` `b5213cbc-5b13-4f8c-bbc9-b2cca61c7356` (INT)
+- `baseContentHash` `f6e4a4d6-434b-4be1-9933-2db3ae1c54b5`
+- `resultRevisionNo` `b65f90a3-7afc-475a-9b16-4a449c6f797c` (INT, nullable)
+- `summary` `63aeae5b-a741-4a2a-8584-7d7f50cac9ac` (4000)
+- `blobKey` `aa49def9-2fc7-471e-8ef9-10b1e706df6d`
+- `contentHash` `da616a8e-d8f4-4e48-8e9e-37647879c8ae`
+- `publishedBy` `30f68b1c-3853-4d2a-99e6-8b01ae40b103`
+- `publishedAt` `312bd94d-2336-4720-bd35-c9a7c5d7566b` (**DATETIME**, mirrors stage_artifact)
+- `version` `ea655a5e-c1dd-458d-b122-f8d1f1871e87`
+- `createdAt` `576bb844-983e-4dd3-9947-33f6a3cd7add` (DATETIME)
+- `updatedAt` `320c3883-97a7-4db2-aeee-87e2b278e17e` (DATETIME)
+
+There are no extra-long fields; all other text fields are 255.
+
+**Relationships:**
+- `feature` (MANY_TO_ONE → GH Feature, `featureSyncUuid` → `syncUuid`) `ebed6492-183b-4a57-8bf9-8f44aa817b5b`.
+- `GH Feature.changeRequests` (ONE_TO_MANY, **CASCADING**, the same as `stageArtifacts`)
+  `bbcaa410-a437-465a-99db-24635a0b1bd9`.
+
+**Security:** administrator and editor = GH Administrators `_e-…458`, viewer = GH Users `_e-…460`,
+data_steward = GH Service Accounts `_e-…462`. This mirrors GH Stage Artifact. The record type is in the app.
+
+### Rules (additive kind branches before `default`; existing branches unchanged, diff-verified against the live originals)
+- **GH_reassembleStoryItems** `_27520` v2 → **v3**: one extra position-ordered query for
+  `itemType in {spec_ref, answer, change}`, split by type into `spec_refs` / `answers` / `change_log`. Each is `[]`
+  when empty. Elements are returned exactly as stored. The three original queries are unchanged.
+- **GH_recordToJson** `_27503` v4 → **v5**:
+  - The story branch adds `spec_refs` / `answers` / `change_log`, always present.
+  - New `spec_change_request` projection with 21 keys: the 20 rows of spec §3.1, where `created_at` and
+    `updated_at` share one row. The fixture's `get_response` has the same 21 keys.
+- **GH_queryRecords** `_27526` v4 → **v5**: a `spec_change_request` get/list branch returning all 21 fields.
+- **GH_casUpsert** `_27509` v10 → **v12**.
+  - Story branch (v11):
+    - The delete set is now `itemType in replaceTypes`. `ac`/`question`/`label` are **always** in it, which keeps
+      the existing behaviour.
+    - `spec_ref`/`answer`/`change` are added **only when** `spec_refs`/`answers`/`change_log` is a key of the
+      payload (`contains(touniformstring(a!keys(payload)), …)`). An absent key leaves those rows alone; `[]` clears.
+    - The three new types are exploded like the original three: position = 1-based array index, text = the element
+      unchanged, syncUuid = `<story>:<type>:<n>`. The (story, type, position) uniqueness still holds.
+    - Delete batch size went from 1000 to 5000.
+  - New `spec_change_request` branch: stage_artifact-shaped attribution, CAS 409, and a GH Change Log row in the same
+    `a!writeRecords` batch. **v12** adds an optional 6th input `rawBody` (Text) and sends `title`/`opened_at`/
+    `closed_at` through `GH_payloadText`. Callers that pass 5 arguments are unaffected (regression re-run 21/21 on v12).
+- **GH_payloadText** `_a-0000f08d-249e-8000-9c33-011c48011c48_30039` (**new**, v6).
+  - Returns the exact JSON string of a top-level key from `rawBody`: it matches `"key":` and only accepts a plain
+    string with no escapes.
+  - Otherwise it falls back to the parsed value. A value that `a!fromJson` cast to a date or datetime is rendered
+    as ISO-8601 through `a!toJson(a!map(v: …))`. A bare Variant `a!toJson` returns 500, and `typeof` reports every
+    map value as `Any Type`, so the map wrapper is needed.
+  - Tested with `testRule`: both JSON separator styles, an explicit `null`, and decoy keys inside strings.
+- Unchanged: GH_appendChangeLog, GH_changesSince, the blob rules, GH_isServiceCaller, GH_errorResponse.
+
+### Web API edit
+Only `GH_records_upsert` `8e153f45-…` changed, and only by `"spec_change_request"` appended to its inline kind list.
+The app owner made the edit in Designer on 2026-10-15. No other Web API changed and no new Web API was created.
+
+### Item types
+`GH Story Item.itemType` has no constant, check or validation list anywhere: it is free TEXT, and the only places
+that enumerate values are the casUpsert and reassemble branches above. The allowed values are now
+`ac | question | label | spec_ref | answer | change`. `text` stays Extra Long (LONGVARCHAR 65535 bytes), so no field
+changed.
+
+### ⚠️ OPEN ITEM (deviation from the spec): `opened_at` / `closed_at` are not byte-for-byte
+**Constraint:** `GH_records_upsert` parses the body with `a!fromJson`. Per the docs and confirmed live, it
+**auto-casts any string in a supported ISO date/datetime format** to Date / Date and Time *before* any rule sees
+the payload. The offset is normalised to UTC, and sub-second precision is lost (`.123456` → `.120`,
+`.987654` → `.990`). The original string cannot be recovered inside a rule.
+
+| Stage | `"2026-10-14T10:00:00.123456+00:00"` reads back as |
+|---|---|
+| Before any fix (cast datetime written into TEXT) | `10/14/2026 10:00 AM GMT+00:00` |
+| Now (GH_payloadText fallback) | `2026-10-14T10:00:00.120Z` |
+
+**Proposed resolution (needs owner approval — a second Web API edit):** in `GH_records_upsert`'s call to
+`rule!GH_casUpsert(…)`, add the argument `rawBody: http!request.body`. Nothing else changes. The rule side is
+already deployed and tested, and once the edit is in, `cr.*.get_byte_for_byte` should pass with the exact strings.
+The alternative is a contract amendment: accept ISO-8601 UTC with ms and have Genesis compare instants.
+**Latent, pre-existing, same cause:** any text field of any kind whose whole value looks like an ISO date or
+datetime is cast. For example, a story title `"2026-10-14"` used to be stored as `10/14/2026`, and an array
+element that is a bare ISO string would be cast too. Genesis's trace elements are JSON objects (`{…}`), so they
+are safe.
+
+### Live validation evidence (2026-10-15, `/tmp/gh46/harness.py`) — 38/41
+| Area | Result | Evidence |
+|---|---|---|
+| `story_with_trace.json` step 1 PUT/GET | 2/2 ✅ | 201 v0. All six arrays match byte-for-byte (unicode, `\"`, `\\`, `\n`), with `questions: []` and `epic_sync_uuid`/`appian_part` `""`. |
+| Step 2 (new keys absent) | 2/2 ✅ | 200 v1. Title changed; `spec_refs` (2), `answers` (2) and `change_log` (1) unchanged. |
+| Step 3 (`spec_refs: []`, 2-entry change_log, answers absent) | 2/2 ✅ | 200 v2. `spec_refs: []`, change_log replaced, answers kept. |
+| Stale PUT | 1/1 ✅ | 409 `{"error":"conflict","current_version":2}` |
+| `/changes` | 1/1 ✅ | story rows have versions exactly `[0,1,2]` |
+| List carries the new keys | 1/1 ✅ | `records_list/story` records include `spec_refs`/`answers`/`change_log` |
+| CR applied: create / update / stale | 3/3 ✅ | 201 v0; 200 v1; 409 `current_version: 1` |
+| CR GET byte-for-byte (applied, update, discarded) | **0/3 ⚠️** | Every other key matches exactly: unicode title, `summary` JSON text, `published_at` `2026-10-15T09:30:05Z`, hashes, blob_key. **Only `opened_at`/`closed_at` differ** (see the open item). |
+| CR discarded | 2/2 ✅ | 201. **`result_revision_no: null`** (DB NULL, JSON `null`, not 0). `title` null → `""`; **`summary` null → `""`** (the fixture says `null`). |
+| CR `/changes` + list | 2/2 ✅ | `kind: "spec_change_request"` rows v0, v1 (applied) and v0 (discarded); list returns both |
+| Blob at `…:cr-03` | 5/5 ✅ | sha256 self-check; 201 `{new,1}` → 200 `{unchanged,1}` → GET with identical base64 and `content_hash`, v1; versions `[1]` |
+| Blob ~1 MB (971,096 bytes; 1,294,796 base64 characters) | 2/2 ✅ | 201, and GET returns identical bytes and sha256 |
+| Activity | 3/3 ✅ | `ttl_seconds: 86400` → 200; marker `expires_at − set_at` = 86400 s; clear 200 |
+| Regression | 12/12 ✅ | meta 1.0.0; unauthenticated 401 (GET meta and PUT records); unknown kind 400; team, membership, feature, epic, story (AC order, `questions: []`, unicode labels, new arrays `[]`), board_state, stage_artifact, wiki_page and wiki_entry all round-trip. Re-run 21/21 on casUpsert v12. |
+| (report) absent-key probe | — | An absent original key clears that type. `spec_refs: null` clears like `[]`. Absent `answers`/`change_log` are kept. |
+| (informational) blob `/changes` row | ✗ pre-existing | no `blob` rows have ever been written (see above) |
+
+Read-after-write lag was about 1.5 s throughout this run.
+
+### Cleanup
+Removed all validation rows: 5 GH Story rows, 29 GH Story Item rows, 2 rows each of team, membership, feature, epic,
+board_state, stage_artifact, wiki_page and wiki_entry, 9 GH Spec Change Request rows (CR table empty again),
+2 GH Blob Version rows, and their 2 Documents in GH Artifact Blobs. The activity marker was cleared. A final
+sweep confirmed all 29 validation keys return 404. GH Change Log rows remain, as an append-only feed with a
+monotonic cursor.

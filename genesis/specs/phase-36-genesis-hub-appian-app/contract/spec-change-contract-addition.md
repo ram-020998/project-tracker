@@ -1,8 +1,29 @@
 # Genesis Hub API — Spec Change Request & Story Traceability addition (ADR-075/076, Phase 46-09)
 
-> **BUILD STATUS:** ⏳ **NOT BUILT** — handed to the separate write-capable Dev-MCP (Appian) agent on 2026-10-15.
-> Replace this line with the as-built summary (record type UUID, rule versions, harness N/N) when done, exactly like
-> `object-wiki-contract-addition.md`.
+> **BUILD STATUS:** 🟡 **BUILT + LIVE-VALIDATED on the dev-env Hub (2026-10-15) — 38/41, ONE OPEN ITEM.** Both changes
+> are live on the existing generic endpoints. The story arrays (§2) are **fully green**: every `story_with_trace.json`
+> step matches byte-for-byte, absent keys keep their rows, `spec_refs: []` clears, the stale write gets a 409
+> (`current_version: 2`), `/changes` shows one row per upsert, and list carries the keys. `spec_change_request`
+> (§3) works for create 201 / update 200 / stale 409 / `/changes` / list, **`result_revision_no` reads back `null`**
+> on a discarded CR, and the blob at `…:cr-03` is 201 new → 200 unchanged → identical bytes and hash. A ~1 MB
+> document is lossless, and `ttl_seconds: 86400` is accepted. All 9 existing kinds still round-trip,
+> `contract_version` is `1.0.0`, and unauthenticated calls get 401.
+> **⚠️ OPEN:** `opened_at` / `closed_at` do **not** come back as the exact strings yet. The Web API parses the body
+> with `a!fromJson`, which turns any ISO date/datetime-looking string into a datetime *before* the rules see it.
+> That datetime is UTC, and sub-second digits are lost. The rules now return ISO-8601 UTC (e.g. `.123456+00:00` →
+> `2026-10-14T10:00:00.120Z`). For the exact strings, `GH_records_upsert` must also pass the raw body:
+> `rawBody: http!request.body` in its `rule!GH_casUpsert(…)` call. That would be a **second Web API edit** and
+> needs owner approval; the rule side is already built and tested. As-built: record type **GH Spec Change
+> Request** `a0fc6f95-aa70-4ad8-9ffd-a609d3198a84` (table `GH_SPEC_CHANGE_REQUEST`). Rules: `GH_casUpsert` v12,
+> `GH_recordToJson` v5, `GH_queryRecords` v5, `GH_reassembleStoryItems` v3, and a new `GH_payloadText`
+> `_a-0000f08d-249e-8000-9c33-011c48011c48_30039` (v6). Web API edit: `"spec_change_request"` appended to
+> `GH_records_upsert`'s inline kind list, done in Designer. **Genesis must know:**
+> - Null `title` / `summary` read back as `""`; the fixture's `summary: null` comes back as `""`.
+> - An **absent** `acceptance_criteria` / `questions` / `labels` key clears that type. This is the existing,
+>   unchanged behaviour, so always send the three.
+> - An explicit JSON `null` on a new key clears that type, the same as `[]`.
+>
+> Full record: `progress/phase-36-genesis-hub-appian-app.md` § "SPEC CHANGE REQUEST ADDITION".
 >
 > **Status:** 🟢 FROZEN ADDITION to the v1.0.0 contract — **additive, backward-compatible** (ADR-064 amendment, like
 > the v0.69.0 `on_board` field and the Phase-42 Object Wiki addition). Two changes:
