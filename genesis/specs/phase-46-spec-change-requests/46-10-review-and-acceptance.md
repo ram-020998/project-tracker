@@ -67,5 +67,18 @@ Record evidence (run ids, revision numbers, screenshots of the document) in 46-1
   only `c-` + 8 hex; CR dirs and blob keys are built from integers + uuids; CR numbering after a pull). Two NITs, both
   already-recorded deviations (best-effort "latest" file after Apply; the emulator tweak).
 
-### 4.2 Live acceptance (§3) — waiting for the user's go-ahead to update the fleet
+### 4.2 Fleet update (2026-10-15, on the user's go-ahead)
+- No active runs on either instance (the memory-maintenance gate was resolved by the user first).
+- Backups (SQLite online backup, sources opened read-only, both v23 + `integrity_check ok`):
+  `~/Genesis/backups/phase46-pre-v24-20261015-171825/{main,userb}-genesis.db`.
+- `gsm stop` both → `gsm provision --all --no-mcp --no-env --force` (genesis-workflows `e20d66e`:
+  feature-breakdown-analysis 0.3.0, story-design-analysis 0.3.1, story-implementation 0.1.1) → `gsm start` both. The
+  fleet runs the editable genesis checkout, i.e. genesis `9aa01b0`; startup migrated both DBs to **v24**
+  (`kb_spec_change_requests` present). Both healthy; `/api/catalog` lists the new versions; collaboration enabled +
+  available against the dev-env Hub; no errors in either log since startup.
+
+### 4.3 Live acceptance (§3)
+| # | Result | Evidence |
+|---|---|---|
+| 1 | ✅ (API) — UI look to be confirmed by the user | `main` feature 3 "Multi Round Evaluations" (finalized 2026-09-04, 72 stories, 0 linked = legacy): `/spec/allowed` → `allowed: ["reopen"]`, `downstream_locked: false`, 0 CRs; `/spec/coverage` → `traceable: false, mode: none`; served spec has 172 labels and 0 coverage badges; no stage carries `spec_changed`; `POST …/change-requests` → 409, no row written. Note: the coverage GET normalized the working copy (170 `data-cid` added — the documented 46-02 §9 side effect; text unchanged). |
 
