@@ -304,6 +304,17 @@ Asked one question at a time before building 46-05; the user chose option A for 
   an empty `affected` list, an agent-written decision-less plan, and Apply saves the revision without story changes.
   Rejected: treat as no change (Discard only); Genesis writes the empty plan itself.
 
+### 5.9 Round 7 — 46-06 build decisions (2026-10-15)
+
+Asked one question at a time before building 46-06; the user chose option A for both and accepted the assistant's
+12 other proposals. Full text: `46-06-apply-and-discard.md` §10.
+- **Q1 — publishing before 46-09 → A:** Apply publishes what the existing bindings support (spec stage, updated/created
+  stories, deletion tombstones, the breakdown stage in backlog mode); a `HubConflict` → "publish pending", no
+  pull-then-republish. The CR record/blob, advisory marker and conflict merge stay in 46-09. Rejected: publish nothing;
+  everything now incl. pull-and-republish.
+- **Q2 — answers on locked stories → A:** the Apply confirmation (A7) also covers locked stories that keep
+  `no_change` but get answers (matches V4). Rejected: A7 as written (update/remove only).
+
 ## 6. Defaults chosen by the assistant — ✅ confirmed by the user 2026-10-14 (umbrella §13 Q1–Q5, each answered "A" = the default as written)
 
 *(Heading was "not yet explicitly confirmed"; the confirmation round is recorded in §5.7.)*

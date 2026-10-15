@@ -139,3 +139,53 @@ failure at step 6 → everything rolled back, CR still open, spec still `under-c
 membership rule; `GNS_` keys allocated in order; backlog mode end-to-end + the genesis-workflows parity test;
 discard restores the sandbox byte-for-byte and changes no story; publish hooks called with the right entities (fake
 provider), `HubConflict` retry path.
+
+
+## 10. Build decisions (2026-10-15, before the build — recorded with the user)
+
+Asked one question at a time; the user chose option A for both. The other points (proposals 1–12) were proposed by
+the assistant at the 46-06 restatement and accepted by the user ("Yes") without change. They refine §2–§9 above;
+where they differ, this section wins.
+
+**Q1 — what Apply publishes before 46-09 → A.** When collaboration is enabled, Apply publishes (best-effort,
+reported, never rolled back) what the existing bindings already support: the spec stage, every updated or created
+story, deletion tombstones for removed stories, and — in backlog mode — the breakdown stage. A `HubConflict` is
+reported as "publish pending" for that entity; there is **no pull-then-republish** in 46-06 (46-09 §2 forbids a pull
+overwriting a just-applied change; its conflict-merge rules arrive there). The CR record + document blob, the
+advisory marker and the conflict merge stay in 46-09. Rejected: B (publish nothing until 46-09); C (all of §5.4 now,
+incl. the pull-and-republish that contradicts 46-09 §2).
+
+**Q2 — answers on locked stories and the Apply confirmation → A.** A7's confirmation set also includes locked
+stories (Design Review or later) that keep `no_change` but carry `answer_questions` (matching V4, which already
+treats such an answer as a change): `confirm_locked_story_ids` must equal exactly the set of locked items whose
+decision is not `no_change` **or** that carry answers. The Apply dialog lists them ("Record 1 answer on GNS_000057
+(Implementation) as you asked"). Rejected: B (keep A7 as written; answers on locked stories pass on
+`user_requested` alone).
+
+**Accepted proposals (1–12):**
+1. **One transaction for real.** `StageStore.add_revision` / `set_html` / `set_upstream_versions` and the `StoryStore`
+   create / update / delete paths gain an optional `conn=` (additive, like `set_status(conn=)`). The revision file is
+   written inside the transaction block and removed on rollback; the stage's authoritative "latest" file is swapped in
+   after the commit.
+2. `StoryStore._JSON_FIELDS` gains `answers` and `change_log` now (Apply writes them); their API/UI stay in 46-08.
+3. **The plan is read once.** Apply reads `plan.json` once under the per-spec lock; exactly those bytes are
+   validated, executed and frozen — a concurrent agent write cannot change what is applied.
+4. **Formatting-only changes clear suspicion.** Apply refreshes the link fingerprints of every story on a clause whose
+   change is `formatting` (no `change_log` entry). A formatting/moved-only CR therefore applies as a new revision
+   that changes no story fields (46-05 §11 Q2).
+5. **Candidates** (46-05 §11 Q1) get A5's existence + `row_version` check, apply their `add_spec_refs` (+ any
+   `changes`), and receive an `updated` `change_log` entry.
+6. **`change_log.summary`** = the decision's (or new story's) rationale, capped at 500 chars (the 46-09 cap); clause
+   labels come from the final clause map (the base map for removed clauses).
+7. **Sandbox write-back** of the final spec happens only when the sandbox `spec.html` still holds the bytes Apply
+   read; otherwise it is left alone and the apply report carries a warning.
+8. **Backlog-mode re-render** replaces `breakdown.html` as specified (§6.4): markup the breakdown chat added outside
+   the embedded JSON is lost (flagged, accepted). New backlog items get the renderer's full field shape (`storyType`,
+   `category`, `appianPart`, …).
+9. **Parity test** (genesis-workflows) uses `pytest.importorskip("genesis.kb.backlog_doc")` until 46-11 re-pins
+   genesis v0.77.0 (the dev pin v0.76.0 lacks the module); it covers the workflow fixtures incl. the traced path with
+   labels.
+10. **Positions** shift feature-wide as specified (`position > followed_up.position` → +1); per-epic order is kept.
+11. **Board membership** of a new story: `on_board = 1` only when the feature's application has a Workbench board
+    and the Q3 rule holds; the card goes at the end of the To Do lane (`max(to-do board_position) + 1`).
+12. The 409 `apply_blocked` body carries a `blockers` list (`ChangeRequestError` gains it).

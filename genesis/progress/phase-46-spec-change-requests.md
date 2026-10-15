@@ -13,7 +13,7 @@
 | 46-03 story↔spec links | ✅ built (2026-10-14) | genesis `0d8622e` · genesis-workflows `da0bb91` | SHIP |
 | 46-04 CR lifecycle | ✅ built (2026-10-14) | genesis `b8a9fc8` | SHIP |
 | 46-05 impact analysis | ✅ built (2026-10-15) | genesis `297fd2b` | NEEDS_FIXES → fixed → SHIP |
-| 46-06 apply / discard | ⏳ next | — | — |
+| 46-06 apply / discard | 🧱 building (decisions recorded 2026-10-15) | — | — |
 | 46-08 story answers / history / badges | — | — | — |
 | 46-07 web | — | — | — |
 | 46-09 collaboration / Hub | — | — | — |
@@ -239,3 +239,14 @@ in the impact input, the awaiting-plan document, `can_apply` from A1–A4, **Dis
   `analysis_id` now reads as stale; a missing `base.html` degrades reads instead of a 500 — each with a regression
   test.
 - Not verified live: a real agent turn writing `plan.json` from `impact-input.json` (needs the fleet updated).
+
+## 46-06 — apply and discard (building)
+
+**Decisions recorded before the build (2026-10-15)** — full text in `specs/.../46-06-apply-and-discard.md` §10
+(findings §5.9): Q1 = A (Apply publishes what existing bindings support — spec stage, updated/created stories,
+tombstones, breakdown in backlog mode; `HubConflict` → "publish pending", no pull; CR record/blob/marker/merge in
+46-09); Q2 = A (A7's confirmation also covers answers on locked stories); proposals 1–12 accepted (conn-aware stores
+with revision files removed on rollback, `answers`/`change_log` JSON fields now, the plan read once under the lock,
+formatting-only fingerprint refresh, candidates in A5 + change_log, summary = rationale ≤ 500 chars, guarded sandbox
+write-back, backlog re-render replaces `breakdown.html`, parity test `importorskip` until 46-11, feature-wide position
+shift, `on_board` only with a board, `blockers` in the 409).
