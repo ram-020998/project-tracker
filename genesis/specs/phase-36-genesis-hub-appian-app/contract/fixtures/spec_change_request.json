@@ -1,0 +1,197 @@
+{
+  "kind": "spec_change_request",
+  "path": "/records/spec_change_request/5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
+  "notes": "Phase 46-09 addition. Only applied/discarded CRs are published. opened_at/closed_at are payload-preserved TEXT (exact strings, incl. microseconds + offset). summary is a small JSON object as opaque text. result_revision_no is null on a discarded CR and must read back null (an Integer null). A null title reads back \"\" (established behaviour). The frozen document is an artifact blob keyed <feature_sync_uuid>:cr-<nn>.",
+  "applied": {
+    "put_request": {
+      "sync_uuid": "5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
+      "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+      "cr_no": 3,
+      "title": "Accept LEI for corporate applicants — «LEI»",
+      "status": "applied",
+      "mode": "stories",
+      "opened_by": "ram",
+      "opened_at": "2026-10-14T10:00:00.123456+00:00",
+      "closed_by": "ram",
+      "closed_at": "2026-10-15T09:30:00.000001+00:00",
+      "base_revision_no": 6,
+      "base_content_hash": "3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081920",
+      "result_revision_no": 7,
+      "summary": "{\"updated\":3,\"created\":1,\"removed\":0,\"unchanged\":2,\"not_applied_locked\":2,\"result_revision\":7,\"summary\":\"Accept LEI; corporate applicants only.\"}",
+      "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:cr-03",
+      "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
+      "published_by": "ramaswamy.u",
+      "published_at": "2026-10-15T09:30:05Z",
+      "base_version": null
+    },
+    "get_response": {
+      "sync_uuid": "5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
+      "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+      "cr_no": 3,
+      "title": "Accept LEI for corporate applicants — «LEI»",
+      "status": "applied",
+      "mode": "stories",
+      "opened_by": "ram",
+      "opened_at": "2026-10-14T10:00:00.123456+00:00",
+      "closed_by": "ram",
+      "closed_at": "2026-10-15T09:30:00.000001+00:00",
+      "base_revision_no": 6,
+      "base_content_hash": "3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081920",
+      "result_revision_no": 7,
+      "summary": "{\"updated\":3,\"created\":1,\"removed\":0,\"unchanged\":2,\"not_applied_locked\":2,\"result_revision\":7,\"summary\":\"Accept LEI; corporate applicants only.\"}",
+      "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:cr-03",
+      "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
+      "published_by": "ramaswamy.u",
+      "published_at": "2026-10-15T09:30:05Z",
+      "version": 0,
+      "created_at": "2026-10-15T09:30:06Z",
+      "updated_at": "2026-10-15T09:30:06Z"
+    }
+  },
+  "update": {
+    "put_request": {
+      "sync_uuid": "5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
+      "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+      "cr_no": 3,
+      "title": "Accept LEI (corporate)",
+      "status": "applied",
+      "mode": "stories",
+      "opened_by": "ram",
+      "opened_at": "2026-10-14T10:00:00.123456+00:00",
+      "closed_by": "ram",
+      "closed_at": "2026-10-15T09:30:00.000001+00:00",
+      "base_revision_no": 6,
+      "base_content_hash": "3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081920",
+      "result_revision_no": 7,
+      "summary": "{\"updated\":3,\"created\":1,\"removed\":0,\"unchanged\":2,\"not_applied_locked\":2,\"result_revision\":7,\"summary\":\"Accept LEI; corporate applicants only.\"}",
+      "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:cr-03",
+      "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
+      "published_by": "ramaswamy.u",
+      "published_at": "2026-10-15T09:30:05Z",
+      "base_version": 0
+    },
+    "get_response": {
+      "sync_uuid": "5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
+      "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+      "cr_no": 3,
+      "title": "Accept LEI (corporate)",
+      "status": "applied",
+      "mode": "stories",
+      "opened_by": "ram",
+      "opened_at": "2026-10-14T10:00:00.123456+00:00",
+      "closed_by": "ram",
+      "closed_at": "2026-10-15T09:30:00.000001+00:00",
+      "base_revision_no": 6,
+      "base_content_hash": "3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081920",
+      "result_revision_no": 7,
+      "summary": "{\"updated\":3,\"created\":1,\"removed\":0,\"unchanged\":2,\"not_applied_locked\":2,\"result_revision\":7,\"summary\":\"Accept LEI; corporate applicants only.\"}",
+      "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:cr-03",
+      "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
+      "published_by": "ramaswamy.u",
+      "published_at": "2026-10-15T09:30:05Z",
+      "version": 1,
+      "created_at": "2026-10-15T09:30:06Z",
+      "updated_at": "2026-10-15T09:40:00Z"
+    }
+  },
+  "stale_put": {
+    "put_request": {
+      "sync_uuid": "5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
+      "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+      "cr_no": 3,
+      "title": "Accept LEI for corporate applicants — «LEI»",
+      "status": "applied",
+      "mode": "stories",
+      "opened_by": "ram",
+      "opened_at": "2026-10-14T10:00:00.123456+00:00",
+      "closed_by": "ram",
+      "closed_at": "2026-10-15T09:30:00.000001+00:00",
+      "base_revision_no": 6,
+      "base_content_hash": "3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081920",
+      "result_revision_no": 7,
+      "summary": "{\"updated\":3,\"created\":1,\"removed\":0,\"unchanged\":2,\"not_applied_locked\":2,\"result_revision\":7,\"summary\":\"Accept LEI; corporate applicants only.\"}",
+      "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:cr-03",
+      "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
+      "published_by": "ramaswamy.u",
+      "published_at": "2026-10-15T09:30:05Z",
+      "base_version": 0
+    },
+    "expect_status": 409,
+    "expect_body": {
+      "error": "conflict",
+      "current_version": 1
+    }
+  },
+  "discarded": {
+    "put_request": {
+      "sync_uuid": "6f7a8b9c-0d1e-4f2a-b3c4-d5e6f7a8b9c0",
+      "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+      "cr_no": 4,
+      "title": null,
+      "status": "discarded",
+      "mode": "stories",
+      "opened_by": "ram",
+      "opened_at": "2026-10-16T07:00:00+00:00",
+      "closed_by": "ram",
+      "closed_at": "2026-10-16T08:00:00+00:00",
+      "base_revision_no": 7,
+      "base_content_hash": "3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081920",
+      "result_revision_no": null,
+      "summary": null,
+      "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:cr-04",
+      "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
+      "published_by": "ramaswamy.u",
+      "published_at": "2026-10-15T09:30:05Z",
+      "base_version": null
+    },
+    "get_response": {
+      "sync_uuid": "6f7a8b9c-0d1e-4f2a-b3c4-d5e6f7a8b9c0",
+      "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+      "cr_no": 4,
+      "title": "",
+      "status": "discarded",
+      "mode": "stories",
+      "opened_by": "ram",
+      "opened_at": "2026-10-16T07:00:00+00:00",
+      "closed_by": "ram",
+      "closed_at": "2026-10-16T08:00:00+00:00",
+      "base_revision_no": 7,
+      "base_content_hash": "3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081920",
+      "result_revision_no": null,
+      "summary": null,
+      "blob_key": "ce089835-d693-4351-a707-b0b25bd28ead:cr-04",
+      "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
+      "published_by": "ramaswamy.u",
+      "published_at": "2026-10-15T09:30:05Z",
+      "version": 0,
+      "created_at": "2026-10-16T08:00:06Z",
+      "updated_at": "2026-10-16T08:00:06Z"
+    }
+  },
+  "blob": {
+    "path": "/blobs/artifact/ce089835-d693-4351-a707-b0b25bd28ead:cr-03",
+    "put_request": {
+      "base64": "PCFkb2N0eXBlIGh0bWw+PGh0bWw+PGhlYWQ+PG1ldGEgY2hhcnNldD0idXRmLTgiPjx0aXRsZT5DUi0wMyBJbXBhY3QgQW5hbHlzaXM8L3RpdGxlPjwvaGVhZD48Ym9keT48aDE+Q1ItMDMg4oCUIEFjY2VwdCBMRUkgZm9yIGNvcnBvcmF0ZSBhcHBsaWNhbnRzPC9oMT48cCBjbGFzcz0iY2hpcCI+QXBwbGllZDwvcD48cD4zIHVwZGF0ZWQgwrcgMSBjcmVhdGVkIMK3IDIgdW5jaGFuZ2VkIChwYXN0IERlc2lnbikuIOadseS6rCDwn5qAPC9wPjwvYm9keT48L2h0bWw+",
+      "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
+      "published_by": "ramaswamy.u"
+    },
+    "put_response_first": {
+      "status": "new",
+      "version": 1
+    },
+    "put_response_repeat": {
+      "status": "unchanged",
+      "version": 1
+    },
+    "get_response": {
+      "base64": "PCFkb2N0eXBlIGh0bWw+PGh0bWw+PGhlYWQ+PG1ldGEgY2hhcnNldD0idXRmLTgiPjx0aXRsZT5DUi0wMyBJbXBhY3QgQW5hbHlzaXM8L3RpdGxlPjwvaGVhZD48Ym9keT48aDE+Q1ItMDMg4oCUIEFjY2VwdCBMRUkgZm9yIGNvcnBvcmF0ZSBhcHBsaWNhbnRzPC9oMT48cCBjbGFzcz0iY2hpcCI+QXBwbGllZDwvcD48cD4zIHVwZGF0ZWQgwrcgMSBjcmVhdGVkIMK3IDIgdW5jaGFuZ2VkIChwYXN0IERlc2lnbikuIOadseS6rCDwn5qAPC9wPjwvYm9keT48L2h0bWw+",
+      "content_hash": "fe6704514cc309b8ecd4ff4f5e802ef9cfdcee7b7dd107ec14912b7164de6872",
+      "version": 1
+    }
+  },
+  "changes_row_example": {
+    "kind": "spec_change_request",
+    "sync_uuid": "5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
+    "version": 0
+  }
+}

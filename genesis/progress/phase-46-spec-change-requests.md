@@ -16,7 +16,7 @@
 | 46-06 apply / discard | ✅ built (2026-10-15) | genesis `1b31489` · genesis-workflows `7d8e92d` | SHIP (tests folded in) |
 | 46-08 story answers / history / badges | ✅ built (2026-10-15) | genesis `e0d0e3e` · genesis-workflows `e20d66e` | SHIP (NITs folded in) |
 | 46-07 web | ✅ built (2026-10-15) | genesis `a5cd09a` | NEEDS_FIXES → fixed → SHIP |
-| 46-09 collaboration / Hub | ⏳ next | — | — |
+| 46-09 collaboration / Hub | 🧱 contract frozen; Hub build handed to the Appian agent (2026-10-15) | — | — |
 | 46-10 review + acceptance | — | — | — |
 | 46-11 release | — | — | — |
 
@@ -416,4 +416,14 @@ produced); Q3 = A (proposals 1–14 accepted; pulled-mirror CR controls move to 
   revision tab).
 - Not verified live: the whole flow in a running `genesis serve` with a real agent (§13 acceptance — Initiate → edit →
   Analyze → plan → Apply / Discard); the fleet is not updated mid-phase.
+
+## 46-09 — collaboration and the Hub (in progress)
+
+**2026-10-15 — contract frozen, Hub build handed off.** `contract/spec-change-contract-addition.md` + fixtures
+`story_with_trace.json` (three steps: all arrays, an old-Genesis edit omitting the new keys, `[]` clearing) and
+`spec_change_request.json` (applied, update, stale 409, discarded with a null result revision, the `…:cr-03` blob);
+the Appian agent's brief is `specs/phase-46-spec-change-requests/46-09-appian-agent-handoff.md`. Freeze refinements
+are in 46-09 §10 (absent key preserves; Text timestamps; `base_content_hash`; attribution fields; `dir_path`).
+The genesis-side bindings, publish points, conflict merge, strict `LocalHubProvider` and the advisory marker are
+not started yet (they wait for the user's go-ahead).
 

@@ -1,0 +1,266 @@
+{
+  "kind": "story",
+  "path": "/records/story/7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f",
+  "notes": "Phase 46-09 addition. spec_refs / answers / change_log are arrays of OPAQUE strings (compact JSON written by Genesis) stored as GH Story Item rows with item_type spec_ref / answer / change. Step 1: all arrays present. Step 2: an OLD-Genesis edit that omits the three new keys -> their rows are preserved. Step 3: spec_refs [] clears, change_log replaced, answers (absent) preserved. Elements contain unicode, quotes, backslashes and \\n escapes and must round-trip byte-for-byte. Null text fields read back as \"\" (established behaviour; Genesis tolerates).",
+  "steps": [
+    {
+      "step": 1,
+      "put_request": {
+        "sync_uuid": "7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f",
+        "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+        "epic_sync_uuid": null,
+        "key": "GNS_000057",
+        "title": "As a reviewer I can approve up to fifty claims",
+        "story_type": "Story",
+        "category": "core",
+        "appian_part": null,
+        "description": "Bulk approval with a hard limit — 東京 🚀 «quotes» and a \"double quote\".",
+        "dev_note_ref": "TD §4.2",
+        "status": "implementation",
+        "position": 3,
+        "owner_username": "ramaswamy.u",
+        "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+        "modified_by": "ramaswamy.u",
+        "acceptance_criteria": [
+          "Given a reviewer\nWhen they select 51 claims\nThen Approve is disabled"
+        ],
+        "questions": [],
+        "labels": [
+          "bulk",
+          "priorité-élevée"
+        ],
+        "base_version": null,
+        "spec_refs": [
+          "{\"clause_id\":\"c-1a2b3c4d\",\"fingerprint\":\"9f2c8e1a7b3d4c5e\",\"origin\":\"breakdown\",\"linked_at\":\"2026-10-14T10:00:00.123456+00:00\"}",
+          "{\"clause_id\":\"c-0000beef\",\"fingerprint\":\"0a1b2c3d4e5f6a7b\",\"origin\":\"cr\",\"linked_at\":\"2026-10-15T09:30:00.000001+00:00\"}"
+        ],
+        "answers": [
+          "{\"question\":\"Is fifty the max?\",\"answer\":\"Yes — CR-03.\\nApplies to every queue.\",\"answered_by\":\"ram\",\"answered_at\":\"2026-10-15T09:30:00.000001+00:00\",\"source\":\"cr\",\"cr_no\":3}",
+          "{\"question\":\"Undo window? (東京)\",\"answer\":\"One minute; path C:\\\\temp\\\\x is irrelevant\",\"answered_by\":\"priya\",\"answered_at\":\"2026-10-15T11:02:03.456789+00:00\",\"source\":\"manual\",\"cr_no\":null}"
+        ],
+        "change_log": [
+          "{\"cr_no\":3,\"cr_sync_uuid\":\"5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9\",\"decision\":\"updated\",\"summary\":\"The limit changes the AC.\",\"clause_labels\":[\"§2-1\"],\"clause_ids\":[\"c-1a2b3c4d\"],\"fields\":[\"acceptance_criteria\",\"spec_refs\"],\"at\":\"2026-10-15T09:30:00.000001+00:00\",\"by\":\"ram\",\"needs_design_rerun\":false,\"follow_up_of\":null,\"follow_ups\":[\"GNS_000131\"]}"
+        ]
+      },
+      "get_response": {
+        "sync_uuid": "7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f",
+        "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+        "epic_sync_uuid": "",
+        "key": "GNS_000057",
+        "title": "As a reviewer I can approve up to fifty claims",
+        "story_type": "Story",
+        "category": "core",
+        "appian_part": "",
+        "description": "Bulk approval with a hard limit — 東京 🚀 «quotes» and a \"double quote\".",
+        "dev_note_ref": "TD §4.2",
+        "status": "implementation",
+        "position": 3,
+        "owner_username": "ramaswamy.u",
+        "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+        "modified_by": "ramaswamy.u",
+        "acceptance_criteria": [
+          "Given a reviewer\nWhen they select 51 claims\nThen Approve is disabled"
+        ],
+        "questions": [],
+        "labels": [
+          "bulk",
+          "priorité-élevée"
+        ],
+        "spec_refs": [
+          "{\"clause_id\":\"c-1a2b3c4d\",\"fingerprint\":\"9f2c8e1a7b3d4c5e\",\"origin\":\"breakdown\",\"linked_at\":\"2026-10-14T10:00:00.123456+00:00\"}",
+          "{\"clause_id\":\"c-0000beef\",\"fingerprint\":\"0a1b2c3d4e5f6a7b\",\"origin\":\"cr\",\"linked_at\":\"2026-10-15T09:30:00.000001+00:00\"}"
+        ],
+        "answers": [
+          "{\"question\":\"Is fifty the max?\",\"answer\":\"Yes — CR-03.\\nApplies to every queue.\",\"answered_by\":\"ram\",\"answered_at\":\"2026-10-15T09:30:00.000001+00:00\",\"source\":\"cr\",\"cr_no\":3}",
+          "{\"question\":\"Undo window? (東京)\",\"answer\":\"One minute; path C:\\\\temp\\\\x is irrelevant\",\"answered_by\":\"priya\",\"answered_at\":\"2026-10-15T11:02:03.456789+00:00\",\"source\":\"manual\",\"cr_no\":null}"
+        ],
+        "change_log": [
+          "{\"cr_no\":3,\"cr_sync_uuid\":\"5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9\",\"decision\":\"updated\",\"summary\":\"The limit changes the AC.\",\"clause_labels\":[\"§2-1\"],\"clause_ids\":[\"c-1a2b3c4d\"],\"fields\":[\"acceptance_criteria\",\"spec_refs\"],\"at\":\"2026-10-15T09:30:00.000001+00:00\",\"by\":\"ram\",\"needs_design_rerun\":false,\"follow_up_of\":null,\"follow_ups\":[\"GNS_000131\"]}"
+        ],
+        "version": 0,
+        "created_by": "ramaswamy.u",
+        "created_at": "2026-10-15T09:31:00Z",
+        "updated_at": "2026-10-15T09:31:00Z"
+      }
+    },
+    {
+      "step": 2,
+      "put_request": {
+        "sync_uuid": "7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f",
+        "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+        "epic_sync_uuid": null,
+        "key": "GNS_000057",
+        "title": "As a reviewer I can approve up to FIFTY claims",
+        "story_type": "Story",
+        "category": "core",
+        "appian_part": null,
+        "description": "Bulk approval with a hard limit — 東京 🚀 «quotes» and a \"double quote\".",
+        "dev_note_ref": "TD §4.2",
+        "status": "implementation",
+        "position": 3,
+        "owner_username": "ramaswamy.u",
+        "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+        "modified_by": "ramaswamy.u",
+        "acceptance_criteria": [
+          "Given a reviewer\nWhen they select 51 claims\nThen Approve is disabled"
+        ],
+        "questions": [],
+        "labels": [
+          "bulk",
+          "priorité-élevée"
+        ],
+        "base_version": 0
+      },
+      "get_response": {
+        "sync_uuid": "7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f",
+        "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+        "epic_sync_uuid": "",
+        "key": "GNS_000057",
+        "title": "As a reviewer I can approve up to FIFTY claims",
+        "story_type": "Story",
+        "category": "core",
+        "appian_part": "",
+        "description": "Bulk approval with a hard limit — 東京 🚀 «quotes» and a \"double quote\".",
+        "dev_note_ref": "TD §4.2",
+        "status": "implementation",
+        "position": 3,
+        "owner_username": "ramaswamy.u",
+        "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+        "modified_by": "ramaswamy.u",
+        "acceptance_criteria": [
+          "Given a reviewer\nWhen they select 51 claims\nThen Approve is disabled"
+        ],
+        "questions": [],
+        "labels": [
+          "bulk",
+          "priorité-élevée"
+        ],
+        "version": 1,
+        "created_by": "ramaswamy.u",
+        "created_at": "2026-10-15T09:31:00Z",
+        "updated_at": "2026-10-15T12:00:00Z",
+        "spec_refs": [
+          "{\"clause_id\":\"c-1a2b3c4d\",\"fingerprint\":\"9f2c8e1a7b3d4c5e\",\"origin\":\"breakdown\",\"linked_at\":\"2026-10-14T10:00:00.123456+00:00\"}",
+          "{\"clause_id\":\"c-0000beef\",\"fingerprint\":\"0a1b2c3d4e5f6a7b\",\"origin\":\"cr\",\"linked_at\":\"2026-10-15T09:30:00.000001+00:00\"}"
+        ],
+        "answers": [
+          "{\"question\":\"Is fifty the max?\",\"answer\":\"Yes — CR-03.\\nApplies to every queue.\",\"answered_by\":\"ram\",\"answered_at\":\"2026-10-15T09:30:00.000001+00:00\",\"source\":\"cr\",\"cr_no\":3}",
+          "{\"question\":\"Undo window? (東京)\",\"answer\":\"One minute; path C:\\\\temp\\\\x is irrelevant\",\"answered_by\":\"priya\",\"answered_at\":\"2026-10-15T11:02:03.456789+00:00\",\"source\":\"manual\",\"cr_no\":null}"
+        ],
+        "change_log": [
+          "{\"cr_no\":3,\"cr_sync_uuid\":\"5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9\",\"decision\":\"updated\",\"summary\":\"The limit changes the AC.\",\"clause_labels\":[\"§2-1\"],\"clause_ids\":[\"c-1a2b3c4d\"],\"fields\":[\"acceptance_criteria\",\"spec_refs\"],\"at\":\"2026-10-15T09:30:00.000001+00:00\",\"by\":\"ram\",\"needs_design_rerun\":false,\"follow_up_of\":null,\"follow_ups\":[\"GNS_000131\"]}"
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "put_request": {
+        "sync_uuid": "7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f",
+        "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+        "epic_sync_uuid": null,
+        "key": "GNS_000057",
+        "title": "As a reviewer I can approve up to FIFTY claims",
+        "story_type": "Story",
+        "category": "core",
+        "appian_part": null,
+        "description": "Bulk approval with a hard limit — 東京 🚀 «quotes» and a \"double quote\".",
+        "dev_note_ref": "TD §4.2",
+        "status": "implementation",
+        "position": 3,
+        "owner_username": "ramaswamy.u",
+        "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+        "modified_by": "ramaswamy.u",
+        "acceptance_criteria": [
+          "Given a reviewer\nWhen they select 51 claims\nThen Approve is disabled"
+        ],
+        "questions": [],
+        "labels": [
+          "bulk",
+          "priorité-élevée"
+        ],
+        "base_version": 1,
+        "spec_refs": [],
+        "change_log": [
+          "{\"cr_no\":3,\"cr_sync_uuid\":\"5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9\",\"decision\":\"updated\",\"summary\":\"The limit changes the AC.\",\"clause_labels\":[\"§2-1\"],\"clause_ids\":[\"c-1a2b3c4d\"],\"fields\":[\"acceptance_criteria\",\"spec_refs\"],\"at\":\"2026-10-15T09:30:00.000001+00:00\",\"by\":\"ram\",\"needs_design_rerun\":false,\"follow_up_of\":null,\"follow_ups\":[\"GNS_000131\"]}",
+          "{\"cr_no\":4,\"cr_sync_uuid\":\"6f7a8b9c-0d1e-4f2a-b3c4-d5e6f7a8b9c0\",\"decision\":\"not_applied\",\"summary\":\"\",\"clause_labels\":[],\"clause_ids\":[],\"fields\":[],\"at\":\"2026-10-16T08:00:00+00:00\",\"by\":\"ram\",\"needs_design_rerun\":false,\"follow_up_of\":null,\"follow_ups\":[]}"
+        ]
+      },
+      "get_response": {
+        "sync_uuid": "7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f",
+        "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+        "epic_sync_uuid": "",
+        "key": "GNS_000057",
+        "title": "As a reviewer I can approve up to FIFTY claims",
+        "story_type": "Story",
+        "category": "core",
+        "appian_part": "",
+        "description": "Bulk approval with a hard limit — 東京 🚀 «quotes» and a \"double quote\".",
+        "dev_note_ref": "TD §4.2",
+        "status": "implementation",
+        "position": 3,
+        "owner_username": "ramaswamy.u",
+        "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+        "modified_by": "ramaswamy.u",
+        "acceptance_criteria": [
+          "Given a reviewer\nWhen they select 51 claims\nThen Approve is disabled"
+        ],
+        "questions": [],
+        "labels": [
+          "bulk",
+          "priorité-élevée"
+        ],
+        "spec_refs": [],
+        "change_log": [
+          "{\"cr_no\":3,\"cr_sync_uuid\":\"5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9\",\"decision\":\"updated\",\"summary\":\"The limit changes the AC.\",\"clause_labels\":[\"§2-1\"],\"clause_ids\":[\"c-1a2b3c4d\"],\"fields\":[\"acceptance_criteria\",\"spec_refs\"],\"at\":\"2026-10-15T09:30:00.000001+00:00\",\"by\":\"ram\",\"needs_design_rerun\":false,\"follow_up_of\":null,\"follow_ups\":[\"GNS_000131\"]}",
+          "{\"cr_no\":4,\"cr_sync_uuid\":\"6f7a8b9c-0d1e-4f2a-b3c4-d5e6f7a8b9c0\",\"decision\":\"not_applied\",\"summary\":\"\",\"clause_labels\":[],\"clause_ids\":[],\"fields\":[],\"at\":\"2026-10-16T08:00:00+00:00\",\"by\":\"ram\",\"needs_design_rerun\":false,\"follow_up_of\":null,\"follow_ups\":[]}"
+        ],
+        "version": 2,
+        "created_by": "ramaswamy.u",
+        "created_at": "2026-10-15T09:31:00Z",
+        "updated_at": "2026-10-16T08:00:01Z",
+        "answers": [
+          "{\"question\":\"Is fifty the max?\",\"answer\":\"Yes — CR-03.\\nApplies to every queue.\",\"answered_by\":\"ram\",\"answered_at\":\"2026-10-15T09:30:00.000001+00:00\",\"source\":\"cr\",\"cr_no\":3}",
+          "{\"question\":\"Undo window? (東京)\",\"answer\":\"One minute; path C:\\\\temp\\\\x is irrelevant\",\"answered_by\":\"priya\",\"answered_at\":\"2026-10-15T11:02:03.456789+00:00\",\"source\":\"manual\",\"cr_no\":null}"
+        ]
+      }
+    }
+  ],
+  "stale_put": {
+    "put_request": {
+      "sync_uuid": "7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f",
+      "feature_sync_uuid": "ce089835-d693-4351-a707-b0b25bd28ead",
+      "epic_sync_uuid": null,
+      "key": "GNS_000057",
+      "title": "As a reviewer I can approve up to FIFTY claims",
+      "story_type": "Story",
+      "category": "core",
+      "appian_part": null,
+      "description": "Bulk approval with a hard limit — 東京 🚀 «quotes» and a \"double quote\".",
+      "dev_note_ref": "TD §4.2",
+      "status": "implementation",
+      "position": 3,
+      "owner_username": "ramaswamy.u",
+      "team_uuid": "1d745740-0da2-48bd-89e5-9f32a69cc569",
+      "modified_by": "ramaswamy.u",
+      "acceptance_criteria": [
+        "Given a reviewer\nWhen they select 51 claims\nThen Approve is disabled"
+      ],
+      "questions": [],
+      "labels": [
+        "bulk",
+        "priorité-élevée"
+      ],
+      "base_version": 0,
+      "spec_refs": [],
+      "change_log": [
+        "{\"cr_no\":3,\"cr_sync_uuid\":\"5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9\",\"decision\":\"updated\",\"summary\":\"The limit changes the AC.\",\"clause_labels\":[\"§2-1\"],\"clause_ids\":[\"c-1a2b3c4d\"],\"fields\":[\"acceptance_criteria\",\"spec_refs\"],\"at\":\"2026-10-15T09:30:00.000001+00:00\",\"by\":\"ram\",\"needs_design_rerun\":false,\"follow_up_of\":null,\"follow_ups\":[\"GNS_000131\"]}",
+        "{\"cr_no\":4,\"cr_sync_uuid\":\"6f7a8b9c-0d1e-4f2a-b3c4-d5e6f7a8b9c0\",\"decision\":\"not_applied\",\"summary\":\"\",\"clause_labels\":[],\"clause_ids\":[],\"fields\":[],\"at\":\"2026-10-16T08:00:00+00:00\",\"by\":\"ram\",\"needs_design_rerun\":false,\"follow_up_of\":null,\"follow_ups\":[]}"
+      ]
+    },
+    "expect_status": 409,
+    "expect_body": {
+      "error": "conflict",
+      "current_version": 2
+    }
+  }
+}

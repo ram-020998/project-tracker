@@ -106,3 +106,20 @@ fixtures, CAS 409, `/changes` emission, the blob, and every existing kind still 
 Binding round trip (local → payload → local) for the six arrays incl. size caps; `spec_change_request` publish/pull
 with the blob; `_LOCAL_ONLY` exclusions; the conflict merge rules; strict `LocalHubProvider`; fixture conformance;
 advisory marker set/refresh/clear.
+
+## 10. Contract freeze (2026-10-15) — handed to the Appian agent
+
+Step 1 of §8 is done: the shapes are frozen in
+`specs/phase-36-genesis-hub-appian-app/contract/spec-change-contract-addition.md` + fixtures
+`story_with_trace.json` / `spec_change_request.json`; the Appian agent's brief is `46-09-appian-agent-handoff.md`
+(the human runs it in parallel with the genesis-side work). Refinements of §2–§4 made while freezing:
+- **Absent key preserves.** A story PUT that omits `spec_refs` / `answers` / `change_log` leaves those rows untouched
+  (an older Genesis on a teammate's machine must not wipe them); a present key replaces, `[]` clears. The Hub always
+  returns the three arrays (`[]` when empty) — this resolves §3's "missing → []" vs "only when rows exist".
+- **`spec_change_request` fields:** `opened_at` / `closed_at` are payload-preserved **Text** (not Date-time) so the
+  exact strings round-trip; `base_content_hash` added (the local column is NOT NULL, a puller needs it);
+  `published_by` / `published_at` added (the stage_artifact attribution model); no stage reference on the wire — a
+  puller resolves the feature's spec stage locally, and `stage_id` / `dir_path` stay local.
+- **Binding gap fixed in the plan:** the CR document path is derived from `dir_path` (`<dir_path>/document.html`), not
+  a `document_path` column.
+
