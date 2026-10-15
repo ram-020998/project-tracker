@@ -340,6 +340,17 @@ Asked one question at a time before building 46-07; the user chose option A for 
   switch + popover from `revision=working`, CR drawer, Overview chip from the latest applied CR, Activity text, chat
   dividers, pulled mirrors → 46-09, the backend additions).
 
+### 5.12 Round 10 — 46-09 genesis-side build decisions (2026-10-15)
+
+Asked one question at a time before building the genesis side of 46-09; the user chose option A for all three. Full
+text: `46-09-collaboration-and-hub.md` §11 (the contract freeze is §10).
+- **Q1 — manual answers → A:** auto-publish server-side after each answer operation (best-effort, merge on conflict).
+  Rejected: no automatic publish (story edits aren't auto-published today).
+- **Q2 — conflict merge → A:** also write the merged story locally so local equals the Hub. Rejected: Hub-only.
+- **Q3 — proposals 1–10 → A:** element encoding + caps, the CR binding (pulled `stage_id` / `dir_path` derived
+  locally), publish points incl. every touched story, the merge, the marker, puller UI, the strict emulator, no
+  capability gate, tests.
+
 ## 6. Defaults chosen by the assistant — ✅ confirmed by the user 2026-10-14 (umbrella §13 Q1–Q5, each answered "A" = the default as written)
 
 *(Heading was "not yet explicitly confirmed"; the confirmation round is recorded in §5.7.)*

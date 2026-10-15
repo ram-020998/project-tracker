@@ -123,3 +123,44 @@ Step 1 of §8 is done: the shapes are frozen in
 - **Binding gap fixed in the plan:** the CR document path is derived from `dir_path` (`<dir_path>/document.html`), not
   a `document_path` column.
 
+## 11. Build decisions — genesis side (2026-10-15, asked one at a time; these win over §2–§9 where they differ)
+
+Finding while reading the code: story edits are not auto-published today (`publish_story` runs on board moves /
+removals from the web, on Apply and on Finalize only), so "the same path as a story edit" (§2) had no automatic path.
+- **Q1 — manual answers → A:** answer / edit / reopen publish the story **automatically, server-side**, right after
+  the operation when collaboration is enabled — best-effort, never failing the answer; a conflict runs the same merge
+  as Apply; other failures are logged + reported in the response. Rejected: no automatic publish.
+- **Q2 — the conflict merge → A:** the merged story is also **written locally** (one CAS-guarded update + the new
+  published version), so local equals the Hub; only a merge writes locally, never a pull over a just-applied change.
+  Rejected: Hub-only.
+- **Q3 — proposals 1–10 → A (all accepted):**
+  1. Elements of `spec_refs` / `answers` / `change_log` travel as compact JSON strings, parsed back on pull; an
+     element that won't parse is dropped and logged loudly; on pull an absent key leaves the local value alone, a
+     present key replaces it.
+  2. History entries are capped when written (≤ 40 clause ids / labels + "+N more", summary ≤ 500); publishing checks
+     every element ≤ 4,000 characters — still over → that story's publish fails with a clear error (never a silent
+     truncation).
+  3. Binding `spec_change_request` → `kb_spec_change_requests`: parent = feature; `summary_json` ↔ `summary`; open
+     CRs never published; blob `<feature_sync_uuid>:cr-<nn>`; local-only `dir_path`, `stage_id`, `analysis_id`,
+     `analyzed_at`, `analyzed_spec_hash`; on pull `stage_id` = the puller's spec stage (skip + retry when absent) and
+     `dir_path` = a local folder under it holding the pulled `document.html`.
+  4. Publish points (best-effort, reported): Apply → the CR record + every story it touched (incl. answers-only,
+     history-only and link-refresh-only stories; the apply report gains `touched` with the fields changed per story,
+     used by the merge); Discard → the record; answer operations → the story (Q1).
+  5. Conflict merge per §2 + Q2: the fields the operation changed are ours (answers → `answers` + `questions`); re-PUT
+     once with the Hub's version as the base and write the merge locally; a second conflict → "publish pending".
+  6. Marker: Initiate sets `stage_artifact` / the spec stage's sync_uuid for 24 h, Analyze refreshes it, Apply /
+     Discard clear it — best-effort, needs onboarding.
+  7. Pullers: the pulled spec view gets a read-only "Change requests (n)" drawer (a closed CR opens its document only —
+     revisions don't sync) and the "Spec under change by …" marker (also on the Overview spec card); coverage and the
+     UX/TD badges come from pulled records (tested; no code change expected).
+  8. Strict `LocalHubProvider`: only the contract's record kinds; story arrays must be lists of strings with known
+     keys; a story PUT without a key keeps the stored array (the Hub rule); the old tests using a made-up kind move
+     to a real one.
+  9. Rollout: no capability gate — 46-11 ships the Hub addition before genesis v0.77.0; against a Hub without it, the
+     CR publish fails with a reported error and Apply stands; the Appian agent's report is checked for how the Hub
+     treats the extra story keys.
+  10. Tests: round trips of the six arrays incl. caps; CR publish/pull with the blob; local-only exclusions; every
+      merge rule; the strict emulator; fixture conformance; marker set/refresh/clear; puller list / coverage / badge;
+      web with jest-axe.
+
