@@ -1,0 +1,11 @@
+{
+  "id": "KU-37",
+  "src": "genesis/reference/decision-log.md",
+  "lines": [728, 751],
+  "type": "GUIDELINE",
+  "areas": ["appian-kb"],
+  "statement": "Same ADR-037 content, but this record is malformed on purpose.",
+  "exact": ["kb_objects"],
+  "strength": "MANDATORY",
+  "refs": ["ADR-037"]
+}

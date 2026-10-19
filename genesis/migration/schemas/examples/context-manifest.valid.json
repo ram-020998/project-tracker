@@ -1,0 +1,8 @@
+{
+  "context": {
+    "areas": ["collaboration-hub", "web-ui"],
+    "rules": ["ADR-063"],
+    "read": ["genesis/genesis/collab/service.py"],
+    "depends_on": ["48-02"]
+  }
+}

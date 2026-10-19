@@ -1,0 +1,7 @@
+{
+  "batch": "P1",
+  "coverage": [
+    {"src": "genesis/reference/decision-log.md", "lines": [728, 728], "skip": "whitespace"},
+    {"src": "genesis/reference/decision-log.md", "lines": [732, 748]}
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question.schema.json",
+  "title": "Examination question",
+  "description": "One examination-bank question, written from the ledger by a session that did not write the docs. Umbrella Phase 47 §5.4.",
+  "type": "object",
+  "required": ["id", "units", "question", "answer_points", "high_stakes"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^Q-[A-Za-z0-9]+-[0-9]{4}$",
+      "description": "Q-<batch-or-area>-<nnnn>."
+    },
+    "units": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "pattern": "^KU-[A-Za-z0-9]+-[0-9]{4}$"},
+      "description": "The KU ids this question tests."
+    },
+    "question": {
+      "type": "string",
+      "description": "The scenario/question posed to the examiner."
+    },
+    "answer_points": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "description": "The points a correct answer must make; the reviewer grades against these."
+    },
+    "high_stakes": {
+      "type": "boolean",
+      "description": "True if any tested unit is high-stakes (RULE/DECISION/LESSON/CONTRACT/mandatory PROCEDURE)."
+    }
+  }
+}

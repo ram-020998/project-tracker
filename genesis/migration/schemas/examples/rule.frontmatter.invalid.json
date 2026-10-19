@@ -1,0 +1,6 @@
+{
+  "id": "ADR-37",
+  "kind": "architecture",
+  "areas": ["appian-kb"],
+  "applies_to": ["genesis/genesis/kb/store.py"]
+}

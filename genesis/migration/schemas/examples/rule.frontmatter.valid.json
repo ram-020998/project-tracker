@@ -1,0 +1,10 @@
+{
+  "id": "ADR-037",
+  "kind": "decision",
+  "status": "accepted",
+  "areas": ["appian-kb"],
+  "applies_to": ["genesis/genesis/kb/store.py", "genesis/genesis/kb/dev_mcp.py", "genesis-appian-parser/**"],
+  "amends": [],
+  "superseded_by": null,
+  "verify": "cd genesis && .venv/bin/python -m pytest -q tests/test_kb_store.py"
+}

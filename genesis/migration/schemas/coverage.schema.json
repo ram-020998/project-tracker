@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coverage.schema.json",
+  "title": "Batch coverage map",
+  "description": "Maps every non-blank line range of each source in a batch to the unit ids that cover it, or to a skip reason. Umbrella Phase 47 §5.1. Line coverage must reach 100% of non-blank lines (§6.1).",
+  "type": "object",
+  "required": ["batch", "coverage"],
+  "properties": {
+    "batch": {
+      "type": "string",
+      "pattern": "^(P[0-9]+|B[0-9]{2,})$",
+      "description": "Batch id from batches.yaml (P1, P2, B01..Bnn)."
+    },
+    "coverage": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["src", "lines"],
+        "x-exactly-one-of": [["units", "skip"]],
+        "properties": {
+          "src": {"type": "string"},
+          "lines": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"type": "integer"}
+          },
+          "units": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "pattern": "^KU-[A-Za-z0-9]+-[0-9]{4}$"},
+            "description": "KU ids that cover this range."
+          },
+          "skip": {
+            "type": "string",
+            "enum": ["blank", "heading-only", "formatting", "duplicate"],
+            "description": "Why this range carries no unit."
+          },
+          "duplicate_of": {
+            "type": "string",
+            "pattern": "^KU-[A-Za-z0-9]+-[0-9]{4}$",
+            "description": "Required when skip=duplicate: the KU this range repeats.",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

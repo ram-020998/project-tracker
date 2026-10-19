@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rule.frontmatter.schema.json",
+  "title": "Rule file frontmatter",
+  "description": "The YAML frontmatter of a knowledge/rules/<ID>.md file (one rule per file). Umbrella Phase 47 §4. Validated here as JSON (the frontmatter parsed to an object).",
+  "type": "object",
+  "required": ["id", "kind", "status", "areas", "applies_to"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^(ADR|LSN|STD|WA)-[0-9]{3}$",
+      "description": "ADR-nnn (decision) | LSN-nnn (lesson) | STD-nnn (standard) | WA-nnn (agreement)."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["decision", "lesson", "standard", "agreement"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["proposed", "accepted", "superseded"]
+    },
+    "areas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["engine", "runs-config", "data-plane", "workflow-library", "agent-sdk",
+                 "chat-copilot", "appian-kb", "appian-parser", "feature-sdlc", "stories-workbench",
+                 "collaboration-hub", "memory", "web-ui", "dev-release-ops", "all", "history"]
+      }
+    },
+    "applies_to": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "description": "Repo-relative path globs the rule governs (matched by gk rules --paths)."
+    },
+    "amends": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^(ADR|LSN|STD|WA)-[0-9]{3}$"},
+      "description": "Rule ids this one amends.",
+      "nullable": true
+    },
+    "superseded_by": {
+      "type": "string",
+      "pattern": "^(ADR|LSN|STD|WA)-[0-9]{3}$",
+      "description": "The rule id that supersedes this one; null if active.",
+      "nullable": true
+    },
+    "verify": {
+      "type": "string",
+      "description": "A command that checks the rule still holds; null if none.",
+      "nullable": true
+    }
+  }
+}

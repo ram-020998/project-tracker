@@ -1,0 +1,6 @@
+{
+  "context": {
+    "areas": ["collab-hub", "web-ui"],
+    "rules": "ADR-063"
+  }
+}

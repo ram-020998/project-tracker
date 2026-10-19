@@ -1,0 +1,9 @@
+{
+  "batch": "P1",
+  "coverage": [
+    {"src": "genesis/reference/decision-log.md", "lines": [728, 728], "skip": "heading-only"},
+    {"src": "genesis/reference/decision-log.md", "lines": [729, 731], "skip": "blank"},
+    {"src": "genesis/reference/decision-log.md", "lines": [732, 748], "units": ["KU-P1-0001"]},
+    {"src": "genesis/reference/decision-log.md", "lines": [749, 751], "skip": "duplicate", "duplicate_of": "KU-P1-0001"}
+  ]
+}
