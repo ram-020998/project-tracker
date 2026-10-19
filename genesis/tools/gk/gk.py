@@ -15,14 +15,14 @@ Commands:
   fates <area>                      every unit has a fate; targets exist; wrong has a conflict
   copycheck <paths...>              12-word overlap of new docs vs all extract sources
   exact <paths...>                  path-like tokens in new docs exist in the repos at HEAD
-  validate [--knowledge DIR]        the knowledge store (frontmatter/links/state/provenance/budgets)
+  validate [--knowledge DIR]        the knowledge store (frontmatter/links/state/provenance/budgets/applies_to)
   build [--check] [--out DIR]       build _build/ (deterministic); --check fails if stale
   budget [--knowledge DIR]          per-doc token budget vs umbrella §7
   rules --paths <files...>          deterministic rule selection for changed files
-  context <sub-spec>                resolve a sub-spec's context manifest
+  context <sub-spec>                resolve + schema-validate a sub-spec's context manifest
   sample --seed S --kind K --n N    reproducible reviewer samples
   next-id <LSN|STD|WA>              allocate the next rule id
-  batches check                     tiling + cap + boundary-safety of batches.yaml
+  batches check                     exact-once tiling + 200K cap + boundary-safety of batches.yaml
 """
 from __future__ import annotations
 
@@ -146,14 +146,19 @@ def cmd_fates(a) -> int:
 def cmd_copycheck(a) -> int:
     new_docs = _read_docs(a.paths)
     sources = _all_sources()
-    hits = core.copycheck(new_docs, sources, n=a.n)
+    res = core.copycheck(new_docs, sources, n=a.n)
     if a.json:
-        print(json.dumps(hits, indent=2))
+        print(json.dumps(res, indent=2))
     else:
-        for h in hits:
+        for h in res["hits"]:
             print(f"  COPY {h['doc']}:{h['doc_line']} == {h['src']}:{h['src_line']}  “{h['shingle']}”")
-    print(f"\n{len(hits)} overlap(s) of >= {a.n} words")
-    return 1 if hits else 0
+        for e in res["exemptions"]:
+            print(f"  EXEMPT {e['doc']}:{e['line']} [{e['kind']}] {e['reason']}")
+        for e in res["errors"]:
+            print(f"  ERROR {e['doc']}:{e['line']} {e['msg']}")
+    print(f"\n{len(res['hits'])} overlap(s) of >= {a.n} words; "
+          f"{len(res['exemptions'])} exemption(s); {len(res['errors'])} error(s)")
+    return 1 if (res["hits"] or res["errors"]) else 0
 
 
 def cmd_exact(a) -> int:
@@ -168,7 +173,15 @@ def cmd_exact(a) -> int:
 
 
 def cmd_validate(a) -> int:
-    errs = core.validate_store(Path(a.knowledge) if a.knowledge else core.KNOWLEDGE)
+    knowledge = Path(a.knowledge) if a.knowledge else core.KNOWLEDGE
+    rf = None
+    try:
+        areas = core.load_areas()
+        root = _resolve_code_root(getattr(a, "code_root", None), areas["repos"])
+        rf = core.repo_files(root, areas["repos"])
+    except core.GkError:
+        print("note: code root not found — skipping applies_to dead-glob lint (P3)", file=sys.stderr)
+    errs = core.validate_store(knowledge, repo_files=rf)
     for e in errs:
         print("  FAIL " + e)
     print("OK" if not errs else f"\n{len(errs)} problem(s)")
@@ -222,9 +235,11 @@ def cmd_context(a) -> int:
         print("no context manifest found", file=sys.stderr)
         return 1
     schema = core.load_schema("context-manifest.schema.json")
-    errs = core.schema_validate(schema, {"context": man}) if False else []
+    errs = core.schema_validate(schema, {"context": man})
     print(json.dumps(man, indent=2))
-    return 0
+    for e in errs:
+        print("  INVALID " + e, file=sys.stderr)
+    return 1 if errs else 0
 
 
 def cmd_sample(a) -> int:
@@ -250,12 +265,19 @@ def cmd_nextid(a) -> int:
 def cmd_batches(a) -> int:
     if a.sub != "check":
         return 2
+    inv = core.load_inventory()
     batches, limit = core.load_batches(Path(a.batches) if a.batches else None)
-    errs = core.check_batches_boundaries(batches)
-    print(f"batches: {len(batches)}  char_limit {limit:,}")
+    errs, st = core.check_batches_all(inv, batches, limit)
+    print(f"batches: {st['batches']}  (pilot {st['p']}, B {st['b']})  char_limit {limit:,}")
+    print(f"extract files: {st['extract']}  distinct covered: {st['covered']}  "
+          f"entries: {st['entries']}")
+    print(f"total chars: {st['total_chars']:,}  (inventory extract: {st['inv_chars']:,})  "
+          f"max batch: {st['max_chars']:,}")
+    print(f"multi-entry sources boundary-checked: {st['boundary_checked']}")
     for e in errs:
         print("  FAIL " + e)
-    print("OK: all multi-entry boundaries are safe" if not errs else f"\n{len(errs)} unsafe boundary(ies)")
+    print("\nOK: tiling exact-once, within cap, boundaries safe" if not errs
+          else f"\n{len(errs)} problem(s)")
     return 1 if errs else 0
 
 
@@ -288,7 +310,8 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("exact"); s.add_argument("paths", nargs="+")
     s.add_argument("--code-root", dest="code_root"); s.set_defaults(fn=cmd_exact)
 
-    s = sub.add_parser("validate"); s.add_argument("--knowledge"); s.set_defaults(fn=cmd_validate)
+    s = sub.add_parser("validate"); s.add_argument("--knowledge")
+    s.add_argument("--code-root", dest="code_root"); s.set_defaults(fn=cmd_validate)
 
     s = sub.add_parser("build"); s.add_argument("--check", action="store_true")
     s.add_argument("--out"); s.add_argument("--knowledge"); s.set_defaults(fn=cmd_build)

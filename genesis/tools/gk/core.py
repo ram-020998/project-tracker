@@ -42,16 +42,25 @@ ALL_AREAS = AREA_IDS + PSEUDO_AREAS
 BUDGETS = {"core": 15000, "pack": 12000, "reference": 8000, "rule": 1500, "procedure": 12000}
 
 # State facts may live ONLY in knowledge/state/ (gk validate). Patterns that
-# mark a "state fact" (a thing that changes per release).
+# mark a "state fact" (a thing that changes per release). Matched against prose
+# with code spans/fences stripped (identifiers inside `code` are allowed), and
+# never applied inside state/ (its home). Covers version strings (with or without
+# a leading v), the db_current_version key, DB/migration versions written in
+# prose, test counts and CI pipeline/job ids.
 STATE_FACT_PATTERNS = [
-    (re.compile(r"\bv\d+\.\d+\.\d+\b"), "version string"),
-    (re.compile(r"\bcurrent_version\b"), "DB current_version"),
+    (re.compile(r"\bv?\d+\.\d+\.\d+\b"), "version string"),
+    (re.compile(r"current_version"), "current_version key"),
     (re.compile(r"\bm0\d{3}\b"), "migration id"),
+    (re.compile(r"\bDB\s+v?\d+\b", re.I), "DB version"),
+    (re.compile(r"\bversion\s+\d+\b", re.I), "version number"),
     (re.compile(r"\b\d+\s+tests?\b", re.I), "test count"),
+    (re.compile(r"\bpytest\s+\d+\b", re.I), "test count"),
+    (re.compile(r"\bpipeline\s+#?\d+\b", re.I), "CI pipeline id"),
+    (re.compile(r"\b(?:gl|ci|job|run)-\d+\b", re.I), "CI id"),
 ]
 
 PROVENANCE_RE = re.compile(r"<!--\s*src:\s*[^>]*-->")
-VERBATIM_RE = re.compile(r"<!--\s*verbatim:\s*[^>]*-->")
+VERBATIM_RE = re.compile(r"<!--\s*verbatim:(?P<reason>[^>]*)-->")
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
 FENCE_RE = re.compile(r"^\s*```")
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
@@ -505,9 +514,18 @@ CONFLICT_RE = re.compile(r"conflicts(?:\.md)?#\S+")
 
 
 def check_fates(units: list[dict]) -> list[str]:
-    """Every unit has a fate; merge/superseded targets exist; wrong has a conflict id."""
+    """Every unit has a fate; merge/supersede targets exist; wrong has a conflict id;
+    and **every merge/supersede chain terminates at a surviving unit** (no cycle,
+    no chain that strands the knowledge).
+
+    * a ``merge`` chain must end at a unit whose fate is ``keep``;
+    * a ``superseded`` chain must end at ``keep``, ``history`` or a rule id
+      (ADR/LSN/STD/WA — a surviving rule);
+    * a cycle in the merge/supersede graph is reported with the whole chain.
+    """
     errs: list[str] = []
-    ids = {u.get("id") for u in units}
+    by_id = {u.get("id"): u for u in units}
+    ids = set(by_id)
     for u in units:
         uid = u.get("id", "<no-id>")
         fate = u.get("fate")
@@ -529,17 +547,54 @@ def check_fates(units: list[dict]) -> list[str]:
             notes = u.get("notes") or ""
             if not (CONFLICT_RE.search(ref) or CONFLICT_RE.search(notes)):
                 errs.append(f"{uid}: fate=wrong without a conflict id (conflicts.md#<anchor>)")
+
+    # Walk each merge/supersede chain to its terminal; report cycles and strands.
+    rule_re = re.compile(r"(ADR|LSN|STD|WA)-\d{3}")
+    for u in units:
+        if u.get("fate") not in ("merge", "superseded"):
+            continue
+        start = u.get("id")
+        seen: list[str] = [start]
+        cur = u
+        while True:
+            tgt = cur.get("fate_target")
+            if not tgt or (tgt not in by_id and rule_re.fullmatch(tgt or "")):
+                # terminal is a surviving rule id (valid only for superseded);
+                # a merge that points at a rule id is flagged by existence check above.
+                break
+            if tgt not in by_id:
+                break  # missing target already reported
+            if tgt in seen:
+                errs.append(f"{start}: {u['fate']} chain forms a cycle: " + " -> ".join(seen + [tgt]))
+                break
+            seen.append(tgt)
+            nxt = by_id[tgt]
+            nfate = nxt.get("fate")
+            if nfate not in ("merge", "superseded"):
+                # terminal node reached — check it is a survivor for this chain kind
+                survivors = ("keep",) if u["fate"] == "merge" else ("keep", "history")
+                if nfate not in survivors:
+                    errs.append(f"{start}: {u['fate']} chain ends at {tgt} (fate={nfate}), "
+                                f"not a surviving unit: " + " -> ".join(seen))
+                break
+            cur = nxt
     return errs
 
 
 # --- copy check (§6.2) -----------------------------------------------------
+def _words_with_lines(text: str) -> list[tuple[str, int]]:
+    out = []
+    for lineno, ln in enumerate(text.splitlines(), 1):
+        for m in re.finditer(r"[A-Za-z0-9]+", ln.lower()):
+            out.append((m.group(0), lineno))
+    return out
+
+
 def _strip_noncopy(text: str) -> str:
-    """Remove fenced code, inline code, html comments, and verbatim paragraphs."""
-    # drop whole paragraphs that carry a verbatim exemption
+    """Source-side strip: drop fenced code, inline code, comments, verbatim paras."""
     paras = re.split(r"\n\s*\n", text)
     paras = [p for p in paras if not VERBATIM_RE.search(p)]
     text = "\n\n".join(paras)
-    # drop fenced code blocks
     out_lines, in_fence = [], False
     for ln in text.splitlines():
         if FENCE_RE.match(ln):
@@ -553,42 +608,102 @@ def _strip_noncopy(text: str) -> str:
     return text
 
 
-def _words_with_lines(text: str) -> list[tuple[str, int]]:
-    out = []
-    for lineno, ln in enumerate(text.splitlines(), 1):
-        for m in re.finditer(r"[A-Za-z0-9]+", ln.lower()):
-            out.append((m.group(0), lineno))
-    return out
+def _scan_doc(text: str) -> tuple[list[tuple[str, int]], list[dict], list[dict]]:
+    """New-doc scan: returns (words-with-lines, exemptions, errors).
+
+    * a ``<!-- verbatim: reason -->`` paragraph is exempt **only** when ``reason``
+      is non-empty — it is recorded as an exemption and dropped from the scan;
+      an **empty** reason is an error and the paragraph is **not** exempted
+      (so copied prose inside it is still caught, §6.2);
+    * fenced code blocks are recorded as exemptions and dropped;
+    * inline code and html comments are stripped before shingling.
+    """
+    lines = text.split("\n")
+    n = len(lines)
+    exempt = [False] * (n + 1)
+    exemptions: list[dict] = []
+    errors: list[dict] = []
+    # 1) verbatim paragraphs (maximal runs of non-blank lines)
+    j = 0
+    while j < n:
+        if lines[j].strip() == "":
+            j += 1; continue
+        k = j
+        while k < n and lines[k].strip() != "":
+            k += 1
+        block = "\n".join(lines[j:k])
+        m = VERBATIM_RE.search(block)
+        if m:
+            reason = m.group("reason").strip()
+            if reason:
+                exemptions.append({"line": j + 1, "kind": "verbatim", "reason": reason})
+                for t in range(j, k):
+                    exempt[t + 1] = True
+            else:
+                errors.append({"line": j + 1, "msg": "empty verbatim reason (needs a reason, §6.2)"})
+        j = k
+    # 2) fenced code blocks
+    in_fence, fstart = False, None
+    for idx in range(1, n + 1):
+        if FENCE_RE.match(lines[idx - 1]):
+            exempt[idx] = True
+            if not in_fence:
+                in_fence, fstart = True, idx
+            else:
+                in_fence = False
+                exemptions.append({"line": fstart, "kind": "code-fence", "reason": "fenced code block"})
+            continue
+        if in_fence:
+            exempt[idx] = True
+    # 3) words (original line numbers), skipping exempt lines + inline code/comments
+    words: list[tuple[str, int]] = []
+    for idx in range(1, n + 1):
+        if exempt[idx]:
+            continue
+        ln = INLINE_CODE_RE.sub(" ", HTML_COMMENT_RE.sub(" ", lines[idx - 1]))
+        for mm in re.finditer(r"[A-Za-z0-9]+", ln.lower()):
+            words.append((mm.group(0), idx))
+    return words, exemptions, errors
+
+
+def _shingle_words(words: list[tuple[str, int]], n: int) -> list[tuple[str, int]]:
+    return [(" ".join(w for w, _ in words[i:i + n]), words[i][1])
+            for i in range(len(words) - n + 1)]
 
 
 def shingles(text: str, n: int = 12) -> list[tuple[str, int]]:
-    words = _words_with_lines(_strip_noncopy(text))
-    out = []
-    for i in range(len(words) - n + 1):
-        key = " ".join(w for w, _ in words[i:i + n])
-        out.append((key, words[i][1]))
-    return out
+    return _shingle_words(_words_with_lines(_strip_noncopy(text)), n)
 
 
-def copycheck(new_docs: dict[str, str], sources: dict[str, str], n: int = 12) -> list[dict]:
+def copycheck(new_docs: dict[str, str], sources: dict[str, str], n: int = 12) -> dict:
     """12-word shingle overlap of each new doc against every source.
 
-    ``new_docs``/``sources`` map path -> text. Returns a list of hits
-    ``{doc, doc_line, src, src_line, shingle}`` (code spans, exact/backticked
-    items and verbatim paragraphs are ignored via :func:`_strip_noncopy`).
+    Returns ``{"hits": [...], "exemptions": [...], "errors": [...]}``:
+    * **hits** — ``{doc, doc_line, src, src_line, shingle}`` for each ≥ n-word run
+      shared with a source (code spans, exempted verbatim blocks and fenced code
+      are not scanned);
+    * **exemptions** — every block skipped, with ``{doc, line, kind, reason}`` so a
+      §6.2 reviewer can inspect each one (P2);
+    * **errors** — e.g. an empty-reason verbatim block (M3); a non-empty ``errors``
+      list fails the check.
     """
     index: dict[str, tuple[str, int]] = {}
     for spath, stext in sources.items():
         for key, line in shingles(stext, n):
             index.setdefault(key, (spath, line))
-    hits = []
+    hits, exemptions, errors = [], [], []
     for dpath, dtext in new_docs.items():
-        for key, dline in shingles(dtext, n):
+        words, ex, er = _scan_doc(dtext)
+        for e in ex:
+            exemptions.append({"doc": dpath, **e})
+        for e in er:
+            errors.append({"doc": dpath, **e})
+        for key, dline in _shingle_words(words, n):
             if key in index:
                 spath, sline = index[key]
                 hits.append({"doc": dpath, "doc_line": dline, "src": spath,
                              "src_line": sline, "shingle": key})
-    return hits
+    return {"hits": hits, "exemptions": exemptions, "errors": errors}
 
 
 # --- exact-item existence (paths/migrations) -------------------------------
@@ -859,7 +974,7 @@ def budget_report(built: dict[str, str]) -> list[dict]:
 
 
 # --- store validator -------------------------------------------------------
-def validate_store(knowledge: Path) -> list[str]:
+def validate_store(knowledge: Path, repo_files: set[str] | None = None) -> list[str]:
     errs: list[str] = []
     rule_schema = load_schema("rule.frontmatter.schema.json")
     rules = load_rules(knowledge / "rules")
@@ -877,6 +992,12 @@ def validate_store(knowledge: Path) -> list[str]:
         for a in fm.get("areas") or []:
             if a not in ALL_AREAS:
                 errs.append(f"{r['path'].name}: unknown area {a}")
+        # P3: a rule's applies_to glob must match at least one real file in the repos.
+        if repo_files is not None:
+            for g in fm.get("applies_to") or []:
+                rx = glob_to_regex(g)
+                if not any(rx.match(f) for f in repo_files):
+                    errs.append(f"{r['path'].name}: applies_to glob {g!r} matches no file in the code repos")
     # markdown files (authored): provenance, state facts, links, archive links
     for md in sorted(knowledge.rglob("*.md")):
         if "_build" in md.parts:
@@ -1059,3 +1180,94 @@ def check_batches_boundaries(batches: list[dict], blob_lines=base_lines) -> list
         for s in unsafe_boundaries(lines, ranges):
             errs.append(f"{src}: unsafe split boundary before line {s}")
     return errs
+
+
+def check_batches_all(inventory: dict[str, dict], batches: list[dict], char_limit: int,
+                      blob_lines=base_lines) -> tuple[list[str], dict]:
+    """The single batch-plan check shared by ``gk batches check`` and
+    ``migration/scripts/check_batches.py``: exact-once tiling of every extract
+    file (no gap/overlap), the per-batch char cap, no archive-only file in a
+    batch, per-file recorded chars == inventory, unique/contiguous ids, **and**
+    boundary safety (via :func:`unsafe_boundaries`). Returns ``(errs, stats)``.
+    """
+    extract = {p: v for p, v in inventory.items() if v["class"] == "extract"}
+    archive = {p for p, v in inventory.items() if v["class"] != "extract"}
+    errs: list[str] = []
+    covered: dict[str, list] = {}
+    recorded: dict[str, int] = {}
+    ids: list[str] = []
+    for b in batches:
+        ids.append(b["id"])
+        tot = 0
+        for (src, a, bb, ch) in b["entries"]:
+            tot += ch
+            if src in archive:
+                errs.append(f"{b['id']}: archive-only file in batch: {src}")
+            covered.setdefault(src, []).append((a, bb))
+            recorded[src] = recorded.get(src, 0) + ch
+        if b["chars"] is not None and tot != b["chars"]:
+            errs.append(f"{b['id']}: declared chars {b['chars']} != sum of entries {tot}")
+        if tot > char_limit:
+            errs.append(f"{b['id']}: {tot} chars exceeds limit {char_limit}")
+    for path, info in extract.items():
+        ranges = sorted(covered.get(path, []))
+        if not ranges:
+            errs.append(f"MISSING from batches: {path}"); continue
+        expect = 1
+        for (a, b) in ranges:
+            if a != expect:
+                errs.append(f"{path}: gap/overlap — range starts at {a}, expected {expect}"); break
+            expect = b + 1
+        else:
+            if expect - 1 != info["lines"]:
+                errs.append(f"{path}: covered to line {expect-1}, file has {info['lines']} lines")
+        if recorded.get(path) != info["chars"]:
+            errs.append(f"{path}: batch chars {recorded.get(path)} != inventory chars {info['chars']}")
+    for path in covered:
+        if path not in extract:
+            errs.append(f"not an extract source (or unknown): {path}")
+    if len(ids) != len(set(ids)):
+        errs.append("duplicate batch ids")
+    p_ids = [i for i in ids if re.fullmatch(r"P\d+", i)]
+    b_ids = [i for i in ids if re.fullmatch(r"B\d+", i)]
+    if not p_ids:
+        errs.append("no pilot (P) batches")
+    exp = [f"B{i:02d}" for i in range(1, len(b_ids) + 1)]
+    if b_ids != exp:
+        errs.append(f"B-series not contiguous: {b_ids[:3]}..{b_ids[-3:]} vs {exp[:3]}..{exp[-3:]}")
+    # boundary safety on every multi-entry source
+    bchecked = 0
+    for src, ranges in covered.items():
+        if src not in extract or len(ranges) < 2:
+            continue
+        try:
+            lines = blob_lines(src)
+        except GkError as e:
+            errs.append(str(e)); continue
+        bchecked += 1
+        for s in unsafe_boundaries(lines, ranges):
+            errs.append(f"{src}: unsafe split boundary before line {s} "
+                        f"(cuts inside a paragraph/table/list-item/code block)")
+    stats = {
+        "batches": len(batches), "p": len(p_ids), "b": len(b_ids),
+        "extract": len(extract), "covered": len(covered),
+        "entries": sum(len(x["entries"]) for x in batches),
+        "total_chars": sum(sum(e[3] for e in x["entries"]) for x in batches),
+        "inv_chars": sum(v["chars"] for v in extract.values()),
+        "max_chars": max((sum(e[3] for e in x["entries"]) for x in batches), default=0),
+        "char_limit": char_limit, "boundary_checked": bchecked,
+    }
+    return errs, stats
+
+
+def repo_files(code_root: Path, repos: list[str]) -> set[str]:
+    """Repo-prefixed tracked files across the code repos at HEAD (for P3/exact)."""
+    out: set[str] = set()
+    for r in repos:
+        d = code_root / r
+        if not (d / ".git").exists():
+            continue
+        for f in _git("ls-files", repo=d).splitlines():
+            if f:
+                out.add(f"{r}/{f}")
+    return out

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "coverage.schema.json",
   "title": "Batch coverage map",
-  "description": "Maps every non-blank line range of each source in a batch to the unit ids that cover it, or to a skip reason. Umbrella Phase 47 §5.1. Line coverage must reach 100% of non-blank lines (§6.1).",
+  "description": "Maps every non-blank line range of each source in a batch to the unit ids that cover it, or to a skip reason. Umbrella Phase 47 §5.1. Line coverage must reach 100% of non-blank lines (§6.1). Note (47-02 review P1): ranges here MAY overlap at the unit level — one source line can feed several units — so `gk coverage` does not require exact tiling; the exactly-once tiling of every source line is a BATCH-level invariant enforced by batches.yaml via `check_batches.py` / `gk batches check`, not here.",
   "type": "object",
   "required": ["batch", "coverage"],
   "properties": {

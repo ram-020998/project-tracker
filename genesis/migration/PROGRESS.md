@@ -13,7 +13,7 @@
 | # | Sub-spec | Pass / output | Gate | Status | Commit | Verdict |
 |---|---|---|---|---|---|---|
 | 47-01 | Inventory, area taxonomy, schemas, templates, batch plan | setup | **user approved areas + batch plan (2026-10-19, with changes 1–3)** | ✅ | 5e8e148 | PASS-F (review-1) |
-| 47-02 | `gk` tooling + the migration agents | setup | — | ⚠ | _see report_ | — |
+| 47-02 | `gk` tooling + the migration agents | setup | — | ⚠ | _see report_ | FAIL (review-1) → fixes for review-2 |
 | 47-03 | Pilot: Collaboration & Hub (all four passes; batches P1,P2) | extract→reconcile→write→examine | **GO / NO-GO** | ☐ | — | — |
 | 47-04 | Extraction of all remaining batches (B01..B26) | extract | — | ☐ | — | — |
 | 47-05 | Reconcile, per area | reconcile | **user decides conflicts** | ☐ | — | — |
@@ -150,3 +150,25 @@ them) and adopted **before** the next unit starts (umbrella §6.4).
     `install.sh` (idempotent) in `genesis/agents/`; write limited by
     `write.allowedPaths` (write not auto-approved), shell gated by `deniedCommands`;
     all four pass `kiro-cli agent validate` and the guardrail smoke test.
+- **2026-10-20 — 47-02 review-1 FAIL fixed** (`reviews/47-02-review-1.md`; fixes
+  for review-2). Test-first (a reproducing test added per finding, then the fix):
+  - **B1 (BLOCKER)** `gk fates` now resolves the merge/supersede graph: a cycle,
+    or a chain that never ends at a surviving unit (merge → `keep`; supersede →
+    `keep`/`history`/rule id), is reported with the whole chain.
+  - **M1** `gk batches check` now enforces exact-once tiling + the 200K cap (not
+    only boundary safety) via a **single** shared implementation
+    `core.check_batches_all`, which `check_batches.py` also calls (no duplication).
+  - **M2** `gk validate` state-fact detection now also catches CI pipeline/job ids,
+    the `db_current_version` key, bare/prefixed semver, DB/migration versions in
+    prose ("DB v24", "version 20", "m0024") and `pytest <n>`; identifiers inside
+    code spans and anything in `state/` remain allowed.
+  - **M3 / P2** `gk copycheck` requires a **non-empty** verbatim reason (an empty
+    one is an error and no longer exempts) and prints every exemption
+    (location + kind + reason) so the §6.2 review can inspect them.
+  - **m1** `gk context` now validates the manifest against
+    `context-manifest.schema.json` (the dead `if False` branch is removed).
+  - **P1** documented in `schemas/coverage.schema.json`: unit-level coverage
+    ranges MAY overlap; exact-once tiling is a **batch**-level invariant enforced
+    by `batches.yaml` / `check_batches.py` / `gk batches check`.
+  - **P3** `gk validate` fails on an `applies_to` glob that matches no file in the
+    code repos (resolved against the code root at HEAD).
