@@ -468,15 +468,66 @@ def _has_words(ln: str) -> bool:
     return bool(re.search(r"[A-Za-z]{2,}", ln))
 
 
-def validate_coverage(cov: dict, batch_unit_ids: set[str], blob_lines=base_lines) -> dict:
-    """Validate a batch coverage map. Returns {pct, gaps, errs}.
+def _score_range(lines: list[str], covered: list[bool], a: int, b: int,
+                 total_nb: int, covered_nb: int, gaps: list[str], src: str) -> tuple[int, int]:
+    """Tally non-blank / covered-non-blank lines in [a, b] and append gap runs.
 
-    * every skip reason is justified: ``blank`` lines are blank; ``heading-only``
-      lines are headings; ``formatting`` lines carry no words; ``duplicate``
-      points (via ``duplicate_of``) to a unit present in the batch;
-    * ``pct`` = covered non-blank lines / total non-blank lines over the sources
-      named in the map; ``gaps`` lists uncovered non-blank ranges.
-    """
+    Returns the updated ``(total_nb, covered_nb)``. ``covered`` is a 1-based
+    boolean list (index 0 unused); ``b`` is clamped to the file length so a batch
+    range cannot read past the blob."""
+    b = min(b, len(lines))
+    run_start = None
+    for i in range(a, b + 1):
+        nb = _nonblank(lines[i - 1])
+        cov = i < len(covered) and covered[i]
+        if nb:
+            total_nb += 1
+            if cov:
+                covered_nb += 1
+        uncovered_nb = nb and not cov
+        if uncovered_nb and run_start is None:
+            run_start = i
+        elif not uncovered_nb and run_start is not None:
+            gaps.append(f"{src}:{run_start}-{i-1}"); run_start = None
+    if run_start is not None:
+        gaps.append(f"{src}:{run_start}-{b}")
+    return total_nb, covered_nb
+
+
+def _entries_overlap(entries: list[dict], a: int, b: int) -> bool:
+    for e in entries:
+        x, y = e["lines"]
+        if x <= b and a <= y:
+            return True
+    return False
+
+
+def validate_coverage(cov: dict, batch_unit_ids: set[str], blob_lines=base_lines,
+                      batch_ranges: list[tuple[str, int, int]] | None = None,
+                      partial: bool = False) -> dict:
+    """Validate a batch coverage map. Returns
+    ``{pct, gaps, errs, unmapped, partial, total_nonblank, covered_nonblank}``.
+
+    Skip reasons are always justified: ``blank`` lines are blank; ``heading-only``
+    lines are headings; ``formatting`` lines carry no words; ``duplicate`` points
+    (via ``duplicate_of``) to a unit present in the batch; a ``units`` entry cites
+    only ids in the batch.
+
+    **Scoring has two modes.**
+
+    * *legacy* (``batch_ranges is None``) — ``pct`` is over the sources named in
+      the map (ad-hoc maps / unit tests).
+    * *batch* (``batch_ranges = [(src, a, b), ...]`` taken from the batch's
+      definition in ``batches.yaml`` and read at the base tag) — the denominator
+      is **every non-blank line of every batch range**, not just the lines the map
+      happens to mention. A batch entry whose src does not appear in the map is
+      *unmapped*: it is listed in ``unmapped`` and (unless ``partial``) its
+      non-blank lines count against the total as a gap, so an incomplete batch
+      can never report 100%. A coverage-map entry for a src — or a line range —
+      that is **not** part of the batch is an error. With ``partial=True`` only
+      the mapped batch entries are scored (``exit 0`` when those are complete),
+      but every unmapped entry is still returned so a resumed multi-session batch
+      can report its progress honestly."""
     errs: list[str] = []
     schema = load_schema("coverage.schema.json")
     for e in schema_validate(schema, cov):
@@ -485,11 +536,19 @@ def validate_coverage(cov: dict, batch_unit_ids: set[str], blob_lines=base_lines
     for entry in cov.get("coverage", []):
         by_src.setdefault(entry["src"], []).append(entry)
 
-    total_nb = covered_nb = 0
-    gaps: list[str] = []
+    _cache: dict[str, list[str]] = {}
+
+    def _lines(src: str) -> list[str]:
+        if src not in _cache:
+            _cache[src] = blob_lines(src)
+        return _cache[src]
+
+    # Validate every map entry (bounds + skip reasons) and build a per-src
+    # 1-based "covered" bitmap shared by both scoring modes.
+    covered_by_src: dict[str, list[bool]] = {}
     for src, entries in by_src.items():
         try:
-            lines = blob_lines(src)
+            lines = _lines(src)
         except GkError as e:
             errs.append(str(e)); continue
         covered = [False] * (len(lines) + 1)
@@ -522,25 +581,75 @@ def validate_coverage(cov: dict, batch_unit_ids: set[str], blob_lines=base_lines
                 for uid in entry["units"]:
                     if uid not in batch_unit_ids:
                         errs.append(f"{src}:{a}-{b}: cites unknown unit {uid}")
-        # coverage stats + gaps over non-blank lines
-        run_start = None
-        for i in range(1, len(lines) + 1):
-            nb = _nonblank(lines[i - 1])
-            if nb:
-                total_nb += 1
-                if covered[i]:
-                    covered_nb += 1
-            uncovered_nb = nb and not covered[i]
-            if uncovered_nb and run_start is None:
-                run_start = i
-            elif not uncovered_nb and run_start is not None:
-                gaps.append(f"{src}:{run_start}-{i-1}"); run_start = None
-        if run_start is not None:
-            gaps.append(f"{src}:{run_start}-{len(lines)}")
+        covered_by_src[src] = covered
+
+    total_nb = covered_nb = 0
+    gaps: list[str] = []
+    unmapped: list[str] = []
+
+    if batch_ranges is None:
+        # Legacy: score the whole of every source named in the map.
+        for src in by_src:
+            if src not in covered_by_src:
+                continue
+            lines = _lines(src)
+            total_nb, covered_nb = _score_range(
+                lines, covered_by_src[src], 1, len(lines), total_nb, covered_nb, gaps, src)
+        pct = 100.0 if total_nb == 0 else round(100.0 * covered_nb / total_nb, 2)
+        return {"pct": pct, "gaps": gaps, "errs": errs, "unmapped": unmapped,
+                "partial": False, "total_nonblank": total_nb, "covered_nonblank": covered_nb}
+
+    # Batch mode: the batch definition is authoritative for the denominator.
+    batch_srcs: dict[str, list[tuple[int, int]]] = {}
+    for (src, a, b) in batch_ranges:
+        batch_srcs.setdefault(src, []).append((a, b))
+
+    # A map entry for a src/range that is not part of the batch is an error.
+    for src, entries in by_src.items():
+        branges = batch_srcs.get(src)
+        if branges is None:
+            errs.append(f"{src}: coverage map entry for a source not in the batch")
+            continue
+        for entry in entries:
+            a, b = entry["lines"]
+            if not any(A <= a and b <= B for (A, B) in branges):
+                errs.append(f"{src}:{a}-{b}: coverage range outside the batch's ranges for {src}")
+
+    for (src, a, b) in batch_ranges:
+        mapped = src in by_src and _entries_overlap(by_src[src], a, b)
+        if not mapped:
+            unmapped.append(f"{src}:{a}-{b}")
+            if partial:
+                continue  # --partial scores only the mapped batch entries
+            try:
+                lines = _lines(src)
+            except GkError as e:
+                errs.append(str(e)); continue
+            covered = covered_by_src.get(src) or [False] * (len(lines) + 1)
+            total_nb, covered_nb = _score_range(
+                lines, covered, a, b, total_nb, covered_nb, gaps, src)
+            continue
+        try:
+            lines = _lines(src)
+        except GkError as e:
+            errs.append(str(e)); continue
+        total_nb, covered_nb = _score_range(
+            lines, covered_by_src[src], a, b, total_nb, covered_nb, gaps, src)
 
     pct = 100.0 if total_nb == 0 else round(100.0 * covered_nb / total_nb, 2)
-    return {"pct": pct, "gaps": gaps, "errs": errs, "total_nonblank": total_nb,
-            "covered_nonblank": covered_nb}
+    return {"pct": pct, "gaps": gaps, "errs": errs, "unmapped": unmapped,
+            "partial": partial, "total_nonblank": total_nb, "covered_nonblank": covered_nb}
+
+
+def coverage_ok(res: dict, partial: bool = False) -> bool:
+    """The single pass/fail rule shared by the CLI and the tests. Without
+    ``--partial`` a batch must be complete: no errors, no gaps, no unmapped
+    sources, and 100% of non-blank lines covered. With ``--partial`` the mapped
+    sources must be complete (unmapped sources are allowed and reported)."""
+    base = not res["errs"] and not res["gaps"] and res["pct"] == 100.0
+    if partial:
+        return base
+    return base and not res.get("unmapped")
 
 
 # --- query / fates ---------------------------------------------------------

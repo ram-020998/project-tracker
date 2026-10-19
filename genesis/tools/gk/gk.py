@@ -10,7 +10,7 @@ rule): nothing writes into the repo by default.
 Commands:
   inventory --out PATH              regenerate the base-tag inventory CSV
   ledger validate <batch>           schema + unique ids + lines@base + exact items present
-  coverage <batch>                  % non-blank covered, gaps, skip-reason validation
+  coverage <batch> [--partial]     whole-batch coverage; gaps + unmapped sources; skip-reason validation
   ledger query [filters]            filter units (--area/--type/--src/--fate; --json)
   fates <area>                      every unit has a fate; targets exist; wrong has a conflict
   copycheck <paths...>              12-word overlap of new docs vs all extract sources
@@ -120,14 +120,26 @@ def cmd_coverage(a) -> int:
     led_path = Path(a.ledger) if a.ledger else core.MIG / "ledger" / f"{a.batch}.jsonl"
     cov = json.loads(cov_path.read_text())
     unit_ids = {u["id"] for u in core.load_jsonl(led_path)} if led_path.exists() else set()
-    res = core.validate_coverage(cov, unit_ids)
+    batches, _ = core.load_batches(Path(a.batches) if a.batches else None)
+    bdef = next((b for b in batches if b["id"] == a.batch), None)
+    if bdef is None:
+        print(f"error: batch {a.batch} not found in batches.yaml", file=sys.stderr)
+        return 2
+    batch_ranges = [(src, lo, hi) for (src, lo, hi, _ch) in bdef["entries"]]
+    m = len(batch_ranges)
+    res = core.validate_coverage(cov, unit_ids, batch_ranges=batch_ranges, partial=a.partial)
+    scope = " (mapped sources only)" if a.partial else ""
     print(f"coverage {cov_path}: {res['pct']}% of non-blank lines "
-          f"({res['covered_nonblank']}/{res['total_nonblank']})")
+          f"({res['covered_nonblank']}/{res['total_nonblank']}){scope}")
     for g in res["gaps"]:
         print("  GAP " + g)
+    for u in res["unmapped"]:
+        print("  UNMAPPED " + u)
     for e in res["errs"]:
         print("  FAIL " + e)
-    ok = not res["errs"] and not res["gaps"] and res["pct"] == 100.0
+    if res["unmapped"]:
+        print(f"PARTIAL: {len(res['unmapped'])} of {m} batch sources not yet mapped")
+    ok = core.coverage_ok(res, partial=a.partial)
     print("OK" if ok else "\nincomplete/invalid coverage")
     return 0 if ok else 1
 
@@ -304,7 +316,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.set_defaults(fn=cmd_ledger)
 
     s = sub.add_parser("coverage"); s.add_argument("batch")
-    s.add_argument("--coverage"); s.add_argument("--ledger"); s.set_defaults(fn=cmd_coverage)
+    s.add_argument("--coverage"); s.add_argument("--ledger"); s.add_argument("--batches")
+    s.add_argument("--partial", action="store_true"); s.set_defaults(fn=cmd_coverage)
 
     s = sub.add_parser("fates"); s.add_argument("area"); s.add_argument("--ledger")
     s.set_defaults(fn=cmd_fates)

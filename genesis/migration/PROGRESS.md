@@ -228,3 +228,4 @@ them) and adopted **before** the next unit starts (umbrella §6.4).
   - **P2** the catalogue now documents that the exact tier (like every tier) runs
     after code spans/fences and URLs are stripped, so a literal state value inside
     `` `code` `` or a URL target is allowed (the §6.2 review is the backstop).
+- **2026-10-20 — pilot P1 defect fixed: `gk coverage <batch>` now scores the whole batch (every source entry + range from `batches.yaml`, read at the base tag), not just the sources already in the map — unmapped sources are listed and fail by default; new `--partial` scores only mapped sources and prints `PARTIAL: <n> of <m> batch sources not yet mapped` for resumed batches (see `handoffs/47-02.md` §gk coverage fix).**

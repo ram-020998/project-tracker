@@ -128,6 +128,76 @@ class CoverageTests(unittest.TestCase):
         self.assertTrue(any("not a unit in this batch" in e for e in res["errs"]))
 
 
+class CoverageBatchTests(unittest.TestCase):
+    """The batch denominator comes from batches.yaml, not from the map. A batch
+    whose map covers only some of its sources must FAIL by default and must list
+    the unmapped sources; --partial scores only the mapped sources (exit 0 when
+    complete) while still reporting the unmapped ones; a map entry for a source
+    or range outside the batch is an error."""
+    ids = {f"KU-B99-{i:04d}" for i in range(1, 6)}
+
+    def full_map(self, src="s"):
+        # Fully covers lines 1-16 of the 16-line sample fixture for one source.
+        return {"batch": "B99", "coverage": [
+            {"src": src, "lines": [1, 1], "skip": "heading-only"},
+            {"src": src, "lines": [2, 2], "skip": "blank"},
+            {"src": src, "lines": [3, 3], "units": ["KU-B99-0001"]},
+            {"src": src, "lines": [4, 4], "skip": "blank"},
+            {"src": src, "lines": [5, 5], "skip": "heading-only"},
+            {"src": src, "lines": [6, 7], "units": ["KU-B99-0002"]},
+            {"src": src, "lines": [8, 8], "skip": "blank"},
+            {"src": src, "lines": [9, 9], "units": ["KU-B99-0003"]},
+            {"src": src, "lines": [10, 10], "skip": "formatting"},
+            {"src": src, "lines": [11, 11], "skip": "blank"},
+            {"src": src, "lines": [12, 14], "units": ["KU-B99-0004"]},
+            {"src": src, "lines": [15, 15], "skip": "blank"},
+            {"src": src, "lines": [16, 16], "units": ["KU-B99-0005"]},
+        ]}
+
+    def test_fully_covered_batch_passes(self):
+        res = core.validate_coverage(self.full_map(), self.ids, blob_lines=fake_blob,
+                                     batch_ranges=[("s", 1, 16)])
+        self.assertEqual(res["errs"], [])
+        self.assertEqual(res["gaps"], [])
+        self.assertEqual(res["unmapped"], [])
+        self.assertEqual(res["pct"], 100.0)
+        self.assertTrue(core.coverage_ok(res, partial=False))
+
+    def test_missing_source_fails_by_default(self):
+        # batch has two sources; the map only covers the first.
+        res = core.validate_coverage(self.full_map("s"), self.ids, blob_lines=fake_blob,
+                                     batch_ranges=[("s", 1, 16), ("s2", 1, 16)])
+        self.assertIn("s2:1-16", res["unmapped"])
+        self.assertLess(res["pct"], 100.0)        # the unmapped source drags the denominator
+        self.assertFalse(core.coverage_ok(res, partial=False))
+
+    def test_missing_source_partial_exits_ok_and_lists_unmapped(self):
+        # Same input + --partial: the mapped source is complete -> exit 0, but
+        # the unmapped source is still reported (PARTIAL progress for a resume).
+        res = core.validate_coverage(self.full_map("s"), self.ids, blob_lines=fake_blob,
+                                     batch_ranges=[("s", 1, 16), ("s2", 1, 16)], partial=True)
+        self.assertEqual(res["pct"], 100.0)
+        self.assertEqual(res["gaps"], [])
+        self.assertEqual(res["unmapped"], ["s2:1-16"])
+        self.assertTrue(core.coverage_ok(res, partial=True))
+
+    def test_map_entry_for_source_outside_batch_is_error(self):
+        cov = self.full_map("s")
+        cov["coverage"].append({"src": "s2", "lines": [3, 3], "units": ["KU-B99-0001"]})
+        res = core.validate_coverage(cov, self.ids, blob_lines=fake_blob,
+                                     batch_ranges=[("s", 1, 16)])
+        self.assertTrue(any("not in the batch" in e for e in res["errs"]), res["errs"])
+        self.assertFalse(core.coverage_ok(res, partial=False))
+        self.assertFalse(core.coverage_ok(res, partial=True))
+
+    def test_map_range_outside_batch_range_is_error(self):
+        # the batch only owns lines 1-10 of s, but the map covers 12-14.
+        res = core.validate_coverage(self.full_map("s"), self.ids, blob_lines=fake_blob,
+                                     batch_ranges=[("s", 1, 10)])
+        self.assertTrue(any("outside the batch's ranges" in e for e in res["errs"]), res["errs"])
+        self.assertFalse(core.coverage_ok(res, partial=False))
+
+
 class QueryFatesTests(unittest.TestCase):
     units = [
         {"id": "KU-A-0001", "areas": ["memory"], "type": "RULE", "src": "a.md", "fate": "keep"},
