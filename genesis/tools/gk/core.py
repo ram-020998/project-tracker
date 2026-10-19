@@ -42,41 +42,58 @@ ALL_AREAS = AREA_IDS + PSEUDO_AREAS
 BUDGETS = {"core": 15000, "pack": 12000, "reference": 8000, "rule": 1500, "procedure": 12000}
 
 # State facts may live ONLY in knowledge/state/ (gk validate). Patterns that
-# --- state-fact catalogue (gk validate) ------------------------------------
-# A "state fact" is a value that CHANGES PER RELEASE and must therefore live only
-# in knowledge/state/current.yaml — never restated in a pack / core / reference /
-# procedure doc. ``gk validate`` scans those prose docs after stripping code
-# spans/fences (:func:`_strip_code_only`) AND URLs (:func:`_strip_urls`), and
-# never scans ``state/``.
+# --- state-fact catalogue (gk validate) — TWO TIERS (review-3 redesign) -----
+# A "state fact" is a value that CHANGES PER RELEASE and must live only in
+# knowledge/state/current.yaml — never restated in a pack / core / reference /
+# procedure doc. Two prose heuristic rounds failed in opposite directions
+# (too-narrow, then too-broad: "run 2 of the pilot" wrongly blocked), so the
+# check now has two tiers. Scans run after stripping code spans/fences
+# (:func:`_strip_code_only`) AND URLs (:func:`_strip_urls`); state/ is never scanned.
 #
-# DETECTED (flagged when it appears in prose outside state/):
-#   - version string, with or without a leading v ...... v0.69.0 / 0.69.0
-#   - the current_version / db_current_version key ..... db_current_version
-#   - migration id ..................................... m0024
-#   - DB/schema version written in prose ............... DB v24 / version 20
-#   - test count next to a runner word, or "<n> tests" . pytest 1105 / vitest 332 / jest 332 / 99 tests
-#   - CI pipeline/job/run id (hyphen, space or #) ...... gl-9931 / CI 7087827 / pipeline #45678 / job 7087827
-#   - a bare 6+-digit ref after # ...................... #7087827
+# ERROR (blocks `gk validate`) — exact + a few UNAMBIGUOUS forms only:
+#   (a) EXACT: any literal scalar value from state/current.yaml (length >= 3 and
+#       not a plain integer < 1000), appearing anywhere outside state/.
+#   (b) STRICT FORMS:
+#       - a known repo name + optional "v" + semver .... genesis v0.77.0
+#       - DB v<N> ...................................... DB v24
+#       - the db_current_version key ................... db_current_version
+#       - CI pipeline/ci/job id with >= 6 digits ....... #7087827 / pipeline #?7087827 / CI 7087827 / job 7087827
+#       - a test-runner word + a count (not a path/flag) pytest 1105 / vitest 332 / jest 332 / unittest 50
 #
-# ALLOWED (never flagged): anything in knowledge/state/; identifiers inside a
-#   `code` span or fence; a version inside a URL or markdown-link target (the link
-#   TEXT is still scanned); a short #ref such as #12; an HTTP status like HTTP 409;
-#   two-part numbers that are not semver (section 3.2, Python 3.11); plain counts
-#   not next to a test-runner word (step 13).
+# WARNING (printed, never blocks — read by the reviewer each round):
+#   - bare semver (no repo) ........................ 0.69.0 / v1.2.3
+#   - "version <N>" in prose ....................... version 20
+#   - a migration id in prose ...................... m0024
+#   - a hyphenated CI id ........................... gl-9931
+#   - a bare "<n> tests" count ..................... 99 tests
 #
-# Detection is HEURISTIC: this catalogue is what the mechanical check guarantees;
-# near-miss forms outside it are deferred to the §6.2 human review (see the
-# "Deferred checks" note in PROGRESS and review-2 F2).
-STATE_FACT_PATTERNS = [
-    (re.compile(r"\bv?\d+\.\d+\.\d+\b"), "version string"),
-    (re.compile(r"current_version"), "current_version key"),
-    (re.compile(r"\bm0\d{3}\b"), "migration id"),
-    (re.compile(r"\bDB\s+v?\d+\b", re.I), "DB version"),
-    (re.compile(r"\bversion\s+\d+\b", re.I), "version number"),
-    (re.compile(r"\b\d+\s+tests?\b", re.I), "test count"),
-    (re.compile(r"\b(?:pytest|vitest|jest|mocha|unittest|go\s+test)\s+\d+\b", re.I), "test count"),
-    (re.compile(r"\b(?:gl|ci|job|run|pipeline)[-\s]#?\d+\b", re.I), "CI id"),
+# ALLOWED (neither): anything in knowledge/state/; identifiers inside a `code`
+#   span/fence; a version inside a URL or markdown-link TARGET (link text is still
+#   scanned); short counts after ambiguous words (run 2, job 3, ci 3, pipeline 2,
+#   step 13, retry 3 times, port 8760); #<short> refs (#12); HTTP 409; two-part
+#   numbers that are not semver (section 3.2, Python 3.11); runner + path/flag
+#   (pytest -q, pytest tests/x.py, go test ./...).
+#
+# Detection is HEURISTIC by nature: the ERROR tier is the mechanical guarantee;
+# the WARNING tier + the §6.2 human review are the backstop for looser forms.
+REPO_NAMES = ("genesis", "genesis-core", "genesis-workflows", "kiro-agent-sdk",
+              "genesis-appian-parser")
+_REPOS_RE = "|".join(re.escape(r) for r in REPO_NAMES)
+
+STATE_ERROR_PATTERNS = [
+    (re.compile(rf"\b(?:{_REPOS_RE})\s+v?\d+\.\d+\.\d+\b"), "repo version"),
+    (re.compile(r"\bDB\s+v\d+\b", re.I), "DB version"),
+    (re.compile(r"\bdb_current_version\b"), "current_version key"),
     (re.compile(r"#\d{6,}\b"), "CI id"),
+    (re.compile(r"\b(?:pipeline|ci|job)\s+#?\d{6,}\b", re.I), "CI id"),
+    (re.compile(r"\b(?:pytest|vitest|jest|unittest)\s+\d+(?![\w./-])", re.I), "test count"),
+]
+STATE_WARN_PATTERNS = [
+    (re.compile(r"\bv?\d+\.\d+\.\d+\b"), "bare version"),
+    (re.compile(r"\bversion\s+\d+\b", re.I), "version number"),
+    (re.compile(r"\bm0\d{3}\b"), "migration id"),
+    (re.compile(r"\b(?:gl|ci|job|run|pipeline)-\d+\b", re.I), "hyphenated CI id"),
+    (re.compile(r"\b\d+\s+tests?\b", re.I), "test count"),
 ]
 
 PROVENANCE_RE = re.compile(r"<!--\s*src:\s*[^>]*-->")
@@ -996,8 +1013,10 @@ def budget_report(built: dict[str, str]) -> list[dict]:
 
 
 # --- store validator -------------------------------------------------------
-def validate_store(knowledge: Path, repo_files: set[str] | None = None) -> list[str]:
+def validate_store(knowledge: Path, repo_files: set[str] | None = None,
+                   warnings: list | None = None) -> list[str]:
     errs: list[str] = []
+    state_values = load_state_values(knowledge / "state" / "current.yaml")
     rule_schema = load_schema("rule.frontmatter.schema.json")
     rules = load_rules(knowledge / "rules")
     ids: set[str] = set()
@@ -1043,13 +1062,14 @@ def validate_store(knowledge: Path, repo_files: set[str] | None = None) -> list[
             resolved = (md.parent / target).resolve()
             if not resolved.exists():
                 errs.append(f"{rel}: dangling link: {target}")
-        # state facts only in state/ (code spans/fences and URLs stripped first)
+        # state facts only in state/ — two tiers: ERROR blocks, WARNING is surfaced
         if needs_prov and not in_state:
-            scan = _strip_urls(_strip_code_only(text))
-            for pat, label in STATE_FACT_PATTERNS:
-                mm = pat.search(scan)
-                if mm:
-                    errs.append(f"{rel}: {label} {mm.group(0)!r} outside state/current.yaml")
+            res = state_fact_scan(text, state_values)
+            for msg in res["errors"]:
+                errs.append(f"{rel}: {msg} outside state/current.yaml")
+            if warnings is not None:
+                for msg in res["warnings"]:
+                    warnings.append(f"{rel}: {msg} (state-fact warning)")
         # provenance on every authored prose paragraph
         if needs_prov:
             errs.extend(_provenance_errors(rel, text))
@@ -1080,14 +1100,89 @@ def _strip_code_only(text: str) -> str:
 
 
 def _strip_urls(text: str) -> str:
-    """Drop URL noise before the state-fact scan (review S1): keep a markdown
-    link's TEXT but drop the ``(target)``; remove autolinks ``<scheme://…>`` and
-    bare ``scheme://…`` URLs — a version inside a URL is not a per-release
-    assertion, but the visible link text is still scanned."""
-    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)      # [text](url) -> text
-    text = re.sub(r"<(?:https?|ftp)://[^>\s]+>", " ", text)   # <autolink>
-    text = re.sub(r"\b(?:https?|ftp)://\S+", " ", text)       # bare URL
+    """Normalise URLs away before the state-fact scan (review S1/M2).
+
+    Step 1 removes raw URL tokens (bare, autolink-inner, markdown-target-inner)
+    with a tokenizer that consumes **balanced** parentheses, so a URL like
+    ``https://e.com/p_(v2)/v1.2.3/g`` is removed whole — including when it is the
+    target of a markdown link whose own closing ``)`` would otherwise stop a naive
+    ``[^)]*`` match. Step 2 collapses the remaining ``[text](…)`` to its text (the
+    link text is still scanned). Reference definitions ``[1]: url`` and autolinks
+    ``<url>`` are handled by step 1 removing their URL token."""
+    out: list[str] = []
+    i, n = 0, len(text)
+    scheme = re.compile(r"(?:https?|ftp)://")
+    while i < n:
+        if scheme.match(text, i):
+            j = i
+            while j < n and not text[j].isspace() and text[j] not in "<>":
+                j += 1
+            token = text[i:j]
+            while token:                      # trim trailing punctuation / unbalanced ')'
+                c = token[-1]
+                if c in ".,;:!?\"'":
+                    token = token[:-1]; j -= 1; continue
+                if c == ")" and token.count("(") < token.count(")"):
+                    token = token[:-1]; j -= 1; continue
+                break
+            out.append(" ")                   # drop the URL token
+            i = j
+        else:
+            out.append(text[i]); i += 1
+    text = "".join(out)
+    text = re.sub(r"\[([^\]]*)\]\(\s*[^)]*\)", r"\1", text)   # [text](blanked) -> text
     return text
+
+
+def load_state_values(state_file: Path) -> set[str]:
+    """Flatten the scalar values of state/current.yaml for the EXACT-match tier.
+
+    Keeps values of length >= 3 that are not a plain integer < 1000 (a short id
+    or small count would collide with ordinary prose), so a literal state value
+    pasted into another doc is caught precisely, with no heuristic."""
+    if not state_file.exists():
+        return set()
+    vals: set[str] = set()
+    for raw in state_file.read_text().splitlines():
+        s = raw.strip()
+        if not s or s.startswith("#"):
+            continue
+        if s.startswith("-"):
+            v = s[1:].strip()
+        elif ":" in s:
+            v = s.split(":", 1)[1].strip()
+        else:
+            continue
+        v = v.strip("\"'")
+        if len(v) < 3:
+            continue
+        if re.fullmatch(r"-?\d+", v) and abs(int(v)) < 1000:
+            continue
+        if v:
+            vals.add(v)
+    return vals
+
+
+def state_fact_scan(text: str, state_values=()) -> dict:
+    """Two-tier state-fact scan of one doc's prose → ``{"errors":[...],
+    "warnings":[...]}`` (see the STATE_*_PATTERNS catalogue). Code spans/fences
+    and URLs are stripped first; ERROR = exact state values + unambiguous strict
+    forms (blocks), WARNING = looser heuristics (printed, never blocks)."""
+    scan = _strip_urls(_strip_code_only(text))
+    errors: list[str] = []
+    warnings: list[str] = []
+    for v in state_values:
+        if re.search(r"(?<!\w)" + re.escape(v) + r"(?!\w)", scan):
+            errors.append(f"state value {v!r}")
+    for pat, label in STATE_ERROR_PATTERNS:
+        m = pat.search(scan)
+        if m:
+            errors.append(f"{label} {m.group(0)!r}")
+    for pat, label in STATE_WARN_PATTERNS:
+        m = pat.search(scan)
+        if m:
+            warnings.append(f"{label} {m.group(0)!r}")
+    return {"errors": errors, "warnings": warnings}
 
 
 def _provenance_errors(rel, text: str) -> list[str]:

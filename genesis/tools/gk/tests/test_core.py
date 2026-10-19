@@ -240,7 +240,7 @@ class StoreTests(unittest.TestCase):
 
     def test_negative_version_outside_state(self):
         p = self.k / "areas" / "collaboration-hub" / "pack.md"
-        p.write_text(p.read_text() + "\nShipped in v1.2.3 now. <!-- src: KU-B99-0009 -->\n")
+        p.write_text(p.read_text() + "\nShipped in genesis v1.2.3 now. <!-- src: KU-B99-0009 -->\n")
         errs = core.validate_store(self.k)
         self.assertTrue(any("outside state" in e for e in errs))
 
@@ -471,101 +471,127 @@ class BatchesAllTests(unittest.TestCase):
 
 
 class StateFactTests(unittest.TestCase):
-    """M2 — state-fact detection breadth."""
-    def setUp(self):
-        self.k = Path(tempfile.mkdtemp()) / "knowledge"
-        shutil.copytree(FIX / "knowledge", self.k)
+    """Two-tier state-fact check (review-3 redesign): exact state values + a few
+    unambiguous strict forms are ERRORS (block); looser heuristics are WARNINGS
+    (printed, never block). Tests target the pure ``core.state_fact_scan`` plus a
+    couple of ``validate_store`` integrations."""
+    STATE = {"v0.69.0", "1234"}          # mimics flattened state/current.yaml scalars
 
-    def tearDown(self):
-        shutil.rmtree(self.k.parent)
+    def errs(self, text, state=()):
+        return core.state_fact_scan(text, state)["errors"]
 
-    def _pack_with(self, prose):
-        p = self.k / "areas" / "collaboration-hub" / "pack.md"
-        p.write_text(p.read_text() + f"\n{prose} <!-- src: KU-B99-0009 -->\n")
-        return core.validate_store(self.k)
+    def warns(self, text, state=()):
+        return core.state_fact_scan(text, state)["warnings"]
 
-    def test_negative_ci_pipeline_id(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("Built by pipeline #45678.")))
+    # --- positives: must NOT error (ordinary/procedural prose + allowed forms) ---
+    def test_positive_prose_allowed(self):
+        for t in ["run 2 of the pilot", "job 3", "run 3 times", "pipeline 2", "ci 3",
+                  "gl 4", "step 13", "retry 3 times", "port 8760", "Phase 46",
+                  "ADR-076", "HTTP 409", "Python 3.11", "pytest -q",
+                  "pytest tests/test_x.py", "go test ./..."]:
+            self.assertEqual(self.errs(t), [], f"should not error: {t!r}")
 
-    def test_negative_gitlab_ci_id(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("See job gl-9931 for logs.")))
+    def test_positive_parenthesised_md_link_url(self):
+        self.assertEqual(self.errs("See [docs](https://e.com/p_(v2)/v1.2.3/g) now."), [])
 
-    def test_negative_db_current_version_key(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("The db_current_version is bumped.")))
+    def test_positive_parenthesised_bare_url(self):
+        self.assertEqual(self.errs("Fetch https://e.com/p_(v2)/v1.2.3/g here."), [])
 
-    def test_negative_bare_semver(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("Shipped in 0.69.0 recently.")))
-
-    def test_negative_prose_version_number(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("Now at version 20 of the schema.")))
-
-    def test_negative_db_v_prose(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("Requires DB v24 at least.")))
-
-    def test_negative_migration_in_prose(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("Added in migration m0024 here.")))
-
-    def test_negative_test_count_pytest(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("The suite is pytest 1105 now.")))
+    def test_positive_reference_style_link(self):
+        self.assertEqual(self.errs("See notes[1].\n\n[1]: https://e.com/v1.2.3/notes"), [])
 
     def test_positive_code_span_identifier_allowed(self):
-        # a per-release identifier inside a code span is allowed (not a prose assertion)
-        errs = self._pack_with("See the `db_current_version` column and `m0024` migration.")
-        self.assertFalse(any("outside state" in e for e in errs), errs)
+        self.assertEqual(self.errs("See `db_current_version` and `genesis v0.77.0` here."), [])
 
-    def test_positive_state_file_allowed(self):
-        # the fixture state/current.yaml carries versions + test_count and validate stays clean
-        self.assertEqual(core.validate_store(self.k), [])
+    # --- negatives: must ERROR (strict unambiguous forms) ---
+    def test_error_repo_semver(self):
+        self.assertTrue(self.errs("Requires genesis v0.77.0 to run."))
 
-    # S1 — a semver inside a URL is not a per-release assertion
-    def test_positive_semver_in_md_link_allowed(self):
-        errs = self._pack_with("See [the docs](https://example.com/v1.2.3/guide) for detail.")
-        self.assertFalse(any("outside state" in e for e in errs), errs)
+    def test_error_repo_semver_table_cell(self):
+        self.assertTrue(self.errs("| current | genesis v0.77.0 |"))
 
-    def test_positive_semver_in_bare_url_allowed(self):
-        errs = self._pack_with("Fetch https://example.com/v1.2.3/guide when needed.")
-        self.assertFalse(any("outside state" in e for e in errs), errs)
+    def test_error_db_v(self):
+        self.assertTrue(self.errs("Requires DB v24 at least."))
 
-    def test_positive_semver_in_autolink_allowed(self):
-        errs = self._pack_with("Visit <https://example.com/v1.2.3/> for release notes.")
-        self.assertFalse(any("outside state" in e for e in errs), errs)
+    def test_error_db_current_version(self):
+        self.assertTrue(self.errs("The db_current_version is bumped."))
 
-    def test_negative_semver_in_link_text_flagged(self):
-        # the link TEXT is still scanned
-        errs = self._pack_with("Read [genesis v0.77.0](https://example.com/guide) today.")
-        self.assertTrue(any("outside state" in e for e in errs), errs)
+    def test_error_hash_big_number(self):
+        self.assertTrue(self.errs("Built in #7087827 today."))
 
-    def test_negative_semver_in_table_cell(self):
-        errs = self._pack_with("| current | genesis v0.77.0 |")
-        self.assertTrue(any("outside state" in e for e in errs), errs)
+    def test_error_pipeline_big(self):
+        self.assertTrue(self.errs("From pipeline 7087827 here."))
 
-    # F2 — more CI-id / test-count forms
-    def test_negative_hash_big_number(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("Built in #7087827 today.")))
+    def test_error_ci_big(self):
+        self.assertTrue(self.errs("See CI 7087827 for the run."))
 
-    def test_negative_ci_space_number(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("See CI 7087827 for the run.")))
+    def test_error_job_big(self):
+        self.assertTrue(self.errs("Logged under job 7087827 now."))
 
-    def test_negative_pipeline_space_number(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("From pipeline 7087827 here.")))
+    def test_error_runner_counts(self):
+        for t in ["pytest 1105", "vitest 332", "jest 332", "unittest 50"]:
+            self.assertTrue(self.errs("The suite is " + t + " now."), t)
 
-    def test_negative_job_space_number(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("Logged under job 7087827 now.")))
+    def test_error_link_text_semver(self):
+        self.assertTrue(self.errs("Read [genesis v0.77.0](https://e.com/guide) today."))
 
-    def test_negative_vitest_count(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("The suite is vitest 332 today.")))
+    def test_error_exact_state_value(self):
+        self.assertTrue(self.errs("We are on v0.69.0 in production.", self.STATE))
+        self.assertTrue(self.errs("The count is 1234 exactly.", self.STATE))
 
-    def test_negative_jest_count(self):
-        self.assertTrue(any("outside state" in e for e in self._pack_with("Now at jest 332 green.")))
+    # --- warnings: looser forms — never error, surface as warnings ---
+    def test_warning_bare_semver(self):
+        self.assertEqual(self.errs("Shipped in 0.69.0 recently."), [])
+        self.assertTrue(self.warns("Shipped in 0.69.0 recently."))
 
-    def test_positive_issue_short_number(self):
-        self.assertFalse(any("outside state" in e for e in self._pack_with("Fixes issue #12 cleanly.")))
+    def test_warning_version_number(self):
+        self.assertEqual(self.errs("Now at version 20 of the schema."), [])
+        self.assertTrue(self.warns("Now at version 20 of the schema."))
 
-    def test_positive_http_status(self):
-        self.assertFalse(any("outside state" in e for e in self._pack_with("Returns HTTP 409 on conflict.")))
+    def test_warning_migration_in_prose(self):
+        self.assertEqual(self.errs("Added in migration m0024 here."), [])
+        self.assertTrue(self.warns("Added in migration m0024 here."))
 
-    def test_positive_step_number(self):
-        self.assertFalse(any("outside state" in e for e in self._pack_with("Go to step 13 next.")))
+    def test_warning_gitlab_id(self):
+        self.assertEqual(self.errs("See job gl-9931 for logs."), [])
+        self.assertTrue(self.warns("See job gl-9931 for logs."))
+
+    def test_warning_bare_test_count(self):
+        self.assertEqual(self.errs("There are 99 tests now."), [])
+        self.assertTrue(self.warns("There are 99 tests now."))
+
+    # --- integration through validate_store ---
+    def test_integration_exact_value_errors(self):
+        k = Path(tempfile.mkdtemp()) / "knowledge"
+        shutil.copytree(FIX / "knowledge", k)
+        try:
+            p = k / "areas" / "collaboration-hub" / "pack.md"
+            p.write_text(p.read_text() + "\nWe shipped genesis v0.69.0 today. <!-- src: KU-B99-0009 -->\n")
+            errs = core.validate_store(k)
+            self.assertTrue(any("outside state" in e for e in errs), errs)
+        finally:
+            shutil.rmtree(k.parent)
+
+    def test_integration_warning_does_not_block(self):
+        k = Path(tempfile.mkdtemp()) / "knowledge"
+        shutil.copytree(FIX / "knowledge", k)
+        try:
+            p = k / "areas" / "collaboration-hub" / "pack.md"
+            p.write_text(p.read_text() + "\nSome older 1.2.3 note here. <!-- src: KU-B99-0009 -->\n")
+            warns = []
+            errs = core.validate_store(k, warnings=warns)
+            self.assertFalse(any("outside state" in e for e in errs), errs)
+            self.assertTrue(any("1.2.3" in w for w in warns), warns)
+        finally:
+            shutil.rmtree(k.parent)
+
+    def test_fixture_store_clean(self):
+        k = Path(tempfile.mkdtemp()) / "knowledge"
+        shutil.copytree(FIX / "knowledge", k)
+        try:
+            self.assertEqual(core.validate_store(k), [])
+        finally:
+            shutil.rmtree(k.parent)
 
 
 class ContextCliTests(unittest.TestCase):

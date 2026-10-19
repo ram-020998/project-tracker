@@ -13,7 +13,7 @@
 | # | Sub-spec | Pass / output | Gate | Status | Commit | Verdict |
 |---|---|---|---|---|---|---|
 | 47-01 | Inventory, area taxonomy, schemas, templates, batch plan | setup | **user approved areas + batch plan (2026-10-19, with changes 1–3)** | ✅ | 5e8e148 | PASS-F (review-1) |
-| 47-02 | `gk` tooling + the migration agents | setup | — | ⚠ | _see report_ | FAIL (review-1,2) → fixes for review-3 |
+| 47-02 | `gk` tooling + the migration agents | setup | — | ⚠ | _see report_ | FAIL (review-1,2,3) → fixes for review-4 |
 | 47-03 | Pilot: Collaboration & Hub (all four passes; batches P1,P2) | extract→reconcile→write→examine | **GO / NO-GO** | ☐ | — | — |
 | 47-04 | Extraction of all remaining batches (B01..B26) | extract | — | ☐ | — | — |
 | 47-05 | Reconcile, per area | reconcile | **user decides conflicts** | ☐ | — | — |
@@ -194,3 +194,20 @@ them) and adopted **before** the next unit starts (umbrella §6.4).
     `<!--` or `verbatim:`) is now an error and does not exempt.
   - **F1** deferred to 47-05 reconcile (see §Deferred checks) — unverifiable until
     the rules store exists.
+- **2026-10-20 — 47-02 review-3 FAIL fixed; state-fact check redesigned**
+  (`reviews/47-02-review-3.md`; fixes for review-4). Two prose-heuristic rounds
+  failed in opposite directions (review-2 broadened the CI pattern and it then
+  blocked ordinary prose like "run 2 of the pilot"), so the **state-fact check is
+  now two-tier: exact state values + a few strict unambiguous forms = ERROR
+  (block); all looser heuristics = WARNING (printed every review, never block).**
+  - **Errors:** any literal scalar from `state/current.yaml` (len ≥ 3, not a plain
+    int < 1000) appearing outside `state/`; plus `<repo> v<semver>`, `DB v<N>`,
+    `db_current_version`, CI ids with ≥ 6 digits (`#NNNNNN` / `pipeline|ci|job #?NNNNNN`),
+    and a test-runner word + count (`pytest|vitest|jest|unittest N`, N not a path/flag).
+    The ambiguous `run|job|ci|gl <small number>` heuristic is **removed** from the
+    error tier (review-3 M1).
+  - **Warnings:** bare semver, `version N`, `m0024`, `gl-9931`, `<n> tests`.
+  - **S1/M2 URL stripping** rewritten as a balanced-parenthesis tokenizer that
+    removes a whole URL (even one containing `()`), then collapses `[text](…)`,
+    reference defs and autolinks — the link text is still scanned.
+  - `gk validate` now prints `WARN` lines (non-blocking) alongside `FAIL`.

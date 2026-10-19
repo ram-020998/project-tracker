@@ -181,10 +181,16 @@ def cmd_validate(a) -> int:
         rf = core.repo_files(root, areas["repos"])
     except core.GkError:
         print("note: code root not found — skipping applies_to dead-glob lint (P3)", file=sys.stderr)
-    errs = core.validate_store(knowledge, repo_files=rf)
+    warns: list = []
+    errs = core.validate_store(knowledge, repo_files=rf, warnings=warns)
     for e in errs:
         print("  FAIL " + e)
-    print("OK" if not errs else f"\n{len(errs)} problem(s)")
+    for w in warns:
+        print("  WARN " + w)
+    if errs:
+        print(f"\n{len(errs)} problem(s), {len(warns)} warning(s)")
+    else:
+        print(f"OK ({len(warns)} warning(s))" if warns else "OK")
     return 1 if errs else 0
 
 
