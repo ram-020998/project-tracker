@@ -36,7 +36,7 @@ artifact looks like, and how the reading is split into sessions that fit the bud
 5. **Templates** → `migration/templates/`: the handoff note (what was done, counts, check outputs, open points,
    what the reviewer should look at), the review request, the conflict entry.
 6. **Batch plan** → `migration/batches.yaml`: batches `P1`, `P2` (the pilot, 47-03) and `B01…Bnn` (47-04).
-   Each batch lists sources as whole files or contiguous line ranges split at headings; **≤ 250K chars** per
+   Each batch lists sources as whole files or contiguous line ranges split at headings; **≤ 200K chars** (gate decision 2026-10-19; drafted as 250K) per
    batch; every `extract` file covered **exactly once** (no gap, no overlap). Keep related documents together
    (a phase's spec + sub-specs + progress doc in one batch where the budget allows) so duplicates meet inside
    one batch.
@@ -53,7 +53,7 @@ the tag, and `migration/handoffs/47-01.md`.
 - Every schema validates its valid example and rejects its invalid one (`python3 -m json.tool` + a small
   validation script; `jsonschema` is not required — the script may hand-check required keys and enums).
 - The batch plan passes a script check: union of batch ranges = all `extract` lines, no overlaps, every batch
-  ≤ 250K chars.
+  ≤ 200K chars.
 - The user approved `areas.yaml` and `batches.yaml` (recorded in the handoff with the date).
 
 ## Verification (reviewer — on top of umbrella §6)

@@ -10,8 +10,12 @@ additions, lessons, procedures (Hub validation, deployment) — and it is self-c
 ## Sources (sizes at 2026-10-19; 47-01's `batches.yaml` is authoritative)
 | Batch | Sources | ~chars |
 |---|---|---|
-| **P1** | `specs/phase-35*` (+ sub-specs), `specs/phase-37*`, `specs/phase-38*`, `progress/phase-35/37/38-*`, `reference/decision-log.md` ADR-063…065 range | ~145K |
-| **P2** | `specs/phase-36-genesis-hub-appian-app*` (incl. `contract/` docs + `fixtures/*.json`), `progress/phase-36-*` | ~165K |
+| **P1** | specs + progress of phases 35, 37, 38 · `progress/collab-settings-toggle-adr-065.md` · `reference/decision-log.md` lines 1323–1353 (ADR-063…065) · `bible/04` lines 70, 72, 73 · the collaboration lessons in `bible/06` (exact lines in `migration/handoffs/47-01.md`) | 180,487 |
+| **P2** | all of phase 36: specs, `contract/` docs + `fixtures/*.json`, `progress/phase-36-*` | 199,128 |
+
+(Recomposed at the 47-01 gate, 2026-10-19: the pilot must contain the authoritative ADR text, its bible/04 copies
+and the area's lessons so it tests DECISION/LESSON extraction and the duplicate merge; the contract docs sit with
+their fixtures.)
 
 Collaboration knowledge that lives in other files (bible chunks, tracker, later phases) is extracted in 47-04 and
 folded in when the area is rewritten in full in 47-06. The pilot's pack is therefore a **pilot draft**; its

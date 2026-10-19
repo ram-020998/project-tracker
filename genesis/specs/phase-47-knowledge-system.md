@@ -73,11 +73,12 @@ When sources disagree, or a source disagrees with the code, the conflict is **al
 or CONTRACT is **decided by the user**; others follow the authority order with the record kept.
 
 ### 3.5 Areas
-The partition the store is organized by — one per subsystem, each with path globs over the code repos. Candidate
-list (47-01 derives the final list from the code and the user approves it): platform runtime · data plane ·
-workflow library · agent SDK · chat & copilot · Appian knowledge base (parser, sync, MCP/CLI integrations) ·
-feature SDLC (features, stages, spec change requests) · stories & workbench · collaboration & Hub · memory · web UI
-· dev, release & operations.
+The partition the store is organized by — one per subsystem, each with path globs over the code repos.
+**Approved at the 47-01 gate (2026-10-19); `migration/areas.yaml` is authoritative** — 14 areas: `engine` ·
+`runs-config` · `data-plane` · `workflow-library` · `agent-sdk` · `chat-copilot` · `appian-parser` · `appian-kb` ·
+`feature-sdlc` · `stories-workbench` · `collaboration-hub` · `memory` · `web-ui` · `dev-release-ops`; plus the
+pseudo-areas `all` (→ `CORE.md`) and `history` (no pack). (The draft candidate list had 12; the gate split platform
+runtime into `engine` + `runs-config` and the parser out of the Appian knowledge base.)
 
 ## 4. Target design — the new knowledge store
 ```
@@ -181,7 +182,8 @@ method (recorded in `migration/PROGRESS.md` §Method changes) before the next un
 
 ## 7. Budgets
 - **Sessions:** a session's mandatory reading is **≤ 300K characters** (~80K tokens); an extraction batch is
-  **≤ 250K characters** of source. 47-01's batch plan enforces this; anything larger is split.
+  **≤ 200K characters** of source (lowered from 250K at the 47-01 gate, 2026-10-19, so batch + the session's
+  spec/schema reading stays under the 300K cap). 47-01's batch plan enforces this; anything larger is split.
 - **Store:** `CORE.md` ≤ 15K tokens · area pack ≤ 12K · reference doc ≤ 8K · rule file ≤ 1.5K.
 - **Reviews:** the reviewer stays under half its context; it samples (with a seed) rather than skim.
 
@@ -217,7 +219,7 @@ batch over the changed ranges.
 | 47-01 | Inventory, area taxonomy, schemas, batch plan | 1–2 | user approves areas + batch plan |
 | 47-02 | `gk` tooling + the migration agents | 2 | — |
 | 47-03 | **Pilot: collaboration & Hub**, all four passes end to end | 6–8 | **GO / NO-GO** |
-| 47-04 | Extraction of all remaining batches | ~18 | — |
+| 47-04 | Extraction of all remaining batches (B01–B26) | ~26 | — |
 | 47-05 | Reconcile, per area | ~12 | user decides conflicts |
 | 47-06 | Write, per area | 12–20 | — |
 | 47-07 | Core, state, procedures, glossary, history index | 2–3 | — |
@@ -228,7 +230,7 @@ batch over the changed ranges.
 
 Mandatory sub-spec types: **review** = 47-10 (plus a review after every unit); **release & onboarding** = 47-11;
 **API development** = not applicable (no product API; the `gk` CLI interface is specified in 47-02).
-Total ≈ 65–75 work sessions plus their reviews.
+Total ≈ 75–85 work sessions plus their reviews.
 
 ## 11. Risks
 | Risk | Mitigation |
