@@ -1445,22 +1445,3 @@ remove-propagation (delete a card when a teammate clears `on_board`). See bible/
   the frozen document as an artifact blob `<feature_sync_uuid>:cr-<nn>`; manual answers auto-publish; a conflict merge is
   written locally; `GH_records_upsert` passes `rawBody` so timestamps round-trip byte-for-byte; a pull never re-applies a
   version the machine already holds (46-10 live finding).
-
-## ADR-077 — The Genesis Knowledge System: scoped rules, generated state, archived history, role agents (Phase 47) — **Proposed**
-
-- **Status:** **Proposed** — drafted 2026-10-19 (`specs/phase-47-knowledge-system.md` (+ `47-01..47-11`)). Mirror in `bible/04`.
-- **Context:** following the bible fills 45–50% of a 1M-token context before any work (~280K tokens of mandatory
-  reading by chars/4, most of it history and duplicated ADR/state text, organized by phase rather than by area);
-  hand-maintained copies drift; long context lowers adherence.
-- **Decision:** rewrite all Genesis knowledge **from scratch** into `genesis/knowledge/`: one file per rule (ADRs,
-  lessons, standards, agreements) with status, areas and `applies_to` path globs; one pack per area; a small always-
-  loaded core with an area router; state in one generated file; history kept only as an index. Migration by four
-  passes with separate role agents (extract → reconcile → write → examine) and an independent review of every unit
-  of work, proven by line coverage, unit fates, a copy check, 100% high-stakes review and an examination. Delivery
-  through Kiro role agents (`genesis-spec/build/review/release/docs`) that load the core plus exactly the areas a
-  task needs (`gk context` / `gk rules`, deterministic); `genesis-docs` is the only writer of the store. After the
-  cutover no agent reads the old documents (archived).
-- **Consequences:** onboarding ≤ 60K tokens per session (target); every release updates one state file and the
-  touched documents only; a validator gates every project-tracker push; ~65–75 migration sessions; no new Genesis
-  phase until the cutover. Supersedes the "read the whole bible" onboarding rule and the bible's verbatim-append
-  editing rule at cutover.
