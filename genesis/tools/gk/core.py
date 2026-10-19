@@ -42,11 +42,31 @@ ALL_AREAS = AREA_IDS + PSEUDO_AREAS
 BUDGETS = {"core": 15000, "pack": 12000, "reference": 8000, "rule": 1500, "procedure": 12000}
 
 # State facts may live ONLY in knowledge/state/ (gk validate). Patterns that
-# mark a "state fact" (a thing that changes per release). Matched against prose
-# with code spans/fences stripped (identifiers inside `code` are allowed), and
-# never applied inside state/ (its home). Covers version strings (with or without
-# a leading v), the db_current_version key, DB/migration versions written in
-# prose, test counts and CI pipeline/job ids.
+# --- state-fact catalogue (gk validate) ------------------------------------
+# A "state fact" is a value that CHANGES PER RELEASE and must therefore live only
+# in knowledge/state/current.yaml — never restated in a pack / core / reference /
+# procedure doc. ``gk validate`` scans those prose docs after stripping code
+# spans/fences (:func:`_strip_code_only`) AND URLs (:func:`_strip_urls`), and
+# never scans ``state/``.
+#
+# DETECTED (flagged when it appears in prose outside state/):
+#   - version string, with or without a leading v ...... v0.69.0 / 0.69.0
+#   - the current_version / db_current_version key ..... db_current_version
+#   - migration id ..................................... m0024
+#   - DB/schema version written in prose ............... DB v24 / version 20
+#   - test count next to a runner word, or "<n> tests" . pytest 1105 / vitest 332 / jest 332 / 99 tests
+#   - CI pipeline/job/run id (hyphen, space or #) ...... gl-9931 / CI 7087827 / pipeline #45678 / job 7087827
+#   - a bare 6+-digit ref after # ...................... #7087827
+#
+# ALLOWED (never flagged): anything in knowledge/state/; identifiers inside a
+#   `code` span or fence; a version inside a URL or markdown-link target (the link
+#   TEXT is still scanned); a short #ref such as #12; an HTTP status like HTTP 409;
+#   two-part numbers that are not semver (section 3.2, Python 3.11); plain counts
+#   not next to a test-runner word (step 13).
+#
+# Detection is HEURISTIC: this catalogue is what the mechanical check guarantees;
+# near-miss forms outside it are deferred to the §6.2 human review (see the
+# "Deferred checks" note in PROGRESS and review-2 F2).
 STATE_FACT_PATTERNS = [
     (re.compile(r"\bv?\d+\.\d+\.\d+\b"), "version string"),
     (re.compile(r"current_version"), "current_version key"),
@@ -54,9 +74,9 @@ STATE_FACT_PATTERNS = [
     (re.compile(r"\bDB\s+v?\d+\b", re.I), "DB version"),
     (re.compile(r"\bversion\s+\d+\b", re.I), "version number"),
     (re.compile(r"\b\d+\s+tests?\b", re.I), "test count"),
-    (re.compile(r"\bpytest\s+\d+\b", re.I), "test count"),
-    (re.compile(r"\bpipeline\s+#?\d+\b", re.I), "CI pipeline id"),
-    (re.compile(r"\b(?:gl|ci|job|run)-\d+\b", re.I), "CI id"),
+    (re.compile(r"\b(?:pytest|vitest|jest|mocha|unittest|go\s+test)\s+\d+\b", re.I), "test count"),
+    (re.compile(r"\b(?:gl|ci|job|run|pipeline)[-\s]#?\d+\b", re.I), "CI id"),
+    (re.compile(r"#\d{6,}\b"), "CI id"),
 ]
 
 PROVENANCE_RE = re.compile(r"<!--\s*src:\s*[^>]*-->")
@@ -635,12 +655,14 @@ def _scan_doc(text: str) -> tuple[list[tuple[str, int]], list[dict], list[dict]]
         m = VERBATIM_RE.search(block)
         if m:
             reason = m.group("reason").strip()
-            if reason:
+            if not reason:
+                errors.append({"line": j + 1, "msg": "empty verbatim reason (needs a reason, §6.2)"})
+            elif "<!--" in reason or "verbatim:" in reason:
+                errors.append({"line": j + 1, "msg": "malformed/nested verbatim marker in reason"})
+            else:
                 exemptions.append({"line": j + 1, "kind": "verbatim", "reason": reason})
                 for t in range(j, k):
                     exempt[t + 1] = True
-            else:
-                errors.append({"line": j + 1, "msg": "empty verbatim reason (needs a reason, §6.2)"})
         j = k
     # 2) fenced code blocks
     in_fence, fstart = False, None
@@ -1021,10 +1043,11 @@ def validate_store(knowledge: Path, repo_files: set[str] | None = None) -> list[
             resolved = (md.parent / target).resolve()
             if not resolved.exists():
                 errs.append(f"{rel}: dangling link: {target}")
-        # state facts only in state/
+        # state facts only in state/ (code spans/fences and URLs stripped first)
         if needs_prov and not in_state:
+            scan = _strip_urls(_strip_code_only(text))
             for pat, label in STATE_FACT_PATTERNS:
-                mm = pat.search(_strip_code_only(text))
+                mm = pat.search(scan)
                 if mm:
                     errs.append(f"{rel}: {label} {mm.group(0)!r} outside state/current.yaml")
         # provenance on every authored prose paragraph
@@ -1054,6 +1077,17 @@ def _strip_code_only(text: str) -> str:
         if not in_fence:
             out.append(INLINE_CODE_RE.sub(" ", ln))
     return "\n".join(out)
+
+
+def _strip_urls(text: str) -> str:
+    """Drop URL noise before the state-fact scan (review S1): keep a markdown
+    link's TEXT but drop the ``(target)``; remove autolinks ``<scheme://…>`` and
+    bare ``scheme://…`` URLs — a version inside a URL is not a per-release
+    assertion, but the visible link text is still scanned."""
+    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)      # [text](url) -> text
+    text = re.sub(r"<(?:https?|ftp)://[^>\s]+>", " ", text)   # <autolink>
+    text = re.sub(r"\b(?:https?|ftp)://\S+", " ", text)       # bare URL
+    return text
 
 
 def _provenance_errors(rel, text: str) -> list[str]:

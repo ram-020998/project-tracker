@@ -13,7 +13,7 @@
 | # | Sub-spec | Pass / output | Gate | Status | Commit | Verdict |
 |---|---|---|---|---|---|---|
 | 47-01 | Inventory, area taxonomy, schemas, templates, batch plan | setup | **user approved areas + batch plan (2026-10-19, with changes 1–3)** | ✅ | 5e8e148 | PASS-F (review-1) |
-| 47-02 | `gk` tooling + the migration agents | setup | — | ⚠ | _see report_ | FAIL (review-1) → fixes for review-2 |
+| 47-02 | `gk` tooling + the migration agents | setup | — | ⚠ | _see report_ | FAIL (review-1,2) → fixes for review-3 |
 | 47-03 | Pilot: Collaboration & Hub (all four passes; batches P1,P2) | extract→reconcile→write→examine | **GO / NO-GO** | ☐ | — | — |
 | 47-04 | Extraction of all remaining batches (B01..B26) | extract | — | ☐ | — | — |
 | 47-05 | Reconcile, per area | reconcile | **user decides conflicts** | ☐ | — | — |
@@ -95,6 +95,15 @@ faithfully (a KU that restates the source as-is, with the offending token in `ex
   verbatim (`exact: ["ADR-025-03", "atomic_json"]`), and reconcile logs the mis-reference as a
   conflict (authority: code at HEAD — `atomic_json` is a Phase 25-03 helper, not an ADR).
 
+## Deferred checks
+Checks that cannot run until a later unit's inputs exist — recorded here so they are not forgotten.
+
+- **47-05 reconcile — `gk fates` supersede-target existence (review-2 F1).** `gk fates` must verify a
+  `superseded:<ADR-id>` target **exists** among the ledger's DECISION units or in `knowledge/rules/`. Today
+  any well-formed rule id (`(ADR|LSN|STD|WA)-nnn`) is accepted as a chain terminal because the rules store and
+  the decision-log do not exist yet; once they do, cross-check every supersede rule-id target and fail on a
+  dangling one (feed `check_fates` the known rule-id set).
+
 ## Method changes
 PROCESS findings from a review are recorded here (with the review that raised
 them) and adopted **before** the next unit starts (umbrella §6.4).
@@ -172,3 +181,16 @@ them) and adopted **before** the next unit starts (umbrella §6.4).
     by `batches.yaml` / `check_batches.py` / `gk batches check`.
   - **P3** `gk validate` fails on an `applies_to` glob that matches no file in the
     code repos (resolved against the code root at HEAD).
+- **2026-10-20 — 47-02 review-2 FAIL fixed** (`reviews/47-02-review-2.md`; fixes
+  for review-3). Review-1's six findings were confirmed durably closed.
+  - **S1 (MAJOR)** `gk validate` strips URLs (markdown-link targets, autolinks and
+    bare `scheme://` URLs) before the state-fact scan, so a semver inside a URL is
+    no longer a false positive; the link **text** is still scanned.
+  - **F2** state-fact detection also catches `#<6+ digits>`, space-form CI ids
+    (`CI 7087827`, `pipeline 7087827`, `job 7087827`) and runner-word test counts
+    (`vitest 332`, `jest 332`); `#12`, `HTTP 409`, `step 13` still pass. The full
+    catalogue is documented on `STATE_FACT_PATTERNS`.
+  - **F3 (MINOR)** a verbatim marker whose reason is nested/garbled (contains
+    `<!--` or `verbatim:`) is now an error and does not exempt.
+  - **F1** deferred to 47-05 reconcile (see §Deferred checks) — unverifiable until
+    the rules store exists.

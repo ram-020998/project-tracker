@@ -195,6 +195,14 @@ class CopycheckTests(unittest.TestCase):
         self.assertTrue(res["hits"], "copy inside an empty-reason verbatim must still be caught")
         self.assertTrue(any("empty verbatim reason" in e["msg"] for e in res["errors"]))
 
+    def test_negative_nested_verbatim_reason_is_error(self):
+        # F3: a nested/garbled verbatim reason (contains <!-- / verbatim:) is malformed:
+        # it is an error and must NOT exempt, so the copy is still caught.
+        doc = f"{self.SENT} <!-- verbatim: a <!-- verbatim: b --> -->\n"
+        res = core.copycheck({"new.md": doc}, {"src.md": SAMPLE})
+        self.assertTrue(any("malformed" in e["msg"] or "nested" in e["msg"] for e in res["errors"]), res)
+        self.assertTrue(res["hits"])
+
 
 class ExactTests(unittest.TestCase):
     def setUp(self):
@@ -508,6 +516,56 @@ class StateFactTests(unittest.TestCase):
     def test_positive_state_file_allowed(self):
         # the fixture state/current.yaml carries versions + test_count and validate stays clean
         self.assertEqual(core.validate_store(self.k), [])
+
+    # S1 — a semver inside a URL is not a per-release assertion
+    def test_positive_semver_in_md_link_allowed(self):
+        errs = self._pack_with("See [the docs](https://example.com/v1.2.3/guide) for detail.")
+        self.assertFalse(any("outside state" in e for e in errs), errs)
+
+    def test_positive_semver_in_bare_url_allowed(self):
+        errs = self._pack_with("Fetch https://example.com/v1.2.3/guide when needed.")
+        self.assertFalse(any("outside state" in e for e in errs), errs)
+
+    def test_positive_semver_in_autolink_allowed(self):
+        errs = self._pack_with("Visit <https://example.com/v1.2.3/> for release notes.")
+        self.assertFalse(any("outside state" in e for e in errs), errs)
+
+    def test_negative_semver_in_link_text_flagged(self):
+        # the link TEXT is still scanned
+        errs = self._pack_with("Read [genesis v0.77.0](https://example.com/guide) today.")
+        self.assertTrue(any("outside state" in e for e in errs), errs)
+
+    def test_negative_semver_in_table_cell(self):
+        errs = self._pack_with("| current | genesis v0.77.0 |")
+        self.assertTrue(any("outside state" in e for e in errs), errs)
+
+    # F2 — more CI-id / test-count forms
+    def test_negative_hash_big_number(self):
+        self.assertTrue(any("outside state" in e for e in self._pack_with("Built in #7087827 today.")))
+
+    def test_negative_ci_space_number(self):
+        self.assertTrue(any("outside state" in e for e in self._pack_with("See CI 7087827 for the run.")))
+
+    def test_negative_pipeline_space_number(self):
+        self.assertTrue(any("outside state" in e for e in self._pack_with("From pipeline 7087827 here.")))
+
+    def test_negative_job_space_number(self):
+        self.assertTrue(any("outside state" in e for e in self._pack_with("Logged under job 7087827 now.")))
+
+    def test_negative_vitest_count(self):
+        self.assertTrue(any("outside state" in e for e in self._pack_with("The suite is vitest 332 today.")))
+
+    def test_negative_jest_count(self):
+        self.assertTrue(any("outside state" in e for e in self._pack_with("Now at jest 332 green.")))
+
+    def test_positive_issue_short_number(self):
+        self.assertFalse(any("outside state" in e for e in self._pack_with("Fixes issue #12 cleanly.")))
+
+    def test_positive_http_status(self):
+        self.assertFalse(any("outside state" in e for e in self._pack_with("Returns HTTP 409 on conflict.")))
+
+    def test_positive_step_number(self):
+        self.assertFalse(any("outside state" in e for e in self._pack_with("Go to step 13 next.")))
 
 
 class ContextCliTests(unittest.TestCase):
