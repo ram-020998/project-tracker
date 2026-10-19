@@ -1,0 +1,52 @@
+{
+  "name": "genesis-migration-writer",
+  "description": "Pass-2/3 reconciler and writer for the Genesis Knowledge System migration (Phase 47). In reconcile mode it merges an area's units, sets fates, records conflicts and writes migration/reconciled/<area>.jsonl; in write mode it authors the knowledge store (rules, packs, reference docs) from the reconciled units and the code — never by copying old prose.",
+  "prompt": "file:///Users/ramaswamy.u/.kiro/agents/prompts/genesis-migration-writer.md",
+  "tools": [
+    "read",
+    "glob",
+    "grep",
+    "code",
+    "shell",
+    "write"
+  ],
+  "allowedTools": [
+    "read",
+    "glob",
+    "grep",
+    "code",
+    "shell"
+  ],
+  "toolsSettings": {
+    "write": {
+      "allowedPaths": [
+        "/Users/ramaswamy.u/repo/project-tracker/genesis/migration/reconciled/**",
+        "/Users/ramaswamy.u/repo/project-tracker/genesis/migration/conflicts.md",
+        "/Users/ramaswamy.u/repo/project-tracker/genesis/knowledge/**",
+        "/Users/ramaswamy.u/repo/project-tracker/genesis/migration/handoffs/**",
+        "/Users/ramaswamy.u/repo/project-tracker/genesis/migration/PROGRESS.md",
+        "/tmp/genesis-migration/**"
+      ]
+    },
+    "shell": {
+      "autoAllowReadonly": true,
+      "deniedCommands": [
+        ".*\\bgit\\s+(?:-[Cc]\\s+\\S+\\s+)*(?:tag|checkout|switch|reset|restore|stash|rebase|merge|cherry-pick|clean|rm|mv|apply|am|update-index|update-ref|gc|prune)\\b.*",
+        "(?:^|.*[|&;]\\s*)(?:sudo\\s+)?rm\\s+.*",
+        "(?:^|.*[|&;]\\s*)(?:sudo\\s+)?mv\\s+.*",
+        ".*\\bsed\\s+-i.*",
+        "(?:^|.*[|&;]\\s*)sudo\\s+.*",
+        ".*\\bgsm\\b.*",
+        ".*\\bcurl\\b.*-X\\s*(POST|PUT|PATCH|DELETE).*"
+      ]
+    }
+  },
+  "hooks": {
+    "agentSpawn": [
+      {
+        "command": "echo \"writer started $(date '+%Y-%m-%d %H:%M %z')\"; echo \"base tag: knowledge-migration-base\"; echo \"project-tracker HEAD $(git -C /Users/ramaswamy.u/repo/project-tracker log --oneline -1 2>/dev/null)\"; echo \"uncommitted files: $(git -C /Users/ramaswamy.u/repo/project-tracker status --porcelain 2>/dev/null | wc -l | tr -d ' ')\""
+      }
+    ]
+  },
+  "welcomeMessage": "Genesis migration writer: give me the area and the mode (reconcile | write). I work only from the reconciled units and the code at HEAD."
+}

@@ -1,10 +1,10 @@
 path,bytes,chars,lines,type,class,reason
 genesis/.DS_Store,10244,0,0,os-metadata,archive-only,macOS Finder metadata; no knowledge content
-genesis/.obsidian/app.json,2,2,1,json,archive-only,Obsidian editor workspace/config; no knowledge content
-genesis/.obsidian/appearance.json,2,2,1,json,archive-only,Obsidian editor workspace/config; no knowledge content
-genesis/.obsidian/core-plugins.json,696,696,33,json,archive-only,Obsidian editor workspace/config; no knowledge content
-genesis/.obsidian/graph.json,511,511,22,json,archive-only,Obsidian editor workspace/config; no knowledge content
-genesis/.obsidian/workspace.json,7034,7034,222,json,archive-only,Obsidian editor workspace/config; no knowledge content
+genesis/.obsidian/app.json,2,0,0,json,archive-only,Obsidian editor workspace/config; no knowledge content
+genesis/.obsidian/appearance.json,2,0,0,json,archive-only,Obsidian editor workspace/config; no knowledge content
+genesis/.obsidian/core-plugins.json,696,0,0,json,archive-only,Obsidian editor workspace/config; no knowledge content
+genesis/.obsidian/graph.json,511,0,0,json,archive-only,Obsidian editor workspace/config; no knowledge content
+genesis/.obsidian/workspace.json,7034,0,0,json,archive-only,Obsidian editor workspace/config; no knowledge content
 genesis/AGENT_ONBOARDING.md,35023,34416,286,markdown,extract,
 genesis/README.md,29615,29191,111,markdown,extract,
 genesis/agents/genesis-migration-reviewer.json,1853,1853,48,json,extract,

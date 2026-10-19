@@ -7,10 +7,16 @@ Verifies ``migration/batches.yaml`` against ``migration/inventory.csv``:
   file is present and each of its lines is covered **exactly once** (no gap, no
   overlap);
 * **no** ``archive-only`` file appears in any batch;
-* every batch's total chars <= the declared ``char_limit`` (<= 250,000);
+* every batch's total chars <= the declared ``char_limit`` (<= 200,000, lowered
+  from 250,000 at the 47-01 gate, 2026-10-19);
 * recorded per-entry chars are self-consistent (split chunks of a file sum to
   the file's inventory char count);
-* batch ids are unique; P-batches and a contiguous B01..Bnn series exist.
+* batch ids are unique; P-batches and a contiguous B01..Bnn series exist;
+* **boundary safety (47-01 review P1):** every internal split boundary of a
+  multi-entry source lands on a safe point (a blank line, a heading start, or
+  between two sibling list items) and never inside a fenced code block — read
+  from the source blob at the base tag, so a later hand-edit to batches.yaml
+  that smuggles a mid-paragraph/table/list-item/code-block split is rejected.
 
 Exit status is non-zero on any violation.
 
@@ -20,6 +26,7 @@ from __future__ import annotations
 
 import csv
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -27,6 +34,72 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 MIG = REPO_ROOT / "genesis" / "migration"
 INVENTORY = MIG / "inventory.csv"
 BATCHES = MIG / "batches.yaml"
+BASE_TAG = "knowledge-migration-base"
+
+
+def base_blob_lines(path: str) -> list[str] | None:
+    """The source's lines at the migration base tag (``splitlines``), or None."""
+    try:
+        out = subprocess.run(["git", "-C", str(REPO_ROOT), "show", f"{BASE_TAG}:{path}"],
+                             check=True, capture_output=True, text=True).stdout
+    except subprocess.CalledProcessError:
+        return None
+    return out.splitlines()
+
+
+def _is_heading(ln: str) -> bool:
+    return bool(re.match(r"\s{0,3}#{1,6}\s", ln))
+
+
+def _is_list_item(ln: str) -> bool:
+    return bool(re.match(r"\s*(?:[-*+]|\d+[.)])\s", ln))
+
+
+def _is_table_row(ln: str) -> bool:
+    return ln.strip().startswith("|")
+
+
+def unsafe_boundaries(lines: list[str], ranges: list[tuple[int, int]]) -> list[int]:
+    """Return the start-lines of any chunk whose cut point is unsafe.
+
+    A cut after line L (next chunk starts at L+1) is SAFE iff it is not inside a
+    fenced code block and one of: L or L+1 is blank; L+1 is a heading; or L and
+    L+1 are sibling list items. Otherwise the cut falls inside a paragraph,
+    table, list item or code block — unsafe.
+    """
+    n = len(lines)
+    # fence state after each 1-based line (odd => inside a code fence).
+    fence_open = [False] * (n + 2)
+    inside = False
+    for i in range(1, n + 1):
+        if lines[i - 1].lstrip().startswith("```"):
+            inside = not inside
+        fence_open[i] = inside
+
+    def blank(i: int) -> bool:
+        return 1 <= i <= n and lines[i - 1].strip() == ""
+
+    bad = []
+    starts = sorted(a for (a, _) in ranges)
+    for s in starts:
+        if s == 1:
+            continue  # file start, not an internal boundary
+        L = s - 1  # previous chunk ended here
+        if not (1 <= L < n):
+            continue
+        if fence_open[L]:
+            bad.append(s); continue
+        line_L, line_N = lines[L - 1], lines[s - 1]
+        if blank(L) or blank(s):
+            continue
+        if _is_heading(line_N):
+            continue
+        if _is_list_item(line_L) and _is_list_item(line_N) \
+                and not _is_table_row(line_L) and not _is_table_row(line_N):
+            continue
+        bad.append(s)
+    return bad
+
 
 
 def load_inventory():
@@ -118,6 +191,21 @@ def main() -> int:
         if path not in extract:
             errs.append(f"not an extract source (or unknown): {path}")
 
+    # Boundary safety (47-01 review P1): every internal split of a multi-entry
+    # source must cut at a safe point, checked against the base-tag blob.
+    boundary_checked = 0
+    for path, ranges in covered.items():
+        if path not in extract or len(ranges) < 2:
+            continue
+        lines = base_blob_lines(path)
+        if lines is None:
+            errs.append(f"{path}: cannot read blob at {BASE_TAG} for boundary check")
+            continue
+        boundary_checked += 1
+        for s in unsafe_boundaries(lines, ranges):
+            errs.append(f"{path}: unsafe split boundary before line {s} "
+                        f"(cuts inside a paragraph/table/list-item/code block)")
+
     # Id sanity.
     if len(ids) != len(set(ids)):
         errs.append("duplicate batch ids")
@@ -138,6 +226,7 @@ def main() -> int:
     print(f"total entries (incl. splits): {nfiles}")
     print(f"total chars               : {tot_chars:,}  (inventory extract: {sum(v['chars'] for v in extract.values()):,})")
     print(f"max batch chars           : {max(sum(e[3] for e in b['entries']) for b in batches):,}  (limit {char_limit:,})")
+    print(f"multi-entry sources boundary-checked: {boundary_checked}")
     if errs:
         print(f"\nFAIL — {len(errs)} problem(s):")
         for e in errs[:50]:

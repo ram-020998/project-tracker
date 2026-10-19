@@ -12,8 +12,8 @@
 ## Sub-specs
 | # | Sub-spec | Pass / output | Gate | Status | Commit | Verdict |
 |---|---|---|---|---|---|---|
-| 47-01 | Inventory, area taxonomy, schemas, templates, batch plan | setup | **user approved areas + batch plan (2026-10-19, with changes 1–3)** | ⚠ | _see report_ | — |
-| 47-02 | `gk` tooling + the migration agents | setup | — | ☐ | — | — |
+| 47-01 | Inventory, area taxonomy, schemas, templates, batch plan | setup | **user approved areas + batch plan (2026-10-19, with changes 1–3)** | ✅ | 5e8e148 | PASS-F (review-1) |
+| 47-02 | `gk` tooling + the migration agents | setup | — | ⚠ | _see report_ | — |
 | 47-03 | Pilot: Collaboration & Hub (all four passes; batches P1,P2) | extract→reconcile→write→examine | **GO / NO-GO** | ☐ | — | — |
 | 47-04 | Extraction of all remaining batches (B01..B26) | extract | — | ☐ | — | — |
 | 47-05 | Reconcile, per area | reconcile | **user decides conflicts** | ☐ | — | — |
@@ -81,6 +81,20 @@ other 13 areas reconcile in 47-05, write in 47-06, and are examined in 47-08.
 | web-ui | ☐ | ☐ | ☐ |
 | dev-release-ops | ☐ | ☐ | ☐ |
 
+## Known source issues
+Faults in the **source** corpus found during 47-01/47-02. The extractor records each one
+faithfully (a KU that restates the source as-is, with the offending token in `exact`); reconcile
+(47-05) logs it as a conflict for the user — the new store must never silently "fix" a source.
+
+- **`ADR-025-03` is not a real ADR (`bible/04-adrs-and-constraints.md` line 73, mirrored in
+  `reference/decision-log.md`).** It is the only sub-numbered "ADR" token in the whole corpus.
+  Inside the **ADR-065** cell it cites "ADR-025-03 (`atomic_json`)" — a reference to **Phase
+  25-03**'s `atomic_json` utility, not a decision record (no `## ADR-025-03` heading exists in
+  `decision-log.md`). Resolution for 47-02: **keep** the rule-id pattern `^(ADR|LSN|STD|WA)-[0-9]{3}$`
+  (47-01 schemas) rather than widen it for one malformed citation; the P1 extractor records the line
+  verbatim (`exact: ["ADR-025-03", "atomic_json"]`), and reconcile logs the mis-reference as a
+  conflict (authority: code at HEAD — `atomic_json` is a Phase 25-03 helper, not an ADR).
+
 ## Method changes
 PROCESS findings from a review are recorded here (with the review that raised
 them) and adopted **before** the next unit starts (umbrella §6.4).
@@ -108,3 +122,31 @@ them) and adopted **before** the next unit starts (umbrella §6.4).
   - **Areas:** `platform-runtime` → `engine` + `runs-config`; `appian-parser`
     split out of `appian-kb`. Now 14 real areas + `all`/`history`; schema enums
     updated; coverage re-checked green (0 unmatched).
+- **2026-10-19 — 47-02 built `gk` + the migration agents, closing the 47-01
+  review (`reviews/47-01-review-1.md`, PASS WITH FINDINGS).**
+  - **M1** `check_batches.py` docstring corrected to 200,000.
+  - **M2** `coverage.schema.json` gained `x-required-if` (skip=`duplicate` ⇒
+    `duplicate_of`); `validate_schemas.py` honours it; the invalid example
+    exercises it. `gk coverage` enforces the same rule.
+  - **M3** source fault `ADR-025-03` recorded under §Known source issues (the
+    id pattern is kept; the extractor records it verbatim, reconcile logs a conflict).
+  - **M4** `gk inventory` applies one convention — **every** archive-only row has
+    chars/lines = 0 (text and binary alike); extract totals unchanged. The
+    committed `inventory.csv` was regenerated.
+  - **P1** boundary-safety is now mechanical in **both** `check_batches.py` and
+    `gk batches check`: every internal split of a multi-entry source is read from
+    the base-tag blob and must cut on a safe point (blank / heading / between
+    sibling list items, never inside a fence) — a hand-edit that smuggles a
+    mid-paragraph split now fails.
+  - **P3** `gk inventory` reads blobs **at the base tag** (`git show <tag>:<path>`),
+    never the working tree.
+  - **P2 (spirit)** the agents' `rm`/`mv`/`sudo` deny patterns are anchored to a
+    command boundary (`^` or after `;`/`&`/`|`), so a commit message or path that
+    merely contains the word "rm"/"reset" is not blocked; the git-write deny is the
+    reviewer's anchored `git …` pattern (extractor/writer omit only add/commit/
+    pull/push; examiner/reviewer deny all git writes).
+  - **Tooling:** `genesis/tools/gk/` (stdlib-only `gk.py`+`core.py`, 50 unit tests
+    with a negative test per check). **Agents:** extractor/writer/examiner +
+    `install.sh` (idempotent) in `genesis/agents/`; write limited by
+    `write.allowedPaths` (write not auto-approved), shell gated by `deniedCommands`;
+    all four pass `kiro-cli agent validate` and the guardrail smoke test.

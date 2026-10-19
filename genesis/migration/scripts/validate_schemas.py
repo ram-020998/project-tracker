@@ -9,8 +9,9 @@ For every ``migration/schemas/*.schema.json`` this script:
 
 No third-party dependency: a small recursive checker covers the JSON-Schema
 subset these schemas use — type, enum, const, pattern, required, properties,
-items, minItems/maxItems, nullable, and the custom ``x-exactly-one-of``
-(exactly one of a group of keys must be present).
+items, minItems/maxItems, nullable, the custom ``x-exactly-one-of`` (exactly
+one of a group of keys must be present) and ``x-required-if`` (a key becomes
+required when another equals a constant, e.g. skip=duplicate ⇒ duplicate_of).
 
 Run:  python3 genesis/migration/scripts/validate_schemas.py
 Exit status is non-zero if any schema/example check fails.
@@ -68,6 +69,12 @@ def check(schema: dict, value, path: str, errs: list[str]) -> None:
             present = [k for k in group if k in value]
             if len(present) != 1:
                 errs.append(f"{path}: exactly one of {group} required, found {present}")
+        for rule in schema.get("x-required-if", []):
+            prop, const = rule["property"], rule["const"]
+            if value.get(prop) == const:
+                for req in rule["required"]:
+                    if req not in value:
+                        errs.append(f"{path}: '{req}' required when {prop}={const!r}")
         props = schema.get("properties", {})
         for k, sub in props.items():
             if k in value:

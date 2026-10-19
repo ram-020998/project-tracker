@@ -18,6 +18,9 @@
         "type": "object",
         "required": ["src", "lines"],
         "x-exactly-one-of": [["units", "skip"]],
+        "x-required-if": [
+          {"property": "skip", "const": "duplicate", "required": ["duplicate_of"]}
+        ],
         "properties": {
           "src": {"type": "string"},
           "lines": {
