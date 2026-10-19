@@ -27,7 +27,7 @@
     "shell": {
       "autoAllowReadonly": true,
       "deniedCommands": [
-        ".*\\bgit\\b.*\\b(add|commit|push|tag|checkout|switch|reset|restore|stash|rebase|merge|cherry-pick|clean|rm|mv|apply|am)\\b.*",
+        ".*\\bgit\\s+(?:-[Cc]\\s+\\S+\\s+)*(?:add|commit|push|tag|checkout|switch|reset|restore|stash|rebase|merge|cherry-pick|clean|rm|mv|apply|am|update-index|update-ref|gc|prune)\\b.*",
         ".*\\brm\\s+.*",
         ".*\\bmv\\s+.*",
         ".*\\bsed\\s+-i.*",

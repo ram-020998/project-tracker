@@ -11,6 +11,18 @@ Umbrella §3–§9 · `migration/schemas/`, `areas.yaml`, `batches.yaml`, `templ
 Every check the method relies on is a program with tests — including tests proving it **fails** on wrong work —
 and each migration role has its own agent with enforced write limits.
 
+## Carried from the 47-01 review (`migration/reviews/47-01-review-1.md`) — fix first, in this unit
+- **M1** `check_batches.py` docstring still says 250K (the code enforces 200K) — fix the text.
+- **M2** `coverage.schema.json`: when `skip` is `duplicate`, require `duplicate_of` (conditional) — plus a negative test.
+- **M3** not a schema change: the only sub-numbered "ADR" in the corpus is `ADR-025-03` in `bible/04` line 73, a
+  mis-reference to Phase 25-03's `atomic_json` (no such ADR exists; the reviewer's second example `ADR-25-08` does not
+  occur in the corpus). Keep the id pattern; note it in `PROGRESS.md` §Known source issues so the P1 extractor records
+  the line faithfully and reconcile logs it as a conflict.
+- **M4** `gk inventory`: record archive-only files consistently (one convention for chars/lines, documented).
+- **P1** `gk batches check` (new): besides tiling and the cap, verify **mechanically** that every partial-file boundary
+  falls on a safe split (not inside a paragraph, list item, table or fenced code block) — with negative tests.
+- **P3** `gk inventory` reads file contents **at the base tag** (`git show <tag>:<path>`), never the working tree.
+
 ## Work
 ### A. `gk` — `genesis/tools/gk/gk.py`, Python 3 standard library only, run as `python3 genesis/tools/gk/gk.py`
 | Command | Does |
@@ -48,8 +60,15 @@ set, shell deny list for git writes / `rm` / `mv` / `sed -i` / `gsm` (the extrac
 `--trust-all-tools`. Each prompt carries the session discipline (budgets, read only the context manifest, the
 search-safety rules, the handoff and the commit procedure).
 
+**Shell is not path-limited (found 2026-10-19).** `write.allowedPaths` limits only the write tool; a script run
+through the shell can write anywhere. Every agent prompt therefore forbids running repo-writing scripts in place, and
+the **reviewer checks every commit of a unit changes only the paths its agent may write**
+(`git show --name-only <commit>`). Deny git writes with the anchored pattern used by the reviewer config
+(`\bgit\s+(?:-[Cc]\s+\S+\s+)*(?:add|commit|…)\b`) so words inside paths or messages do not trip it; the extractor's
+and writer's lists omit only `add`, `commit`, `pull`, `push`.
+
 ## Definition of Done
-All unit tests pass, including every negative test · every agent passes `kiro-cli agent validate` and a guardrail
+All 47-01 review findings above closed · all unit tests pass, including every negative test · every agent passes `kiro-cli agent validate` and a guardrail
 smoke test (an out-of-scope write fails, `rm` is denied, an allowed write works) recorded in the handoff ·
 `install.sh` is idempotent.
 

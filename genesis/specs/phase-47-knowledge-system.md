@@ -166,7 +166,8 @@ answer; the reviewer grades against the units. A miss is a defect in the new doc
 ### 6.1 Mechanical checks (re-run by the reviewer, never taken from the handoff)
 Schema validation of everything produced; line coverage = **100%** of non-blank lines; unit usage (after
 reconcile) = **100%** with a fate; the copy check (§6.2); `exact` items match their sources and the code; links
-resolve; `_build/` is fresh; budgets (§7) met.
+resolve; `_build/` is fresh; budgets (§7) met; **every commit of the unit changes only paths its agent may write**
+(`git show --name-only`) and the working tree is clean.
 ### 6.2 Copy check
 No paragraph of a new document may share a run of **12 or more consecutive words** with any source, ignoring code
 spans, `exact` items and quoted UI strings. An exemption needs an inline `<!-- verbatim: reason -->` and is
