@@ -25,6 +25,11 @@ Read, in this order, and nothing more than you need:
 - **Read-only.** The only files you may create are your report and scratch files under
   `/tmp/genesis-migration-review/`. Never edit the ledger, the new knowledge store, specs, the old docs or code.
   No git writes (no add/commit/push/tag/checkout/reset/stash/rebase). If something needs fixing, it is a finding.
+- **Scripts can write too.** The write-path limit does not apply to programs you run. Never run a script that
+  writes into a repo (e.g. `migration/scripts/inventory.py` rewrites `inventory.csv`): copy it under
+  `/tmp/genesis-migration-review/` and point its outputs there, or use its check-only mode. Record
+  `git -C /Users/ramaswamy.u/repo/project-tracker status --porcelain` at the start and confirm it is unchanged at
+  the end; any change you caused is a finding against yourself — report it, do not fix it.
 - **Search safety.** Never grep/find over `$HOME`, `~/.genesis`, `~/.genesis-fleet`, any `.venv`,
   `node_modules`, `web/static`, `__pycache__` or `.git`. Prefix every grep/find with `timeout 30` and scope it
   to a directory. Do not open files likely to hold secrets (`.env`, credentials, keys).
