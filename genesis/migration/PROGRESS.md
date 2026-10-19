@@ -13,7 +13,7 @@
 | # | Sub-spec | Pass / output | Gate | Status | Commit | Verdict |
 |---|---|---|---|---|---|---|
 | 47-01 | Inventory, area taxonomy, schemas, templates, batch plan | setup | **user approved areas + batch plan (2026-10-19, with changes 1–3)** | ✅ | 5e8e148 | PASS-F (review-1) |
-| 47-02 | `gk` tooling + the migration agents | setup | — | ⚠ | _see report_ | FAIL (review-1,2,3) → fixes for review-4 |
+| 47-02 | `gk` tooling + the migration agents | setup | — | ⚠ | _see report_ | FAIL (review-1,2,3,4) → fixes for review-5 |
 | 47-03 | Pilot: Collaboration & Hub (all four passes; batches P1,P2) | extract→reconcile→write→examine | **GO / NO-GO** | ☐ | — | — |
 | 47-04 | Extraction of all remaining batches (B01..B26) | extract | — | ☐ | — | — |
 | 47-05 | Reconcile, per area | reconcile | **user decides conflicts** | ☐ | — | — |
@@ -211,3 +211,20 @@ them) and adopted **before** the next unit starts (umbrella §6.4).
     removes a whole URL (even one containing `()`), then collapses `[text](…)`,
     reference defs and autolinks — the link text is still scanned.
   - `gk validate` now prints `WARN` lines (non-blocking) alongside `FAIL`.
+- **2026-10-20 — 47-02 review-4 FAIL fixed** (`reviews/47-02-review-4.md`; fixes
+  for review-5).
+  - **M1** the strict "known repo + semver" ERROR form now accepts the pin
+    separators space / `@` / `==` / `-` / `/` / `:` (and optional `v`), so
+    `genesis@v0.77.0`, `genesis==0.77.0`, `kiro-agent-sdk@0.77.0`,
+    `genesis-workflows: v0.22.0` all block. Repo names are matched longest-first
+    so `genesis-workflows v0.22.0` is reported as `genesis-workflows` (not
+    `genesis`) and the `-` separator never splits `genesis-core` into
+    `genesis`+`core` (a bare repo name still passes).
+  - **P1** the EXACT tier now ignores **pure integers** entirely (dropped in
+    `load_state_values` and skipped in `state_fact_scan`) — a bare number collides
+    with ports/line numbers/issue ids in prose; test counts are covered by the
+    strict runner form. `port 1105` / `line 1105` pass even when `current.yaml`
+    holds `1105`.
+  - **P2** the catalogue now documents that the exact tier (like every tier) runs
+    after code spans/fences and URLs are stripped, so a literal state value inside
+    `` `code` `` or a URL target is allowed (the §6.2 review is the backstop).

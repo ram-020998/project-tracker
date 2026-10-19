@@ -51,10 +51,17 @@ BUDGETS = {"core": 15000, "pack": 12000, "reference": 8000, "rule": 1500, "proce
 # (:func:`_strip_code_only`) AND URLs (:func:`_strip_urls`); state/ is never scanned.
 #
 # ERROR (blocks `gk validate`) — exact + a few UNAMBIGUOUS forms only:
-#   (a) EXACT: any literal scalar value from state/current.yaml (length >= 3 and
-#       not a plain integer < 1000), appearing anywhere outside state/.
+#   (a) EXACT: any literal scalar value from state/current.yaml that is NOT a pure
+#       integer and has length >= 3, appearing anywhere outside state/. (Pure
+#       integers are excluded — a bare number collides with ports/line numbers/
+#       issue ids in prose; test counts are covered by the strict runner form.)
+#       The exact tier, like every tier, runs AFTER code spans/fences and URLs are
+#       stripped, so a literal state value inside `code` or a URL target is allowed
+#       (the §6.2 human review is the backstop).
 #   (b) STRICT FORMS:
-#       - a known repo name + optional "v" + semver .... genesis v0.77.0
+#       - a known repo name + a pin separator (space, @, ==, -, /, :) + optional
+#         "v" + semver ........................... genesis v0.77.0 / genesis@v0.77.0 /
+#                                                  genesis==0.77.0 / kiro-agent-sdk@0.77.0
 #       - DB v<N> ...................................... DB v24
 #       - the db_current_version key ................... db_current_version
 #       - CI pipeline/ci/job id with >= 6 digits ....... #7087827 / pipeline #?7087827 / CI 7087827 / job 7087827
@@ -72,16 +79,21 @@ BUDGETS = {"core": 15000, "pack": 12000, "reference": 8000, "rule": 1500, "proce
 #   scanned); short counts after ambiguous words (run 2, job 3, ci 3, pipeline 2,
 #   step 13, retry 3 times, port 8760); #<short> refs (#12); HTTP 409; two-part
 #   numbers that are not semver (section 3.2, Python 3.11); runner + path/flag
-#   (pytest -q, pytest tests/x.py, go test ./...).
+#   (pytest -q, pytest tests/x.py, go test ./...); a repo NAME on its own
+#   (genesis-core, "genesis ships", genesis/genesis/collab/service.py).
 #
 # Detection is HEURISTIC by nature: the ERROR tier is the mechanical guarantee;
 # the WARNING tier + the §6.2 human review are the backstop for looser forms.
 REPO_NAMES = ("genesis", "genesis-core", "genesis-workflows", "kiro-agent-sdk",
               "genesis-appian-parser")
-_REPOS_RE = "|".join(re.escape(r) for r in REPO_NAMES)
+# longest first so "genesis-workflows v…" is reported as genesis-workflows, not genesis,
+# and the "-" separator never splits "genesis-core" into "genesis" + "core".
+_REPOS_RE = "|".join(re.escape(r) for r in sorted(REPO_NAMES, key=len, reverse=True))
+# pin separators between a repo name and a version: whitespace, @, ==, -, /, :
+_PIN_SEP = r"(?:\s+|\s*(?:==|[@/:-])\s*)"
 
 STATE_ERROR_PATTERNS = [
-    (re.compile(rf"\b(?:{_REPOS_RE})\s+v?\d+\.\d+\.\d+\b"), "repo version"),
+    (re.compile(rf"\b(?:{_REPOS_RE}){_PIN_SEP}v?\d+\.\d+\.\d+\b"), "repo version"),
     (re.compile(r"\bDB\s+v\d+\b", re.I), "DB version"),
     (re.compile(r"\bdb_current_version\b"), "current_version key"),
     (re.compile(r"#\d{6,}\b"), "CI id"),
@@ -1154,12 +1166,13 @@ def load_state_values(state_file: Path) -> set[str]:
         else:
             continue
         v = v.strip("\"'")
+        if not v:
+            continue
+        if re.fullmatch(r"-?\d+", v):      # P1: pure integers excluded from the exact tier
+            continue
         if len(v) < 3:
             continue
-        if re.fullmatch(r"-?\d+", v) and abs(int(v)) < 1000:
-            continue
-        if v:
-            vals.add(v)
+        vals.add(v)
     return vals
 
 
@@ -1172,6 +1185,8 @@ def state_fact_scan(text: str, state_values=()) -> dict:
     errors: list[str] = []
     warnings: list[str] = []
     for v in state_values:
+        if re.fullmatch(r"-?\d+", v):      # P1: never exact-match a bare integer
+            continue
         if re.search(r"(?<!\w)" + re.escape(v) + r"(?!\w)", scan):
             errors.append(f"state value {v!r}")
     for pat, label in STATE_ERROR_PATTERNS:

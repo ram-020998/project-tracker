@@ -536,8 +536,51 @@ class StateFactTests(unittest.TestCase):
         self.assertTrue(self.errs("Read [genesis v0.77.0](https://e.com/guide) today."))
 
     def test_error_exact_state_value(self):
-        self.assertTrue(self.errs("We are on v0.69.0 in production.", self.STATE))
-        self.assertTrue(self.errs("The count is 1234 exactly.", self.STATE))
+        self.assertTrue(self.errs("We are on v0.69.0 in production.", {"v0.69.0"}))
+
+    # M1 — the repo+semver ERROR form accepts the common pin separators
+    def test_error_repo_semver_separators(self):
+        for t in ["genesis v0.77.0", "genesis@v0.77.0", "genesis==0.77.0",
+                  "genesis-v0.77.0", "genesis/v0.77.0", "genesis:v0.77.0",
+                  "kiro-agent-sdk@0.77.0", "genesis-workflows: v0.22.0"]:
+            self.assertTrue(self.errs("Pin " + t + " here."), t)
+
+    def test_error_repo_longest_name_wins(self):
+        errs = self.errs("Uses genesis-workflows v0.22.0 now.")
+        self.assertTrue(any("genesis-workflows" in e for e in errs), errs)
+        self.assertFalse(any("repo version 'genesis v" in e for e in errs), errs)
+
+    def test_positive_repo_name_alone_or_path(self):
+        for t in ["genesis-core", "genesis ships a new loop",
+                  "genesis/genesis/collab/service.py", "run genesis-core locally"]:
+            self.assertEqual(self.errs(t), [], t)
+
+    # P1 — pure integers are excluded from the exact tier (ports/lines/ids are prose)
+    def test_load_state_values_excludes_integers(self):
+        d = Path(tempfile.mkdtemp())
+        try:
+            f = d / "current.yaml"
+            f.write_text("genesis_version: v0.69.0\ndb_current_version: 20\ntest_count: 1105\n")
+            vals = core.load_state_values(f)
+            self.assertIn("v0.69.0", vals)
+            self.assertNotIn("1105", vals)
+            self.assertNotIn("20", vals)
+        finally:
+            shutil.rmtree(d)
+
+    def test_exact_tier_ignores_pure_integers(self):
+        self.assertEqual(self.errs("Listens on port 1105 and line 1234.", {"1105", "1234"}), [])
+
+    def test_integration_integer_state_value_not_blocked(self):
+        k = Path(tempfile.mkdtemp()) / "knowledge"
+        shutil.copytree(FIX / "knowledge", k)
+        try:
+            (k / "state" / "current.yaml").write_text("db_current_version: 1105\n")
+            p = k / "areas" / "collaboration-hub" / "pack.md"
+            p.write_text(p.read_text() + "\nListens on port 1105 here. <!-- src: KU-B99-0009 -->\n")
+            self.assertEqual(core.validate_store(k), [])
+        finally:
+            shutil.rmtree(k.parent)
 
     # --- warnings: looser forms — never error, surface as warnings ---
     def test_warning_bare_semver(self):
@@ -566,7 +609,7 @@ class StateFactTests(unittest.TestCase):
         shutil.copytree(FIX / "knowledge", k)
         try:
             p = k / "areas" / "collaboration-hub" / "pack.md"
-            p.write_text(p.read_text() + "\nWe shipped genesis v0.69.0 today. <!-- src: KU-B99-0009 -->\n")
+            p.write_text(p.read_text() + "\nWe are on v0.69.0 here. <!-- src: KU-B99-0009 -->\n")
             errs = core.validate_store(k)
             self.assertTrue(any("outside state" in e for e in errs), errs)
         finally:
