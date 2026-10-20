@@ -322,14 +322,19 @@ def cmd_verify_lossless(ctx: Ctx, baseline: str, write: bool = False, max_dups: 
     for f in files:
         if f.startswith("context/.packs/"):
             continue
+        top = f.split("/")[0]
         # Active layer for the duplicate report: not history, and not test fixtures (which copy real headings).
-        active = f.split("/")[0] not in ("archive", "specs", "progress") and not f.startswith(DUP_SKIP)
+        active = top not in ("archive", "specs", "progress") and not f.startswith(DUP_SKIP)
+        # Strict presence (47-09 m1, now the default): a baseline unit counts as kept only if it survives
+        # in the active layer OR archive/ — never because a spec, a progress doc or a test fixture quotes it.
+        lossless = top not in ("specs", "progress") and not f.startswith(DUP_SKIP)
         for line, raw in units(read(ctx.tracker / f)):
             n = normalize(raw)
             if not counted(n):
                 continue
             h = unit_hash(n)
-            present.add(h)
+            if lossless:
+                present.add(h)
             if active and not TABLE_SEP.match(n):
                 where[h].append(f"{f}:{line}")
     missing = [(h, v) for h, v in base.items() if h not in present]

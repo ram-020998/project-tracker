@@ -173,6 +173,20 @@ def test_verify_lossless_duplicates_skip_test_fixtures(git_env):
     assert code == 0 and "agent-system/tests/fixtures/" not in out and "DEVLOOP" not in out, out
 
 
+def test_verify_lossless_strict_ignores_specs(git_env):
+    # m1 (47-09): strict is the default — a baseline unit that survives only in specs/ is MISSING,
+    # even though a spec file quotes it verbatim.
+    env = git_env
+    marker = "UNIQUELOSSLESSUNIT a marvellously unique baseline paragraph that lives nowhere else."
+    env.write("bible/05-dev-loop-and-release.md", env.read("bible/05-dev-loop-and-release.md") + f"\n{marker}\n")
+    git(env.tracker.parent, "commit", "-qam", "add unique baseline unit")
+    # move it out of the active layer: delete from the mandatory file, quote it only in a spec
+    env.edit("bible/05-dev-loop-and-release.md", f"\n{marker}\n", "\n")
+    env.write("specs/phase-48-demo/48-05-note.md", f"# note\n\n{marker}\n")
+    code, out, _ = env.run("verify-lossless", "--baseline", "HEAD")
+    assert code == 1 and "missing: **1** → FAIL" in out and "UNIQUELOSSLESSUNIT" in out, out
+
+
 def test_propose_tags_writes_candidates(env):
     out_dir = env.root / "proposals"
     code, out, err = env.run("propose-tags", "--out-dir", str(out_dir))
