@@ -39,7 +39,8 @@ if path and not ranged and any(re.search(p, path) for p in PROTECTED):
     name = path.rsplit("/", 1)[-1]
     sys.stderr.write(
         f"genesis bulk-read-guard: refusing a whole-file read of `{name}`. "
-        "Use `genesis-ctx adr|lesson|area <id>` or `genesis-ctx search <term> --archive`, "
+        "Use `{{GENESIS_HOME}}/bin/genesis-ctx adr|lesson|area <id>` or "
+        "`{{GENESIS_HOME}}/bin/genesis-ctx search <term> --archive`, "
         "or read a bounded range (pass a `limit`)."
     )
     sys.exit(2)

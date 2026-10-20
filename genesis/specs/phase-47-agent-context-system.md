@@ -127,7 +127,7 @@ must both fail before a rule is missed; the review agent's `check` on the diff i
 ### 6.6 Install / update (47-07)
 
 `agent-system/install.sh` / `update.sh` / `uninstall.sh` → a stdlib Python installer that renders `{{TRACKER}}` /
-`{{REPOS}}` / `{{MODEL}}` placeholders, validates, writes `~/.kiro/agents/genesis-*.md`, skills under
+`{{REPOS}}` / `{{GENESIS_HOME}}` / `{{MODEL}}` placeholders, validates, writes `~/.kiro/agents/genesis-*.json`, skills under
 `~/.kiro/genesis/skills/` (outside the default skill path, so other agents don't inherit them), hook scripts and a
 `genesis-ctx` shim; a manifest with hashes; backups; dry-run diff; removes files dropped from the source; never touches
 files it does not own.
@@ -202,7 +202,7 @@ history only); auto-generating the README phase table; CI for project-tracker (t
 | Q3 | Archive files are named by source (`archive/tracker-status-log.md`, `archive/bible-08-shipped-phases.md`, …); each moved block leaves a one-line pointer at its old place. |
 | Q4 | `genesis-ctx` runs from its project-tracker source via a shim, so tool fixes apply without reinstall; agents/skills/hooks need `update.sh`. |
 | Q5 | `genesis-dev` commits locally; only `genesis-release` pushes or tags, and always asks. |
-| Q6 | No model is pinned in agent profiles (uses your default); `install.conf` can set `MODEL`. |
+| Q6 | `claude-opus-5.5` pinned in every profile; `MODEL=` in `install.conf` overrides (operator decision, S5b 2026-10-20 — replaces "no model pinned"). |
 
 ## 14. Risks
 

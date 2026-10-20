@@ -30,13 +30,13 @@ the area catalog, current state) and the live repo status. Each one pulls the re
 
 ---
 
-## 2. One-time setup *(after 47-07)*
+## 2. One-time setup *(installed 2026-10-20, 47-07)*
 
 ```bash
-# 1. Kiro CLI 3
-kiro-cli --version                      # must be 3.x
+# 1. Kiro CLI with the V3 engine. `kiro-cli --version` prints 2.x — that is fine as long as `--v3` exists:
+kiro-cli --help-all | grep -- --v3      # "Launch the next generation Kiro agent"
 
-# 2. (optional) machine settings — only if your paths differ from the defaults
+# 2. (optional) machine settings — only if your paths differ from the defaults, or to override the model
 cp /Users/ramaswamy.u/repo/project-tracker/genesis/agent-system/install.conf.example \
    /Users/ramaswamy.u/repo/project-tracker/genesis/agent-system/install.conf
 
@@ -45,9 +45,18 @@ cp /Users/ramaswamy.u/repo/project-tracker/genesis/agent-system/install.conf.exa
 /Users/ramaswamy.u/repo/project-tracker/genesis/agent-system/install.sh
 
 # 4. Check
-kiro-cli agent list | grep genesis-     # five agents
+kiro-cli --v3 agent list | grep genesis-     # five agents
 ~/.kiro/genesis/bin/genesis-ctx status --brief
 ```
+
+**Launching.** The profiles are V3-format JSON (`~/.kiro/agents/genesis-*.json`), so every launch line in this guide
+uses **`kiro-cli --v3 chat --agent <name>`**. *Optional:* `kiro-cli settings chat.agentEngine v3` makes plain
+`kiro-cli` start the V3 engine — but it is a **global** setting that changes the engine for **every** agent and session
+on this machine, not only the Genesis ones; leave it unset unless you want that. With it set, the `--v3` in the lines
+below is redundant but harmless.
+
+The agents call `genesis-ctx` by its absolute path (`~/.kiro/genesis/bin/genesis-ctx`); your PATH is not changed. For
+your own terminal you may add `export PATH="$HOME/.kiro/genesis/bin:$PATH"` (the installer prints this hint).
 
 **Always launch from your root workspace**, e.g. `cd ~/repo-gitlab/ramaswamy.u`. Never from inside project-tracker.
 The agents use absolute paths, so the folder you launch from doesn't matter for them; it only keeps unrelated
@@ -77,7 +86,7 @@ Replace `NN` with the phase number (e.g. 48) and `<slug>` with its spec folder n
 ### Step 1 — Spec session (`genesis-spec`)
 
 ```bash
-cd ~/repo-gitlab/ramaswamy.u && kiro-cli chat --agent genesis-spec
+cd ~/repo-gitlab/ramaswamy.u && kiro-cli --v3 chat --agent genesis-spec
 ```
 
 **Prompt:**
@@ -113,7 +122,7 @@ Don't push.
 Follow the **build order** in the umbrella's sub-phase ledger. For each sub-spec:
 
 ```bash
-cd ~/repo-gitlab/ramaswamy.u && kiro-cli chat --agent genesis-dev
+cd ~/repo-gitlab/ramaswamy.u && kiro-cli --v3 chat --agent genesis-dev
 ```
 
 **Prompt:**
@@ -153,7 +162,7 @@ Resume NN-0X. Read its As built / Resume note and continue from there.
 After the last build sub-spec (before release):
 
 ```bash
-cd ~/repo-gitlab/ramaswamy.u && kiro-cli chat --agent genesis-review
+cd ~/repo-gitlab/ramaswamy.u && kiro-cli --v3 chat --agent genesis-review
 ```
 
 **Prompt:**
@@ -180,7 +189,7 @@ It will ask before updating or restarting the fleet. It never approves a gate on
 ### Step 5 — Release (`genesis-release`)
 
 ```bash
-cd ~/repo-gitlab/ramaswamy.u && kiro-cli chat --agent genesis-release
+cd ~/repo-gitlab/ramaswamy.u && kiro-cli --v3 chat --agent genesis-release
 ```
 
 **Prompt:**
@@ -199,7 +208,7 @@ CI is green — refresh the fleet.
 ### Step 6 — Documentation write-back (`genesis-docs`)
 
 ```bash
-cd ~/repo-gitlab/ramaswamy.u && kiro-cli chat --agent genesis-docs
+cd ~/repo-gitlab/ramaswamy.u && kiro-cli --v3 chat --agent genesis-docs
 ```
 
 **Prompt:**
@@ -289,8 +298,10 @@ today; the spec agent writes the hand-off prompt (as in 46-09).
 
 ## 7. Context hygiene
 
-- At the start of every session you can type `/context show` to see what's loaded; a fresh agent should be at
-  **≤ 5 %**, a dev agent after its pack **≤ 10 %**.
+- At the start of every session you can type `/context show` to see what's loaded. A fresh `genesis-dev` measured
+  **≈ 5.5 %** of the window on 2026-10-20: ≈ 1.6 % is Genesis (the eight L0 files ≈ 14.7K tokens + role prompt +
+  status) and ≈ 3.9 % is Kiro's own system prompt and built-in tools, which a plain session has too. After the pack a
+  dev agent should stay **≤ 12 %**.
 - Let the agents use **sub-agents** for broad exploration (they do this by default); only the summary comes back.
 - Prefer a **new session** over compaction when switching sub-specs; compaction is fine within one sub-spec.
 - If an agent starts reading huge files whole, say: `Use genesis-ctx for that, not a full read.` (A guard hook also
@@ -304,15 +315,18 @@ All sources live in `project-tracker/genesis/agent-system/`.
 
 | You want to | Edit | Then |
 |---|---|---|
-| Change a role's behaviour | `agents/genesis-<role>.md` (the body) | `agent-system/update.sh` |
-| Change permissions / tools / hooks | the profile's frontmatter | `update.sh` |
+| Change a role's behaviour | `agents/genesis-<role>.json` (the `prompt` string) | `agent-system/update.sh` |
+| Change permissions / tools / hooks | the profile's `permissions` / `tools` / `hooks` fields | `update.sh` |
 | Change a procedure (release, review, spec format…) | `skills/genesis-<name>/SKILL.md` | `update.sh` |
-| Add a skill | new `skills/genesis-<name>/SKILL.md` + add `skill://…` to the profiles that need it | `update.sh` |
+| Add a skill | new `skills/genesis-<name>/SKILL.md` + add `skill://…` to the profiles that need it **and** name its path in their prompt's "Skills" paragraph (the installer checks) | `update.sh` |
+| Pin a different model | `MODEL=` in `install.conf` (overrides the `claude-opus-5.5` pinned in each profile) | `update.sh` |
 | Fix `genesis-ctx` | `tools/genesis_ctx/` | nothing — the shim runs the source |
 | Add an area | `context/areas.toml` + tags | `genesis-ctx index && genesis-ctx lint` |
 
-`update.sh --dry-run` shows exactly what will change; `update.sh --pull` pulls project-tracker first. Old versions are
-kept in `~/.kiro/genesis/backups/`. `uninstall.sh` removes only what the installer put there.
+`update.sh --dry-run` shows exactly what will change (with diffs); `update.sh --pull` pulls project-tracker first.
+Old versions are kept in `~/.kiro/genesis/backups/`. `uninstall.sh` removes only what the installer put there (the
+files listed in `~/.kiro/genesis/install.json`). The installer refuses to overwrite a `genesis-*` file it did not
+install; `--force` backs it up first.
 
 You can also ask `genesis-docs` to make these edits: `Change the release skill so that … ; then tell me to run update.sh.`
 
@@ -322,10 +336,14 @@ You can also ask `genesis-docs` to make these edits: `Change the release skill s
 
 | Symptom | Cause / fix |
 |---|---|
-| Agent not listed | Run `install.sh`; check `~/.kiro/agents/genesis-*.md` exists; CLI must be 3.x |
-| Agent seems to know nothing about Genesis | `/context show` — the L0 files must be listed; if not, `update.sh` (paths may have changed; check `install.conf`) |
-| "genesis-ctx: command not found" in a hook | `~/.kiro/genesis/bin/genesis-ctx` missing → `install.sh`; Python ≥ 3.11 needed |
-| Pack too large (> 40K warning) | Ask the agent to narrow `areas` in the manifest; nothing is hidden — one-liners stay in L0 |
+| Agent not listed | Run `install.sh`; check `~/.kiro/agents/genesis-*.json` exists; list with `kiro-cli --v3 agent list` (the V2 engine skips V3-format profiles) |
+| Launched without `--v3` | The V2 engine ignores the `permissions` block / skips the profile — relaunch with `kiro-cli --v3 chat --agent …` |
+| Agent seems to know nothing about Genesis | `/context show` — the eight L0 files must be listed; if not, `update.sh` (paths may have changed; check `install.conf`) |
+| Skill tool lists only `appian`, not the `genesis-*` skills | Expected with this CLI (it registers profile skills only for sessions *created* in that agent's mode). Each prompt names its skills by absolute path and the agent reads the `SKILL.md` directly — no action needed |
+| A sub-agent (`genesis-review` spawned by `genesis-dev`) has no status block | SessionStart hooks don't run for sub-agents; its prompt tells it to run `genesis-ctx status --brief` itself |
+| "genesis-ctx: command not found" | Agents use the absolute `~/.kiro/genesis/bin/genesis-ctx`; if that is missing → `install.sh`; Python ≥ 3.11 needed. In your own terminal, use the full path or the PATH hint from §2 |
+| `install.sh` says "Refusing … not installed by Genesis" | A `genesis-*` file you made yourself sits at a destination; move it, or `install.sh --force` (backs it up) |
+| Pack too large (> 60K warning, > 120K fail) | Ask the agent to narrow `areas` in the manifest; nothing is hidden — one-liners stay in L0 |
 | Lint fails at the end of a docs/spec session | The Stop hook makes the agent fix it (up to 2 tries); if it still fails, the summary is shown — ask it to fix the listed items |
 | Agent missed a rule | Tell `genesis-docs`: `ADR-0NN/L-0NN should apply to <area/path>; fix the tags.` — then it's fixed for every future pack |
 | An agent wants to push/tag and you didn't ask | Say no; only `genesis-release` may, and only with your yes |

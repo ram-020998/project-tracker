@@ -1,18 +1,23 @@
 # install.conf.example — copy to install.conf and edit.
 #
-# Consumed by agent-system/install.sh / update.sh (built in 47-07). The installer renders
-# the {{TRACKER}} / {{REPOS}} / {{MODEL}} placeholders in the agent/skill/hook templates
-# from these values. Use ABSOLUTE paths. Format: KEY=VALUE, one per line; '#' comments ok.
+# Consumed by agent-system/install.sh / update.sh / uninstall.sh (47-07). The installer renders the
+# {{TRACKER}} / {{REPOS}} / {{GENESIS_HOME}} / {{MODEL}} placeholders in every agent/skill/hook file from these
+# values. Use ABSOLUTE paths (~ is expanded). Format: KEY=VALUE, one per line; '#' comments ok. Unknown keys are
+# an error. Every key is optional; the defaults are shown.
 #
 # install.conf itself is git-ignored (see agent-system/.gitignore) — it is local to each
 # machine. This .example file is the committed template.
 
 # Absolute path to project-tracker/genesis (source of agents, skills, hooks, genesis-ctx).
+# Default: derived from the location of install.sh.
 TRACKER=/Users/ramaswamy.u/repo/project-tracker/genesis
 
 # Absolute path to the repos root that area path globs resolve against ({{REPOS}}).
 REPOS=/Users/ramaswamy.u/repo-gitlab/ramaswamy.u
 
-# Optional: pin a model for the installed agents. Leave empty to use your Kiro default
-# (Phase 47 decision Q6 — no model is pinned in the profiles).
+# Where the skills, hooks, the genesis-ctx shim, the manifest and backups go.
+GENESIS_HOME=~/.kiro/genesis
+
+# Optional model override. Every profile pins claude-opus-5.5 (Phase 47 Q6, operator decision S5b);
+# a non-empty MODEL replaces it in all five installed profiles. Empty = keep each profile's own model.
 MODEL=

@@ -1,7 +1,7 @@
 # 47-06 — The five agents, their skills and hooks (Kiro CLI 3)
 
-> **Status:** 🟢 BUILT 2026-10-20 (session S5; As built below — live `/context show` acceptance runs after the real
-> install in 47-07). Repo: project-tracker (`genesis/agent-system/`). Parent:
+> **Status:** 🟢 BUILT 2026-10-20 (session S5; As built below — live acceptance after the real install recorded in
+> S5b, see "Live acceptance after the real install"). Repo: project-tracker (`genesis/agent-system/`). Parent:
 > `specs/phase-47-agent-context-system.md`. Decisions D2–D5, D9. Session S5.
 
 ## 1. Goal
@@ -38,7 +38,11 @@ fallback in §8.
 `{{TRACKER}}` = `/Users/ramaswamy.u/repo/project-tracker/genesis`, `{{REPOS}}` = `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u`
 (rendered by the installer, 47-07). Deny always wins (CLI 3).
 
-## 4. Example profile — `agent-system/agents/genesis-dev.md` (template)
+## 4. Example profile — `agent-system/agents/genesis-dev.json` (template)
+
+> **Correction (S5b, operator decision #5):** profiles are **JSON** (`genesis-*.json`), not Markdown — see As built,
+> deviation 1. The block below shows the fields in the original frontmatter notation; the committed file
+> `agents/genesis-dev.json` is authoritative (same fields, `prompt` string = the body, `permissions.rules` objects).
 
 ```markdown
 ---
@@ -233,3 +237,25 @@ Live `/context show` + runtime sub-agent spawn (e) are verified in the fresh-ses
 `install.sh` runs (47-07). Build order from here: **47-07** (installer + tests, then `install.sh --dry-run` → real
 install on the operator's yes), then **47-08** (the `genesis-doc-writeback` skill is already written to the 47-08
 standard; verify the `add adr|lesson` formats and finalize).
+
+### Live acceptance after the real install (S5b, 2026-10-20, `kiro-cli --v3`, KAS 0.66.43)
+
+Headless probes: `kiro-cli --v3 chat --agent <a> --output-format stream-json …` from `~/repo-gitlab/ramaswamy.u`; the
+context numbers are the engine's own `contextUsage` breakdown (the data `/context show` renders).
+
+| Check | Result |
+|---|---|
+| `kiro-cli --v3 agent list` | **five** `genesis-*` agents, Global, no load errors (the two "File URI not found" errors in the list belong to the pre-existing `project-tracker` agent). |
+| L0 resources loaded (genesis-dev) | **Pass** — exactly the eight §4 `file://` resources: L0-core 1,126 · bible/02 900 · bible/07 888 · adr-digest 4,051 · lesson-digest 3,750 · area-catalog 760 · state 792 · coding-standards 2,428 = **14,695 tokens (1.5 %)**. |
+| SessionStart status in context | **Pass** — the agent quoted `genesis-ctx status (local refs only, no fetch)` + the repo lines verbatim. |
+| Starting context (≤ 5 % bar) | genesis-dev **5.51 %** vs a plain V3 session with the same one-line prompt **3.87 %** → **Genesis-attributable ≈ 1.6 %** (matches the 1.7 % estimate above). The remaining ≈ 3.9 % is Kiro's own system prompt + built-in tools, present in every session. The literal 5 % is exceeded only by that platform baseline — **flagged to the operator**; the bar is read as Genesis-attributable. |
+| `code` tool (decision #2) | **Present** — the V3 built-in list contains `code` (tree-sitter/LSP); genesis-dev ran `code get_document_symbols` successfully. Kept on spec/dev/review by exact id `code`. |
+| Sub-agent spawn (e) | **Pass** — genesis-dev spawned `genesis-review`; it answered in its review role with L0 loaded. SessionStart hooks do **not** run for sub-agents → review prompt step 1 now says to run `genesis-ctx status --brief` itself when no status block is present. |
+| Bulk-read guard (installed) | **Pass** — a whole-file read of `decision-log.md` by genesis-dev was blocked with the guard message (now naming the absolute `genesis-ctx` path); a ranged read passes. |
+| **`skill://` resources** | **Fallback applied.** The skill tool listed only the inherited `appian` skill. Root cause (KAS source + log): profile skills are registered only at `session/new` when the session is *created* in the agent's mode; `kiro-cli --v3 chat --agent X` creates it as `vibe` and then calls `session/setMode`, which does not re-register skills. Fallback (§8 spirit): every prompt ends with a **Skills** paragraph naming each skill and its absolute `SKILL.md` path ("activate it if listed, else read it directly"); verified — genesis-dev read `genesis-backend-dev` and quoted its heading. The `skill://` entries stay (they work wherever a client creates the session in-mode); the installer now **fails validation** if a `skill://` path is not named in the prompt. |
+| CLI auto-upgrade | `chat.enableAutoAgentUpgrade` is on; after the first and every later `--v3` launch the installed files still match the manifest (**18/18 sha256 + mode**). |
+
+Interactive check for the operator: `cd ~/repo-gitlab/ramaswamy.u && kiro-cli --v3 chat --agent genesis-dev`, then
+`/context show` → expect the eight L0 files (≈ 14.7K tokens, ≈ 1.5 %) and a total of **≈ 5–6 %** before any pack; if the
+six `genesis-*` skills also appear as progressively-loaded items, the interactive client creates sessions in-mode and
+the fallback is merely redundant.
