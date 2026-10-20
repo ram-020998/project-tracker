@@ -214,24 +214,45 @@ def changed_files(ctx: Ctx, since: str | None, files: list[str] | None, staged: 
                 out.append(f"{repo}/{f}" if repo else f)
         return out, notes
     names = [repo] if repo else list(REPO_NAMES)
-    out = []
+    out: list[str] = []
+    scanned = resolved = 0
     for name in names:
         root = ctx.repos / name
         if not root.is_dir():
             if repo:
                 raise CtxError(f"repo not found: {root}")
             continue
+        scanned += 1
         if since:
             if _git_lines(root, "rev-parse", "--verify", "--quiet", since + "^{commit}") is None:
                 if repo:
                     raise CtxError(f"{name}: unknown revision `{since}`")
                 notes.append(f"{name}: `{since}` does not resolve — skipped")
                 continue
+            resolved += 1
             lines = (_git_lines(root, "diff", "--name-only", since) or []) + \
                     (_git_lines(root, "ls-files", "--others", "--exclude-standard") or [])
         else:
             lines = _git_lines(root, "diff", "--cached", "--name-only") or []
         out += [f"{name}/{l}" for l in lines]
+    # project-tracker itself (m2): emit `tracker:` paths relative to genesis/ (not scanned under --repo).
+    if not repo and _git_lines(ctx.tracker, "rev-parse", "--show-toplevel") is not None:
+        scanned += 1
+        tr_lines: list[str] | None = []
+        if since:
+            if _git_lines(ctx.tracker, "rev-parse", "--verify", "--quiet", since + "^{commit}") is None:
+                notes.append(f"project-tracker: `{since}` does not resolve — skipped")
+                tr_lines = None
+            else:
+                resolved += 1
+                tr_lines = (_git_lines(ctx.tracker, "diff", "--name-only", "--relative", since) or []) + \
+                           (_git_lines(ctx.tracker, "ls-files", "--others", "--exclude-standard") or [])
+        else:
+            tr_lines = _git_lines(ctx.tracker, "diff", "--cached", "--name-only", "--relative") or []
+        if tr_lines:
+            out += [f"tracker:{l}" for l in tr_lines]
+    if since and scanned and resolved == 0:
+        raise CtxError(f"`{since}` does not resolve in any repo (code repos or project-tracker)")
     return sorted(set(out)), notes
 
 

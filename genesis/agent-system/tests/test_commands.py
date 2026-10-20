@@ -209,6 +209,22 @@ def test_check_since_in_temp_repo(env):
     assert env.run("check", "--since", "nope", "--repo", "genesis")[0] == 2
 
 
+def test_check_since_scans_project_tracker(git_env):
+    # m2 (47-09): check scans project-tracker and emits tracker: paths for a tracker revision.
+    e = git_env
+    git(e.tracker.parent, "tag", "ptbase")
+    e.write("context/tags/adr.toml", e.read("context/tags/adr.toml") + "\n# 47-09 touch\n")
+    code, out, _ = e.run("check", "--since", "ptbase", "--json")
+    assert code == 0
+    d = json.loads(out)
+    assert any(f["path"] == "tracker:context/tags/adr.toml" for f in d["files"])
+
+
+def test_check_since_unresolved_in_any_repo_exits_2(env):
+    # m3 (47-09): a revision that resolves in no repo exits 2, not 0-with-an-empty-checklist.
+    assert env.run("check", "--since", "deadbeef")[0] == 2
+
+
 def test_index_is_deterministic(env):
     before = {p.name: p.read_text() for p in (env.tracker / "context/_generated").iterdir()}
     code, out, _ = env.run("index")
