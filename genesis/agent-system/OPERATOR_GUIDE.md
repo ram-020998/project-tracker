@@ -76,6 +76,12 @@ The agents use absolute paths, so the folder you launch from doesn't matter for 
    resume prompt (§5.3).
 5. **Pushes, tags, fleet restarts and anything destructive are always your call.** The agents ask; answer explicitly.
 6. **If an agent says something contradicts an ADR, stop and decide.** That's the system working.
+7. **Never launch a Genesis agent with `--trust-all-tools`.** The role boundaries depend on the per-agent
+   permission rules and on the `shell-guard.sh` hook, which blocks `git push`/`tag` (every agent but
+   `genesis-release`) and any shell write outside the agent's write roots **even under trust-all** — but
+   `--trust-all-tools` removes the "ask" backstop for everything else. Launch with
+   `kiro-cli --v3 chat --agent genesis-…` and answer the prompts; `genesis-dev` and `genesis-release` in
+   particular must never run trusted.
 
 ---
 
@@ -347,3 +353,5 @@ You can also ask `genesis-docs` to make these edits: `Change the release skill s
 | Lint fails at the end of a docs/spec session | The Stop hook makes the agent fix it (up to 2 tries); if it still fails, the summary is shown — ask it to fix the listed items |
 | Agent missed a rule | Tell `genesis-docs`: `ADR-0NN/L-0NN should apply to <area/path>; fix the tags.` — then it's fixed for every future pack |
 | An agent wants to push/tag and you didn't ask | Say no; only `genesis-release` may, and only with your yes |
+| You're tempted to pass `--trust-all-tools` | Don't (golden rule 7). `shell-guard.sh` still blocks `git push`/`tag` (non-release) and writes outside the agent's roots under trust-all, but trust-all drops the "ask" gate for everything else. Relaunch without it. |
+| `shell-guard` refused a command | It blocks `git push`/`tag` for every agent but `genesis-release`, and shell writes (`>`, `tee`, `cp`, `mv`, `rm`, `sed -i`, `dd of=`) outside the agent's write roots. Use the `write` tool, or a path under `/tmp` or the agent's repo; let `genesis-release` do pushes/tags |

@@ -27,16 +27,23 @@ fallback in §8.
 | `tools` | read, write, shell, web, subagent, code | read, write, shell, web, subagent, code | read, shell, code, write | read, write, shell | read, write, shell |
 | `fs_write` allow | `{{TRACKER}}/specs/**`, `{{TRACKER}}/README.md` | `{{REPOS}}/**`, `{{TRACKER}}/specs/**` | `{{TRACKER}}/specs/**/reviews/**`, `/tmp/genesis-review/**` | version files in `{{REPOS}}/**` (ask), `{{TRACKER}}/specs/**` | `{{TRACKER}}/**` |
 | `fs_write` deny | `{{REPOS}}/**` | `{{REPOS}}/**/.git/**` | `{{REPOS}}/**` | — | `{{REPOS}}/**` |
-| `shell` allow | `genesis-ctx *`, `git status*`, `git log*`, `git diff*`, `git show*`, `git -C {{TRACKER}} add/commit` | + pytest, ruff, npm/npx (lint, typecheck, test, build), `git add*`, `git commit*` | + pytest, ruff, npm/npx test/lint/typecheck, node (Playwright scripts in `/tmp`) | + `git add*`, `git commit*`, `glab ci list*`, `glab ci trace*` | `genesis-ctx *`, `git -C {{TRACKER}} …` status/diff/add/commit |
+| `shell` allow | `genesis-ctx *`, `git status*`, `git log*`, `git diff*`, `git show*`, `git -C {{TRACKER}} add/commit` | + pytest, ruff, npm/npx (lint, typecheck, test, build), `git add*`, `git commit*` | + pytest, ruff, npm/npx test/lint/typecheck (`node *` is `ask`) | + `git add*`, `git commit*`, `glab ci list*`, `glab ci trace*` | `genesis-ctx *`, `git -C {{TRACKER}} …` status/diff/add/commit |
 | `shell` ask | `git -C {{TRACKER}} push*`, anything else | anything else | anything else | `git tag*`, `git push*`, `gsm *` | `git push*` |
 | `shell` deny | `git tag*`, any push from a code repo | `git push*`, `git tag*`, `git reset --hard*`, `git clean*`, `rm -rf*` | `git commit*`, `git push*`, `git tag*` | `git push --force*`, `git reset --hard*` | `git push --force*` |
 | Extra L1 file | — | `reference/coding-standards.md` | `reference/coding-standards.md` | — | — |
 | Skills | spec-authoring | backend-dev, api-dev, web-dev, workflow-authoring, db-migration, live-acceptance | code-review, live-acceptance | release | doc-writeback, spec-authoring |
 | Sub-agents | default (exploration) | `genesis-review` | default (exploration) | — | default (exploration) |
-| Hooks | SessionStart status · Stop `lint --specs-only` (bounded) | SessionStart status · PreToolUse bulk-read guard | SessionStart status · PreToolUse guard | SessionStart status | SessionStart status · Stop `lint` (bounded) |
+| Hooks | SessionStart status · PreToolUse shell-guard · Stop `lint --specs-only` (bounded) | SessionStart status · PreToolUse bulk-read guard · PreToolUse shell-guard | SessionStart status · PreToolUse bulk-read guard · PreToolUse shell-guard | SessionStart status · PreToolUse shell-guard (`--allow-push-tag`) | SessionStart status · PreToolUse shell-guard · Stop `lint` (bounded) |
 
 `{{TRACKER}}` = `/Users/ramaswamy.u/repo/project-tracker/genesis`, `{{REPOS}}` = `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u`
 (rendered by the installer, 47-07). Deny always wins (CLI 3).
+
+**Permission hardening (47-09 fix B1/M1).** The broad read-command shell allows (`cat *`, `grep *`, `ls *`, `rg *`,
+`find *`) are removed from every profile — reads go through the built-in `read`/`grep`/`code` tools — and `node *` is
+`ask`. A `cat x > /any/path` (or `node -e "fs.writeFileSync(…)"`) therefore no longer slips through an allow rule, and
+the `shell-guard.sh` PreToolUse hook (§8) is a hard backstop that holds **even under `--trust-all-tools`**: it refuses
+`git push`/`tag` for every agent but `genesis-release` (any path, `env`/`-C`/chain/`sh -c` form) and any shell write
+outside the agent's write roots. The installer validation also rejects re-adding a bare `<write-cmd> *` shell allow.
 
 ## 4. Example profile — `agent-system/agents/genesis-dev.json` (template)
 
@@ -139,6 +146,7 @@ Skills are **procedures + pointers** to existing documents (by absolute path, re
 |---|---|---|
 | `bulk-read-guard.sh` | PreToolUse on `read`: if the path is one of `reference/decision-log.md`, `bible/03|04|06`, `archive/**`, `tracker.md` **and** no range is given → exit 2 with "Use `genesis-ctx adr|lesson|area|search` or a ranged read." | rely on the L0 protocol + review; keep the script for later |
 | `stop-lint.sh [--specs-only]` | Stop: run `genesis-ctx lint`; on failure, if this session has continued < 2 times (counter in `$TMPDIR/genesis-stop-<session_id>`), print `{"decision":"block","reason":"<lint summary>"}`; else exit 0 and leave the summary for the user | role prompt step "run lint before finishing" |
+| `shell-guard.sh [--allow-push-tag] --write-root R…` | PreToolUse on `shell` (47-09 B1/M1): exit 2 on (a) a `git push`/`tag` subcommand from any form (absolute path, `env`/`command`/`exec`/`VAR=`/`-C`/chain/`sh -c`) unless `--allow-push-tag` (genesis-release); (b) a shell write (`>`/`>>`/`2>`/`&>`, `tee`, `cp`, `mv`, `rm`, `sed -i`, `dd of=`) whose target resolves outside the agent's `--write-root`s. Holds under `--trust-all-tools`. Fails open only if the payload can't be read | the removed broad allows + the no-trust `ask` gate + the review |
 | (SessionStart) | `genesis-ctx status --brief` directly | `UserPromptSubmit` with `cache_ttl` |
 
 ## 9. Acceptance

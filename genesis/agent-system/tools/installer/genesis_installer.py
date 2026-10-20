@@ -41,6 +41,14 @@ EFFECTS = {"allow", "deny", "ask"}
 TRIGGERS = {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop", "PreTaskExec", "PostTaskExec",
             "PostFileCreate", "PostFileSave", "PostFileDelete"}
 RESOURCE_SCHEMES = ("file://", "skill://")
+# Bare commands whose `<cmd> *` allow rule is a blanket that also matches `<cmd> x > /any/path` — the B1
+# hole (47-09). The installer refuses them as a shell `allow`; reads go through the read/grep tools and
+# shell writes are governed by shell-guard.sh. `ask`/`deny` rules and sub-command forms (`git add *`,
+# `npm run *`) are fine.
+WRITE_CAPABLE_BARE = {"cat", "grep", "egrep", "fgrep", "rg", "ls", "find", "head", "tail", "tee", "cp",
+                      "mv", "rm", "sed", "dd", "tr", "awk", "cut", "sort", "uniq", "xargs", "node",
+                      "nodejs", "python", "python3", "sh", "bash", "zsh", "dash", "eval"}
+BARE_ALLOW_RE = re.compile(r"^([a-z][a-z0-9_.-]*)\s*\*$")
 AGENT_SUFFIXES = (".json", ".md", ".yaml", ".yml")  # a same-name agent in any of these would collide
 SKIP_NAMES = {".DS_Store", "__pycache__", ".gitkeep"}
 
@@ -281,6 +289,13 @@ def validate(cfg: Config, desired: dict[Path, Item]) -> list[str]:
             m = rule.get("match")
             if not isinstance(m, list) or not m or not all(isinstance(x, str) and x for x in m):
                 errors.append(f"{where}: permissions.rules[{i}] match must be a non-empty list of strings")
+            elif rule.get("capability") == "shell" and rule.get("effect") == "allow":
+                for pat in m:
+                    bare = BARE_ALLOW_RE.match(pat.strip())
+                    if bare and bare.group(1) in WRITE_CAPABLE_BARE:
+                        errors.append(f"{where}: permissions.rules[{i}] shell allow `{pat}` is a blanket for a "
+                                      f"write-capable command (it also matches `{bare.group(1)} x > /any/path`, "
+                                      "the B1 hole) — use the read/grep tools, or `ask`/`deny`, not a bare allow")
         for i, hook in enumerate(prof.get("hooks") or []):
             label = f"{where}: hooks[{i}]"
             if not isinstance(hook, dict):

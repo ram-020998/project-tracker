@@ -307,6 +307,15 @@ def test_validation_catches_unrendered_placeholder_and_unknown_skill(inst, capsy
     assert rc == 1 and "{{NOT_A_KEY}}" in out and "not part of this installation" in out
 
 
+def test_validation_rejects_bare_write_capable_shell_allow(inst, capsys):
+    # 47-09 B1: re-introducing a `cat */node *` shell allow (a blanket for a write-capable command) is refused.
+    prof = json.loads(json.dumps(PROFILE))
+    prof["permissions"]["rules"].append({"capability": "shell", "match": ["cat *"], "effect": "allow"})
+    inst.profile("genesis-beta", toolsSettings={}, permissions=prof["permissions"])
+    rc, out = inst.run("install", capsys=capsys)
+    assert rc == 1 and "blanket for a write-capable command" in out and "cat *" in out
+
+
 def test_validation_catches_bad_permissions_and_tools(inst, capsys):
     prof = json.loads(json.dumps(PROFILE))
     prof["permissions"]["rules"].append({"capability": "execute_bash", "match": ["x"], "effect": "permit"})

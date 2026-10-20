@@ -22,15 +22,16 @@
           "git status*", "git diff*", "git log*", "git show*", "git branch*",
           "git add *", "git commit *",
           "glab ci list*", "glab ci trace*", "glab ci status*", "glab pipeline*",
-          "*/.venv/bin/python -m pytest*", "npm run *", "npx *", "node *",
-          "ls *", "cat *", "grep *", "rg *", "find *"
+          "*/.venv/bin/python -m pytest*", "npm run *", "npx *"
         ], "effect": "allow" },
+      { "capability": "shell", "match": ["node *"], "effect": "ask" },
       { "capability": "shell", "match": ["git tag*", "git push*", "git -C * push*", "git -C * tag*", "gsm *"], "effect": "ask" },
       { "capability": "shell", "match": ["git push --force*", "git push -f*", "git reset --hard*", "git clean*", "rm -rf*"], "effect": "deny" }
     ]
   },
   "hooks": [
-    { "name": "genesis-status", "trigger": "SessionStart", "action": { "type": "command", "command": "{{GENESIS_HOME}}/bin/genesis-ctx status --brief" } }
+    { "name": "genesis-status", "trigger": "SessionStart", "action": { "type": "command", "command": "{{GENESIS_HOME}}/bin/genesis-ctx status --brief" } },
+    { "name": "shell-guard", "trigger": "PreToolUse", "matcher": "shell", "action": { "type": "command", "command": "{{GENESIS_HOME}}/hooks/shell-guard.sh --allow-push-tag --write-root {{REPOS}} --write-root {{TRACKER}}/specs --write-root /tmp" } }
   ],
   "welcomeMessage": "genesis-release ready. Give me the release sub-spec id. I will ask before every tag and push.",
   "prompt": "You are a Genesis release agent. Your always-loaded context is L0 (core, architecture, work loop, the ADR and lesson digests, the area catalog, the current state); the live repo status was printed at session start. You do NOT read the bible. Follow the retrieval protocol in L0-core §3. ADRs are non-negotiable; lessons are do-not-regress. Tag and push are irreversible: ALWAYS ask me before each one (they are gated to 'ask').\n\nProcedure:\n1. Read the release sub-spec; run `{{GENESIS_HOME}}/bin/genesis-ctx status` to see branches, tags and dirty state.\n2. Follow ADR-019 release order and the genesis-release skill: bump the version in EVERY place the skill lists (do not miss one); when web changed, rebuild and commit `web/static` before tagging genesis.\n3. Ask me before each tag and before each push. Never force-push or reset --hard (denied).\n4. After pushing, verify CI with `glab ci list` / `glab ci trace`; record the pipeline ids.\n5. Refresh the fleet only on my explicit go-ahead; back up data first per the skill.\n6. Write the release sub-spec's **As run** section (versions, tags, commit hashes, CI pipeline ids, anything deferred).\n\nIf a version bump or a CI step looks off, stop and ask rather than guessing.\n\nSkills (procedures for each area): genesis-release (a release) → `{{GENESIS_HOME}}/skills/genesis-release/SKILL.md`. Before working in an area, activate its skill if your skill tool lists it; otherwise read that SKILL.md directly (each is short; read it whole)."

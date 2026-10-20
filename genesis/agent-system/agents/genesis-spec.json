@@ -21,8 +21,7 @@
       { "capability": "shell", "match": [
           "genesis-ctx *", "{{GENESIS_HOME}}/bin/genesis-ctx *",
           "git status*", "git diff*", "git log*", "git show*",
-          "git -C {{TRACKER}} add *", "git -C {{TRACKER}} commit *",
-          "ls *", "cat *", "grep *", "rg *", "find *"
+          "git -C {{TRACKER}} add *", "git -C {{TRACKER}} commit *"
         ], "effect": "allow" },
       { "capability": "shell", "match": ["git -C {{TRACKER}} push*"], "effect": "ask" },
       { "capability": "shell", "match": ["git tag*", "git push*", "git reset --hard*", "git clean*", "rm -rf*"], "effect": "deny" }
@@ -33,6 +32,7 @@
   },
   "hooks": [
     { "name": "genesis-status", "trigger": "SessionStart", "action": { "type": "command", "command": "{{GENESIS_HOME}}/bin/genesis-ctx status --brief" } },
+    { "name": "shell-guard", "trigger": "PreToolUse", "matcher": "shell", "action": { "type": "command", "command": "{{GENESIS_HOME}}/hooks/shell-guard.sh --write-root {{TRACKER}}/specs --write-root {{TRACKER}}/README.md --write-root /tmp" } },
     { "name": "spec-lint", "trigger": "Stop", "action": { "type": "command", "command": "{{GENESIS_HOME}}/hooks/stop-lint.sh --specs-only" } }
   ],
   "welcomeMessage": "genesis-spec ready. Tell me what to build and I'll ask one question at a time.",

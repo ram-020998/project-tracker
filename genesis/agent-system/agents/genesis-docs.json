@@ -23,8 +23,7 @@
           "genesis-ctx *", "{{GENESIS_HOME}}/bin/genesis-ctx *",
           "git status*", "git diff*", "git log*", "git show*", "git branch*",
           "git -C {{TRACKER}} add *", "git -C {{TRACKER}} commit *", "git -C {{TRACKER}} status*",
-          "git -C {{TRACKER}} diff*", "git -C {{TRACKER}} log*",
-          "ls *", "cat *", "grep *", "rg *", "find *"
+          "git -C {{TRACKER}} diff*", "git -C {{TRACKER}} log*"
         ], "effect": "allow" },
       { "capability": "shell", "match": ["git push*", "git -C {{TRACKER}} push*"], "effect": "ask" },
       { "capability": "shell", "match": ["git push --force*", "git tag*", "git reset --hard*", "git clean*", "rm -rf*"], "effect": "deny" }
@@ -35,6 +34,7 @@
   },
   "hooks": [
     { "name": "genesis-status", "trigger": "SessionStart", "action": { "type": "command", "command": "{{GENESIS_HOME}}/bin/genesis-ctx status --brief" } },
+    { "name": "shell-guard", "trigger": "PreToolUse", "matcher": "shell", "action": { "type": "command", "command": "{{GENESIS_HOME}}/hooks/shell-guard.sh --write-root {{TRACKER}} --write-root /tmp" } },
     { "name": "doc-lint", "trigger": "Stop", "action": { "type": "command", "command": "{{GENESIS_HOME}}/hooks/stop-lint.sh" } }
   ],
   "welcomeMessage": "genesis-docs ready. Give me the phase id to write back.",
