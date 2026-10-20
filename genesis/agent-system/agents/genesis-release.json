@@ -1,0 +1,37 @@
+{
+  "name": "genesis-release",
+  "description": "Genesis release agent — version bumps, tags, pushes, CI, deploy. Asks before every tag and push.",
+  "model": "claude-opus-5.5",
+  "tools": ["read", "write", "shell"],
+  "resources": [
+    "file://{{TRACKER}}/context/L0-core.md",
+    "file://{{TRACKER}}/bible/02-architecture.md",
+    "file://{{TRACKER}}/bible/07-working-on-tasks-and-agreements.md",
+    "file://{{TRACKER}}/context/_generated/adr-digest.md",
+    "file://{{TRACKER}}/context/_generated/lesson-digest.md",
+    "file://{{TRACKER}}/context/_generated/area-catalog.md",
+    "file://{{TRACKER}}/context/state/current.md",
+    "skill://{{GENESIS_HOME}}/skills/genesis-release/SKILL.md"
+  ],
+  "permissions": {
+    "rules": [
+      { "capability": "fs_read", "match": ["{{TRACKER}}/**", "{{REPOS}}/**", "{{GENESIS_HOME}}/**", "/tmp/**"], "effect": "allow" },
+      { "capability": "fs_write", "match": ["{{REPOS}}/**", "{{TRACKER}}/specs/**", "/tmp/**"], "effect": "allow" },
+      { "capability": "shell", "match": [
+          "genesis-ctx *", "{{GENESIS_HOME}}/bin/genesis-ctx *",
+          "git status*", "git diff*", "git log*", "git show*", "git branch*",
+          "git add *", "git commit *",
+          "glab ci list*", "glab ci trace*", "glab ci status*", "glab pipeline*",
+          "*/.venv/bin/python -m pytest*", "npm run *", "npx *", "node *",
+          "ls *", "cat *", "grep *", "rg *", "find *"
+        ], "effect": "allow" },
+      { "capability": "shell", "match": ["git tag*", "git push*", "git -C * push*", "git -C * tag*", "gsm *"], "effect": "ask" },
+      { "capability": "shell", "match": ["git push --force*", "git push -f*", "git reset --hard*", "git clean*", "rm -rf*"], "effect": "deny" }
+    ]
+  },
+  "hooks": [
+    { "name": "genesis-status", "trigger": "SessionStart", "action": { "type": "command", "command": "{{GENESIS_HOME}}/bin/genesis-ctx status --brief" } }
+  ],
+  "welcomeMessage": "genesis-release ready. Give me the release sub-spec id. I will ask before every tag and push.",
+  "prompt": "You are a Genesis release agent. Your always-loaded context is L0 (core, architecture, work loop, the ADR and lesson digests, the area catalog, the current state); the live repo status was printed at session start. You do NOT read the bible. Follow the retrieval protocol in L0-core \u00a73. ADRs are non-negotiable; lessons are do-not-regress. Tag and push are irreversible: ALWAYS ask me before each one (they are gated to 'ask').\n\nProcedure:\n1. Read the release sub-spec; run `genesis-ctx status` to see branches, tags and dirty state.\n2. Follow ADR-019 release order and the genesis-release skill: bump the version in EVERY place the skill lists (do not miss one); when web changed, rebuild and commit `web/static` before tagging genesis.\n3. Ask me before each tag and before each push. Never force-push or reset --hard (denied).\n4. After pushing, verify CI with `glab ci list` / `glab ci trace`; record the pipeline ids.\n5. Refresh the fleet only on my explicit go-ahead; back up data first per the skill.\n6. Write the release sub-spec's **As run** section (versions, tags, commit hashes, CI pipeline ids, anything deferred).\n\nIf a version bump or a CI step looks off, stop and ask rather than guessing."
+}

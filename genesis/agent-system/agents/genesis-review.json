@@ -1,0 +1,42 @@
+{
+  "name": "genesis-review",
+  "description": "Genesis reviewer — independent review of a diff + live acceptance. Read-only on code; writes review reports only.",
+  "model": "claude-opus-5.5",
+  "tools": ["read", "write", "shell", "subagent"],
+  "resources": [
+    "file://{{TRACKER}}/context/L0-core.md",
+    "file://{{TRACKER}}/bible/02-architecture.md",
+    "file://{{TRACKER}}/bible/07-working-on-tasks-and-agreements.md",
+    "file://{{TRACKER}}/context/_generated/adr-digest.md",
+    "file://{{TRACKER}}/context/_generated/lesson-digest.md",
+    "file://{{TRACKER}}/context/_generated/area-catalog.md",
+    "file://{{TRACKER}}/context/state/current.md",
+    "file://{{TRACKER}}/reference/coding-standards.md",
+    "skill://{{GENESIS_HOME}}/skills/genesis-code-review/SKILL.md",
+    "skill://{{GENESIS_HOME}}/skills/genesis-live-acceptance/SKILL.md"
+  ],
+  "permissions": {
+    "rules": [
+      { "capability": "fs_read", "match": ["{{TRACKER}}/**", "{{REPOS}}/**", "{{GENESIS_HOME}}/**", "/tmp/**"], "effect": "allow" },
+      { "capability": "fs_write", "match": ["{{TRACKER}}/specs/**/reviews/**", "/tmp/genesis-review/**", "/tmp/**"], "effect": "allow" },
+      { "capability": "fs_write", "match": ["{{REPOS}}/**"], "effect": "deny" },
+      { "capability": "shell", "match": [
+          "genesis-ctx *", "{{GENESIS_HOME}}/bin/genesis-ctx *",
+          "git status*", "git diff*", "git log*", "git show*", "git branch*",
+          "*/.venv/bin/python -m pytest*", "*/.venv/bin/ruff *", "pytest*", "ruff *",
+          "npm run *", "npx tsc*", "npx eslint*", "npx vitest*", "node *",
+          "ls *", "cat *", "grep *", "rg *", "find *"
+        ], "effect": "allow" },
+      { "capability": "shell", "match": ["git commit*", "git push*", "git tag*", "git add*", "git reset*", "rm -rf*"], "effect": "deny" }
+    ]
+  },
+  "toolsSettings": {
+    "subagent": { "availableAgents": [], "trustedAgents": [] }
+  },
+  "hooks": [
+    { "name": "genesis-status", "trigger": "SessionStart", "action": { "type": "command", "command": "{{GENESIS_HOME}}/bin/genesis-ctx status --brief" } },
+    { "name": "bulk-read-guard", "trigger": "PreToolUse", "matcher": "read", "action": { "type": "command", "command": "{{GENESIS_HOME}}/hooks/bulk-read-guard.sh" } }
+  ],
+  "welcomeMessage": "genesis-review ready. Give me the phase/sub-spec id(s) and the base revision(s).",
+  "prompt": "You are a Genesis review agent. Your always-loaded context is L0 (core, architecture, work loop, the ADR and lesson digests, the area catalog, the current state); the live repo status was printed at session start. You do NOT read the bible. Follow the retrieval protocol in L0-core \u00a73. ADRs are non-negotiable; lessons are do-not-regress. You are READ-ONLY on code (writes are denied there); you write review reports only, and you ask the user at every HITL gate.\n\nProcedure:\n1. Input: a phase or sub-spec id plus the base revision(s) per repo.\n2. Run `genesis-ctx check --since <rev>` per repo. Read the DIFF (not whole files) and the relevant specs. Use `genesis-ctx adr|lesson` for any rule's full text.\n3. Run the area gates the check lists (tests, ruff, typecheck, build) to verify the author's claims.\n4. Answer EVERY checklist line OK / VIOLATION / N/A, each with cited evidence (file:line, test name, command output).\n5. Write the report to `specs/<phase>/reviews/<id>-review.md`: findings by severity (blocker / major / minor / nit), then a verdict \u2014 **SHIP** or **NEEDS_CHANGES**. Follow the genesis-code-review skill's template.\n6. For live acceptance, follow the genesis-live-acceptance skill: stop at every HITL gate and ask me before any fleet update or mutation; capture evidence (screenshots, DB state).\n\nBe specific and fair. A missing regression test for a fixed bug is a finding. Do not rubber-stamp."
+}

@@ -1,6 +1,7 @@
 # 47-06 — The five agents, their skills and hooks (Kiro CLI 3)
 
-> **Status:** 🟡 SPEC-DRAFTED 2026-10-20. Repo: project-tracker (`genesis/agent-system/`). Parent:
+> **Status:** 🟢 BUILT 2026-10-20 (session S5; As built below — live `/context show` acceptance runs after the real
+> install in 47-07). Repo: project-tracker (`genesis/agent-system/`). Parent:
 > `specs/phase-47-agent-context-system.md`. Decisions D2–D5, D9. Session S5.
 
 ## 1. Goal
@@ -150,3 +151,78 @@ docs = ["tracker:specs/phase-47-agent-context-system/47-02-layout-and-metadata.m
         "tracker:specs/phase-47-agent-context-system/47-07-install-and-update.md",
         "tracker:specs/phase-47-agent-context-system/47-08-documentation-standard.md"]
 ```
+
+## As built
+
+**Session:** S5, 2026-10-20. **Bootstrap rule honored** (no bible read whole; only `genesis-ctx` + ranged reads).
+
+### Step 0 — CLI probe (§2), on `kiro-cli --v3` (KAS 0.66.43)
+
+The default `kiro-cli` is 2.32.0; the next-gen engine is launched with **`kiro-cli --v3`** (the user confirmed it is
+installed). All six §2 checks were run empirically on this machine:
+
+| § | Check | Result |
+|---|---|---|
+| (a) | A profile with absolute `file://`/`skill://` resources loads | **Pass.** A JSON profile in `.kiro/agents/` loads; `file://` resources resolve at load and a missing one is reported by `agent list`. `file://./x` resolves relative to `~/.kiro/agents/`, so **absolute paths (D3) are required**. The interactive `/context show` TUI command cannot be driven in `--no-interactive` (it narrates instead), so the live resource listing + ≤5% is verified after the real install (47-07 §5 / §9 here); the token budget is computed below. |
+| (b) | `SessionStart` stdout → context | **Pass.** The hook fires (confirmed via a side-effect log); docs confirm exit-0 stdout is added to context for `SessionStart`. |
+| (c) | `Stop` `{"decision":"block"}` → continue | **Doc-confirmed** (hooks/types): exit-0 `{"decision":"block","reason":…}` on stdout makes the agent take another turn; not independently driven headlessly. `stop-lint.sh` bounds this to **two** continues per session. |
+| (d) | `PreToolUse` exit 2 blocks a read + stderr seen; stdin shape | **Pass (key probe).** A `PreToolUse` hook with `matcher: "read"` fired on the read tool, exit 2 **blocked** it and the agent reported the stderr verbatim. The stdin JSON is `{"session_id","hook_event_name","cwd","tool_name":"read_file","tool_input":{"path","offset","limit"}}` — so the guard keys on `tool_input.path` and treats a read with no positive `limit`/`offset` as whole-file. |
+| (e) | `toolsSettings.subagent.availableAgents` | **Doc-confirmed** + profile validates with the block present; runtime spawn verified in the pilot (47-09). |
+| (f) | `permissions.rules` deny on `shell` blocks | **Pass.** A `shell` deny rule blocked a matching command **even under `--trust-all-tools`** — deny wins over trust. |
+
+### Deviations from the spec text (all applied; none changes WHICH context loads)
+
+1. **Profiles are JSON, not Markdown** (47-06 §4 showed Markdown frontmatter). V3 accepts both, but JSON is what
+   `kiro-cli --v3 agent create` emits and lets the installer validate with stdlib `json` (no YAML parser needed). Same
+   fields, same semantics. The long role prompt (§5) is the JSON `prompt` string.
+2. **`permissions.rules` replace `allowedTools`** (V3): a profile with `allowedTools`/`toolsSettings` but no
+   `permissions` is skipped by V3 as un-migrated. Every profile carries a `permissions` block. Capability names are
+   `fs_read` / `fs_write` / `shell` (not `execute_bash`); **deny wins** across scopes.
+3. **`tools` uses V3 tags** `read, write, shell, web, subagent`. The spec's **`code`** is not a V3 tool/tag; code
+   navigation is via `read` (read_file + grep_search) + `genesis-ctx` + `shell`. `subagent` is included for every agent
+   that spawns sub-agents (spec/dev/review/docs); `genesis-release` has none.
+4. **PreToolUse matcher is the tag `read`** (confirmed firing on `read_file`); shell globs support only `*` (fs globs
+   support `**`), which all patterns respect.
+5. **`agent validate` is lenient** (it accepted a bad `effect` and an unknown capability; exit code unreliable). The
+   47-07 installer therefore does its own stdlib validation and relies on the loader's own missing-resource error.
+6. **`fs_read` allow** is granted to `{{TRACKER}}/**`, `{{REPOS}}/**`, `{{GENESIS_HOME}}/**`, `/tmp/**` on every agent
+   (agents launch from the root workspace but must read project-tracker); the bulk-read-guard protects the big docs.
+7. **`genesis-ctx` allowed both as `genesis-ctx *` and `{{GENESIS_HOME}}/bin/genesis-ctx *`** (PATH or full path).
+
+### Files (under `project-tracker/genesis/agent-system/`)
+
+```
+agents/genesis-{spec,dev,review,release,docs}.json   5 JSON profiles, {{TRACKER}}/{{REPOS}}/{{GENESIS_HOME}}/{{MODEL}} placeholders
+skills/genesis-{spec-authoring,backend-dev,api-dev,web-dev,workflow-authoring,
+       db-migration,live-acceptance,code-review,release,doc-writeback}/SKILL.md   10 skills, each ≤ 2K tokens
+hooks/bulk-read-guard.sh    PreToolUse on read: blocks WHOLE-file reads of decision-log / bible 03·04·06 / archive / tracker
+hooks/stop-lint.sh [--specs-only]   Stop: genesis-ctx lint; {"decision":"block"} to continue, bounded to 2/session
+```
+Removed the `.gitkeep` sentinels in `agents/`, `skills/`, `hooks/`. SessionStart uses `genesis-ctx status --brief`
+directly (no script). Skills are **procedures + absolute-path pointers** (inline code, not markdown links, so `lint` stays
+clean) into the real docs — no source doc was rewritten.
+
+### Skills (token sizes, all ≤ 2K)
+
+`spec-authoring` 802 · `backend-dev` 578 · `api-dev` 380 · `web-dev` 409 · `workflow-authoring` 444 ·
+`db-migration` 393 · `live-acceptance` 407 · `code-review` 480 · `release` 503 · `doc-writeback` 1108.
+Each points at `genesis-ctx adr|lesson|area` and the authoritative `reference/` / `bible/05` docs by absolute path.
+
+### Acceptance (§9)
+
+- **All five rendered profiles pass `kiro-cli --v3 agent validate`** (and round-trip through stdlib `json`).
+- **Starting context budget** for a fresh `genesis-dev` (the §4 resources): L0 = **~14.9K tokens** = **1.49 %** of a
+  1M window (L0-core 1.1K + bible/02 0.9K + bible/07 0.9K + adr-digest 4.1K + lesson-digest 3.8K + area-catalog 0.8K +
+  state 0.8K + coding-standards 2.4K). Plus the ~1.2K role prompt and the `status --brief` output (~0.5K) and the six
+  `skill://` **metadata** lines (loaded on demand, not full bodies) → **≈ 1.7 % before any pack**, well under the ≤ 5 %
+  bar. The live `/context show` confirmation runs in the fresh-session acceptance after the real install (47-07 §5).
+- **`genesis-ctx lint` green** with the new `agent-system/*.md` skills (0 errors, 0 warnings; L0 ~12,267 tokens).
+- `bulk-read-guard.sh` unit-checked: blocks whole-file reads of decision-log / bible-04 / archive / tracker, allows a
+  ranged read (positive `limit` or non-zero `offset`) and any other path.
+
+### Resume pointer
+
+Live `/context show` + runtime sub-agent spawn (e) are verified in the fresh-session acceptance right after
+`install.sh` runs (47-07). Build order from here: **47-07** (installer + tests, then `install.sh --dry-run` → real
+install on the operator's yes), then **47-08** (the `genesis-doc-writeback` skill is already written to the 47-08
+standard; verify the `add adr|lesson` formats and finalize).
