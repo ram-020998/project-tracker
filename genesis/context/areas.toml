@@ -4,9 +4,8 @@
 # code-map sections (context/tags/*.toml) are tagged with areas; `genesis-ctx pack`
 # (47-03) turns a task's areas into the set of rules and code it loads.
 #
-# This is the STARTING PROPOSAL. The final list, and any re-tagging, is locked with
-# the user in 47-05. 47-02 only fills in paths/keywords from the real repo layout and
-# verifies that every path glob matches at least one file.
+# Finalized in 47-05 (S4, 2026-10-20): the 22 areas below; `gates` = the bible/05 §6 test/lint commands for the
+# repos an area's globs touch (kiro-agent-sdk / genesis-appian-parser gates are taken from those repos, not bible/05).
 #
 # Schema (47-02 §3):
 #   [area.<name>]      name is [a-z0-9-]+
@@ -33,18 +32,23 @@ title    = "genesis-core: LangGraph nodes, state, validators, reliability, heali
 paths    = ["genesis-core/genesis_core/**"]
 keywords = ["node", "graph", "state", "validator", "reliability", "healing", "subgraph", "langgraph", "gate"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd genesis-core && ../genesis/.venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis-core && ../genesis/.venv/bin/ruff check genesis_core"]
 
 [area.sdk-acp]
 title    = "kiro-agent-sdk: ACP client/session, tool bridge"
 paths    = ["kiro-agent-sdk/src/**"]
 keywords = ["acp", "sdk", "session", "agent client", "tool bridge", "mcp env"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd kiro-agent-sdk && .venv/bin/python -m pytest -q"]
 
 [area.parser]
 title    = "genesis-appian-parser: Appian object/XML parsing"
 paths    = ["genesis-appian-parser/genesis_appian_parser/**"]
 keywords = ["parser", "appian", "xml", "sail parse", "object parse"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd genesis-appian-parser && ../genesis/.venv/bin/python -m pytest -q",
+            "cd genesis-appian-parser && ../genesis/.venv/bin/ruff check ."]
 
 [area.workflows-library]
 title    = "genesis-workflows: workflows, skills, registries, CI publish gates"
@@ -57,6 +61,8 @@ keywords = ["workflow", "registry", "bundle", "publish gate", "skill package", "
 skills   = ["genesis-workflow-authoring"]
 
 # ───────────────────────────── genesis backend ─────────────────────────────
+gates    = ["cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_library.py",
+            "cd genesis-workflows && ../genesis/.venv/bin/python -m pytest -q workflows --ignore=workflows/_fixtures"]
 
 [area.runs-worker]
 title    = "Run manager, subprocess worker, HITL gates, events/SSE, checkpoints, scheduler"
@@ -66,18 +72,24 @@ paths    = ["genesis/genesis/runs/**", "genesis/genesis/runtime/engine.py",
             "genesis/genesis/api/schedules.py"]
 keywords = ["run", "worker", "subprocess", "hitl", "gate", "event", "sse", "checkpoint", "resume", "schedule"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis"]
 
 [area.db]
 title    = "genesis DB layer and migrations"
 paths    = ["genesis/genesis/db/**"]
 keywords = ["database", "migration", "schema", "sqlite", "runner"]
 skills   = ["genesis-db-migration"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis"]
 
 [area.api]
 title    = "FastAPI /api surface"
 paths    = ["genesis/genesis/api/**"]
 keywords = ["api", "fastapi", "route", "endpoint", "router"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis"]
 
 [area.chat]
 title    = "Chat, copilot, chat modes, skills-in-chat"
@@ -85,6 +97,11 @@ paths    = ["genesis/genesis/chat/**", "genesis/genesis/skills/**",
             "genesis/web/src/features/chat/**", "kiro-agent-sdk/src/**"]
 keywords = ["chat", "copilot", "chat mode", "skill", "steering", "session"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
+gates    = ["cd kiro-agent-sdk && .venv/bin/python -m pytest -q",
+            "cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis",
+            "cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/"]
 
 [area.kb-sync]
 title    = "Appian KB store, sync, delta sync, business map"
@@ -92,6 +109,8 @@ paths    = ["genesis/genesis/kb/store.py", "genesis/genesis/kb/blob.py",
             "genesis/genesis/kb/doc_sync.py", "genesis/genesis/services/application_sync.py"]
 keywords = ["kb", "knowledge base", "sync", "delta sync", "business map", "store"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis"]
 
 [area.documents]
 title    = "Document library, rendering, GWS/document integrations"
@@ -101,6 +120,10 @@ paths    = ["genesis/genesis/kb/documents.py", "genesis/genesis/kb/doc_parsing.p
             "genesis/web/src/features/documents/**", "genesis/web/src/features/library/**"]
 keywords = ["document", "library", "gws", "pdf", "spreadsheet", "render", "upload"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis",
+            "cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/"]
 
 [area.features-stages]
 title    = "Feature workspace, spec, UX/TD/breakdown stages, stage finalizers, spec change requests"
@@ -115,6 +138,10 @@ paths    = ["genesis/genesis/kb/features.py", "genesis/genesis/kb/stages.py",
             "genesis/web/src/features/applications/**", "genesis/web/src/features/catalog/**"]
 keywords = ["feature", "spec", "ux", "technical design", "breakdown", "stage", "finalizer", "change request", "cr"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis",
+            "cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/"]
 
 [area.stories-workbench]
 title    = "Stories, boards, design/implementation lanes, story workspace, object wiki"
@@ -125,6 +152,10 @@ paths    = ["genesis/genesis/kb/stories.py", "genesis/genesis/kb/story_stages.py
             "genesis/web/src/features/workbench/**"]
 keywords = ["story", "board", "lane", "workbench", "object wiki", "design lane", "implementation lane"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis",
+            "cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/"]
 
 [area.collaboration-hub]
 title    = "Collaboration, Hub provider, collab sync"
@@ -133,6 +164,10 @@ paths    = ["genesis/genesis/collab/**", "genesis/genesis/api/collab.py",
             "genesis/web/src/features/collab/**"]
 keywords = ["collab", "collaboration", "hub", "provider", "autopull", "merge"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis",
+            "cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/"]
 
 [area.memory]
 title    = "Memory store, embeddings, retrieval, memory jobs"
@@ -140,6 +175,10 @@ paths    = ["genesis/genesis/memory/**", "genesis/genesis/mcp/memory_server.py",
             "genesis/genesis/runtime/memory_jobs.py", "genesis/web/src/features/memory/**"]
 keywords = ["memory", "embedding", "vector", "retrieval", "consolidation"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis",
+            "cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/"]
 
 [area.config-secrets]
 title    = "Settings, secrets, environments, MCP/CLI registries, managed-native"
@@ -148,6 +187,10 @@ paths    = ["genesis/genesis/config/**", "genesis/genesis/runtime/settings.py",
             "genesis/genesis/api/config_routes.py", "genesis/web/src/features/settings/**"]
 keywords = ["settings", "secret", "environment", "registry", "mcp", "cli", "managed native", "config"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis",
+            "cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/"]
 
 [area.distribution]
 title    = "Install, lockfile, shipping, launcher, update"
@@ -155,6 +198,8 @@ paths    = ["genesis/genesis/dist/**", "genesis/genesis/runtime/launcher.py",
             "genesis/genesis/runtime/updater.py", "genesis/genesis/cli/install.py"]
 keywords = ["install", "lockfile", "ship", "launcher", "update", "distribution", "catalog"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis"]
 
 [area.appian-integration]
 title    = "Appian integration: Dev MCP, SAIL CLI, DevOps, write tools"
@@ -164,6 +209,8 @@ paths    = ["genesis/genesis/integrations/sail/**", "genesis/genesis/kb/dev_mcp.
             "genesis/genesis/api/native_cli.py"]
 keywords = ["appian", "dev mcp", "sail", "sail cli", "devops", "write tool", "native"]
 skills   = ["genesis-backend-dev"]
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis"]
 
 [area.observability-credits]
 title    = "Metrics snapshot, run provenance, credits, logging"
@@ -172,6 +219,8 @@ keywords = ["metrics", "observability", "credit", "provenance", "logging", "tele
 skills   = ["genesis-backend-dev"]
 
 # ───────────────────────────── web shell & runs ─────────────────────────────
+gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis"]
 
 [area.web-shell]
 title    = "Web app shell, design system, tokens, theming, system pages"
@@ -180,6 +229,8 @@ paths    = ["genesis/web/src/app/**", "genesis/web/src/shared/**",
             "genesis/web/src/features/overview/**"]
 keywords = ["app shell", "layout", "design system", "token", "theme", "ui", "router", "overview"]
 skills   = ["genesis-web-dev"]
+gates    = ["cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/"]
 
 [area.web-runs]
 title    = "Runs list, run detail graph, run inspection (web)"
@@ -188,6 +239,8 @@ keywords = ["runs page", "run detail", "graph", "inspection", "timeline"]
 skills   = ["genesis-web-dev"]
 
 # ───────────────────────────── cross-cutting (always loaded) ─────────────────────────────
+gates    = ["cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/"]
 
 [area.security]
 title    = "Localhost guardrail, read-only chat, trust, secrets handling"
