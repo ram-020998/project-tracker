@@ -230,6 +230,11 @@ batched retrieval was denied), m6 and m7 were still open. Decided with the user;
    prompt was trimmed by two lines L0 already states, so it stays ≤ 1.2K tokens). A test renders every profile and
    checks that the documented `adr` and `lesson` forms match an allow rule, match no ask/deny rule, and pass the
    profile's shell-guard.
+   **Live re-run after `update.sh`:** the review's exact Q41–Q50 batch (one fresh genesis-dev session,
+   `--no-interactive`, no trust-all) went from 0/10 to **10/10** (`grade5.py`). The agent's first call was
+   `…/genesis-ctx adr ADR-021 ADR-032 ADR-035 ADR-050 ADR-061 ADR-062 ADR-073 ADR-033 ADR-052 ADR-076`, which
+   completed. It also attempted a `grep … | grep … | cut` over the saved output, which was denied as expected (a pipe),
+   and it recovered with single-id `genesis-ctx adr` calls. Evidence: `/tmp/genesis-dev/batch5-r2.{txt,err}`.
 3. **m6** (`8af14c7`). genesis-dev `trustedAgents = ["genesis-review"]` (matches 47-06 §4; pinned by a test).
    genesis-review's `/tmp/**` write is kept as the review left it, and so is genesis-spec's missing explicit
    code-repo push deny (shell-guard refuses it anyway). Both are recorded as deviations in the 47-06 As-built.
