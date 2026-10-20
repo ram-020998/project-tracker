@@ -394,3 +394,26 @@ def test_real_agent_system_renders_and_validates(tmp_path, monkeypatch):
     names = sorted(p.stem for p in desired if p.parent == cfg.agents_dir)
     assert names == ["genesis-dev", "genesis-docs", "genesis-release", "genesis-review", "genesis-spec"]
     assert len({p.parts[-2] for p in desired if p.name == "SKILL.md"}) == 10
+
+
+def test_genesis_docs_allows_read_only_git_on_code_repos(tmp_path, monkeypatch):
+    # 47-09 m8 follow-up: genesis-docs gathers `git log <prev>..<new>` per code repo, so read-only
+    # `git -C {{REPOS}}/* …` must be allowed (shell-guard still blocks push/tag and out-of-scope writes).
+    home = tmp_path / "home"
+    (home / ".kiro" / "agents").mkdir(parents=True)
+    monkeypatch.setenv("HOME", str(home))
+    tracker = tmp_path / "tracker"
+    src = tracker / "agent-system"
+    for sub in ("agents", "skills", "hooks"):
+        shutil.copytree(REAL_SOURCE / sub, src / sub, ignore=shutil.ignore_patterns("__pycache__", ".DS_Store"))
+    repos = tmp_path / "repos"
+    cfg = gi.Config(source=src, tracker=tracker, repos=repos, home=home / ".kiro" / "genesis",
+                    agents_dir=home / ".kiro" / "agents", model="")
+    desired = gi.build_desired(cfg)
+    docs = next(json.loads(i.data) for p, i in desired.items() if p.name == "genesis-docs.json")
+    allow = [m for r in docs["permissions"]["rules"]
+             if r["capability"] == "shell" and r["effect"] == "allow" for m in r["match"]]
+    for sub in ("log", "show", "diff", "status", "describe"):
+        assert f"git -C {repos}/* {sub}*" in allow, f"missing read-only git -C {sub}"
+    # no push/tag crept into an allow rule for genesis-docs
+    assert not any("push" in m or "tag" in m for m in allow)

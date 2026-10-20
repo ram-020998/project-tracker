@@ -23,7 +23,9 @@
           "genesis-ctx *", "{{GENESIS_HOME}}/bin/genesis-ctx *",
           "git status*", "git diff*", "git log*", "git show*", "git branch*",
           "git -C {{TRACKER}} add *", "git -C {{TRACKER}} commit *", "git -C {{TRACKER}} status*",
-          "git -C {{TRACKER}} diff*", "git -C {{TRACKER}} log*"
+          "git -C {{TRACKER}} diff*", "git -C {{TRACKER}} log*",
+          "git -C {{REPOS}}/* log*", "git -C {{REPOS}}/* show*", "git -C {{REPOS}}/* diff*",
+          "git -C {{REPOS}}/* status*", "git -C {{REPOS}}/* describe*"
         ], "effect": "allow" },
       { "capability": "shell", "match": ["git push*", "git -C {{TRACKER}} push*"], "effect": "ask" },
       { "capability": "shell", "match": ["git push --force*", "git tag*", "git reset --hard*", "git clean*", "rm -rf*"], "effect": "deny" }

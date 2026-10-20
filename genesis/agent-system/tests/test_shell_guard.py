@@ -37,6 +37,8 @@ def test_git_push_tag_blocked_for_non_release(cmd):
     "git diff HEAD~1",
     'git commit -m "add a push button and tag input"',   # push/tag only in the message, not a subcommand
     "git log > /tmp/out.txt",                             # redirect target named tag/push is not the subcommand
+    "git -C /work log --oneline v1..v2",                  # read-only git against a code repo (m8 follow-up)
+    "git -C /work describe --tags",
 ])
 def test_benign_git_allowed(cmd):
     assert guard(cmd, *WR)[0] == 0
