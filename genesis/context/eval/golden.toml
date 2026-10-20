@@ -333,3 +333,88 @@ ask      = "What id format do finalized stories get, and where is the number all
 expect   = ["ADR-072"]
 phrase   = "GNS_"
 critical = false
+
+# ───────── batch 5 (Q41–Q50, 47-09 m9) — key phrase is ONLY in the ADR full text, not its digest ─────────
+# Task-framed (never names the ADR): the agent must route via the area, notice the L0 digest lacks the detail,
+# and fetch the full text with `genesis-ctx adr <id>`. Every phrase was verified absent from both _generated
+# digests and present in the ADR full text (47-09 re-review, 2026-10-21).
+
+[[q]]
+id       = "Q41"
+area     = "runs-worker"
+ask      = "Approval gates default to auto-advancing. What author-side problem does making auto_approve=true the system-enforced default (instead of relying on authors to keep gates rare) prevent? Cite the ADR."
+expect   = ["ADR-021"]
+phrase   = "approver fatigue"
+critical = false
+
+[[q]]
+id       = "Q42"
+area     = "observability-credits"
+ask      = "Genesis shows real per-turn credit usage. Which field inside Kiro's final per-turn ACP metadata notification carries that credit value? Cite the ADR."
+expect   = ["ADR-032"]
+phrase   = "meteringUsage"
+critical = false
+
+[[q]]
+id       = "Q43"
+area     = "api"
+ask      = "A workflow input declared format:\"file\" is uploaded at launch, not passed inline. Which HTTP endpoint handles that multipart upload? Cite the ADR."
+expect   = ["ADR-035"]
+phrase   = "/api/runs/upload"
+critical = false
+
+[[q]]
+id       = "Q44"
+area     = "features-stages"
+ask      = "When an SDLC status change asks for a (state, action) pair that is not in the transition table, what specific exception does the single lifecycle authority raise? Cite the ADR."
+expect   = ["ADR-050"]
+phrase   = "IllegalTransitionError"
+critical = false
+
+[[q]]
+id       = "Q45"
+area     = "stories-workbench"
+ask      = "Workbench board membership is explicit. Which kb_stories flag (added in the v0.69.0 amendment) records membership and syncs it to teammates? Cite the ADR."
+expect   = ["ADR-061"]
+phrase   = "on_board"
+critical = false
+
+[[q]]
+id       = "Q46"
+area     = "stories-workbench"
+ask      = "When a ticket is dragged into the Design lane, a design workflow launches. What is that workflow's user-facing display name? Cite the ADR."
+expect   = ["ADR-062"]
+phrase   = "Appian Ticket Design"
+critical = false
+
+[[q]]
+id       = "Q47"
+area     = "appian-integration"
+ask      = "Genesis package-management writes against Appian require a minimum Dev MCP version. What exact version? Cite the ADR."
+expect   = ["ADR-073"]
+phrase   = "26.6.110"
+critical = false
+
+[[q]]
+id       = "Q48"
+area     = "chat"
+ask      = "The chat copilot can operate runs. What single global control reverts the copilot and all sessions to read-only? Cite the ADR."
+expect   = ["ADR-033"]
+phrase   = "kill-switch"
+critical = false
+
+[[q]]
+id       = "Q49"
+area     = "documents"
+ask      = "The DocumentProvider interface lets a second document source be added as an additive adapter. Which hypothetical second source does the ADR name as the motivating example? Cite the ADR."
+expect   = ["ADR-052"]
+phrase   = "SharePoint"
+critical = false
+
+[[q]]
+id       = "Q50"
+area     = "features-stages"
+ask      = "While a spec change request is open, the spec moves to a new lifecycle status. What is that status called? Cite the ADR."
+expect   = ["ADR-076"]
+phrase   = "under-change"
+critical = false
