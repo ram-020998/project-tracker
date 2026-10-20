@@ -203,6 +203,42 @@ and §4-after-pack (14–20 % vs 10 %). Decided with the user and implemented as
    is only in the full rule text, not the L0 digest); and the dry run's proposed area additions to ADR-075/076 go
    beyond the 47-08 routing table — confirm them in a real docs run before they land.
 
+### 5.9 Round 8 — the 47-09 round-2 fix round (2026-10-20, after the round-2 re-review: NEEDS_CHANGES, M5)
+
+The re-review (round-2 section of `reviews/47-09-review.md`, fix set `d389aae..1fb3042`) confirmed B1, M1–M4 and Q31
+fixed and §2/§3/§4 passing. It raised one new major, **M5**: the B1/M1 shell-guard over-blocked ordinary idioms. m9 (the
+batched retrieval was denied), m6 and m7 were still open. Decided with the user; one local commit per item, no push:
+
+1. **M5 — quote-aware shell-guard** (`c8c5d9e`). The guard's Python now lexes the command like a shell (quotes,
+   escapes, comments, heredocs, `$(…)`/backtick/`<(…)` bodies, subshells) instead of regexing raw text. A `>` inside
+   quotes is not a redirect. `2>&1`, `>&2`, `N>&M` and `N>&-` are fd dups, not writes. `/dev/null`, `/dev/stdout`,
+   `/dev/stderr`, `/dev/tty` and `/dev/fd/N` are allowed redirect/`tee`/`cp`/`dd` targets. Variables assigned earlier
+   in the line and `for` loop values are resolved, and an unresolvable write target now **fails closed** (round 1
+   could treat it as a relative path and allow it). Push/tag detection is hardened too: `$G`, `if`/`while`,
+   `timeout`/`sudo -u`/`env -i`, `eval`, a heredoc fed to a shell, `git -c alias.…`.
+   - Tests: the 4 review false positives are regression tests, with 55 more cases; all 34 round-1 cases are unchanged
+     (94 guard tests in total).
+   - The review's probe table is 38/38 (33 original probes plus 5 false-positive probes).
+   - A replay of all 196 distinct shell commands Genesis agents ran in recorded sessions: 0 newly blocked, 22 old
+     false denials now pass.
+2. **m9 — retrieval form** (`a22026b`). The denied batch was genesis-dev's
+   `G=…/genesis-ctx; for a in 021 032 035 050; do echo "=== ADR-$a"; $G adr ADR-$a; done` (and the same for 061…076).
+   A loop/`;` cannot match the `{{GENESIS_HOME}}/bin/genesis-ctx *` allow rule, so non-interactive mode denied it.
+   The allow rules and shell-guard were **not** loosened. Instead, the standard form is now one direct call with many
+   ids, `<abs>/genesis-ctx adr ADR-021 ADR-032 …` (`adr`/`lesson` already take `nargs=+`), with no loop, pipe, `;`,
+   `&&`, `$(…)`, redirect or `VAR=` prefix. That rule is in L0-core §3 and in all five role prompts (genesis-dev's
+   prompt was trimmed by two lines L0 already states, so it stays ≤ 1.2K tokens). A test renders every profile and
+   checks that the documented `adr` and `lesson` forms match an allow rule, match no ask/deny rule, and pass the
+   profile's shell-guard.
+3. **m6** (`8af14c7`). genesis-dev `trustedAgents = ["genesis-review"]` (matches 47-06 §4; pinned by a test).
+   genesis-review's `/tmp/**` write is kept as the review left it, and so is genesis-spec's missing explicit
+   code-repo push deny (shell-guard refuses it anyway). Both are recorded as deviations in the 47-06 As-built.
+4. **m7** (`772405f`). The installed `stop-lint.sh` → full `genesis-ctx lint` on this tracker (≈ 500 `.md`) measured
+   0.18 s warm, 0.38 s cold and 0.78 s cold under load, so a 2× margin is ≈ 1.6 s. The CLI default (10 s) already
+   covered that, so no raise was needed. It is now set explicitly (`"timeout": 10`) on both Stop hooks, with a test
+   keeping it ≥ 10 s. The shared `nosid` fallback counter (the other half of round-1 m7) was not in this round's
+   brief and is unchanged.
+
 ## 6. ADR-077 (Proposed) — full text
 
 - **Status:** Proposed — 2026-10-20 (Phase 47).
