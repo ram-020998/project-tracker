@@ -244,3 +244,8 @@ first fence, duplicate key ` #2`. Each lint rule has its own failing fixture.
    (29 base, 15 `# ──`, 2 bold; was 50). Remaining base keys are all path-like; `genesis/genesis/  (scripts/` and
    `genesis-workflows/  skills/{gam/SKILL.md` stay (they contain `/`). Fixture `bible/03` gained the real
    `genesis-workflows/` shape; two new tests (continuation, preamble) → **90 passed**.
+9. **S3 tool fixes (47-04 build):**
+   - `archive` pads the pointer with blank lines when it lands next to text. Otherwise a kept bullet and the
+     pointer fused into one unit and verify-lossless failed.
+   - The verify-lossless duplicate scan skips `agent-system/tests/fixtures/`.
+   - One test each → **92 passed**.

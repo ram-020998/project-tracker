@@ -1,0 +1,25 @@
+{
+  "baseline": "d89f763efe69d424c99290ebbae892a5c112c75e",
+  "baseline_commit": "d89f763efe69d424c99290ebbae892a5c112c75e",
+  "files": [
+    "tracker.md",
+    "reference/decision-log.md",
+    "bible/08-roadmap-and-backlog.md",
+    "bible/06-hard-won-lessons.md",
+    "bible/03-codebase-map.md",
+    "bible/04-adrs-and-constraints.md",
+    "bible/01-current-state.md",
+    "AGENT_ONBOARDING.md",
+    "bible/00-onboarding-and-overview.md",
+    "reference/coding-standards.md",
+    "bible/05-dev-loop-and-release.md",
+    "bible/02-architecture.md",
+    "bible/07-working-on-tasks-and-agreements.md"
+  ],
+  "baseline_units": 1338,
+  "missing": 0,
+  "result": "PASS",
+  "missing_units": [],
+  "active_duplicates": 4,
+  "timestamp": "2026-10-20T08:01:36+00:00"
+}
