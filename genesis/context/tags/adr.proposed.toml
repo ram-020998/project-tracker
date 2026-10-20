@@ -1,0 +1,992 @@
+# adr.proposed.toml — written by `genesis-ctx propose-tags` (47-04 step 5), reviewed in 47-05.
+# Candidate tags only: every value is a proposal. `confidence` (high | medium | low) and `evidence`
+# are review aids and must be removed when an entry is accepted into adr.toml.
+# reviewed_fp is the current fingerprint — accepting an entry means its `rule` has been reviewed.
+
+[ADR-001]
+title = "LangGraph as the orchestration engine (not an LLM orchestrator)"
+status = "accepted"
+areas = ["core-engine", "runs-worker", "chat"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "LangGraph owns control flow; agents never orchestrate."
+reviewed_fp = "0b0c61da18b4d725"
+confidence = "medium"
+evidence = "areas: core-engine=3 (kw 'langgraph'×6); runs-worker=3 (kw 'hitl'×3); chat=2 (kw 'copilot'×1, kw 'steering'×1) | rule: bible/04 first sentence"
+
+[ADR-002]
+title = "Kiro via `kiro-agent-sdk` over ACP as the agent runtime"
+status = "accepted"
+areas = ["sdk-acp", "config-secrets"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "agent steps = narrow Kiro turns over ACP, per-node MCP injection; NO global Kiro `mcp.json`."
+reviewed_fp = "8db76958b749691d"
+confidence = "medium"
+evidence = "areas: sdk-acp=9 (kw 'acp'×5, kw 'sdk'×3, kw 'session'×3); config-secrets=4 (kw 'mcp'×4, kw 'cli'×1) | rule: bible/04 first sentence"
+
+[ADR-003]
+title = "Local web app; shared GitLab library; internal Solutions users"
+status = "accepted"
+areas = ["chat", "config-secrets", "distribution", "documents"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "4da6ce2ba9971592"
+confidence = "low"
+evidence = "areas: chat=3 (kw 'copilot'×2, kw 'steering'×1); config-secrets=3 (kw 'mcp'×2, kw 'config'×1); distribution=2 (kw 'install'×1, kw 'lockfile'×1); documents=2 (kw 'library'×2) | rule: bible/04 first sentence (clipped)"
+
+[ADR-004]
+title = "Per-node MCP injection (not globally-installed agents)"
+status = "accepted"
+areas = ["core-engine", "sdk-acp", "chat", "config-secrets"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "agent steps = narrow Kiro turns over ACP, per-node MCP injection; NO global Kiro `mcp.json`."
+reviewed_fp = "b65be3a211805290"
+confidence = "medium"
+evidence = "areas: core-engine=4 (kw 'node'×3, kw 'state'×1); sdk-acp=4 (kw 'acp'×2, kw 'session'×2); chat=3 (kw 'copilot'×1, kw 'session'×2); config-secrets=3 (kw 'mcp'×8) | rule: bible/04 first sentence"
+
+[ADR-005]
+title = "Shared MCP registry, no \"profiles\""
+status = "accepted"
+areas = ["config-secrets", "workflows-library"]
+paths = []
+amends = []
+amended_by = ["ADR-029"]
+superseded_by = ""
+rule = "the shared MCP/CLI registry lives in the library (curated tier, changed via MR)."
+reviewed_fp = "3658d30b501dbf67"
+confidence = "medium"
+evidence = "areas: config-secrets=8 (kw 'registry'×5, kw 'mcp'×4, kw 'cli'×1, kw 'config'×1); workflows-library=5 (kw 'workflow'×2, kw 'registry'×5) | rule: bible/04 first sentence"
+
+[ADR-006]
+title = "Self-contained workflow packages; selective install + lockfile"
+status = "accepted"
+areas = ["workflows-library", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "fc1197eeedbc3a47"
+confidence = "low"
+evidence = "areas: workflows-library=13 (kw 'workflow'×4, kw 'registry'×1, path workflow.yaml, path graph.py); distribution=8 (kw 'install'×3, kw 'lockfile'×4, kw 'update'×1, kw 'catalog'×1) | rule: bible/04 first sentence (clipped)"
+
+[ADR-007]
+title = "Role = filter tag + curated bundles; cross-role picking allowed"
+status = "accepted"
+areas = ["distribution", "chat", "release-ci"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "1c776cc3e3b7a121"
+confidence = "low"
+evidence = "areas: distribution=3 (kw 'install'×1, kw 'lockfile'×1, kw 'catalog'×1); chat=2 (kw 'copilot'×1, kw 'steering'×1); release-ci=2 (kw 'tag'×2) | rule: bible/04 first sentence (clipped)"
+
+[ADR-008]
+title = "Single app; LangGraph Studio interim, custom workbench later"
+status = "accepted"
+areas = ["stories-workbench", "runs-worker", "chat", "core-engine"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "d34f9e1ca01ed0e7"
+confidence = "low"
+evidence = "areas: stories-workbench=5 (kw 'workbench'×3, phase 7 'workbench'); runs-worker=3 (kw 'run'×1, kw 'hitl'×2); chat=2 (kw 'copilot'×1, kw 'steering'×1); core-engine=2 (kw 'reliability'×1, kw 'langgraph'×1) | rule: bible/04 first sentence (clipped)"
+
+[ADR-009]
+title = "All three HITL modes are required"
+status = "accepted"
+areas = ["runs-worker", "chat", "core-engine", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "576b1ac82f10a35d"
+confidence = "low"
+evidence = "areas: runs-worker=4 (kw 'run'×1, kw 'hitl'×2, kw 'resume'×1); chat=2 (kw 'copilot'×1, kw 'steering'×1); core-engine=2 (kw 'state'×2); distribution=2 (kw 'install'×1, kw 'lockfile'×1) | rule: bible/04 first sentence (clipped)"
+
+[ADR-010]
+title = "Small editable state + per-run blackboard + SQLite checkpointer"
+status = "accepted"
+areas = ["core-engine", "chat", "runs-worker", "db"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "state is small/serializable/editable (pointers + decisions); bulk lives in the `RunWorkspace` blackboard under `$GENESIS_ARTIFACTS_DIR`; never inline bulk in state/chat."
+reviewed_fp = "708718343eac39de"
+confidence = "medium"
+evidence = "areas: core-engine=4 (kw 'state'×6, kw 'langgraph'×1); chat=3 (kw 'chat'×2, kw 'copilot'×1); runs-worker=3 (kw 'run'×2, kw 'hitl'×1); db=2 (kw 'sqlite'×2) | rule: bible/04 first sentence"
+
+[ADR-011]
+title = "Reliability trio is a HARD requirement (CI-enforced)"
+status = "accepted"
+areas = ["core-engine", "release-ci"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "reliability trio (validator + retry + escalation) MANDATORY on every agent node; CI-enforced."
+reviewed_fp = "642acb9a0f117961"
+confidence = "medium"
+evidence = "areas: core-engine=7 (kw 'node'×2, kw 'validator'×2, kw 'reliability'×2, kw 'gate'×1); release-ci=3 (kw 'ci'×3) | rule: bible/04 first sentence"
+
+[ADR-012]
+title = "`build()` + `META` contract; validated in CI; run in a subprocess worker"
+status = "accepted"
+areas = ["runs-worker"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "graph execution runs in a disposable subprocess worker, not the app; pause=kill, resume=fresh worker from checkpoint; the app never imports workflow Python."
+reviewed_fp = "2f22af9c95bfbe72"
+confidence = "medium"
+evidence = "areas: runs-worker=19 (kw 'run'×5, kw 'worker'×9, kw 'subprocess'×6, kw 'gate'×1) | rule: bible/04 first sentence"
+
+[ADR-013]
+title = "solutions-copilot retired; Genesis owns its config UI"
+status = "accepted"
+areas = ["chat", "config-secrets", "web-shell", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "71e518585d614357"
+confidence = "low"
+evidence = "areas: chat=4 (kw 'copilot'×3, kw 'steering'×1); config-secrets=4 (kw 'registry'×1, kw 'mcp'×1, kw 'config'×2); web-shell=3 (kw 'token'×1, kw 'ui'×2); distribution=2 (kw 'install'×1, kw 'lockfile'×1) | rule: bible/04 first sentence (clipped)"
+
+[ADR-014]
+title = "Authoring: scaffolder + test harness + agent-assisted + steering; open contribution"
+status = "accepted"
+areas = ["chat", "workflows-library", "distribution", "documents"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "5b54e252676712f7"
+confidence = "low"
+evidence = "areas: chat=4 (kw 'copilot'×1, kw 'steering'×3); workflows-library=3 (kw 'workflow'×3); distribution=2 (kw 'install'×1, kw 'lockfile'×1); documents=2 (kw 'library'×2) | rule: bible/04 first sentence (clipped)"
+
+[ADR-015]
+title = "Build the complete app + ERD first, then migrate skills one by one"
+status = "accepted"
+areas = ["stories-workbench", "chat", "config-secrets", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "2c71881b899a8bde"
+confidence = "low"
+evidence = "areas: stories-workbench=4 (kw 'workbench'×2, phase 7 'workbench'); chat=3 (kw 'copilot'×1, kw 'skill'×1, kw 'steering'×1); config-secrets=2 (phase 8 'settings'); distribution=2 (kw 'install'×1, kw 'lockfile'×1) | rule: bible/04 first sentence (clipped)"
+
+[ADR-016]
+title = "Name = Genesis"
+status = "accepted"
+areas = ["chat", "distribution", "documents", "sdk-acp"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "66741be24e0a2f62"
+confidence = "low"
+evidence = "areas: chat=2 (kw 'copilot'×1, kw 'steering'×1); distribution=2 (kw 'install'×1, kw 'lockfile'×1); documents=2 (kw 'library'×2); sdk-acp=2 (kw 'sdk'×2) | rule: bible/04 first sentence (clipped)"
+
+[ADR-017]
+title = "Python 3.11+ across platform + workflows"
+status = "accepted"
+areas = ["chat", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Q1–Q14 product decisions (ADR-003, ADR-006–009, ADR-013–017) — local web app with a shared GitLab library (Q1), self-contained workflow packages + selective install + lockfile (Q4), role tags + bundles (Q5), single…"
+reviewed_fp = "aa21b42d0ae3f295"
+confidence = "low"
+evidence = "areas: chat=2 (kw 'copilot'×1, kw 'steering'×1); distribution=2 (kw 'install'×1, kw 'lockfile'×1) | rule: bible/04 first sentence (clipped)"
+
+[ADR-018]
+title = "Blackboard handoff over inline data"
+status = "accepted"
+areas = ["core-engine"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "state is small/serializable/editable (pointers + decisions); bulk lives in the `RunWorkspace` blackboard under `$GENESIS_ARTIFACTS_DIR`; never inline bulk in state/chat."
+reviewed_fp = "b6307d977a3398e6"
+confidence = "medium"
+evidence = "areas: core-engine=3 (kw 'state'×3) | rule: bible/04 first sentence"
+
+[ADR-019]
+title = "`genesis-core` shared package + semver major-compat gate"
+status = "accepted"
+areas = ["distribution", "core-engine", "runs-worker", "release-ci"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "genesis-core semver; `CORE_MAJOR` (=1, distinct from pip version) is the compat-gate key; the loader refuses a library whose declared `genesis_core_major != CORE_MAJOR` (additive-only within a major)."
+reviewed_fp = "8545f98c3222e9f1"
+confidence = "medium"
+evidence = "areas: distribution=7 (kw 'lockfile'×1, phase 3 'install', phase 3 'lockfile', phase 3 'distribution'); core-engine=6 (kw 'node'×1, kw 'state'×1, kw 'validator'×1, kw 'gate'×3); runs-worker=5 (kw 'worker'×1, kw 'subprocess'×1, kw 'gate'×3); release-ci=4 (kw 'version'×4, kw 'ci'×1) | rule: bible/04 first sentence"
+
+[ADR-020]
+title = "No global Kiro mutation"
+status = "accepted"
+areas = ["config-secrets", "core-engine", "sdk-acp"]
+paths = []
+amends = []
+amended_by = ["ADR-029"]
+superseded_by = ""
+rule = "agent steps = narrow Kiro turns over ACP, per-node MCP injection; NO global Kiro `mcp.json`."
+reviewed_fp = "f35bf8398a4d0a2c"
+confidence = "medium"
+evidence = "areas: config-secrets=3 (kw 'mcp'×4); core-engine=2 (kw 'node'×2); sdk-acp=2 (kw 'acp'×2) | rule: bible/04 first sentence"
+
+[ADR-021]
+title = "`auto_approve` default posture for HITL- Decision: `META.auto_approve = true` by default — validated steps auto-advance; a run pauses only a…"
+status = "accepted"
+areas = ["runs-worker", "config-secrets", "core-engine", "documents"]
+paths = []
+amends = []
+amended_by = ["ADR-068"]
+superseded_by = ""
+rule = "`META.auto_approve=true` default; pause only at 3 sanctioned gate classes (approval|escalation|pre_mutation); `pre_mutation` REQUIRED before any write/deploy/data MCP node."
+reviewed_fp = "361c9be622e7da80"
+confidence = "medium"
+evidence = "areas: runs-worker=5 (kw 'run'×1, kw 'hitl'×3, kw 'gate'×1); config-secrets=2 (kw 'mcp'×2); core-engine=2 (kw 'node'×1, kw 'gate'×1); documents=2 (phase 2 'library') | rule: bible/04 first sentence"
+
+[ADR-022]
+title = "Dedicated, configurable artifacts root + retention"
+status = "accepted"
+areas = ["runs-worker", "core-engine", "config-secrets", "workflows-library"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "state is small/serializable/editable (pointers + decisions); bulk lives in the `RunWorkspace` blackboard under `$GENESIS_ARTIFACTS_DIR`; never inline bulk in state/chat."
+reviewed_fp = "a713106a71ffc73f"
+confidence = "medium"
+evidence = "areas: runs-worker=5 (kw 'run'×6, kw 'checkpoint'×1, kw 'resume'×1); core-engine=3 (kw 'state'×5); config-secrets=2 (kw 'config'×2); workflows-library=2 (kw 'workflow'×2) | rule: bible/04 first sentence"
+
+[ADR-023]
+title = "FastAPI backend embedding LangGraph; Studio is a dev harness only"
+status = "accepted"
+areas = ["runs-worker", "core-engine", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "backend is FastAPI embedding LangGraph (NOT a LangGraph Server); Studio is interim debug only."
+reviewed_fp = "2b4b9aaa050d3d5a"
+confidence = "medium"
+evidence = "areas: runs-worker=9 (kw 'run'×3, kw 'hitl'×2, phase 5 'run', phase 5 'hitl'); core-engine=5 (kw 'graph'×2, kw 'langgraph'×12); distribution=4 (kw 'install'×1, kw 'lockfile'×1, kw 'catalog'×2) | rule: bible/04 first sentence"
+
+[ADR-024]
+title = "Async-first engine (`AsyncSqliteSaver` + `aiosqlite`); Python 3.13 pin"
+status = "accepted"
+areas = ["runs-worker", "core-engine"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "engine is async-first (ainvoke/astream + AsyncSqliteSaver + aiosqlite); Python pinned 3.13."
+reviewed_fp = "1200bf3fc6a46d64"
+confidence = "high"
+evidence = "areas: runs-worker=13 (kw 'run'×3, kw 'worker'×1, kw 'subprocess'×1, kw 'checkpoint'×1); core-engine=6 (kw 'node'×3, kw 'langgraph'×3) | rule: bible/04 first sentence"
+
+[ADR-025]
+title = "Fork = seed a NEW thread (not in-thread time-travel)"
+status = "accepted"
+areas = ["runs-worker", "core-engine"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "\"fork\" = seed a NEW thread from a past checkpoint; the original is untouched."
+reviewed_fp = "50d7cd9958557aff"
+confidence = "medium"
+evidence = "areas: runs-worker=12 (kw 'run'×4, kw 'hitl'×2, kw 'checkpoint'×5, phase 5 'run'); core-engine=5 (kw 'node'×2, kw 'state'×2, kw 'langgraph'×1) | rule: bible/04 first sentence"
+
+[ADR-026]
+title = "Web workbench stack: React + TypeScript (supersedes the Preact default)"
+status = "accepted"
+areas = ["distribution", "security", "stories-workbench"]
+paths = []
+amends = []
+amended_by = ["ADR-063"]
+superseded_by = ""
+rule = "web UI = React+TS (local single-user); multi-user/hosted would re-open ADR-012/023 (separate track)."
+reviewed_fp = "2e06badfd7c764a7"
+confidence = "medium"
+evidence = "areas: distribution=4 (kw 'launcher'×1, path runtime/launcher.py); security=4 (kw 'localhost'×2, kw 'guardrail'×2); stories-workbench=4 (kw 'workbench'×2, phase 7 'workbench') | rule: bible/04 first sentence"
+
+[ADR-027]
+title = "Web revamp frontend stack (Tailwind + shadcn/ui + React Router + TanStack Query + React Flow)"
+status = "accepted"
+areas = ["web-shell", "runs-worker", "core-engine", "documents"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "the web stack (Tailwind + shadcn/Radix + React Router + TanStack Query + React Flow + react-hook-form/zod + react-markdown/mermaid/shiki + Recharts + Vitest/RTL/MSW) and the Overcut visual language (07-03a)."
+reviewed_fp = "3f11219ad516c0fd"
+confidence = "high"
+evidence = "areas: web-shell=12 (kw 'layout'×1, kw 'design system'×1, kw 'theme'×1, kw 'ui'×5); runs-worker=11 (kw 'run'×4, kw 'subprocess'×1, kw 'hitl'×2, kw 'gate'×1); core-engine=10 (kw 'node'×4, kw 'graph'×4, kw 'state'×3, kw 'gate'×1); documents=7 (kw 'document'×3, kw 'library'×1, path web/) | rule: bible/04 first sentence"
+
+[ADR-028]
+title = "Backend API namespaced under `/api` + SPA history fallback"
+status = "accepted"
+areas = ["api", "runs-worker", "config-secrets"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "ALL backend endpoints under `/api` (APIRouter) + SPA history fallback; the web client prepends `/api` centrally (never hard-code it in components); the Vite dev proxy is a single `/api` → :8760."
+reviewed_fp = "bdfe26648d7d321e"
+confidence = "high"
+evidence = "areas: api=14 (kw 'api'×25, kw 'fastapi'×1, kw 'route'×1, kw 'endpoint'×1); runs-worker=9 (kw 'run'×1, kw 'sse'×1, path api/, phase 5 'run'); config-secrets=7 (kw 'settings'×1, kw 'config'×4, path api/) | rule: bible/04 first sentence"
+
+[ADR-029]
+title = "Two-Tier MCP/CLI Registry (revises ADR-005/020)"
+status = "accepted"
+areas = ["config-secrets", "security", "workflows-library"]
+paths = []
+amends = ["ADR-005", "ADR-020"]
+amended_by = []
+superseded_by = ""
+rule = "two-tier MCP/CLI registry (curated read-only + custom writable) + tool allowlist + direct-stdio introspection."
+reviewed_fp = "81784f999df25207"
+confidence = "high"
+evidence = "areas: config-secrets=12 (kw 'settings'×1, kw 'secret'×1, kw 'registry'×6, kw 'mcp'×13); security=11 (kw 'security'×1, kw 'read-only'×3, kw 'trust'×3, kw 'secret'×1); workflows-library=11 (kw 'workflow'×2, kw 'registry'×6, path mcp-registry.json, path cli-registry.json) | rule: bible/04 first sentence | edges: revises ADR-005, revises ADR-020"
+
+[ADR-030]
+title = "Persistence engine: SQLite now, Postgres/pgvector only on an explicit trigger"
+status = "accepted"
+areas = ["db", "runs-worker", "core-engine", "features-stages"]
+paths = []
+amends = []
+amended_by = ["ADR-037", "ADR-041"]
+superseded_by = ""
+rule = "persistence stays SQLite; move to Postgres/pgvector only on an explicit trigger (multi-user, transcript RAG, or heavy analytics)."
+reviewed_fp = "533947ba058053b3"
+confidence = "high"
+evidence = "areas: db=10 (kw 'migration'×3, kw 'sqlite'×8, kw 'runner'×1, path genesis/db/); runs-worker=10 (kw 'run'×7, kw 'worker'×1, kw 'subprocess'×1, kw 'checkpoint'×2); core-engine=4 (kw 'node'×1, kw 'state'×1, kw 'langgraph'×2); features-stages=4 (kw 'feature'×1, kw 'spec'×4) | rule: bible/04 first sentence"
+
+[ADR-031]
+title = "Chat is a read-only conversational assistant (never orchestrates)"
+status = "accepted"
+areas = ["chat", "runs-worker", "config-secrets", "security"]
+paths = []
+amends = []
+amended_by = ["ADR-033", "ADR-034", "ADR-045", "ADR-076"]
+superseded_by = ""
+rule = "Chat is a read-only assistant (never orchestrates): it observes/answers, never drives or mutates."
+reviewed_fp = "feea89c605bd8b26"
+confidence = "high"
+evidence = "areas: chat=20 (kw 'chat'×20, kw 'copilot'×2, kw 'skill'×2, kw 'steering'×1); runs-worker=13 (kw 'run'×3, kw 'worker'×2, kw 'subprocess'×4, kw 'gate'×1); config-secrets=12 (kw 'secret'×2, kw 'mcp'×5, kw 'cli'×9, kw 'config'×1); security=11 (kw 'read-only'×11, kw 'trust'×3, kw 'secret'×2, kw 'allowlist'×4) | rule: bible/04 first sentence"
+
+[ADR-032]
+title = "Credit usage is REAL metered data from Kiro ACP (not estimated)"
+status = "accepted"
+areas = ["observability-credits", "sdk-acp", "chat", "runs-worker"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "credit usage is REAL metered data from Kiro ACP (`_kiro.dev/metadata.meteringUsage`, verified per-turn not cumulative), NOT estimated — there is no pricing engine."
+reviewed_fp = "b51f92be89c38bda"
+confidence = "medium"
+evidence = "areas: observability-credits=9 (kw 'credit'×6, kw 'provenance'×2, kw 'telemetry'×2, phase 11 'credit'); sdk-acp=8 (kw 'acp'×5, kw 'sdk'×4, kw 'session'×2); chat=5 (kw 'chat'×4, kw 'session'×2); runs-worker=4 (kw 'run'×5, kw 'event'×1) | rule: bible/04 first sentence"
+
+[ADR-033]
+title = "The Chat copilot may operate runs (human-confirmed, run-management layer only), never owns control flow"
+status = "accepted"
+areas = ["chat", "config-secrets", "runs-worker", "core-engine"]
+paths = []
+amends = ["ADR-031"]
+amended_by = ["ADR-034"]
+superseded_by = ""
+rule = "the Chat copilot may operate runs (start / read status / answer gates / cancel) at the run-management layer only, but (a) LangGraph still owns each workflow's control flow (ADR-001 intact — the copilot calls the same…"
+reviewed_fp = "0878e4e0f48aebd0"
+confidence = "low"
+evidence = "areas: chat=14 (kw 'chat'×11, kw 'copilot'×14, kw 'chat mode'×1, kw 'session'×7); config-secrets=11 (kw 'secret'×1, kw 'registry'×2, kw 'mcp'×6, kw 'cli'×4); runs-worker=10 (kw 'run'×13, kw 'hitl'×4, kw 'gate'×8, kw 'sse'×1); core-engine=9 (kw 'node'×2, kw 'graph'×1, kw 'langgraph'×4, kw 'gate'×8) | rule: bible/04 first sentence (clipped) | edges: refines ADR-031"
+
+[ADR-034]
+title = "Skills are first-class \"standalone activities\", chat-invoked and filesystem-provisioned (Phase 14)"
+status = "accepted"
+areas = ["chat", "workflows-library", "config-secrets", "sdk-acp"]
+paths = []
+amends = ["ADR-031", "ADR-033"]
+amended_by = []
+superseded_by = ""
+rule = "Skills are a first-class \"standalone activity\" concept beside Workflows, chat-invoked + filesystem-provisioned."
+reviewed_fp = "8d9f6f6696bffc29"
+confidence = "high"
+evidence = "areas: chat=17 (kw 'chat'×17, kw 'copilot'×1, kw 'skill'×24, kw 'steering'×2); workflows-library=11 (kw 'workflow'×9, kw 'registry'×2, path references/, path skills/); config-secrets=10 (kw 'settings'×1, kw 'environment'×1, kw 'registry'×2, kw 'mcp'×3); sdk-acp=9 (kw 'acp'×8, kw 'sdk'×5, kw 'session'×8) | rule: bible/04 first sentence | edges: refines ADR-031, refines ADR-033, refines ADR-031, refines ADR-033"
+
+[ADR-035]
+title = "Run input file attachments (bounded, sanitized, provisioned into the blackboard) (Phase 15)"
+status = "accepted"
+areas = ["runs-worker", "chat", "workflows-library", "api"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Run input file attachments."
+reviewed_fp = "150c50268050e6a6"
+confidence = "medium"
+evidence = "areas: runs-worker=7 (kw 'run'×5, kw 'worker'×5, kw 'subprocess'×1); chat=6 (kw 'copilot'×3, kw 'skill'×1, phase 14 'chat'); workflows-library=5 (kw 'workflow'×8, phase 15 'workflow'); api=4 (kw 'api'×4, kw 'endpoint'×1) | rule: bible/04 first sentence"
+
+[ADR-036]
+title = "Internalized Appian Knowledge Base (Genesis owns the parser + KB, fed by the single dev-tagged environment) (Phase 16)"
+status = "accepted"
+areas = ["appian-integration", "kb-sync", "config-secrets", "parser"]
+paths = []
+amends = []
+amended_by = ["ADR-073"]
+superseded_by = ""
+rule = "Internalized Appian Knowledge Base."
+reviewed_fp = "de5e6b04f19d0047"
+confidence = "medium"
+evidence = "areas: appian-integration=14 (kw 'appian'×15, kw 'dev mcp'×5, kw 'devops'×5, kw 'native'×3); kb-sync=12 (kw 'kb'×23, kw 'knowledge base'×3, kw 'sync'×6, kw 'store'×1); config-secrets=8 (kw 'environment'×8, kw 'registry'×2, kw 'mcp'×16); parser=8 (kw 'parser'×6, kw 'appian'×15, phase 16 'appian') | rule: bible/04 first sentence"
+
+[ADR-037]
+title = "Code-free temporal KB + live code via the Dev MCP (Phase 16)"
+status = "accepted"
+areas = ["kb-sync", "appian-integration", "parser", "config-secrets"]
+paths = []
+amends = ["ADR-030"]
+amended_by = ["ADR-073"]
+superseded_by = ""
+rule = "Code-free temporal KB + live code via the Dev MCP."
+reviewed_fp = "551b8d95e6392fa8"
+confidence = "medium"
+evidence = "areas: kb-sync=11 (kw 'kb'×20, kw 'sync'×6, kw 'store'×3, phase 16 'knowledge base'); appian-integration=10 (kw 'appian'×2, kw 'dev mcp'×9, kw 'sail'×4, phase 16 'appian'); parser=7 (kw 'parser'×3, kw 'appian'×2, phase 16 'appian'); config-secrets=6 (kw 'environment'×5, kw 'mcp'×10) | rule: bible/04 first sentence | edges: refines ADR-030, refines ADR-030"
+
+[ADR-038]
+title = "Managed native Appian MCP servers (vendored, versioned, replaceable via manual drop-in, not forked) (Phase 16)"
+status = "accepted"
+areas = ["appian-integration", "config-secrets"]
+paths = []
+amends = []
+amended_by = ["ADR-073"]
+superseded_by = ""
+rule = "Managed native Appian MCP servers (vendored, versioned, replaceable, not forked)."
+reviewed_fp = "248b527b4ffe7f10"
+confidence = "medium"
+evidence = "areas: appian-integration=24 (kw 'appian'×17, kw 'dev mcp'×9, kw 'sail'×9, kw 'sail cli'×3); config-secrets=16 (kw 'environment'×2, kw 'registry'×8, kw 'mcp'×31, kw 'cli'×7) | rule: bible/04 first sentence"
+
+[ADR-039]
+title = "Business understanding is an agent-synthesized, evidence-grounded artifact (the Business Application Map) (Phase 17)"
+status = "accepted"
+areas = ["core-engine", "kb-sync", "parser", "appian-integration"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Business understanding is an agent-synthesized, evidence-grounded artifact (the Business Application Map)."
+reviewed_fp = "1769d14ccd58aab7"
+confidence = "medium"
+evidence = "areas: core-engine=13 (kw 'node'×2, kw 'graph'×1, kw 'validator'×2, kw 'reliability'×3); kb-sync=11 (kw 'kb'×16, kw 'knowledge base'×1, kw 'sync'×8, kw 'store'×2); parser=8 (kw 'parser'×3, kw 'appian'×6, phase 16 'appian'); appian-integration=6 (kw 'appian'×6, kw 'sail'×1, phase 16 'appian') | rule: bible/04 first sentence"
+
+[ADR-040]
+title = "Managed-native CLI connector (`gws` installed/versioned/authenticated inside Genesis, standard OAuth) (Phase 19)"
+status = "accepted"
+areas = ["appian-integration", "config-secrets", "documents", "security"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Managed-native CLI connector (`gws`)."
+reviewed_fp = "e98c7bd1e50cc08b"
+confidence = "high"
+evidence = "areas: appian-integration=23 (kw 'appian'×6, kw 'dev mcp'×4, kw 'sail'×14, kw 'sail cli'×3); config-secrets=21 (kw 'settings'×3, kw 'secret'×5, kw 'registry'×7, kw 'mcp'×8); documents=13 (kw 'document'×4, kw 'library'×4, kw 'gws'×31, phase 19 'document'); security=12 (kw 'localhost'×3, kw 'read-only'×9, kw 'secret'×5, kw 'allowlist'×5) | rule: bible/04 first sentence"
+
+[ADR-041]
+title = "Documents are a global first-class store linked into applications (dedup; untrack unlinks, never deletes) (Phase 19)"
+status = "accepted"
+areas = ["documents", "kb-sync"]
+paths = []
+amends = ["ADR-030"]
+amended_by = []
+superseded_by = ""
+rule = "Documents are a global first-class store linked into applications."
+reviewed_fp = "6bfa270c069325b9"
+confidence = "high"
+evidence = "areas: documents=16 (kw 'document'×22, kw 'library'×4, kw 'gws'×1, kw 'pdf'×1); kb-sync=10 (kw 'kb'×14, kw 'sync'×7, kw 'business map'×1, kw 'store'×8) | rule: bible/04 first sentence | edges: refines ADR-030"
+
+[ADR-042]
+title = "Features & Specs are first-class sub-entities of an application (Chat-authored, HTML-authoritative) (Phase 20)"
+status = "accepted"
+areas = ["features-stages", "chat", "core-engine", "documents"]
+paths = []
+amends = []
+amended_by = ["ADR-075"]
+superseded_by = ""
+rule = "Features & Specs are first-class sub-entities of an application; a spec is authored conversationally (Chat, not a workflow), HTML-authoritative."
+reviewed_fp = "c4244f8b25e4647d"
+confidence = "high"
+evidence = "areas: features-stages=11 (kw 'feature'×15, kw 'spec'×19, path api/features.py, phase 20 'spec'); chat=10 (kw 'chat'×11, kw 'session'×5, phase 10 'chat', phase 14 'chat'); core-engine=6 (kw 'graph'×1, kw 'langgraph'×3, kw 'gate'×2); documents=6 (kw 'document'×2, phase 19 'document', phase 19 'library') | rule: bible/04 first sentence"
+
+[ADR-043]
+title = "Embed the Lavish annotation SDK (vendored, MIT) for in-app HTML review (Phase 20)"
+status = "accepted"
+areas = ["features-stages", "api"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Embed the Lavish annotation SDK (vendored, MIT) for in-app HTML review."
+reviewed_fp = "503ccd3edb1117e0"
+confidence = "high"
+evidence = "areas: features-stages=12 (kw 'feature'×2, kw 'spec'×5, kw 'ux'×2, path api/features.py); api=10 (kw 'api'×3, kw 'route'×1, path genesis/api/assets/lavish/, path api/features.py) | rule: bible/04 first sentence"
+
+[ADR-044]
+title = "A Feature is a workspace of sequential artifact stages (Phase 21)"
+status = "superseded"
+areas = ["features-stages"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = "ADR-056"
+rule = "A Feature is a workspace of sequential artifact stages."
+reviewed_fp = "e19ec5346174f7ad"
+confidence = "medium"
+evidence = "areas: features-stages=13 (kw 'feature'×16, kw 'spec'×16, kw 'breakdown'×6, phase 20 'spec') | rule: bible/04 first sentence"
+
+[ADR-045]
+title = "The reused chat mirrors the Kiro CLI/ACP surface; refines ADR-031 (Phase 21)"
+status = "accepted"
+areas = ["chat", "sdk-acp", "features-stages", "security"]
+paths = []
+amends = ["ADR-031"]
+amended_by = ["ADR-076"]
+superseded_by = ""
+rule = "The reused chat mirrors the Kiro CLI/ACP surface."
+reviewed_fp = "1207af90d000d15d"
+confidence = "medium"
+evidence = "areas: chat=10 (kw 'chat'×15, kw 'session'×5, phase 13 'copilot', phase 21 'chat'); sdk-acp=9 (kw 'acp'×5, kw 'sdk'×7, kw 'session'×5); features-stages=7 (kw 'spec'×3, phase 20 'spec', phase 21 'feature'); security=4 (kw 'read-only'×5, kw 'trust'×1) | rule: bible/04 first sentence | edges: refines ADR-031, refines ADR-031, refines ADR-031, refines ADR-031"
+
+[ADR-046]
+title = "Genesis ships as a local, browser-based app via clone + git-tag self-update (Phase 22)"
+status = "accepted"
+areas = ["distribution", "config-secrets", "release-ci"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Genesis ships as a local, browser-based app via clone + git-tag self-update."
+reviewed_fp = "9a0c685c6495cc28"
+confidence = "high"
+evidence = "areas: distribution=17 (kw 'install'×10, kw 'ship'×2, kw 'launcher'×5, kw 'update'×3); config-secrets=11 (kw 'settings'×2, kw 'mcp'×1, kw 'cli'×3, kw 'config'×2); release-ci=10 (kw 'version'×1, kw 'tag'×7, kw 'release'×3, kw 'ci'×3) | rule: bible/04 first sentence"
+
+[ADR-047]
+title = "Genesis runs fixed, backend-defined scheduled maintenance syncs (Phase 23)"
+status = "accepted"
+areas = ["runs-worker", "kb-sync", "api", "config-secrets"]
+paths = []
+amends = []
+amended_by = ["ADR-074"]
+superseded_by = ""
+rule = "Genesis runs fixed, backend-defined scheduled maintenance syncs, and the app sync is re-runnable as a full-package refresh."
+reviewed_fp = "36d765365525f1fe"
+confidence = "high"
+evidence = "areas: runs-worker=17 (kw 'run'×7, kw 'hitl'×2, kw 'schedule'×5, path runtime/scheduler.py); kb-sync=11 (kw 'kb'×3, kw 'sync'×17, kw 'store'×1, phase 45 'sync'); api=9 (kw 'api'×10, path api/applications.py, path api/schedules.py); config-secrets=9 (kw 'settings'×2, kw 'environment'×2, kw 'config'×2, path runtime/) | rule: bible/04 first sentence | edges: amended by ADR-074, amended by ADR-074"
+
+[ADR-048]
+title = "Core Appian-MCP credentials are environment-scoped (entered on the environment, resolved from the dev env only)"
+status = "accepted"
+areas = ["config-secrets", "appian-integration"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Core Appian-MCP credentials are environment-scoped."
+reviewed_fp = "4a3c9d847aabeeb7"
+confidence = "medium"
+evidence = "areas: config-secrets=11 (kw 'settings'×1, kw 'environment'×9, kw 'registry'×1, kw 'mcp'×6); appian-integration=6 (kw 'appian'×14, kw 'devops'×4) | rule: bible/04 first sentence"
+
+[ADR-049]
+title = "Applications-first IA: primary nav is Applications · Chat · Runs · Documents; Overview + Catalog live under Settings"
+status = "accepted"
+areas = ["config-secrets", "features-stages"]
+paths = []
+amends = []
+amended_by = ["ADR-061"]
+superseded_by = ""
+rule = "Applications-first IA."
+reviewed_fp = "e1e276419efd1c1c"
+confidence = "medium"
+evidence = "areas: config-secrets=13 (kw 'settings'×18, kw 'environment'×1, kw 'mcp'×6, kw 'cli'×4); features-stages=7 (kw 'spec'×1, kw 'ux'×1, kw 'breakdown'×1, phase 24 'ux') | rule: bible/04 first sentence"
+
+[ADR-050]
+title = "Typed SDLC domain + single-authority LifecycleService (Phase 25-01)"
+status = "accepted"
+areas = ["api", "core-engine", "features-stages", "kb-sync"]
+paths = []
+amends = []
+amended_by = ["ADR-076"]
+superseded_by = ""
+rule = "Typed SDLC domain + single-authority `LifecycleService`."
+reviewed_fp = "d45cdc053e8b6549"
+confidence = "medium"
+evidence = "areas: api=4 (kw 'api'×2, kw 'route'×2); core-engine=3 (kw 'state'×5); features-stages=3 (kw 'spec'×7); kb-sync=3 (kw 'store'×4) | rule: bible/04 first sentence"
+
+[ADR-051]
+title = "AgentProvider interface over the agent runtime (Phase 25-05)"
+status = "accepted"
+areas = ["chat", "sdk-acp", "collaboration-hub", "core-engine"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "`AgentProvider` interface over the agent runtime."
+reviewed_fp = "842f86f6a9d72fb2"
+confidence = "high"
+evidence = "areas: chat=6 (kw 'chat'×4, kw 'session'×4); sdk-acp=5 (kw 'acp'×2, kw 'session'×4); collaboration-hub=3 (kw 'provider'×10); core-engine=3 (path genesis_core/agents/) | rule: bible/04 first sentence"
+
+[ADR-052]
+title = "DocumentProvider interface for document sourcing (Phase 25-09)"
+status = "accepted"
+areas = ["documents"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "`DocumentProvider` interface for document sourcing."
+reviewed_fp = "f82b4660df163e64"
+confidence = "high"
+evidence = "areas: documents=12 (kw 'document'×7, kw 'gws'×5, path integrations/gws/, path genesis/integrations/documents/) | rule: bible/04 first sentence"
+
+[ADR-053]
+title = "the Genesis Agentic Memory Layer"
+status = "accepted"
+areas = ["memory", "core-engine"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Genesis Agentic Memory Layer."
+reviewed_fp = "bd67f00182b46c52"
+confidence = "medium"
+evidence = "areas: memory=9 (kw 'memory'×13, kw 'retrieval'×2, kw 'consolidation'×2, phase 26 'memory'); core-engine=4 (kw 'node'×2, kw 'graph'×2) | rule: bible/04 first sentence"
+
+[ADR-054]
+title = "memory store/infra + local embedder"
+status = "accepted"
+areas = ["memory", "runs-worker", "core-engine", "db"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Memory store/infra + local embedder."
+reviewed_fp = "03e203fec11e7601"
+confidence = "medium"
+evidence = "areas: memory=7 (kw 'memory'×9, kw 'vector'×1, kw 'consolidation'×1, phase 26 'memory'); runs-worker=4 (kw 'worker'×2, kw 'subprocess'×2); core-engine=3 (kw 'graph'×3); db=3 (kw 'migration'×1, kw 'sqlite'×2) | rule: bible/04 first sentence"
+
+[ADR-055]
+title = "UI/UX design language + light-first theming (Phase 27)"
+status = "accepted"
+areas = ["web-shell"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "UI/UX design language + light-first theming."
+reviewed_fp = "cacca2fb2f273564"
+confidence = "high"
+evidence = "areas: web-shell=14 (kw 'token'×5, kw 'theme'×5, kw 'ui'×5, path web/src/styles/tokens.css) | rule: bible/04 first sentence"
+
+[ADR-056]
+title = "The Genesis Feature Workspace (parallel, plug-in stages) (Phase 28)"
+status = "accepted"
+areas = ["features-stages"]
+paths = []
+amends = []
+amended_by = ["ADR-057", "ADR-058"]
+superseded_by = ""
+rule = "The Genesis Feature Workspace (parallel, plug-in stages)."
+reviewed_fp = "c55d6ae5253a6473"
+confidence = "medium"
+evidence = "areas: features-stages=27 (kw 'feature'×16, kw 'spec'×4, kw 'ux'×6, kw 'technical design'×2) | rule: bible/04 first sentence | edges: amended by ADR-058, supersedes ADR-044, supersedes ADR-044"
+
+[ADR-057]
+title = "The UX Design stage: grounded mockup→implementation analysis (Phase 29)"
+status = "accepted"
+areas = ["features-stages"]
+paths = []
+amends = ["ADR-056"]
+amended_by = ["ADR-058"]
+superseded_by = ""
+rule = "The UX Design stage: grounded mockup→implementation analysis."
+reviewed_fp = "725f54c092508839"
+confidence = "medium"
+evidence = "areas: features-stages=22 (kw 'feature'×10, kw 'spec'×15, kw 'ux'×23, kw 'technical design'×2) | rule: bible/04 first sentence | edges: refines ADR-056"
+
+[ADR-058]
+title = "The Technical Design stage: grounded, workstream-decomposed technical design (Phase 30)"
+status = "accepted"
+areas = ["features-stages"]
+paths = []
+amends = ["ADR-056", "ADR-057"]
+amended_by = []
+superseded_by = ""
+rule = "The Technical Design stage: grounded, workstream-decomposed technical design."
+reviewed_fp = "a931097b1cb9b469"
+confidence = "medium"
+evidence = "areas: features-stages=30 (kw 'feature'×5, kw 'spec'×7, kw 'ux'×13, kw 'technical design'×12) | rule: bible/04 first sentence | edges: refines ADR-057, amends ADR-056, amends ADR-056, amends ADR-056"
+
+[ADR-059]
+title = "The Feature Breakdown stage: grounded, workstream-decomposed, Jira-ready backlog (Phase 31)"
+status = "accepted"
+areas = ["features-stages"]
+paths = []
+amends = []
+amended_by = ["ADR-075"]
+superseded_by = ""
+rule = "The Feature Breakdown stage: grounded, workstream-decomposed, Jira-ready backlog."
+reviewed_fp = "0b1eac679b736c31"
+confidence = "medium"
+evidence = "areas: features-stages=36 (kw 'feature'×18, kw 'spec'×9, kw 'ux'×5, kw 'technical design'×8) | rule: bible/04 first sentence"
+
+[ADR-060]
+title = "Finalized Stories: the Feature Breakdown backlog becomes first-class, editable Story records (Phase 32)"
+status = "accepted"
+areas = ["features-stages", "kb-sync", "web-shell", "appian-integration"]
+paths = []
+amends = []
+amended_by = ["ADR-075"]
+superseded_by = ""
+rule = "Finalized Stories: the Feature Breakdown backlog becomes first-class, editable Story records."
+reviewed_fp = "d61e4b25e05299a9"
+confidence = "high"
+evidence = "areas: features-stages=11 (kw 'feature'×18, kw 'ux'×2, kw 'breakdown'×12, kw 'stage'×8); kb-sync=6 (kw 'kb'×12, kw 'sync'×4); web-shell=6 (kw 'ui'×3, path shared/ui); appian-integration=5 (kw 'appian'×3, kw 'native'×2) | rule: bible/04 first sentence"
+
+[ADR-061]
+title = "The Genesis Workbench: a per-application Kanban execution board (Phase 33)"
+status = "accepted"
+areas = ["stories-workbench", "features-stages", "kb-sync", "release-ci"]
+paths = []
+amends = ["ADR-049"]
+amended_by = ["ADR-062"]
+superseded_by = ""
+rule = "The Genesis Workbench: a per-application Kanban execution board."
+reviewed_fp = "18e3ca424965cf88"
+confidence = "medium"
+evidence = "areas: stories-workbench=14 (kw 'story'×21, kw 'board'×70, kw 'lane'×38, kw 'workbench'×25); features-stages=8 (kw 'feature'×9, kw 'ux'×2, kw 'stage'×5); kb-sync=7 (kw 'kb'×16, kw 'sync'×2, kw 'store'×2); release-ci=6 (kw 'version'×9, kw 'ci'×2, kw 'pipeline'×1) | rule: bible/04 first sentence | edges: amends ADR-049, amends ADR-049, amends ADR-049"
+
+[ADR-062]
+title = "Workbench lane automation: the Design & Design Review lanes (Phase 34)"
+status = "superseded"
+areas = ["features-stages", "stories-workbench", "core-engine", "release-ci"]
+paths = []
+amends = ["ADR-061"]
+amended_by = []
+superseded_by = "ADR-068"
+rule = "Workbench lane automation: the Design & Design Review lanes (the first per-lane automation ADR-061 deferred)."
+reviewed_fp = "ef7908bf3b3703c2"
+confidence = "medium"
+evidence = "areas: features-stages=20 (kw 'feature'×7, kw 'spec'×6, kw 'ux'×5, kw 'technical design'×3); stories-workbench=18 (kw 'story'×32, kw 'board'×7, kw 'lane'×18, kw 'workbench'×8); core-engine=15 (kw 'node'×9, kw 'state'×2, kw 'reliability'×4, kw 'healing'×3); release-ci=8 (kw 'version'×5, kw 'release'×2, kw 'ci'×2, kw 'pipeline'×1) | rule: bible/04 first sentence | edges: amends ADR-061, amends ADR-061"
+
+[ADR-063]
+title = "The Genesis Collaboration Hub: local-first with selective centralization (Phase 35–38)"
+status = "accepted"
+areas = ["collaboration-hub", "stories-workbench", "features-stages"]
+paths = []
+amends = ["ADR-026"]
+amended_by = ["ADR-065", "ADR-074"]
+superseded_by = ""
+rule = "The Genesis Collaboration Hub: local-first with selective centralization."
+reviewed_fp = "d25283bc95d59644"
+confidence = "high"
+evidence = "areas: collaboration-hub=22 (kw 'collab'×5, kw 'collaboration'×11, kw 'hub'×22, kw 'provider'×6); stories-workbench=11 (kw 'story'×8, kw 'board'×25, kw 'lane'×3, kw 'workbench'×2); features-stages=10 (kw 'feature'×1, kw 'spec'×2, kw 'ux'×7, kw 'breakdown'×1) | rule: bible/04 first sentence | edges: amends ADR-026, amends ADR-026, amends ADR-026"
+
+[ADR-064]
+title = "The Genesis Hub Appian application + its frozen API contract (Phase 36)"
+status = "accepted"
+areas = ["collaboration-hub", "kb-sync", "stories-workbench", "appian-integration"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Genesis Hub Appian application + its frozen API contract."
+reviewed_fp = "f88ff69025a63c0e"
+confidence = "medium"
+evidence = "areas: collaboration-hub=10 (kw 'collaboration'×2, kw 'hub'×20, kw 'provider'×1, phase 36 'hub'); kb-sync=9 (kw 'kb'×5, kw 'sync'×5, kw 'store'×5); stories-workbench=8 (kw 'story'×12, kw 'board'×8, kw 'lane'×1, kw 'workbench'×1); appian-integration=7 (kw 'appian'×27, kw 'dev mcp'×1, kw 'sail'×1, phase 36 'appian') | rule: bible/04 first sentence"
+
+[ADR-065]
+title = "Two-toggle collaboration enablement (Settings switch gated on Hub availability) (post-Phase-38)"
+status = "accepted"
+areas = ["collaboration-hub", "config-secrets"]
+paths = []
+amends = ["ADR-063"]
+amended_by = []
+superseded_by = ""
+rule = "Two-toggle collaboration enablement (a Settings-level switch gated on Hub availability, on top of the env master)."
+reviewed_fp = "c63aafd766ff1843"
+confidence = "medium"
+evidence = "areas: collaboration-hub=12 (kw 'collab'×14, kw 'collaboration'×7, kw 'hub'×20, kw 'provider'×7); config-secrets=8 (kw 'settings'×12, kw 'environment'×2, kw 'config'×6) | rule: bible/04 first sentence | edges: refines ADR-063"
+
+[ADR-066]
+title = "Run inspection & node observability: capture what the agent was given & produced, per iteration (Phase 39)"
+status = "accepted"
+areas = ["observability-credits", "runs-worker", "web-runs"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Run inspection & node observability — capture what the agent was given & produced, per iteration."
+reviewed_fp = "482faef1bd9227fb"
+confidence = "medium"
+evidence = "areas: observability-credits=8 (kw 'metrics'×3, kw 'observability'×3, phase 39 'observability'); runs-worker=8 (kw 'run'×6, kw 'event'×3, phase 39 'run'); web-runs=5 (kw 'inspection'×3, phase 39 'inspection') | rule: bible/04 first sentence"
+
+[ADR-067]
+title = "Grounded artifact verification & cost-aware self-healing: the second reliability tier (Phase 40)"
+status = "accepted"
+areas = ["core-engine", "features-stages"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Grounded artifact verification & cost-aware self-healing — the second reliability tier."
+reviewed_fp = "9aee978d41dbac38"
+confidence = "medium"
+evidence = "areas: core-engine=11 (kw 'reliability'×7, kw 'healing'×10, kw 'gate'×1, phase 40 'reliability'); features-stages=5 (kw 'feature'×2, kw 'ux'×1, kw 'breakdown'×2) | rule: bible/04 first sentence"
+
+[ADR-068]
+title = "Write-capable Appian implementation lane: Genesis implements object-level code (Phase 42)"
+status = "accepted"
+areas = ["stories-workbench", "core-engine", "appian-integration", "config-secrets"]
+paths = []
+amends = ["ADR-021"]
+amended_by = []
+superseded_by = ""
+rule = "Write-capable Appian implementation lane — Genesis implements object-level code."
+reviewed_fp = "9380507a5bc2aa0d"
+confidence = "medium"
+evidence = "areas: stories-workbench=18 (kw 'story'×8, kw 'lane'×9, kw 'workbench'×3, kw 'object wiki'×2); core-engine=12 (kw 'node'×3, kw 'reliability'×2, kw 'healing'×6, kw 'langgraph'×1); appian-integration=11 (kw 'appian'×16, kw 'dev mcp'×3, kw 'native'×1, phase 41 'sail'); config-secrets=9 (kw 'environment'×7, kw 'registry'×1, kw 'mcp'×8, phase 41 'cli') | rule: bible/04 first sentence | edges: amends ADR-021, supersedes ADR-062, amends ADR-021, supersedes ADR-062"
+
+[ADR-069]
+title = "Workflow-node skill provisioning: inject a Kiro skill into a workflow agent session (Phase 42)"
+status = "accepted"
+areas = ["chat", "runs-worker"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Workflow-node skill provisioning."
+reviewed_fp = "5ca819e2d75e7fdf"
+confidence = "medium"
+evidence = "areas: chat=11 (kw 'chat'×3, kw 'skill'×15, kw 'session'×4, phase 14 'chat'); runs-worker=5 (kw 'run'×5, kw 'worker'×2) | rule: bible/04 first sentence"
+
+[ADR-070]
+title = "The Object Wiki: a local-first, Hub-shared, append-only per-object change ledger (Phase 42)"
+status = "accepted"
+areas = ["collaboration-hub", "stories-workbench", "kb-sync"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Object Wiki — a local-first, Hub-shared, append-only per-object change ledger."
+reviewed_fp = "d28697cdbb9ba76d"
+confidence = "high"
+evidence = "areas: collaboration-hub=13 (kw 'collab'×5, kw 'collaboration'×4, kw 'hub'×16, kw 'autopull'×1); stories-workbench=10 (kw 'story'×4, kw 'board'×1, kw 'object wiki'×7, path genesis/kb/object_wiki.py); kb-sync=7 (kw 'kb'×5, kw 'sync'×5, kw 'store'×1) | rule: bible/04 first sentence"
+
+[ADR-071]
+title = "The unified Story Workspace: one consistent, consolidated story view (Phase 43)"
+status = "accepted"
+areas = ["stories-workbench", "api", "features-stages"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The unified Story Workspace."
+reviewed_fp = "3ad8fe836bfdbe84"
+confidence = "medium"
+evidence = "areas: stories-workbench=11 (kw 'story'×17, kw 'board'×16, kw 'lane'×8, phase 43 'story'); api=7 (kw 'api'×1, kw 'route'×3, kw 'endpoint'×3); features-stages=6 (kw 'feature'×6, kw 'stage'×5) | rule: bible/04 first sentence"
+
+[ADR-072]
+title = "Global human-readable story identifier (GNS_000001) (Phase 44)"
+status = "accepted"
+areas = ["features-stages", "kb-sync", "stories-workbench", "collaboration-hub"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Global human-readable story identifier `GNS_000001`."
+reviewed_fp = "7c29bd0e12686eac"
+confidence = "medium"
+evidence = "areas: features-stages=5 (kw 'feature'×3, kw 'spec'×1, kw 'breakdown'×1); kb-sync=4 (kw 'kb'×6, kw 'sync'×1); stories-workbench=4 (kw 'story'×12, kw 'board'×1); collaboration-hub=3 (kw 'hub'×9) | rule: bible/04 first sentence"
+
+[ADR-073]
+title = "Environment package management: the only sanctioned non-design-object write (Phase 45)"
+status = "accepted"
+areas = ["appian-integration", "kb-sync", "config-secrets", "parser"]
+paths = []
+amends = ["ADR-036", "ADR-037", "ADR-038"]
+amended_by = []
+superseded_by = ""
+rule = "Environment package management — the only sanctioned non-design-object write."
+reviewed_fp = "4bcc78953dfc3a20"
+confidence = "high"
+evidence = "areas: appian-integration=14 (kw 'appian'×7, kw 'dev mcp'×4, path genesis/kb/dev_packages.py, path genesis/kb/dev_mcp.py); kb-sync=12 (kw 'kb'×6, kw 'sync'×6, phase 16 'knowledge base', phase 45 'sync'); config-secrets=9 (kw 'settings'×1, kw 'environment'×2, kw 'registry'×3, kw 'mcp'×5); parser=6 (kw 'parser'×1, kw 'appian'×7, phase 16 'appian') | rule: bible/04 first sentence | edges: amends ADR-036, amends ADR-037, amends ADR-038, amends ADR-036, amends ADR-037, amends ADR-038"
+
+[ADR-074]
+title = "Incremental, package-scoped KB sync (Phase 45)"
+status = "accepted"
+areas = ["kb-sync", "collaboration-hub", "parser", "runs-worker"]
+paths = []
+amends = ["ADR-047", "ADR-063"]
+amended_by = []
+superseded_by = ""
+rule = "Incremental, package-scoped KB sync."
+reviewed_fp = "1793cb4323e9c475"
+confidence = "medium"
+evidence = "areas: kb-sync=10 (kw 'kb'×16, kw 'sync'×19, phase 45 'sync', phase 45 'delta sync'); collaboration-hub=7 (kw 'collaboration'×2, kw 'hub'×4, kw 'merge'×2); parser=6 (kw 'parser'×5, kw 'appian'×4); runs-worker=6 (kw 'run'×4, kw 'schedule'×3) | rule: bible/04 first sentence | edges: amends ADR-047, refines ADR-063, amends ADR-047, refines ADR-063"
+
+[ADR-075]
+title = "Spec clause model and story↔spec traceability (Phase 46)"
+status = "accepted"
+areas = ["features-stages"]
+paths = []
+amends = ["ADR-042", "ADR-059", "ADR-060"]
+amended_by = []
+superseded_by = ""
+rule = "Spec clause model + story↔spec traceability."
+reviewed_fp = "de28c9267b52939d"
+confidence = "high"
+evidence = "areas: features-stages=17 (kw 'feature'×4, kw 'spec'×27, kw 'breakdown'×7, kw 'cr'×4) | rule: bible/04 first sentence | edges: amends ADR-042, amends ADR-042, amends ADR-059, amends ADR-060"
+
+[ADR-076]
+title = "Spec change requests: a chat-driven CR, a program-applied plan (Phase 46)"
+status = "accepted"
+areas = ["features-stages"]
+paths = []
+amends = ["ADR-031", "ADR-045", "ADR-050"]
+amended_by = []
+superseded_by = ""
+rule = "Spec change requests — a chat-driven CR, a program-applied plan."
+reviewed_fp = "cfd1570d1f0f0ccd"
+confidence = "high"
+evidence = "areas: features-stages=37 (kw 'feature'×3, kw 'spec'×30, kw 'ux'×2, kw 'technical design'×1) | rule: bible/04 first sentence | edges: amends ADR-050, refines ADR-031, refines ADR-045, amends ADR-050, refines ADR-031, refines ADR-045"
