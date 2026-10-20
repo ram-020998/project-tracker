@@ -162,6 +162,47 @@ control. Decided by the user:
 2. **Session totals** are recorded for information only, never gated.
 3. Applied to 47-06 §9 and 47-09 §4.
 
+### 5.8 Round 7 — the 47-09 review fix round (2026-10-20, after reviews/47-09-review.md: NEEDS_CHANGES)
+
+The independent review (`specs/phase-47-agent-context-system/reviews/47-09-review.md`) passed §2 (golden 97.5 %,
+critical 100 %), 47-08 §6 and §4-before-pack, but failed §1 (1 blocker, 1 major on permissions), §3 (recall 91.7 %)
+and §4-after-pack (14–20 % vs 10 %). Decided with the user and implemented as one commit per item (local only, no push):
+
+1. **Permissions (B1 + M1).** New `agent-system/hooks/shell-guard.sh`, a `PreToolUse` hook on `shell` for all five
+   agents (rendered per agent with its write roots). It exits 2 — even under `--trust-all-tools` — on (a) a `git
+   push`/`tag` subcommand in any form (absolute path `/usr/bin/git`, `env`/`command`/`exec`/`VAR=` prefix, `-C`,
+   `&&`/`;`/`|` chain, `sh -c "…"`), except for `genesis-release` (`--allow-push-tag`); (b) a shell write (`>`, `>>`,
+   `2>`, `&>`, `tee`, `cp`, `mv`, `rm`, `sed -i`, `dd of=`) whose target resolves outside the agent's write roots.
+   The broad read-command shell allows (`cat *`, `grep *`, `ls *`, `rg *`, `find *`) are removed from every profile
+   (reads go through the `read`/`grep`/`code` tools) and `node *` is `ask`. The installer rejects re-adding a bare
+   `<write-cmd> *` shell allow. `OPERATOR_GUIDE.md` golden rule 7 + troubleshooting: never `--trust-all-tools`. Tests
+   cover every §1 bypass (`/usr/bin/git … push`, `env git … push`, `cat x > path`); 47-06 §3/§8 record the hook.
+2. **Tags (M2).** `ADR-001` += `features-stages`, `ADR-064` += `features-stages`, `ADR-036` += `collaboration-hub`
+   (`reviewed_fp` unchanged — the decision-log text did not change). `recall_replay.py` → 84/84 = 100 %. The ADR-019 →
+   `release-ci` finding is **rejected** (the standing decision: only ADR-011 and ADR-026 sit on the always-on areas,
+   §5.6).
+3. **Pack tiers (M3).** The token estimator is calibrated to ≈ chars ÷ 2.5 (was chars ÷ 4, which under-counted packs
+   ~1.6× so the verdict lied); L0/state caps rescaled 15K→24K / 4K→6.4K to keep their headroom; pack warn/fail stay
+   60K/120K and are now truthful. `pack` renders **full text only for direct hits** — the manifest's `adrs`/`lessons`,
+   path-glob hits and their amendment chains; everything an area adds becomes a one-line *Also applies — load with
+   `genesis-ctx adr|lesson <id>`* pointer (one-hop disclosure). `check` keeps the full area-wide checklist. The
+   `genesis-spec-authoring` skill now requires manifests to list applicable ADR/lesson ids explicitly (from
+   `genesis-ctx area <a>`). 47-02 §5/§6, 47-03 §4, 47-09 §3/§4 and the umbrella updated: recall = cited ⊆ full ∪
+   listed = 100 %, full-text recall reported separately. The §4 replay packs drop from ~123K/139K/181K to
+   ~26K/36K/39K real tokens.
+4. **Minors.** A wildcard-free `code`/path entry that is a directory routes as `<dir>/**` (`areas_for_code`,
+   `globs_touch`, `check`; lint warns; M4). `check` scans project-tracker too (emits `tracker:` paths) and exits 2 when
+   `--since` resolves in no repo (m2/m3). Strict `verify-lossless` is the default — the present side counts only the
+   active layer ∪ `archive/`, never specs/progress/fixtures (m1). L-030 gets a `tags/lesson.toml` rule and the
+   bold-lead parser ignores `**` inside backticks, so its digest line is no longer truncated (m4). `golden.toml` +
+   `golden_grade.py` moved to `context/eval/` (4e).
+5. **Golden/docs-dry-run items.** Fixed (prompt issue): the `genesis-doc-writeback` skill now tells the agent to run
+   `genesis-ctx` **unpiped** and use the `read`/`grep` tools, not shell pipes (m8). **Listed for the user, no change:**
+   golden Q31 (release-ci, not critical) — the answer cites L-056 and is correct in substance; it fails only the
+   narrow phrase match, so the expected set is unchanged; m9 (optional eval idea: add golden questions whose key phrase
+   is only in the full rule text, not the L0 digest); and the dry run's proposed area additions to ADR-075/076 go
+   beyond the 47-08 routing table — confirm them in a real docs run before they land.
+
 ## 6. ADR-077 (Proposed) — full text
 
 - **Status:** Proposed — 2026-10-20 (Phase 47).
