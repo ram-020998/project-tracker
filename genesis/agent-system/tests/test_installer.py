@@ -487,3 +487,14 @@ def test_subagent_trust_matches_the_spec(tmp_path, monkeypatch):
     assert sub["genesis-dev"] == {"availableAgents": ["genesis-review"], "trustedAgents": ["genesis-review"]}
     for name in ("genesis-docs", "genesis-review", "genesis-spec", "genesis-release"):
         assert not sub[name].get("trustedAgents"), name
+
+
+def test_stop_lint_hooks_have_an_explicit_timeout(tmp_path, monkeypatch):
+    # 47-09 m7: full `lint` on the real tracker measured ≤ 0.78 s (cold, under load) → 2× ≈ 1.6 s. The Stop hooks pin
+    # the CLI default (10 s, array format = seconds) explicitly so they cover that with margin and never drop below it.
+    _, profiles = _rendered_profiles(tmp_path, monkeypatch)
+    stops = {n: h for n, p in profiles.items() for h in p.get("hooks", []) if h["trigger"] == "Stop"}
+    assert set(stops) == {"genesis-docs", "genesis-spec"}
+    for name, h in stops.items():
+        assert "stop-lint.sh" in h["action"]["command"], name
+        assert isinstance(h.get("timeout"), int) and h["timeout"] >= 10, name
