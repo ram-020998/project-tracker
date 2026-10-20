@@ -50,64 +50,7 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
 
 > 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
 
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
-
 ---
-
-> 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
 
 - **Backlog (`specs/backlog/`):** the **skill → workflow migration program** (the 45 solutions-copilot
   skills, waves A–D) — deferred; the methodology is intact and resumes when scheduled.
@@ -123,4 +66,3 @@ human's go-ahead — specs are pushed and 16-01/16-02 are shipped + CI-green; co
 block. This does not authorize starting any phase *beyond* 16 or any `specs/backlog/` work.)
 
 ---
-
