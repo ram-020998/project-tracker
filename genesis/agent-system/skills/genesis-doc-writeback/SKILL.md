@@ -24,6 +24,10 @@ One home per fact. Move a finished phase's knowledge into those homes, keep the 
 | CI pipeline ids / commit hashes | the release sub-spec's As-run + the progress doc | — | L0, state, digests |
 
 ## Write-back, in order (no bulk reading)
+Run every `{{GENESIS_HOME}}/bin/genesis-ctx …` command **unpiped** — no `| grep`, `| head`, `> file` or other pipe — and
+read files with the built-in `read`/`grep` tools, never a shell `cat`/`grep` pipe. The shell allow list is tight
+(47-06) and shell writes are gated by `shell-guard.sh`, so a piped or redirected helper will be refused or dropped; an
+unpiped command's full output comes straight back to you (47-09 fix m8).
 1. **Gather:** the umbrella; each sub-spec's **As built**/**As run**; `specs/<phase>/reviews/*`;
    `git log <prev-tag>..<new-tag> --oneline` per changed repo; `{{GENESIS_HOME}}/bin/genesis-ctx status`.
 2. **ADRs:** each proposed ADR → **Accepted** (Status line) in the decision-log; new ones via `{{GENESIS_HOME}}/bin/genesis-ctx add adr`;
@@ -51,9 +55,10 @@ One home per fact. Move a finished phase's knowledge into those homes, keep the 
 - Accepting a proposed ADR is an **edit**, not an `add`: change its heading + Status line to **Accepted**, set
   `status = "accepted"` in `tags/adr.toml`, then `{{GENESIS_HOME}}/bin/genesis-ctx index --reviewed ADR-0NN`.
 - Never hand-write `<!-- L-NNN -->` markers or `context/_generated/*`; read any rule's full text with
-  `{{GENESIS_HOME}}/bin/genesis-ctx adr|lesson <id>` (the bulk-read guard blocks whole-file reads of the big docs).
+  `{{GENESIS_HOME}}/bin/genesis-ctx adr|lesson <id>` **unpiped** (the bulk-read guard blocks whole-file reads of the big docs).
 
 ## Budgets (enforced by lint)
-L0 ≤ 15K tokens · `state/current.md` ≤ 4K · each ADR `rule` and lesson rule ≤ 220 chars · a tracker §6 entry ≤ 5 lines.
+L0 ≤ 24K tokens · `state/current.md` ≤ 6.4K · each ADR `rule` and lesson rule ≤ 220 chars · a tracker §6 entry ≤ 5 lines
+(the token estimate is ≈ chars ÷ 2.5, calibrated to the real tokenizer — 47-09 fix M3a).
 When L0 nears its budget, **propose** (never silently apply) a compression: merge a superseded ADR's line into its
 successor's, or group lessons by area in the digest.
