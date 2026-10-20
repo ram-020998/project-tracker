@@ -198,7 +198,7 @@ reviewed_fp = "0682886df19fa191"
 [L-030]
 areas = ["release-ci", "web-shell"]
 phase = ""
-rule = ""
+rule = "The genesis `frontend` CI job runs only on `changes: [web/**/*]`; a follow-up tag touching no web file does NOT re-run the stale-bundle guard — force it with a real `web/**` touch."
 reviewed_fp = "dd1146cf5d41e573"
 
 [L-031]

@@ -32,7 +32,7 @@ Full text: `genesis-ctx lesson <ID>`.
 - L-027 [release-ci] — Pin ruff in EVERY repo that runs `ruff check` in CI (16-08 recurrence of the 16-02 lesson).
 - L-028 [config-secrets,appian-integration] — MCP introspection must allow a large `tools/list` line (16-08).
 - L-029 [appian-integration,config-secrets,distribution,workflows-library] — Managed-native launch vs. env-resolution boundary (16-08, ADR-038).
-- L-030 [release-ci,web-shell] — The genesis `frontend` CI job only runs on `changes: [web/
+- L-030 [release-ci,web-shell] — The genesis `frontend` CI job runs only on `changes: [web/**/*]`; a follow-up tag touching no web file does NOT re-run the stale-bundle guard — force it with a real `web/**` touch.
 - L-031 [appian-integration,kb-sync,parser,config-secrets,api] — Match the real Appian Deployment REST contract for the export — read the vendor's own client, don't guess (16-07 live fix).
 - L-032 [kb-sync,parser] — De-dupe KB objects by UUID — real exports repeat UUIDs (16-07 live fix).
 - L-033 [workflows-library,distribution,runs-worker] — A newly-released library workflow must be `genesis install`-ed before it can run — and a missing workflow must not 500 (Phase 17-05 live).

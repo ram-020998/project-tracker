@@ -93,10 +93,22 @@ def num(id_: str) -> int:
 
 
 def bold_lead(text: str) -> str | None:
-    """The bold lead of a bullet: the first **…** right after the dash (and an optional lesson marker)."""
+    """The bold lead of a bullet: the first **…** right after the dash (and an optional lesson marker).
+
+    A `**` that falls inside an inline code span (backticks) is NOT the closing delimiter, so a lead
+    such as ``changes: [web/**/*]`` is not truncated (47-09 fix, L-030)."""
     t = collapse(text)
-    m = re.match(r"^[-*+] (?:<!--\s*L-\d{3}\s*-->\s*)?\*\*(.+?)\*\*", t)
-    return m.group(1).strip() if m else None
+    m = re.match(r"^[-*+] (?:<!--\s*L-\d{3}\s*-->\s*)?\*\*", t)
+    if not m:
+        return None
+    i, in_code = m.end(), False
+    while i < len(t):
+        if t[i] == "`":
+            in_code = not in_code
+        elif not in_code and t.startswith("**", i):
+            return t[m.end():i].strip() or None
+        i += 1
+    return None
 
 
 def _is_block_break(line: str) -> bool:

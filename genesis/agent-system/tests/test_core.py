@@ -44,6 +44,12 @@ def test_bold_lead_wrapped_and_marker():
     assert md.bold_lead("- plain") is None
 
 
+def test_bold_lead_ignores_stars_inside_backticks():
+    # `**` inside an inline code span is not the closing delimiter (L-030 digest fix, 47-09).
+    lead = md.bold_lead("- <!-- L-030 --> **Only runs on `changes: [web/**/*]` (16-08).** rest of body")
+    assert lead == "Only runs on `changes: [web/**/*]` (16-08)."
+
+
 def test_fence_mask_nested_lengths():
     lines = ["````md", "```toml", "x = 1", "```", "````", "out"]
     assert md.fence_mask(lines) == [True, True, True, True, True, False]
