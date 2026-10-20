@@ -16,6 +16,38 @@ lossless proof (≤ 6 sessions); **bootstrap rule: Phase 47 sessions do not read
 spec set. Specs: `specs/phase-47-agent-context-system.md` + `47-01..47-10`; operator guide
 `agent-system/OPERATOR_GUIDE.md`; ADR-077 (Proposed). project-tracker only — no Genesis release.
 
+### Deferred items (pointers)
+
+Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47-04). Open items stay findable here.
+
+**Backlog specs** (`specs/backlog/`):
+
+- [Backlog — Dev MCP browser-based SSO authentication](../specs/backlog/devmcp-browser-sso-auth.md)
+- [Backlog — ERD generation improvements (Lucid ids, layout/grouping, token)](../specs/backlog/erd-generation-improvements.md)
+- [Backlog — Implementation packages (one deployment package per story)](../specs/backlog/implementation-packages.md)
+- [Backlog — Implementation rollback execution](../specs/backlog/implementation-rollback-execution.md)
+- [Backlog — Faster incremental sync: stop re-adding every bundle root to each delta package](../specs/backlog/incremental-sync-performance.md)
+- [Backlog — Auto KB re-sync after implementation](../specs/backlog/kb-resync-after-implementation.md)
+- [Backlog — Multi-repo update version check](../specs/backlog/multi-repo-version-check.md)
+- [Phase 15 — Follow-up Fixes (design-doc live-run issues)](../specs/backlog/phase-15-followup-fixes.md)
+- [Phase 16 — Deferred / Backlog register](../specs/backlog/phase-16-deferred.md)
+- [25-11 — Per-Story Execution & WorkflowRun Linkage](../specs/backlog/phase-25-11-per-story-execution.md)
+- [25-12 — AI Cost & Performance Pass](../specs/backlog/phase-25-12-ai-cost-and-performance-pass.md)
+- [Backlog — Phase 46 follow-ups (recorded 2026-10-15 at the v0.77.0 release)](../specs/backlog/phase-46-follow-ups.md)
+- [Backlog — Skill → Workflow Migration Program (formerly Phase 8)](../specs/backlog/skill-migration-program.md)
+- [Backlog — The Object Wiki as agent grounding/memory](../specs/backlog/wiki-as-agent-memory.md)
+
+**Deferred inside shipped phases (not in `specs/backlog/`):**
+
+- PPTX mockup input for the UX Design stage (v1 is PDF-only) (Phase 29) — archived detail: search `genesis-ctx search "PPTX deferred" --archive`
+- Memory follow-ups: the 26-05 internal-server node-injection seam (agentic nodes injecting `genesis-memory`), the two 26-08 contextual reuses (Application-detail "Memory" tab + Settings "Your Memory"), a canvas force-graph lib swap; non-goals with seams built: multi-user ACL, Postgres+pgvector migration, auto-prefetch injection, hard-delete/purge (Phase 26) — archived detail: search `genesis-ctx search "node-injection seam" --archive`
+- Chat session-provider over the `AgentProvider` interface (ADR-051) (Phase 25) — archived detail: search `genesis-ctx search "chat session-provider deferred" --archive`
+- Wheel + package-index transport; Windows-native beyond WSL (Phase 22) — archived detail: search `genesis-ctx search "package-index transport" --archive`
+- PDF export of chat transcripts (Markdown export only; browser print for PDF) (Phase 21) — archived detail: search `genesis-ctx search "PDF deferred" --archive`
+- Tempo Report parser + generic-haul fallback (Phase 18) — archived detail: search `genesis-ctx search "Tempo Report" --archive`
+- Executing bundled skill scripts (ADR-034) (Phase 14) — archived detail: search `genesis-ctx search "executing bundled scripts" --archive`
+- Home stat-card sparklines / recent-activity feed (Phase 27) — archived detail: search `genesis-ctx search "sparklines" --archive`
+
 > 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
 
 > 📦 Moved verbatim to [archive/bible-08-shipped-phases.md](../archive/bible-08-shipped-phases.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.
