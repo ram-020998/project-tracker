@@ -232,10 +232,29 @@ def test_add_adr_and_lesson(env):
     assert code == 0, err
     c = env.corpus()
     l6 = c.lesson("L-006")
-    assert l6.lead == "Never reuse a lesson id." and "   Second line." in l6.text
+    assert l6.lead == "Never reuse a lesson id (Phase 47)." and "   Second line." in l6.text
+    assert "- <!-- L-006 --> **Never reuse a lesson id (Phase 47).** First line of the body." in \
+        env.read("bible/06-hard-won-lessons.md")
     assert tomllib.loads(env.read("context/tags/lesson.toml"))["L-006"]["areas"] == ["db"]
     assert env.run("lint")[0] == 0, env.run("lint")[1]
     assert env.run("add", "lesson", "--areas", "db", "--rule", "x" * 300)[0] == 2
+    assert env.run("add", "lesson", "--areas", "db", "--rule", "x" * 215, "--phase", "48")[0] == 2  # lead > 220
+
+
+def test_add_adr_writes_the_house_format(env):
+    """47-08 §5: heading with (Phase NN) + Status, Context, Decision, Alternatives rejected, Consequences; amends."""
+    code, _, err = env.run("add", "adr", "--id", "ADR-078", "--title", "Probe decision", "--phase", "48",
+                           "--areas", "chat", "--rule", "Probe rule.", "--amends", "ADR-031", "--status", "accepted")
+    assert code == 0, err
+    log = env.read("reference/decision-log.md")
+    block = log[log.index("## ADR-078"):]
+    assert block.startswith("## ADR-078 — Probe decision (Phase 48) — **Accepted**\n\n- **Status:** **Accepted** — ")
+    leads = [ln.split("**")[1] for ln in block.splitlines() if ln.startswith("- **")]
+    assert leads == ["Status:", "Context.", "Decision.", "Alternatives rejected.", "Consequences."]
+    assert "- **Decision.** Probe rule." in block and "Amends ADR-031: _(what changes and why)_." in block
+    tag = tomllib.loads(env.read("context/tags/adr.toml"))["ADR-078"]
+    assert tag["title"] == "Probe decision (Phase 48)" and tag["status"] == "accepted"
+    assert env.run("lint")[0] == 0, env.run("lint")[1]
 
 
 def test_pack_and_adr_dedupe_combined_bible04_bullet(env):

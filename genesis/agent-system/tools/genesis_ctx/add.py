@@ -36,8 +36,16 @@ def _append(path: Path, block: str) -> None:
     path.write_text(text + sep + block, encoding="utf-8")
 
 
+def _with_phase(text: str, phase: str) -> str:
+    """House format: '<text> (Phase NN)' — appended once; a text that already names its phase is left alone."""
+    phase = phase.strip()
+    if not phase or "(Phase " in text:
+        return text
+    return f"{text} (Phase {phase})"
+
+
 def cmd_add_adr(ctx: Ctx, adr_id: str, title: str, areas_csv: str, rule: str, body_file: str | None,
-                amends: list[str] | None, status: str = "proposed") -> int:
+                amends: list[str] | None, status: str = "proposed", phase: str = "") -> int:
     c = Corpus(ctx)
     i = md.parse_adr_id(adr_id)
     if not i:
@@ -51,18 +59,25 @@ def cmd_add_adr(ctx: Ctx, adr_id: str, title: str, areas_csv: str, rule: str, bo
         if not o or o not in c.adr_tags:
             raise CtxError(f"--amends {a}: no tag entry for that ADR")
         amended.append(o)
+    title = _with_phase(md.collapse(title), phase)
     date = _dt.date.today().isoformat()
-    lines = [f"## {i} — {md.collapse(title)} — **{status.capitalize()}**", "",
+    # 47-08 §5: `## ADR-0NN — <title> (Phase NN) — **Accepted**` + Status, Context, Decision, Alternatives rejected,
+    # Consequences (the house order); an amending ADR says "Amends ADR-0NN: …" (47-08 §2).
+    lines = [f"## {i} — {title} — **{status.capitalize()}**", "",
              f"- **Status:** **{status.capitalize()}** — {date}."]
-    if amended:
-        lines.append(f"- **Amends** {', '.join(amended)}.")
     if body_file:
-        lines += ["", Path(body_file).read_text(encoding="utf-8").rstrip("\n")]
+        body = Path(body_file).read_text(encoding="utf-8").rstrip("\n")
+        lines += [body]
+        for o in amended:
+            if f"Amends {o}" not in body:
+                print(f"add adr: warning — the body does not say 'Amends {o}: …'; add it to Consequences (47-08 §2)")
     else:
-        lines += [f"- **Decision.** {rule}", "- **Context.** _(to write)_", "- **Consequences.** _(to write)_"]
+        lines += ["- **Context.** _(to write)_", f"- **Decision.** {rule}", "- **Alternatives rejected.** _(to write)_",
+                  "- **Consequences.** " + " ".join([f"Amends {o}: _(what changes and why)_." for o in amended]
+                                                     + ["_(to write)_"])]
     _append(ctx.decision_log, "\n".join(lines) + "\n")
     c = Corpus(ctx)
-    tag = {i: {"title": md.collapse(title), "status": status, "areas": areas, "paths": [], "amends": amended,
+    tag = {i: {"title": title, "status": status, "areas": areas, "paths": [], "amends": amended,
                "amended_by": [], "superseded_by": "", "rule": rule, "reviewed_fp": c.adr_fp(i)}}
     _append(ctx.tags_dir / "adr.toml", tomlio.dumps(tag))
     text = read(ctx.tags_dir / "adr.toml")
@@ -88,8 +103,12 @@ def cmd_add_lesson(ctx: Ctx, areas_csv: str, rule: str, body_file: str | None, p
     if c.lessons and any(not l.marker for l in c.lessons):
         raise CtxError("bible/06 has unmarked lessons — run `genesis-ctx mark` first")
     lid = md.fmt_lesson(max(used, default=0) + 1)
+    # 47-08 §5: `- <!-- L-0NN --> **<rule sentence> (Phase NN).** <body>` — the bold lead is the digest one-liner.
+    lead = _with_phase(rule.rstrip(". "), phase) + "."
+    if len(lead) > config.RULE_MAX_CHARS:
+        raise CtxError(f"the lesson's bold lead is {len(lead)} chars with its phase (max {config.RULE_MAX_CHARS})")
     body = Path(body_file).read_text(encoding="utf-8").strip().split("\n") if body_file else []
-    bullet = [f"- <!-- {lid} --> **{rule}**" + (f" {body[0].strip()}" if body else "")]
+    bullet = [f"- <!-- {lid} --> **{lead}**" + (f" {body[0].strip()}" if body else "")]
     bullet += ["   " + b.strip() if b.strip() else "" for b in body[1:]]
     end = rng[1]
     while end > rng[0] + 1 and lines[end - 1].strip() == "":

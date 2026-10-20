@@ -1,6 +1,7 @@
 # 47-08 — Documentation standard and the documentation agent's write-back
 
-> **Status:** 🟡 SPEC-DRAFTED 2026-10-20. Repo: project-tracker. Parent: `specs/phase-47-agent-context-system.md`.
+> **Status:** 🟢 BUILT 2026-10-20 (session S5b; As built below — the §6 Phase-46 dry run is checked in 47-09).
+> Repo: project-tracker. Parent: `specs/phase-47-agent-context-system.md`.
 > Decisions D1, D4, D7. Session S5. Becomes the body of the `genesis-doc-writeback` skill.
 
 ## 1. Goal
@@ -68,3 +69,37 @@ right home — checked in 47-09.
 docs = ["tracker:specs/phase-47-agent-context-system/47-02-layout-and-metadata.md",
         "tracker:specs/phase-47-agent-context-system/47-03-genesis-ctx.md"]
 ```
+
+## As built (2026-10-20, session S5b)
+
+- **Commits:** project-tracker — one local commit "Phase 47 (47-08)" (not pushed).
+- **Format check (§5), dry run into a temp copy** (`git archive HEAD genesis` → `/tmp`, `genesis-ctx --tracker <copy>`;
+  the real `decision-log.md`, `bible/06` and tags were never written — `git status` clean on them; temp copy removed).
+  Before the fix, `add` wrote three deviations from §5:
+  | | Found | §5 / house format |
+  |---|---|---|
+  | ADR heading | `## ADR-078 — Probe decision — **Accepted**` (no phase) | `## ADR-078 — <title> (Phase 48) — **Accepted**` |
+  | ADR bullets | Status, `**Amends** ADR-050.`, Decision, Context, Consequences | Status, Context, Decision, **Alternatives rejected**, Consequences; "Amends ADR-0NN: …" in the section |
+  | Lesson lead | `**Probe lessons keep their phase.**` (phase only in the tag) | `**<rule> (Phase 48).**` |
+  After the fix the same run wrote exactly the §5 shapes (heading with `(Phase 48)`; the five bullets in house order,
+  Consequences carrying `Amends ADR-050: …`; `- <!-- L-087 --> **Probe lessons keep their phase (Phase 48).** Body…`
+  with indented continuation lines), the tag entries (`title` incl. the phase, `amended_by` updated on ADR-050,
+  `phase = "48"`), the digests (`- ADR-078 [chat] (amends 050) — Probe rule.`, `- L-087 [chat] — Probe lessons keep
+  their phase (Phase 48).`), and `lint` stayed green on the copy.
+- **Changed:** `agent-system/tools/genesis_ctx/add.py` + `cli.py` — `add adr --phase NN` (appends ` (Phase NN)` to the
+  heading and tag title unless the title already names a phase); scaffold in house order with an
+  "Alternatives rejected" bullet and "Amends ADR-0NN: …" in Consequences; with `--body-file` nothing is injected and
+  a warning names any amended ADR the body does not mention. `add lesson --phase NN` puts ` (Phase NN).` inside the
+  bold lead and checks the lead (incl. phase) ≤ 220 chars. Amends the 47-03 §3 `add` behaviour (additive flag; same
+  tag schema).
+  `agent-system/skills/genesis-doc-writeback/SKILL.md` finalized: verified formats, both `--phase` flags, the
+  body-file contract, how to **accept** a proposed ADR (edit + tag status + `index --reviewed`), no hand-written
+  markers / generated files (1,391 tokens ≤ 2K). Installed with `update.sh` (one changed file).
+- **Tests:** `test_commands.py` — `test_add_adr_and_lesson` asserts the new lesson line; new
+  `test_add_adr_writes_the_house_format` (heading, bullet order, amends text, tag title, lint). Suite **124 passed**;
+  ruff: no new findings (22 pre-existing E741 in `genesis_ctx`, unchanged).
+- **Decisions / deviations** (ADR impact: none): the phase is a separate `--phase` flag on both commands (not typed
+  into `--title`/`--rule`), so the house suffix is uniform; a title/rule that already contains `(Phase ` is left
+  alone. The docs agent passes the phase id as written in the As-built (`48` or `46-09`).
+- **Lesson candidates:** none beyond 47-07's.
+- **Code-map changes:** none (same modules).

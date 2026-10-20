@@ -37,12 +37,21 @@ One home per fact. Move a finished phase's knowledge into those homes, keep the 
 7. **Skills:** if a procedure changed, edit the skill in `agent-system/skills/` and tell the operator to run `update.sh`.
 8. **Verify:** `{{GENESIS_HOME}}/bin/genesis-ctx index && {{GENESIS_HOME}}/bin/genesis-ctx lint` green; print the L0 budget. Commit project-tracker locally; ask before pushing.
 
-## `{{GENESIS_HOME}}/bin/genesis-ctx add` formats
-- `{{GENESIS_HOME}}/bin/genesis-ctx add adr --id ADR-0NN --title "…" --areas a,b --rule "…" [--status accepted|proposed] [--amends ADR-0MM] [--body-file F]`
-  → appends `## ADR-0NN — <title> (Phase NN) — **Accepted**` with the house bullets (Status, Context, Decision,
-  Alternatives rejected, Consequences) + the tag entry; updates the amended ADR's `amended_by`; then `index`.
-- `{{GENESIS_HOME}}/bin/genesis-ctx add lesson --areas a,b --rule "<rule sentence>" [--phase NN] [--body-file F]`
-  → appends `- <!-- L-0NN --> **<rule> (Phase NN).** <body>` to `bible/06` §7 + the tag entry; then `index`.
+## `{{GENESIS_HOME}}/bin/genesis-ctx add` formats (verified 2026-10-20, 47-08 §5)
+- `{{GENESIS_HOME}}/bin/genesis-ctx add adr --id ADR-0NN --title "…" --phase NN --areas a,b --rule "…" [--status accepted|proposed] [--amends ADR-0MM …] [--body-file F]`
+  → appends `## ADR-0NN — <title> (Phase NN) — **Accepted**` + `- **Status:** **Accepted** — <date>.` and, without
+  a body file, scaffolds **Context**, **Decision** (= the rule), **Alternatives rejected**, **Consequences** (with
+  "Amends ADR-0MM: …" for each `--amends`) — fill every `_(to write)_`. With `--body-file`, the file holds those four
+  bullets in that order; the command warns if it does not say "Amends ADR-0MM: …". Writes the tag entry (title incl.
+  the phase), adds the new id to each amended ADR's `amended_by`, then runs `index`.
+- `{{GENESIS_HOME}}/bin/genesis-ctx add lesson --areas a,b --rule "<rule sentence>" --phase NN [--body-file F]`
+  → appends `- <!-- L-0NN --> **<rule> (Phase NN).** <body>` at the end of `bible/06` §7 (next free id; body lines
+  indented 3), the `tags/lesson.toml` entry (`phase = "NN"`), then `index`. The bold lead incl. the phase is the
+  digest one-liner: ≤ 220 chars.
+- Accepting a proposed ADR is an **edit**, not an `add`: change its heading + Status line to **Accepted**, set
+  `status = "accepted"` in `tags/adr.toml`, then `{{GENESIS_HOME}}/bin/genesis-ctx index --reviewed ADR-0NN`.
+- Never hand-write `<!-- L-NNN -->` markers or `context/_generated/*`; read any rule's full text with
+  `{{GENESIS_HOME}}/bin/genesis-ctx adr|lesson <id>` (the bulk-read guard blocks whole-file reads of the big docs).
 
 ## Budgets (enforced by lint)
 L0 ≤ 15K tokens · `state/current.md` ≤ 4K · each ADR `rule` and lesson rule ≤ 220 chars · a tracker §6 entry ≤ 5 lines.

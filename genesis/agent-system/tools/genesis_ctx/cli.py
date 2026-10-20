@@ -71,11 +71,12 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--body-file")
     a.add_argument("--amends", nargs="+", metavar="ADR")
     a.add_argument("--status", default="proposed", choices=["proposed", "accepted"])
+    a.add_argument("--phase", default="", help="appends ' (Phase NN)' to the title (47-08 §5)")
     a = asub.add_parser("lesson")
     a.add_argument("--areas", required=True)
     a.add_argument("--rule", required=True)
     a.add_argument("--body-file")
-    a.add_argument("--phase", default="")
+    a.add_argument("--phase", default="", help="appends ' (Phase NN).' to the bold lead; tag phase = NN")
 
     s = sub.add_parser("mark", help="one-shot: insert <!-- L-NNN --> markers into bible/06 §7 (idempotent)")
     s.add_argument("--dry-run", action="store_true")
@@ -133,7 +134,7 @@ def run(args: argparse.Namespace) -> int:
         from .add import cmd_add_adr, cmd_add_lesson
         if args.what == "adr":
             return cmd_add_adr(ctx, args.id, args.title, args.areas, args.rule, args.body_file, args.amends,
-                               args.status)
+                               args.status, args.phase)
         return cmd_add_lesson(ctx, args.areas, args.rule, args.body_file, args.phase)
     if args.cmd == "mark":
         from .migrate import cmd_mark
