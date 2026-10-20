@@ -85,13 +85,29 @@ def test_pack_sub_spec(env):
     assert "| security | always-on |" in text and "| release-ci | always-on |" in text
     assert "ADR-076 | manifest" in text                                          # manifest ADR
     assert "ADR-028 | area api; path `genesis/genesis/api/app.py`" in text       # tag paths
-    assert "ADR-033 | area chat" in text and "### ADR-031" in text
+    assert "ADR-033 | area chat" in text                                         # area-only: routed, listed
+    assert "### ADR-076" in text                                                 # manifest ADR → full text
+    assert "## Also applies" in text and "| ADR-031 |" in text                   # area-only ADR → one-line pointer
     assert "L-003 | manifest; area api" in text
     assert "`genesis/genesis/  chat/`" in text and "````text" in text
     assert "`tracker:reference/hitl-design.md` | area chat" in text               # area docs
     assert "`tracker:specs/phase-48-demo.md` | umbrella spec" in text
     assert "ADR-001" not in text.split("## ADRs")[0].split("## Included")[1]       # core-engine not selected
     assert "budget **OK**" in text
+
+
+def test_pack_tiers_full_text_vs_also_applies(env):
+    # 47-09 M3b: manifest adrs/path hits/chains get full text; area-only rules get a one-line pointer.
+    env.write("specs/phase-48-demo/48-06-tier.md",
+              "# 48-06\n\n## Context manifest\n\n```toml\nareas = [\"chat\"]\nadrs = [\"ADR-076\"]\n```\n")
+    code, out, _ = env.run("pack", "48-06", "--out", str(env.root / "t.md"))
+    assert code == 0
+    text = (env.root / "t.md").read_text()
+    full = text.split("## ADRs — full text")[1].split("## Lessons")[0]
+    also = text.split("## Also applies")[1]
+    assert "### ADR-076" in full                                   # manifest ADR → full text
+    assert "### ADR-031" not in full and "| ADR-031 |" in also     # area-only ADR → one-line pointer
+    assert "genesis-ctx adr|lesson <id>" in text                   # the pointer instruction
 
 
 def test_pack_glob_code_upstream_and_areas_only(env):
@@ -294,8 +310,10 @@ def test_add_adr_writes_the_house_format(env):
 
 
 def test_pack_and_adr_dedupe_combined_bible04_bullet(env):
-    # The amendment bullet names ADR-061 + ADR-063 (both stories-workbench); it must print ONCE.
-    code, _, _ = env.run("pack", "--areas", "stories-workbench", "--out", str(env.root / "sw.md"))
+    # The amendment bullet names ADR-061 + ADR-063 (both full-text via the manifest); it must print ONCE.
+    env.write("specs/phase-48-demo/48-07-amend.md",
+              "# 48-07\n\n## Context manifest\n\n```toml\nadrs = [\"ADR-061\", \"ADR-063\"]\n```\n")
+    code, _, _ = env.run("pack", "48-07", "--out", str(env.root / "sw.md"))
     assert code == 0
     text = (env.root / "sw.md").read_text()
     assert text.count("AMEND-BULLET") == 1                                     # deduped across the two ids
@@ -307,10 +325,12 @@ def test_pack_and_adr_dedupe_combined_bible04_bullet(env):
 def test_b04_skip_honoured_in_pack_but_not_adr(env):
     # b04 = "skip" drops ADR-031's bible/04 bullet from packs, but `adr` always prints it.
     env.edit("context/tags/adr.toml", '[ADR-031]\ntitle', '[ADR-031]\nb04 = "skip"\ntitle')
-    code, _, _ = env.run("pack", "--areas", "chat", "--out", str(env.root / "c.md"))
+    env.write("specs/phase-48-demo/48-08-skip.md",
+              "# 48-08\n\n## Context manifest\n\n```toml\nadrs = [\"ADR-031\"]\n```\n")
+    code, _, _ = env.run("pack", "48-08", "--out", str(env.root / "c.md"))
     assert code == 0
     text = (env.root / "c.md").read_text()
-    assert "### ADR-031" in text                                               # decision-log section stays
+    assert "### ADR-031" in text                                               # decision-log section stays (direct hit)
     assert "**Chat is read-only.**" not in text                                # the bible/04 bullet is skipped
     _, out, _ = env.run("adr", "31")
     assert "**Chat is read-only.**" in out                                     # `adr` ignores skip

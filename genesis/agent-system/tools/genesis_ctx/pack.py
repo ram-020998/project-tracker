@@ -113,7 +113,19 @@ def build_pack(ctx: Ctx, ref: str | None, extra_areas: list[str]) -> tuple[str, 
     adr_ids = sorted(sel["adrs"])
     lesson_ids = sorted(sel["lessons"])
     sec_keys = [s.key for s in c.sections if s.key in sel["sections"]]
-    b04_own, b04_refs = c.b04_assignment(adr_ids, honor_skip=True)   # dedupe + honour `b04 = "skip"`
+
+    # Full text only for DIRECT hits: manifest `adrs`, path-glob hits, and their amendment chains.
+    # Rules that reached the pack only through an area become a one-line "Also applies" pointer the
+    # agent loads on demand (one-hop progressive disclosure, 47-09 M3b). `check` keeps the full
+    # area-wide checklist; recall (§3) counts full ∪ listed.
+    direct_seeds = [i for i, w in sel["adrs"].items()
+                    if any(r == "manifest" or r.startswith("path ") for r in w)]
+    direct = set(c.pack_chain(direct_seeds))
+    full_adr_ids = [i for i in adr_ids if i in direct]
+    also_adr_ids = [i for i in adr_ids if i not in direct]
+    full_lesson_ids = [i for i in lesson_ids if "manifest" in sel["lessons"][i]]
+    also_lesson_ids = [i for i in lesson_ids if i not in full_lesson_ids]
+    b04_own, b04_refs = c.b04_assignment(full_adr_ids, honor_skip=True)   # dedupe + honour `b04 = "skip"`
 
     def _adr(i: str) -> str:
         return render_adr(c, i, level=3, b04_bullets=b04_own[i], b04_refs=b04_refs[i])
@@ -128,9 +140,13 @@ def build_pack(ctx: Ctx, ref: str | None, extra_areas: list[str]) -> tuple[str, 
     if note:
         body += ["", note]
     body += ["", "## ADRs — full text", ""]
-    body += [_adr(i) for i in adr_ids] or ["_(none)_"]
+    body += [_adr(i) for i in full_adr_ids] or ["_(none — manifest `adrs`, path hits and their chains only; see Also applies)_"]
     body += ["", "## Lessons — full text", ""]
-    body += [render_lesson(c, i, level=3) for i in lesson_ids] or ["_(none)_"]
+    body += [render_lesson(c, i, level=3) for i in full_lesson_ids] or ["_(none — manifest `lessons` only; see Also applies)_"]
+    also_rows = [(i, c.adr_rule(i) or "(no rule yet)") for i in also_adr_ids] + \
+                [(i, c.lesson_rule(i)) for i in also_lesson_ids]
+    body += ["", "## Also applies — load with `genesis-ctx adr|lesson <id>` before changing related code", ""]
+    body += _table(also_rows, ("id", "rule")) if also_rows else ["_(none)_"]
     body += ["", "## Code map", ""]
     for k in sec_keys:
         s = c.section(k)
@@ -155,11 +171,12 @@ def build_pack(ctx: Ctx, ref: str | None, extra_areas: list[str]) -> tuple[str, 
     text = "\n".join(head) + "\n\n" + body_text
     summary = {
         "task": task, "tokens": est, "verdict": verdict,
-        "counts": {"areas": len(sel["areas"]), "adrs": len(adr_ids), "lessons": len(lesson_ids),
+        "counts": {"areas": len(sel["areas"]), "adrs": len(full_adr_ids), "adrs_also": len(also_adr_ids),
+                   "lessons": len(full_lesson_ids), "lessons_also": len(also_lesson_ids),
                    "sections": len(sec_keys), "read_next": len(rows)},
         "parts": {
-            "adrs": sum(tokens(_adr(i)) for i in adr_ids),
-            "lessons": sum(tokens(render_lesson(c, i, level=3)) for i in lesson_ids),
+            "adrs": sum(tokens(_adr(i)) for i in full_adr_ids),
+            "lessons": sum(tokens(render_lesson(c, i, level=3)) for i in full_lesson_ids),
             "sections": sum(tokens(c.section(k).display) for k in sec_keys),
         },
     }
@@ -175,8 +192,9 @@ def cmd_pack(ctx: Ctx, ref: str | None, areas_csv: str | None, out: str | None) 
     print(f"Pack written: {path}\n")
     print("| part | items | ~tokens |\n|---|---:|---:|")
     print(f"| areas | {s['counts']['areas']} | |")
-    print(f"| ADRs | {s['counts']['adrs']} | {s['parts']['adrs']:,} |")
-    print(f"| lessons | {s['counts']['lessons']} | {s['parts']['lessons']:,} |")
+    print(f"| ADRs — full text | {s['counts']['adrs']} | {s['parts']['adrs']:,} |")
+    print(f"| lessons — full text | {s['counts']['lessons']} | {s['parts']['lessons']:,} |")
+    print(f"| also applies (one-line pointers) | {s['counts']['adrs_also'] + s['counts']['lessons_also']} | |")
     print(f"| code-map sections | {s['counts']['sections']} | {s['parts']['sections']:,} |")
     print(f"| read next | {s['counts']['read_next']} | |")
     print(f"| **total** | | **{s['tokens']:,}** — {s['verdict']} |")
