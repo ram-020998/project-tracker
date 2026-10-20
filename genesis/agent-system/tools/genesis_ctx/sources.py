@@ -145,6 +145,14 @@ SEC_C = re.compile(r"^\*\*([^*].*?)\*\*\s*:?\s*$")
 RULE_LINE = re.compile(r"^-{3,}\s*$")
 REPO_HDR = re.compile(r"^[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*/\s*$")
 ENTRY = re.compile(r"^  (?! )(\S+)")
+# A base-map entry's first token must be path-like: it contains "/" or ends in a file extension.
+# Anything else on a 2-space line (a wrapped prose line such as `runner),`) continues the previous entry.
+PATH_EXT = re.compile(
+    r"\.(?:py|pyi|ts|tsx|js|jsx|mjs|cjs|json|md|yaml|yml|toml|sh|ini|cfg|txt|sql|html|css|lock|xml)$")
+
+
+def path_like(token: str) -> bool:
+    return "/" in token or bool(PATH_EXT.search(token))
 
 
 @dataclass
@@ -193,20 +201,24 @@ def parse_codemap(text: str) -> list[Section]:
         first_b = next((j for j in range(open_i + 1, len(lines)) if SEC_B.match(lines[j])), len(lines))
         base_end = min(close_i, first_b)
         repo, cur = None, None
+
+        def flush(end):
+            # A preamble (repo header → first entry) is kept only if it has text.
+            if cur and (cur[0] != cur[2] or any(lines[j].strip() for j in range(cur[1], end))):
+                raw.append(_close(lines, cur, end))
+
         for i in range(open_i + 1, base_end):
             line = lines[i]
             if REPO_HDR.match(line):
-                if cur:
-                    raw.append(_close(lines, cur, i))
-                repo, cur = line.strip(), None
+                flush(i)
+                repo = line.strip()
+                cur = (repo, i + 1, repo)          # "<repo>/" preamble until the first entry
                 continue
             m = ENTRY.match(line)
-            if m and repo:
-                if cur:
-                    raw.append(_close(lines, cur, i))
+            if m and repo and path_like(m.group(1)):
+                flush(i)
                 cur = (f"{repo}  {m.group(1)}", i, repo)
-        if cur:
-            raw.append(_close(lines, cur, base_end))
+        flush(base_end)
         scan_from = base_end
     starts = []
     for i in range(scan_from, len(lines)):

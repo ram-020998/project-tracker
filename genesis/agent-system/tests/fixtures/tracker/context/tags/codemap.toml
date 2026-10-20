@@ -18,6 +18,12 @@ areas = ["db"]
 ["genesis/genesis/  chat/"]
 areas = ["chat"]
 
+["genesis-workflows/  registry.json"]
+areas = ["features-stages"]
+
+["genesis-workflows/  skills/{gam/SKILL.md"]
+areas = ["features-stages"]
+
 ["── Phase 25 — Architectural Foundation Hardening (genesis v0.49.0)"]
 areas = ["api", "security"]
 

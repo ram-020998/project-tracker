@@ -96,6 +96,8 @@ def test_codemap_sections_all_kinds(env):
         "genesis-core/genesis_core/  state.py #2",
         "genesis/genesis/  db/",
         "genesis/genesis/  chat/",
+        "genesis-workflows/  registry.json",
+        "genesis-workflows/  skills/{gam/SKILL.md",
         "── Phase 25 — Architectural Foundation Hardening (genesis v0.49.0)",
         "── Phase 29 — UX Design stage (grounded mockup→implementation analysis; ADR-057)",
         "── Phase 31 — Feature Breakdown stage (ADR-059)",
@@ -114,6 +116,28 @@ def test_codemap_base_ends_at_first_block_inside_fence(env):
     p45 = c.section("Phase 45 — Incremental Delta Sync (genesis v0.76.0)")
     assert p45.kind == "bold" and "apply(mode='incremental')" in p45.text
     assert "CORE_MAJOR=1." in c.section("genesis-core/genesis_core/  types.py").text
+
+
+def test_codemap_wrapped_prose_lines_continue_the_entry(env):
+    # Real genesis-workflows shape: a wrapped paragraph at 2-space indent.
+    c = env.corpus()
+    reg = c.section("genesis-workflows/  registry.json")
+    assert "appian-atlas [read-only]" in reg.text and "runner), workflows/" in reg.text
+    assert "skills/{gam" not in reg.text
+    assert "(self-contained pyyaml" in c.section("genesis-workflows/  skills/{gam/SKILL.md").text
+    keys = {s.key for s in c.sections}
+    for odd in ("appian-atlas", "cli-registry.json,", "runner),", "(self-contained"):
+        assert f"genesis-workflows/  {odd}" not in keys
+
+
+def test_codemap_preamble_before_first_entry_is_a_repo_section(env):
+    env.write("bible/03-codebase-map.md",
+              "```\nrepo-a/\n  free text before any entry,\n  still prose\n  mod.py   entry.\n"
+              "repo-b/\n  x/   entry.\n```\n")
+    keys = [(s.key, s.text) for s in env.corpus().sections]
+    assert keys == [("repo-a/", "  free text before any entry,\n  still prose"),
+                    ("repo-a/  mod.py", "  mod.py   entry."),
+                    ("repo-b/  x/", "  x/   entry.")]
 
 
 def test_untagged_titles_drop_id_paren_and_status(env):

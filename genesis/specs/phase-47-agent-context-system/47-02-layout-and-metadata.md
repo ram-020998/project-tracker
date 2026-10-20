@@ -148,9 +148,14 @@ via `genesis-ctx add lesson` (47-08).
 
 - **(a) Base-map entries.** The base map runs from the line after the first fence opener to the first `# ──` line
   (to the fence close if there is none — the real file has three `# ──` blocks inside its first fence). Under a repo
-  header line (column 0, ending in `/`, e.g. `genesis/genesis/`), each line indented exactly 2 spaces starts an entry;
-  the entry runs to the next entry, repo header or the end of the base map. Key: header + the entry's first token —
-  `"genesis/genesis/  db/"`.
+  header line (column 0, ending in `/`, e.g. `genesis/genesis/`), an entry starts only on a line indented exactly
+  2 spaces whose **first token is path-like** — it contains `/` or ends in a file extension (`.py .pyi .ts .tsx .js
+  .jsx .mjs .cjs .json .md .yaml .yml .toml .sh .ini .cfg .txt .sql .html .css .lock .xml`). Any other line
+  (e.g. a wrapped prose line at 2-space indent such as `runner), workflows/…`) continues the previous entry. The
+  entry runs to the next entry, repo header or the end of the base map. Key: header + the entry's first token —
+  `"genesis/genesis/  db/"`. Text between a repo header and its first entry (if any non-blank) forms a section keyed
+  by the header alone — `"genesis-workflows/"`. (Amended S3, 2026-10-20, user-approved: the real `genesis-workflows/`
+  block is a wrapped paragraph and the old "every 2-space line" rule produced keys like `runner),`.)
 - **(b) `# ── … ──` blocks.** A column-0 line starting `# ──` starts a section. Key: the line without the leading `# `
   and the trailing `─` run — `"── Phase 34 — Design Lane Automation (Workbench Design + Design Review; ADR-062)"`.
 - **(c) Bold-line blocks.** A line that is only bold text `**…**` (a trailing `:` inside or outside allowed) starts a

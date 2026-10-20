@@ -203,7 +203,7 @@ first fence, duplicate key ` #2`. Each lint rule has its own failing fixture.
     primaries. **Every id ADR-001..076 has decision-log text.** ADR-051 stops at L1219.
   - `bible/04`: 64 ADR bullets covering all 76 ids.
   - `bible/06`: 86 lessons, all with bold leads, none marked yet.
-  - `bible/03`: 50 sections (33 base, 15 `# ──`, 2 bold) and one ` #2` key.
+  - `bible/03`: 50 sections (33 base, 15 `# ──`, 2 bold) and one ` #2` key — **46 after the S3 rule fix** (item 8).
 - `lint` → exit 1 with 215 errors, all expected before 47-04/05: adr-untagged 76, lesson-unmarked 86,
   codemap-untagged 50, generated-stale 3. L0 is currently ~2.1K tokens.
 - `verify-lossless --baseline HEAD`: 1,338 baseline units, **0 missing**, 0.65 s; 24 duplicates in the active layer
@@ -236,7 +236,11 @@ first fence, duplicate key ` #2`. Each lint rule has its own failing fixture.
    - `mark --dry-run`, `verify-lossless --max-dups`.
 7. **Python 3.11 not verified by execution:** no 3.11 interpreter on this machine. The code avoids 3.12+ syntax
    (an AST scan found no backslash or same-quote f-string expressions); it was run on 3.13.
-8. **For 47-05:** in `bible/03`'s base map the `genesis-workflows/` block is a wrapped paragraph at 2-space indent.
-   Rule (a) therefore yields sections with odd keys: `appian-atlas`, `cli-registry.json,`, `runner),`,
-   `skills/{gam/SKILL.md`, `(self-contained`, and `genesis/genesis/  (scripts/`. This is deterministic and lossless,
-   only noisier to tag (they can share one area list).
+8. **Base-map entry rule tightened (S3, 2026-10-20, user-approved; 47-02 §4.3 (a)).** The `genesis-workflows/`
+   block in `bible/03`'s base map is a wrapped paragraph at 2-space indent, so the original rule yielded odd keys
+   (`appian-atlas`, `cli-registry.json,`, `runner),`, `(self-contained`). An entry now starts only on a 2-space
+   line whose first token is path-like (contains `/` or ends in a file extension); other lines continue the
+   previous entry; non-blank text before a repo's first entry is a `"<repo>/"` section. Real file: **46 sections**
+   (29 base, 15 `# ──`, 2 bold; was 50). Remaining base keys are all path-like; `genesis/genesis/  (scripts/` and
+   `genesis-workflows/  skills/{gam/SKILL.md` stay (they contain `/`). Fixture `bible/03` gained the real
+   `genesis-workflows/` shape; two new tests (continuation, preamble) → **90 passed**.
