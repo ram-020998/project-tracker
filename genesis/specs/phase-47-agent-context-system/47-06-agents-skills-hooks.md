@@ -146,7 +146,7 @@ Skills are **procedures + pointers** to existing documents (by absolute path, re
 |---|---|---|
 | `bulk-read-guard.sh` | PreToolUse on `read`: if the path is one of `reference/decision-log.md`, `bible/03|04|06`, `archive/**`, `tracker.md` **and** no range is given → exit 2 with "Use `genesis-ctx adr|lesson|area|search` or a ranged read." | rely on the L0 protocol + review; keep the script for later |
 | `stop-lint.sh [--specs-only]` | Stop: run `genesis-ctx lint`; on failure, if this session has continued < 2 times (counter in `$TMPDIR/genesis-stop-<session_id>`), print `{"decision":"block","reason":"<lint summary>"}`; else exit 0 and leave the summary for the user | role prompt step "run lint before finishing" |
-| `shell-guard.sh [--allow-push-tag] --write-root R…` | PreToolUse on `shell` (47-09 B1/M1): exit 2 on (a) a `git push`/`tag` subcommand from any form (absolute path, `env`/`command`/`exec`/`VAR=`/`-C`/chain/`sh -c`) unless `--allow-push-tag` (genesis-release); (b) a shell write (`>`/`>>`/`2>`/`&>`, `tee`, `cp`, `mv`, `rm`, `sed -i`, `dd of=`) whose target resolves outside the agent's `--write-root`s. Holds under `--trust-all-tools`. Fails open only if the payload can't be read | the removed broad allows + the no-trust `ask` gate + the review |
+| `shell-guard.sh [--allow-push-tag] --write-root R…` | PreToolUse on `shell` (47-09 B1/M1): exit 2 on (a) a `git push`/`tag` subcommand from any form (absolute path, `env`/`command`/`exec`/`VAR=`/`-C`/chain/`sh -c`) unless `--allow-push-tag` (genesis-release); (b) a shell write (`>`/`>>`/`2>`/`&>`, `tee`, `cp`, `mv`, `rm`, `sed -i`, `dd of=`) whose target resolves outside the agent's `--write-root`s (or cannot be resolved statically). The command is lexed like a shell (47-09 M5): a `>` inside quotes is not a redirect; fd duplications (`2>&1`, `>&2`, `N>&M`) are not writes; `/dev/null`·`/dev/stdout`·`/dev/stderr`·`/dev/tty`·`/dev/fd/N` are allowed targets. Holds under `--trust-all-tools`. Fails open only if the payload can't be read | the removed broad allows + the no-trust `ask` gate + the review |
 | (SessionStart) | `genesis-ctx status --brief` directly | `UserPromptSubmit` with `cache_ttl` |
 
 ## 9. Acceptance
@@ -268,3 +268,31 @@ Interactive check for the operator: `cd ~/repo-gitlab/ramaswamy.u && kiro-cli --
 `/context show` → expect the eight L0 files (≈ 14.7K tokens, ≈ 1.5 %) and a total of **≈ 5–6 %** before any pack; if the
 six `genesis-*` skills also appear as progressively-loaded items, the interactive client creates sessions in-mode and
 the fallback is merely redundant.
+
+### 47-09 round-2 fix M5 — quote-aware `shell-guard.sh` (2026-10-20, genesis-dev)
+
+The round-1 guard ran a `>` regex over raw segment text, so it read quoted `>` and fd duplications as file targets and
+false-denied ordinary commands (`2>/dev/null`, `… 2>&1`, an f-string `{v:>7}`, `grep '2>/dev/null'`). The embedded
+Python now **lexes the command like a shell**: quotes, `\` escapes, `#` comments, line continuations; `;` `&&` `||` `|`
+`|&` `&` newline and `( … )` subshells; heredocs (body attached to its command); `$(…)`, backticks and `<(…)`/`>(…)`
+bodies are analysed recursively; `$((…))`, `(( … ))` and `[[ … ]]` are not redirects.
+- **Redirects:** `N>`, `>>`, `>|`, `&>`, `&>>`, `<>` and `>&file` are writes; `>&N` / `N>&M` / `N>&-` are fd dups (not
+  writes). `/dev/null`, `/dev/stdout`, `/dev/stderr`, `/dev/tty`, `/dev/fd/N` are allowed for redirects, `tee`, `cp`,
+  `dd of=` (not for `rm`/`mv`). Paths are normalised first (`/dev/../etc/x` is blocked).
+- **Resolution:** `NAME=…` / `export NAME=…` earlier in the line and `for v in a b c` loop values are tracked; `~` and
+  set environment variables expand; `cd`/`pushd` move the cwd, a `( … )` subshell restores it. A write target that
+  cannot be resolved statically (unset `$VAR`, a `$(…)` inside it) is **blocked** (fail closed) — the round-1 guard
+  resolved such a target as a relative path and could *allow* it.
+- **Push/tag (a), hardened while here:** any word that is `git` (also via `$G`, `/usr/bin/git`) followed by push/tag
+  after git's global options; wrappers `env -i`/`sudo -u x`/`timeout N`/`nice -n N`/`stdbuf`; `if`/`while` heads;
+  `sh|bash|zsh -c` with combined flags (`-lc`); `eval`; a heredoc/here-string fed to a shell; an unresolvable git
+  subcommand (`git $X`); `git -c alias.…=…`. Known over-blocks kept (fail closed): `git push --help`, read-only
+  `git tag -l` (the profiles deny `git tag*` anyway). Not a sandbox: a script *file* run by an interpreter is not
+  inspected (the profiles don't allow-list `bash`/`python`, so without trust-all it still asks).
+
+Evidence: `tests/test_shell_guard.py` **94 passed** (34 round-1 cases unchanged, the 4 review false positives plus 21 more
+idioms allowed, 20 real out-of-scope writes and 14 push/tag forms blocked). The review's probe table re-run against the
+repo hook (`/tmp/genesis-dev/guard_probe_r2.sh`) gave **38/38** as expected: the 33 original probes and 5 false-positive
+probes. A replay of all **196 distinct shell commands** that Genesis agents ran in recorded sessions, through the old and
+new hook, found **0 newly blocked**; 22 old false denials now pass, and the 14 still blocked are the review's deliberate
+push/tag/out-of-root probes (plus `git tag --sort` listing).
