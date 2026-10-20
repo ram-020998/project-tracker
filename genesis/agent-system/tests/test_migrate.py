@@ -123,6 +123,23 @@ def test_verify_lossless_ignores_moved_detects_deleted(git_env):
     assert env.run("verify-lossless", "--baseline", "nope")[0] == 2
 
 
+def test_archive_keeps_first_bullet_and_pointer_is_its_own_block(git_env):
+    # Real tracker §6 shape: bullets without blank lines; the newest one stays, the rest move.
+    env = git_env
+    env.write("tracker.md", "# T\n\n## 6. Status log\n\n- **2026-10-20 — Phase 47** KEEP-47.\n"
+                            "- **2026-10-15 — Phase 46** MOVE-46.\n- **2026-10-13 — Phase 45** MOVE-45.\n")
+    git(env.tracker.parent, "commit", "-qam", "bullet log")
+    plan = env.root / "plan.toml"
+    plan.write_text(PLAN.replace("start = '^## 6\\. Status log'", "start = '^- \\*\\*2026-10-20 — Phase 47'"))
+    code, out, _ = env.run("archive", "--plan", str(plan), "--step", "1", "--apply")
+    assert code == 0 and "| 1 | `tracker.md` | L6–L7 |" in out, out
+    tr = env.read("tracker.md")
+    assert "KEEP-47.\n\n> 📦 Moved verbatim to " in tr and "MOVE-4" not in tr and tr.endswith("`progress/`.\n")
+    assert "(already applied)" in env.run("archive", "--plan", str(plan), "--step", "1")[1]
+    code, out, _ = env.run("verify-lossless", "--baseline", "HEAD")
+    assert code == 0 and "missing: **0** → PASS" in out, out
+
+
 def test_verify_lossless_marker_insertion_is_lossless(git_env):
     env = git_env
     _strip_markers(env)

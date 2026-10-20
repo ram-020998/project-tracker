@@ -197,6 +197,12 @@ def cmd_archive(ctx: Ctx, plan: str, step_n: int | None, apply: bool) -> int:
                 rep = [ptr]
             if idx == 0 and s.get("note"):
                 rep += ["", s["note"]] if rep else [s["note"]]
+            if rep:
+                # Keep the pointer its own block: a pointer glued to a kept bullet would change that unit.
+                if a > 0 and not _blank(lines[a - 1]):
+                    rep = [""] + rep
+                if b < len(lines) and not _blank(lines[b]):
+                    rep = rep + [""]
             lines[a:b] = rep
             if not rep and 0 < a < len(lines) and _blank(lines[a - 1]) and _blank(lines[a]):
                 del lines[a]
