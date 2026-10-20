@@ -1,0 +1,26 @@
+# 47-05 archive plan (schema: 47-03 §3.1). bible/00 and bible/01 move verbatim into archive/ now that their
+# replacements exist (context/L0-core.md, context/state/current.md). Each file stays as a one-line pointer stub
+# because the old onboarding manifest links them until 47-10.
+#   genesis-ctx archive --plan agent-system/migration/47-05.plan.toml [--apply]
+date = "2026-10-20"
+phase = "47-05"
+
+[[step]]
+n       = 1
+name    = "bible/00 — onboarding and overview"
+source  = "bible/00-onboarding-and-overview.md"
+dest    = "archive/bible-00-onboarding-and-overview.md"
+start   = '^<!-- GENESIS BIBLE — CHUNK 00'
+include_start = true
+end     = "EOF"
+pointer = "each"
+
+[[step]]
+n       = 1
+name    = "bible/01 — current state"
+source  = "bible/01-current-state.md"
+dest    = "archive/bible-01-current-state.md"
+start   = '^<!-- GENESIS BIBLE — CHUNK 01'
+include_start = true
+end     = "EOF"
+pointer = "each"

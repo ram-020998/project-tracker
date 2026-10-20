@@ -55,12 +55,12 @@ def cmd_mark(ctx: Ctx, dry_run: bool = False) -> int:
 
 # ───────────────────────────── archive ─────────────────────────────
 
-PLAN_TOP = {"date", "baseline", "step"}
+PLAN_TOP = {"date", "phase", "baseline", "step"}
 STEP_KEYS = {"n", "name", "source", "dest", "start", "include_start", "end", "heading", "contains", "stop",
              "pointer", "note"}
 
 
-def load_plan(path: Path) -> tuple[str, list[dict]]:
+def load_plan(path: Path) -> tuple[str, list[dict], str]:
     try:
         data = tomllib.loads(Path(path).read_text(encoding="utf-8"))
     except FileNotFoundError as e:
@@ -95,7 +95,7 @@ def load_plan(path: Path) -> tuple[str, list[dict]]:
                     re.compile(rx)
                 except re.error as e:
                     raise CtxError(f"{where}: bad regex in `{key}`: {e}") from e
-    return str(data.get("date") or today()), steps
+    return str(data.get("date") or today()), steps, str(data.get("phase") or "47-04")
 
 
 def _blank(s: str) -> bool:
@@ -143,14 +143,14 @@ def find_blocks(lines: list[str], step: dict) -> list[tuple[int, int]] | str:
     return out or "none"
 
 
-def pointer_line(source: str, dest: str, date: str) -> str:
+def pointer_line(source: str, dest: str, date: str, phase: str = "47-04") -> str:
     link = os.path.relpath(dest, os.path.dirname(source) or ".").replace(os.sep, "/")
-    return (f"{POINTER_PREFIX}[{dest}]({link}) (Phase 47-04, {date}). "
+    return (f"{POINTER_PREFIX}[{dest}]({link}) (Phase {phase}, {date}). "
             "Search with `genesis-ctx search <term> --archive`.")
 
 
 def cmd_archive(ctx: Ctx, plan: str, step_n: int | None, apply: bool) -> int:
-    date, steps = load_plan(Path(plan))
+    date, steps, phase = load_plan(Path(plan))
     chosen = [s for s in steps if step_n is None or int(s["n"]) == step_n]
     if not chosen:
         raise CtxError(f"plan has no step n = {step_n}")
@@ -180,7 +180,7 @@ def cmd_archive(ctx: Ctx, plan: str, step_n: int | None, apply: bool) -> int:
         chunks = []
         if not dst.exists():
             chunks.append(f"# {s['name']} — archived verbatim\n\n> Moved verbatim from `{s['source']}` in Phase "
-                          f"47-04. Never mandatory: search with `genesis-ctx search <term> --archive`; don't read "
+                          f"{phase}. Never mandatory: search with `genesis-ctx search <term> --archive`; don't read "
                           f"whole.\n\n")
         for a, b in blocks:
             chunks.append(f"<!-- archived from {s['source']} L{a + 1}–L{b}, step {s['n']}, {date} -->\n\n"
@@ -189,7 +189,7 @@ def cmd_archive(ctx: Ctx, plan: str, step_n: int | None, apply: bool) -> int:
         with dst.open("a", encoding="utf-8") as fh:
             fh.write("".join(chunks))
         mode = s.get("pointer", "each")
-        ptr = pointer_line(s["source"], s["dest"], date)
+        ptr = pointer_line(s["source"], s["dest"], date, phase)
         for idx in range(len(blocks) - 1, -1, -1):
             a, b = blocks[idx]
             rep: list[str] = []

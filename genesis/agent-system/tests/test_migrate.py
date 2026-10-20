@@ -83,6 +83,14 @@ def test_archive_dry_run_then_apply_with_pointers(env):
     assert "Do not start backlog" in b08
 
 
+def test_archive_plan_phase_names_the_pointer(env):
+    plan = env.root / "plan.toml"
+    plan.write_text(PLAN.replace('date = "2026-10-21"', 'date = "2026-10-21"\nphase = "47-05"'))
+    assert env.run("archive", "--plan", str(plan), "--step", "1", "--apply")[0] == 0
+    assert "(Phase 47-05, 2026-10-21)." in env.read("tracker.md")
+    assert "in Phase 47-05." in env.read("archive/tracker-status-log.md")
+
+
 def test_archive_reapply_is_noop(env):
     plan = env.root / "plan.toml"
     plan.write_text(PLAN)
