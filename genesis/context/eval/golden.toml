@@ -1,0 +1,335 @@
+# 47-09 §2 — golden questions ("nothing is missed").
+# Written by genesis-review on 2026-10-20 from the TAG TABLES (context/tags/adr.toml + lesson.toml areas and rules,
+# as listed by `genesis-ctx` and the L0 digests), not from memory. One question per [[q]].
+#   ask      = the question put to a fresh genesis-dev session
+#   expect   = every id the answer must cite (all required)
+#   phrase   = a key phrase from the rule text the answer must contain (case-insensitive; "-", "_" and spaces
+#              are treated alike by the grader)
+#   area     = the area whose tag table the question was drawn from
+#   critical = one of the 47-09 §2 critical rules (100 % required)
+# Spread: 40 questions, all 22 areas, 14 critical. Graded by reviews/golden_grade.py.
+# (47-09 §2 names context/eval/golden.toml as the long-term home; the review agent may only write under reviews/.)
+
+# ───────────────────────────── critical ─────────────────────────────
+
+[[q]]
+id       = "Q01"
+area     = "chat"
+ask      = "May the Genesis chat write files? If so, where?"
+expect   = ["ADR-031", "ADR-034"]
+phrase   = "sandbox"
+critical = true
+
+[[q]]
+id       = "Q02"
+area     = "chat"
+ask      = "May the chat copilot approve a workflow's HITL gate on the user's behalf, or change a run without asking?"
+expect   = ["ADR-033"]
+phrase   = "confirm"
+critical = true
+
+[[q]]
+id       = "Q03"
+area     = "core-engine"
+ask      = "What must wrap every agent node in a workflow, and is it enforced anywhere?"
+expect   = ["ADR-011"]
+phrase   = "validator"
+critical = true
+
+[[q]]
+id       = "Q04"
+area     = "runs-worker"
+ask      = "A workflow node is about to call an MCP tool that writes or deploys. Which gate must come before it, and does the run pause anywhere else by default?"
+expect   = ["ADR-021"]
+phrase   = "pre_mutation"
+critical = true
+
+[[q]]
+id       = "Q05"
+area     = "stories-workbench"
+ask      = "During the Implementation lane an existing Appian object became obsolete. May the agent delete it?"
+expect   = ["ADR-068"]
+phrase   = "deprecate"
+critical = true
+
+[[q]]
+id       = "Q06"
+area     = "distribution"
+ask      = "In what order are the Genesis repos released, and what does the loader enforce for compatibility?"
+expect   = ["ADR-019"]
+phrase   = "CORE_MAJOR"
+critical = true
+
+[[q]]
+id       = "Q07"
+area     = "security"
+ask      = "Can I run `genesis serve` bound to 0.0.0.0 so a colleague can open it from their laptop?"
+expect   = ["ADR-026"]
+phrase   = "i-understand-no-auth"
+critical = true
+
+[[q]]
+id       = "Q08"
+area     = "sdk-acp"
+ask      = "What shape must the `env` field have in an MCP server entry sent over ACP?"
+expect   = ["L-001"]
+phrase   = "list"
+critical = true
+
+[[q]]
+id       = "Q09"
+area     = "web-shell"
+ask      = "A genesis release changed web/ in tag N; tag N+1 only bumps pins. Did CI re-check the committed web bundle on N+1, and what do you do if the frontend job died on tag N?"
+expect   = ["L-030"]
+phrase   = "stale-bundle"
+critical = true
+
+[[q]]
+id       = "Q10"
+area     = "memory"
+ask      = "I need a new table for the memory feature. Which database does it go in, and how is the schema created?"
+expect   = ["ADR-054"]
+phrase   = "migration"
+critical = true
+
+[[q]]
+id       = "Q11"
+area     = "config-secrets"
+ask      = "Can I store the core Appian MCP credentials in environments.json?"
+expect   = ["ADR-048"]
+phrase   = "SecretProvider"
+critical = true
+
+[[q]]
+id       = "Q12"
+area     = "security"
+ask      = "Can the chat's tool trust use trust-all for convenience? How must its allowlist entries be written?"
+expect   = ["L-017"]
+phrase   = "@server/tool"
+critical = true
+
+[[q]]
+id       = "Q13"
+area     = "config-secrets"
+ask      = "May Genesis register its MCP servers in the user's global Kiro mcp.json so every agent can use them?"
+expect   = ["ADR-020", "ADR-004"]
+phrase   = "per node"
+critical = true
+
+[[q]]
+id       = "Q14"
+area     = "appian-integration"
+ask      = "May a workflow agent or the chat call the Dev MCP package tools? On which packages may they be used?"
+expect   = ["ADR-073"]
+phrase   = "genesis-delta"
+critical = true
+
+# ───────────────────────────── per-area ─────────────────────────────
+
+[[q]]
+id       = "Q15"
+area     = "api"
+ask      = "Where must backend endpoints live, and where does the web client add the URL prefix?"
+expect   = ["ADR-028"]
+phrase   = "/api"
+critical = false
+
+[[q]]
+id       = "Q16"
+area     = "appian-integration"
+ask      = "How are the Appian Dev and DevOps MCP servers installed and run on a user's machine? May we fork them?"
+expect   = ["ADR-038"]
+phrase   = "vendored"
+critical = false
+
+[[q]]
+id       = "Q17"
+area     = "chat"
+ask      = "How should a Kiro slash command typed in the Genesis chat be sent to Kiro?"
+expect   = ["L-046"]
+phrase   = "prompt"
+critical = false
+
+[[q]]
+id       = "Q18"
+area     = "collaboration-hub"
+ask      = "When is collaboration (Hub sync) actually active?"
+expect   = ["ADR-065"]
+phrase   = "GENESIS_COLLAB_ENABLED"
+critical = false
+
+[[q]]
+id       = "Q19"
+area     = "core-engine"
+ask      = "Besides the validator/retry/escalation trio, what second reliability mechanism should a workflow use, and what bounds it?"
+expect   = ["ADR-067"]
+phrase   = "attach_healing"
+critical = false
+
+[[q]]
+id       = "Q20"
+area     = "db"
+ask      = "Should Genesis move its persistence to Postgres now? When would that be justified?"
+expect   = ["ADR-030"]
+phrase   = "trigger"
+critical = false
+
+[[q]]
+id       = "Q21"
+area     = "distribution"
+ask      = "How is Genesis shipped to users, launched, and updated?"
+expect   = ["ADR-046"]
+phrase   = "genesis up"
+critical = false
+
+[[q]]
+id       = "Q22"
+area     = "documents"
+ask      = "Through which interface must Genesis source documents (Google Docs etc.)?"
+expect   = ["ADR-052"]
+phrase   = "DocumentProvider"
+critical = false
+
+[[q]]
+id       = "Q23"
+area     = "features-stages"
+ask      = "Who owns and repairs the hidden clause ids in a spec's HTML?"
+expect   = ["ADR-075"]
+phrase   = "data-cid"
+critical = false
+
+[[q]]
+id       = "Q24"
+area     = "features-stages"
+ask      = "Once a spec is locked, how can it still be changed?"
+expect   = ["ADR-076"]
+phrase   = "change request"
+critical = false
+
+[[q]]
+id       = "Q25"
+area     = "kb-sync"
+ask      = "May the Appian KB store SAIL source code? How does an agent get the code when it needs it?"
+expect   = ["ADR-037"]
+phrase   = "Dev MCP"
+critical = false
+
+[[q]]
+id       = "Q26"
+area     = "kb-sync"
+ask      = "How does the KB sync decide which objects to export and parse?"
+expect   = ["ADR-074"]
+phrase   = "covered_until"
+critical = false
+
+[[q]]
+id       = "Q27"
+area     = "kb-sync"
+ask      = "A sync produced only a partial parse of an application. Can it go through the normal whole-app merge, and where should the guard live?"
+expect   = ["L-077"]
+phrase   = "store"
+critical = false
+
+[[q]]
+id       = "Q28"
+area     = "observability-credits"
+ask      = "How are the credit figures in Genesis produced? Could we estimate them from token counts?"
+expect   = ["ADR-032"]
+phrase   = "metered"
+critical = false
+
+[[q]]
+id       = "Q29"
+area     = "parser"
+ask      = "An Appian export contains the same object more than once. How should the KB de-duplicate?"
+expect   = ["L-032"]
+phrase   = "UUID"
+critical = false
+
+[[q]]
+id       = "Q30"
+area     = "release-ci"
+ask      = "Anything to watch about the ruff version used in CI?"
+expect   = ["L-025", "L-027"]
+phrase   = "pin"
+critical = false
+
+[[q]]
+id       = "Q31"
+area     = "release-ci"
+ask      = "Before you tag a release, what must you verify about the release commit?"
+expect   = ["L-056"]
+phrase   = "changed file"
+critical = false
+
+[[q]]
+id       = "Q32"
+area     = "release-ci"
+ask      = "After bumping a shared repo's tag (e.g. genesis-core), what else has to change so CI stays green?"
+expect   = ["L-057"]
+phrase   = "transitive"
+critical = false
+
+[[q]]
+id       = "Q33"
+area     = "runs-worker"
+ask      = "Where does a workflow graph execute, and how are pause and resume implemented?"
+expect   = ["ADR-012"]
+phrase   = "subprocess"
+critical = false
+
+[[q]]
+id       = "Q34"
+area     = "runs-worker"
+ask      = "Is there a node.started event? How does the UI know a node is currently running?"
+expect   = ["L-005"]
+phrase   = "run.cursor"
+critical = false
+
+[[q]]
+id       = "Q35"
+area     = "web-runs"
+ask      = "How should Run Detail derive node status and the conversation for a run with thousands of events?"
+expect   = ["L-066"]
+phrase   = "event log"
+critical = false
+
+[[q]]
+id       = "Q36"
+area     = "web-shell"
+ask      = "May I use `<Button asChild>` to render a router link that looks like a button?"
+expect   = ["L-069"]
+phrase   = "broken"
+critical = false
+
+[[q]]
+id       = "Q37"
+area     = "web-shell"
+ask      = "For the new visual design, should we adopt @mui/material?"
+expect   = ["ADR-055"]
+phrase   = "tokens"
+critical = false
+
+[[q]]
+id       = "Q38"
+area     = "workflows-library"
+ask      = "Can a workflow's graph.py with custom reducer state keys start with `from __future__ import annotations`?"
+expect   = ["L-022"]
+phrase   = "must not"
+critical = false
+
+[[q]]
+id       = "Q39"
+area     = "workflows-library"
+ask      = "I released a new workflow in genesis-workflows, but the app cannot run it. What is the likely cause?"
+expect   = ["L-033"]
+phrase   = "genesis install"
+critical = false
+
+[[q]]
+id       = "Q40"
+area     = "stories-workbench"
+ask      = "What id format do finalized stories get, and where is the number allocated?"
+expect   = ["ADR-072"]
+phrase   = "GNS_"
+critical = false
