@@ -18,7 +18,10 @@
 #   keywords = [string]  routing hints (propose-tags, search)
 #   skills   = [string]  optional: skills a pack for this area should surface
 #   docs     = [string]  optional: docs a pack for this area should list
+#   gates    = [string]  optional: gate commands `genesis-ctx check` prints for the area
 #   always   = true      cross-cutting areas only — included in every pack; no paths
+#   Any other key is a lint error. Globs: `**` = any number of path segments (incl. none),
+#   `*` / `?` = within one segment.
 #
 # The five repos under {{REPOS}}: genesis (app: genesis/genesis + genesis/web),
 # genesis-core, genesis-workflows, kiro-agent-sdk, genesis-appian-parser.

@@ -18,7 +18,7 @@ abandoned; the migration must be cheap.
 | File | Bytes |
 |---|---|
 | `tracker.md` | 386,453 (§6 status log alone: 353,557 — 235 entries) |
-| `reference/decision-log.md` | 210,323 (77 `## ADR-` sections) |
+| `reference/decision-log.md` | 210,323 (count corrected 2026-10-20, §5.5: 74 `## ADR-` headings = 72 primary + 2 amendment headings (`ADR-026 amendment`, `ADR-038/040 amendment`); + 2 `###` primary ADRs (028, 029); + 2 bullet-form ADRs (053, 054); + 2 more amendment/addendum headings (`### ADR-027 addendum`, `## Amendment … (amends ADR-061/063/064)`) — 76 distinct ids, ADR-001..076, every one with decision-log text) |
 | `bible/08-roadmap-and-backlog.md` | 134,108 |
 | `bible/06-hard-won-lessons.md` | 80,477 (86 lessons) |
 | `bible/03-codebase-map.md` | 79,162 |
@@ -102,6 +102,31 @@ Accepted in principle. Questions asked: verbatim rule, agent location, roles, CL
 - Duplicates are removed **from the active layer** (archived), not deleted — so the lossless check stays trivially true.
 - **Bootstrap rule** (D8): Phase 47 itself is built without reading the bible.
 - Skills live in `~/.kiro/genesis/skills/` (not `~/.kiro/skills/`) so the user's other agents do not inherit them.
+
+### 5.5 Round 4 — anchor rules (2026-10-20, during 47-02/03 build)
+
+Checking the real files' structure (grep/ranged reads of headings, fences and bold leads — no whole-file reads) showed
+that the 47-02 §4.1/§4.3 anchor rules did not fit. Found, and decided with the user:
+
+1. **decision-log.md.** ADR-028/029 are `###` headings under `## ADR-027` (with a `### ADR-027 addendum`);
+   amendments are their own headings (`## ADR-026 amendment`, `## ADR-038/040 amendment`,
+   `## Amendment (…) (amends ADR-061/063/064)`); ADR-053/054 are **column-0 bullets** (`- **ADR-053 (ACCEPTED …`)
+   inside the `## ADR-051` section — the only bullet-form entries. **Rule:** anchors are `##`/`###` headings and
+   column-0 bullets whose bold lead starts with an ADR id; each runs to the next anchor (so ADR-051 stops before the
+   ADR-053 bullet). An anchor names the ids its text starts with (slash continuations included) or, failing that, its
+   `amends ADR-…` list. Amendment/addendum anchors load with every ADR they name. No anchor → `bible/04` only, lint
+   warns (no current case). Count in §2.1 corrected.
+2. **bible/04 bold leads.** Id lists are expanded: `ADR-002/004/020`, `ADR-006–009` ranges, `(+ ADR-029)`,
+   `+ ADR-063`.
+3. **bible/03.** The first fence holds the base map *and* three `# ──` blocks; Phases 45/46 use a bold line
+   (`**Phase 45 — …:**`) + fence instead of `# ──`; `genesis-core/  state.py` appears twice. **Rule:** the base map
+   ends at the first `# ──`; bold-only lines start sections keyed by their text; `# ──` / bold sections end at the next
+   one or at `---`; duplicate keys get ` #2`.
+4. **Gap-fills:** optional `gates = [...]` per area (printed by `check`); a plain `index` only fills empty
+   fingerprints, `index --reviewed <ids…>` / `--reviewed-all` refreshes them (so `index` never silences a drift
+   finding); the `[[step]]` archive-plan schema lives in 47-03 §3.1 (the tool validates it; the plan itself is 47-04).
+
+Rules recorded in 47-02 §3/§4.1/§4.3 and 47-03 §3/§3.1/§5/§7. D7 holds — neither file is edited.
 
 ## 6. ADR-077 (Proposed) — full text
 

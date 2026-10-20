@@ -1,0 +1,31 @@
+# Fixture code-map tags (schema: 47-02 §4.3).
+
+["genesis-core/genesis_core/  types.py"]
+areas = ["core-engine"]
+
+["genesis-core/genesis_core/  state.py"]
+areas = ["core-engine"]
+
+["genesis-core/genesis_core/  nodes/"]
+areas = ["core-engine"]
+
+["genesis-core/genesis_core/  state.py #2"]
+areas = ["core-engine"]
+
+["genesis/genesis/  db/"]
+areas = ["db"]
+
+["genesis/genesis/  chat/"]
+areas = ["chat"]
+
+["── Phase 25 — Architectural Foundation Hardening (genesis v0.49.0)"]
+areas = ["api", "security"]
+
+["── Phase 29 — UX Design stage (grounded mockup→implementation analysis; ADR-057)"]
+areas = ["features-stages"]
+
+["── Phase 31 — Feature Breakdown stage (ADR-059)"]
+areas = ["features-stages"]
+
+["Phase 45 — Incremental Delta Sync (genesis v0.76.0)"]
+areas = ["kb-sync"]

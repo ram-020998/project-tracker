@@ -1,0 +1,50 @@
+# Fixture area registry (same schema as the real context/areas.toml).
+
+[area.core-engine]
+title    = "genesis-core engine"
+paths    = ["genesis-core/genesis_core/**"]
+keywords = ["node", "state", "validator"]
+
+[area.chat]
+title    = "Chat, copilot"
+paths    = ["genesis/genesis/chat/**", "kiro-agent-sdk/src/**"]
+keywords = ["chat", "copilot"]
+skills   = ["genesis-backend-dev"]
+docs     = ["tracker:reference/hitl-design.md"]
+
+[area.api]
+title    = "FastAPI /api"
+paths    = ["genesis/genesis/api/**"]
+keywords = ["api", "route"]
+
+[area.db]
+title    = "DB + migrations"
+paths    = ["genesis/genesis/db/**"]
+keywords = ["migration", "database"]
+gates    = ["genesis/.venv/bin/python -m pytest genesis/tests/db -q"]
+
+[area.features-stages]
+title    = "Features and stages"
+paths    = ["genesis/genesis/kb/features.py", "genesis/genesis/kb/stories.py"]
+keywords = ["feature", "stage", "breakdown"]
+
+[area.stories-workbench]
+title    = "Stories and boards"
+paths    = ["genesis/genesis/kb/boards.py"]
+keywords = ["board", "workbench", "membership"]
+
+[area.kb-sync]
+title    = "KB store and sync"
+paths    = ["genesis/genesis/kb/store.py"]
+keywords = ["sync", "incremental"]
+
+[area.security]
+title    = "Localhost guardrail, read-only chat, secrets"
+always   = true
+keywords = ["localhost", "read-only", "secret"]
+
+[area.release-ci]
+title    = "Versioning, tags, CI"
+always   = true
+keywords = ["version", "tag", "pipeline"]
+gates    = ["glab ci list"]

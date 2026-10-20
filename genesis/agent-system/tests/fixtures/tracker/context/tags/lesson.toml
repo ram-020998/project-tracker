@@ -1,0 +1,26 @@
+# Fixture lesson tags (schema: 47-02 §4.2).
+
+[L-001]
+areas = ["chat", "core-engine"]
+phase = "pre-16"
+rule = ""
+
+[L-002]
+areas = ["chat"]
+phase = "13"
+rule = ""
+
+[L-003]
+areas = ["api"]
+phase = "9"
+rule = "Split SSE frames on CRLF-or-LF pairs."
+
+[L-004]
+areas = ["stories-workbench"]
+phase = "36"
+rule = ""
+
+[L-005]
+areas = ["core-engine"]
+phase = "47"
+rule = ""

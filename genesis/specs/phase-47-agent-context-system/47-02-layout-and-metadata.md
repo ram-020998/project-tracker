@@ -68,6 +68,7 @@ paths    = ["genesis/genesis/chat/**", "genesis/genesis/skills/**", "genesis/web
 keywords = ["chat", "copilot", "chat mode", "skill", "steering", "session"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
 docs     = ["tracker:reference/hitl-design.md"]        # optional: docs a pack should list
+gates    = []                                          # optional: gate commands `genesis-ctx check` lists for the area
 ```
 
 Proposed areas: `core-engine` (genesis-core nodes/state/validators/reliability/healing), `sdk-acp` (kiro-agent-sdk),
@@ -82,8 +83,10 @@ requests), `stories-workbench` (stories, boards, design/implementation lanes, st
 SAIL CLI, DevOps, write tools), and two **cross-cutting** areas that are always included in every pack: `security`
 (localhost guardrail, read-only chat, trust, secrets handling) and `release-ci` (versioning, pins, tags, CI).
 
-Rules: an area name is `[a-z0-9-]+`; every area has ≥ 1 path glob (except cross-cutting ones, `always = true`);
-a file may belong to several areas.
+Rules: an area name is `[a-z0-9-]+`; every area has a `title` and ≥ 1 path glob (except cross-cutting ones,
+`always = true`); a file may belong to several areas. Optional keys: `keywords`, `skills`, `docs`, `gates` (string
+arrays; `gates` = shell commands that `genesis-ctx check` prints as the area's gates). Any other key is a lint error.
+Glob syntax: `**` = any number of path segments (incl. none), `*` / `?` = within one segment.
 
 ## 4. Sidecar tags — `context/tags/*.toml`
 
@@ -102,8 +105,26 @@ rule       = "Chat never orchestrates or mutates; read-only @server/tool allowli
 reviewed_fp = "3f9a0c1e2b7d4a65"   # fingerprint of the full text when `rule` was last reviewed
 ```
 
-- **Source anchors are computed, not stored:** the decision-log section is `^## ADR-031\b` up to the next `^## `; the
-  `bible/04` bullets are the top-level bullets whose bold lead contains `ADR-031`. No edits to either file.
+- **Source anchors are computed, not stored.** No edits to either file. Rules locked 2026-10-20 against the real files
+  (47-01 §5.5):
+  - **decision-log anchors.** An anchor is (i) any `##` / `###` heading, or (ii) a column-0 bullet whose bold lead
+    *starts* with an ADR id (`- **ADR-053 (ACCEPTED …`). Every anchor runs to the next anchor (the next `##`/`###`
+    heading or the next such bullet), so a bullet anchor is excluded from the section it sits in (ADR-051's text stops
+    before the ADR-053 bullet). `#` and `####`+ headings are content.
+  - **Ids an anchor names.** If its text (heading text / bold lead) *starts* with an id group — `ADR-NNN` plus slash
+    continuations (`ADR-038/040`, `ADR-061/063/064`) — those ids. Otherwise the ids of an `amends ADR-…` list in the
+    heading (same id-list syntax, §4.1 id lists). Ids that appear only as `revises` / `refines` / `amended by` /
+    `supersedes` mentions are **relations, not anchors** (they feed `propose-tags` amendment edges). An anchor that
+    names no id (`## Technical ADRs (foundational)`) is a boundary only.
+  - **Kind.** An anchor is an **amendment** if it is an `amends …` heading or its lead (text before the first ` — `)
+    contains the word `amendment` or `addendum`; otherwise **primary**.
+  - **An ADR's decision-log text** = every anchor naming it, primary and amendment, in document order. An
+    amendment/addendum anchor loads with **every** ADR it names. Each ADR has exactly one primary anchor (lint error on
+    a duplicate). An ADR with no decision-log anchor (none today) uses its `bible/04` bullets only; lint warns.
+  - **`bible/04` bullets** = the column-0 bullets whose bold lead names the id anywhere, with **id-list expansion**:
+    `ADR-NNN`; slash continuations `ADR-002/004/020`; ranges `ADR-006–009` (en dash or `..`); `(+ ADR-029)` and
+    `+ ADR-063` are ordinary ids. So the `Amendment (v0.69.0) … (amends ADR-061 + ADR-063)` bullet loads with both.
+  - **Fingerprint** (`reviewed_fp`) = `sha256[:16]` of the whitespace-collapsed decision-log text + `bible/04` bullets.
 - `amends` / `amended_by` must be **symmetric** (lint). Loading an ADR loads its whole amendment chain.
 - `rule` ≤ 220 characters, one sentence, imperative.
 
@@ -123,10 +144,19 @@ via `genesis-ctx add lesson` (47-08).
 
 ### 4.3 Code-map sections — `tags/codemap.toml`
 
-`bible/03` is not edited. A section is (a) in the base map (the first fenced block), one 2-space-indented module entry
-(`  db/ …`, `  kb/ …`) with its continuation lines, under its repo header line (`genesis/genesis/`); (b) each
-`# ── … ──` block up to the next one. A section's key is a slug of its header text plus the repo, e.g.
-`["genesis/genesis/  db/"]` or `["── Phase 34 — Design Lane Automation"]`.
+`bible/03` is not edited. Section rules locked 2026-10-20 against the real file (47-01 §5.5):
+
+- **(a) Base-map entries.** The base map runs from the line after the first fence opener to the first `# ──` line
+  (to the fence close if there is none — the real file has three `# ──` blocks inside its first fence). Under a repo
+  header line (column 0, ending in `/`, e.g. `genesis/genesis/`), each line indented exactly 2 spaces starts an entry;
+  the entry runs to the next entry, repo header or the end of the base map. Key: header + the entry's first token —
+  `"genesis/genesis/  db/"`.
+- **(b) `# ── … ──` blocks.** A column-0 line starting `# ──` starts a section. Key: the line without the leading `# `
+  and the trailing `─` run — `"── Phase 34 — Design Lane Automation (Workbench Design + Design Review; ADR-062)"`.
+- **(c) Bold-line blocks.** A line that is only bold text `**…**` (a trailing `:` inside or outside allowed) starts a
+  section (the real Phase 45 / 46 blocks). Key: the text without `**` and the trailing `:`.
+- (b) and (c) sections run to the next (b)/(c) start, a `---` line, or EOF — inside or outside a fence.
+- **Duplicate keys** get ` #2`, ` #3`, … in document order (`"genesis-core/genesis_core/  state.py #2"`).
 
 ```toml
 ["genesis/genesis/  chat/"]
@@ -226,7 +256,7 @@ excluding `__pycache__`, `*.pyc`, `.DS_Store`, `*.egg-info`. **Every non-cross-c
 | core-engine | 30 | documents | 31 |
 | sdk-acp | 4 | features-stages | 75 |
 | parser | 58 | stories-workbench | 29 |
-| workflows-library | 98 | collaboration-hub | 23 |
+| workflows-library | 95 ¹ | collaboration-hub | 23 |
 | runs-worker | 15 | memory | 21 |
 | db | 28 | config-secrets | 44 |
 | api | 28 | distribution | 12 |
@@ -237,6 +267,10 @@ excluding `__pycache__`, `*.pyc`, `.DS_Store`, `*.egg-info`. **Every non-cross-c
 
 22 areas total: the 20 from §3 + the 2 cross-cutting (`security`, `release-ci`). All four TOML files parse with
 `tomllib`.
+
+¹ Corrected in S2 (47-03 build) from 98: pathlib also counted 3 files under
+`genesis-workflows/workflows/sync-application/.ruff_cache/`. `genesis-ctx`'s own glob engine (which skips tool
+caches) reproduces every other count exactly.
 
 ### Deviations from the spec
 
@@ -258,3 +292,12 @@ excluding `__pycache__`, `*.pyc`, `.DS_Store`, `*.egg-info`. **Every non-cross-c
 
 No spec item failed against the real repos; nothing required stopping for a decision. `genesis-ctx` validation of
 these shapes is exercised by the 47-03 tests.
+
+### Spec amendments during the 47-03 build (S2, 2026-10-20 — user-approved, 47-01 §5.5)
+
+Building `genesis-ctx` against the real files showed that the §4.1 / §4.3 anchor rules did not fit
+`decision-log.md` (`###` ADRs, amendment headings, bullet-form ADR-053/054) or `bible/03` (`# ──` blocks inside the
+first fence, bold-line Phase 45/46 sections, a duplicate base-map key). The user approved replacement rules, now in
+§4.1 and §4.3; §3 gained the optional `gates` field (also documented in the `context/areas.toml` header). The two
+`.gitkeep` files in `agent-system/tools/genesis_ctx/` and `agent-system/tests/` were removed when those directories
+received their real contents.

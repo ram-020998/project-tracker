@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# genesis-ctx — runs the context compiler from its project-tracker source (Phase 47, 47-03; umbrella Q4),
+# so fixes to the tool apply without a reinstall. The installer (47-07) puts a shim like this on PATH.
+set -euo pipefail
+src="${BASH_SOURCE[0]}"
+while [[ -L "$src" ]]; do
+  dir="$(cd -P "$(dirname "$src")" && pwd)"
+  src="$(readlink "$src")"
+  [[ "$src" != /* ]] && src="$dir/$src"
+done
+here="$(cd -P "$(dirname "$src")" && pwd)"
+py="${GENESIS_CTX_PYTHON:-}"
+if [[ -z "$py" ]]; then
+  for c in python3.14 python3.13 python3.12 python3.11 python3; do
+    if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' 2>/dev/null; then
+      py="$c"
+      break
+    fi
+  done
+fi
+if [[ -z "$py" ]]; then
+  echo "genesis-ctx: needs Python >= 3.11 (or set GENESIS_CTX_PYTHON)" >&2
+  exit 2
+fi
+PYTHONPATH="$here${PYTHONPATH:+:$PYTHONPATH}" exec "$py" -m genesis_ctx "$@"

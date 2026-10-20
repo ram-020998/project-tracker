@@ -1,0 +1,106 @@
+# Fixture ADR tags (schema: 47-02 §4.1). reviewed_fp is filled by `genesis-ctx index` in the test setup.
+
+[ADR-001]
+title = "LangGraph orchestrates"
+status = "accepted"
+areas = ["core-engine"]
+rule = "LangGraph routes every run; agents never pick the next node."
+
+[ADR-003]
+title = "Local web app"
+status = "accepted"
+areas = ["security"]
+rule = "Genesis is a local web app on 127.0.0.1."
+
+[ADR-026]
+title = "React + TypeScript web"
+status = "accepted"
+areas = ["security"]
+rule = "The web app is React + TypeScript; the server binds 127.0.0.1 only."
+
+[ADR-027]
+title = "Overcut visual language"
+status = "accepted"
+areas = ["core-engine"]
+rule = "Use the Overcut visual language for workbench canvases."
+
+[ADR-028]
+title = "Backend API under /api"
+status = "accepted"
+areas = ["api"]
+paths = ["genesis/genesis/api/app.py"]
+rule = "Every backend route lives under /api with an SPA history fallback."
+
+[ADR-029]
+title = "Two-tier registry"
+status = "accepted"
+areas = ["core-engine"]
+rule = "MCP and CLI registries have a curated and a custom tier."
+
+[ADR-031]
+title = "Chat is a read-only assistant"
+status = "accepted"
+areas = ["chat", "security"]
+amended_by = ["ADR-033"]
+rule = "Chat never orchestrates or mutates; read-only @server/tool allowlist."
+
+[ADR-033]
+title = "Copilot may operate runs"
+status = "accepted"
+areas = ["chat"]
+amends = ["ADR-031"]
+rule = "Copilot run operations always need a human confirmation."
+
+[ADR-038]
+title = "Managed native MCP servers"
+status = "accepted"
+areas = ["core-engine"]
+rule = "Native Appian MCP servers are vendored and versioned."
+
+[ADR-040]
+title = "Managed-native CLI connector"
+status = "accepted"
+areas = ["core-engine"]
+rule = "The gws CLI is installed and versioned inside Genesis."
+
+[ADR-051]
+title = "AgentProvider interface"
+status = "accepted"
+areas = ["core-engine"]
+rule = "Agent runtimes plug in behind the AgentProvider protocol."
+
+[ADR-053]
+title = "Memory layer"
+status = "accepted"
+areas = ["chat"]
+rule = "Memory reaches agents only through the genesis-memory MCP."
+
+[ADR-054]
+title = "Memory store"
+status = "accepted"
+areas = ["db"]
+rule = "Memory lives in its own memory.db with its own migrations."
+
+[ADR-061]
+title = "Workbench board"
+status = "accepted"
+areas = ["stories-workbench"]
+rule = "Each application has one Kanban board."
+
+[ADR-063]
+title = "Collaboration Hub"
+status = "accepted"
+areas = ["stories-workbench"]
+rule = "Collaboration is local-first with selective centralization."
+
+[ADR-064]
+title = "Hub Appian application"
+status = "accepted"
+areas = ["stories-workbench"]
+rule = "The Hub API contract is frozen."
+
+[ADR-076]
+title = "Spec change requests"
+status = "accepted"
+areas = ["features-stages"]
+rule = "A change request is applied by a program, never by the agent."
