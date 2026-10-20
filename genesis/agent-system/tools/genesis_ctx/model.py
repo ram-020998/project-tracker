@@ -260,8 +260,22 @@ class Corpus:
     def areas_for_path(self, path: str) -> list[str]:
         return sorted(n for n in self.areas if any(globs.match(g, path) for g in self.area_globs(n)))
 
+    def dir_to_glob(self, entry: str) -> str:
+        """A wildcard-free `code`/path entry that is a directory routes as `<dir>/**` (47-09 fix M4).
+
+        A spec author naturally writes a directory (`genesis/genesis/db`); without this it matches no
+        area glob (which end in `/**`) and silently routes nothing. Files and non-existent paths are
+        returned unchanged."""
+        if globs.WILD.search(entry):
+            return entry
+        if entry.startswith("tracker:"):
+            rel = entry[8:]
+            return "tracker:" + rel.rstrip("/") + "/**" if (self.ctx.tracker / rel).is_dir() else entry
+        return entry.rstrip("/") + "/**" if (self.ctx.repos / entry).is_dir() else entry
+
     def areas_for_code(self, entry: str) -> list[str]:
         """Areas for a manifest `code` entry: the entry string itself, plus every file it expands to."""
+        entry = self.dir_to_glob(entry)
         found = set(self.areas_for_path(entry))
         if globs.WILD.search(entry):
             for f in self.expand(entry):
@@ -271,7 +285,8 @@ class Corpus:
     def globs_touch(self, pats: list[str], paths: list[str]) -> str | None:
         """First path (or expanded file) matched by any glob in pats, else None."""
         for p in paths:
-            cands = [p] + (self.expand(p) if globs.WILD.search(p) else [])
+            entry = self.dir_to_glob(p)
+            cands = [entry] + (self.expand(entry) if globs.WILD.search(entry) else [])
             for c in cands:
                 if any(globs.match(g, c) for g in pats):
                     return p

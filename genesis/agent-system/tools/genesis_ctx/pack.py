@@ -241,7 +241,7 @@ def cmd_check(ctx: Ctx, since: str | None, files: list[str] | None, staged: bool
         raise CtxError("check needs exactly one of --since REV, --files F…, --staged")
     c = Corpus(ctx)
     paths, notes = changed_files(ctx, since, files, staged, repo)
-    per_file = {p: c.areas_for_path(p) for p in paths}
+    per_file = {p: c.areas_for_code(p) for p in paths}
     area_why: dict[str, list[str]] = defaultdict(list)
     for al in per_file.values():
         for a in al:
@@ -254,7 +254,7 @@ def cmd_check(ctx: Ctx, since: str | None, files: list[str] | None, staged: bool
         _add(adrs, i, why)
     for i, t in sorted(c.adr_tags.items()):
         pats = list(t.get("paths", []) or [])
-        hit = next((p for p in paths if any(globs.match(g, p) for g in pats)), None)
+        hit = c.globs_touch(pats, paths) if pats else None
         if hit:
             _add(adrs, i, f"path `{hit}`")
     for i, why in c.pack_chain(list(adrs)).items():

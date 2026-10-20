@@ -252,6 +252,10 @@ class Lint:
             for doc in d.get("docs", []):
                 if not resolve_doc(self.ctx, doc).exists() and not globs.WILD.search(doc):
                     self.warn("manifest-missing-doc", f"doc `{doc}` does not exist (yet)", w)
+            for ce in d.get("code", []):
+                if not globs.WILD.search(ce) and c.dir_to_glob(ce) != ce:
+                    self.warn("manifest-bare-dir",
+                              f"code entry `{ce}` is a directory; it routes as `{ce.rstrip('/')}/**`", w)
 
     def run(self, specs_only: bool = False) -> list[Finding]:
         if not specs_only:

@@ -175,6 +175,26 @@ def test_check_files_maps_areas_rules_gates(env):
     assert "- [ ] ADR-054" in out and "OK / VIOLATION / N/A" in out
 
 
+def test_bare_directory_code_entry_routes_as_dir_glob(env):
+    # 47-09 fix M4: a wildcard-free `code`/path entry that is a directory routes as `<dir>/**`.
+    c = env.corpus()
+    assert c.dir_to_glob("genesis/genesis/db") == "genesis/genesis/db/**"
+    assert c.dir_to_glob("genesis/genesis/db/") == "genesis/genesis/db/**"
+    assert "db" in c.areas_for_code("genesis/genesis/db")
+    assert c.areas_for_code("genesis/genesis/db") == c.areas_for_code("genesis/genesis/db/**")
+    assert c.dir_to_glob("genesis/genesis/db/runner.py") == "genesis/genesis/db/runner.py"  # a file, unchanged
+    # check routes the bare directory to the db area and its gate
+    code, out, _ = env.run("check", "--files", "genesis/genesis/db", "--json")
+    assert code == 0
+    d = json.loads(out)
+    assert "db" in d["files"][0]["areas"] and any(g["area"] == "db" for g in d["gates"])
+    # a manifest with a bare-dir code entry lints with a warning
+    env.write("specs/phase-48-demo/48-09-dir.md",
+              "# 48-09\n\n## Context manifest\n\n```toml\nareas = [\"db\"]\ncode = [\"genesis/genesis/db\"]\n```\n")
+    code, out, _ = env.run("lint", "--json")
+    assert any(f["code"] == "manifest-bare-dir" for f in json.loads(out)["findings"])
+
+
 def test_check_since_in_temp_repo(env):
     repo = env.repos / "genesis"
     git_init(repo)
