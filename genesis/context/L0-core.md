@@ -61,3 +61,19 @@ the Chat `/` palette (or auto-activated by description).
 - Ask before destructive/irreversible actions (force push, history rewrite, deleting data, anything "prod").
 - Never commit secrets; reference secrets by key name only; don't push beyond the normal Genesis release flow.
 - Honest pushback; keep changes scoped; if stuck twice on the same error, find the root cause and change approach.
+
+## 6. The agent system (who does what — ADR-077)
+
+Five role agents, launched by the human from `~/repo-gitlab/ramaswamy.u` with `kiro-cli --v3 chat --agent genesis-<role>`
+(never `--trust-all-tools`). Each hands off through files, not chat:
+
+| Agent | Does | Writes / hands off |
+|---|---|---|
+| `genesis-spec` | Q&A → findings, umbrella, sub-specs | sub-specs with a `## Context manifest` (areas + explicit ADR/lesson ids + code paths) |
+| `genesis-dev` | implements ONE sub-spec (commits locally; never pushes/tags) | code + the sub-spec's **As built** (commits, tests, review verdict, decisions, lesson candidates, code-map changes, Resume note); spawns `genesis-review` |
+| `genesis-review` | independent review (`genesis-ctx check`) + live acceptance; never edits code | `specs/<phase>/reviews/*-review.md` with SHIP / NEEDS_CHANGES |
+| `genesis-release` | versions, tags, pushes (always asks), CI, fleet | the release sub-spec's **As run** |
+| `genesis-docs` | phase write-back; maintains the agent system | ADRs, lessons, code map, state, progress, changelog, README, tracker |
+
+Command details: the `genesis-ctx` skill. Changing agents, skills or hooks: edit `agent-system/` in project-tracker,
+then `agent-system/update.sh` (skill `genesis-agent-system`). The human's guide: `agent-system/OPERATOR_GUIDE.md`.

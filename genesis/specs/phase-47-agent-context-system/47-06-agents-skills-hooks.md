@@ -307,3 +307,11 @@ repo hook (`/tmp/genesis-dev/guard_probe_r2.sh`) gave **38/38** as expected: the
 probes. A replay of all **196 distinct shell commands** that Genesis agents ran in recorded sessions, through the old and
 new hook, found **0 newly blocked**; 22 old false denials now pass, and the 14 still blocked are the review's deliberate
 push/tag/out-of-root probes (plus `git tag --sort` listing).
+
+### Addendum (2026-10-20, after the switchover — user request)
+
+Two skills added (12 total): **`genesis-ctx`** (all five agents — every subcommand, flags, exit codes, manifest format,
+pack tiers, budgets, the one-call form; a test fails if any CLI subcommand is undocumented) and
+**`genesis-agent-system`** (genesis-docs only — layout, placeholders, the verified CLI-3 facts, the change procedure).
+`context/L0-core.md` §6 gives every agent the five roles and their file handoffs. Installed via `update.sh` (2 added,
+5 changed); live check: a fresh genesis-review answered from L0 §6 and from the installed skill with no denials.

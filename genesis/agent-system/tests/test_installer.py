@@ -393,7 +393,7 @@ def test_real_agent_system_renders_and_validates(tmp_path, monkeypatch):
     assert gi.validate(cfg, desired) == []
     names = sorted(p.stem for p in desired if p.parent == cfg.agents_dir)
     assert names == ["genesis-dev", "genesis-docs", "genesis-release", "genesis-review", "genesis-spec"]
-    assert len({p.parts[-2] for p in desired if p.name == "SKILL.md"}) == 10
+    assert len({p.parts[-2] for p in desired if p.name == "SKILL.md"}) == 12
 
 
 def test_genesis_docs_allows_read_only_git_on_code_repos(tmp_path, monkeypatch):
@@ -504,3 +504,28 @@ def test_stop_lint_hooks_have_an_explicit_timeout(tmp_path, monkeypatch):
     for name, h in stops.items():
         assert "stop-lint.sh" in h["action"]["command"], name
         assert isinstance(h.get("timeout"), int) and h["timeout"] >= 10, name
+
+
+def test_genesis_ctx_skill_documents_every_subcommand():
+    # The genesis-ctx skill must not drift from the tool: every subcommand the CLI registers appears in it.
+    import re
+    import subprocess
+    root = Path(__file__).resolve().parents[1]
+    out = subprocess.run([str(root / "tools" / "genesis-ctx"), "--help"], capture_output=True, text=True, check=True).stdout
+    block = out.split("COMMAND", 2)[-1]
+    cmds = set(re.findall(r"(?m)^    ([a-z][a-z0-9-]+)\s", block))
+    assert {"pack", "adr", "check", "verify-lossless"} <= cmds, cmds
+    skill = (root / "skills" / "genesis-ctx" / "SKILL.md").read_text()
+    missing = sorted(c for c in cmds if f"`{c}" not in skill)
+    assert not missing, f"genesis-ctx skill does not document: {missing}"
+
+
+def test_ctx_and_agent_system_skills_are_wired(tmp_path, monkeypatch):
+    # Every agent gets the genesis-ctx skill; only genesis-docs gets genesis-agent-system. Both as a skill://
+    # resource AND by absolute path in the prompt (KAS 0.66.43 skips profile skills on `chat --agent`).
+    _, profiles = _rendered_profiles(tmp_path, monkeypatch)
+    for name, p in profiles.items():
+        for skill, wanted in (("genesis-ctx", True), ("genesis-agent-system", name == "genesis-docs")):
+            in_res = any(r.endswith(f"/skills/{skill}/SKILL.md") for r in p["resources"])
+            in_prompt = f"/skills/{skill}/SKILL.md" in p["prompt"]
+            assert in_res == wanted and in_prompt == wanted, (name, skill)

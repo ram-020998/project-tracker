@@ -319,6 +319,10 @@ today; the spec agent writes the hand-off prompt (as in 46-09).
 
 All sources live in `project-tracker/genesis/agent-system/`.
 
+Two skills help the agents here: `genesis-ctx` (every agent — all `genesis-ctx` commands, flags, the manifest format and
+how packs are built) and `genesis-agent-system` (genesis-docs — how to change agents, skills, hooks and the installer
+safely, plus the CLI-3 quirks we found). Every agent also knows the five roles and their handoffs (`context/L0-core.md` §6).
+
 | You want to | Edit | Then |
 |---|---|---|
 | Change a role's behaviour | `agents/genesis-<role>.json` (the `prompt` string) | `agent-system/update.sh` |
