@@ -487,6 +487,12 @@ def test_subagent_trust_matches_the_spec(tmp_path, monkeypatch):
     assert sub["genesis-dev"] == {"availableAgents": ["genesis-review"], "trustedAgents": ["genesis-review"]}
     for name in ("genesis-docs", "genesis-review", "genesis-spec", "genesis-release"):
         assert not sub[name].get("trustedAgents"), name
+    # 47-09 round 3 (m6 live): V3 ignores trustedAgents for approval; only a `subagent` permission rule lets the
+    # spawn run without a prompt (a non-interactive spawn was denied without it, allowed with it).
+    sub_rules = {n: [r for r in p["permissions"]["rules"] if r["capability"] == "subagent"] for n, p in profiles.items()}
+    assert sub_rules["genesis-dev"] == [{"capability": "subagent", "match": ["genesis-review"], "effect": "allow"}]
+    for name in ("genesis-docs", "genesis-review", "genesis-spec", "genesis-release"):
+        assert not [r for r in sub_rules[name] if r["effect"] == "allow"], name
 
 
 def test_stop_lint_hooks_have_an_explicit_timeout(tmp_path, monkeypatch):

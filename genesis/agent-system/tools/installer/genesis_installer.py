@@ -36,7 +36,7 @@ MANIFEST_VERSION = 1
 
 # What the installer accepts in a profile. Deliberately strict — extend on purpose, not by accident.
 KNOWN_TOOLS = {"read", "write", "shell", "web", "subagent", "code"}  # V3 tool tags (47-06 As-built §3; S5b probe)
-KNOWN_CAPABILITIES = {"fs_read", "fs_write", "shell"}
+KNOWN_CAPABILITIES = {"fs_read", "fs_write", "shell", "subagent"}  # subagent: 47-09 round 3 (m6 live)
 EFFECTS = {"allow", "deny", "ask"}
 TRIGGERS = {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop", "PreTaskExec", "PostTaskExec",
             "PostFileCreate", "PostFileSave", "PostFileDelete"}

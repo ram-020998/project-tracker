@@ -24,6 +24,7 @@
       { "capability": "fs_read", "match": ["{{TRACKER}}/**", "{{REPOS}}/**", "{{GENESIS_HOME}}/**", "/tmp/**"], "effect": "allow" },
       { "capability": "fs_write", "match": ["{{REPOS}}/**", "{{TRACKER}}/specs/**", "/tmp/**"], "effect": "allow" },
       { "capability": "fs_write", "match": ["{{REPOS}}/**/.git/**"], "effect": "deny" },
+      { "capability": "subagent", "match": ["genesis-review"], "effect": "allow" },
       { "capability": "shell", "match": [
           "genesis-ctx *", "{{GENESIS_HOME}}/bin/genesis-ctx *",
           "git status*", "git diff*", "git log*", "git show*", "git branch", "git branch --list*",
