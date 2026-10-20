@@ -27,7 +27,7 @@ a diff against the rules, and to keep the context layer healthy. It is also the 
 | `status [--brief]` | For each of the five repos: branch, latest tag (`git describe --tags --abbrev=0`), dirty file count, commits ahead of upstream (from the local ref, no fetch); project-tracker dirty count; the "Active phase" line of `context/state/current.md`. `--brief` ≤ 25 lines (used by the `SessionStart` hook). |
 | `pack <sub-spec-id or path> [--areas a,b] [--out FILE]` | Compile the task's context pack (§4). With only `--areas` (no sub-spec) for bug fixes and small tasks. Writes `context/.packs/<id>.md` and prints its path + a summary table. |
 | `check (--since <rev> \| --files f1 f2 … \| --staged) [--repo NAME]` | Map changed files → areas (globs) → a checklist of every applicable ADR rule and lesson rule (with ids) + the area's gate commands (`gates`, 47-02 §3). The review agent must answer each line OK / VIOLATION / N/A. |
-| `adr <ID…> [--no-chain]` | Print the decision-log section(s) + every `bible/04` bullet referencing the id + the amendment chain (default on). |
+| `adr <ID…> [--no-chain]` | Print the decision-log section(s) + every `bible/04` bullet referencing the id + the amendment chain (default on). A `bible/04` bullet that names several ids prints **once** (under the first id, with a pointer under the rest); `adr` always prints a bullet (ignores `b04 = "skip"`). |
 | `lesson <ID…>` | Print the lesson bullet(s) verbatim. |
 | `area <name>` | Print the area's catalog line, its ADR/lesson one-liners, its code-map sections, docs, skills. |
 | `search <regex> [--archive] [--max N]` | Grep across the active layer (and `archive/`, `specs/`, `progress/` with `--archive`); prints file:line + 1 line of context. History lookups only. |
@@ -37,6 +37,7 @@ a diff against the rules, and to keep the context layer healthy. It is also the 
 | `mark` | One-shot: insert `<!-- L-NNN -->` markers into unmarked `bible/06` lesson bullets (idempotent). |
 | `archive --plan FILE [--apply]` | One-shot: move the heading/line ranges named in a plan file into `archive/` files, leaving a one-line pointer; dry-run by default (47-04). |
 | `propose-tags` | One-shot: write `context/tags/*.proposed.toml` with candidate areas (keywords + phase→area + path mentions), candidate amendment edges (from "amends / refines / supersedes ADR-NNN" text), candidate one-liners (first sentence of the `bible/04` bullet, or the lesson's bold lead) and a **confidence** per item (47-05). |
+| `propose-b04 [--apply]` | One-shot (step 0 / a 47-03 fix): flag each legacy `bible/04` bullet `include`/`skip` and (with `--apply`) write the `b04` field into `tags/adr.toml`. `include` when the bullet has a distinctive token (backticked identifier, version, number, quoted term, cross-referenced ADR id) absent from that ADR's decision-log text; else `skip`; default **`include` when unsure**. Prints the flagged bullets (id + unique tokens) and the skip list; dry-run by default. |
 | `verify-lossless --baseline <rev> [--write]` | §6. |
 
 ### 3.1 Archive plan format (`archive --plan FILE [--step N] [--apply]`)
@@ -88,7 +89,12 @@ Pack layout (Markdown):
 
 1. **Header** — task id, areas (and *why* each: manifest / path `X` / always-on), token estimate, budget verdict.
 2. **Inclusion table** — every ADR / lesson / section with the reason it is included (area, path, manifest, chain).
-3. **ADRs — full text** (decision-log section + `bible/04` bullet(s)), sorted by id.
+3. **ADRs — full text** (decision-log section + `bible/04` bullet(s)), sorted by id. Each distinct `bible/04` bullet
+   prints **once per pack**: a bullet that names several selected ids is shown under the first id, with a one-line
+   "shown once under ADR-NNN" pointer under the others (combined bullets like `ADR-002/004/020` no longer repeat). A
+   per-ADR tag `b04 = "skip"` (47-02 §4.1) additionally drops that ADR's bullet when its decision-log already carries the
+   content; a shared bullet is dropped only when **every** id it covers is `skip`. The excluded text is never a unique
+   rule — the decision-log section and the L0 one-liner remain.
 4. **Lessons — full text**, sorted by id.
 5. **Code map — the matching sections** verbatim.
 6. **Read next** — the docs and code paths (paths only, with reasons): the agent opens them itself, in ranges.
@@ -255,3 +261,34 @@ first fence, duplicate key ` #2`. Each lint rule has its own failing fixture.
      pointer fused into one unit and verify-lossless failed.
    - The verify-lossless duplicate scan skips `agent-system/tests/fixtures/`.
    - One test each → **92 passed**.
+
+### Step 0 — bible/04 pack dedupe + `b04` (S5, 2026-10-20; own commit, a 47-03 fix)
+
+The context pack and `genesis-ctx adr` printed a combined `bible/04` bullet (`ADR-002/004/020`, the `Q1–Q14` range
+bullet, an `amends ADR-061 + ADR-063` amendment) once **per id it covered**, so it repeated up to a dozen times.
+
+1. **Dedupe** (`Corpus.b04_assignment`, used by `pack` and `adr`): each distinct bullet is shown once, under the first
+   selected id, with a `_(shared bible/04 bullet — shown once under ADR-NNN)_` pointer under the rest.
+2. **`b04 = "include" | "skip"`** added to `tags/adr.toml` (47-02 §4.1). `pack`/`check` drop an ADR's bullet when
+   `skip`; a shared bullet is dropped only when **every** covering id is `skip`. `adr <id>` always prints it.
+3. **`propose-b04`** (new one-shot, 47-03 §3): flags a bullet `include` when a distinctive token (backtick, version,
+   number, quoted term, cross-referenced ADR id — ADR-id groups stripped before the number scan) is absent from the
+   ADR's decision-log text; else `skip`; default **include** when there is no decision-log text or no distinctive
+   token. On the real tracker: **76 bulleted ADRs → 61 include, 15 skip** (skip = 004, 020, 024, 025, 026, 028, 029,
+   036, 037, 044, 051, 052, 056, 057, 072; each skip's distinctive tokens were verified present in the decision-log).
+   `lint` accepts `b04` and rejects any value other than `include`/`skip`. Applied with `--apply`, then `index` (digests
+   unchanged — `b04` is not a digest or fingerprint field), `lint` green.
+4. **Three simulated packs** (same area manifests as 47-05), token change from dedupe + skip:
+
+   | sub-spec | 47-05 | S5 (after step 0) | Δ |
+   |---|---:|---:|---:|
+   | 46-02 (features-stages, chat) | 77,072 | **74,569** | −2,503 |
+   | 46-05 (features-stages, chat, stories-workbench) | 83,796 | **81,296** | −2,500 |
+   | 46-07 (features-stages, web-shell) | 73,793 | **71,101** | −2,692 |
+
+   Item counts are unchanged (45/35/14, 48/36/17, 39/36/12) — same packs. The dedupe+skip removes the ~2.5K of
+   repeated/redundant `bible/04` bullet text; the remaining bulk is **unique decision-log text** (deduping shared
+   decision-log anchors would save only ~0.4K more — measured). So the **≤ 70K target is not reachable by dedupe
+   alone** for 46-02/46-05 (46-07 is at 71.1K); closing the rest needs the tighter manifests / `features-stages` split
+   already flagged for 47-09 (47-05 As-built). **98 tests pass** (4 added: pack+adr dedupe, `b04` skip honoured in
+   pack not `adr`, `propose-b04` flag/apply, lint rejects a bad `b04`).

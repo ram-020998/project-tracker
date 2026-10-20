@@ -11,7 +11,7 @@ def test_help_lists_every_command(env):
     code, out, _ = env.run("--help")
     assert code == 0
     for cmd in ("status", "pack", "check", "adr", "lesson", "area", "search", "index", "lint", "add", "mark",
-                "archive", "propose-tags", "verify-lossless"):
+                "archive", "propose-tags", "propose-b04", "verify-lossless"):
         assert cmd in out
 
 
@@ -236,3 +236,27 @@ def test_add_adr_and_lesson(env):
     assert tomllib.loads(env.read("context/tags/lesson.toml"))["L-006"]["areas"] == ["db"]
     assert env.run("lint")[0] == 0, env.run("lint")[1]
     assert env.run("add", "lesson", "--areas", "db", "--rule", "x" * 300)[0] == 2
+
+
+def test_pack_and_adr_dedupe_combined_bible04_bullet(env):
+    # The amendment bullet names ADR-061 + ADR-063 (both stories-workbench); it must print ONCE.
+    code, _, _ = env.run("pack", "--areas", "stories-workbench", "--out", str(env.root / "sw.md"))
+    assert code == 0
+    text = (env.root / "sw.md").read_text()
+    assert text.count("AMEND-BULLET") == 1                                     # deduped across the two ids
+    assert "shared bible/04 bullet — shown once under ADR-061" in text          # pointer under ADR-063
+    _, out, _ = env.run("adr", "61", "63")
+    assert out.count("AMEND-BULLET") == 1                                       # `adr` dedupes too
+
+
+def test_b04_skip_honoured_in_pack_but_not_adr(env):
+    # b04 = "skip" drops ADR-031's bible/04 bullet from packs, but `adr` always prints it.
+    env.edit("context/tags/adr.toml", '[ADR-031]\ntitle', '[ADR-031]\nb04 = "skip"\ntitle')
+    code, _, _ = env.run("pack", "--areas", "chat", "--out", str(env.root / "c.md"))
+    assert code == 0
+    text = (env.root / "c.md").read_text()
+    assert "### ADR-031" in text                                               # decision-log section stays
+    assert "**Chat is read-only.**" not in text                                # the bible/04 bullet is skipped
+    _, out, _ = env.run("adr", "31")
+    assert "**Chat is read-only.**" in out                                     # `adr` ignores skip
+    assert env.run("lint")[0] == 0                                             # b04 is a valid field

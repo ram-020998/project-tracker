@@ -103,6 +103,7 @@ amended_by = ["ADR-033", "ADR-034", "ADR-045"]
 superseded_by = ""
 rule       = "Chat never orchestrates or mutates; read-only @server/tool allowlist; file writes only in the per-session sandbox."
 reviewed_fp = "3f9a0c1e2b7d4a65"   # fingerprint of the full text when `rule` was last reviewed
+b04        = "include"             # optional (default "include"); "skip" omits the bible/04 bullet from packs
 ```
 
 - **Source anchors are computed, not stored.** No edits to either file. Rules locked 2026-10-20 against the real files
@@ -129,6 +130,16 @@ reviewed_fp = "3f9a0c1e2b7d4a65"   # fingerprint of the full text when `rule` wa
   `check` follow `amended_by` / `superseded_by` transitively and `amends` one hop from the seeds only (47-03 §4,
   amended S4 — 47-01 §5.6).
 - `rule` ≤ 220 characters, one sentence, imperative.
+- **`b04` dedupe (S5, 2026-10-20; step 0, a 47-03 fix).** A `bible/04` bullet that names several ADRs (`ADR-002/004/020`,
+  the `ADR-003 + ADR-006–009 + ADR-013–017` range bullet, an `amends ADR-061 + ADR-063` amendment) is printed **once per
+  pack**, under the first selected id, with a one-line "shown once under ADR-NNN" pointer under the others — it no longer
+  repeats under every id it covers. The optional per-ADR `b04 = "skip"` additionally drops the bullet from `pack` /
+  `check` when the decision-log section already carries its distinctive content; a combined bullet is dropped only when
+  **every** ADR it covers is `skip`. `genesis-ctx adr <id>` always prints the bullet (it ignores `b04`). `b04` is set by
+  `genesis-ctx propose-b04` (47-03 §3): it flags a bullet `include` when it has a distinctive token (backticked
+  identifier, version, number, quoted term or a cross-referenced ADR id) absent from that ADR's decision-log text
+  (sections + amendments), otherwise `skip`; the default is **`include` when unsure** (no decision-log text, or no
+  distinctive token to judge by). `b04` is not part of `reviewed_fp`.
 
 ### 4.2 Lessons — `tags/lesson.toml`
 

@@ -602,3 +602,99 @@ def _count(d: dict) -> dict[str, int]:
         out[v["confidence"]] += 1
         out["empty"] += 0 if v["areas"] else 1
     return out
+
+
+# ───────────────────────────── propose-b04 ─────────────────────────────
+# Flag each legacy bible/04 bullet include/skip for pack dedupe (47-03 §4, step 0 / 47-03 fix).
+
+B04_BACKTICK = re.compile(r"`([^`]+)`")
+B04_QUOTED = re.compile(r"[\u201c\u201d\"]([^\u201c\u201d\"]+)[\u201c\u201d\"]")
+B04_VERSION = re.compile(r"\bv?\d+\.\d+(?:\.\d+)*\b")
+B04_NUMBER = re.compile(r"\b\d{2,}\b")
+B04_ADRID = re.compile(r"ADR-\d{3}")
+
+
+def b04_tokens(bullet) -> list[str]:
+    """Distinctive tokens in a bible/04 bullet: backticked identifiers, quoted terms, versions,
+    multi-digit numbers and ADR ids OTHER than the bullet's own subject ids. ADR-id groups are
+    stripped before number extraction so bare id fragments (`004`, `009`) do not leak in."""
+    text = bullet.text
+    own = {md.fmt_adr(n) for n in bullet.ids}
+    toks: list[str] = []
+
+    def add(t: str) -> None:
+        t = t.strip().strip("`.,;:()")
+        if len(t) >= 2 and t not in toks:
+            toks.append(t)
+
+    for m in B04_BACKTICK.finditer(text):
+        add(m.group(1))
+    for m in B04_QUOTED.finditer(text):
+        add(m.group(1))
+    no_ids = md.ID_GROUP.sub(" ", text)          # drop ADR-NNN / ranges before version & number scan
+    for t in B04_VERSION.findall(no_ids):
+        add(t)
+    for t in B04_NUMBER.findall(no_ids):
+        add(t)
+    for t in B04_ADRID.findall(text):
+        if t not in own:
+            add(t)
+    return toks
+
+
+def compute_b04(c: Corpus, adr_id: str) -> tuple[str, list[str], list[str]]:
+    """(flag, unique_tokens, all_tokens). "skip" only when the ADR has decision-log text AND the
+    bullet has ≥ 1 distinctive token AND every token already appears there; otherwise "include"
+    (the conservative default when unsure)."""
+    bullets = c.b04_for(adr_id)
+    if not bullets:
+        return "include", [], []
+    dl = " ".join(a.text for a in c.anchors_for(adr_id)).lower()
+    if not dl.strip():
+        return "include", [], []                    # the bullet is the only source
+    all_toks: list[str] = []
+    unique: list[str] = []
+    for b in bullets:
+        for t in b04_tokens(b):
+            if t not in all_toks:
+                all_toks.append(t)
+                if t.lower() not in dl:
+                    unique.append(t)
+    if not all_toks:
+        return "include", [], []                    # no distinctive token to judge by
+    return ("include" if unique else "skip"), unique, all_toks
+
+
+def cmd_propose_b04(ctx: Ctx, apply: bool = False) -> int:
+    c = Corpus(ctx)
+    rows = []
+    for i in c.adr_ids:
+        if not c.b04_for(i):
+            continue
+        flag, unique, all_toks = compute_b04(c, i)
+        rows.append((i, flag, unique, all_toks))
+    include = [r for r in rows if r[1] == "include"]
+    skip = [r for r in rows if r[1] == "skip"]
+    print(f"# propose-b04 — {len(rows)} ADRs carry a bible/04 bullet: "
+          f"{len(include)} include, {len(skip)} skip\n")
+    print("## Flagged `include` — distinctive token(s) absent from the decision-log\n")
+    print("| ADR | unique tokens |\n|---|---|")
+    for i, _flag, unique, _all in include:
+        toks = ", ".join(f"`{esc(t)}`" for t in unique) if unique else \
+            "_(no decision-log text or no distinctive token — default include)_"
+        print(f"| {i} | {toks} |")
+    print(f"\n## `skip` — bible/04 bullet fully covered by the decision-log ({len(skip)})\n")
+    print(", ".join(i for i, *_ in skip) or "_(none)_")
+    if apply:
+        path = ctx.tags_dir / "adr.toml"
+        text = read(path)
+        n = 0
+        for i, flag, *_ in rows:
+            if i in c.adr_tags:
+                text = tomlio.set_field(text, i, "b04", flag)
+                n += 1
+        path.write_text(text, encoding="utf-8")
+        print(f"\napplied: wrote `b04` for {n} ADR(s) into {ctx.rel(path)} — run `genesis-ctx index`.")
+    else:
+        print("\n(dry run — add --apply to write `b04` into tags/adr.toml)")
+    return 0

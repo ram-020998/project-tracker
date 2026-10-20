@@ -191,3 +191,19 @@ def test_propose_tags_writes_candidates(env):
     assert "kb-sync" in cm["Phase 45 — Incremental Delta Sync (genesis v0.76.0)"]["areas"]
     assert f"| adr.proposed.toml | {len(adr)} |" in out
     assert not (env.tracker / "context/tags/adr.proposed.toml").exists()
+
+
+def test_propose_b04_flags_and_applies(env):
+    code, out, _ = env.run("propose-b04")
+    assert code == 0
+    assert "propose-b04" in out and "include" in out and "skip" in out
+    assert "ADR-031" in out                                   # redundant bullet → listed under skip
+    assert "b04" not in env.read("context/tags/adr.toml")     # dry run writes nothing
+    code, out, _ = env.run("propose-b04", "--apply")
+    assert code == 0
+    tags = tomllib.loads(env.read("context/tags/adr.toml"))
+    assert tags["ADR-031"]["b04"] == "skip"                   # @server/tool is in the decision-log
+    assert tags["ADR-026"]["b04"] == "include"                # prose-only bullet → default include
+    assert tags["ADR-061"]["b04"] == "include"                # v0.61.0 absent from the decision-log
+    assert "ADR-028" not in tags or "b04" not in tags["ADR-028"]   # no bible/04 bullet → no b04
+    assert env.run("lint")[0] == 0

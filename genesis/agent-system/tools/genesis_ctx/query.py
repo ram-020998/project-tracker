@@ -91,7 +91,8 @@ def _ids(raw: list[str], parser, kind: str) -> list[str]:
     return out
 
 
-def render_adr(c: Corpus, adr_id: str, reason: str = "", level: int = 2) -> str:
+def render_adr(c: Corpus, adr_id: str, reason: str = "", level: int = 2,
+               b04_bullets=None, b04_refs=None) -> str:
     h, h2 = "#" * level, "#" * (level + 1)
     tag = c.adr_tags.get(adr_id)
     head = f"{h} {adr_id} — {c.adr_title(adr_id)}"
@@ -116,9 +117,12 @@ def render_adr(c: Corpus, adr_id: str, reason: str = "", level: int = 2) -> str:
         out += ["", f"**Rule:** {rule}"]
     for a in c.anchors_for(adr_id):
         out += ["", f"{h2} decision-log.md L{a.lineno}–L{a.end} ({a.kind}, {a.form})", "", a.text]
-    for b in c.b04_for(adr_id):
+    bullets = c.b04_for(adr_id) if b04_bullets is None else b04_bullets
+    for b in bullets:
         out += ["", f"{h2} bible/04 L{b.lineno}", "", b.text]
-    if not c.anchors_for(adr_id) and not c.b04_for(adr_id):
+    for owner in (b04_refs or []):
+        out += ["", f"_(shared bible/04 bullet — shown once under {owner})_"]
+    if not c.anchors_for(adr_id) and not bullets and not (b04_refs):
         out += ["", "_(no text found in decision-log.md or bible/04)_"]
     return "\n".join(out)
 
@@ -131,7 +135,8 @@ def cmd_adr(ctx: Ctx, ids: list[str], chain: bool = True) -> int:
         raise CtxError("unknown ADR id(s): " + ", ".join(unknown))
     closure = c.chain(wanted, chain)
     order = wanted + sorted(k for k in closure if k not in wanted)
-    print("\n\n".join(render_adr(c, i, closure[i]) for i in order))
+    own, refs = c.b04_assignment(order, honor_skip=False)   # `adr` always prints the bullet
+    print("\n\n".join(render_adr(c, i, closure[i], b04_bullets=own[i], b04_refs=refs[i]) for i in order))
     return 0
 
 

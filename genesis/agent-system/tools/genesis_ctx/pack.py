@@ -113,6 +113,10 @@ def build_pack(ctx: Ctx, ref: str | None, extra_areas: list[str]) -> tuple[str, 
     adr_ids = sorted(sel["adrs"])
     lesson_ids = sorted(sel["lessons"])
     sec_keys = [s.key for s in c.sections if s.key in sel["sections"]]
+    b04_own, b04_refs = c.b04_assignment(adr_ids, honor_skip=True)   # dedupe + honour `b04 = "skip"`
+
+    def _adr(i: str) -> str:
+        return render_adr(c, i, level=3, b04_bullets=b04_own[i], b04_refs=b04_refs[i])
 
     body: list[str] = []
     body += ["## Areas", ""] + _table([(a, "; ".join(w)) for a, w in sorted(sel["areas"].items())], ("area", "why"))
@@ -124,7 +128,7 @@ def build_pack(ctx: Ctx, ref: str | None, extra_areas: list[str]) -> tuple[str, 
     if note:
         body += ["", note]
     body += ["", "## ADRs — full text", ""]
-    body += [render_adr(c, i, level=3) for i in adr_ids] or ["_(none)_"]
+    body += [_adr(i) for i in adr_ids] or ["_(none)_"]
     body += ["", "## Lessons — full text", ""]
     body += [render_lesson(c, i, level=3) for i in lesson_ids] or ["_(none)_"]
     body += ["", "## Code map", ""]
@@ -154,7 +158,7 @@ def build_pack(ctx: Ctx, ref: str | None, extra_areas: list[str]) -> tuple[str, 
         "counts": {"areas": len(sel["areas"]), "adrs": len(adr_ids), "lessons": len(lesson_ids),
                    "sections": len(sec_keys), "read_next": len(rows)},
         "parts": {
-            "adrs": sum(tokens(render_adr(c, i, level=3)) for i in adr_ids),
+            "adrs": sum(tokens(_adr(i)) for i in adr_ids),
             "lessons": sum(tokens(render_lesson(c, i, level=3)) for i in lesson_ids),
             "sections": sum(tokens(c.section(k).display) for k in sec_keys),
         },

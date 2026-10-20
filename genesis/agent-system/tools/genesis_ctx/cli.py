@@ -88,6 +88,9 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("propose-tags", help="one-shot: write context/tags/*.proposed.toml (47-05 input)")
     s.add_argument("--out-dir", help="write elsewhere (e.g. a temp dir for a preview)")
 
+    s = sub.add_parser("propose-b04", help="one-shot: flag each bible/04 bullet include/skip for pack dedupe")
+    s.add_argument("--apply", action="store_true", help="write `b04` into tags/adr.toml (dry-run by default)")
+
     s = sub.add_parser("verify-lossless", help="prove no baseline paragraph is missing (47-03 §6)")
     s.add_argument("--baseline", required=True, metavar="REV")
     s.add_argument("--write", action="store_true", help="store archive/LOSSLESS.json")
@@ -141,6 +144,9 @@ def run(args: argparse.Namespace) -> int:
     if args.cmd == "propose-tags":
         from .migrate import cmd_propose_tags
         return cmd_propose_tags(ctx, args.out_dir)
+    if args.cmd == "propose-b04":
+        from .migrate import cmd_propose_b04
+        return cmd_propose_b04(ctx, args.apply)
     if args.cmd == "verify-lossless":
         from .migrate import cmd_verify_lossless
         return cmd_verify_lossless(ctx, args.baseline, args.write, args.max_dups)

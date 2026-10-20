@@ -87,6 +87,38 @@ class Corpus:
         n = md.num(adr_id)
         return [b for b in self.b04 if n in b.ids]
 
+    def adr_b04(self, adr_id: str) -> str:
+        """Per-ADR bible/04 policy: "skip" omits this ADR's bible/04 bullet from packs; else "include"
+        (default). `adr <id>` ignores this; only pack/check honour "skip" (47-02 §4.1, 47-03 §4)."""
+        v = (self.adr_tags.get(adr_id, {}).get("b04") or "").strip().lower()
+        return "skip" if v == "skip" else "include"
+
+    def b04_assignment(self, order: list[str], honor_skip: bool) -> tuple[dict[str, list], dict[str, list]]:
+        """Assign each DISTINCT bible/04 bullet to exactly one ADR in `order` (dedupe), so a combined
+        bullet (`ADR-002/004/020`) prints once per pack, not once per id (47-03 §4).
+
+        honor_skip (pack/check): a bullet is shown only if at least one covering ADR present in `order`
+        has `b04 != "skip"`. `adr` passes honor_skip=False, so it always prints the bullet.
+        Returns (own, refs): own[id] = bullets to render in full under id; refs[id] = owner ids of
+        bullets that also cover id but are shown under another id (a one-line pointer)."""
+        bullets: dict[int, tuple] = {}            # bullet.start -> (bullet, covering ids, in render order)
+        for i in order:
+            for b in self.b04_for(i):
+                bullets.setdefault(b.start, (b, []))[1].append(i)
+        own: dict[str, list] = {i: [] for i in order}
+        refs: dict[str, list] = {i: [] for i in order}
+        for start in sorted(bullets):
+            b, covering = bullets[start]
+            if honor_skip and all(self.adr_b04(a) == "skip" for a in covering):
+                continue                          # every covering ADR's decision-log already carries it
+            owner = covering[0]                   # the first ADR in render order
+            own[owner].append(b)
+            for a in covering[1:]:
+                refs[a].append(owner)
+        for i in order:
+            own[i].sort(key=lambda bb: bb.start)
+        return own, refs
+
     @cached_property
     def primary_ids(self) -> list[str]:
         return sorted({md.fmt_adr(i) for a in self.anchors if a.kind == "primary" for i in a.ids})

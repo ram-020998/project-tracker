@@ -13,7 +13,8 @@ from .model import AREA_KEYS, AREA_NAME, Corpus, find_spec, resolve_doc, spec_fi
 from .sources import parse_manifest
 
 ADR_STATUSES = {"proposed", "accepted", "superseded", "amended"}
-ADR_FIELDS = {"title", "status", "areas", "paths", "amends", "amended_by", "superseded_by", "rule", "reviewed_fp"}
+ADR_FIELDS = {"title", "status", "areas", "paths", "amends", "amended_by", "superseded_by", "rule",
+              "reviewed_fp", "b04"}
 LESSON_FIELDS = {"areas", "phase", "rule", "reviewed_fp"}
 CODEMAP_FIELDS = {"areas"}
 
@@ -102,6 +103,8 @@ class Lint:
             self._areas_known(t.get("areas", []), w, i)
             if len(t.get("rule", "") or "") > config.RULE_MAX_CHARS:
                 self.err("rule-too-long", f"{i}: rule is {len(t['rule'])} chars (max {config.RULE_MAX_CHARS})", w)
+            if "b04" in t and t["b04"] not in ("include", "skip"):
+                self.err("tag-invalid", f"{i}: b04 must be \"include\" or \"skip\" (got {t['b04']!r})", w)
             st = t.get("status", "accepted")
             if st not in ADR_STATUSES:
                 self.err("tag-invalid", f"{i}: status `{st}` not in {sorted(ADR_STATUSES)}", w)

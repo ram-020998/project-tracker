@@ -44,6 +44,13 @@ def test_adr_tag_incomplete_and_rule_too_long(env):
     assert {"adr-tag-incomplete", "rule-too-long"} <= errors
 
 
+def test_adr_invalid_b04(env):
+    env.edit("context/tags/adr.toml", '[ADR-031]\ntitle', '[ADR-031]\nb04 = "maybe"\ntitle')
+    code, errors, _, d = codes(env)
+    assert code == 1 and "tag-invalid" in errors
+    assert any("b04" in f["message"] for f in d["findings"])
+
+
 def test_adr_duplicate_primary_anchor(env):
     env.edit("reference/decision-log.md", "## ADR-064 —", "## ADR-063 — again\n\nDup.\n\n## ADR-064 —")
     _fail(env, "adr-duplicate-anchor")
