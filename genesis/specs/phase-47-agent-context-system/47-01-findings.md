@@ -151,6 +151,17 @@ pulled collaboration and sync ADRs into every pack. Decided with the user:
    `delete*` tool allowlisted), ADR-021 (references ADR-068) and ADR-017. Low-confidence items were approved as
    proposed.
 
+### 5.7 Round 6 — context bars measure the Genesis share (2026-10-20, before the 47-09 review)
+
+The 47-06 live check measured genesis-dev at 5.51 % at start, against 3.87 % for a plain `kiro-cli --v3` session
+with the same prompt. The ≈ 3.9 % baseline is Kiro's own system prompt and built-in tools, which Genesis does not
+control. Decided by the user:
+
+1. **Gate on the Genesis share** = session total − a plain `kiro-cli --v3` session with the same prompt.
+   Bars: **≤ 5 % at start, ≤ 10 % after the pack**.
+2. **Session totals** are recorded for information only, never gated.
+3. Applied to 47-06 §9 and 47-09 §4.
+
 ## 6. ADR-077 (Proposed) — full text
 
 - **Status:** Proposed — 2026-10-20 (Phase 47).

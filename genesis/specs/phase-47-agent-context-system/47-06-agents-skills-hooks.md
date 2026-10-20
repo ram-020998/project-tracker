@@ -145,7 +145,8 @@ Skills are **procedures + pointers** to existing documents (by absolute path, re
 
 - `kiro-cli agent validate` (or the CLI-3 equivalent) passes for all five rendered profiles.
 - In a fresh `genesis-dev` session from the root workspace, `/context show` lists exactly the §4 resources and the
-  starting context is **≤ 5 %** of the window before any pack.
+  starting **Genesis share** is **≤ 5 %** of the window before any pack. Genesis share = session total − a plain
+  `kiro-cli --v3` session with the same prompt; the total is recorded for information only (47-01 §5.7).
 - Probe results (§2) recorded; any fallback applied.
 
 ## Context manifest

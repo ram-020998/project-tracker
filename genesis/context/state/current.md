@@ -1,4 +1,4 @@
-Active phase: Phase 47 — in progress (47-05)
+Active phase: Phase 47 — in progress (47-09)
 
 <!-- context/state/current.md — the current-state snapshot (47-05 §4). OVERWRITTEN every phase by genesis-docs:
      current values only, no history, no CI ids. History lives in progress/ and archive/. Keep ≤ 4K tokens. -->

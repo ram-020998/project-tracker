@@ -40,8 +40,10 @@ tags/areas, never the expected set.
 ## 4. Context measurement
 
 From the root workspace: fresh `genesis-dev`, `/context show` → record the % before and after `genesis-ctx pack` for a
-46-sized sub-spec. **Pass: ≤ 5 % before the pack, ≤ 10 % after.** Same for `genesis-spec` at the start of a spec
-session (≤ 5 %).
+46-sized sub-spec. Also record a **baseline**: a plain `kiro-cli --v3` session (no agent) with the same prompt. The
+**Genesis share** = session total − baseline. **Pass (gated on the Genesis share): ≤ 5 % before the pack, ≤ 10 %
+after.** Same for `genesis-spec` at the start of a spec session (share ≤ 5 %). Session totals are recorded for
+information only, not gated (47-01 §5.7).
 
 ## 5. Live pilot
 
