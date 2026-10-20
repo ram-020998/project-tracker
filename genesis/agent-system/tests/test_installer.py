@@ -478,3 +478,12 @@ def test_documented_retrieval_form_matches_each_profiles_allow_rules(tmp_path, m
     assert re.search(r"genesis-ctx adr ADR-\d{3} ADR-\d{3}", sec3) and "one direct call" in sec3
     for word in ("loop", "pipe", "redirect"):
         assert word in sec3
+
+
+def test_subagent_trust_matches_the_spec(tmp_path, monkeypatch):
+    # 47-09 m6: genesis-dev may spawn AND auto-trust genesis-review (47-06 §4); nobody else trusts a sub-agent.
+    _, profiles = _rendered_profiles(tmp_path, monkeypatch)
+    sub = {n: (p.get("toolsSettings") or {}).get("subagent") or {} for n, p in profiles.items()}
+    assert sub["genesis-dev"] == {"availableAgents": ["genesis-review"], "trustedAgents": ["genesis-review"]}
+    for name in ("genesis-docs", "genesis-review", "genesis-spec", "genesis-release"):
+        assert not sub[name].get("trustedAgents"), name

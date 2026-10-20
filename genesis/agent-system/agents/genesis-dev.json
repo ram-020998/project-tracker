@@ -37,7 +37,7 @@
     ]
   },
   "toolsSettings": {
-    "subagent": { "availableAgents": ["genesis-review"], "trustedAgents": [] }
+    "subagent": { "availableAgents": ["genesis-review"], "trustedAgents": ["genesis-review"] }
   },
   "hooks": [
     { "name": "genesis-status", "trigger": "SessionStart", "action": { "type": "command", "command": "{{GENESIS_HOME}}/bin/genesis-ctx status --brief" } },

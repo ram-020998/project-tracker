@@ -212,6 +212,13 @@ installed). All six §2 checks were run empirically on this machine:
    and prints a one-line `export PATH=…` hint for the operator's own terminal. The bare `genesis-ctx *` shell-allow rule
    is kept in each profile as a harmless extra. (The absolute path lives inside backtick/code spans; prose descriptions
    and the `"genesis-ctx *"` allow rule stay bare.)
+8. **Profile vs §3 matrix, recorded deviations (47-09 m6).** (a) genesis-review `fs_write` allows `/tmp/**` as well as
+   `/tmp/genesis-review/**`: its live-acceptance and probe scripts use throwaway sandboxes such as `/tmp/gr-sbx`, and a
+   `/tmp` write cannot reach code or the tracker. Its shell-guard write roots are `{{TRACKER}}/specs` + `/tmp`. Kept.
+   (b) genesis-spec has no explicit `git -C <code repo> push*` deny rule; it falls to "ask". In practice it is denied,
+   because shell-guard refuses any push/tag from a non-release agent, in any form, even under trust-all. Kept.
+   (c) genesis-dev `trustedAgents` now **matches** §4 (`["genesis-review"]`, so spawning the reviewer needs no
+   approval), pinned by `test_subagent_trust_matches_the_spec`.
 
 ### Files (under `project-tracker/genesis/agent-system/`)
 
