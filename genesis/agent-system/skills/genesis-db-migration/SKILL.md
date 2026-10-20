@@ -5,8 +5,8 @@ description: Use when changing the Genesis database schema — forward-only numb
 
 # Database migrations
 
-Rules & precedent: `genesis-ctx area db` (ADR-030 SQLite posture, the migration lessons) and
-`genesis-ctx adr ADR-054` (the separate memory.db). Migration code lives under the db package in
+Rules & precedent: `{{GENESIS_HOME}}/bin/genesis-ctx area db` (ADR-030 SQLite posture, the migration lessons) and
+`{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-054` (the separate memory.db). Migration code lives under the db package in
 `{{REPOS}}/genesis/genesis/db/` (migrations are numbered `mNNNN_*`).
 
 ## Rules

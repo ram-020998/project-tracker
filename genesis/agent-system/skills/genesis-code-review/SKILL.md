@@ -6,13 +6,13 @@ description: Use when reviewing a Genesis diff — how to run genesis-ctx check,
 # Code review
 
 Standard: `{{TRACKER}}/reference/coding-standards.md` §1 (already in your L0) and the latest review sub-spec
-(`genesis-ctx search "review" --archive`). You are READ-ONLY on code; you write only the report.
+(`{{GENESIS_HOME}}/bin/genesis-ctx search "review" --archive`). You are READ-ONLY on code; you write only the report.
 
 ## Procedure
-1. For each changed repo: `genesis-ctx check --since <base-rev> --repo <name>` → a checklist of every applicable ADR rule,
+1. For each changed repo: `{{GENESIS_HOME}}/bin/genesis-ctx check --since <base-rev> --repo <name>` → a checklist of every applicable ADR rule,
    lesson rule and the area gate commands, mapped from the changed files.
 2. Read the **diff** (`git -C <repo> diff <base-rev>`), not whole files; pull any rule's full text with
-   `genesis-ctx adr|lesson <id>`.
+   `{{GENESIS_HOME}}/bin/genesis-ctx adr|lesson <id>`.
 3. Run the gate commands the check lists (tests, ruff, typecheck, build) to verify the author's claims yourself.
 4. Answer EVERY checklist line **OK / VIOLATION / N/A**, each with cited evidence (file:line, a test name, command output).
 

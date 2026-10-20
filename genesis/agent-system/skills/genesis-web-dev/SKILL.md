@@ -5,8 +5,8 @@ description: Use when changing the Genesis React+TypeScript SPA (genesis/web) â€
 
 # Web development (React + TypeScript SPA)
 
-Full rules: `genesis-ctx adr ADR-027` and `genesis-ctx adr ADR-055` (Overcut visual language, design tokens),
-plus `genesis-ctx area web-shell`. Conventions live in `{{TRACKER}}/bible/05-dev-loop-and-release.md` (web section).
+Full rules: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-027` and `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-055` (Overcut visual language, design tokens),
+plus `{{GENESIS_HOME}}/bin/genesis-ctx area web-shell`. Conventions live in `{{TRACKER}}/bible/05-dev-loop-and-release.md` (web section).
 
 ## Rules
 - Reuse existing primitives (shadcn/Radix, the Overcut components); don't re-implement a button/dialog/card.

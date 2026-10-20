@@ -8,8 +8,8 @@ description: Use when authoring or changing a Genesis workflow (a LangGraph grap
 Authoritative standards (read in ranges):
 - `{{TRACKER}}/reference/workflow-authoring-standard.md`
 - `{{TRACKER}}/reference/reliability-standard.md`
-- Rules: `genesis-ctx adr ADR-011` (reliability trio) and `genesis-ctx adr ADR-067` (healing config), plus
-  `genesis-ctx area workflows-library`.
+- Rules: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-011` (reliability trio) and `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-067` (healing config), plus
+  `{{GENESIS_HOME}}/bin/genesis-ctx area workflows-library`.
 
 ## Rules
 - **Reliability trio is MANDATORY on every agent node** (ADR-011): a program validator + retry + escalation. CI enforces

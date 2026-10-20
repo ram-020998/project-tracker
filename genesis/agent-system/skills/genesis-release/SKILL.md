@@ -5,9 +5,9 @@ description: Use when releasing Genesis — the ADR-019 order, every version loc
 
 # Release
 
-Order & rules: `genesis-ctx adr ADR-019` (genesis-core semver + CORE_MAJOR compat gate) and
+Order & rules: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-019` (genesis-core semver + CORE_MAJOR compat gate) and
 `{{TRACKER}}/bible/05-dev-loop-and-release.md` §6; precedent in the latest release sub-spec
-(`genesis-ctx search "release" --archive`). Record CI ids and hashes in the release sub-spec's **As run**, not in L0/state.
+(`{{GENESIS_HOME}}/bin/genesis-ctx search "release" --archive`). Record CI ids and hashes in the release sub-spec's **As run**, not in L0/state.
 
 ## Order (ADR-019)
 Release upstream→downstream so the compat gate holds: `genesis-core` first (its `CORE_MAJOR` is the gate key), then the

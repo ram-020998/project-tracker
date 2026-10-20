@@ -9,14 +9,14 @@ Authoritative sources (read in ranges, do not read whole):
 - Dev loop & commands: `{{TRACKER}}/bible/05-dev-loop-and-release.md` §6.
 - Conventions: `{{TRACKER}}/reference/coding-standards.md` §2–§4 (already in your L0).
 - Tests: `{{TRACKER}}/reference/testing-strategy.md`.
-- For the rules that apply to the files you touch: `genesis-ctx pack <sub-spec>` (or `--areas …`).
+- For the rules that apply to the files you touch: `{{GENESIS_HOME}}/bin/genesis-ctx pack <sub-spec>` (or `--areas …`).
 
 ## Environment
 - One shared venv for ALL Python repos: `{{REPOS}}/genesis/.venv`.
 - Run Python as `{{REPOS}}/genesis/.venv/bin/python …` (not a bare `python`).
 - `kiro-agent-sdk` has its own venv: `{{REPOS}}/kiro-agent-sdk/.venv` — use it for that repo's tests.
 
-## Gates (run before you hand off; `genesis-ctx check` lists the exact ones per area)
+## Gates (run before you hand off; `{{GENESIS_HOME}}/bin/genesis-ctx check` lists the exact ones per area)
 - `{{REPOS}}/genesis/.venv/bin/python -m pytest -q` (narrow to the touched package while iterating).
 - `{{REPOS}}/genesis/.venv/bin/ruff check .` (line-length and lint per each repo's config).
 - Type/parity checks where the area defines them (workflow META↔yaml parity, etc.).

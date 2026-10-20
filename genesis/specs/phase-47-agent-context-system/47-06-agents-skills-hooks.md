@@ -178,16 +178,23 @@ installed). All six §2 checks were run empirically on this machine:
 2. **`permissions.rules` replace `allowedTools`** (V3): a profile with `allowedTools`/`toolsSettings` but no
    `permissions` is skipped by V3 as un-migrated. Every profile carries a `permissions` block. Capability names are
    `fs_read` / `fs_write` / `shell` (not `execute_bash`); **deny wins** across scopes.
-3. **`tools` uses V3 tags** `read, write, shell, web, subagent`. The spec's **`code`** is not a V3 tool/tag; code
-   navigation is via `read` (read_file + grep_search) + `genesis-ctx` + `shell`. `subagent` is included for every agent
-   that spawns sub-agents (spec/dev/review/docs); `genesis-release` has none.
+3. **`tools` uses V3 tags** `read, write, shell, web, subagent` plus **`code`** — the `--v3` engine's `/tools` lists a
+   **code-intelligence tool `code`** (tree-sitter/LSP symbol search, refs, AST, diagnostics), so it is kept on
+   `genesis-spec`, `genesis-dev` and `genesis-review` (per the operator's instruction to verify the tool exists before
+   dropping it). `genesis-release`/`genesis-docs` have no `code`. `subagent` is on every agent that spawns sub-agents
+   (spec/dev/review/docs); `genesis-release` has none.
 4. **PreToolUse matcher is the tag `read`** (confirmed firing on `read_file`); shell globs support only `*` (fs globs
    support `**`), which all patterns respect.
 5. **`agent validate` is lenient** (it accepted a bad `effect` and an unknown capability; exit code unreliable). The
    47-07 installer therefore does its own stdlib validation and relies on the loader's own missing-resource error.
 6. **`fs_read` allow** is granted to `{{TRACKER}}/**`, `{{REPOS}}/**`, `{{GENESIS_HOME}}/**`, `/tmp/**` on every agent
    (agents launch from the root workspace but must read project-tracker); the bulk-read-guard protects the big docs.
-7. **`genesis-ctx` allowed both as `genesis-ctx *` and `{{GENESIS_HOME}}/bin/genesis-ctx *`** (PATH or full path).
+7. **`genesis-ctx` is invoked by absolute path** `{{GENESIS_HOME}}/bin/genesis-ctx` in every role prompt, skill body
+   and hook command (agent shells do not load the user's shell profile, so a bare `genesis-ctx` would not resolve, and
+   PATH/`/usr/local/bin` are deliberately left untouched — operator decision #3). The installer renders `{{GENESIS_HOME}}`
+   and prints a one-line `export PATH=…` hint for the operator's own terminal. The bare `genesis-ctx *` shell-allow rule
+   is kept in each profile as a harmless extra. (The absolute path lives inside backtick/code spans; prose descriptions
+   and the `"genesis-ctx *"` allow rule stay bare.)
 
 ### Files (under `project-tracker/genesis/agent-system/`)
 

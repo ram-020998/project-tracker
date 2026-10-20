@@ -6,11 +6,11 @@ description: Use when running live acceptance of Genesis — the fleet + Playwri
 # Live acceptance
 
 Procedure & precedent: `{{TRACKER}}/bible/05-dev-loop-and-release.md` (the acceptance/fleet section) and the latest
-shipped phase's review/acceptance sub-spec (`genesis-ctx search "live acceptance" --archive` to find it). Scripts you
+shipped phase's review/acceptance sub-spec (`{{GENESIS_HOME}}/bin/genesis-ctx search "live acceptance" --archive` to find it). Scripts you
 write go in `/tmp` (Playwright drivers); you are read-only on the repos.
 
 ## Procedure
-1. Bring up the app locally per the dev loop; confirm the version and DB version with `genesis-ctx status` and the app's
+1. Bring up the app locally per the dev loop; confirm the version and DB version with `{{GENESIS_HOME}}/bin/genesis-ctx status` and the app's
    own report.
 2. Drive the real UI with Playwright from `/tmp` (node scripts), exercising the acceptance scenarios the sub-spec lists.
 3. Capture **evidence**: screenshots and the relevant DB/API state for each scenario, saved under `/tmp/genesis-review/`.

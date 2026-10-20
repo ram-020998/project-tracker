@@ -29,14 +29,14 @@ Defaults · Risks · ADR summaries. Keep history out; link to `progress/`.
 
 A `## Context manifest` heading followed by a fenced ` ```toml ` block with these keys (all optional arrays of strings):
 
-- `areas` — area names from `context/areas.toml` (`genesis-ctx area <name>`).
+- `areas` — area names from `context/areas.toml` (`{{GENESIS_HOME}}/bin/genesis-ctx area <name>`).
 - `adrs` — extra ADRs beyond the areas' tags (e.g. `"ADR-0NN"`).
 - `lessons` — extra lessons (e.g. `"L-0NN"`).
 - `docs` — docs to read next (`"tracker:specs/.../NN-02-foo.md"`, `"reference/foo.md"`).
 - `code` — path globs the task touches (drive path→area routing; e.g. `"genesis/genesis/foo/**"`).
 - `upstream` — sub-spec ids whose **As-built** must be read first (e.g. `"NN-02"`).
 
-`genesis-ctx pack <id>` = manifest ∪ area defaults ∪ path-derived areas ∪ amendment closure. Two routes
+`{{GENESIS_HOME}}/bin/genesis-ctx pack <id>` = manifest ∪ area defaults ∪ path-derived areas ∪ amendment closure. Two routes
 must both miss before a rule is lost; the review `check` on the diff is the third. Keep packs under budget by
 naming tight `areas`/`adrs`, not whole catalogs.
 
@@ -48,5 +48,5 @@ Never batch questions. Research externally (web) when a library/API/standard is 
 `SPEC-DRAFTED` → `BUILT` (per sub-spec) → `SHIPPED`. Sub-spec status uses the same words in its own banner.
 
 ## Finish
-`genesis-ctx lint --specs-only` green (unknown area/ADR/lesson/upstream or a missing manifest fails it).
+`{{GENESIS_HOME}}/bin/genesis-ctx lint --specs-only` green (unknown area/ADR/lesson/upstream or a missing manifest fails it).
 Update the README phase row to the new status. Commit specs locally in project-tracker; push only on the user's go-ahead.

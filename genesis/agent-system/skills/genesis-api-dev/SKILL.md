@@ -5,8 +5,8 @@ description: Use when adding or changing a Genesis HTTP endpoint or its web clie
 
 # API development
 
-Full rules: `genesis-ctx adr ADR-028` (namespaced /api + SPA fallback) and the API lessons for your change
-(`genesis-ctx area api` lists them; read the full text with `genesis-ctx lesson <id>`).
+Full rules: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-028` (namespaced /api + SPA fallback) and the API lessons for your change
+(`{{GENESIS_HOME}}/bin/genesis-ctx area api` lists them; read the full text with `{{GENESIS_HOME}}/bin/genesis-ctx lesson <id>`).
 
 ## Rules
 - EVERY backend route lives under `/api` via an `APIRouter` in `{{REPOS}}/genesis/genesis/api/app.py`; keep the SPA
@@ -16,7 +16,7 @@ Full rules: `genesis-ctx adr ADR-028` (namespaced /api + SPA fallback) and the A
 - Keep the request/response contract and `{{REPOS}}/genesis/web/src/types` in parity; update the contract fixtures when
   you change a shape, and regenerate/adjust the TS types in the same change.
 - Concurrency: use the project's CAS / `409 Conflict` convention for optimistic updates (don't invent a new one —
-  `genesis-ctx search "409" --archive` for precedent).
+  `{{GENESIS_HOME}}/bin/genesis-ctx search "409" --archive` for precedent).
 
 ## Gates
 - Backend: `{{REPOS}}/genesis/.venv/bin/python -m pytest -q` (API tests + contract fixtures).
