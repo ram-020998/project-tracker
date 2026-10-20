@@ -38,7 +38,8 @@ def repo_status(path: Path) -> dict:
 def active_phase(ctx: Ctx) -> str | None:
     for line in read(ctx.state_file).split("\n"):
         if re.search(r"(?i)\bactive phase\b", line):
-            return md.collapse(re.sub(r"[*_>`]|^\s*[-#]+\s*", "", line))
+            text = md.collapse(re.sub(r"[*_>`]|^\s*[-#]+\s*", "", line))
+            return re.sub(r"(?i)^active phase\s*:?\s*", "", text) or None
     return None
 
 

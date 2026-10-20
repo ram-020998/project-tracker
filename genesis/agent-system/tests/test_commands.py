@@ -33,7 +33,9 @@ def test_status_on_temp_git_repo_with_tag(env):
     assert g["present"] and g["tag"] == "v0.1.0" and g["dirty"] == 1 and g["branch"] == "main"
     assert g["ahead"] is None  # no upstream
     assert data["repos"]["genesis-workflows"]["present"] is False
-    assert data["active_phase"].startswith("Active phase: 48")
+    assert data["active_phase"].startswith("48 — Demo phase")
+    _, out, _ = env.run("status", "--brief")
+    assert "Active phase: 48 — Demo phase" in out and "Active phase: Active phase" not in out
     code, brief, _ = env.run("status", "--brief")
     assert code == 0 and len(brief.strip().split("\n")) <= 25 and "v0.1.0" in brief
 
