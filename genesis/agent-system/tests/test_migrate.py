@@ -158,6 +158,13 @@ def test_verify_lossless_reports_active_duplicates(git_env):
     assert code == 0 and "| 2 | bible/05-dev-loop-and-release.md:3, context/dup.md:3 |" in out
 
 
+def test_verify_lossless_duplicates_skip_test_fixtures(git_env):
+    env = git_env
+    env.write("agent-system/tests/fixtures/tracker/bible/05-copy.md", "# x\n\nRun the tests before you commit. DEVLOOP.\n")
+    code, out, _ = env.run("verify-lossless", "--baseline", "HEAD")
+    assert code == 0 and "agent-system/tests/fixtures/" not in out and "DEVLOOP" not in out, out
+
+
 def test_propose_tags_writes_candidates(env):
     out_dir = env.root / "proposals"
     code, out, err = env.run("propose-tags", "--out-dir", str(out_dir))

@@ -219,6 +219,7 @@ def cmd_archive(ctx: Ctx, plan: str, step_n: int | None, apply: bool) -> int:
 # ───────────────────────────── verify-lossless ─────────────────────────────
 
 HEADING = re.compile(r"^#{1,6}\s")
+DUP_SKIP = ("agent-system/tests/fixtures/",)
 ORDERED = re.compile(r"^\d+[.)] ")
 TABLE_SEP = re.compile(r"^\|[\s:|-]+\|?$")
 
@@ -321,7 +322,8 @@ def cmd_verify_lossless(ctx: Ctx, baseline: str, write: bool = False, max_dups: 
     for f in files:
         if f.startswith("context/.packs/"):
             continue
-        active = f.split("/")[0] not in ("archive", "specs", "progress")
+        # Active layer for the duplicate report: not history, and not test fixtures (which copy real headings).
+        active = f.split("/")[0] not in ("archive", "specs", "progress") and not f.startswith(DUP_SKIP)
         for line, raw in units(read(ctx.tracker / f)):
             n = normalize(raw)
             if not counted(n):
