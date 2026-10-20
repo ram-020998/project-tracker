@@ -244,6 +244,9 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 From Phase 47 on: ≤ 5 lines per phase; detail lives in `progress/`.
 
-- **2026-10-20 — Phase 47 (Agent Context System): 🟡 SPEC-DRAFTED (awaiting build sign-off).** Problem: "read the bible" loads ~1.12 MB (~300K tokens, 45–50 % of a 1M window) before any work, growing each phase; a prior from-scratch rewrite needed 120–200 sessions. Design: tiered context (L0 core + one-line rule per ADR/lesson; role skills; `genesis-ctx` per-task packs from sub-spec context manifests + sidecar area tags + amendment closure; verbatim `archive/`), five CLI-3 role agents installed globally from `agent-system/` (install/update/uninstall), a documentation standard + `genesis-docs` write-back; move-only migration proven lossless, ≤ 6 sessions. Specs: `specs/phase-47-agent-context-system.md` + `47-01..47-10`; operator guide `agent-system/OPERATOR_GUIDE.md`; ADR-077 Proposed. project-tracker only.
+- **2026-10-20 — Phase 47 (Agent Context System): ✅ SHIPPED (project-tracker only; ADR-077 Accepted).** Tiered context
+  (always-loaded core ≈1.5 % of a 1M window; per-task packs via `genesis-ctx`) + five CLI-3 role agents installed from
+  `agent-system/`; move-only migration proven lossless (0 of 1,338 baseline units missing); 47-09 review SHIP after 3 rounds.
+  Details: `progress/phase-47-agent-context-system.md`. Pilot carried into Phase 48.
 
 > 📦 Moved verbatim to [archive/tracker-status-log.md](archive/tracker-status-log.md) (Phase 47-04, 2026-10-20). Search with `genesis-ctx search <term> --archive`.

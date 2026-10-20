@@ -1,8 +1,8 @@
 # Genesis Agents — Operator Guide
 
-> **Status:** DRAFT 2026-10-20 (Phase 47 spec set). Describes the system as designed in
-> `specs/phase-47-agent-context-system.md`; finalized after the pilot in 47-10. Where a step depends on the build, it is
-> marked *(after 47-0x)*.
+> **Status:** FINAL 2026-10-20 (Phase 47 shipped; ADR-077). Verified live on this machine (Kiro CLI with the V3 engine,
+> KAS 0.66.43). The first real phase built with these agents (Phase 48) doubles as the pilot — note anything unclear
+> here and ask `genesis-docs` to fix it. Known limits: `specs/backlog/phase-47-follow-ups.md`.
 
 This guide is for you, the human running Genesis development. It tells you which agent to start, when, with what
 prompt, and in what order. You never paste the bible again.
@@ -117,7 +117,7 @@ During the session:
 **Closing prompt:**
 
 ```text
-Spec approved. Mark it SPEC-DRAFTED → APPROVED (today's date), update the README row, and commit project-tracker.
+Spec approved. Mark it APPROVED (today's date) in the umbrella Status line, update the README row, and commit project-tracker.
 Don't push.
 ```
 

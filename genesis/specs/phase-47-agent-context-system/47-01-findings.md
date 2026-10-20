@@ -244,7 +244,15 @@ batched retrieval was denied), m6 and m7 were still open. Decided with the user;
    keeping it ≥ 10 s. The shared `nosid` fallback counter (the other half of round-1 m7) was not in this round's
    brief and is unchanged.
 
-## 6. ADR-077 (Proposed) — full text
+### 5.10 Round 9 — round 3 and the switchover (2026-10-20)
+
+Round-3 re-review (frozen scope): M5, m7 verified; m9 10/10. **m6** failed live — V3 ignores `trustedAgents` for
+approval — fixed with a `subagent` permission rule on genesis-dev, verified live (`f2b2150`). New **B2** (allow-listed
+commands that write through flags): **the user accepted it as a known minor** ("we don't need to fix this") → backlog.
+The user asked to stop spending sessions: the round-3 write-up, the m6 fix and the whole 47-10 switchover were done in
+the main session; the separate **live pilot (47-09 §5) is carried into Phase 48**. Verdict **SHIP**.
+
+## 6. ADR-077 (Accepted 2026-10-20; canonical text in `reference/decision-log.md`) — draft text
 
 - **Status:** Proposed — 2026-10-20 (Phase 47).
 - **Context.** The "read the bible" onboarding loads ~300K tokens of mixed rules, state and history into every session

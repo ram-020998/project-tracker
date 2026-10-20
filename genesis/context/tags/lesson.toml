@@ -536,3 +536,15 @@ areas = ["features-stages", "chat"]
 phase = "46"
 rule = ""
 reviewed_fp = "b961006a5eb959b3"
+
+[L-087]
+areas = ["release-ci"]
+phase = "47"
+rule = ""
+reviewed_fp = "6d681ecfb9a75d7b"
+
+[L-088]
+areas = ["security", "release-ci"]
+phase = "47"
+rule = ""
+reviewed_fp = "7ce0c1185e37e6c6"

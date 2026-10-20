@@ -1,8 +1,7 @@
 <!-- GENESIS BIBLE — CHUNK 02. DO NOT summarize or drop content when editing; keep it verbatim-faithful. -->
-> **This file is one chunk of the Genesis bible.** The bible is split across `bible/` and indexed by
-> [`../AGENT_ONBOARDING.md`](../AGENT_ONBOARDING.md). **When asked to "read the bible", read the index AND every
-> chunk it lists, then follow all of it religiously.** This chunk holds: **§3 Architecture — the mental model (layers, reliability trio, state/blackboard, subprocess workers, data plane, HITL, release/versioning).**
-> Section numbers (§0–§10) are the ORIGINAL bible sections and are preserved here; the §→chunk map lives in the index.
+> **Part of the Genesis always-loaded core (Phase 47, ADR-077).** Every `genesis-*` agent loads this file at session
+> start; there is no "read the bible" any more — see [`../AGENT_ONBOARDING.md`](../AGENT_ONBOARDING.md). This file holds:
+> **§3 Architecture — the mental model (layers, reliability trio, state/blackboard, subprocess workers, data plane, HITL, release/versioning).** Section numbers (§0–§10) are the original bible sections, kept so old references still resolve.
 
 ---
 

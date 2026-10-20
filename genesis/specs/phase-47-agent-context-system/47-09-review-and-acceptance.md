@@ -1,6 +1,6 @@
 # 47-09 — Review, evaluation and pilot
 
-> **Status:** 🟡 SPEC-DRAFTED 2026-10-20. Repo: all of Phase 47. Parent: `specs/phase-47-agent-context-system.md`.
+> **Status:** ✅ BUILT 2026-10-20 — review rounds 1–3, verdict SHIP (`reviews/47-09-review.md`); §5 pilot carried into Phase 48. Repo: all of Phase 47. Parent: `specs/phase-47-agent-context-system.md`.
 > Session S6 — run **with the new agents** (dogfood).
 
 ## 1. Independent review (`genesis-review`, read-only)
@@ -51,6 +51,9 @@ with full text reserved for direct hits (M3b), the 46-05/46-09/46-06 replay pack
 after-pack share lands under the 10 % bar.
 
 ## 5. Live pilot
+
+> **Carried into Phase 48** (user decision, 2026-10-20): the first real phase built end to end with the new agents is
+> the pilot; record each session's `/context show` and any operator-guide gaps there.
 
 A small, real task from `specs/backlog/` chosen by the user, run end to end with the operator guide: spec → one dev
 sub-spec → review → (release only if the user wants) → docs. Record context % at each session start, and anything in the

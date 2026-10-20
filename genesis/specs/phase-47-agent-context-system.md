@@ -1,6 +1,6 @@
 # Phase 47 — Agent Context System (tiered context, role agents, cheap migration)
 
-> **Status:** 🟡 **SPEC-DRAFTED 2026-10-20 — awaiting build sign-off.** · **Author:** Genesis assistant with the user.
+> **Status:** ✅ **SHIPPED 2026-10-20** (project-tracker only; ADR-077 Accepted; review SHIP — `reviews/47-09-review.md`; as-built `progress/phase-47-agent-context-system.md`). Spec-drafted 2026-10-20. · **Author:** Genesis assistant with the user.
 > Sub-specs: `phase-47-agent-context-system/47-01..47-10`. Findings (research + every decision): `47-01-findings.md`.
 > New ADR (**Proposed**): **ADR-077** (§15). Repo: **project-tracker only** — no Genesis code repo changes, no Genesis
 > release. Operator guide (how to use the agents): `../agent-system/OPERATOR_GUIDE.md`.

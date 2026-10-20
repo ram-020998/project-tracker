@@ -1445,3 +1445,36 @@ remove-propagation (delete a card when a teammate clears `on_board`). See bible/
   the frozen document as an artifact blob `<feature_sync_uuid>:cr-<nn>`; manual answers auto-publish; a conflict merge is
   written locally; `GH_records_upsert` passes `rawBody` so timestamps round-trip byte-for-byte; a pull never re-applies a
   version the machine already holds (46-10 live finding).
+
+## ADR-077 — Tiered, program-compiled agent context and role agents (Phase 47) — **Accepted**
+
+- **Status:** **Accepted** — 2026-10-20.
+- **Status:** **Accepted** — 2026-10-20 (Phase 47; project-tracker only, no Genesis release). Spec:
+  `specs/phase-47-agent-context-system.md` + `47-01..47-10`; review `reviews/47-09-review.md` (SHIP, round 3); as-built
+  `progress/phase-47-agent-context-system.md`.
+- **Context.** "Read the bible" loaded ~1.12 MB (~300K tokens; 45–50 % of a 1M window) of mixed rules, state and
+  history into every session, and grew 20–40K tokens per phase. Rules were only as reliable as the agent's recall of a
+  huge context; a from-scratch rewrite of the corpus had already failed (120–200 sessions).
+- **Decision.** (1) Context loads in tiers: **L0** always (`context/L0-core.md`, `bible/02`, `bible/07`, a one-line digest
+  of **every** ADR and lesson, the area catalog, `context/state/current.md`; ≈1.5 % of the window); **L1** per role
+  (agent prompt, coding standards, skills read on demand by absolute path); **L2** per task — `genesis-ctx pack` compiles
+  the sub-spec's context manifest + area tags + path globs: **full text** for direct hits (manifest ids, path hits) and
+  their amendment chains (everything that amends a loaded ADR, transitively; what a seed amends, one hop), **one line +
+  id** for area-only hits; **L3** on demand (`archive/`, history via `genesis-ctx search --archive`). (2) Rules are
+  selected **by program** (sidecar TOML tags in `context/tags/`, `context/areas.toml`); semantic search is never used to
+  select rules. (3) History is moved verbatim to `archive/`; a strict `verify-lossless` proves no baseline paragraph is
+  missing. (4) One home per fact; digests are generated (`genesis-ctx index`) and guarded by `genesis-ctx lint`.
+  (5) Five Kiro-CLI-3 role agents (`genesis-spec/dev/review/release/docs`, JSON profiles, `claude-opus-5.5` pinned) with
+  scoped `permissions` + a `shell-guard.sh` PreToolUse hook (blocks git push/tag and out-of-scope shell writes even under
+  `--trust-all-tools`; only genesis-release may push/tag, always asking) are installed globally from
+  `project-tracker/genesis/agent-system/` by `install.sh` / `update.sh` / `uninstall.sh`. (6) `genesis-docs` does the
+  phase write-back; `genesis-dev` records an **As built** section per sub-spec and spawns `genesis-review` as a sub-agent.
+- **Alternatives rejected.** Trimming the bible (growth continues); rewriting the corpus from scratch (cost ∝ corpus);
+  role agents that still read the bible (problem moved, not solved); semantic search for rule selection (fuzzy recall
+  is the wrong tool for non-negotiables); a second routing level (controlled evidence: never helps, can hurt).
+- **Consequences.** Replaces the bible's "read every chunk" and, for the active layer only, "never summarize" (the
+  archive stays verbatim). Every sub-spec from Phase 48 carries a `## Context manifest` listing areas, ADR/lesson ids
+  and code paths. Agents are launched from the root workspace with `kiro-cli --v3 chat --agent genesis-<role>`, never
+  with `--trust-all-tools`. Known limits (backlog `phase-47-follow-ups.md`): allow-listed commands that write through
+  flags (B2, accepted minor); skills are listed by path in prompts because the V3 build does not register profile
+  skills on `chat --agent`. No Genesis code, runtime or ADR-001..076 change.

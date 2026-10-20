@@ -949,3 +949,14 @@ superseded_by = ""
 rule = "A locked spec changes only through a change request: chat drafts the CR, program code applies the plan."
 reviewed_fp = "cfd1570d1f0f0ccd"
 b04 = "include"
+
+[ADR-077]
+title = "Tiered, program-compiled agent context and role agents (Phase 47)"
+status = "accepted"
+areas = ["release-ci", "security"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Agents load L0 + role + a genesis-ctx task pack, never the bulk docs whole; rules are selected by program (tags/areas/paths), never by search; history is archived verbatim; never run with --trust-all-tools."
+reviewed_fp = "f390b21498029d86"

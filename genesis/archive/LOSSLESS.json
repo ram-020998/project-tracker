@@ -1,5 +1,5 @@
 {
-  "baseline": "d89f763efe69d424c99290ebbae892a5c112c75e",
+  "baseline": "d89f763",
   "baseline_commit": "d89f763efe69d424c99290ebbae892a5c112c75e",
   "files": [
     "tracker.md",
@@ -20,6 +20,6 @@
   "missing": 0,
   "result": "PASS",
   "missing_units": [],
-  "active_duplicates": 4,
-  "timestamp": "2026-10-20T08:01:36+00:00"
+  "active_duplicates": 9,
+  "timestamp": "2026-10-20T14:15:30+00:00"
 }

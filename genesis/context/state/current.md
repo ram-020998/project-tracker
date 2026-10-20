@@ -1,4 +1,4 @@
-Active phase: Phase 47 — in progress (47-09)
+Active phase: none — Phase 47 complete (2026-10-20); next real phase = Phase 48 (also the agent-system pilot)
 
 <!-- context/state/current.md — the current-state snapshot (47-05 §4). OVERWRITTEN every phase by genesis-docs:
      current values only, no history, no CI ids. History lives in progress/ and archive/. Keep ≤ 4K tokens. -->
@@ -33,6 +33,9 @@ All repos are at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`, remote `git@gitl
 
 ## What works today
 
+- **Agent system (Phase 47):** five role agents `genesis-spec/dev/review/release/docs` (Kiro CLI V3, JSON profiles, `claude-opus-5.5`)
+  installed from `project-tracker/genesis/agent-system/` (`install.sh` / `update.sh` / `uninstall.sh`); launch with
+  `kiro-cli --v3 chat --agent genesis-<role>` from `~/repo-gitlab/ramaswamy.u`; context via `genesis-ctx`; never `--trust-all-tools`.
 - `genesis serve` → FastAPI backend + SPA at `http://127.0.0.1:8760`; API under `/api`, Swagger at `/docs`, SPA history fallback.
 - Primary nav: Applications · Chat · Runs · Documents (Applications is the landing); Overview + Catalog live in Settings.
 - Runs list + Run Detail (graph, inspector, turn-grouped conversation, all 3 HITL modes, per-node and run-total credits).

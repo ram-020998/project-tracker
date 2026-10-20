@@ -89,3 +89,5 @@ Full text: `genesis-ctx lesson <ID>`.
 - L-084 [collaboration-hub,appian-integration,features-stages] — Appian `a!fromJson` silently turns date-looking strings into datetimes; the Hub returns null text as `""` (Phase 46-09 Hub build).
 - L-085 [collaboration-hub,features-stages,stories-workbench] — A client-side publish hook that nothing calls is invisible until a live two-machine check (Phase 46-10 F1, pre-existing since 38-04).
 - L-086 [features-stages,chat] — Program-owned IDs inside agent-authored HTML stay stable when the normalizer edits only start tags (Phase 46-02).
+- L-087 [release-ci] — Migrate a large doc corpus by MOVING text with scripts and adding a sidecar index — never by having an agent read and rewrite it; probe the real CLI before designing against its docs (Phase 47).
+- L-088 [security,release-ci] — Guard agent shells with a command-parsing PreToolUse hook, not prefix globs, and test every guard with a bypass corpus AND a positive corpus (Phase 47).

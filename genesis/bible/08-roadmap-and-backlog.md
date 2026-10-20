@@ -1,20 +1,20 @@
 <!-- GENESIS BIBLE — CHUNK 08. DO NOT summarize or drop content when editing; keep it verbatim-faithful. -->
-> **This file is one chunk of the Genesis bible.** The bible is split across `bible/` and indexed by
-> [`../AGENT_ONBOARDING.md`](../AGENT_ONBOARDING.md). **When asked to "read the bible", read the index AND every
-> chunk it lists, then follow all of it religiously.** This chunk holds: **§9 Roadmap & backlog — shipped-phase as-builts + what is next.**
-> Section numbers (§0–§10) are the ORIGINAL bible sections and are preserved here; the §→chunk map lives in the index.
+> **Part of the Genesis context layer (Phase 47, ADR-077).** Agents load this file **per task** through
+> `genesis-ctx` (pack / adr / lesson / area) or by ranged reads — never whole, and there is no "read the bible"
+> any more (see [`../AGENT_ONBOARDING.md`](../AGENT_ONBOARDING.md)). This file holds: **§9 Roadmap & backlog — shipped-phase as-builts + what is next.**
+> Section numbers (§0–§10) are the original bible sections, kept so old references still resolve.
 
 ---
 
 ## 9. Roadmap & backlog (what's next — context, not an assignment)
 
-### 🟡 SPEC-DRAFTED — Phase 47: Agent Context System (2026-10-20, awaiting build sign-off)
+### ✅ SHIPPED — Phase 47: Agent Context System (2026-10-20)
 
-Replaces "read the bible" with tiered, program-compiled context and five CLI-3 role agents (`genesis-spec`, `genesis-dev`,
-`genesis-review`, `genesis-release`, `genesis-docs`) installed globally from `agent-system/`. Move-only migration with a
-lossless proof (≤ 6 sessions); **bootstrap rule: Phase 47 sessions do not read the bible** — their context is the Phase 47
-spec set. Specs: `specs/phase-47-agent-context-system.md` + `47-01..47-10`; operator guide
-`agent-system/OPERATOR_GUIDE.md`; ADR-077 (Proposed). project-tracker only — no Genesis release.
+"Read the bible" is replaced by tiered, program-compiled context and five CLI-3 role agents (`genesis-spec/dev/review/
+release/docs`) installed globally from `agent-system/`. Spec + as-built: `specs/phase-47-agent-context-system.md`,
+`progress/phase-47-agent-context-system.md`; ADR-077 Accepted; follow-ups `specs/backlog/phase-47-follow-ups.md`;
+operator guide `agent-system/OPERATOR_GUIDE.md`. project-tracker only — no Genesis release. The live pilot is carried
+into Phase 48 (the first phase built end to end with the new agents).
 
 ### Deferred items (pointers)
 

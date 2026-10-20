@@ -79,3 +79,4 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Untagged = not ye
 - ADR-074 [kb-sync,collaboration-hub,parser,runs-worker,appian-integration] (amends 047,063) — KB sync is incremental and package-scoped: list objects modified since this machine's own last sync (`covered_until`) and parse only those.
 - ADR-075 [features-stages,stories-workbench,chat] (amends 042,059,060) — Every spec section/clause carries a hidden `data-cid` that PROGRAM code owns and repairs; stories trace to spec clauses.
 - ADR-076 [features-stages,chat,stories-workbench] (amends 031,045,050) — A locked spec changes only through a change request: chat drafts the CR, program code applies the plan.
+- ADR-077 [release-ci,security] — Agents load L0 + role + a genesis-ctx task pack, never the bulk docs whole; rules are selected by program (tags/areas/paths), never by search; history is archived verbatim; never run with --trust-all-tools.

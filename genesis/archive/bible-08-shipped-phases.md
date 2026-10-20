@@ -880,3 +880,12 @@ auto-fetch source** (2026-08-05); commit/push approved — 16-01/16-02/16-03 + 1
   (`fs_write_root`) → genesis-workflows **v0.6.0** (skills library) → genesis **v0.26.1**; genesis-core **v0.8.2** (sdk-pin bump only).
   Remaining: manual live-acceptance vs. real kiro-cli (auto-activation + `/gam`, headless-undrivable).
 
+<!-- Phase 47-10 (2026-10-20): the Phase 47 SPEC-DRAFTED block, superseded by the SHIPPED line -->
+
+### 🟡 SPEC-DRAFTED — Phase 47: Agent Context System (2026-10-20, awaiting build sign-off)
+
+Replaces "read the bible" with tiered, program-compiled context and five CLI-3 role agents (`genesis-spec`, `genesis-dev`,
+`genesis-review`, `genesis-release`, `genesis-docs`) installed globally from `agent-system/`. Move-only migration with a
+lossless proof (≤ 6 sessions); **bootstrap rule: Phase 47 sessions do not read the bible** — their context is the Phase 47
+spec set. Specs: `specs/phase-47-agent-context-system.md` + `47-01..47-10`; operator guide
+`agent-system/OPERATOR_GUIDE.md`; ADR-077 (Proposed). project-tracker only — no Genesis release.

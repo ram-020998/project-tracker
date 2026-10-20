@@ -1,8 +1,8 @@
 <!-- GENESIS BIBLE — CHUNK 03. DO NOT summarize or drop content when editing; keep it verbatim-faithful. -->
-> **This file is one chunk of the Genesis bible.** The bible is split across `bible/` and indexed by
-> [`../AGENT_ONBOARDING.md`](../AGENT_ONBOARDING.md). **When asked to "read the bible", read the index AND every
-> chunk it lists, then follow all of it religiously.** This chunk holds: **§4 Codebase map — where every module lives across the five repos.**
-> Section numbers (§0–§10) are the ORIGINAL bible sections and are preserved here; the §→chunk map lives in the index.
+> **Part of the Genesis context layer (Phase 47, ADR-077).** Agents load this file **per task** through
+> `genesis-ctx` (pack / adr / lesson / area) or by ranged reads — never whole, and there is no "read the bible"
+> any more (see [`../AGENT_ONBOARDING.md`](../AGENT_ONBOARDING.md)). This file holds: **§4 Codebase map — where every module lives across the five repos.**
+> Section numbers (§0–§10) are the original bible sections, kept so old references still resolve.
 
 ---
 
