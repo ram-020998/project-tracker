@@ -1,0 +1,18 @@
+# context/tags/codemap.toml — per code-map-section sidecar metadata (Phase 47, sub-spec 47-02 §4.3).
+#
+# bible/03-codebase-map.md is NOT edited. A "section" is either:
+#   (a) in the base map (the first fenced block): one 2-space-indented module entry
+#       (e.g. "  db/ ...", "  kb/ ...") plus its continuation lines, under its repo
+#       header line (e.g. "genesis/genesis/"); or
+#   (b) each "# -- ... --" block, up to the next one.
+# A section's key is a slug of its header text plus the repo, e.g.
+#   ["genesis/genesis/  db/"]  or  ["-- Phase 34 -- Design Lane Automation"].
+# Entries are populated in 47-05. 47-02 only creates this file with the schema below.
+#
+# Schema:
+#   ["<section key>"]
+#   areas = [area]   area names from areas.toml (>= 1)
+#
+# Example shape (do not keep as a real entry):
+#   ["genesis/genesis/  chat/"]
+#   areas = ["chat"]

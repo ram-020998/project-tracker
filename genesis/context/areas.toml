@@ -1,0 +1,197 @@
+# context/areas.toml — the area registry (Phase 47, sub-spec 47-02 §3).
+#
+# An "area" is a slice of Genesis that has its own rules. ADRs, lessons and
+# code-map sections (context/tags/*.toml) are tagged with areas; `genesis-ctx pack`
+# (47-03) turns a task's areas into the set of rules and code it loads.
+#
+# This is the STARTING PROPOSAL. The final list, and any re-tagging, is locked with
+# the user in 47-05. 47-02 only fills in paths/keywords from the real repo layout and
+# verifies that every path glob matches at least one file.
+#
+# Schema (47-02 §3):
+#   [area.<name>]      name is [a-z0-9-]+
+#   title    = string  one-line description
+#   paths    = [glob]  globs relative to {{REPOS}} = /Users/ramaswamy.u/repo-gitlab/ramaswamy.u
+#                      (a "tracker:" prefix means relative to project-tracker/genesis/).
+#                      Every non-cross-cutting area has >= 1 path glob; a file may
+#                      belong to several areas.
+#   keywords = [string]  routing hints (propose-tags, search)
+#   skills   = [string]  optional: skills a pack for this area should surface
+#   docs     = [string]  optional: docs a pack for this area should list
+#   always   = true      cross-cutting areas only — included in every pack; no paths
+#
+# The five repos under {{REPOS}}: genesis (app: genesis/genesis + genesis/web),
+# genesis-core, genesis-workflows, kiro-agent-sdk, genesis-appian-parser.
+
+# ───────────────────────────── engine & SDK ─────────────────────────────
+
+[area.core-engine]
+title    = "genesis-core: LangGraph nodes, state, validators, reliability, healing"
+paths    = ["genesis-core/genesis_core/**"]
+keywords = ["node", "graph", "state", "validator", "reliability", "healing", "subgraph", "langgraph", "gate"]
+skills   = ["genesis-backend-dev"]
+
+[area.sdk-acp]
+title    = "kiro-agent-sdk: ACP client/session, tool bridge"
+paths    = ["kiro-agent-sdk/src/**"]
+keywords = ["acp", "sdk", "session", "agent client", "tool bridge", "mcp env"]
+skills   = ["genesis-backend-dev"]
+
+[area.parser]
+title    = "genesis-appian-parser: Appian object/XML parsing"
+paths    = ["genesis-appian-parser/genesis_appian_parser/**"]
+keywords = ["parser", "appian", "xml", "sail parse", "object parse"]
+skills   = ["genesis-backend-dev"]
+
+[area.workflows-library]
+title    = "genesis-workflows: workflows, skills, registries, CI publish gates"
+paths    = ["genesis-workflows/workflows/**", "genesis-workflows/skills/**",
+            "genesis-workflows/ci/**", "genesis-workflows/schemas/**",
+            "genesis-workflows/registry.json", "genesis-workflows/bundles.json",
+            "genesis-workflows/skills-registry.json", "genesis-workflows/mcp-registry.json",
+            "genesis-workflows/cli-registry.json"]
+keywords = ["workflow", "registry", "bundle", "publish gate", "skill package", "langgraph.json"]
+skills   = ["genesis-workflow-authoring"]
+
+# ───────────────────────────── genesis backend ─────────────────────────────
+
+[area.runs-worker]
+title    = "Run manager, subprocess worker, HITL gates, events/SSE, checkpoints, scheduler"
+paths    = ["genesis/genesis/runs/**", "genesis/genesis/runtime/engine.py",
+            "genesis/genesis/runtime/checkpoint.py", "genesis/genesis/runtime/scheduler.py",
+            "genesis/genesis/runtime/schedule_store.py", "genesis/genesis/api/run_routes.py",
+            "genesis/genesis/api/schedules.py"]
+keywords = ["run", "worker", "subprocess", "hitl", "gate", "event", "sse", "checkpoint", "resume", "schedule"]
+skills   = ["genesis-backend-dev"]
+
+[area.db]
+title    = "genesis DB layer and migrations"
+paths    = ["genesis/genesis/db/**"]
+keywords = ["database", "migration", "schema", "sqlite", "runner"]
+skills   = ["genesis-db-migration"]
+
+[area.api]
+title    = "FastAPI /api surface"
+paths    = ["genesis/genesis/api/**"]
+keywords = ["api", "fastapi", "route", "endpoint", "router"]
+skills   = ["genesis-backend-dev"]
+
+[area.chat]
+title    = "Chat, copilot, chat modes, skills-in-chat"
+paths    = ["genesis/genesis/chat/**", "genesis/genesis/skills/**",
+            "genesis/web/src/features/chat/**", "kiro-agent-sdk/src/**"]
+keywords = ["chat", "copilot", "chat mode", "skill", "steering", "session"]
+skills   = ["genesis-backend-dev", "genesis-web-dev"]
+
+[area.kb-sync]
+title    = "Appian KB store, sync, delta sync, business map"
+paths    = ["genesis/genesis/kb/store.py", "genesis/genesis/kb/blob.py",
+            "genesis/genesis/kb/doc_sync.py", "genesis/genesis/services/application_sync.py"]
+keywords = ["kb", "knowledge base", "sync", "delta sync", "business map", "store"]
+skills   = ["genesis-backend-dev"]
+
+[area.documents]
+title    = "Document library, rendering, GWS/document integrations"
+paths    = ["genesis/genesis/kb/documents.py", "genesis/genesis/kb/doc_parsing.py",
+            "genesis/genesis/kb/pdf_render.py", "genesis/genesis/integrations/documents/**",
+            "genesis/genesis/integrations/gws/**", "genesis/genesis/api/documents.py",
+            "genesis/web/src/features/documents/**", "genesis/web/src/features/library/**"]
+keywords = ["document", "library", "gws", "pdf", "spreadsheet", "render", "upload"]
+skills   = ["genesis-backend-dev", "genesis-web-dev"]
+
+[area.features-stages]
+title    = "Feature workspace, spec, UX/TD/breakdown stages, stage finalizers, spec change requests"
+paths    = ["genesis/genesis/kb/features.py", "genesis/genesis/kb/stages.py",
+            "genesis/genesis/kb/spec_clauses.py", "genesis/genesis/kb/spec_changes.py",
+            "genesis/genesis/kb/spec_diff.py", "genesis/genesis/kb/spec_impact.py",
+            "genesis/genesis/kb/cr_apply.py", "genesis/genesis/kb/cr_document.py",
+            "genesis/genesis/kb/cr_plan.py", "genesis/genesis/services/spec_change.py",
+            "genesis/genesis/services/spec_clauses.py", "genesis/genesis/services/stage_artifacts.py",
+            "genesis/genesis/chat/stage_finalizer.py", "genesis/genesis/api/features.py",
+            "genesis/genesis/api/change_requests.py", "genesis/web/src/features/features/**",
+            "genesis/web/src/features/applications/**", "genesis/web/src/features/catalog/**"]
+keywords = ["feature", "spec", "ux", "technical design", "breakdown", "stage", "finalizer", "change request", "cr"]
+skills   = ["genesis-backend-dev", "genesis-web-dev"]
+
+[area.stories-workbench]
+title    = "Stories, boards, design/implementation lanes, story workspace, object wiki"
+paths    = ["genesis/genesis/kb/stories.py", "genesis/genesis/kb/story_stages.py",
+            "genesis/genesis/kb/story_trace.py", "genesis/genesis/kb/boards.py",
+            "genesis/genesis/kb/object_wiki.py", "genesis/genesis/chat/story_design_finalizer.py",
+            "genesis/genesis/chat/story_implementation_finalizer.py",
+            "genesis/web/src/features/workbench/**"]
+keywords = ["story", "board", "lane", "workbench", "object wiki", "design lane", "implementation lane"]
+skills   = ["genesis-backend-dev", "genesis-web-dev"]
+
+[area.collaboration-hub]
+title    = "Collaboration, Hub provider, collab sync"
+paths    = ["genesis/genesis/collab/**", "genesis/genesis/api/collab.py",
+            "genesis/genesis/api/collab_sync.py", "genesis/genesis/runtime/collab_autopull.py",
+            "genesis/web/src/features/collab/**"]
+keywords = ["collab", "collaboration", "hub", "provider", "autopull", "merge"]
+skills   = ["genesis-backend-dev"]
+
+[area.memory]
+title    = "Memory store, embeddings, retrieval, memory jobs"
+paths    = ["genesis/genesis/memory/**", "genesis/genesis/mcp/memory_server.py",
+            "genesis/genesis/runtime/memory_jobs.py", "genesis/web/src/features/memory/**"]
+keywords = ["memory", "embedding", "vector", "retrieval", "consolidation"]
+skills   = ["genesis-backend-dev"]
+
+[area.config-secrets]
+title    = "Settings, secrets, environments, MCP/CLI registries, managed-native"
+paths    = ["genesis/genesis/config/**", "genesis/genesis/runtime/settings.py",
+            "genesis/genesis/mcp/native/**", "genesis/genesis/cli_tools/native/**",
+            "genesis/genesis/api/config_routes.py", "genesis/web/src/features/settings/**"]
+keywords = ["settings", "secret", "environment", "registry", "mcp", "cli", "managed native", "config"]
+skills   = ["genesis-backend-dev", "genesis-web-dev"]
+
+[area.distribution]
+title    = "Install, lockfile, shipping, launcher, update"
+paths    = ["genesis/genesis/dist/**", "genesis/genesis/runtime/launcher.py",
+            "genesis/genesis/runtime/updater.py", "genesis/genesis/cli/install.py"]
+keywords = ["install", "lockfile", "ship", "launcher", "update", "distribution", "catalog"]
+skills   = ["genesis-backend-dev"]
+
+[area.appian-integration]
+title    = "Appian integration: Dev MCP, SAIL CLI, DevOps, write tools"
+paths    = ["genesis/genesis/integrations/sail/**", "genesis/genesis/kb/dev_mcp.py",
+            "genesis/genesis/kb/dev_packages.py", "genesis/genesis/mcp/native/**",
+            "genesis/genesis/cli_tools/native/**", "genesis/genesis/api/native_mcp.py",
+            "genesis/genesis/api/native_cli.py"]
+keywords = ["appian", "dev mcp", "sail", "sail cli", "devops", "write tool", "native"]
+skills   = ["genesis-backend-dev"]
+
+[area.observability-credits]
+title    = "Metrics snapshot, run provenance, credits, logging"
+paths    = ["genesis/genesis/api/metrics.py", "genesis/genesis/runtime/logging.py"]
+keywords = ["metrics", "observability", "credit", "provenance", "logging", "telemetry"]
+skills   = ["genesis-backend-dev"]
+
+# ───────────────────────────── web shell & runs ─────────────────────────────
+
+[area.web-shell]
+title    = "Web app shell, design system, tokens, theming, system pages"
+paths    = ["genesis/web/src/app/**", "genesis/web/src/shared/**",
+            "genesis/web/src/styles/**", "genesis/web/src/features/system/**",
+            "genesis/web/src/features/overview/**"]
+keywords = ["app shell", "layout", "design system", "token", "theme", "ui", "router", "overview"]
+skills   = ["genesis-web-dev"]
+
+[area.web-runs]
+title    = "Runs list, run detail graph, run inspection (web)"
+paths    = ["genesis/web/src/features/runs/**", "genesis/web/src/features/run-detail/**"]
+keywords = ["runs page", "run detail", "graph", "inspection", "timeline"]
+skills   = ["genesis-web-dev"]
+
+# ───────────────────────────── cross-cutting (always loaded) ─────────────────────────────
+
+[area.security]
+title    = "Localhost guardrail, read-only chat, trust, secrets handling"
+always   = true
+keywords = ["security", "localhost", "guardrail", "read-only", "trust", "secret", "allowlist"]
+
+[area.release-ci]
+title    = "Versioning, pins, tags, CI pipelines"
+always   = true
+keywords = ["version", "pin", "tag", "release", "ci", "pipeline", "gitlab-ci"]

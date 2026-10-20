@@ -1,0 +1,18 @@
+# install.conf.example — copy to install.conf and edit.
+#
+# Consumed by agent-system/install.sh / update.sh (built in 47-07). The installer renders
+# the {{TRACKER}} / {{REPOS}} / {{MODEL}} placeholders in the agent/skill/hook templates
+# from these values. Use ABSOLUTE paths. Format: KEY=VALUE, one per line; '#' comments ok.
+#
+# install.conf itself is git-ignored (see agent-system/.gitignore) — it is local to each
+# machine. This .example file is the committed template.
+
+# Absolute path to project-tracker/genesis (source of agents, skills, hooks, genesis-ctx).
+TRACKER=/Users/ramaswamy.u/repo/project-tracker/genesis
+
+# Absolute path to the repos root that area path globs resolve against ({{REPOS}}).
+REPOS=/Users/ramaswamy.u/repo-gitlab/ramaswamy.u
+
+# Optional: pin a model for the installed agents. Leave empty to use your Kiro default
+# (Phase 47 decision Q6 — no model is pinned in the profiles).
+MODEL=

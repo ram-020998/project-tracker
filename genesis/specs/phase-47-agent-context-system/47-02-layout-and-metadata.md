@@ -1,6 +1,6 @@
 # 47-02 — Layout, sidecar metadata, context manifests, L0 composition
 
-> **Status:** 🟡 SPEC-DRAFTED 2026-10-20. Repo: project-tracker. Parent: `specs/phase-47-agent-context-system.md`.
+> **Status:** 🟢 BUILT 2026-10-20 (skeleton). Repo: project-tracker. Parent: `specs/phase-47-agent-context-system.md`.
 > Decisions D1, D2, D7, D9. Built in session S2 (skeleton files) together with 47-03.
 
 ## 1. Goal
@@ -180,3 +180,81 @@ Budget ≤ 15K tokens (`lint` fails above). Live repo state is not in L0: the `S
 areas = []
 docs  = ["tracker:specs/phase-47-agent-context-system.md"]
 ```
+
+## As built
+
+**Session:** S2 (skeleton only; `genesis-ctx` itself is 47-03). **Date:** 2026-10-20. **Bootstrap rule honored**
+(no bible / tracker / decision-log reads; context was the Phase 47 spec set plus the real repo layout).
+
+### Files created (20)
+
+Under `project-tracker/genesis/`:
+
+```
+context/L0-core.md                 placeholder (commented with the §6 composition it must hold; authored 47-05)
+context/areas.toml                 22 areas, paths+keywords filled from the real repo layout (see table below)
+context/tags/adr.toml              header-only; §4.1 schema documented; no entries
+context/tags/lesson.toml           header-only; §4.2 schema documented; no entries
+context/tags/codemap.toml          header-only; §4.3 schema documented; no entries
+context/_generated/README.md       "generated — do not edit" + the files `index` will write
+context/.gitignore                 ignores .packs/
+context/state/.gitkeep             keeps state/ (current.md is 47-05)
+context/eval/.gitkeep              keeps eval/ (golden.toml is 47-09)
+archive/README.md                  "verbatim history, never mandatory; search, don't read whole"
+agent-system/.gitignore            ignores install.conf
+agent-system/install.conf.example  TRACKER / REPOS / MODEL template (MODEL empty per Q6)
+agent-system/agents/.gitkeep
+agent-system/skills/.gitkeep
+agent-system/hooks/.gitkeep
+agent-system/tools/genesis_ctx/.gitkeep
+agent-system/tools/installer/.gitkeep
+agent-system/tests/.gitkeep
+agent-system/migration/.gitkeep
+```
+
+`agent-system/OPERATOR_GUIDE.md` already existed (S1) and was left untouched. No existing document was moved,
+edited or archived (that is 47-04/47-05); the only spec edit is this file's Status line and this section.
+
+### Areas — glob-match counts
+
+Globs resolve against `{{REPOS}}` = `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u`. Counts are matching **files**,
+excluding `__pycache__`, `*.pyc`, `.DS_Store`, `*.egg-info`. **Every non-cross-cutting glob matches ≥ 1 file
+(0 zero-match globs).** Verified with `tomllib` + `pathlib.Path(repos).glob(pattern)`.
+
+| Area | files | Area | files |
+|---|---:|---|---:|
+| core-engine | 30 | documents | 31 |
+| sdk-acp | 4 | features-stages | 75 |
+| parser | 58 | stories-workbench | 29 |
+| workflows-library | 98 | collaboration-hub | 23 |
+| runs-worker | 15 | memory | 21 |
+| db | 28 | config-secrets | 44 |
+| api | 28 | distribution | 12 |
+| chat | 32 | appian-integration | 14 |
+| kb-sync | 4 | observability-credits | 2 |
+| web-shell | 48 | web-runs | 35 |
+| security | cross-cutting (`always=true`, no paths) | release-ci | cross-cutting (`always=true`, no paths) |
+
+22 areas total: the 20 from §3 + the 2 cross-cutting (`security`, `release-ci`). All four TOML files parse with
+`tomllib`.
+
+### Deviations from the spec
+
+1. **`.gitkeep` sentinels** in the otherwise-empty directories (`context/state/`, `context/eval/`, and the six
+   `agent-system/` subdirs). Git does not track empty directories; the sentinels make the skeleton tree survive a
+   clone. Each names what lands there and in which sub-spec. Not mentioned in §2 but required to honor it.
+2. **Area path precision beyond the §3 one-liners.** §3 gives each area as a prose phrase ("run manager, subprocess
+   worker, HITL gates, …"); §3 says the list is "the starting proposal, finalized in 47-05". I translated each phrase
+   into concrete globs against the real tree. Judgment calls worth a second look in 47-05:
+   - `chat` keeps `kiro-agent-sdk/src/**` exactly as the §3 example shows, so it overlaps `sdk-acp` (allowed — "a
+     file may belong to several areas").
+   - `observability-credits` maps only to `api/metrics.py` + `runtime/logging.py` (2 files): there is no dedicated
+     credits/observability package in the tree today; run-provenance/credit data lives inside `runs/` and
+     `api/metrics.py`. Flagged for 47-05.
+   - `runs-worker`, `config-secrets`, `distribution`, `appian-integration` reach into specific `runtime/*.py`,
+     `mcp/native/**` and `cli_tools/native/**` files rather than whole packages, to avoid swallowing unrelated code.
+3. **`web-runs` uses the real directory name `run-detail`** (`features/run-detail/**`), which is correct for the
+   current tree.
+
+No spec item failed against the real repos; nothing required stopping for a decision. `genesis-ctx` validation of
+these shapes is exercised by the 47-03 tests.

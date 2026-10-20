@@ -1,0 +1,35 @@
+# context/tags/adr.toml — per-ADR sidecar metadata (Phase 47, sub-spec 47-02 §4.1).
+#
+# One table per ADR. Nothing in reference/decision-log.md or bible/04 is edited; this
+# file is the sidecar that `genesis-ctx` (47-03) reads to route and load ADRs.
+# Entries are populated in 47-05 (from `genesis-ctx propose-tags`, reviewed with the user).
+# 47-02 only creates this file with the schema documented here — no entries yet.
+#
+# Schema:
+#   [ADR-NNN]
+#   title       = string
+#   status      = "proposed" | "accepted" | "superseded" | "amended"
+#   areas       = [area]     area names from areas.toml (>= 1)
+#   paths       = [glob]     optional extra globs beyond the areas'
+#   amends      = [ADR-ID]   ADRs this one changes (must be symmetric with amended_by — lint)
+#   amended_by  = [ADR-ID]   ADRs that change this one (symmetric with amends — lint)
+#   superseded_by = ADR-ID   "" if none; a "superseded" ADR must set this (lint)
+#   rule        = string     <= 220 chars, one imperative sentence; the L0 one-liner
+#   reviewed_fp = string     sha256[:16] of the ADR full text when `rule` was last reviewed
+#
+# Source anchors are COMPUTED, not stored (47-02 §4.1):
+#   - decision-log section: `^## ADR-NNN\b` up to the next `^## `
+#   - bible/04 bullets: top-level bullets whose bold lead contains the id
+# Loading an ADR loads its whole amendment chain (both directions).
+#
+# Example shape (do not keep as a real entry):
+#   [ADR-031]
+#   title       = "Chat is a read-only assistant"
+#   status      = "accepted"
+#   areas       = ["chat", "security"]
+#   paths       = []
+#   amends      = []
+#   amended_by  = ["ADR-033", "ADR-034", "ADR-045"]
+#   superseded_by = ""
+#   rule        = "Chat never orchestrates or mutates; read-only @server/tool allowlist; file writes only in the per-session sandbox."
+#   reviewed_fp = "3f9a0c1e2b7d4a65"

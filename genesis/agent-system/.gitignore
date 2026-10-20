@@ -1,0 +1,3 @@
+# Local, per-machine installer config (absolute paths / optional model). Not source.
+# The committed template is install.conf.example.
+install.conf

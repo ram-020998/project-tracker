@@ -1,0 +1,22 @@
+# context/tags/lesson.toml — per-lesson sidecar metadata (Phase 47, sub-spec 47-02 §4.2).
+#
+# One table per hard-won lesson in bible/06. Each lesson bullet carries an invisible
+# marker immediately after the list dash, e.g.
+#   - <!-- L-001 --> **ACP MCP env MUST be a list ...
+# IDs are assigned once, in document order, by `genesis-ctx mark` (47-04); never reused;
+# new lessons get the next id via `genesis-ctx add lesson` (47-08).
+# Entries are populated in 47-05. 47-02 only creates this file with the schema below.
+#
+# Schema:
+#   [L-NNN]
+#   areas       = [area]   area names from areas.toml (>= 1)
+#   phase       = string   phase the lesson came from (e.g. "pre-16", "34")
+#   rule        = string   "" = use the bullet's bold lead sentence verbatim; else <= 220 chars
+#   reviewed_fp = string   sha256[:16] of the lesson bullet when `rule` was last reviewed
+#
+# Example shape (do not keep as a real entry):
+#   [L-001]
+#   areas       = ["sdk-acp", "config-secrets"]
+#   phase       = "pre-16"
+#   rule        = ""
+#   reviewed_fp = "a1b2c3d4e5f60718"
