@@ -30,15 +30,22 @@ Defaults · Risks · ADR summaries. Keep history out; link to `progress/`.
 A `## Context manifest` heading followed by a fenced ` ```toml ` block with these keys (all optional arrays of strings):
 
 - `areas` — area names from `context/areas.toml` (`{{GENESIS_HOME}}/bin/genesis-ctx area <name>`).
-- `adrs` — extra ADRs beyond the areas' tags (e.g. `"ADR-0NN"`).
-- `lessons` — extra lessons (e.g. `"L-0NN"`).
+- `adrs` — the ADR ids this task must honour **in full**. **MANDATORY, not just "extras":** run
+  `{{GENESIS_HOME}}/bin/genesis-ctx area <a>` for every area above and copy each applicable ADR id here.
+  The pack renders only these (plus path-glob hits and their amendment chains) as **full text**; an ADR
+  that reaches the pack only through its area gets a one-line *Also applies* pointer, not its decision log.
+- `lessons` — same rule: list every lesson id the task must honour in full (from `genesis-ctx area <a>`).
 - `docs` — docs to read next (`"tracker:specs/.../NN-02-foo.md"`, `"reference/foo.md"`).
-- `code` — path globs the task touches (drive path→area routing; e.g. `"genesis/genesis/foo/**"`).
+- `code` — path globs the task touches (drive path→area routing; e.g. `"genesis/genesis/foo/**"`). A bare
+  directory routes as `<dir>/**`; prefer the explicit glob.
 - `upstream` — sub-spec ids whose **As-built** must be read first (e.g. `"NN-02"`).
 
-`{{GENESIS_HOME}}/bin/genesis-ctx pack <id>` = manifest ∪ area defaults ∪ path-derived areas ∪ amendment closure. Two routes
-must both miss before a rule is lost; the review `check` on the diff is the third. Keep packs under budget by
-naming tight `areas`/`adrs`, not whole catalogs.
+`{{GENESIS_HOME}}/bin/genesis-ctx pack <id>` = manifest ∪ area defaults ∪ path-derived areas ∪ amendment closure.
+**Full text** is reserved for the manifest's `adrs`/`lessons`, path-glob hits and their chains; everything an area
+adds is a one-line *Also applies* pointer you load on demand (`genesis-ctx adr|lesson <id>`). So list the ids you
+need in full explicitly — area membership alone gives only the pointer. Recall (every cited rule ∈ full ∪ listed)
+stays 100 %; two routes must both miss before a rule is lost, and the review `check` on the diff is the third.
+Keep packs under budget by naming tight `areas`/`adrs`, not whole catalogs.
 
 ## Q&A protocol
 Ask ONE question at a time. Record each answer immediately in findings §Decisions (D1, D2 …) with the reason.

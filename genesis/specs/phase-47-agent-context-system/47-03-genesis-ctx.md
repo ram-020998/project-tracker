@@ -89,23 +89,29 @@ Pack layout (Markdown):
 
 1. **Header** — task id, areas (and *why* each: manifest / path `X` / always-on), token estimate, budget verdict.
 2. **Inclusion table** — every ADR / lesson / section with the reason it is included (area, path, manifest, chain).
-3. **ADRs — full text** (decision-log section + `bible/04` bullet(s)), sorted by id. Each distinct `bible/04` bullet
+3. **ADRs — full text** (decision-log section + `bible/04` bullet(s)), sorted by id, **for direct hits only**:
+   the manifest's `adrs`, path-glob hits, and their amendment chains (47-09 fix M3b). Each distinct `bible/04` bullet
    prints **once per pack**: a bullet that names several selected ids is shown under the first id, with a one-line
    "shown once under ADR-NNN" pointer under the others (combined bullets like `ADR-002/004/020` no longer repeat). A
    per-ADR tag `b04 = "skip"` (47-02 §4.1) additionally drops that ADR's bullet when its decision-log already carries the
    content; a shared bullet is dropped only when **every** id it covers is `skip`. The excluded text is never a unique
    rule — the decision-log section and the L0 one-liner remain.
-4. **Lessons — full text**, sorted by id.
-5. **Code map — the matching sections** verbatim.
-6. **Read next** — the docs and code paths (paths only, with reasons): the agent opens them itself, in ranges.
+4. **Lessons — full text**, sorted by id, for the manifest's `lessons` only.
+5. **Also applies** — every ADR/lesson that reached the pack only through an area, one line each (id + rule) under
+   "load with `genesis-ctx adr|lesson <id>` before changing related code" (one-hop progressive disclosure, 47-09 M3b).
+   Recall still counts full ∪ listed (47-09 §3).
+6. **Code map — the matching sections** verbatim.
+7. **Read next** — the docs and code paths (paths only, with reasons): the agent opens them itself, in ranges.
 
 **Closure rule (amended S4, 2026-10-20 — 47-01 §5.6):** `pack` and `check` follow `amended_by` / `superseded_by`
 transitively from every loaded ADR, but `amends` only one hop and only from the seeds, so a chain-added ADR never pulls
 in what *it* amends (ADR-026 → 063 no longer reaches 047). `genesis-ctx adr <id>` still prints the whole chain in both
 directions.
 
-Budget: warn at 60K tokens (chars ÷ 4), fail at 120K with a hint to narrow `areas` (raised from 40K / 80K in S4,
-47-01 §5.6). Excluded items remain visible in L0 as one-liners, so narrowing never hides a rule.
+Budget: warn at 60K tokens, fail at 120K with a hint to narrow `areas` (raised from 40K / 80K in S4, 47-01 §5.6). The
+estimator is ≈ chars ÷ 2.5, calibrated to the real tokenizer (47-09 fix M3a; was chars ÷ 4, which under-counted packs
+~1.6×). Excluded items remain visible in L0 as one-liners and in the pack's *Also applies* table, so narrowing never
+hides a rule.
 
 ## 5. Lint
 

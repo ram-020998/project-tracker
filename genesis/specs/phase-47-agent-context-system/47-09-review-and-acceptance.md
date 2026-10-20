@@ -32,10 +32,13 @@ each; cite the ADR/lesson ids; use genesis-ctx as you normally would." A script 
 
 ## 3. Recall replay on Phase 46 — "the pack would have included it"
 
-For each of 46-02 … 46-09: write the context manifest the spec agent would have written (areas + code paths from the
-sub-spec's own text), run `genesis-ctx pack`, and compare the pack's ADR/lesson set with every `ADR-NNN` cited in that
-sub-spec, its As-built and the 46-10 review. **Pass: 100 % recall** (precision reported, not gated). A miss → fix the
-tags/areas, never the expected set.
+For each of 46-02 … 46-09: write the context manifest the spec agent would have written (areas + code paths — and,
+from phase 48 on, the applicable `adrs`/`lessons` listed explicitly per the `genesis-spec-authoring` skill), run
+`genesis-ctx pack`, and compare the pack's ADR/lesson set with every `ADR-NNN` cited in that sub-spec, its As-built and
+the 46-10 review. The pack set = the **full-text** rules ∪ the one-line **Also applies** pointers (47-09 fix M3b).
+**Pass: recall = every cited rule ∈ full ∪ listed = 100 %** (precision reported, not gated). Report **full-text recall**
+(cited ∈ full text) separately, not gated — the one-hop pointer means area-routed rules are never missed. A miss → fix
+the tags/areas, never the expected set.
 
 ## 4. Context measurement
 
@@ -43,7 +46,9 @@ From the root workspace: fresh `genesis-dev`, `/context show` → record the % b
 46-sized sub-spec. Also record a **baseline**: a plain `kiro-cli --v3` session (no agent) with the same prompt. The
 **Genesis share** = session total − baseline. **Pass (gated on the Genesis share): ≤ 5 % before the pack, ≤ 10 %
 after.** Same for `genesis-spec` at the start of a spec session (share ≤ 5 %). Session totals are recorded for
-information only, not gated (47-01 §5.7).
+information only, not gated (47-01 §5.7). The pack budget estimator is calibrated to ≈ 2.5 chars/token (47-09 fix M3a);
+with full text reserved for direct hits (M3b), the 46-05/46-09/46-06 replay packs are ~26K/36K/39K real tokens, so the
+after-pack share lands under the 10 % bar.
 
 ## 5. Live pilot
 

@@ -190,8 +190,8 @@ Every sub-spec carries this section (the `genesis-spec-authoring` skill writes i
 
 ```toml
 areas    = ["features-stages", "web-shell"]
-adrs     = ["ADR-075"]             # extra, beyond what the areas imply
-lessons  = ["L-083"]
+adrs     = ["ADR-075"]             # MANDATORY: every applicable ADR id (from `genesis-ctx area <a>`) — these get FULL TEXT
+lessons  = ["L-083"]               # same: the lessons to load in full
 code     = ["genesis/genesis/kb/spec_clauses.py", "genesis/web/src/features/features/**"]
 docs     = ["tracker:specs/phase-46-spec-change-requests/46-02-clause-model.md"]
 upstream = ["48-02"]               # sub-specs whose As-built this one depends on
@@ -199,7 +199,10 @@ upstream = ["48-02"]               # sub-specs whose As-built this one depends o
 ````
 
 Umbrella specs carry a manifest too (the union the phase is expected to touch). Paths in `code` also contribute areas
-through `areas.toml` globs — so a wrong or missing `areas` entry is caught by the paths.
+through `areas.toml` globs — so a wrong or missing `areas` entry is caught by the paths. The pack renders **full text**
+only for the manifest's `adrs`/`lessons`, path-glob hits and their amendment chains; a rule reached only through its
+area appears as a one-line *Also applies* pointer (`genesis-ctx adr|lesson <id>`), so list the ids you need in full
+explicitly (47-09 §3; genesis-spec-authoring skill).
 
 ## 6. L0 composition (every agent, `file://` resources, in this order)
 
@@ -214,7 +217,8 @@ through `areas.toml` globs — so a wrong or missing `areas` entry is caught by 
 6. `context/_generated/area-catalog.md` — one line per area.
 7. `context/state/current.md`.
 
-Budget ≤ 15K tokens (`lint` fails above). Live repo state is not in L0: the `SessionStart` hook prints
+Budget ≤ 24K tokens (`lint` fails above; the estimator is ≈ chars ÷ 2.5, calibrated to the real tokenizer — 47-09 fix
+M3a, raised from 15K at the old chars ÷ 4). Live repo state is not in L0: the `SessionStart` hook prints
 `genesis-ctx status --brief` into the context.
 
 ## 7. Acceptance
