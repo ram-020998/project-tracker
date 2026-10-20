@@ -16,3 +16,38 @@ include_start = false
 end     = "EOF"
 pointer = "each"
 note    = "From Phase 47 on: ≤ 5 lines per phase; detail lives in `progress/`."
+
+# Step 2 — bible/08 shipped/closed ### blocks (47-04 §4). Stops amended with the user (S3): the real closing line is
+# bold (`**Do not start backlog…`), and the Phase 16 CLOSED block is followed by a `---` + a history/backlog list.
+[[step]]
+n        = 2
+name     = "Shipped phases"
+source   = "bible/08-roadmap-and-backlog.md"
+dest     = "archive/bible-08-shipped-phases.md"
+heading  = '^### '
+contains = ["SHIPPED", "CLOSED"]
+stop     = ['^### ', '^## ', '^---\s*$', '^\*{0,2}Do not start backlog']
+pointer  = "each"
+
+# Step 2 (b) — user-approved deviation (beyond ### blocks): the Shipped / Phase 13 / Phase 14 history bullets after
+# the `---`. "Backlog (specs/backlog/)", "Open follow-ups" and the closing paragraph stay.
+[[step]]
+n       = 2
+name    = "Shipped phases"
+source  = "bible/08-roadmap-and-backlog.md"
+dest    = "archive/bible-08-shipped-phases.md"
+start   = '^- \*\*Shipped:\*\* Phases 1–6'
+include_start = true
+end     = '^- \*\*Backlog \(`specs/backlog/`\):\*\*'
+pointer = "each"
+
+# Step 3 — AGENT_ONBOARDING.md historical note + the ⭐ SHIPPED Phase 27–30 banner sections.
+[[step]]
+n       = 3
+name    = "Onboarding banners"
+source  = "AGENT_ONBOARDING.md"
+dest    = "archive/onboarding-banners.md"
+start   = '^> \*\*Note:\*\* the Phase 26–30 blocks below are kept as the historical release banners'
+include_start = true
+end     = '^## 📚 The bible manifest'
+pointer = "each"

@@ -1,0 +1,882 @@
+# Shipped phases — archived verbatim
+
+> Moved verbatim from `bible/08-roadmap-and-backlog.md` in Phase 47-04. Never mandatory: search with `genesis-ctx search <term> --archive`; don't read whole.
+
+<!-- archived from bible/08-roadmap-and-backlog.md L19–L29, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED — Phase 46: Spec Change Requests & Story Traceability (heading was "BUILDING", before that "SPEC-DRAFTED — awaiting build sign-off")
+
+> **Status:** ✅ **SHIPPED 2026-10-15 — genesis v0.77.0 → genesis-workflows v0.22.0 (+ the Genesis Hub contract addition, live-validated 41/41); CI green — genesis #7087827 (master) + #7087831 (v0.77.0 tag), genesis-workflows #7087975 + #7087976 (v0.22.0); ADR-075/076 Accepted; m0024 → DB v24**. **PHASE 46 COMPLETE — no active phase.** Spec sections and clauses carry hidden, program-maintained `data-cid` IDs (repaired after every chat turn); the breakdown (`feature-breakdown-analysis` 0.3.0) records which clauses each story implements (`spec_refs` with fingerprints) and the spec preview shows per-clause story coverage. Once the breakdown is complete a spec changes only through a numbered **change request** run from the spec's own chat: **Initiate change request** → the spec is *under change* (every downstream run keeps reading the CR's base revision) → **Analyze impact** (a program diff → an impact input; the agent writes `plan.json`; a live *CR-n Impact Analysis* document) → refine in the chat → **Apply changes** (one transaction: stories updated / created / removed with change history and answers, spec revision N+1; Design-Review-or-later stories change only when the user asked and ticks a confirmation) or **Discard** (the spec restored byte-for-byte). Stories gain answers to their open questions, spec references, a change history, a *re-run design* flag and a board icon; UX Design / Technical Design / the breakdown show *spec changed (CR-n)* with Mark as reviewed; the story workflows (`story-design-analysis` 0.3.1, `story-implementation` 0.1.1) receive answers, open questions and spec clauses; everything shared syncs through the Genesis Hub (story trace arrays, CR records + frozen documents, a conflict merge, a *Spec under change by* marker, a read-only CR list for teammates). Gates at release: genesis pytest **1105** + ruff clean; web tsc + eslint (0 errors) + vitest **332** (jest-axe) + build committed; genesis-workflows validate_library **13** + pytest **256** (the backlog-renderer parity test runs against genesis v0.77.0). Whole-phase independent review SHIP (9/9 invariants). Live acceptance on merge-assist-dev (fleet `main` + `userb`, driven with Playwright): 46-10 §3 steps 1–12 ✅; step 13 (backlog-mode CR) skipped by the user's decision (hermetic tests cover it). The acceptance found and fixed one bug (a pull re-applying this machine's own published record flipped an under-change spec back to completed). Follow-ups: `specs/backlog/phase-46-follow-ups.md`.
+
+> **Build progress:** go-ahead given 2026-10-14. **46-02 clause model ✅ built** (genesis `196e78d`, local; review SHIP). **46-03 story↔spec links ✅ built** (genesis `0d8622e` + genesis-workflows `da0bb91`, local; m0024 → DB v24; review SHIP). **46-04 CR lifecycle ✅ built** (genesis `b8a9fc8`, local; review SHIP). **46-05 impact analysis ✅ built** (genesis `297fd2b`, local; review SHIP after fixes; build decisions in 46-05 §11). **46-06 apply ✅ built** (genesis `1b31489` + genesis-workflows `7d8e92d`, local; review SHIP; build decisions in 46-06 §10). **46-08 story answers / history / badges ✅ built** (genesis `e0d0e3e` + genesis-workflows `e20d66e`, local; review SHIP; build decisions in 46-08 §9). **46-07 web experience ✅ built** (genesis `a5cd09a`, local; review NEEDS_FIXES → SHIP; build decisions in 46-07 §14). **46-09 genesis side ✅ built** (genesis `d4c39b4`, local; review SHIP; build decisions in 46-09 §11); the Hub addition is live-validated 41/41 (Appian agent, two Designer edits by the user). **46-09 ✅.** Next 46-10. Ledger + as-built: `progress/phase-46-spec-change-requests.md`. Code stays local until the 46-11 release.
+
+> **Status at spec time (superseded):** 🟡 **SPEC-DRAFTED 2026-10-14 — no code changed; build begins only after the user's go-ahead.** Spec: `specs/phase-46-spec-change-requests.md` (+ `46-01..46-11`; findings with the research and every decision: `46-01-findings.md`). **New ADRs (Proposed):** ADR-075 (spec clause model + story↔spec traceability) + ADR-076 (spec change requests). Repos: genesis (m0024 → DB v24; v0.77.0) → genesis-workflows (v0.22.0: `feature-breakdown-analysis` 0.3.0 `clauseRefs`, story design/implementation prompt additions; the planned `spec-story-linking` backfill workflow was dropped the same day — existing stories are left as they are) + additive Genesis Hub fields (built by the separate Appian agent).
+>
+> **What.** Spec sections/clauses get hidden program-maintained `data-cid` IDs (repaired after every chat turn); the breakdown records which clauses each story implements (`spec_refs` with fingerprints); the spec preview shows per-clause story coverage. Once the breakdown is complete, a spec changes only through a numbered **change request** driven from the spec's existing chat: **Initiate change request** (spec → *Under change*, CR-n divider in the chat) → edit in chat → **Analyze impact** (program diff + linked stories → the agent writes a structured plan → Genesis renders the **"CR-n Impact Analysis"** document) → refine in chat → **Apply changes** (one transaction: stories updated/created/removed, change history, new spec revision, spec *Completed*) or **Discard change request**. Stories in Design Review or later are never touched unless the user explicitly asks. While a CR is open, downstream runs read the last completed revision. Backlog mode updates the breakdown when stories aren't finalized. Story questions get answers; UX/TD show "spec changed (CR-n)".
+>
+> **Locked with the user 2026-10-14** (three rounds — Option B; the chat-driven CR flow; button names Analyze impact / Apply changes; straight to Completed; Discard; backlog mode; one chat per spec; lane rule; no raise-from-story; UX/TD badges; Hub fields + answers; one impact-analysis document per CR). Existing stories are left as they are — no backfill; only breakdowns produced after the release are traceable (legacy features keep Reopen). Defaults umbrella §13 Q1–Q5 ✅ confirmed by the user 2026-10-14 (all as written) — was "still to confirm at build sign-off".
+
+<!-- archived from bible/08-roadmap-and-backlog.md L31–L32, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED — Genesis Hub read-only Appian site (Appian-side only, 2026-10-14)
+A polished, strictly read-only Appian site over the Genesis Hub app (`/suite/sites/genesis-hub`, GH Users): Home, Applications, Features, Board, Stories, Object Wiki, Team + Feature/Story/Wiki Page record views. Built in merge-assist-dev with Dev MCP — no Genesis repo change, no tag. Spec, UUIDs and evidence: `specs/appian-env/` (start at `AGENT_ONBOARDING.md`).
+
+<!-- archived from bible/08-roadmap-and-backlog.md L34–L38, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED — Phase 45: Incremental Delta Sync
+
+> **Status:** ✅ **SHIPPED 2026-10-13 — genesis-appian-parser v0.3.0 → genesis v0.76.0 → genesis-workflows v0.21.0; CI green — parser #7059369, genesis #7059384 (master) + #7059385 (v0.76.0 tag: genesis + frontend + clean-install), genesis-workflows #7059427 + #7059428 (v0.21.0). PHASE 45 COMPLETE; ADR-073/074 Accepted; live-accepted on merge-assist-dev (8/8 steps, 45-09 §5).** Built sub-phase by sub-phase (45-02..45-09, each independently reviewed = SHIP) — as-built in `progress/phase-45-incremental-delta-sync.md`; live findings F1 (live Hub has no blob change rows → KB-version poll), F2 (Decision versionKey hash → parser fix), F3 (RU Sandbox untracked), F4 (incremental build slower than a full export → `specs/backlog/incremental-sync-performance.md`). Multi-repo: genesis-appian-parser v0.3.0 → genesis (m0023, DB → v23) → genesis-workflows; no Hub change. Spec: `specs/phase-45-incremental-delta-sync.md` (+ `45-01..45-10`, findings `45-01-findings.md`). **New ADRs (Accepted 2026-10-13):** ADR-073 (environment package management — the only non-design-object write, Genesis code only, never agents; delete guard on `genesis-delta-*`) + ADR-074 (incremental, package-scoped KB sync). Backlog spin-off: `specs/backlog/implementation-packages.md`.
+>
+> Dev MCP **26.6.110** adds `listObjects` + package tools, making the Phase-16-deferred true incremental sync possible: list objects modified since the last sync → a temporary `genesis-delta-*` package of the changed objects + all entry-point roots → Deployment REST export → KB-aware parse (references resolved against the KB) → an incremental KB merge (no removals; bundles rebuilt; derived fields updated in place) → publish a snapshot built from the KB to the Hub. Deletions are left to a full sync, which runs automatically when the last full sync is ≥ 7 days old or the change set exceeds 500 objects / 25%. One global schedule configurable in Settings → General (every N hours in a window or fixed times; default every 4 h 08:00–20:00 IST weekdays, enabled); with collaboration on, one designated machine runs it and teammates auto-pull the KB. Refresh = delta; a separate Full sync action. **Evidence:** a live trial on merge-assist-dev passed end to end (22 changed objects → 0.11 MB package, export 8.9 s, package deleted); today's merge would shrink the KB 2,763 → 41 objects on a partial package; KB-aware parse is lossless (edges 2,605/2,605, bundles 202/202). Locked with the user 2026-10-12; built + live-accepted + released 2026-10-13 (as-built: `progress/phase-45-incremental-delta-sync.md`).
+
+<!-- archived from bible/08-roadmap-and-backlog.md L40–L44, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED — Phase 44: Workbench, SDLC & Workspace Fixes (12-issue bundle)
+
+> **Status:** ✅ **SHIPPED 2026-09-25 — genesis v0.75.0, CI green. PHASE 44 COMPLETE.** genesis-only (web + backend); **one migration** (`m0022`, `current_version` 21 → 22) for the story-identifier sequence (fix 3); every other fix is code-only. **No Genesis Hub change.** Spec: `specs/phase-44-fixes-bundle.md`; as-built `progress/phase-44-fixes-bundle.md`. **ADR-072 (Accepted)** — global human-readable story identifier. Released genesis **v0.75.0** (tag `v0.75.0`, master `19b733fe`), CI green; independently reviewed = SHIP. Two live fixes folded in from fleet testing (the paginated-`/runs` workflow-detail crash via `catalogApi.runsFor`; `appian-dev-write` added to the catalog internal-MCP filter). Gates: genesis pytest **851**; web **vitest 288**.
+>
+> Twelve live-reported defects bundled into one genesis-only fix phase: **(1)** move the Features tab next to Overview on the app detail; **(2)** a delete-feature control (backend `DELETE /features/{id}` + `useDeleteFeature` already exist — UI only); **(3)** meaningful running story identifiers **`GNS_000001`** — a global monotonic sequence (`kb_sequences`, m0022) allocated at Finalize + manual-create, stored in the already-synced `kb_stories.key` (ADR-072; no Hub change; existing stories left as-is); **(4)** publish **system/finalizer** card lane moves to the Hub (today only manual frontend moves publish — the finalizers `LifecycleService.transition` locally but never call `collab.publish_board_move`); **(5)** the design card not advancing to Design Review — **same root cause as (4)**: the unpublished `design→design-review` move is reverted by the always-on auto-pull re-mirroring the Hub's stale status (collab-enabled only) → fixed by (4)'s publish; **(6)** real-time **SSE streaming** in the run node "View Details" (a running turn's `fold_iterations` `seq_end` is frozen at the prompt seq → the conversation slice hides in-progress events; + hardcoded `live={false}` + poll-only) → extend the running turn's seq_end + tail the run SSE scoped to the open node; **(7)** the chat page shows feature/story stage chats — `list_sessions` only excludes `feature_spec`; exclude all stage modes (ux_design/technical_design/feature_breakdown/story_design) so only read_only+copilot show; **(8)** runs page count stuck at 100 + no pagination — `RunStore.list` hard-caps 100; add **server-side pagination + filters** (20/page, `{runs,total}`); **(9)** catalog shows internal MCPs (`genesis-kb`/`appian-dev`…) as unmet prereqs disabling Launch — filter the internal/managed MCP set out of `required_mcp` in the **backend** `/catalog`; **(10)** remove the "Linked apps" column from the Documents grid; **(11)** move the gws + sail connector banners from the top of Settings→CLI into each CLI's detail (shown only when that CLI is selected); **(12)** make Settings **General** the first + default tab. Build order 44-01 (UI layout: 1/2/10/11/12) → 44-02 (chat filter) → 44-03 (catalog filter) → 44-04 (story ids + m0022) → 44-05 (workbench publish: 4+5) → 44-06 (runs pagination) → 44-07 (real-time node view) → 44-08 review+release (genesis-only minor, fresh DB → v22). Locked with the user 2026-09-25 (see the spec §2).
+
+<!-- archived from bible/08-roadmap-and-backlog.md L46–L56, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED — Phase 43: The Unified Story Workspace
+
+> **Status:** ✅ **SHIPPED 2026-09-24 — genesis v0.74.0, CI green. PHASE 43 COMPLETE.** genesis-only (web + a thin, board-independent read endpoint); **no migration** (DB stays v21). **ADR-071 Accepted.** Specs: umbrella `specs/phase-43-unified-story-workspace.md` + `phase-43-unified-story-workspace/43-01..43-05`; as-built `progress/phase-43-unified-story-workspace.md`. Gates: genesis pytest **844**; web **vitest 286** + build. Amends the *presentation* of ADR-060/061/062/068 (their data/artifacts unchanged).
+>
+> **Why.** Opening a story today gives a **different screen depending on where you click and the card's lane** — the feature `StoryDetailPage` (details, no documents), the board `BoardCardDrawer` (details, no documents), or the lane-routed `StoryCardPage` → `StoryDesignWorkspace` (design chat) | `ImplementationReviewWorkspace` (implementation report/rollback/objects). Three disjoint surfaces, each showing a slice, chosen by `BoardPage.openCardView` lane branching; there is no single place to see everything about a story, and the look-and-feel changes as the card advances.
+>
+> **What.** ONE canonical **Story Workspace** page — `/applications/:appUuid/stories/:storyId` — reached from **every** entry point (feature Stories tab, every board lane, legacy-route redirects), with **tabs**: **Overview** (details/AC/open-questions + inline Edit/Delete, always) · **Design** (the design doc **read-only** + an **"Edit / chat"** button opening the existing design chat **in a new browser tab**, enabled only in Design/Design-Review; read-only afterward) · **Implementation** (the implementation report + objects-modified table + rollback document, read-only). Tabs render **only** when their artifacts exist; the page **lands on the stage-relevant tab**. A **single documents-viewer chrome** gives each document a type label (Design document / Implementation report / Objects modified / Rollback document) and dispatches to the existing renderers (themed HTML / sandboxed iframe / `MarkdownView` / table) — the one net-new component. A **consolidated, board-independent read endpoint** (`…/stories/{id}/workspace`, reading `StoryStageStore.get_for_story` directly) feeds the page, so a feature-side story **not on a board** still resolves (Overview only) and documents "light up" once it has been through the board. The board **To-Do drawer + the lane-based routing split are removed**; `StoryDetailPage`/`StoryCardPage` become redirects; the design chat workspace stays as the new-tab target.
+>
+> **Locked with the user (2026-09-24, Q1–Q11):** single canonical route; always the same page (drawer removed); tabs + a stage-relevant default tab; editing from this page; the design "Edit / chat" opens the chat in a **new browser tab**; the design is read-only after implementation; the four-document set is sufficient; converge on one doc-viewer chrome; reachable for a not-yet-on-a-board story (Overview only); **consolidated read path + UI only — no migration**; **genesis-only**.
+>
+> **Sub-phases:** 43-01 consolidated read path (board-independent endpoint + relax the design/report reads, drop the Q16 lane gate) → 43-02 the Story Workspace shell + Overview + routing/redirects + remove the drawer → 43-03 the documents-viewer chrome + Design & Implementation tabs + default-tab logic → 43-04 review & hardening → 43-05 release (genesis vX.Y.0). **No build until the user says go.** (The "few issue fixes" the user flagged for this iteration are a **later phase**.)
+
+<!-- archived from bible/08-roadmap-and-backlog.md L58–L72, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED — Phase 42: Code Implementation (the Workbench Implementation lane — Genesis's first write-capable stage)
+
+> **Status:** ✅ **SHIPPED 2026-09-24 — Phase 42 COMPLETE.** genesis-core **v0.9.8** → genesis **v0.73.0** → genesis-workflows **v0.20.0** (ADR-019 order), CI green; the Appian Hub `GH Object Wiki Page`/`Entry` record types built + live-validated (additive to ADR-064). **ADR-068/069/070 → Accepted.** All 9 sub-phases shipped — 42-02 the `appian-dev-write` write MCP (55 create/update tools, ZERO delete*) · 42-03 genesis-core `kiro_node(skills=…)` · 42-04 the `story-implementation` workflow (no-delete triple-guard; fail-safe reverify gate; attach_healing; off-loop wiki persist) · 42-05 the backend (m0021 `current_version`→21 + `ObjectWikiStore` + `VALID_STAGES`+='implementation' + the audited `(IMPLEMENTATION,"send-back")→DESIGN_REVIEW` edge + `StoryImplementationFinalizer` + start/review endpoints + board DTO) · 42-06 the Object-Wiki collab bindings + persist_wiki Hub wiring + the additive Hub contract · 42-07 the web (drag confirm; card run-states; read-only sandboxed review surface) · 42-08 write-safety review + hardening (allowlist 60→55; report lane gate; wiki attribution) · 42-09 coordinated release. **First live acceptance must be on a sandbox app** (procedure in the progress doc). As-built: `progress/phase-42-code-implementation.md`.
+>
+> **Specs:** umbrella `specs/phase-42-code-implementation.md` + `phase-42-code-implementation/42-01..42-09`; backlog `specs/backlog/{implementation-rollback-execution,wiki-as-agent-memory,kb-resync-after-implementation}.md`. **New ADRs (Proposed → Accepted at 42-09):** **ADR-068** (write-capable implementation lane) · **ADR-069** (workflow-node skill provisioning) · **ADR-070** (the Object Wiki) — mirrored in `reference/decision-log.md`.
+>
+> **The corner-turn.** Everything through Phase 41 **reads** the Appian environment and **writes documents** (KB, Business Map, the four feature stages, finalized stories, the Workbench board, the story design — proposal-only, ADR-062). Genesis is an SDLC platform, and this phase makes it **actually implement object-level code** in the **dev-tagged environment**. This is a **deliberate, eyes-open contradiction** of the read-only posture (ADR-021 `pre_mutation` / 036/037 read-only env / 038 read-only allowlist / 062 proposal-only) — placeholders held **until a stable Dev MCP made writes safe**; Phase 41 adopted **Dev MCP 26.6.90** (157 tools, full CRUD, no server-side readonly gate → writes enabled purely by widening Genesis's allowlist). The new ADRs amend/supersede those clauses for this lane.
+>
+> **Flow (mirrors the Phase-34 Design automation, one lane further).** A lead reviews a story's completed **Design** in Design Review, then drags the card **Design Review → Implementation**; a **confirm dialog is the single blanket approval** for all the object changes. An unattended **`story-implementation` ("Ticket Implementation")** workflow runs: **(1) reverify** the design covers the feature Technical Design (mismatch → an **escalation gate**: proceed-anyway / send-back-to-Design-Review); **(2) prepare a local, temporary rollback doc** (current code + object **version** of every UPDATE'd object; NEW objects → "delete to roll back"; **no indirect dependents**); **(3) implement** — a **single agent** with the `appian` + `appian-object-generation` skills + Dev-MCP **write** tools iterates object-by-object; **NO deletes ever** — a retire → mark the object description "deprecated by Genesis"; **(4) verify** only the touched objects (`validate*`/`test*`); **(5) heal** (`attach_healing`, ADR-067); **(6) update the Object Wiki** + move the card to **Code Review**. A **read-only review surface** (implementation report + rollback doc) is reachable from the card in both Implementation and Code Review.
+>
+> **Locked with the user (2026-09-23, two Q&A rounds — umbrella §3):** no per-object gate (the drag is the approval); **dev-env only**; **no deletes** (deprecate-in-description); reverify mismatch → escalate (proceed / send-back); the rollback doc is **local + temporary** (never published); rollback *execution* + auto KB re-sync + agents-read-the-wiki are **backlog**; a **single implement agent** then heal; **build workflow-node skill provisioning** (ADR-069); a **dedicated `appian-dev-write`** registry entry (create/update all types, **no delete**) injected only by implement/heal; the **Object Wiki is local-first + Hub-shared** (write local → publish/pull when the Hub is available; no hard Hub dependency); a **single wiki-authoring agent** writes the business + technical descriptions per object and posts to the Hub; the read-only review surface shows the implementation report + rollback doc.
+>
+> **Data model:** **m0021** — `wiki_object_pages` (one per Appian object) + `wiki_object_entries` (append-only; `change_kind` created|updated|deprecated; business + technical descriptions; story ref + bug flag; author; timestamp; object version; **no code stored**); `current_version` 20 → **21**. `kb_story_stages` gains a `'implementation'` stage (no schema change). **Multi-repo:** genesis (m0021 + `ObjectWikiStore` + the implementation-start endpoint + `StoryImplementationFinalizer` + the review-surface API + write-registry wiring + skill provisioning + web) + genesis-workflows (the `story-implementation` workflow + the `appian-dev-write` entry) + the **Appian Genesis Hub** (a new Object-Wiki record type, built by the separate write-capable agent — additive to the frozen ADR-064 contract) [+ genesis-core only if the skill primitive lands in core].
+>
+> **Sub-phases:** 42-01 research/findings + ADRs → 42-02 Dev-MCP write enablement → 42-03 workflow-node skill provisioning → 42-04 the `story-implementation` workflow → 42-05 platform backend → 42-06 Object Wiki store + collab + Hub → 42-07 web → 42-08 review & hardening → 42-09 release. **No build until the user says go.**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L74–L80, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 41: Dev MCP 26.6.90 upgrade (basic auth) + SAIL CLI install — genesis v0.72.3 + genesis-workflows v0.19.0 (2026-09-15, CI green + DEPLOYED)
+
+> **Spec:** `specs/phase-41-devmcp-upgrade-and-sail-cli.md`; as-built `progress/phase-41-devmcp-upgrade-and-sail-cli.md`; deferred `specs/backlog/devmcp-browser-sso-auth.md`. Amends **ADR-038** (the appian-dev bundle now also carries the SAIL CLI; basic-auth default; `LCP_API_PATH` dropped) + **ADR-040** (SAIL is a second managed-native CLI, installed from the Dev MCP bundle). CI green: genesis-workflows #6813196 (v0.19.0); genesis #6813229 (v0.72.1 — v0.72.0 was red from a forgotten `git add tests/`, fixed forward, §7). genesis-core / kiro-agent-sdk / genesis-appian-parser unchanged.
+>
+> **Adopt the Appian Dev MCP `26.6.90`** with **basic auth only** (browser/SSO deferred). Two breakages fixed: the bundle **flipped the default auth to browser** → the `appian-dev` registry pins a static **`LCP_AUTH_METHOD=basic`**; **`LCP_API_PATH` is obsolete** (bundle defaults `/suite/plugins/servlet/stateless/lcp-api`) → **removed end-to-end** (registry no longer injects it; dropped from `EnvironmentRegistry` `_ALLOWED`/dataclass/`resolve_var`, `EnvBody`/`config_routes`, the web env form; back-compat: a stored `lcp_api_path` still loads). Allowlist **+5 read tools** (`getPortal`/`listPortals`/`listObjectVersions`/`listMyTasks`/`getDevMcpVersionInfo`; 72 total — all 67 prior tools still exist, read-only posture intact; `LCP_TOOL_MODE=readonly` is documented by Appian but NOT implemented in 26.6.90). **`truststore`** (auto-trust corp CAs) is a free win.
+>
+> **SAIL CLI — install-from-bundle, one action, full plumbing, no consumer yet:** installing **appian-dev** from the bundle now ALSO installs the bundled SAIL CLI (`ConfigService.install_appian_dev_bundle` → `NativeMcpInstaller` for the MCP, then extracts the **host-platform** SAIL binary from the same tarball via `cli_tools/native/sail_bundle.py` + installs it via `NativeCliInstaller`; unsupported arch → MCP-only + a reason). `NativeCliInstaller` gained a `"sail"` entry + a `version=` override (from the bundle `BUILD-INFO.txt` build_timestamp) + a **macOS `com.apple.quarantine` clear** (an extracted unsigned Go binary is SIGKILL'd on first run otherwise). New `genesis/integrations/sail/` (`SailClient` + `build_sail_client`): resolves the managed binary, injects an isolated `SAIL_HOME` (`~/.genesis/cli-tools/sail/home`) + `SAIL_USERNAME`/`SAIL_PASSWORD` from the **dev-tagged env** (the ADR-048 seam), enforces a subcommand allowlist, `--version` flag; wired into `ctx.extras['sail']` + a `cli-registry.json` `sail` entry; surfaced in the **Settings → CLI tab** (`SailConnectorCard`). **No workflow/chat consumer yet** — capability only. **Verified end-to-end** against the real 26.6.90 bundle (`sail --version` → `sail version 26.6.90`). **v0.72.2:** the `genesis mcp install-native appian-dev` CLI path also uses the combined installer (parity with the UI). **DEPLOYED + LIVE-VERIFIED (2026-09-15):** installed the 26.6.90 bundle on the host (appian-dev `0.1.0+528e6bbb` + sail `20260903-195919`), reinstalled the workflows library (new registry), and `listApplications` returned real apps via basic auth both directly and through the running fleet (`gsm provision` library refresh + restart; both instances on v0.72.2 + the new Dev MCP via the shared mcp-servers symlink; SAIL on `main` only — `userb` cli-tools not shared, harmless as there's no consumer yet). **v0.72.3:** managed-CLI availability cards resolve via the native-CLI installer (not a `shutil.which` PATH probe) so `sail`/`gws` show **reachable** in Settings → CLI; the fleet provisioner (`genesis-fleet`) now shares the host `cli-tools` into instances (like `mcp-servers`) — `sail`/`gws` reachable on `main` + `userb`. CI green: genesis #6813404 (v0.72.3). **Deferred:** browser/SSO auth; a SAIL testing-lane consumer. **No active phase.**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L82–L90, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 39: Run Inspection & Node Observability + Phase 40: Self-Healing Reliability — genesis v0.70.0 + genesis-core v0.9.7 + genesis-workflows v0.17.0 (2026-09-10, CI green)
+
+> **A coordinated multi-repo release (ADR-019 order; no DB migration). Specs:** `specs/phase-39-run-inspection-observability.md` (+ `39-01..39-07`) + `specs/phase-40-self-healing-reliability.md` (+ `40-01..40-06`); as-built `progress/phase-39-run-inspection-observability.md` + `progress/phase-40-self-healing-reliability.md`. **ADR-066 + ADR-067 → Accepted.** Both phases independently reviewed (no MUST-FIX). CI green: genesis-core #6781318 · genesis-workflows #6781339 · genesis #6781332.
+>
+> **Phase 39 (ADR-066) — Run inspection & node observability.** The run-detail node experience is rebuilt into a **single-click summary** (a new authored `GraphNode.description` + per-execution metrics: Turns/credits/tool-calls/time) + a large **adaptive turn-explorer modal** (Pass › Item › Attempt › Turn, depth = reality) exposing, per turn, the exact **prompt / artifacts / conversation / output / credits+timing**. **genesis-core** (additive, `CORE_MAJOR` unchanged): `kiro_node` writes each turn's rendered prompt to a blackboard file + emits **`agent.prompt`** (pointer-only — bytes never inlined, ADR-010/018) + `attempt`/`iteration` on `agent.result`; a reserved **`_iteration`** `PlatformState` channel. **genesis** (no migration): `agent.prompt` persisted; **`fold_iterations`** + **`GET /runs/{id}/nodes/{node}/iterations`** + `GraphNode.description`; the `Inspector` + **`NodeIterationsDialog`** (lazy prompt fetch, per-turn conversation sliced by seq range). **genesis-workflows**: a `description` on **all 12 workflows / 175 graph nodes**; the 4 analysis workflows stamp `_iteration`. New-runs-only capture.
+>
+> **Phase 40 (ADR-067) — Self-Healing Reliability (the second reliability tier).** A genesis-core **`attach_healing`** construct beside the ADR-011 trio: `verify` (grounded critic → a structured, item-keyed **`VerificationReport`**) → `heal` (agent judges blast radius) → **patch the flagged items in place → re-verify** | **one guided restart** with carry-forward guidance → **escalate**, bounded `META.healing {max_heal:1, max_restart:1}`; `verify`+`heal` each wear the ADR-011 trio. New in genesis-core: `nodes/healing.py` + `contracts.py` (`VerificationReport`/`Fix`/`HealDecision` + `check_verification_report`/`check_heal_decision`) + a reserved **`_healing`** channel (`Annotated[dict, _merge]` — per-key merge so a patch's `heals_used` and a restart's `restarts_used` preserve each other → the ladder is provably bounded; **credit-safety, ADR-032**). **All four analysis workflows adopted it** (feature-breakdown 0.2.0 / technical-design 0.3.0 / story-design 0.2.0 / ux-design 0.2.0), replacing the wasteful full-redo-on-verify-failure. genesis needed **no code change** (the run-detail graph renders the new heal/reassemble nodes from the workflow topology). **Gates:** genesis-core pytest 91; genesis pytest 790 + web vitest 270; genesis-workflows validate_library 12 + pytest 185. **Deployed to the fleet** (`gsm provision --all --force`). **No active phase.**
+>
+> **▸ Post-ship — `story-design-analysis` v0.3.0 (genesis-workflows v0.18.0, 2026-09-11, ADR-062 amendment):** the Ticket Design workflow was rebuilt to a **single-context design** (drop the per-object loop + `attach_healing` here — it broke cross-object coherence). See the Phase-34 block below + `reference/decision-log.md` ADR-062 amendment.
+
+<!-- archived from bible/08-roadmap-and-backlog.md L92–L106, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED — Team Collaboration: local-first + selective centralization to a shared Appian Hub (Phases 35–38) — **Phase 35 SHIPPED (v0.63.0); Phase 36 COMPLETE (Appian-side); Phase 37 SHIPPED (v0.64.0 — Hub wire-up); Phase 38 SHIPPED (v0.65.0 — Collaborative SDLC: features/artifacts + stories/epics + boards + the collaboration UX + adoption). The program is DELIVERED for the KB + features + stories + boards; shared-memory sync is the one deferred future phase.**
+
+> **Phase 35 (Foundations & Identity) is ✅ SHIPPED — genesis v0.63.0 (2026-09-05), ADR-063 Accepted. Phases 36–38 remain specs-drafted — do not implement until the user approves.** A **four-phase program** making Genesis **team-collaborative** while staying **local-first + single-user + opt-in** (ADR-063 **amends** ADR-026). A team (PO, UX, developers) works locally; **publishing** a finished work product centralizes it to a shared **Collaboration Hub** = the team's **Appian dev environment** (a dedicated **"Genesis Hub" Appian application**, ADR-064), from which teammates **pull**. **Shared:** the application **KB** (parse once → a gzipped blob everyone pulls + hydrates locally; ~1–2 MB gzipped for a large app; content-hash dedup; **pull-first** sync), **features + published stage artifacts** (Spec/UX/TD/Breakdown — artifact bytes only; **chat/run stay local**), **stories/epics**, and **board status** (lane = a story's shared `status`; membership auto; **in-lane ordering + sidebar curation local**). **Local-only:** chat, runs, catalog, documents, personal memory. **Shared-memory sync is a deferred future phase.** The transport is a **pluggable `SyncProvider` seam** (`genesis/collab/`, mirroring ADR-051/052); **publish-on-complete** (explicit push) + **pull** (auto for read-only views + boards; **notify-then-apply** where a local draft exists; a manual "Sync now"). Synced entities carry a stable **`sync_uuid`** (local int PKs collide across machines); concurrency = **optimistic `row_version` CAS + a soft advisory "in-progress by X"** marker (no hard lock); cross-stage staleness is **notify-only with provenance**. **Identity is self-asserted** (name + Appian **username** [canonical everywhere] + email — Appian is not an IdP); **teams are Genesis-owned, UUID-keyed Hub records**; **visibility is open** (owner/`team_uuid` stamped for a future scoping seam). A **Settings identity/team page** + first-run onboarding. Everything **opt-in / off by default** (solo installs unchanged). A one-time **adoption** bulk-publish seeds the Hub with existing completed work.
+>
+> **Locked with the user (2026-09-05):** local-first preserved (opt-in, defined subset); the shared/local split above; the Hub = the dev environment (no separate Hub env); the Genesis Hub Appian app is **built by a separate write-capable Dev-MCP agent** (Genesis stays read-only against Appian, ADR-036/037); self-asserted identity + a **shared service account** writes with **payload-carried attribution** (spoofing hardening parked); teams are a Genesis entity (not Appian groups); open visibility; **pull-first** KB sync (anyone can refresh-from-Appian on demand, per-app lock, others auto-pull); boards = lane/status + membership shared, in-lane order + sidebar curation local; cross-stage staleness notify-only; soft advisory + CAS (no hard lock); shared memory deferred; adoption = one-time explicit confirmed bulk-publish (never automatic).
+>
+> **Data-model refinements (2026-09-05, after grounding in the Appian skill + docs):** the **local Genesis model stays JSON** (SQLite has no limit — no local normalization); a story's variable-length lists (`acceptance_criteria`/`questions`/`labels`) are **normalized into a `GH Story Item` child record type on the Hub side only** (the Web API explodes on write / reassembles on read), and long free text (`description`) uses Appian **`Extra Long Text` (64000)** — honoring the synced-record-type text tiers (Text 255 / Long Text 4000 / Extra Long Text 64000, ≤3 per record type). **Lossless sync is a hard invariant** (§2.0 of 36-01) with a round-trip fidelity gate (36-06 + 38-02). The KB is a **gzipped blob** (~1–2 MB for a large app, measured) stored as an **Appian Document** + a `GH Blob Version` index (not normalized records) → hydrated into the local SQLite read cache.
+>
+> **The four phases (umbrella + sub-specs each; all `🟡 DRAFTED`):**
+> - **Phase 35 — Collaboration Foundations & Identity** ✅ **SHIPPED — genesis v0.63.0 (2026-09-05), ADR-063 Accepted** (`specs/phase-35-collaboration-foundations.md` + `35-01..35-07`; as-built `progress/phase-35-collaboration-foundations.md`). **m0019** (`sync_uuid` + backfill on the 6 synced tables; `row_version` where missing; owner/team/provenance cols; `collab_*` local tables; `current_version` 18→19). The `genesis/collab/` `SyncProvider` seam + `CollaborationService` + the **local/mock `LocalHubProvider`** (built/tested **without Appian**) + `build_sync_provider()` opt-in registry; the identity/team model + `current_user()`/canonical-username unification (+ `actor` threading into `LifecycleService.transition`) + onboarding; the **Settings→Collaboration page** + Hub-config opt-in UI + first-run `OnboardingDialog`. Opt-in/off-by-default (solo unchanged). Gates green (genesis pytest 730; web vitest 247); live-acceptance (2 instances, local provider) all pass.
+> - **Phase 36 — The Genesis Hub Appian Application** (`specs/phase-36-genesis-hub-appian-app.md` + `36-01..36-07`; **ADR-064**). ✅ **COMPLETE + live-validated (2026-09-05) — all 11 Web APIs + the frozen contract validated end-to-end against the live dev env.** **Appian-side, built by a separate Dev-MCP agent** (grounded in the installed Appian skill) — **11 record types** (Team/Membership/Feature/Epic/Story/**Story Item** [normalized AC/questions/labels]/BoardState/StageArtifact-metadata/Blob-Version/Change-Log/Activity, UUID-keyed, versioned, attributed) + a **blob store = Appian Documents (native versioning) indexed by `GH Blob Version`** (KB + artifacts; content-hash dedup, keep-last-N) + the **Web-API surface** (records upsert/list/get + **base-version CAS→409**; blobs up/down/versions + dedup; `changes` manifest + `contract_version`; activity; `/meta` — team/membership are generic `records` kinds) + a shared service account + an installable **package** + a **frozen JSON contract + fixtures** checked into genesis. **Appian text tiers** honored (Text 255 / Long Text 4000 / **Extra Long Text 64000**, ≤3 per record type — so `description`/AC fit without truncation); **no data loss** (a round-trip fidelity gate). **No genesis tag.** Isolated from subject apps.
+> - **Phase 37 — Hub Wire-up: the Appian provider, KB sharing & live identity/teams** ✅ **SHIPPED — genesis v0.64.0 (2026-09-06)** (`specs/phase-37-hub-wireup.md` + `37-01..37-06`; as-built `progress/phase-37-hub-wireup.md`). genesis-only, no migration. The **`AppianHubProvider`** (implements the Phase-36 contract; tested vs the **shared 36-01 fixtures**); **KB pull-first** sharing (`hydrate_from_blob` replace-current; deliberate refresh-from-Appian publishes the gzip blob; per-app lock; Hub-app exclusion; scheduler pull); **live identity/teams** (onboarding + Settings repointed at Appian; attribution to the Hub); the **sync-UX foundation** (change-manifest poll + Sync-now + notify-then-apply + offline-first — reused by Phase 38).
+> - **Phase 38 — Collaborative SDLC: features, stories, boards & the collaboration UX** ✅ **SHIPPED — genesis v0.65.0 (2026-09-06)** (`specs/phase-38-collaborative-sdlc.md` + `38-01..38-07`; as-built `progress/phase-38-collaborative-sdlc.md`). genesis-only, no migration. Per-entity publish/pull for **features + published stage artifacts** (artifact-only; chat/run stay local; pull = read-only mirror + `upstream_versions` capture), **stories/epics** (publish at Finalize/edit/delete), **boards** (lane=status + membership shared; ordering + sidebar local); the **collaboration UX** (publish controls, auto-pull, notify-then-apply, cross-stage staleness badge, advisory in-progress markers, "published by X" attribution); the one-time **adoption** bulk-publish. **Completes the program for KB + features + stories + boards; shared-memory sync remains the one deferred future phase.**
+>
+> **Multi-repo footprint:** **genesis** (Phases 35/37/38 + the checked-in contract) + the **Appian Hub app** (Phase 36, Appian-side, separate agent); genesis-core / kiro-agent-sdk / genesis-workflows / genesis-appian-parser **unchanged**. Suggested build order: **35 → (36 in parallel once 35-01/36-01 lock the model/contract) → 37 → 38.**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L108–L120, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 34: Design Lane Automation (the Workbench Design + Design Review lanes) — genesis v0.62.0 + genesis-workflows v0.16.0
+
+> **Specs:** `specs/phase-34-design-lane-automation.md` (umbrella) + `phase-34-design-lane-automation/34-01..34-07`. **ADR-062** (Proposed; **amends ADR-061** — the per-lane automation begins). **✅ SHIPPED (2026-09-05) — genesis v0.62.0 + genesis-workflows v0.16.0, CI green.** 34-02 remove design-doc → 34-03 workflow → 34-04 backend (m0018 + StoryStageStore + design-start + StoryDesignFinalizer) → 34-05 web (drag confirm + card run/lock/failed states + Design Review workspace) → 34-06 review → 34-07 release; a post-build fix switched the board to a pointer-first collision so drops land on every lane. Gates: genesis pytest **710** + ruff; genesis-workflows validate_library **12** + pytest **179**; web tsc/eslint0/vitest **239**/build. As-built: `progress/phase-34-design-lane-automation.md`. **Deferred (future phases):** leaving Design Review + every later lane's automation (Implementation / Code Review / Verification / Deployment); an explicit approve/complete control; enforcing the full transition table on manual drags. **No active phase.** **Multi-repo:** genesis (m0018 + backend + web) + genesis-workflows (add `story-design-analysis`; remove `design-doc`); genesis-core / kiro-agent-sdk / genesis-appian-parser unchanged.
+>
+> **Goal.** Make the first two Workbench lanes *active* (the automation ADR-061 deferred). Dragging a ticket into **Design** (from any lane) opens a confirm dialog — **Yes** moves it + launches (or **re-runs**, updating the same design) a grounded **`story-design-analysis`** ("Appian Ticket Design") workflow; **No** just moves it. The workflow takes one story + its feature's finalized **Spec + UX + Technical Design**, **gathers** the ticket-relevant research, then **grounds against the live app** (`@genesis-kb` structure + `@appian-dev` actual code, read-only) and writes an **object-level design HTML** — one `<section>` per object, tagged **NEW/UPDATE**, with granular change detail **and the actual code** (process models: per-node explanation + code per node, never summarized). Reliability trio per agent + a grounded verify critic + deterministic assemble (the Phase-30 lesson). While running the card is **locked** + shows "Design generation running" + a **run link**; on success it **auto-advances to Design Review** (an **audited** `LifecycleService` transition — m0013 — the first per-lane automation); on failure it goes **light-red** + "Workflow failed" + the run link. A **Design Review** card opens a **full-page** workspace reusing the Spec/TD experience (a `story_design` chat + annotatable Lavish preview → the agent revises the design).
+>
+> **Data (m0018):** `kb_story_stages` (+ `kb_story_stage_revisions`) — the per-`(story, stage)` artifact analog of m0015; `current_version` 17 → **18**. A `StoryStageStore` + a `StoryDesignFinalizer` (run→story-artifact bridge; bound-run guard + idempotency + on-read recovery). Also **removes** the superseded `design-doc` workflow (library + running app).
+>
+> **Locked with the user (2026-09-04):** id `story-design-analysis` / "Appian Ticket Design"; confirm-on-entry-to-Design from ANY lane (Yes runs/re-runs, No just moves); running card locked; fail-fast if no dev env / app not synced; code mandatory wherever there's a code-level change (process models per-node with code, not summarized); a per-story artifact store (m0018); one design per story (re-run updates in place); leaving Design Review deferred; failure = light-red card + run link; uninstall `design-doc` from the running app too.
+>
+> **Sub-phases:** 34-01 data model & ADR-062 → 34-02 remove `design-doc` → 34-03 `story-design-analysis` workflow → 34-04 backend (m0018 + `StoryStageStore` + design-start + `StoryDesignFinalizer` + card DTO) → 34-05 web (drag confirm + card run/lock/failed + Design Review workspace) → 34-06 review & hardening → 34-07 release (genesis vX.Y.0 + genesis-workflows vX.Y.0). **No build until the user says go.**
+>
+> **▸ Post-ship — `story-design-analysis` v0.3.0: single-context design (genesis-workflows v0.18.0, 2026-09-11; ADR-062 amendment; CI green #6787425).** User feedback (grounded in the Appian team's own `jarvis-design` skill): the per-object decomposition (`plan_objects → design_object×N → synthesize → assemble`, + the Phase-40 `attach_healing` patch tier) **broke cross-object coherence** — each `design_object` ran in its OWN Kiro turn seeing only that one object, so shared fields/naming/sequencing couldn't stay consistent. **Rebuilt to a single-context design:** `resolve_inputs → load_inputs → research` (grounded, ONE turn) `→ design` (ONE turn, full context → the whole design body) `→ render` (deterministic wrap → one well-formed, script-free, Lavish-safe `design.html`) `→ verify` (grounded critic) `→` bounded **revise** (re-author with carry-forward guidance) `→ escalate`. Output is a **lean implementation plan** (per object: what exists / what changes / what to build, targeted code only where it matters; process models described, not dumped). Dropped the per-object loop + `attach_healing` **here** (kept in feature-breakdown / technical-design / ux). `inputs_schema` unchanged → the genesis caller + `StoryDesignFinalizer` binding unchanged (genesis-workflows-only). Gates: validate_library 12; story-design pytest 21; full workflows pytest 184. See `progress/phase-34-design-lane-automation.md` addendum + `bible/06` §7 (the cross-object-coherence lesson). **`technical-design-analysis` may get the same reconsideration later (deferred).**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L122–L134, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 33: The Workbench (a per-application Kanban execution board) — genesis v0.61.0
+
+> **Specs:** `specs/phase-33-workbench.md` (umbrella) + `phase-33-workbench/33-01..33-05`. **ADR-061** (Accepted; **amends ADR-049** nav). **✅ SHIPPED (2026-09-04) — genesis v0.61.0, CI green.** Single-repo (genesis) + one migration (m0017) + one new web dep (`@dnd-kit`, pinned); genesis-core / kiro-agent-sdk / genesis-workflows / genesis-appian-parser unchanged. 33-02 backend (m0017 + `BoardStore` + `/api/workbench`) → 33-03 web (Workbench nav + **left-sidebar board sub-tabs** + `@dnd-kit` board + import + drawer) → 33-04 review → 33-05 release. Cards **drag across lanes + reorder within a lane** (multiple-containers) persisted via a bulk `PATCH …/lanes/{lane}` reorder endpoint. Gates: genesis pytest **701** + ruff; web tsc/eslint0/vitest **237**/build. As-built: `progress/phase-33-workbench.md`. **Deferred (future phases):** the per-lane automation (drag into Design runs the design workflow, etc.), gated transitions + m0013 audit on moves, WIP limits, swimlanes, multi-board-per-app. **No active phase.**
+>
+> **Goal.** Give the SDLC a place where the **actual work happens**: a new top-level **Workbench** nav item holding one **Jira-style Kanban board per application** over the app's finalized stories (ADR-060, aggregated across all its features). Eight fixed lanes, in order: **To Do → Design → Design Review → Implementation → Code Review → Verification → Deployment → Done**. A card's **lane IS its `kb_stories.status`** (single source of truth). Boards are **curated** — an empty Workbench prompts **"Add applications"** (pick any Genesis app → each gets its own board + sub-tab; removable). Stories are **not** auto-loaded: an **Import** action lists the app's finalized stories not yet on the board (grouped by feature/epic), the user **multi-selects in batches** → they land in **To Do**. Cards **drag** between lanes (`@dnd-kit`, accessible) and a drop **persists the new lane** (`row_version` CAS); **free movement** this phase. A card can be **removed from the board** (membership only — the story stays in the feature's Stories tab). Card click → a **drawer** reusing the Phase-32 story detail.
+>
+> **This phase = the board UI/UX + import + drag-persists-lane ONLY.** The **per-lane automation** (dragging into Design kicks off the design workflow, Implementation the build, etc.) is the subject of **future phases** — this phase lays the surface + the lane model they plug into. Realizes the **ADR-056** reserved story-execution plug-point + surfaces the **ADR-060** `status` seam.
+>
+> **Data (m0017):** `workbench_boards` (the curated app→board registry; FK→ the applications table's uuid ON DELETE CASCADE) + `kb_board_cards` (story membership + per-lane `board_position`; no lane column — lane = `kb_stories.status`); `current_version` 16 → **17**. `LifecycleState` gains `to-do`/`design-review`; `STORY_STAGE_TRANSITIONS` reconciled to the 8-lane order (deployment after verification) — **forward-compat, NOT enforced on drag** (a deliberate, recorded ADR-050 relaxation — a board move is a lane assignment, not yet a gated transition).
+>
+> **Locked with the user (2026-09-04):** eight lanes (deployment after verification); lane = status; imported cards start in To Do; free drag; one curated board per app (add/remove applications); remove-from-board keeps the story; `@dnd-kit`; card-click drawer; flat lanes; genesis-only + m0017.
+>
+> **Sub-phases:** 33-01 data model & ADR-061 → 33-02 backend (m0017 + `BoardStore` + `/api/workbench`) → 33-03 web (Workbench nav + landing + board + `@dnd-kit` + import + drawer) → 33-04 review & hardening → 33-05 release (genesis vX.Y.0). **No build until the user says go.**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L136–L144, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 32: Finalize Stories (Feature Breakdown → first-class, editable Story records) — genesis v0.60.0
+
+> **Specs:** `specs/phase-32-finalize-stories.md` (umbrella) + `phase-32-finalize-stories/32-01..32-05`. **ADR-060** (Accepted). **✅ SHIPPED (2026-09-04) — genesis v0.60.0, CI green.** Single-repo (genesis) + one migration (m0016); genesis-core / kiro-agent-sdk / genesis-workflows / genesis-appian-parser unchanged. 32-02 backend (m0016 + `StoryStore` + finalize/CRUD) → 32-03 web (Finalize control + Stories grid + routed detail/edit) → 32-04 review → 32-05 release. Gates: genesis pytest **684** + ruff; web tsc/eslint0/vitest **232**/build. Also in v0.60.0: a themed `Select` primitive (Radix DropdownMenu) for the Stories + Runs filters, and run-detail graph UX fixes. As-built: `progress/phase-32-finalize-stories.md`. **Deferred:** per-story execution (25-11) + epic CRUD + normalizing the AC/questions/labels JSON columns (a considered option — kept JSON for v1). **No active phase.**
+>
+> **Goal.** Turn the Feature Breakdown's file-only backlog into first-class Genesis data. When the **Feature Breakdown stage is `completed`**, a one-time, irreversible **Finalize Stories** action (a header button near the feature name, replacing "Back to application"; a warning confirm dialog) parses the canonical `backlog.json` embedded in the finalized `breakdown.html` (`_parse_embedded_backlog`) and persists every epic + story/task into new **`kb_epics`/`kb_stories`** tables (m0016; `kb_features.stories_finalized_at` = the one-time marker). Stories then appear in the feature's (previously reserved, ADR-056) **Stories tab** as a formatted grid (Title · Type · Epic · Category · Appian part), each openable at a routed detail page (`…/features/:id/stories/:storyId`) with **story-level CRUD** — add / edit any field incl. reassigning the **parent from a dropdown of the feature's epics** / delete — all `row_version`-CAS protected. Epics are created at finalize and are otherwise **fixed** (no epic CRUD this phase). Each story carries a forward-compat `status` (default **`design`**, not surfaced) for the next per-story-execution phase. **No re-sync** after finalize (stories are the source of truth).
+>
+> **Realizes** the ADR-056 reserved Stories slot + the ADR-050/25-11 `Story`/`Stage` domain. **Locked with the user (2026-09-04):** name "Finalize Stories"; epics first-class but story-only CRUD; one-time + irreversible + no re-sync; a forward-compat `status` default `design` (not surfaced); a routed detail page.
+>
+> **Sub-phases:** 32-01 data model & ADR-060 → 32-02 backend (m0016 + `StoryStore` + finalize + CRUD) → 32-03 web (header Finalize + Stories grid + routed detail/edit) → 32-04 review & hardening → 32-05 release (genesis vX.Y.0). **No build until the user says go.**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L146–L158, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 31: Feature Breakdown Stage (Spec + UX + Technical Design → grounded, Jira-ready backlog) — genesis v0.59.0 + genesis-workflows v0.15.0
+
+> **Specs:** `specs/phase-31-feature-breakdown-stage.md` (umbrella) + `phase-31-feature-breakdown-stage/31-01..31-07` + `31-01-findings.md`. **ADR-059** (Accepted). **✅ SHIPPED (2026-09-04) — PHASE 31 COMPLETE.** genesis **v0.59.0** + genesis-workflows **v0.15.0**, CI green (genesis #6735324 / workflows #6735326). 31-03 workflow → 31-04 platform (backend + web) → 31-05 Jira-importable CSV export → 31-06 review + Lavish-compat hardening (a light paper-bg fix + a deterministic Lavish-injection test) → 31-07 release. No migration (m0015 reused); genesis + genesis-workflows only. Gates: genesis pytest **678** + ruff; web tsc/eslint0/vitest **226**/build; genesis-workflows validate_library **12** + pytest **176**. `genesis install` picked up the workflow. **Live acceptance** (a real feature → Start with notes + a transcript → the run → completion chat → export → Jira import) is user-driven / headless-undrivable. **No active phase.**
+>
+> **Goal.** Make the FOURTH and final feature stage live: turn the finished **Spec + UX Design + Technical Design** into the developer-executable **backlog** (epics + stories/tasks) a team grooms + imports into Jira. Once all three prior artifacts exist, the user opens the stage, optionally types **notes** + attaches **up to 3 supporting docs** (transcript/spike/etc.), and clicks **Start** → a supervised **`feature-breakdown-analysis`** run.
+>
+> **Workflow (`feature-breakdown-analysis`):** `plan_epics` (epics = the Technical Design's **functional workstreams**, 1:1) → per-epic **story/task breakdown** loop (`break_epic`, MAP; Appian rules — form vs process-model split, entry-point splitting, Story=FE-testable / Task=not-FE-verifiable, **Gherkin** AC, one-line TD-anchored Dev Notes, nice-to-have flagging) → **deterministic `assemble`** (a PROGRAM node: `backlog.json` + a reader-first, Lavish-safe `breakdown.html` — `<details>` cards grouped by epic + a CSS-only card↔table toggle + the embedded canonical JSON) → **grounded verify** critic (coverage vs Spec + every TD "What changes"; bounded → escalate) → present → cleanup. Reliability trio per agent; read-only genesis-kb + appian-dev (light spot-check — the TD is already grounded).
+>
+> **Platform (genesis):** three-way prerequisite gating (`requires:["spec","ux","technical_design"]`, frontend `deriveAvailability` + backend 409); a **multipart** start (notes + ≤3 files, ADR-035) + re-run; a `feature_breakdown` StageFinalizer binding + chat mode (`_STEERING_FB`); web `STAGE_DEFS.breakdown` live + the notes-and-dropzone entry state + an **Export** button. **No migration** (m0015 reused); genesis + genesis-workflows only.
+>
+> **Jira export:** `GET …/stages/feature_breakdown/export.csv` — deterministic, from the embedded canonical JSON, the `spec-to-backlog` skill's column contract (Issue ID · Issue Type · Summary · Description · Parent ID · Acceptance Criteria · Labels), **create-new-epics** via Issue ID → Parent ID, no custom-field columns; built with the already-pinned `openpyxl`/`csv` (no new dep). Methodology from the `spec-to-backlog` Kiro skill (analysis core + JSON + Jira mapping ONLY — its Lucid/Sheets/REST renderers dropped); format from the four GSS example breakdowns.
+>
+> **Sub-phases:** 31-01 research/format study (DONE — `31-01-findings.md`) → 31-02 ADR & finalize (DONE — ADR-059 drafted) → 31-03 workflow → 31-04 platform build → 31-05 Jira-importable export → 31-06 code review & hardening (incl. **Lavish-annotation compatibility** of the interactive HTML — the one spike-worthy risk) → 31-07 release. **No active build until the user says go.**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L160–L172, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 30: Technical Design Stage (Spec + UX → grounded technical design) — genesis v0.57.0 + genesis-workflows v0.13.0
+
+> **Specs:** `specs/phase-30-technical-design-stage.md` (umbrella) + `phase-30-technical-design-stage/30-01..30-07` + `30-01-findings.md`. As-built: `progress/phase-30-technical-design-stage.md`. **ADR-058** (Accepted) — the grounded, workstream-decomposed Technical Design stage — + an **ADR-056 amendment** (a stage MAY declare prerequisites).
+>
+> **Goal.** Make the THIRD feature stage live, and the first that **depends on** its predecessors. Once the **Spec + UX Design** artifacts exist (in-review/completed), the user Starts (optional comment, no file) → a supervised **`technical-design-analysis`** run produces a reader-first, **object-level, code-grounded** Technical Design; a bound **`technical_design` completion chat** finalizes it via the same annotatable review.
+>
+> **Workflow (`technical-design-analysis`):** plan into **functional workstreams** → per-workstream **existing-state grounding** loop (`@genesis-kb` structure + `@appian-dev` code, read-only) → per-workstream **design drafting** loop → **agent `assemble`** (coherence) → **grounded `verify`** critic (bounded → escalate) → present. Reliability trio per agent; two queue-pop loops with per-iteration retry reset; `recursion_limit` 300. Each change names a real object or is marked **NEW**; the agent never assumes — blind spots become Open Questions (the inverse of ADR-057's intent-level UX doc). Research-backed (hierarchical decomposition + map-reduce + externally-grounded critic — `30-01-findings.md`).
+>
+> **Platform (genesis):** JSON `/stages/technical_design/start`+`/rerun` (prerequisite-gated → 409; friendly 409 when uninstalled); the **generalized `StageFinalizer`** (a workflow→stage `_BINDINGS` registry serving both workflows; bound-run + stage-match + idempotency guards); the **`technical_design` `ChatModeProfile`** + `_STEERING_TD`; web `STAGE_DEFS.design` live + `deriveAvailability` gating + the comment/Start entry + `TechnicalDesignCardActions`/`RerunTechnicalDesignButton`. **Prerequisite gating** enforced frontend (locked card/blocked workspace) AND backend. **Reuses the Phase-29 surface wholesale**; **no migration**; **genesis + genesis-workflows only**. **UX refinements (30-05):** clickable stage cards (no Open button; locked/not-available not navigable) + openable artifacts (generated → read-only preview; reference → Document Library viewer).
+>
+> **✅ SHIPPED (2026-09-03) — PHASE 30 COMPLETE.** genesis **v0.57.0** (`0878b13`) + genesis-workflows **v0.13.0** (`ae1181c`), CI green — genesis **#6725001** / workflows **#6725004**. 30-06 review found + fixed 2 issues (a TD-start guard for an already-finalized stage; a finalizer stage-match guard). Gates: genesis pytest **665** + ruff; web **vitest 224** + build; genesis-workflows **validate_library 11 + pytest 126**. `genesis install` + serve restarted to v0.57.0. **Live acceptance** (a real Kiro run → the completion chat) is user-driven / headless-undrivable. **No active phase** — Feature Breakdown is the next candidate (not started unless asked).
+>
+> **▸ Post-ship fixes — genesis v0.58.0 + genesis-workflows v0.14.0 (CI green — genesis #6727262 / workflows #6727270).** Driven by the first real live TD run (`r-4567cd05bcca`): (a) the `assemble` agent turn **timed out** (`turn_timeout`) on a ~12-workstream doc → **truncated HTML** (dropped/duplicated/malformed sections) + **no metering** (the 239-vs-~400 credit gap) → **redesigned** into a bounded `synthesize` agent (cross-cutting prose) + a **deterministic program `assemble`** that stitches the validated per-workstream blocks (technical-design-analysis **v0.2.0**); (b) a `cleanup` node deletes tool-output scratch; (c) `worker._snapshot` now reports a terminal status for a completed graph so an **approved escalation finalizes** (the run had been stranded 'running'); (d) run-detail **graph revamp** — elkjs layered LR + orthogonal edge routing (back-edges pre-reversed for correct layering; no lines through nodes), executed path **green** + per-edge **×N** counts (`/runs/{id}/transitions`), minimap removed; (e) run-detail **perf** (per-node event fetch + /steps-driven graph — fixes lag on huge runs); (f) **honest partial credit provenance**; (g) `index.html` no-cache. The stranded run was recovered (good doc regenerated deterministically; stage 3 finalized to in-review). Live-acceptance of a fresh TD run remains user-driven.
+
+<!-- archived from bible/08-roadmap-and-backlog.md L174–L209, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 29: UX Design Stage (Mockup → grounded implementation analysis) — genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1
+
+> **Specs:** `specs/phase-29-ux-design-stage.md` (umbrella) + `phase-29-ux-design-stage/29-01..29-06`. As-built:
+> `progress/phase-29-ux-design-stage.md`. **ADR-057** (Accepted) — the grounded UX Design stage (refines ADR-056).
+>
+> **Goal.** Make the first Phase-28 plug-in stage LIVE. A user uploads a **mockup PDF** on a feature's UX Design
+> stage; Genesis produces a grounded **"UX Implementation Analysis"** — a per-screen reconciliation of what the
+> **mockup** shows, what the **Spec** says, and what exists in the **live Appian env** — stating what must change
+> at **intent level** + a **blind-spot/ripple** analysis + **open questions**; a bound **`ux_design` chat** then
+> walks the questions + finalizes the doc. We are NOT automating mockup *creation* (later roadmap).
+>
+> **Workflow (`ux-design-analysis`):** resolve_inputs → **render_pages** (PyMuPDF PDF→PNG) → load_spec →
+> **screen_inventory** (multimodal, per-screen) → spec_reconcile → **live_grounding** (genesis-kb structure +
+> appian-dev actual code) → **synthesize** (HTML) → **verify** (grounded critic, bounded → escalation gate) →
+> present. Reliability trio per agent (ADR-011); KB-backed blind-spot analysis; per-screen decomposition + a
+> grounded critic (research-backed: multimodal models are weak holistically; ungrounded self-critics show a
+> "progress mirage").
+>
+> **Locked with the user (2026-08-28):** PDF-only v1 (PyMuPDF; **PPTX deferred**); **re-upload replaces + re-runs**;
+> grounding split (**genesis-kb = structure**, **appian-dev = actual code**); **intent-level** output; artifact =
+> **"UX Implementation Analysis"** (HTML in the sandbox + annotatable Lavish review, reuse Phase 20/21);
+> **generalize the per-stage artifact model now (`m0015`)**; handoff = upload → supervised `ux-design-analysis`
+> run (verification escalation gate) → draft doc + completion chat; UX stage reuses the Spec lifecycle states;
+> **read-only** against Appian (ADR-036/037).
+>
+> **Enablers:** additive **image support in `kiro_node`** (SDK already has image parts, gated on
+> `promptCapabilities.image`); **`m0015`** generalized per-`(feature, stage)` artifact model + a `ux_design`
+> `LifecycleService` machine (`current_version` → 15); a **`ux_design` chat mode**; UX goes live via a
+> `STAGE_DEFS` row + a `stage-registry` entry + an inner workspace — **no shell edits**. **Multi-repo** release
+> (genesis-core → genesis → genesis-workflows; kiro-agent-sdk + genesis-appian-parser unchanged).
+>
+> **Sub-phases (linear, each gated on the prior):** 29-01 research & analysis (docs) → 29-02 wireframes +
+> mockups (`/dev/mockups`) → 29-03 brainstorm & finalize (lock ADR-057) → 29-04 build (core → genesis →
+> genesis-workflows; ADR-057 Accepted) → 29-05 code review & hardening → 29-06 coordinated release.
+>
+> **✅ SHIPPED (2026-08-28) — PHASE 29 COMPLETE.** Released genesis v0.55.0 + genesis-workflows v0.12.0 + genesis-core v0.9.6 + kiro-agent-sdk v0.7.1 (CI green — genesis-core #6680648 / genesis #6680663 / genesis-workflows #6680673; kiro-agent-sdk v0.7.1 validated transitively). **Patch v0.55.1 (CI #6681514): two live fixes — the UX builder shows the Upload/running entry state until a completion chat is bound (not a dead "no chat session" pane), and the ADR-035 upload allowlist gains `.pdf` (+ cap 10→25 MB) so the mockup provisions.** **Patch v0.55.2 (CI #6681514): StageFinalizer logs failures + self-heals a stranded stage on read (in-flight recovery).** **v0.56.0 + genesis-workflows v0.12.1 (CI green — genesis master #6683358 / tag #6683359; workflows master #6683423 / tag #6683424): global ⌘K search (applications/features/documents); run-detail display fixes (steps-authoritative node status, execution counts, round dividers, bordered graph canvas); single-nav feature workspace + mockup-faithful UX states; and `ux-design-analysis` v0.1.1 reframed to UX/business language (no object-level technical detail — FB-4).** **Patch v0.56.1 (CI #6703666): wired the UX "Re-upload & re-run" UI (D11) — the backend reupload endpoint + hook existed but had no button; added `ReuploadMockupButton` (confirm → replace + re-run) to the stage header + Overview card.** **Patch v0.56.2 (CI #6703718): StageFinalizer guards on the stage's currently-bound run — a re-upload's reconcile sweep no longer re-finalizes the stale/superseded old run (which resurrected the prior analysis + blocked the new run).** 29-01 research → 29-02 mockup (`/dev/ux-design`) → 29-03 locked design (D0–D13) → 29-04 build (all 7 tasks + the StageFinalizer bridge) → 29-05 independent review (SHIP; M1 re-upload fix + validator hardening) → 29-06 release. ADR-057 Accepted. Decision A (Spec→StageStore) data-safe. Gates: genesis pytest 654 / web vitest 211 / genesis-workflows validate_library 10 + pytest 107. Live acceptance (real mockup + Kiro + synced app) is user-driven. **No active phase.**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L211–L249, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 28: Feature Revamp (the Feature Workspace framework) — genesis v0.54.0 + genesis-workflows v0.11.0
+
+> **Specs:** `specs/phase-28-feature-revamp.md` (umbrella) + `phase-28-feature-revamp/28-01..28-06`. As-built:
+> `progress/phase-28-feature-revamp.md`. **ADR-056** (the parallel Feature Workspace model) — **Proposed**
+> (supersedes ADR-044's sequential unlock clause).
+>
+> **Goal.** Re-conceive a Feature as a durable, UX-centric **workspace** — a framework into which every future
+> capability plugs in — replacing today's **linear** artifact pipeline (`ArtifactPipeline.tsx`: Spec functional +
+> Design/Breakdown disabled placeholders, sequential unlock). **Feature-level stages run in PARALLEL** (Spec, UX
+> Design, Technical Design, Feature Breakdown — any order, none gating another), over a shared artifact /
+> version-provenance / activity / lifecycle substrate, with a reusable **stage-container** plug-in contract.
+>
+> **Constraints (locked with the user 2026-08-25).** Single-user — **no assignment/roles/permissions/lenses/
+> My-Work** (ADR-026). Read-only-now — **no Appian write/deploy**; the draft's story-execution write stages +
+> git/branch model + environment promotion are OUT (future program, own ADRs); framework leaves clean plug-points
+> only. **Stories first-class LATER** (reserve the slot; don't finalize/build the story workflow now).
+> **Framework/architecture only** — no stage capability built this phase; **Spec** is wired in as the one live
+> stage; UX Design / Technical Design / Breakdown appear as first-class **"not yet available"** containers (NOT
+> sequential-locked). Reuses `LifecycleService`/`domain/` (ADR-050 — `ArtifactKind` + a forward story-stage machine
+> already exist), the Phase-27 light-first design language (ADR-055), and Phase-20/21 spec authoring + versioning.
+>
+> **Sub-phases (linear, each gated on the prior):** 28-01 research & UX analysis (docs-only) → 28-02 wireframes +
+> hi-fi coded mockups at `/dev/mockups` → 28-03 brainstorm & finalize (lock IA + ADR-056) → 28-04 architecture
+> build (production framework; Spec wired; ADR-056 Accepted) → 28-05 code review & hardening → 28-06 release
+> (genesis vX.Y.0, frontend-heavy + thin backend; other repos unchanged; small additive migration only if needed).
+>
+> **Origin.** Triggered by the user's draft `artifacts/designs/Genesis_Appian_Orchestrator_Feature_Workspace_
+> UX_Design.md` (a multi-user, spec→deploy vision) — adopted its feature-level mental model, adapted to Genesis's
+> single-user, read-only-now reality.
+>
+> **✅ SHIPPED (2026-08-25).** 28-01 research → 28-02 mockups (`/dev/feature-workspace`) → 28-03 final design (locked)
+> → 28-04 build → 28-05 independent review (**SHIP**) → 28-06 release. **genesis v0.54.0** (release `8ab4b41`, tag
+> `v0.54.0`; CI green **#6650764** master + **#6650766** tag) + **genesis-workflows v0.11.0** (release `db45cb7`, tag
+> `v0.11.0`; CI **#6650936** + **#6650937** — 2 new library skills `appian-object-generation` + `sail-mockup-generation`).
+> **ADR-056 Accepted** (supersedes ADR-044's sequential unlock). Frontend-only (no migration; stages/derived status
+> computed client-side); genesis-core / kiro-agent-sdk / genesis-appian-parser unchanged. Gates: web **vitest 210**
+> (incl jest-axe + `stages.test.ts`) + tsc/eslint/build; genesis pytest **635** + ruff; genesis-workflows validate_skills
+> (3) + validate_library (9) + pytest **93**. A future stage plugs in via a `STAGE_DEFS` row + a registry entry + a
+> `LifecycleService` machine — **no shell edits**. **PHASE 28 COMPLETE — no active phase.**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L251–L261, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED (COMPLETE) — Phase 27: UI/UX Revamp (27-01..27-11) — genesis v0.53.0
+
+> **Specs:** `specs/phase-27-ui-ux-revamp.md` (umbrella) + `phase-27-ui-ux-revamp/27-01..27-11`. As-built: `progress/phase-27-ui-ux-revamp.md`. **ADR-055** (UI/UX design language + light-first theming) — **Accepted**.
+>
+> **Goal.** A **light-first, modern, MUI-inspired** look-and-feel + UX modernization of the ENTIRE web app (off the old dark default). **Frontend-only (genesis); no product/API/DB/behavioural change** — presentation + IA only; ships `web/static` per phase. Requested by the user 2026-08-21.
+>
+> **Locked decisions (ADR-055).** Light is the default theme (dark retained/toggleable); **evolve** the existing Tailwind/token/shadcn primitives to a MUI-inspired language (NOT `@mui/material`); palette **Indigo `#4f46e5` + Slate `#475569`** (cool neutrals); **single-source theming** — two `:root` knobs (`--brand`/`--brand-secondary`) in `web/src/styles/tokens.css` drive both themes + gradients/glows via `color-mix` (no hardcoded brand hex in components); **Poppins** self-hosted (`@fontsource/poppins`); hi-fi coded mockups live at **`/dev/mockups`**.
+>
+> **Sub-phase ledger.** 27-01 research/audit ✅ · 27-02 wireframes ✅ · 27-03 hi-fi mockups ✅ **APPROVED** (mockup commits on master through `16c2b8a`) · **27-04** design-system foundation (global light-first tokens, Poppins, default flip dark→light, per-theme shadows, motion utils) ✅ **BUILT** genesis `286528c` · **27-05** app shell & navigation (differentiated Sidebar, glassy TopBar + route breadcrumbs + ⌘K CommandPalette; `shared/layout/{nav,breadcrumbs,command-palette-store,CommandPalette,TopBar}` + recomposed `AppShell`) ✅ **BUILT** genesis `cf8bfb8` · **27-06** Applications/Features/Spec (core SDLC surface → mockups; gradient tiles, rounded-2xl, motion, glassy chrome, breadcrumb names) ✅ **BUILT** genesis `a85dd83` · **27-07** Runs/Run-detail (runs table + glassy header + rounded graph nodes + HITL card; breadcrumb) ✅ **BUILT** genesis `1000af0` · **27-08** Chat/Copilot (soft-gradient session list + glassy composer + rounded copilot cards) ✅ **BUILT** genesis `f541af1` · **27-09** Documents/Memory (restyled + **tokenized the `/memory` constellation** — last hardcoded-dark surface resolved) ✅ **BUILT** genesis `9b2e733` · **27-10** Catalog/Settings/Overview (gradient catalog cards + Overview motion) ✅ **BUILT** genesis `bf41220` · **27-11** polish + a11y (memory-graph keyboard nav + jest-axe on every mountable page; hex gate CLEAN; dark parity verified) ✅ **WORK COMPLETE** genesis `b8defa0` — then **SHIPPED as genesis v0.53.0** (release `fba9a94`, tag `v0.53.0`; **CI green — #6641436 master + #6641437 tag**). Plus user refinements (Home dashboard, table/markdown/chat legibility, sidebar-to-mockup). Each built sub-phase passed an independent review (SHIP); web **vitest 204**, tsc/eslint/build green, genesis pytest **635** + ruff; zero hardcoded brand hex in components.
+>
+> **Release.** Shipped as **genesis v0.53.0** (2026-08-24, CI green — #6641436 master + #6641437 tag; frontend-only, other repos unchanged). **PHASE 27 COMPLETE.** The `/memory` d3 constellation is token-driven (27-09) — no hardcoded-dark surfaces remain.
+
+<!-- archived from bible/08-roadmap-and-backlog.md L263–L319, step 2, 2026-10-20 -->
+
+### ⭐ SHIPPED — Phase 26: Agentic Memory Layer (26-01..26-08) — genesis v0.52.0 + genesis-workflows v0.10.0
+
+> **Specs:** `specs/phase-26-agentic-memory-layer.md` (umbrella) + `phase-26-agentic-memory-layer/26-01..26-08`. **ADR-053**
+> (Genesis Agentic Memory Layer) + **ADR-054** (memory store/infra + local embedder) — **Accepted**. As-built:
+>> `progress/phase-26-agentic-memory-layer.md`. **SHIPPED (26-01 store/`mm0001` + 26-02 embedder/`sqlite-vec` + 26-03
+> `memory-consolidation` + 26-04 `memory-maintenance` + 26-05 read-only `genesis-memory` MCP + 26-06 scheduler/config/
+> `GET /api/system/memory` + 26-08 curation API + `/memory` web workspace).** Release commits genesis `8ed1460` (v0.52.0) +
+> genesis-workflows `88b2bae` (v0.10.0); CI green — genesis #6620119 (master) + #6620121 (v0.52.0), genesis-workflows #6620190
+> (master) + #6620191 (v0.10.0). Gates: genesis pytest **635**, web vitest **189** (jest-axe), genesis-workflows **93** +
+> `validate_library` (reliability trio), ruff/tsc/eslint clean. `genesis db upgrade` covers both genesis.db (v14) + memory.db
+> (v1). Repos: **genesis** + **genesis-workflows** (genesis-core unchanged at v0.9.5). **Deferred (seams built, backlog):**
+> multi-user ACL, auto-prefetch injection, hard-delete/purge, agentic-node `genesis-memory` injection, the two 26-08 contextual
+> reuses (app-detail Memory tab + Settings "Your Memory"), a canvas force-graph lib swap.
+>
+> **Goal.** Distil the conversations Genesis already stores (`chat_sessions`/`chat_messages`) into a persistent, self-maintaining
+> **agentic memory** so agents get radically more effective over time. **Two scopes** — **personal** (a *named user's*
+> preferences / instructions / feedback / work habits / coding style / review rules; **never shared**) vs **shared** (an
+> application's knowledge / architecture / decisions / best practices / business rules / patterns; **entity-anchored** with
+> **traversable relationships**) — × **three types** (semantic / episodic / procedural), **bi-temporal** (invalidate, don't
+> overwrite). Grounded in a survey of **mem0 / Zep-Graphiti / Letta-MemGPT / LangMem / cognee / A-MEM / Stanford
+> generative-agents** — we reproduce a **minimal local subset** of their concepts and integrate **no** external memory service.
+>
+> **Architecture (decided).**
+> - **Store (ADR-054):** a **NEW, separate `~/.genesis/memory.db`** (genesis.db untouched) with its own migration set (`mm0001`) —
+>   a bi-temporal **entity-relationship graph** (`memory_entities`/`memory_relationships`/`memories`/`memory_links`/
+>   `memory_communities`) + **FTS5** keyword index + a **`sqlite-vec`** vector index, behind **DB-agnostic seams**
+>   (`MemoryStore` + `GraphStore` [recursive-CTE traversal] + `VectorIndex` + `Embedder`). This is the explicit **ADR-030
+>   "transcript RAG" trigger** for vectors; the seam makes a later **Postgres + pgvector (+ Apache AGE)** swap a re-home, not a
+>   rewrite.
+> - **Embeddings:** a **small local model** (ONNX/static — e.g. quantized `bge-small` via `fastembed`, or `model2vec`; ~30–150 MB,
+>   CPU, ms-latency) loaded **only in the worker/MCP subprocess**, behind a swappable `Embedder` (a `NullEmbedder` degrades to
+>   FTS5+graph). **No outbound data** (ADR-026); it is NOT a chat LLM.
+> - **Write path (nightly):** a deterministic **`memory-consolidation`** LangGraph workflow — `extract atomic memories →
+>   classify personal/shared + type → extract entities+relationships → reconcile ADD/UPDATE/INVALIDATE/NOOP (vs top-k similar) →
+>   embed + write`. **Kiro-over-ACP** does the reasoning (**ADR-001** preserved; every agent node under the **reliability trio**
+>   ADR-011); program nodes do all I/O (genesis.db read-only; memory.db writes via `asyncio.to_thread` — the §7 lesson).
+> - **Maintenance ("dreaming", periodic):** a **`memory-maintenance`** workflow — **reflect** (synthesize higher-level memories) /
+>   **dedup-merge-evolve** (A-MEM) / **invalidate** contradicted facts (bi-temporal) / **decay-forget** (soft) / recompute
+>   **communities**. Idempotent + reversible; **skips human-curated (protected/pinned/user) memories**.
+> - **Read path:** a **separate read-only `genesis-memory` MCP** (`mcp/memory_server.py`, modeled on `genesis-kb`, **not merged**)
+>   with `search_memory` / `get_entity` / `get_related_entities` (graph traversal) / `get_personal_memory`; **hybrid retrieval** =
+>   relevance (semantic + keyword + entity/graph) × **recency** × **importance** (Generative-Agents scoring), owner/entity-scoped.
+>   Injection is **MCP-only** (the agent is prompted via steering to query it; ADR-002/004/020, ADR-031/045 preserved).
+> - **Management UI (26-08):** a rich, accessible browser to **see + edit** memory centered on an **Obsidian-style force-directed
+>   memory graph** (hover-highlight, local-graph focus, search/filters, **bi-temporal time-scrub**, community coloring) + a
+>   list/table workbench + an inspector editor + a **review queue** + a **browser-only curation API** (edit/supersede, pin/protect/
+>   verify, soft-forget, hard-delete, relationship CRUD, manual add). **Human edits are authoritative + protected** from the
+>   nightly maintenance; the **agent MCP stays read-only**. Force-graph lib is a **lazy-loaded ADR-027 stack extension**.
+> - **Scheduling + config:** the two jobs fire on the **Phase-23 scheduler** (m0012 `scheduled_jobs`, ADR-047) — consolidation
+>   nightly, maintenance weekly, preflight-skip when unconfigured; a **named-user** setting owns personal memory; a read-only
+>   `GET /api/system/memory` status.
+>
+> **Confirmed decisions (2026-08-19/20):** SQLite+sqlite-vec now + an easy Postgres swap (seam) · a true relationship graph with
+> traversal · reflection/"dreaming" in v1 · MCP-only injection · personal memory keyed to a named user · a small local embedder ·
+> a rich visual Memory Management UI with an Obsidian-style graph in v1. **Non-goals/deferred:** multi-user ACL enforcement; the
+> Postgres migration itself (seam only); hot-path in-turn writes; auto pre-fetch/prompt-injection; embedding the KB/documents
+> into memory. **Suggested build order:** 26-01 → 26-02 → 26-03 → 26-05 → 26-08 → 26-04 → 26-06 → 26-07.
+
+<!-- archived from bible/08-roadmap-and-backlog.md L321–L356, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED (COMPLETE) — Phase 25: Architectural Foundation Hardening (code-review remediation) — genesis v0.50.0 + genesis-core v0.9.5
+
+> **Specs:** `specs/phase-25-architectural-foundation-hardening.md` (umbrella) + `phase-25-…/25-01..25-14` (25-11 → backlog).
+> **ADR-050 + ADR-051 + ADR-052 → Accepted (shipped); ADR-026 amended (25-04 localhost guardrail).** Remediates the production-readiness review (`code-review/genesis-production-readiness-review-2026-08-18.md`).
+> **Shipped in two releases:** **v0.49.0 + core v0.9.4** (25-01..25-08, 2026-08-18) and **v0.50.0 + core v0.9.5** (25-09/25-10-core/25-13 + Overview trim, 2026-08-19), both CI-green. **25-11 (per-story execution) + 25-12 (AI cost pass) are BACKLOG.** Sub-phases:
+>
+> - **25-01 ✅ SHIPPED** — typed SDLC domain (`genesis/domain/`) + single-authority `LifecycleService` + m0013 audit + spec action
+>   endpoints (illegal/precondition → 409) + web allowed-action buttons (`d70bd20`+`0b90392`). ADR-050 (Proposed→Accepted at 25-14).
+> - **25-02 ✅ SHIPPED** — structured logging + correlation IDs (`genesis/runtime/logging.py`; zero-dep stdlib, JSON/console, redaction),
+>   wired into create_app/worker/CLI (`c8ec7d6`).
+> - **25-03 ✅ SHIPPED** — shared `genesis_core/util/atomic_json.py`; hardened custom MCP/CLI stores + environments/secrets/dist writes
+>   (atomic + per-path lock) (`bc06930`+`105c538`).
+> - **25-04 ✅ SHIPPED** — network-exposure guardrail: `genesis serve/up` refuse a non-loopback bind without `--i-understand-no-auth`
+>   (`0a8f13f`).
+> - **25-05 ✅ SHIPPED** — `AgentProvider` interface + `KiroAcpProvider` over the workflow-agent turn path (`genesis_core/agents/`);
+>   `set_collect_impl` preserved (`a2a0ee1`). ADR-051. (chat session-provider deferred.)
+> - **25-06 ✅ SHIPPED** — **C-5:** `ApplicationSyncService` de-dupes API vs scheduler (`e143c5e`). **C-3:**
+>   `KbStore` **1373 → 652 LOC** via four read mixins (`57f0704`,`07a12f2`,`579317b`,`8a80398`; SCD-2 write path
+>   kept); `api/app.py` **841 → 189 LOC** — a pure composition root, via `register_config_routes` (`715fb1b`),
+>   `register_run_routes` (`73c34ea`, incl. ADR-033 copilot enforcement + SSE, verbatim), `register_catalog_routes`
+>   (`d1f66d1`), and `api/_shared.py` (`85f6ae9`, models/formatters out + kills the create_app↔route import cycle).
+>   DoD met (<250). Deviations (flagged): KbStore via mixins not facade; `FeatureService` skipped (25-01 already
+>   holds the LifecycleService authority).
+> - **25-07 ✅ SHIPPED** — `ChatModeProfile` (C-4, `4cfb3fe`): `read_only`/`copilot`/`feature_spec` behavior (cwd/fs
+>   sandbox/trust/mcp/permission/token/steering) composed into one profile resolved per session; branch-free session
+>   methods (guard: no `self.mode ==`); posture ported verbatim + pinned. `chat/manager.py` 716→639.
+> - **25-08 ✅ SHIPPED** — optimistic concurrency (D-1/§17, `09826e7`): **m0014** row_version CAS on features/specs + `StaleWriteError`→409 + LifecycleService state-CAS + run-start idempotency key; +test_optimistic_locking/test_run_idempotency. Precedes 25-11.
+> - **25-09 ✅ SHIPPED (v0.50.0)** — `DocumentProvider` interface + `GoogleDriveProvider` (`integrations/documents/`); `DocumentSyncEngine` depends on the interface (`cd9abc8`). **ADR-052 Accepted.**
+> - **25-10 ◑ CORE SHIPPED (core v0.9.5, `679ee73`)** — `reliable_agent_step()` helper in genesis-core (+4 tests). **Workflow adoption + LOC proof deferred/opportunistic** (release-gated + design-doc = §7 unusual-topology; adopt in hello-appian when picked up).
+> - **25-13 ✅ SHIPPED (v0.50.0)** — observability (§22): `/system/metrics` + `/runs/{id}/provenance` + feature lifecycle Activity feed (m0013) + web Activity/Metrics views (`cba724e`+`3504c28`). Also: Overview trimmed (Active-runs + Installed-workflows removed, `97a0570`).
+> - **25-14 ✅ DONE** — this closeout: two coordinated releases verified CI-green; ADR-050/051/052 Accepted + ADR-026 amended; bible/tracker/progress + review-delta current.
+> - **25-11 (per-story execution) + 25-12 (AI cost & performance pass) → BACKLOG.** 25-12 moved to backlog 2026-08-19 (data-driven; needs live run telemetry — revisit with real data); 25-11 gated on Breakdown→Stories + per-stage workflows.
+>
+> **PHASE 25 COMPLETE.** Release gate (v0.50.0 / core v0.9.5): genesis **571** pytest + ruff · genesis-core **80** + ruff · web **166** vitest + eslint(0)/tsc/build + stale-bundle guard — all green; CI green (core #6607186, genesis #6607193).
+> - **Backlog:** 25-11 per-story execution (gated on Breakdown→Stories + per-stage workflows).
+> (bible/03 codebase-map + bible/04 ADR-050/051 updated with the shipped modules.)
+
+<!-- archived from bible/08-roadmap-and-backlog.md L358–L373, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED (COMPLETE) — Phase 24: UX revamp + environment-scoped credentials (24-01 genesis v0.48.5; 24-02 genesis v0.48.6)
+
+> **Specs:** `specs/phase-24-ux-revamp-and-environment-credentials.md` (umbrella) + `phase-24-…/24-01` + `24-02`.
+> **ADR-048 + ADR-049 (Accepted).** Both sub-phases shipped, CI green.
+> **(24-01) ✅ genesis v0.48.5 + genesis-workflows v0.9.5:** the two core Appian MCPs (`appian-dev`/`appian-devops`) take their
+> creds from the **environment** — entered on the env form, stored per-env in the SecretProvider (`env-<hash(label)>` scope,
+> never in environments.json), resolved ONLY from the dev-tagged env via `EnvironmentRegistry.resolve_var` (secrets injected at
+> worker/chat/cards); `LCP_API_PATH` → public env field; `LCP_URL`/`APPIAN_DOMAIN` auto-derived + hidden; the two servers no
+> longer render an MCP card + a detail pointer to Settings → Environments; one-time non-destructive migration relocates legacy
+> server-scoped creds. See `progress/phase-24-01-environment-credentials.md`.
+> **(24-02) ✅ genesis v0.48.6 (frontend-only):** Applications-first IA — primary nav = Applications · Chat · Runs · Documents
+> (`/` redirects to `/applications`); Overview (metrics) + Catalog (Workflows|Skills) moved into Settings as the first two tabs
+> (default Overview) via extracted `OverviewSection`/`CatalogSection`; standalone `/catalog[/:id/launch]` + `OverviewPage`
+> retained for deep links. web **163** vitest. See `progress/phase-24-02-nav-and-ia-revamp.md`.
+> **PHASE 24 COMPLETE.** (Optional future polish: rename the Settings container to "Manage"/"System" — ADR-049 Option B — if
+> users still hunt for Overview under the gear.)
+
+<!-- archived from bible/08-roadmap-and-backlog.md L375–L397, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED (COMPLETE) — Phase 23: Scheduled & Full-Package Syncs (genesis v0.48.0)
+
+> **As-built: `progress/phase-23-scheduled-and-full-package-syncs.md`.** Keep the local Appian KB + Document Library fresh
+> automatically. **ADR-047.** genesis-only + **m0012**. CI green (pipeline **#6588951**: genesis + frontend + clean-install).
+>
+> - **23-01 full-package refresh** — the app sync is re-runnable: `api/applications.py` unblocks `sync-application`
+>   **`mode=delta`** (a **full re-export → parse → diff the DB → write only the changes**, 16-07 Option A — **not** an env
+>   delta-patch), with `_resolve_mode` (auto-pick baseline↔delta, `refresh` alias) + a per-app **already-running 409** guard;
+>   the web app-detail action is relabeled **Refresh** (mode-less auto-pick, disabled while running).
+> - **23-02 scheduler foundation** — **m0012 `scheduled_jobs`** + `ScheduleStore` + `runtime/scheduler.py` (pure `due_slot` +
+>   a 60s asyncio tick; jobs run as **background tasks**; **mark-before-work**; **restart-safe** within-day via `last_fired_slot`;
+>   handler-gated). Started/stopped in the app lifespan; `DEFAULT_JOBS` seeded on boot.
+> - **23-03 jobs + endpoint** — `application-sync` (all tracked apps, **07:00 IST weekdays** — **(Superseded by Phase 45 / ADR-074, genesis v0.76.0: `application-sync` is now enabled by default every 4 h 08:00–20:00 IST weekdays, user-configurable in Settings → General, incremental with full fallbacks.)** — **serialized** — Appian export is
+>   one-at-a-time/409; per-app mode-pick; skip-if-running; skip if no dev env / workflow uninstalled) + `document-library-sync`
+>   (`scope=library`, **08/12/16/20 IST weekdays**; skip if `gws` down / workflow uninstalled); read-only
+>   `GET /api/system/schedules` (`api/schedules.py`). Released **genesis v0.48.0**.
+>
+> **Gate:** backend **464** pytest + ruff; web **161** Vitest + eslint + tsc + build; CI green. genesis-core / kiro-agent-sdk /
+> genesis-appian-parser / genesis-workflows **unchanged** (the `sync-application` delta mode + `sync-documents` library scope
+> already existed). **Live acceptance** is user-observed (leave `genesis serve` up across a slot, or seed a near-future time —
+> the app-sync job fires once, runs apps serially, records `last_run_*`; the doc job fires on 4-hour slots, none overnight/
+> weekends). **PHASE 23 COMPLETE.** (Deferred: true incremental delta [Appian changed-objects API]; a user-facing schedule
+> config UI [the read-only endpoint + table are the seam]; a `scheduled_job_runs` history table.)
+
+<!-- archived from bible/08-roadmap-and-backlog.md L399–L458, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED (COMPLETE) — Phase 22: Distribution & Browser-Based Shipping (clone + git-tag) (genesis v0.47.0)
+
+> **As-built: `progress/phase-22-distribution-and-shipping.md`.** A **standard, working way to ship Genesis to internal
+> users** as a **local, browser-based** app — modeled on `appian/prod/friday`'s clone + venv + git-tag self-update installer,
+> but browser-based (no Mac `.app`), leveraging Genesis's single-port `genesis serve`. **ADR-046** (clone+tag distribution;
+> wheel+index deferred; Docker/native-app out). **genesis-only, no schema.**
+>
+> **Shipped (22-01..22-07), all CI green (pipeline #6558223: genesis + frontend + the new clean-install):**
+> - **22-01 installer** — `scripts/install.sh`: prereq + **SSH-access preflight** (per-repo `git ls-remote`) → clone (one
+>   clone; deps via git+ssh tag pins) → venv → `pip install .` → `genesis db upgrade` → scaffold + writes `~/.genesis/dist.json`.
+> - **22-02 launcher** — `runtime/launcher.py` = single source of truth for **`genesis up/down/status/logs`** (background serve
+>   + health-wait + open browser); `scripts/genesisctl.sh` rewritten as a thin wrapper.
+> - **22-03 updates** — `runtime/updater.py` + `api/system` `GET/POST /system/update` + **`genesis update`** + an **UpdateBanner**
+>   in `AppShell` (one-click: highest `vX.Y.Z` tag vs deployed → on-branch guard → checkout → `pip install .` → `db upgrade` →
+>   detached restart). Tracked branch = **`master`**; dist config `~/.genesis/dist.json`.
+> - **22-04 Kiro auth** — `runtime/kiro_auth.py` (`whoami` status / pty device-flow login / logout) + `api/system/kiro*` +
+>   **Settings → General "Kiro sign-in"**. (Real-CLI whoami parse: first JSON line + identity claims.)
+> - **22-05 preflight** — `runtime/preflight.py` + `GET /system/preflight` + a dismissible **PreflightChecklist** modal
+>   (required: kiro/db/health; optional: dev-env/uv/gws) with Fix→ links.
+> - **22-06 CI + release** — a **`clean-install`** CI job (fresh non-editable install boots+migrates+serves via `genesis up`;
+>   shellcheck); released **genesis v0.47.0**.
+> - **22-07 docs** — README quickstart + **`docs/INSTALL.md`** (shipped in v0.47.0) + this bible refresh.
+>
+> **Gate:** backend **437** pytest + ruff; web **160** Vitest + eslint + tsc + build; shellcheck — all green. genesis-core /
+> kiro-agent-sdk / genesis-appian-parser / genesis-workflows **unchanged**. **Live acceptance** is user-driven (a clean-machine
+> `install.sh` → `genesis up` → in-app Kiro sign-in → tag a release → the banner → `genesis update`; the device-flow login +
+> detached restart are headless-undrivable). **PHASE 22 COMPLETE.** (Deferred: wheel+package-index transport; Windows-native
+> beyond WSL; auto-apply updates.)
+>
+> **▸ Follow-up patch — genesis v0.48.1 (CI green, #6589165): updater dev-guard.** The 22-03 updater's `repo_dir()` fallback
+> also matches a developer's **editable checkout**, so it showed a spurious "update available" (the editable metadata version
+> lags the git tags) and wired a one-click Update that runs **`pip install .`** — which **clobbers the editable sibling
+> installs** (genesis + core + sdk + parser → non-editable). Fix: a real clone+tag **deployment** is marked by
+> `~/.genesis/dist.json` (`updater.is_managed_install`); when it's absent (dev/editable), `check()` returns
+> **`managed=False` + `update_available=False`** (banner hidden) and `apply()` **refuses** with a clear message. Shipped
+> clone-installs (dist.json present) are unaffected. `UpdateStatus` gains a `managed` field. +2 updater tests → **466**.
+> (Discovered live: the button had been clicked in the dev tree; recovery = `git checkout master` + re-`pip install -e`
+> the four repos `--no-deps`.) See §7's Phase-23 lesson + §6's "do not `pip install .` in the dev venv" note.
+>
+> **▸ Follow-up patches — genesis v0.48.2 + v0.48.3 & genesis-workflows v0.9.4 (CI green): real-install Dev-MCP + packaging
+> fixes.** Found deploying to fresh machines. **(a) SPA packaging (v0.48.2):** the wheel didn't ship `web/static` (it's a repo
+> sibling, not in `packages=["genesis"]`) → `/` 404'd on a real install while `/api` worked. Fix: `force-include web/static →
+> genesis/web_static` + `api/app._resolve_web_static()` (packaged-first, repo fallback); clean-install CI now asserts `/` serves
+> the SPA. **(b) Dev-MCP app enumeration (v0.48.2 + genesis-workflows v0.9.4):** `kb/dev_mcp` now surfaces `isError` (HTTP 401)
+> as a real reason (was a silent empty list → misleading "No untracked apps found") + **paginates** `listApplications` (was
+> capped at 50 → now all apps); `LCP_API_PATH` is a per-dev-env **persisted** field (defaulted) not a hardcoded literal; and the
+> `appian-dev` registry **injects `USERNAME`/`PASSWORD` from the same `LCP_*` secrets** because current lcp-mcp-server builds
+> read the bare names (the real 401 root cause — see §7). **(c) Scheduler (v0.48.3):** the `application-sync` job ships
+> **disabled by default** (on-demand refresh unaffected; re-enable later). Backend **473** pytest + ruff green. Also surfaced:
+> the baseline sync's **DevOps export** needs a valid `APPIAN_API_KEY` + "External Deployments" enabled (a separate 403, not a
+> genesis bug). See §7's two v0.48.2 lessons.
+>
+> **▸ Follow-up patch — genesis v0.48.4: one-click Update upgrades the WHOLE stack.** `updater.apply()` now also runs
+> `genesis install` to refresh the **genesis-workflows** library — the only related repo that isn't a pip dependency (the
+> pinned **genesis-core / kiro-agent-sdk / genesis-appian-parser** are already re-pulled by `pip install .`, since they're
+> git+ssh tag pins in genesis's pyproject). So clicking **Update** now updates genesis + core + sdk + parser + workflows in one
+> go, to the version set the genesis release pins (ADR-019 compat contract). Library refresh is non-fatal (warns on failure).
+> Note: the update *banner* still fires on a new **genesis** tag — the release protocol bumps genesis's pins alongside any
+> core/sdk change, so a new genesis tag accompanies dep changes. (A future enhancement: an independent multi-repo version check
+> so a workflows-only tag also surfaces a banner.)
+
+<!-- archived from bible/08-roadmap-and-backlog.md L460–L499, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED (COMPLETE) — Phase 21: Feature Workspace, Spec-Builder UX & Chat Parity (genesis v0.46.0 + genesis-core v0.9.3 + kiro-agent-sdk v0.7.0)
+
+> **As-built: `progress/phase-21-feature-workspace-and-chat-parity.md`.** A **Phase-20 live-feedback pass** — after the user
+> used Features + the Spec builder, three themes: **(A)** the feature page becomes a proper **workspace**, **(B)** the spec
+> builder becomes **chat-first**, and **(C)** the reused chat reaches **Kiro CLI/ACP parity**. **ADR-044** (a feature = a
+> pipeline of artifact stages, each with its own status) + **ADR-045** (chat mirrors the CLI/ACP surface; **refines ADR-031** —
+> introspection free, write-actions human-confirmed via the Phase-13 bridge). Release chain: **kiro-agent-sdk v0.7.0** →
+> **genesis-core v0.9.3** (SDK pin) → **genesis v0.46.0**; all CI green.
+>
+> **Shipped (21-01..21-07):**
+> - **21-01 ACP parity spike** — `spike/2026-08-12-acp-parity.md`; verified the surface vs **kiro-cli 2.16.2** (models+agents on
+>   `session/new`; commands as a notification; autocomplete client-side; `execute` streams; `contextUsagePercentage` + image cap).
+> - **21-02 feature workspace** — `web/features/features/ArtifactPipeline` (Spec **Edit**→builder / **View**→read-only preview
+>   via `artifact?annotate=0`; Design/Breakdown disabled placeholders); builder split to `…/features/:id/spec`; feature card
+>   drops the spec status. **ADR-044.**
+> - **21-03 spec-builder UX** — full-width `ChatThread` (`chrome="spec"` — no copilot banner) + a full-screen annotatable
+>   **Preview** popup (the doc + **our own comment-queue rail** + one **Send-all**); **`feature_spec` sessions excluded** from the
+>   main Chat list (`ChatStore.list(exclude_modes=…)`).
+> - **21-04 SDK ACP extensions** — kiro-agent-sdk **v0.7.0**: `SystemInit` models/modes/commands; `set_model`/`set_mode`;
+>   `execute_command`; `prompt(images)`; `on_commands`/`on_session_status`.
+> - **21-05 chat parity** — **m0011 `chat_sessions.model`**; `ChatManager` model-at-creation + `ensure_agent_catalog` +
+>   slash-`execute_command` routing + clear/compact + images; `api/chat` `/chat/{models,commands}` + `…/{model,clear,compact}` +
+>   `SendMessage.images`; `Composer` parity toolbar (model select + context meter + Clear/Compact) + **Commands** palette
+>   autocomplete + image attach — **both** the main chat and the spec builder. **ADR-045.**
+> - **21-06 chat transcript export** — `chat/export.py` + `GET …/export.md` (Markdown, includes tools + thinking); an Export
+>   link in the shared chat toolbar. (PDF deferred → browser print only.)
+> - **21-07 release** — the chain above; ADR-044/045 Accepted; docs + this bible refreshed.
+>
+> **Gate:** genesis **409** pytest + **150** Vitest; genesis-core **65**; kiro-agent-sdk **93**; ruff/eslint/tsc clean; CI green.
+> **Live acceptance** is user-driven (restart `genesis serve` to load the new server code + the v0.7.0 SDK). **PHASE 21
+> COMPLETE.** (Optional future polish: mid-conversation model switch; slash-command argument entry; the sequential card-unlock
+> once Design/Breakdown exist; a spreadsheet-grid preview.)
+>
+> **▸ Follow-up patch — genesis v0.46.1 (CI green, #6556691):** post-release live-feedback bug fixes to the chat parity
+> surface (all backend, `genesis/chat/`). (1) **Slash commands hung** — they were dispatched via `_kiro.dev/commands/execute`,
+> which times out headlessly for every command (verified vs kiro-cli 2.17.0); rerouted through the normal `prompt()` path
+> (`stream_turn` + the Clear/Compact `run_slash_command`), so `/effort`, `/model`, `/clear`, `/compact`, etc. return instantly.
+> (2) **`export.md` 500** — `session_to_markdown` now accepts the float that `session_usage_total` actually returns (was
+> assuming a dict). (3) **export thinking formatting** — coalesce streaming `agent.thought` deltas into one blockquote (raw, not
+> per-chunk stripped). Tests 409→**411**. See §7's two v0.46.1 lessons.
+
+<!-- archived from bible/08-roadmap-and-backlog.md L501–L527, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED (COMPLETE) — Phase 20: Features & Spec Authoring (genesis v0.45.0)
+
+> **As-built: `progress/phase-20-features-and-spec-authoring.md`.** An Appian application gains first-class **Features** (the
+> unit of work an engineer develops), and inside a feature a conversationally-authored, annotatable **Spec** — the first of
+> what will grow into design docs / user stories on the **feature page**. **ADR-042** (Features & Specs as first-class app
+> sub-entities; Chat-authored — ADR-001 intact; HTML-authoritative; draft→in-progress→in-review→completed) + **ADR-043** (embed
+> the vendored MIT **Lavish** annotation SDK). **genesis-only release; genesis-core/genesis-workflows unchanged.**
+>
+> **Shipped (all CI green; ADR-042/043 Accepted):**
+> - **20-01 embed spike** — `spike/2026-08-11-lavish-embed.md`; proved the Lavish SDK embeds (postMessage-only, esbuild-bundled,
+>   user-confirmed round-trip) + captured the theming seam.
+> - **20-02 data model** — **m0010** (`kb_features`/`kb_feature_specs`/`kb_feature_spec_revisions`, schema v10) + `FeatureStore`
+>   (untrack cascades features — intrinsic-to-app).
+> - **20-03 features surface** — `api/features.py` (feature CRUD + spec create) + **Features** tab + **feature page**
+>   (`/applications/:uuid/features/:featureId`) + Create-spec empty state.
+> - **20-04 spec chat** — a bound **`feature_spec`** Chat session (additive mode; `genesis-kb` auto-wired) seeded with the
+>   app/feature identity; **Add context** (the app's linked business artifacts); milestone snapshots + status.
+> - **20-05 embedded review** — vendored Lavish SDK (`api/assets/lavish/`, Genesis-themed) served same-origin; `SpecWorkspace` =
+>   reused `ChatThread` + sandboxed review iframe + the postMessage **annotation→chat bridge** + Export-`.md` (`markdownify`).
+> - **20-06 release** — genesis **v0.45.0**, CI green; ADR-042/043 Accepted.
+>
+> **Live-accepted** (create feature → the spec chat authors `spec.html` → annotate a passage in the embedded review → the
+> comment flows into the chat → the agent revises). **Two live fixes** folded in (see §7): the `feature_spec` **cwd = the fs
+> sandbox**, and **trusting `fs_read`/`fs_write`** (kiro-cli's built-in `fs_write` tool was being auto-denied). Context is
+> delivered as **`./context/` files** the agent reads on demand (not dumped into the transcript). **PHASE 20 COMPLETE.**
+> (Optional future polish: multiple specs per feature + templates; design-docs / user-stories tabs; the Mermaid-as-Excalidraw
+> whiteboard; a durable per-session identity preamble so it survives long-conversation cold-starts.)
+
+<!-- archived from bible/08-roadmap-and-backlog.md L529–L560, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED (COMPLETE) — Phase 19: Genesis Document Library (genesis-core v0.9.2 + genesis v0.44.0 + genesis-workflows v0.9.3)
+
+> **Handoff — as-built: `progress/phase-19-document-library.md`.** Attach the business documents that
+> describe an application (the PDFs/Word/Excel/Google Docs in Google Drive) to Genesis, parse them to LLM-consumable Markdown
+> (+ JSON for tabular), and use them **alongside the Appian KB** for spec generation / design discussion. Documents are a
+> **global first-class store** (`kb_documents`, one row per unique doc, dedup by Drive file-id / upload hash) **linked into apps**
+> (`kb_document_links`); **untrack unlinks, never deletes** (**ADR-041**). Google Drive is reached via the **Google Workspace CLI
+> (`gws`)** integrated as a **managed-native CLI connector** (**ADR-040**, the CLI analog of the native Appian MCP — single
+> static binary, no `uv`): Genesis owns an **isolated** config dir (`~/.genesis/cli-tools/gws/config`, file keyring, its own
+> `gws auth login`) and **reads the OAuth client** from the dotfiles-provisioned `~/.config/gws/client_secret.json` — **ships no
+> token**; the dotfiles setup is a documented prerequisite. Read-only Drive/Docs/Sheets/Slides scopes only.
+>
+> **Shipped (all CI green; ADR-040/041 Accepted):**
+> - **19-01 spike** — `spike/2026-08-11-gws-oauth-and-export.md` (live-verified).
+> - **19-02 managed-native `gws` connector** (genesis-core v0.9.2 `CliRegistry` resolution + genesis `NativeCliInstaller`/`gws`
+>   seam/login/`api/native_cli.py`/`genesis cli` + genesis-workflows `cli-registry.json`); live isolated-login smoke test passed.
+> - **19-03 data model** — m0009 (`kb_documents`/`_links`/`_sections`, schema v9) + `DocumentStore` (untrack unlinks-not-deletes).
+> - **19-04 parsing** — `kb/doc_parsing.py` (PDF/DOCX/XLSX/CSV/MD/TXT → Markdown + per-tab JSON + sections); deps pinned
+>   `pypdf==6.15.0`/`python-docx==1.2.0`/`openpyxl==3.1.5`; Google-native export→binary/text convergence.
+> - **19-05 sync** — `DocumentSyncEngine` (`ctx.extras['document_sync']`) + the deterministic **`sync-documents`** workflow
+>   (async `to_thread` write) + `api/documents.py` (upload/gdrive add [auto-syncs Drive docs], link/unlink, sync single|app|
+>   library with friendly 409, list/search/get/delete).
+> - **19-06 consumption** — `genesis-kb` MCP `list/get/search_documents` (auto-trusted in chat) + `build_evidence_pack` includes
+>   linked docs as bounded excerpts (document-aware `design-doc`/`generate-business-map`).
+> - **19-07 web** — Document Library page + **full-screen document viewer** (`/documents/:id`, full-width + overflow scroll) +
+>   per-app **Business Artifacts** tab (add upload/drive/**multi-pick**, unlink/sync) + Settings→CLI **gws connector card**.
+> - **19-08 release** — genesis-core **v0.9.2** → genesis **v0.44.0** → genesis-workflows **v0.9.3**, all CI green; ADR-040/041
+>   flipped to **Accepted**. **Tests:** genesis 375 pytest + 138 Vitest · genesis-core 65 · genesis-workflows 75 + validate_library.
+>
+> **Live-accepted:** a real Google Drive doc (incl. an .xlsx) added → auto-synced via `gws` export → parsed → viewed in the
+> full-screen viewer. **PHASE 19 COMPLETE.** (Optional future polish: a spreadsheet-grid view from `tables.json`; a scheduler
+> for periodic document sync; semantic/pgvector document search — an ADR-030 trigger.)
+
+<!-- archived from bible/08-roadmap-and-backlog.md L563–L583, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED (COMPLETE) — Phase 18: Appian Parser Accuracy Overhaul (genesis-appian-parser v0.2.0 + genesis v0.40.0 + genesis-workflows v0.9.2)
+
+> **Fixed a catastrophic dependency under-linking bug in `genesis-appian-parser`.** A real 2,620-object app reported
+> **804 orphans (30.7%), 803 provably false** — objects genuinely referenced by expression rules / interfaces /
+> constants. Root cause (inherited from the Atlas port): field-path-scoped reference extraction (no Constants / AI Skills
+> / Decisions / Translation Strings / Documents) + `is_orphan` = "not bundled" rather than "unreferenced". Reverified
+> against real XML + the original **Atlas** parser + the **Jarvis** plugin (best-of-both; §9 decision matrix in the spec)
+> and drove accuracy **>95%**, verified by a committed **raw-XML reference oracle** + a **≥95% CI gate**: edge recall
+> **0.324 → 0.978**, precision **0.999**, referenced-object recall **0.869 → 1.0**, **orphans 804 → 0**, false-orphan
+> rate **0.311 → 0.0**, edges 5,084 → 10,617, **12 cross-app integration points**. Also delivered the user's
+> **APPREF/ENTRYPOINT** cross-app integration-point model (by-name `rulereferencebyname`, ENTRYPOINT/APPREF naming +
+> 10-category taxonomy, orphan-exempt, `integration_*` metadata + `stats.cross_app`). **Live-validated on the user's real
+> app** (delete + re-add baseline sync; the venv's editable parser install picks up main without a `genesis serve`
+> restart — parsing runs in a fresh subprocess worker). Delivered **18-01..18-05** on `genesis-appian-parser` main
+> (afcb66d/31567fa/a357db6/c86b20c/44472c4); suite 13 → **25** green, ruff clean. **18-06 SHIPPED:**
+> `genesis-appian-parser` **v0.2.0** (05d0fea) → repin `genesis` **v0.40.0** (8477945) → `genesis-workflows` **v0.9.2**
+> (79edb75), all CI green (a fresh `sync-application` baseline/delta recomputes the accurate graph into the KB).
+> **Deferred:** a **Tempo Report** parser + **generic-haul fallback** (need a package containing those types), richer
+> per-type golden fixtures, Jarvis `orphanCluster` + `TagDetector` behavioral tags (a future Business-Map capability
+> signal). Specs: `specs/phase-18-parser-accuracy.md`; as-built: `progress/phase-18-parser-accuracy.md`. **PHASE 18
+> COMPLETE.**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L585–L611, step 2, 2026-10-20 -->
+
+### ✅ SHIPPED (COMPLETE) — Phase 17: Business Application Map (17-01..17-06; genesis v0.39.0 + genesis-workflows v0.9.1)
+
+> **Agent-synthesized, business-language map of what an application does end-to-end** — **(A)** value stream(s) + **(B)**
+> capability constellation — explicitly **NOT** a technical/object/bundle view (the user's hard steer: no objects, bundles,
+> pages, or properties; those terms are **banned** from the output). Business meaning is *derived*, not parsed, so it is
+> produced by a new **deterministic `generate-business-map` LangGraph workflow** with narrow **agent** nodes (ADR-001)
+> wrapped by the reliability trio (ADR-011); **evidence-grounding + coverage + business-language** validators make it
+> un-hallucinated (every business element cites real KB object UUIDs) + a HITL review gate. Reads the **code-free KB only**
+> (via `genesis-kb`/`KbStore` — no env round-trip), emits a versioned **`BusinessModel v1`** persisted in **m0008
+> `kb_business_maps`** (code-free, point-in-time, stale-on-sync); the web renders A+B on the existing **@xyflow/react +
+> dagre** stack with focus+context linking. **Specs:** `specs/phase-17-business-application-map.md` (umbrella) +
+> `phase-17-business-application-map/business-model-contract.md` + `17-01..17-06`; **ADR-039** (Proposed at drafting; **Accepted** — shipped, see below). **Release chain
+> when built:** genesis (m0008 + KbStore + evidence extractor + API + web) → genesis-workflows (workflow + catalog);
+> genesis-core likely unchanged. **Backend (17-01 persistence/m0008 + 17-02 evidence pack + 17-04 API) SHIPPED in
+> genesis v0.35.0; the deterministic `generate-business-map` workflow (17-03) SHIPPED in genesis-workflows v0.9.0
+> (2 Kiro agent nodes + reliability trio + evidence-grounding/coverage/business-language validators + escalate/review
+> gates). The web **Business Map view** (17-05 — React Flow **A** value stream + **B** capability constellation,
+> first tab, click-for-detail popups, focus+context linking) SHIPPED and was **exercised live**: the first real
+> generation against the 2,763-object "AS GSS Full Application" produced a rich, high-quality model (10 capabilities /
+> 10 entities / 14-stage value stream, 2 decision branches) — readability iterations followed in **genesis v0.37.0**
+> (readable zoom + MiniMap + radial constellation) and **v0.38.0** (detail popups + smoothstep edge routing). NEXT =
+> **17-06** shipped the hardening: (a) a **friendly 409 "workflow not installed"** on generate instead of a 500 (a
+> newly-released library workflow must be `genesis install`-ed first — genesis v0.39.0); (b) **recalibrated the coverage
+> floor 0.6 → 0.3** — coverage is a lenient "is the map non-trivial" signal (a good map abstracts heavily), the human
+> **review gate** is the real backstop (genesis-workflows v0.9.1). **Live-acceptance PASSED** — the first real map read
+> as a coherent business story with no technical vocabulary. **PHASE 17 COMPLETE.** (Optional future polish: richer
+> golden-fixture harness; per-value-stream layout tuning.)**
+
+<!-- archived from bible/08-roadmap-and-backlog.md L613–L768, step 2, 2026-10-20 -->
+
+### ✅ CLOSED (historical heading kept below; remaining items in `specs/backlog/phase-16-deferred.md`) — was: ⭐ ACTIVE (IN PROGRESS — planning complete + pushed; 16-01/16-02/16-03/16-04/16-08 + **16-05 (server + chat)** shipped, **16-05b (workflow cutover) + 16-07 next**) — Phase 16: Appian Knowledge Base ("Atlas-into-Genesis")
+
+> **(Historical — Phase 16 is closed. What it left open is tracked in `specs/backlog/phase-16-deferred.md`: 16-06 versioning [externally gated] and 16-05b [`erd-generation` still uses `appian-atlas`; `design-doc` was removed in Phase 34]. The true incremental delta [§1.3] was delivered by Phase 45. Current state: `bible/01`; no active phase.)**
+
+> **Handoff for the next session:** planning is complete AND implementation is under way. Read
+> `specs/phase-16-appian-knowledge-base.md` (umbrella) + `phase-16-appian-knowledge-base/16-01..16-08` +
+> `genesis-kb-tool-contracts.md`, ADR-036/037/038, and `progress/phase-16-04-applications-surface.md` +
+> `progress/phase-16-08-native-mcp.md`. **Shipped so far:**
+> **16-01** = `genesis-appian-parser` **v0.1.0** (`parse(zip|bytes) -> KbParseResult`, code-free); **16-02** = genesis
+> **v0.28.0** (m0007 `kb_*` + `KbStore`); **16-03** = the **`sync-application`** workflow (genesis **v0.29.1** +
+> genesis-workflows **v0.8.2**); **16-08** = the dev-env `is_dev` toggle (§2.0, genesis **v0.30.0**) + the
+> **managed-native Dev/DevOps MCP installer** (Stage B: genesis-core **v0.9.1** + genesis **v0.31.1** +
+> genesis-workflows **v0.8.4**); **16-04** = the **Applications surface** (genesis **v0.32.0**); **16-05** = the
+> **`genesis-kb` MCP server + CHAT cutover** (genesis **v0.33.0**); **16-07 Option A** = the **`sync-application` delta
+> path** (re-export + SCD-2 delta-merge, genesis-workflows **v0.8.5**) — all CI green.
+> **Next: 16-05b** (cut `erd-generation` + `design-doc` off `appian-atlas` → `genesis-kb`; blocked on Section-C schema +
+> 16-06 versioning + Jarvis→Dev-MCP — `appian-atlas` RETAINED for them meanwhile) **+ the 16-07 remainder** (true
+> incremental delta via a new Appian changed-objects API [the Dev MCP can't back it], scheduler, per-release changelog).
+> **📋 See `specs/backlog/phase-16-deferred.md` for the full deferred register.** Keep extending `tracker.md` §6 as you go.
+
+**Goal.** Move the Appian knowledge base *inside* Genesis and make Genesis an agentic Appian-development environment.
+Stop calling external **Atlas** (GitLab-served pre-parsed KB) / **Jarvis** (in-Appian KB) as services; reproduce their
+*knowledge* surface locally and route every *environment* call through the native **Dev MCP / DevOps MCP**.
+
+**Architecture (decided):**
+- **`genesis-appian-parser`** — a NEW pinned repo: port the Atlas parser's front-half (unzip → type-detect → 15 object
+  parsers → UUID/URN resolution → dep-graph → entry-point **bundles** → diff-hash) into a Genesis-owned, stdlib-only
+  package that emits an **in-memory `KbParseResult`** — **no source code persisted**, no file output. (Atlas parser repo
+  `appian/prod/solutions-atlas-parser`; KB repo `appian/prod/solutions-atlas-kb` with `sync_packages.py`; Atlas MCP
+  `appian/prod/solutions-atlas-mcp-server` — all read via `glab`.)
+- **KB in `genesis.db`** — migration **m0007**, `kb_*` tables, a **temporal SCD-2** model (objects/edges validity-ranged
+  by sync) + `kb_bundles`(+`flow_json`) + `kb_releases`; **cross-app queryable**; **NO code**.
+- **`sync-application` LangGraph workflow** — deterministic **REST export** (Appian Deployment API in a program node — no
+  agent, no credits) → parse → SCD-2 merge → recompute bundles → record sync.
+- **Applications page** (`kb_applications`, `/api/applications*`) — tag one env as **dev** (`is_dev` toggle, single-select,
+  in the existing Environments registry — supplies URL + creds for all Phase-16 auth; 16-08 §2.0) → list its apps via Dev
+  MCP → **Add** an app → baseline sync → status/releases.
+- **`genesis-kb` MCP** — Genesis-owned read-only stdio server (like `introspection_server`), serving the KB; **cuts
+  chat / erd-generation / design-doc off the external `appian-atlas`** onto it (the "KB swapped, functionality
+  preserved" milestone). `get_object_code` fetches SAIL **live via the Dev MCP**.
+- **Native MCP integration (16-08)** — the Dev MCP (`lcp-mcp-server`) + DevOps MCP (`appian-deployment-mcp`) installed as
+  **managed, versioned, updatable** local servers (bundles the user placed at `artifacts/mcp-servers/`); **updatable
+  without forking** (manual drop-in — the operator installs a new bundle; Genesis versions it + keeps the prior for
+  rollback; no auto-fetch source — 2026-08-05).
+  **Connectivity foundation (16-08 §2.0, build FIRST):** a single-select **`is_dev` toggle** on the Environments
+  registry — the registry may hold many envs, exactly one is tagged **dev**, and that env's URL + credentials feed all
+  Phase-16 auth (REST export, Dev MCP, DevOps MCP, changed-objects API); no dev env ⇒ fail fast + a "Test connection".
+
+**Scope decisions (2026-08-04, from a full Atlas(34-tool)+Jarvis(50-tool) audit — see `genesis-kb-tool-contracts.md`):**
+- **Iteration 1 = 16 read-only KB tools** (Section A / Tier-1): `list_applications`, `get_app_overview`,
+  `search_objects`, `get_dependencies`, `get_object_detail`, `get_entry_points_for_object`,
+  `get_dependents_batch`/`get_precedents_batch`, `get_shared_objects`, `search_bundles`, `get_bundle`, `list_orphans`,
+  `get_orphan`, `get_dependency_path`, `get_transitive_dependencies`, `get_hub_objects`, `get_object_code` (live).
+  Return shapes **mirror the Atlas MCP** for a lossless cutover.
+- **Versioning (6 Version tools + release tagging + point-in-time) = BACKLOG (16-06)** — gated on Dev MCP **AP-62096**
+  ("Object version viewing/comparison", Code Review, **26.8 GA / 2026-08-28**; underlying version-UUID plumbing AP-51279
+  is Done). Schema kept version-ready (additive) so it lands code-only later.
+- **Schema/DDL/data-gen (7+2 tools) = DEFERRED (Section C).** **Write/deploy (Section E) = OUT.** **Documents/git-content/
+  pipeline-refresh (Section F) = OUT.** **Live-env reads (Section D) = via Dev/DevOps MCP only.**
+- **Governing principle:** *knowledge fetch → internal `genesis-kb`; any environment call → Dev/DevOps MCP.* Read-only
+  against Appian throughout (Dev MCP read-only allowlist; DevOps export/status/download only).
+
+**Sub-phases (all in `phase-16-appian-knowledge-base/`; iteration-1 unless noted):** 16-01 parser (new repo) **✅ v0.1.0** ·
+16-02 schema+`KbStore` (m0007) **✅ genesis v0.28.0** · 16-03 sync workflow (baseline) **✅ genesis v0.29.1 + genesis-workflows v0.8.2** · 16-08 native MCP integration (§2.0 dev-env toggle **✅ genesis v0.30.0**; **Stage B installer ✅ genesis-core v0.9.1 + genesis v0.31.1 + genesis-workflows v0.8.4** — 16-08 COMPLETE) · 16-04 Applications surface **✅ genesis v0.32.0** · **16-05 `genesis-kb` MCP server + CHAT cutover ✅ genesis v0.33.0**
+(workflow cutover split to **16-05b ◀ NEXT** — `appian-atlas` retained for erd/design-doc until Section-C schema + 16-06)
+· 16-07 delta refresh **✅ Option A (re-export + delta-merge) genesis-workflows v0.8.5** (true incremental delta via a
+new Appian "changed-in-[start,end]" API + scheduler + per-release changelog = deferred, backlog §1.3–§1.5) · **16-06 versioning —
+BACKLOG**. Suggested build order: 16-01 → 16-02 → 16-03 → 16-08 → 16-04 → 16-05 → 16-05b/16-07; 16-06 later. **Release chain:**
+`genesis-appian-parser` (new) → `genesis` (m0007 + KbStore + kb_server + native-MCP installer + applications api/web) →
+`genesis-workflows` (sync-application + managed-native registry entries). genesis-core likely unchanged.
+
+**✅ 16-03 — DONE (`sync-application` workflow).** genesis **v0.29.1** + genesis-workflows **v0.8.2**, CI green. As built
+(see `progress/phase-16-03-sync-workflow.md`): a program-only graph `resolve_inputs → export_package → v_export →
+parse_package → v_parse → write_kb → v_kb → present`; **export = deterministic Appian Deployment REST** in a program
+node, all network/env/secret access isolated in the `_fetch_package_zip` seam (401/403/404 fail-fast; 409/timeout/5xx →
+retry); **parse → code-free `result.json`**; **write_kb → `KbStore` baseline**, store injected via
+`ctx.extras['kb_store']` (wiring resolved to ctx.extras — `build_context` provides it; `graph.py` never imports the
+platform); re-baseline rejected. genesis pins `genesis-appian-parser@v0.1.0`, adds `EnvironmentRegistry.active()`, and
+hardened the checkpointer connection (WAL + busy_timeout). **`write_kb` is a raw async node that runs the blocking
+`KbStore` write via `asyncio.to_thread`** — the deterministic fix for a flaky CI `database is locked` (a sync write on
+the event loop deadlocks the aiosqlite checkpointer; see §7). `appian-dev`/`appian-devops` registered as managed-native
+refs (resolved the old `lcp` placeholder).
+
+**✅ 16-08 §2.0 — DONE (dev-environment toggle).** genesis **v0.30.0**, CI green (#6502611). The Environments registry
+has an **`is_dev`** flag (single-select — tagging one env clears the others); `EnvironmentRegistry.dev_environment()`/
+`dev_environment_label()`/`set_dev_environment()`; `ConfigService.dev_connection_check()` readiness; API `is_dev` on
+upsert + `POST /config/environments/{label}/dev` + `GET /config/environments/dev/check`; web dev toggle + **dev** badge +
+per-row **Set as dev** + **Test connection**. See `progress/phase-16-08-native-mcp.md`.
+
+**✅ 16-08 Stage B — DONE (managed-native Dev/DevOps MCP installer).** genesis-core **v0.9.1** + genesis **v0.31.1** +
+genesis-workflows **v0.8.4**, CI green (see the progress doc for the one `frontend`-guard caveat). As built:
+`NativeMcpInstaller` (`genesis/mcp/native/`) installs a drop-in bundle → `uv sync` under
+`~/.genesis/mcp-servers/<id>/versions/<v>/` → verify entry → sha256 + lockfile → set `current`; `rollback(id)` to the
+prior version; `active_launch_spec(id)` launches from the **per-server venv, NOT `uv`** (Dev `python -m lcp_mcp_server`,
+DevOps `.venv/bin/appian-deployment`); **no network `update`** (manual drop-in). `NativeMcpLockfile` = own atomic JSON
+store (not `genesis.db`). genesis-core `McpRegistry` resolves a `"managed":"<id>"` entry via an injected `launch_provider`
+(env `${VAR}` stays on the entry, resolved as usual; additive, `CORE_MAJOR`=1) + an 8 MiB introspect stream limit.
+`mcp-registry.json` `appian-dev`/`appian-devops` are managed refs with read-only allowlists **set from the real installed
+`tools/list`** (Dev 67/145, DevOps 13/26). Wiring: `ConfigService` + `worker` inject `native.launch_spec_for`;
+`environments.resolve_var` maps `LCP_URL`/`APPIAN_DOMAIN` from the dev env. Surface: `api/native_mcp.py` (GET status +
+POST install|rollback), `genesis mcp install-native|status|rollback-native` CLI, Settings→MCP "Appian MCP servers" panel.
+See `progress/phase-16-08-native-mcp.md`.
+
+**✅ 16-04 — DONE (Applications surface).** genesis **v0.32.0**, CI green (#6504611: `genesis` + `frontend`). As built
+(see `progress/phase-16-04-applications-surface.md`): `api/applications.py` over `KbStore` + `RunManager` (list /
+available [Dev-MCP `listApplications` via `kb/dev_mcp.py`, best-effort + manual-UUID fallback] / add→baseline sync /
+detail / sync-status / objects / bundles / table-scoped untrack); `KbStore.list_syncs`+`latest_sync`;
+`web/features/applications` (page + Add dialog + detail tabs **Business Map | Overview | Syncs | Releases** [Objects + Bundles tabs removed v0.41.0] + live SyncStatus **shown only while a sync is running**)
++ a Sidebar entry. First consumer of the managed-native Dev MCP. (The `frontend` stale-bundle guard ran green here —
+also closing the 16-08 Stage-B gap where it hadn't executed.)
+
+**✅ 16-05 — DONE (`genesis-kb` MCP server + CHAT cutover).** genesis **v0.33.0**, CI green (pipeline 6513536; `frontend`
+skipped — no web change). As built (see `progress/phase-16-05-kb-mcp-and-cutover.md`): **`genesis/mcp/kb_server.py`** —
+a read-only stdio JSON-RPC MCP modeled on `introspection_server.py` (`mode=ro` genesis.db, 32 KB cap, `-m
+genesis.mcp.kb_server --db <db>`) exposing the **17 Tier-1 tools** over `KbStore` with **Atlas-mirrored shapes**;
+`get_object_code`/`get_orphan` fetch live SAIL via the Dev MCP (`genesis/kb/dev_mcp.py` `object_code`, type→getter map +
+defensive parse; graceful `code_status:"unavailable"`, never fabricated). `KbStore` gained the 7 remaining reads
+(entry-points, dependents/precedents batch, shared, hub, dependency-path BFS, transitive-deps BFS; current-state only).
+**Chat cut over** (`chat/mcp.py`): `genesis-kb` always wired (+ best-effort `@appian-dev` for live code); **`appian-atlas`
+dropped from chat**. 288 pytest green, ruff clean.
+
+**⚠️ Phased-cutover decision (2026-08-06) — `appian-atlas` RETAINED for the workflows.** A lossless `erd-generation` +
+`design-doc` cutover is **not** possible in iteration 1: `genesis-kb` deliberately omits the **schema/DDL tools
+(Section C, deferred)** and the **release/version tools (16-06 backlog, AP-62096)** — exactly what those workflows use
+(`get_app_schema`/`get_schema_relationships`; `list_releases`/`get_object_at_release`/`get_changelog`/`compare_releases`/
+`get_release_impact`), and `design-doc` also still uses **Jarvis**. **Per the user's decision, both workflows STAY on
+`appian-atlas`** (their `required_mcp` unchanged; genesis-workflows not re-released) until parity lands. Only **chat**
+cut over (it used Atlas *structural* reads that `genesis-kb` mirrors). Documented in the phase-16 umbrella spec.
+
+**▶ NEXT — 16-05b (workflow cutover) + 16-07 remainder.** **16-05b** = cut `erd-generation` + `design-doc` off
+`appian-atlas` → `genesis-kb` (+ Dev MCP for live/schema), unblocked by (a) a Section-C schema decision (build the
+schema tools OR repoint their schema/data-model research to live Dev-MCP record-type tools) and (b) **16-06 versioning**
+(AP-62096) for `design-doc`'s release-history, plus retiring Jarvis→Dev MCP there. **16-07 remainder** = the true
+incremental delta (Appian changed-objects API — the Dev MCP can't back it), the scheduler, and the per-release
+changelog. **16-06** (versioning) stays BACKLOG (gated on Dev-MCP AP-62096, 26.8 GA). **📋 The full deferred register
+(every postponed Phase-16 item + why + what unblocks it) is `specs/backlog/phase-16-deferred.md` — read it before
+picking up any Phase-16 follow-up.**
+
+**✅ 16-07 — Option A DONE (delta refresh via re-export + SCD-2 delta-merge).** genesis-workflows **v0.8.5**, CI green
+(pipeline 6513690). `sync-application` v0.2.0 `mode=delta`: full re-export + `KbStore.apply(mode='delta')` (diffs by
+`diff_hash`; opens new/modified, closes removed [inferred], recomputes bundles, records the window). `resolve_inputs`
+requires an existing baseline for delta; `check_kb` mode-aware. **The true incremental delta (Appian changed-objects
+API) is deferred — the Dev MCP cannot fetch objects by modified date/time (confirmed 2026-08-06: no modified-since tool;
+objects carry no modified timestamp).** Scheduler + per-release changelog also deferred. See
+`progress/phase-16-07-delta-refresh.md` + backlog §1.3–§1.5.
+
+**Key facts for any Phase-16 work:** the sample package the user provided is
+`/Users/ramaswamy.u/Documents/test/packages/AiDocumentCenterv4.3.1.zip` (also vendored in the parser repo's
+`tests/fixtures/`); the env **accepts Basic auth** (Dev MCP headless, no playwright/SSO); `KbStore` reads/writes are
+**current-state only** in iteration 1 (`valid_to_sync IS NULL`); `KbBundle.flow` / `flow_json` is the **structured dict**
+(Atlas standard), returned verbatim.
+
+**Open items to confirm with the human:** (1) the Appian **changed-objects** API contract (content vs ids; deletes;
+pagination) for 16-07. *(Resolved: env accepts Basic auth; export is deterministic REST not the DevOps MCP; the
+KbStore→worker wiring is `ctx.extras['kb_store']` via `build_context`; native-MCP updates = **manual drop-in, no
+auto-fetch source** (2026-08-05); commit/push approved — 16-01/16-02/16-03 + 16-08 §2.0 are pushed + CI-green.)*
+
+<!-- archived from bible/08-roadmap-and-backlog.md L78–L146, step 2, 2026-10-20 -->
+
+- **Shipped:** Phases 1–6, the web revamp (7.1), the code-review fix program (01–06), Phase 8 (settings
+  revamp), **Phase 9 (agent artifact I/O), Phase 10 (chat assistant), Phase 11 (credit tracking),
+  Phase 12 (Appian code-review workflow), Phase 13 (Chat Copilot & Run Orchestrator — 13-01..13-06),
+  Phase 14 (Skills in Chat — 14-01..14-05), Phase 15 (Design-Document Workflow — 15-01..15-05:
+  dual-source Jarvis+Atlas research → Markdown design doc + run-launch file attachments, ADR-035)**.
+  See `tracker.md` §3/§6 and `reference/roadmap-and-sequencing.md`.
+- **Phase 13: Chat Copilot & Run Orchestrator — COMPLETE (13-01..13-06 shipped; ADR-033 Accepted).**
+  Read `specs/phase-13-copilot-orchestrator.md` (umbrella) + `phase-13-copilot-orchestrator/13-01..13-06`
+  + **ADR-033** + `progress/phase-13-copilot-orchestrator.md` if you touch the copilot. **Delivered:** type `/`
+  in chat → pick a workflow → schema-driven inputs → the Kiro agent **starts the run** and **supervises**
+  it (senses HITL gates, presents options, relays the user's decision, reports outcomes) without staying
+  alive. **Architecture (decided, code-grounded):**
+  - **Genesis Control MCP server** (`genesis/mcp/control_server.py`) — a write-capable sibling of the
+    read-only `introspection_server`, but a **thin MCP→HTTP facade over `/api`** (`POST /api/runs`, `GET
+    /api/runs/{id}`(+`.gate`), `/respond`, `/cancel`, `/api/catalog`, `GET /api/workflows/{id}`) so
+    `RunManager` stays the single source of truth. Tools: `list_launchable_workflows`,
+    `get_workflow_inputs_schema`, `check_launch_readiness`, `start_run`, `get_run_status`, `get_run_steps`,
+    `get_pending_gate`, `respond_to_gate`, `cancel_run`, `list_session_runs`. NO config/secret/registry/deploy tools.
+  - **Human-confirmed mutations via ACP's native permission mechanism** — the SDK permission model is binary
+    (`auto_approve`/`auto_deny`) and *trusted tools skip the prompt*. So keep **read tools trusted (silent)**
+    and leave **mutating tools UNTRUSTED** → kiro-cli fires `session/request_permission` per call → a new SDK
+    **`permission_mode="ask"`** + async `on_permission` callback (13-01) routes it to a **chat confirm card**
+    (fail-closed on timeout). **Load-bearing spike (13-01, do FIRST):** prove kiro-cli actually fires
+    `request_permission` for untrusted MCP tools; if not, use the ADR-033 fallback (UI-mediated pending-action confirm).
+  - **Event-driven supervision** — a `ChatRunSupervisor` (app process) subscribes to `RunManager`'s EventBus
+    for **session-linked runs** (`m0004 chat_run_links`); on `gate.awaiting`/`run.final` it emits a notification
+    + a proactive **nudge turn** so the copilot surfaces the gate + options; **level-triggered reconcile** from
+    durable state (`pending_gate` + `EventLog`) on restart (don't rely on the live subscription). Nudges queue
+    behind the session lock + de-dup by `(run_id, gate_node, raised_at)`.
+  - **Slash UX** — Composer `/` palette from the catalog; **reuse the 07-05 launch form** for schema inputs;
+    on submit the UI hands the agent the `start_run` action (agent is the actor) → confirm card → run linked +
+    supervised. In-chat cards: permission-confirm, gate, terminal; a supervised-runs strip.
+  - **ADR-033 reconciliation:** ADR-001 preserved (LangGraph still owns each workflow's control flow; copilot
+    = operator at the run-management layer = what a human does in the Runs UI); ADR-031 refined (read-write at
+    that layer, every mutation human-confirmed, no config/secret/deploy, read-only default + kill-switch).
+  - **Sub-phase order + release chain:** **13-01 SDK permission bridge — SHIPPED (kiro-agent-sdk v0.5.0;
+    spike confirmed; genesis/core pin bump deferred to 13-03)** → **13-02 control server + ADR-033 —
+    BUILT (genesis/mcp/control_server.py on master `b6edf7c`; requests not httpx; token gating deferred to
+    13-06)** → **13-03 copilot chat mode + run↔session link (`m0004`) + coordinated sdk-v0.5.0 pin bump —
+    SHIPPED (genesis v0.21.0 + genesis-core v0.8.1; the 13-02 control server ships here, now live)** → **13-04
+    run-supervision bridge — SHIPPED (genesis v0.22.0: ChatRunSupervisor observes gate/terminal for linked
+    runs → durable notifications [m0005] + per-session SSE + deterministic system nudge; level-triggered
+    reconcile + SLA)** → **13-05 slash launch + in-chat HITL/confirm UI — SHIPPED (genesis v0.23.0: Composer
+    `/` palette → LaunchDialog → start_run intent turn → PermissionCard/GateCard/TerminalCard + SupervisedRunsStrip;
+    frontend-only release)** → **13-06 safety/audit/advanced-gate + release — SHIPPED (genesis v0.24.0:
+    persisted kill-switch + per-session concurrency/rate/allow-deny enforced app-side on POST /api/runs
+    gated on the control token; `copilot_actions` audit trail [m0006]; pre_mutation never auto-approved;
+    Settings→Copilot section + activity; ADR-033 → Accepted)**. **PHASE 13 COMPLETE.** `genesis-core`
+    unchanged. After any `web/src` change: `npm run build` + commit `web/static`. Remaining: manual
+    live-acceptance vs. real kiro-cli (headless-undrivable).
+- **Phase 14: Skills in Chat — COMPLETE (14-01..14-05 shipped; ADR-034 Accepted).** Read
+  `specs/phase-14-skills-in-chat.md` (umbrella) + `phase-14-skills-in-chat/14-01..14-05` + **ADR-034** + the proving
+  spike `spike/2026-07-16-kiro-skills-in-acp-and-chat.md` before touching code. **Goal:** add **Skills** — Kiro's
+  portable `SKILL.md` instruction packages — as a **second first-class capability beside Workflows**, usable from
+  **Chat** (priority 1). **Concept boundary:** a *Skill* = standalone activity (draft a doc, build a checklist, apply
+  a body of knowledge like GAM), no stages/run, owned by the Kiro agent; a *Workflow* = staged/orchestrated, owned by
+  LangGraph. **Architecture (spike-proven, code-grounded):** skills are **filesystem-discovered** (`.kiro/skills/`),
+  NOT an ACP wire param like MCP — Genesis writes them into a managed workspace **`~/.genesis/.kiro/skills/`** (= the
+  chat `cwd`); kiro-cli auto-discovers them (auto-activation by `description` + explicit `/skill-name`, both proven).
+  Two acquisition paths: **install from a `genesis-workflows` `skills/` library** (parallel of the workflow install +
+  a separate `skills-registry.json`) or **author in-flight** (SKILL.md + scripts/references/assets uploads). **Catalog**
+  → Workflows | Skills sub-tabs; **Chat** `/` palette → unified workflows+skills menu (skills also in read-only chat).
+  **Safety:** skills may write documents **only** into a per-session **skill-output sandbox**
+  `~/.genesis/skill-output/<session_id>/` via a small additive SDK **`fs_write_root`** option (writes elsewhere
+  rejected); executing bundled scripts stays deferred. **Sub-phases:** 14-01 foundation + chat discovery → 14-02
+  skills library + install-from-repo → 14-03 Catalog Skills tab + in-flight authoring → 14-04 chat skills invocation →
+  14-05 safety (skill-output sandbox) / lifecycle / release. **Release chain (shipped):** kiro-agent-sdk **v0.6.0**
+  (`fs_write_root`) → genesis-workflows **v0.6.0** (skills library) → genesis **v0.26.1**; genesis-core **v0.8.2** (sdk-pin bump only).
+  Remaining: manual live-acceptance vs. real kiro-cli (auto-activation + `/gam`, headless-undrivable).
+
