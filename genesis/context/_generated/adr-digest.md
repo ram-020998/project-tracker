@@ -3,7 +3,7 @@
 
 Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Untagged = not yet routed (47-05).
 
-- ADR-001 [core-engine,runs-worker,chat,workflows-library] — LangGraph owns control flow; agents never orchestrate.
+- ADR-001 [core-engine,runs-worker,chat,workflows-library,features-stages] — LangGraph owns control flow; agents never orchestrate.
 - ADR-002 [sdk-acp,core-engine,config-secrets,chat] — Run agent steps as narrow Kiro turns via `kiro-agent-sdk` over ACP, with per-node MCP injection; NO global Kiro `mcp.json`.
 - ADR-003 [distribution,workflows-library,web-shell] — Genesis is a local web app (engine + Kiro/MCP run locally with the user's creds) pulling workflows from a shared GitLab library; users are internal Solutions staff.
 - ADR-004 [sdk-acp,core-engine,config-secrets,chat] — Inject MCP servers per node (per agent turn); never rely on globally-installed agents or a global Kiro `mcp.json`.
@@ -38,7 +38,7 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Untagged = not ye
 - ADR-033 [chat,runs-worker,api,config-secrets] (amends 031; amended by 034) — The chat copilot may operate runs only at the run-management layer: every mutation is human-confirmed, it NEVER auto-approves a workflow's HITL gate, and gets NO config/secret/registry/deploy tools.
 - ADR-034 [chat,workflows-library,config-secrets,sdk-acp,runs-worker] (amends 031,033) — Skills are first-class standalone activities beside Workflows, chat-invoked + filesystem-provisioned; chat writes ONLY inside the per-session skill-output sandbox (`fs_write_root`).
 - ADR-035 [runs-worker,api,workflows-library,web-runs,chat,features-stages] — Run input files (`format:"file"`) are provisioned into the run blackboard at launch via the multipart upload, never passed inline; bounded and sanitized.
-- ADR-036 [kb-sync,parser,appian-integration,config-secrets,db] (amended by 073) — Genesis owns the Appian KB: a Genesis-native parser + a local KB in `genesis.db`, fed only by the single dev-tagged environment (`is_dev`); Atlas/Jarvis are retired as KB sources.
+- ADR-036 [kb-sync,parser,appian-integration,config-secrets,db,collaboration-hub] (amended by 073) — Genesis owns the Appian KB: a Genesis-native parser + a local KB in `genesis.db`, fed only by the single dev-tagged environment (`is_dev`); Atlas/Jarvis are retired as KB sources.
 - ADR-037 [kb-sync,parser,appian-integration,config-secrets,chat,workflows-library] (amends 030; amended by 073) — The KB stores only metadata/structure/dependency graph/bundles — NEVER SAIL source; all code (current + historical) is fetched live via the Dev MCP.
 - ADR-038 [appian-integration,config-secrets,distribution] (amended by 073) — Run the Dev + DevOps MCP servers as managed, vendored, versioned local installs (replaceable, never forked), launched from the per-server venv.
 - ADR-039 [kb-sync,core-engine,parser,appian-integration,workflows-library] — Business understanding is an agent-synthesized, evidence-grounded artifact built by a deterministic workflow from the local code-free KB only.
@@ -66,7 +66,7 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Untagged = not ye
 - ADR-061 [stories-workbench,features-stages,kb-sync,web-shell] (amends 049; amended by 062) — The Workbench is a curated set of per-application Kanban boards over finalized stories, with eight fixed lanes; board membership is explicit (v0.69.0 amendment).
 - ADR-062 [stories-workbench,features-stages,core-engine,workflows-library] {amended} (amends 061; amended by 068; superseded by 068) — Dragging a ticket into Design opens a confirm dialog that launches the design workflow; ADR-068 supersedes its proposal-only clause for the Implementation lane.
 - ADR-063 [collaboration-hub,stories-workbench,features-stages,config-secrets] (amends 026; amended by 065,074) — Genesis stays local-first and single-user; collaboration is an OPT-IN, selective centralization of a defined data subset to the shared Hub.
-- ADR-064 [collaboration-hub,kb-sync,stories-workbench,appian-integration] — The Hub is a dedicated `Genesis Hub` Appian app in the existing dev env, exposing a FROZEN Web API contract.
+- ADR-064 [collaboration-hub,kb-sync,stories-workbench,appian-integration,features-stages] — The Hub is a dedicated `Genesis Hub` Appian app in the existing dev env, exposing a FROZEN Web API contract.
 - ADR-065 [collaboration-hub,config-secrets] (amends 063) — Collaboration is active only when BOTH gates are on: the env master `GENESIS_COLLAB_ENABLED` and the Settings switch (gated on Hub availability).
 - ADR-066 [observability-credits,runs-worker,web-runs,core-engine] — Capture what each agent was given and produced, per iteration, and expose it in the run-detail node summary + turn explorer.
 - ADR-067 [core-engine,workflows-library,features-stages] — Use genesis-core `attach_healing` (grounded verify → heal → patch in place or one guided restart → escalate, bounded by `META.healing`) as the second reliability tier beside the ADR-011 trio.
