@@ -12,8 +12,8 @@ INSTALL_JSON = Path.home() / ".kiro" / "genesis" / "install.json"
 REPO_NAMES = ("genesis", "genesis-core", "genesis-workflows", "kiro-agent-sdk", "genesis-appian-parser")
 
 # Budgets (umbrella Q2), in estimated tokens (chars / 4).
-PACK_WARN = 40_000
-PACK_FAIL = 80_000
+PACK_WARN = 60_000
+PACK_FAIL = 120_000
 L0_BUDGET = 15_000
 STATE_BUDGET = 4_000
 RULE_MAX_CHARS = 220

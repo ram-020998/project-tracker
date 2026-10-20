@@ -128,6 +128,29 @@ that the 47-02 §4.1/§4.3 anchor rules did not fit. Found, and decided with the
 
 Rules recorded in 47-02 §3/§4.1/§4.3 and 47-03 §3/§3.1/§5/§7. D7 holds — neither file is edited.
 
+### 5.6 Round 5 — tag review, closure rule, budgets (2026-10-20, S4 / 47-05)
+
+The review table showed that 14 of 20 area packs were over 40K. The main cause was the amendment closure: it ran the
+whole chain in both directions, from every ADR on the always-on areas. For example, ADR-026 → 063 → 065/074 → 047
+pulled collaboration and sync ADRs into every pack. Decided with the user:
+
+1. **Closure rule (pack + check).** From the seeds (ADRs selected by areas, path globs or the manifest):
+   - follow `amended_by` / `superseded_by` **transitively**, i.e. everything that changes a loaded rule;
+   - follow `amends` **one hop, from seeds only**, never from ADRs the chain added.
+   
+   `genesis-ctx adr <id>` keeps the full chain. Tests: 031 → 033/034/045 still load; 026 no longer pulls 047.
+2. **Always-on areas** (`security`, `release-ci`) carry only ADR-011 and ADR-026, plus their lessons.
+   ADR-019/029/031/045/046 stay on their real areas.
+3. **No blanket trim.** Tags stay recall-first. A tag is removed only when the ADR provably constrains no file in
+   that area's globs. ADR-001/010/012/021/068/073 never leave workflows-library / core-engine / runs-worker, and
+   ADR-020/029/031/033/034/037 never leave chat.
+4. **No area split** for now (features-stages stays one area).
+5. **Budgets:** pack warn **60K**, fail **120K** (was 40K / 80K): umbrella §6.1 L2 row and §13 Q2, 47-03 §4,
+   `config.py`. The 47-09 §4 pass bar stays "≤ 10 % after the pack".
+6. **One-liners:** the critical-ADR rules were approved, with rewrites for ADR-068 (never delete an object; no
+   `delete*` tool allowlisted), ADR-021 (references ADR-068) and ADR-017. Low-confidence items were approved as
+   proposed.
+
 ## 6. ADR-077 (Proposed) — full text
 
 - **Status:** Proposed — 2026-10-20 (Phase 47).

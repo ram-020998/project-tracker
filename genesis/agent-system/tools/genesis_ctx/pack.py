@@ -49,7 +49,7 @@ def select(c: Corpus, manifest: dict, extra_areas: list[str]) -> dict:
         hit = c.globs_touch(list(t.get("paths", []) or []), code) if code else None
         if hit:
             _add(adrs, i, f"path `{hit}`")
-    for i, why in c.chain(list(adrs)).items():
+    for i, why in c.pack_chain(list(adrs)).items():
         if why:
             _add(adrs, i, why)
 
@@ -253,7 +253,7 @@ def cmd_check(ctx: Ctx, since: str | None, files: list[str] | None, staged: bool
         hit = next((p for p in paths if any(globs.match(g, p) for g in pats)), None)
         if hit:
             _add(adrs, i, f"path `{hit}`")
-    for i, why in c.chain(list(adrs)).items():
+    for i, why in c.pack_chain(list(adrs)).items():
         if why:
             _add(adrs, i, why)
     lessons = c.lessons_for_areas(names)

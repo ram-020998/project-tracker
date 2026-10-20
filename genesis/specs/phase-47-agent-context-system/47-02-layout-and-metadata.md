@@ -125,7 +125,9 @@ reviewed_fp = "3f9a0c1e2b7d4a65"   # fingerprint of the full text when `rule` wa
     `ADR-NNN`; slash continuations `ADR-002/004/020`; ranges `ADR-006–009` (en dash or `..`); `(+ ADR-029)` and
     `+ ADR-063` are ordinary ids. So the `Amendment (v0.69.0) … (amends ADR-061 + ADR-063)` bullet loads with both.
   - **Fingerprint** (`reviewed_fp`) = `sha256[:16]` of the whitespace-collapsed decision-log text + `bible/04` bullets.
-- `amends` / `amended_by` must be **symmetric** (lint). Loading an ADR loads its whole amendment chain.
+- `amends` / `amended_by` must be **symmetric** (lint). `genesis-ctx adr` loads an ADR's whole amendment chain. `pack` /
+  `check` follow `amended_by` / `superseded_by` transitively and `amends` one hop from the seeds only (47-03 §4,
+  amended S4 — 47-01 §5.6).
 - `rule` ≤ 220 characters, one sentence, imperative.
 
 ### 4.2 Lessons — `tags/lesson.toml`

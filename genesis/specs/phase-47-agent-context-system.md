@@ -88,7 +88,7 @@ hook), and pulls the rest through `genesis-ctx`.
 |---|---|---|---|
 | **L0** always | `context/L0-core.md` (what Genesis is, retrieval protocol, key implementation contracts) + `bible/02` + `bible/07` + generated **ADR digest**, **lesson digest**, **area catalog** + `context/state/current.md` | `file://` resources in every agent | **≤ 15K tokens** |
 | **L1** by role | role prompt (agent body) + `reference/coding-standards.md` (dev/review) + **skills** (bodies on demand) | agent profile; `skill://` | ≤ 10K at start |
-| **L2** by task | the **context pack**: full text of the ADRs, lessons and code-map sections for the task's areas (+ amendment closure) + the list of specs/code to read | `genesis-ctx pack` | ≤ 40K (warn above) |
+| **L2** by task | the **context pack**: full text of the ADRs, lessons and code-map sections for the task's areas (+ amendment closure) + the list of specs/code to read | `genesis-ctx pack` | ≤ 60K (warn above; fail 120K) |
 | **L3** on demand | `archive/`, old `specs/` + `progress/`, git history | `genesis-ctx search`, `read` with ranges | — |
 
 One routing level only: a one-line digest entry points straight at the full text. (Controlled evidence that a second
@@ -198,7 +198,7 @@ history only); auto-generating the README phase table; CI for project-tracker (t
 | # | Default |
 |---|---|
 | Q1 | Tag files are **TOML** (read with stdlib `tomllib`; tiny emitter for writes) — no third-party dependency. |
-| Q2 | Budgets: L0 ≤ 15K tokens, pack warn at 40K / fail at 80K (estimated as chars ÷ 4). |
+| Q2 | Budgets: L0 ≤ 15K tokens, pack warn at 60K / fail at 120K (estimated as chars ÷ 4; raised from 40K / 80K in S4, 47-01 §5.6). |
 | Q3 | Archive files are named by source (`archive/tracker-status-log.md`, `archive/bible-08-shipped-phases.md`, …); each moved block leaves a one-line pointer at its old place. |
 | Q4 | `genesis-ctx` runs from its project-tracker source via a shim, so tool fixes apply without reinstall; agents/skills/hooks need `update.sh`. |
 | Q5 | `genesis-dev` commits locally; only `genesis-release` pushes or tags, and always asks. |

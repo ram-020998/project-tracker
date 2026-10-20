@@ -33,3 +33,839 @@
 #   superseded_by = ""
 #   rule        = "Chat never orchestrates or mutates; read-only @server/tool allowlist; file writes only in the per-session sandbox."
 #   reviewed_fp = "3f9a0c1e2b7d4a65"
+
+[ADR-001]
+title = "LangGraph as the orchestration engine (not an LLM orchestrator)"
+status = "accepted"
+areas = ["core-engine", "runs-worker", "chat", "workflows-library"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "LangGraph owns control flow; agents never orchestrate."
+reviewed_fp = "0b0c61da18b4d725"
+
+[ADR-002]
+title = "Kiro via `kiro-agent-sdk` over ACP as the agent runtime"
+status = "accepted"
+areas = ["sdk-acp", "core-engine", "config-secrets", "chat"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Run agent steps as narrow Kiro turns via `kiro-agent-sdk` over ACP, with per-node MCP injection; NO global Kiro `mcp.json`."
+reviewed_fp = "8db76958b749691d"
+
+[ADR-003]
+title = "Local web app; shared GitLab library; internal Solutions users"
+status = "accepted"
+areas = ["distribution", "workflows-library", "web-shell"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Genesis is a local web app (engine + Kiro/MCP run locally with the user's creds) pulling workflows from a shared GitLab library; users are internal Solutions staff."
+reviewed_fp = "4da6ce2ba9971592"
+
+[ADR-004]
+title = "Per-node MCP injection (not globally-installed agents)"
+status = "accepted"
+areas = ["sdk-acp", "core-engine", "config-secrets", "chat"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Inject MCP servers per node (per agent turn); never rely on globally-installed agents or a global Kiro `mcp.json`."
+reviewed_fp = "b65be3a211805290"
+
+[ADR-005]
+title = "Shared MCP registry, no \"profiles\""
+status = "accepted"
+areas = ["config-secrets", "workflows-library"]
+paths = []
+amends = []
+amended_by = ["ADR-029"]
+superseded_by = ""
+rule = "The shared MCP/CLI registry lives in the library (curated tier, changed via MR) — no per-user \"profiles\"."
+reviewed_fp = "3658d30b501dbf67"
+
+[ADR-006]
+title = "Self-contained workflow packages; selective install + lockfile"
+status = "accepted"
+areas = ["workflows-library", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Each workflow is a self-contained folder package (`workflow.yaml` + `graph.py`) in the `registry.json` catalog; users install selectively, pinned by ref in a lockfile."
+reviewed_fp = "fc1197eeedbc3a47"
+
+[ADR-007]
+title = "Role = filter tag + curated bundles; cross-role picking allowed"
+status = "accepted"
+areas = ["workflows-library", "distribution", "web-shell"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Roles are filter tags + curated bundles, never hard gating — users may pick workflows across roles."
+reviewed_fp = "1c776cc3e3b7a121"
+
+[ADR-008]
+title = "Single app; LangGraph Studio interim, custom workbench later"
+status = "accepted"
+areas = ["web-shell", "web-runs", "runs-worker"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "One local app bundles engine + UI; LangGraph Studio was the interim harness, the custom workbench is the product UI."
+reviewed_fp = "d34f9e1ca01ed0e7"
+
+[ADR-009]
+title = "All three HITL modes are required"
+status = "accepted"
+areas = ["runs-worker", "core-engine", "web-runs"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "All three HITL modes are REQUIRED: designed approval gates, ad-hoc pause/resume anywhere, and mid-run state injection."
+reviewed_fp = "576b1ac82f10a35d"
+
+[ADR-010]
+title = "Small editable state + per-run blackboard + SQLite checkpointer"
+status = "accepted"
+areas = ["core-engine", "runs-worker", "chat", "workflows-library", "db"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Keep state small/serializable/editable (pointers + decisions); bulk lives in the `RunWorkspace` blackboard under `$GENESIS_ARTIFACTS_DIR`; never inline bulk in state/chat."
+reviewed_fp = "708718343eac39de"
+
+[ADR-011]
+title = "Reliability trio is a HARD requirement (CI-enforced)"
+status = "accepted"
+areas = ["core-engine", "workflows-library", "release-ci"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The reliability trio (validator + retry + escalation) is MANDATORY on every agent node; CI-enforced."
+reviewed_fp = "642acb9a0f117961"
+
+[ADR-012]
+title = "`build()` + `META` contract; validated in CI; run in a subprocess worker"
+status = "accepted"
+areas = ["runs-worker", "core-engine", "workflows-library", "api"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Run graph execution in a disposable subprocess worker, not the app (pause=kill, resume=fresh worker from checkpoint); the app never imports workflow Python."
+reviewed_fp = "2f22af9c95bfbe72"
+
+[ADR-013]
+title = "solutions-copilot retired; Genesis owns its config UI"
+status = "accepted"
+areas = ["config-secrets", "web-shell"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "solutions-copilot is retired: Genesis owns its own config UI (GitLab token, MCP secrets, environments), reusing only its concepts as fresh implementations."
+reviewed_fp = "71e518585d614357"
+
+[ADR-014]
+title = "Authoring: scaffolder + test harness + agent-assisted + steering; open contribution"
+status = "accepted"
+areas = ["workflows-library"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Author workflows via the `create-workflow` scaffolder (reliability trio pre-wired), the local test harness and the library steering; contribution is open."
+reviewed_fp = "5b54e252676712f7"
+
+[ADR-015]
+title = "Build the complete app + ERD first, then migrate skills one by one"
+status = "accepted"
+areas = ["workflows-library"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Build order: the complete app + ERD reference first, then the custom workbench, then migrate skills to workflows one by one."
+reviewed_fp = "2c71881b899a8bde"
+
+[ADR-016]
+title = "Name = Genesis"
+status = "accepted"
+areas = ["distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Names: platform `genesis`, library `genesis-workflows`, SDK `kiro-agent-sdk`."
+reviewed_fp = "66741be24e0a2f62"
+
+[ADR-017]
+title = "Python 3.11+ across platform + workflows"
+status = "accepted"
+areas = ["core-engine", "workflows-library", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "One language — Python — for engine, nodes and workflows (3.11+; ADR-024 pins 3.13)."
+reviewed_fp = "aa21b42d0ae3f295"
+
+[ADR-018]
+title = "Blackboard handoff over inline data"
+status = "accepted"
+areas = ["core-engine", "runs-worker", "workflows-library"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Hand bulk data between nodes via the blackboard (pointers in state), never inline in state or chat."
+reviewed_fp = "b6307d977a3398e6"
+
+[ADR-019]
+title = "`genesis-core` shared package + semver major-compat gate"
+status = "accepted"
+areas = ["core-engine", "workflows-library", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "genesis-core is semver; the loader refuses a library whose `genesis_core_major != CORE_MAJOR` (=1, not the pip version); changes within a major are additive-only."
+reviewed_fp = "8545f98c3222e9f1"
+
+[ADR-020]
+title = "No global Kiro mutation"
+status = "accepted"
+areas = ["config-secrets", "sdk-acp", "core-engine", "chat", "distribution"]
+paths = []
+amends = []
+amended_by = ["ADR-029"]
+superseded_by = ""
+rule = "Never mutate the user's global Kiro configuration — NO global Kiro `mcp.json`; MCP servers are injected per node over ACP."
+reviewed_fp = "f35bf8398a4d0a2c"
+
+[ADR-021]
+title = "`auto_approve` default posture for HITL- Decision: `META.auto_approve = true` by default — validated steps auto-advance; a run pauses only a…"
+status = "accepted"
+areas = ["runs-worker", "core-engine", "workflows-library", "appian-integration", "config-secrets", "documents"]
+paths = []
+amends = []
+amended_by = ["ADR-068"]
+superseded_by = ""
+rule = "`META.auto_approve=true` by default; pause only at approval|escalation|pre_mutation gates; `pre_mutation` REQUIRED before any write/deploy/data MCP node (ADR-068: the Implementation confirm replaces per-object gates)."
+reviewed_fp = "361c9be622e7da80"
+
+[ADR-022]
+title = "Dedicated, configurable artifacts root + retention"
+status = "accepted"
+areas = ["runs-worker", "core-engine", "config-secrets", "workflows-library"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Write run artifacts under the dedicated, configurable artifacts root (`$GENESIS_ARTIFACTS_DIR`) with retention; never inline bulk in state."
+reviewed_fp = "a713106a71ffc73f"
+
+[ADR-023]
+title = "FastAPI backend embedding LangGraph; Studio is a dev harness only"
+status = "accepted"
+areas = ["api", "runs-worker", "core-engine", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The backend is FastAPI EMBEDDING LangGraph (NOT a LangGraph Server); Studio is an interim debug harness only."
+reviewed_fp = "2b4b9aaa050d3d5a"
+
+[ADR-024]
+title = "Async-first engine (`AsyncSqliteSaver` + `aiosqlite`); Python 3.13 pin"
+status = "accepted"
+areas = ["core-engine", "runs-worker", "db", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The engine is async-first (ainvoke/astream + `AsyncSqliteSaver` + aiosqlite); Python is pinned to 3.13."
+reviewed_fp = "1200bf3fc6a46d64"
+
+[ADR-025]
+title = "Fork = seed a NEW thread (not in-thread time-travel)"
+status = "accepted"
+areas = ["runs-worker", "core-engine", "web-runs"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "\"Fork\" = seed a NEW thread from a past checkpoint; never time-travel in-thread — the original is untouched."
+reviewed_fp = "50d7cd9958557aff"
+
+[ADR-026]
+title = "Web workbench stack: React + TypeScript (supersedes the Preact default)"
+status = "accepted"
+areas = ["web-shell", "web-runs", "security", "distribution", "api"]
+paths = []
+amends = []
+amended_by = ["ADR-063"]
+superseded_by = ""
+rule = "Web UI = React+TS for a local single-user app; `genesis serve`/`up` refuse a non-loopback bind unless explicitly opted in (`--i-understand-no-auth`) — Genesis ships no auth."
+reviewed_fp = "2e06badfd7c764a7"
+
+[ADR-027]
+title = "Web revamp frontend stack (Tailwind + shadcn/ui + React Router + TanStack Query + React Flow)"
+status = "accepted"
+areas = ["web-shell", "web-runs", "chat", "features-stages", "stories-workbench", "documents"]
+paths = ["genesis/web/src/**"]
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Use the established web stack (Tailwind + shadcn/Radix + React Router + TanStack Query + React Flow + …); reuse existing primitives and design tokens, not raw palette colors."
+reviewed_fp = "3f11219ad516c0fd"
+
+[ADR-028]
+title = "Backend API namespaced under `/api` + SPA history fallback"
+status = "accepted"
+areas = ["api", "web-shell", "web-runs", "runs-worker", "config-secrets"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "ALL backend endpoints live under `/api` (+ SPA history fallback); the web client prepends `/api` centrally — never hard-code it in components."
+reviewed_fp = "bdfe26648d7d321e"
+
+[ADR-029]
+title = "Two-Tier MCP/CLI Registry (revises ADR-005/020)"
+status = "accepted"
+areas = ["config-secrets", "workflows-library", "chat"]
+paths = []
+amends = ["ADR-005", "ADR-020"]
+amended_by = []
+superseded_by = ""
+rule = "Two-tier MCP/CLI registry: curated read-only (MR-governed) + custom user-writable; effective tool trust = `node.tools ∩ server.allowlist` (a hard cap)."
+reviewed_fp = "81784f999df25207"
+
+[ADR-030]
+title = "Persistence engine: SQLite now, Postgres/pgvector only on an explicit trigger"
+status = "accepted"
+areas = ["db", "runs-worker", "core-engine", "features-stages", "memory", "kb-sync", "documents"]
+paths = []
+amends = []
+amended_by = ["ADR-037", "ADR-041"]
+superseded_by = ""
+rule = "Persistence stays SQLite; move to Postgres/pgvector only on an explicit trigger (multi-user, transcript RAG, heavy analytics); keep repository signatures DB-agnostic."
+reviewed_fp = "533947ba058053b3"
+
+[ADR-031]
+title = "Chat is a read-only conversational assistant (never orchestrates)"
+status = "accepted"
+areas = ["chat", "runs-worker", "config-secrets"]
+paths = []
+amends = []
+amended_by = ["ADR-033", "ADR-034", "ADR-045", "ADR-076"]
+superseded_by = ""
+rule = "Chat is read-only: it observes/answers, never orchestrates or mutates; trust is fail-closed (read-only `@server/tool` allowlist + `auto_deny`); writes only in the per-session sandbox (ADR-034)."
+reviewed_fp = "feea89c605bd8b26"
+
+[ADR-032]
+title = "Credit usage is REAL metered data from Kiro ACP (not estimated)"
+status = "accepted"
+areas = ["observability-credits", "sdk-acp", "chat", "runs-worker", "web-runs"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Credit usage is REAL metered data from Kiro ACP (per turn), NEVER estimated — no pricing engine; every figure carries `provenance` (metered/partial/unavailable)."
+reviewed_fp = "b51f92be89c38bda"
+
+[ADR-033]
+title = "The Chat copilot may operate runs (human-confirmed, run-management layer only), never owns control flow"
+status = "accepted"
+areas = ["chat", "runs-worker", "api", "config-secrets"]
+paths = []
+amends = ["ADR-031"]
+amended_by = ["ADR-034"]
+superseded_by = ""
+rule = "The chat copilot may operate runs only at the run-management layer: every mutation is human-confirmed, it NEVER auto-approves a workflow's HITL gate, and gets NO config/secret/registry/deploy tools."
+reviewed_fp = "0878e4e0f48aebd0"
+
+[ADR-034]
+title = "Skills are first-class \"standalone activities\", chat-invoked and filesystem-provisioned (Phase 14)"
+status = "accepted"
+areas = ["chat", "workflows-library", "config-secrets", "sdk-acp", "runs-worker"]
+paths = []
+amends = ["ADR-031", "ADR-033"]
+amended_by = []
+superseded_by = ""
+rule = "Skills are first-class standalone activities beside Workflows, chat-invoked + filesystem-provisioned; chat writes ONLY inside the per-session skill-output sandbox (`fs_write_root`)."
+reviewed_fp = "8d9f6f6696bffc29"
+
+[ADR-035]
+title = "Run input file attachments (bounded, sanitized, provisioned into the blackboard) (Phase 15)"
+status = "accepted"
+areas = ["runs-worker", "api", "workflows-library", "web-runs", "chat", "features-stages"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Run input files (`format:\"file\"`) are provisioned into the run blackboard at launch via the multipart upload, never passed inline; bounded and sanitized."
+reviewed_fp = "150c50268050e6a6"
+
+[ADR-036]
+title = "Internalized Appian Knowledge Base (Genesis owns the parser + KB, fed by the single dev-tagged environment) (Phase 16)"
+status = "accepted"
+areas = ["kb-sync", "parser", "appian-integration", "config-secrets", "db"]
+paths = []
+amends = []
+amended_by = ["ADR-073"]
+superseded_by = ""
+rule = "Genesis owns the Appian KB: a Genesis-native parser + a local KB in `genesis.db`, fed only by the single dev-tagged environment (`is_dev`); Atlas/Jarvis are retired as KB sources."
+reviewed_fp = "de5e6b04f19d0047"
+
+[ADR-037]
+title = "Code-free temporal KB + live code via the Dev MCP (Phase 16)"
+status = "accepted"
+areas = ["kb-sync", "parser", "appian-integration", "config-secrets", "chat", "workflows-library"]
+paths = []
+amends = ["ADR-030"]
+amended_by = ["ADR-073"]
+superseded_by = ""
+rule = "The KB stores only metadata/structure/dependency graph/bundles — NEVER SAIL source; all code (current + historical) is fetched live via the Dev MCP."
+reviewed_fp = "551b8d95e6392fa8"
+
+[ADR-038]
+title = "Managed native Appian MCP servers (vendored, versioned, replaceable via manual drop-in, not forked) (Phase 16)"
+status = "accepted"
+areas = ["appian-integration", "config-secrets", "distribution"]
+paths = []
+amends = []
+amended_by = ["ADR-073"]
+superseded_by = ""
+rule = "Run the Dev + DevOps MCP servers as managed, vendored, versioned local installs (replaceable, never forked), launched from the per-server venv."
+reviewed_fp = "248b527b4ffe7f10"
+
+[ADR-039]
+title = "Business understanding is an agent-synthesized, evidence-grounded artifact (the Business Application Map) (Phase 17)"
+status = "accepted"
+areas = ["kb-sync", "core-engine", "parser", "appian-integration", "workflows-library"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Business understanding is an agent-synthesized, evidence-grounded artifact built by a deterministic workflow from the local code-free KB only."
+reviewed_fp = "1769d14ccd58aab7"
+
+[ADR-040]
+title = "Managed-native CLI connector (`gws` installed/versioned/authenticated inside Genesis, standard OAuth) (Phase 19)"
+status = "accepted"
+areas = ["documents", "config-secrets", "distribution"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Install the Google Workspace CLI (`gws`) as a managed, versioned local binary resolved via the CLI registry (the CLI analog of ADR-038)."
+reviewed_fp = "e98c7bd1e50cc08b"
+
+[ADR-041]
+title = "Documents are a global first-class store linked into applications (dedup; untrack unlinks, never deletes) (Phase 19)"
+status = "accepted"
+areas = ["documents", "kb-sync", "db"]
+paths = []
+amends = ["ADR-030"]
+amended_by = []
+superseded_by = ""
+rule = "Documents are one global store (dedup by source id, latest version only) LINKED into applications; untracking an app removes its links, never the documents."
+reviewed_fp = "6bfa270c069325b9"
+
+[ADR-042]
+title = "Features & Specs are first-class sub-entities of an application (Chat-authored, HTML-authoritative) (Phase 20)"
+status = "accepted"
+areas = ["features-stages", "chat", "core-engine", "documents", "db"]
+paths = []
+amends = []
+amended_by = ["ADR-075"]
+superseded_by = ""
+rule = "Features & Specs are first-class sub-entities of an application (cascade with it); a spec is authored conversationally in Chat, not by a workflow, and HTML is authoritative."
+reviewed_fp = "c4244f8b25e4647d"
+
+[ADR-043]
+title = "Embed the Lavish annotation SDK (vendored, MIT) for in-app HTML review (Phase 20)"
+status = "accepted"
+areas = ["features-stages", "api", "web-shell"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Embed the vendored Lavish annotation SDK (MIT) for in-app HTML review, themed from design tokens — don't run its server."
+reviewed_fp = "503ccd3edb1117e0"
+
+[ADR-044]
+title = "A Feature is a workspace of sequential artifact stages (Phase 21)"
+status = "amended"
+areas = ["features-stages"]
+paths = []
+amends = []
+amended_by = ["ADR-056"]
+superseded_by = "ADR-056"
+rule = "A Feature is a workspace of artifact stages, each with its own status (no feature status derived from one artifact); the sequential unlock is superseded by ADR-056."
+reviewed_fp = "e19ec5346174f7ad"
+
+[ADR-045]
+title = "The reused chat mirrors the Kiro CLI/ACP surface; refines ADR-031 (Phase 21)"
+status = "accepted"
+areas = ["chat", "sdk-acp", "features-stages"]
+paths = []
+amends = ["ADR-031"]
+amended_by = ["ADR-076"]
+superseded_by = ""
+rule = "The reused chat mirrors the Kiro CLI/ACP surface (model selection, slash commands, compaction, image prompts) while staying within ADR-031's read-only posture."
+reviewed_fp = "1207af90d000d15d"
+
+[ADR-046]
+title = "Genesis ships as a local, browser-based app via clone + git-tag self-update (Phase 22)"
+status = "accepted"
+areas = ["distribution", "config-secrets"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Genesis ships as a local, browser-based app: clone + venv + `pip install .`, launched by `genesis up`, self-updated by git tag."
+reviewed_fp = "9a0c685c6495cc28"
+
+[ADR-047]
+title = "Genesis runs fixed, backend-defined scheduled maintenance syncs (Phase 23)"
+status = "accepted"
+areas = ["kb-sync", "runs-worker", "api", "config-secrets"]
+paths = []
+amends = []
+amended_by = ["ADR-074"]
+superseded_by = ""
+rule = "Scheduled maintenance syncs are fixed and backend-defined; the app sync is re-runnable as a full-package refresh."
+reviewed_fp = "36d765365525f1fe"
+
+[ADR-048]
+title = "Core Appian-MCP credentials are environment-scoped (entered on the environment, resolved from the dev env only)"
+status = "accepted"
+areas = ["config-secrets", "appian-integration", "workflows-library"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Core Appian-MCP credentials are environment-scoped: stored per environment in the SecretProvider (never in `environments.json`) and resolved ONLY from the dev-tagged env."
+reviewed_fp = "4a3c9d847aabeeb7"
+
+[ADR-049]
+title = "Applications-first IA: primary nav is Applications · Chat · Runs · Documents; Overview + Catalog live under Settings"
+status = "accepted"
+areas = ["web-shell", "config-secrets", "features-stages"]
+paths = []
+amends = []
+amended_by = ["ADR-061"]
+superseded_by = ""
+rule = "Applications-first IA: primary nav is Applications · Chat · Runs · Documents, Applications is the landing; Overview + Catalog live in Settings."
+reviewed_fp = "e1e276419efd1c1c"
+
+[ADR-050]
+title = "Typed SDLC domain + single-authority LifecycleService (Phase 25-01)"
+status = "accepted"
+areas = ["features-stages", "stories-workbench", "api", "core-engine", "kb-sync"]
+paths = []
+amends = []
+amended_by = ["ADR-076"]
+superseded_by = ""
+rule = "Model SDLC lifecycle state as typed domain objects; EVERY status change goes through the single `LifecycleService.transition` authority."
+reviewed_fp = "d45cdc053e8b6549"
+
+[ADR-051]
+title = "AgentProvider interface over the agent runtime (Phase 25-05)"
+status = "accepted"
+areas = ["core-engine", "sdk-acp", "chat"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The workflow-agent turn path depends on the `AgentProvider` Protocol (`KiroAcpProvider` default), never binds nodes to the Kiro/ACP loader directly."
+reviewed_fp = "842f86f6a9d72fb2"
+
+[ADR-052]
+title = "DocumentProvider interface for document sourcing (Phase 25-09)"
+status = "accepted"
+areas = ["documents"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Source documents only through the `DocumentProvider` Protocol (provider-neutral `DocRef`/`DocMeta`)."
+reviewed_fp = "f82b4660df163e64"
+
+[ADR-053]
+title = "the Genesis Agentic Memory Layer"
+status = "accepted"
+areas = ["memory", "chat", "core-engine"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Agentic Memory Layer distills persistent memory from stored conversations in two scopes; personal memory is never shared."
+reviewed_fp = "bd67f00182b46c52"
+
+[ADR-054]
+title = "memory store/infra + local embedder"
+status = "accepted"
+areas = ["memory", "runs-worker", "core-engine", "db"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Memory lives in a separate `~/.genesis/memory.db` with its own migrations (genesis.db untouched) and a local embedder."
+reviewed_fp = "03e203fec11e7601"
+
+[ADR-055]
+title = "UI/UX design language + light-first theming (Phase 27)"
+status = "accepted"
+areas = ["web-shell", "web-runs", "chat", "features-stages", "stories-workbench", "documents"]
+paths = ["genesis/web/src/**"]
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Light-first, MUI-inspired design language by evolving the existing tokens + Tailwind + shadcn-style primitives — NOT adopting `@mui/material`."
+reviewed_fp = "cacca2fb2f273564"
+
+[ADR-056]
+title = "The Genesis Feature Workspace (parallel, plug-in stages) (Phase 28)"
+status = "accepted"
+areas = ["features-stages"]
+paths = []
+amends = ["ADR-044"]
+amended_by = ["ADR-057", "ADR-058"]
+superseded_by = ""
+rule = "A Feature is a workspace of parallel, independently-advanceable, plug-in stage containers over a shared substrate; each stage has its own lifecycle."
+reviewed_fp = "c55d6ae5253a6473"
+
+[ADR-057]
+title = "The UX Design stage: grounded mockup→implementation analysis (Phase 29)"
+status = "accepted"
+areas = ["features-stages", "workflows-library"]
+paths = []
+amends = ["ADR-056"]
+amended_by = ["ADR-058"]
+superseded_by = ""
+rule = "The UX Design stage turns an uploaded PDF mockup into a grounded UX Implementation Analysis via the deterministic `ux-design-analysis` workflow."
+reviewed_fp = "725f54c092508839"
+
+[ADR-058]
+title = "The Technical Design stage: grounded, workstream-decomposed technical design (Phase 30)"
+status = "accepted"
+areas = ["features-stages", "workflows-library"]
+paths = []
+amends = ["ADR-056", "ADR-057"]
+amended_by = []
+superseded_by = ""
+rule = "The Technical Design stage turns the finalized Spec + UX analysis into a grounded, workstream-decomposed, object-level design; a stage MAY declare prerequisites."
+reviewed_fp = "a931097b1cb9b469"
+
+[ADR-059]
+title = "The Feature Breakdown stage: grounded, workstream-decomposed, Jira-ready backlog (Phase 31)"
+status = "accepted"
+areas = ["features-stages", "workflows-library", "stories-workbench"]
+paths = []
+amends = []
+amended_by = ["ADR-075"]
+superseded_by = ""
+rule = "The Feature Breakdown stage turns Spec + UX + Technical Design into a grounded, workstream-decomposed, Jira-ready backlog."
+reviewed_fp = "0b1eac679b736c31"
+
+[ADR-060]
+title = "Finalized Stories: the Feature Breakdown backlog becomes first-class, editable Story records (Phase 32)"
+status = "accepted"
+areas = ["features-stages", "stories-workbench", "kb-sync", "web-shell", "appian-integration", "db"]
+paths = []
+amends = []
+amended_by = ["ADR-075"]
+superseded_by = ""
+rule = "Finalize Stories is a one-time, IRREVERSIBLE action on a completed Feature Breakdown that turns its backlog into first-class, editable Story records."
+reviewed_fp = "d61e4b25e05299a9"
+
+[ADR-061]
+title = "The Genesis Workbench: a per-application Kanban execution board (Phase 33)"
+status = "accepted"
+areas = ["stories-workbench", "features-stages", "kb-sync", "web-shell"]
+paths = []
+amends = ["ADR-049"]
+amended_by = ["ADR-062"]
+superseded_by = ""
+rule = "The Workbench is a curated set of per-application Kanban boards over finalized stories, with eight fixed lanes; board membership is explicit (v0.69.0 amendment)."
+reviewed_fp = "18e3ca424965cf88"
+
+[ADR-062]
+title = "Workbench lane automation: the Design & Design Review lanes (Phase 34)"
+status = "amended"
+areas = ["stories-workbench", "features-stages", "core-engine", "workflows-library"]
+paths = []
+amends = ["ADR-061"]
+amended_by = ["ADR-068"]
+superseded_by = "ADR-068"
+rule = "Dragging a ticket into Design opens a confirm dialog that launches the design workflow; ADR-068 supersedes its proposal-only clause for the Implementation lane."
+reviewed_fp = "ef7908bf3b3703c2"
+
+[ADR-063]
+title = "The Genesis Collaboration Hub: local-first with selective centralization (Phase 35–38)"
+status = "accepted"
+areas = ["collaboration-hub", "stories-workbench", "features-stages", "config-secrets"]
+paths = []
+amends = ["ADR-026"]
+amended_by = ["ADR-065", "ADR-074"]
+superseded_by = ""
+rule = "Genesis stays local-first and single-user; collaboration is an OPT-IN, selective centralization of a defined data subset to the shared Hub."
+reviewed_fp = "d25283bc95d59644"
+
+[ADR-064]
+title = "The Genesis Hub Appian application + its frozen API contract (Phase 36)"
+status = "accepted"
+areas = ["collaboration-hub", "kb-sync", "stories-workbench", "appian-integration"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Hub is a dedicated `Genesis Hub` Appian app in the existing dev env, exposing a FROZEN Web API contract."
+reviewed_fp = "f88ff69025a63c0e"
+
+[ADR-065]
+title = "Two-toggle collaboration enablement (Settings switch gated on Hub availability) (post-Phase-38)"
+status = "accepted"
+areas = ["collaboration-hub", "config-secrets"]
+paths = []
+amends = ["ADR-063"]
+amended_by = []
+superseded_by = ""
+rule = "Collaboration is active only when BOTH gates are on: the env master `GENESIS_COLLAB_ENABLED` and the Settings switch (gated on Hub availability)."
+reviewed_fp = "c63aafd766ff1843"
+
+[ADR-066]
+title = "Run inspection & node observability: capture what the agent was given & produced, per iteration (Phase 39)"
+status = "accepted"
+areas = ["observability-credits", "runs-worker", "web-runs", "core-engine"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Capture what each agent was given and produced, per iteration, and expose it in the run-detail node summary + turn explorer."
+reviewed_fp = "482faef1bd9227fb"
+
+[ADR-067]
+title = "Grounded artifact verification & cost-aware self-healing: the second reliability tier (Phase 40)"
+status = "accepted"
+areas = ["core-engine", "workflows-library", "features-stages"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Use genesis-core `attach_healing` (grounded verify → heal → patch in place or one guided restart → escalate, bounded by `META.healing`) as the second reliability tier beside the ADR-011 trio."
+reviewed_fp = "9aee978d41dbac38"
+
+[ADR-068]
+title = "Write-capable Appian implementation lane: Genesis implements object-level code (Phase 42)"
+status = "accepted"
+areas = ["stories-workbench", "appian-integration", "core-engine", "config-secrets", "workflows-library"]
+paths = []
+amends = ["ADR-021", "ADR-062"]
+amended_by = []
+superseded_by = ""
+rule = "Implementation is the only env-mutating lane: the Design Review→Implementation confirm is the single blanket approval (rollback doc first); NEVER delete an object — deprecate via description; no delete* tool allowlisted."
+reviewed_fp = "9380507a5bc2aa0d"
+
+[ADR-069]
+title = "Workflow-node skill provisioning: inject a Kiro skill into a workflow agent session (Phase 42)"
+status = "accepted"
+areas = ["workflows-library", "core-engine", "chat", "runs-worker", "sdk-acp"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "A workflow agent node declares Kiro skills via `kiro_node(skills=[...])`; Genesis provisions them into the blackboard's `.kiro/skills/` — never rely on the host's global `~/.kiro/skills`."
+reviewed_fp = "5ca819e2d75e7fdf"
+
+[ADR-070]
+title = "The Object Wiki: a local-first, Hub-shared, append-only per-object change ledger (Phase 42)"
+status = "accepted"
+areas = ["stories-workbench", "collaboration-hub", "kb-sync", "db"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "The Object Wiki is a local-first, Hub-shared, APPEND-ONLY per-object change ledger."
+reviewed_fp = "d28697cdbb9ba76d"
+
+[ADR-071]
+title = "The unified Story Workspace: one consistent, consolidated story view (Phase 43)"
+status = "accepted"
+areas = ["stories-workbench", "api", "features-stages", "web-shell"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "ONE canonical story page (`/applications/:appUuid/stories/:storyId`) reached from every entry point; no parallel story surfaces."
+reviewed_fp = "3ad8fe836bfdbe84"
+
+[ADR-072]
+title = "Global human-readable story identifier (GNS_000001) (Phase 44)"
+status = "accepted"
+areas = ["features-stages", "kb-sync", "stories-workbench", "collaboration-hub", "db"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Every finalized or created story gets a global, monotonic `GNS_<6-digit>` id allocated from `kb_sequences` inside the finalize/create transaction."
+reviewed_fp = "7c29bd0e12686eac"
+
+[ADR-073]
+title = "Environment package management: the only sanctioned non-design-object write (Phase 45)"
+status = "accepted"
+areas = ["appian-integration", "kb-sync", "parser", "config-secrets", "workflows-library"]
+paths = []
+amends = ["ADR-036", "ADR-037", "ADR-038"]
+amended_by = []
+superseded_by = ""
+rule = "Package tools are used ONLY by Genesis program code (`DevMcpPackages`), never by agents or chat, and only on `genesis-delta-*` packages — the only sanctioned non-design-object write."
+reviewed_fp = "4bcc78953dfc3a20"
+
+[ADR-074]
+title = "Incremental, package-scoped KB sync (Phase 45)"
+status = "accepted"
+areas = ["kb-sync", "collaboration-hub", "parser", "runs-worker", "appian-integration"]
+paths = []
+amends = ["ADR-047", "ADR-063"]
+amended_by = []
+superseded_by = ""
+rule = "KB sync is incremental and package-scoped: list objects modified since this machine's own last sync (`covered_until`) and parse only those."
+reviewed_fp = "1793cb4323e9c475"
+
+[ADR-075]
+title = "Spec clause model and story↔spec traceability (Phase 46)"
+status = "accepted"
+areas = ["features-stages", "stories-workbench", "chat"]
+paths = []
+amends = ["ADR-042", "ADR-059", "ADR-060"]
+amended_by = []
+superseded_by = ""
+rule = "Every spec section/clause carries a hidden `data-cid` that PROGRAM code owns and repairs; stories trace to spec clauses."
+reviewed_fp = "de28c9267b52939d"
+
+[ADR-076]
+title = "Spec change requests: a chat-driven CR, a program-applied plan (Phase 46)"
+status = "accepted"
+areas = ["features-stages", "chat", "stories-workbench"]
+paths = []
+amends = ["ADR-031", "ADR-045", "ADR-050"]
+amended_by = []
+superseded_by = ""
+rule = "A locked spec changes only through a change request: chat drafts the CR, program code applies the plan."
+reviewed_fp = "cfd1570d1f0f0ccd"

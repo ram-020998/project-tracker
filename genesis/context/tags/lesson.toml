@@ -20,3 +20,519 @@
 #   phase       = "pre-16"
 #   rule        = ""
 #   reviewed_fp = "a1b2c3d4e5f60718"
+
+[L-001]
+areas = ["sdk-acp", "config-secrets", "core-engine", "chat"]
+phase = ""
+rule = ""
+reviewed_fp = "4def45ef57bae9e6"
+
+[L-002]
+areas = ["core-engine", "sdk-acp", "config-secrets"]
+phase = ""
+rule = ""
+reviewed_fp = "d211ed184a1b7ece"
+
+[L-003]
+areas = ["runs-worker", "web-runs", "api"]
+phase = ""
+rule = "Keep the per-run SSE bus open until the run is TERMINAL; the client dedupes replayed history and CLOSES the EventSource on terminal final/error, else it reconnects and replays forever."
+reviewed_fp = "cfb096a4bdb05261"
+
+[L-004]
+areas = ["db", "core-engine", "runs-worker", "api"]
+phase = ""
+rule = ""
+reviewed_fp = "9e68eea68783b6db"
+
+[L-005]
+areas = ["runs-worker", "core-engine", "web-runs"]
+phase = ""
+rule = "Use only the canonical event kinds (run.started, node.completed, agent.*, validator.result, retry.scheduled, gate.*, run.final, error) — there is NO node.started/node.failed; running = run.cursor."
+reviewed_fp = "f45ac596836c68d4"
+
+[L-006]
+areas = ["web-runs", "workflows-library", "core-engine"]
+phase = ""
+rule = "Workflows SHOULD declare a `graph:` topology whose node ids match LangGraph node names; without one, Run Detail derives a fallback from /steps so the graph is never blank."
+reviewed_fp = "f2284ec54f84b9b3"
+
+[L-007]
+areas = ["web-runs", "chat"]
+phase = ""
+rule = "The transcript folds `agent.*` events into turns (`buildTranscript` → `groupTurns`, validator/retry notes on the just-closed turn); Markdown answers reuse the existing renderers — no new deps."
+reviewed_fp = "91f41d18e3dc4b0e"
+
+[L-008]
+areas = ["runs-worker", "web-runs"]
+phase = ""
+rule = "A generic `worker_exit` must NOT clobber a specific `error` event; empty-message exceptions report their type + a hint."
+reviewed_fp = "7dcf72db29654796"
+
+[L-009]
+areas = ["core-engine", "runs-worker", "workflows-library", "kb-sync"]
+phase = ""
+rule = "LangGraph: sync `invoke` can't run async nodes and sync `SqliteSaver` fails under async (use `AsyncSqliteSaver`); `Command(resume=…)` needs a checkpointer-compiled graph."
+reviewed_fp = "9d9274019dc45811"
+
+[L-010]
+areas = ["api", "web-shell", "web-runs"]
+phase = ""
+rule = "ALL backend endpoints live under `/api`; the client prepends `/api` centrally and rejects non-JSON — uniform 500s on `/api/*` in the browser usually mean the backend isn't running."
+reviewed_fp = "d0dcbced8ea8ff12"
+
+[L-011]
+areas = ["web-runs", "web-shell"]
+phase = ""
+rule = "Mirror the event/gate/topology/steps contract shapes in `web/src/types` + the golden fixtures; a contract drift must fail a test (stubs must not hide the contract)."
+reviewed_fp = "d5d27e73565d8284"
+
+[L-012]
+areas = ["config-secrets", "web-shell"]
+phase = "8"
+rule = "MCP/CLI settings detail needs BOTH the merged card view and the custom entry, joined by name; the curated tier is read-only, the custom tier editable."
+reviewed_fp = "97fd1e38110f1e92"
+
+[L-013]
+areas = ["workflows-library", "web-runs"]
+phase = ""
+rule = "`workflow.yaml` may carry UI-only keys (e.g. `graph:` topology); the parity lint exempts them via `YAML_ONLY_KEYS`."
+reviewed_fp = "45ddc9e17932c726"
+
+[L-014]
+areas = ["web-shell"]
+phase = ""
+rule = "jest-axe v9 ships no types: keep its ambient `declare module` + matcher augmentation in the existing pure-ambient `.d.ts` files; extend the matcher globally in `web/src/test-setup.ts`."
+reviewed_fp = "0ff067a80e251576"
+
+[L-015]
+areas = ["web-shell", "web-runs"]
+phase = ""
+rule = "Keep heavy web libs lazy (mermaid is dynamic-imported into its own chunk; Recharts is heavy too)."
+reviewed_fp = "0a6ec52ef00e439f"
+
+[L-016]
+areas = ["observability-credits", "sdk-acp", "runs-worker", "chat", "web-runs", "core-engine"]
+phase = "11"
+rule = ""
+reviewed_fp = "a102e2a414664bd6"
+
+[L-017]
+areas = ["chat", "security", "config-secrets"]
+phase = "10"
+rule = "Chat trust is fail-CLOSED — never trust-all; build allowlists in the namespaced `@server/tool` form; a curated server with no `tool_allowlist` is capped only by the node's `tools=` list."
+reviewed_fp = "2680f8ab317bb3d5"
+
+[L-018]
+areas = ["web-runs", "chat", "runs-worker", "api"]
+phase = ""
+rule = "sse-starlette frames SSE events with CRLF — a reader that splits only on LF-LF never parses a frame; accept both separators and don't let an LF-only test fixture hide it."
+reviewed_fp = "b62ac4ab18e87818"
+
+[L-019]
+areas = ["config-secrets", "api"]
+phase = ""
+rule = ""
+reviewed_fp = "1a078644805ba6f1"
+
+[L-020]
+areas = ["core-engine", "workflows-library", "runs-worker"]
+phase = "12"
+rule = "LangGraph's default `recursion_limit` is 25 supersteps — a looping workflow needs the worker to set a higher limit from META; `attach_reliability` keys retries by agent NODE NAME."
+reviewed_fp = "066fcc12e6bb8432"
+
+[L-021]
+areas = ["core-engine", "workflows-library", "runs-worker", "sdk-acp"]
+phase = "9"
+rule = "Never let a huge MCP result re-enter the context window: save it to the blackboard by reference (`save_tool_output`) and never paste tool output into the reply."
+reviewed_fp = "4566098373ecf6ce"
+
+[L-022]
+areas = ["workflows-library", "core-engine", "web-runs"]
+phase = ""
+rule = ""
+reviewed_fp = "89efc172470b2d3b"
+
+[L-023]
+areas = ["workflows-library", "core-engine", "appian-integration", "runs-worker", "config-secrets"]
+phase = "12"
+rule = ""
+reviewed_fp = "452f8a11cf3caa42"
+
+[L-024]
+areas = ["chat", "sdk-acp", "workflows-library"]
+phase = "14"
+rule = ""
+reviewed_fp = "710c9bb0868451eb"
+
+[L-025]
+areas = ["release-ci"]
+phase = "16"
+rule = ""
+reviewed_fp = "00dbcd9b71f833c6"
+
+[L-026]
+areas = ["core-engine", "runs-worker", "db", "kb-sync", "workflows-library"]
+phase = "16"
+rule = ""
+reviewed_fp = "66e5f0173c4724e1"
+
+[L-027]
+areas = ["release-ci"]
+phase = ""
+rule = ""
+reviewed_fp = "961ae31822718ec9"
+
+[L-028]
+areas = ["config-secrets", "appian-integration"]
+phase = ""
+rule = ""
+reviewed_fp = "d2acb30629f5eff9"
+
+[L-029]
+areas = ["appian-integration", "config-secrets", "distribution", "workflows-library"]
+phase = ""
+rule = ""
+reviewed_fp = "0682886df19fa191"
+
+[L-030]
+areas = ["release-ci", "web-shell"]
+phase = ""
+rule = ""
+reviewed_fp = "dd1146cf5d41e573"
+
+[L-031]
+areas = ["appian-integration", "kb-sync", "parser", "config-secrets", "api"]
+phase = ""
+rule = ""
+reviewed_fp = "0466344bc501ee29"
+
+[L-032]
+areas = ["kb-sync", "parser"]
+phase = ""
+rule = ""
+reviewed_fp = "d6fd5719dae670b8"
+
+[L-033]
+areas = ["workflows-library", "distribution", "runs-worker"]
+phase = "17"
+rule = ""
+reviewed_fp = "7e7faefd76db3724"
+
+[L-034]
+areas = ["kb-sync", "web-shell", "web-runs"]
+phase = "17"
+rule = ""
+reviewed_fp = "8cbf51b2fbb63358"
+
+[L-035]
+areas = ["parser", "kb-sync"]
+phase = "18"
+rule = ""
+reviewed_fp = "18110dd1d6c4c4df"
+
+[L-036]
+areas = ["parser"]
+phase = "18"
+rule = ""
+reviewed_fp = "53807548a9395bc3"
+
+[L-037]
+areas = ["parser", "kb-sync"]
+phase = "18"
+rule = ""
+reviewed_fp = "5db728f9aa04a254"
+
+[L-038]
+areas = ["parser"]
+phase = "18"
+rule = ""
+reviewed_fp = "f92e6093f72be11a"
+
+[L-039]
+areas = ["documents", "api", "db"]
+phase = "19"
+rule = ""
+reviewed_fp = "587873530771771f"
+
+[L-040]
+areas = ["documents", "kb-sync"]
+phase = "19"
+rule = ""
+reviewed_fp = "7c6a061baca32429"
+
+[L-041]
+areas = ["sdk-acp", "chat", "features-stages", "core-engine"]
+phase = "20"
+rule = ""
+reviewed_fp = "e6b35c44d5a67c11"
+
+[L-042]
+areas = ["chat", "sdk-acp", "features-stages", "core-engine", "workflows-library"]
+phase = "20"
+rule = ""
+reviewed_fp = "e310dee5ea084c6d"
+
+[L-043]
+areas = ["features-stages", "web-shell"]
+phase = "20"
+rule = ""
+reviewed_fp = "49df54bebb2057e9"
+
+[L-044]
+areas = ["chat", "sdk-acp"]
+phase = "21"
+rule = ""
+reviewed_fp = "079ef7a063130b52"
+
+[L-045]
+areas = ["chat", "security"]
+phase = "21"
+rule = ""
+reviewed_fp = "9334dc3268f1ec6a"
+
+[L-046]
+areas = ["chat", "sdk-acp"]
+phase = ""
+rule = ""
+reviewed_fp = "f0ac4a54efeb0a37"
+
+[L-047]
+areas = ["chat"]
+phase = ""
+rule = ""
+reviewed_fp = "6e00b9ffd1a66329"
+
+[L-048]
+areas = ["distribution", "web-shell", "appian-integration", "config-secrets", "api"]
+phase = ""
+rule = ""
+reviewed_fp = "59d774208c7c7c1b"
+
+[L-049]
+areas = ["config-secrets", "appian-integration", "workflows-library", "distribution"]
+phase = ""
+rule = ""
+reviewed_fp = "5c68f4236ea8c7a2"
+
+[L-050]
+areas = ["kb-sync", "appian-integration", "parser", "runs-worker"]
+phase = "23"
+rule = ""
+reviewed_fp = "c81129f016c4b373"
+
+[L-051]
+areas = ["distribution", "release-ci"]
+phase = "22"
+rule = ""
+reviewed_fp = "2be13df7eee57b49"
+
+[L-052]
+areas = ["distribution"]
+phase = "22"
+rule = ""
+reviewed_fp = "e09914a38bc726a2"
+
+[L-053]
+areas = ["workflows-library", "appian-integration", "config-secrets"]
+phase = "24"
+rule = ""
+reviewed_fp = "79ff324e85255388"
+
+[L-054]
+areas = ["documents", "config-secrets"]
+phase = "19"
+rule = ""
+reviewed_fp = "2dccbcb5da429971"
+
+[L-055]
+areas = ["documents", "web-shell"]
+phase = ""
+rule = ""
+reviewed_fp = "4fb811ad28670af1"
+
+[L-056]
+areas = ["release-ci"]
+phase = ""
+rule = ""
+reviewed_fp = "0568896876a7eb38"
+
+[L-057]
+areas = ["release-ci"]
+phase = "26"
+rule = ""
+reviewed_fp = "0f7ec9a4c16ded45"
+
+[L-058]
+areas = ["features-stages", "runs-worker", "chat"]
+phase = "29"
+rule = ""
+reviewed_fp = "7cc40c320e5cf7fb"
+
+[L-059]
+areas = ["web-runs", "runs-worker", "core-engine"]
+phase = "29"
+rule = ""
+reviewed_fp = "2bf3fa85cd3f4cc5"
+
+[L-060]
+areas = ["web-runs", "runs-worker"]
+phase = "29"
+rule = ""
+reviewed_fp = "d038b6cb2c1c4121"
+
+[L-061]
+areas = ["features-stages", "runs-worker", "chat"]
+phase = "29"
+rule = ""
+reviewed_fp = "01cf234f502235cd"
+
+[L-062]
+areas = ["features-stages", "runs-worker"]
+phase = "30"
+rule = ""
+reviewed_fp = "d25ec9fe3241318b"
+
+[L-063]
+areas = ["features-stages"]
+phase = "30"
+rule = ""
+reviewed_fp = "75d2e5fb816486a5"
+
+[L-064]
+areas = ["core-engine", "workflows-library", "features-stages", "sdk-acp"]
+phase = "30"
+rule = ""
+reviewed_fp = "8bae526e1cf7b444"
+
+[L-065]
+areas = ["core-engine", "runs-worker"]
+phase = "30"
+rule = ""
+reviewed_fp = "f7a49319a0a373aa"
+
+[L-066]
+areas = ["web-runs", "runs-worker"]
+phase = "30"
+rule = ""
+reviewed_fp = "bbd3fd7d53958493"
+
+[L-067]
+areas = ["web-runs"]
+phase = "30"
+rule = "Pre-reverse back-edges of a cyclic workflow graph before ELK layout and route edges around nodes — ELK/dagre's own cycle-breaking scatters the validators (Phase 30 run-graph revamp)."
+reviewed_fp = "db8cc04360e7c2b7"
+
+[L-068]
+areas = ["web-shell", "api", "distribution"]
+phase = "30"
+rule = ""
+reviewed_fp = "f59848d1cc1ff4fd"
+
+[L-069]
+areas = ["web-shell", "web-runs", "features-stages", "stories-workbench", "chat", "documents"]
+phase = "31"
+rule = ""
+reviewed_fp = "c342018b573a8abe"
+
+[L-070]
+areas = ["config-secrets", "appian-integration"]
+phase = ""
+rule = ""
+reviewed_fp = "a1a80b05fe3d956e"
+
+[L-071]
+areas = ["collaboration-hub", "features-stages"]
+phase = "37"
+rule = ""
+reviewed_fp = "6317da74e82a0d91"
+
+[L-072]
+areas = ["collaboration-hub", "features-stages", "stories-workbench"]
+phase = ""
+rule = ""
+reviewed_fp = "b2b81f06d25517ba"
+
+[L-073]
+areas = ["features-stages", "chat"]
+phase = ""
+rule = ""
+reviewed_fp = "a799a5a9c34f2f0d"
+
+[L-074]
+areas = ["stories-workbench", "collaboration-hub"]
+phase = ""
+rule = ""
+reviewed_fp = "a87e50fd24a8340e"
+
+[L-075]
+areas = ["core-engine", "workflows-library", "features-stages"]
+phase = "40"
+rule = ""
+reviewed_fp = "f357c1c4e45af00e"
+
+[L-076]
+areas = ["core-engine", "workflows-library", "features-stages"]
+phase = ""
+rule = ""
+reviewed_fp = "0c0c1c02ef03fe39"
+
+[L-077]
+areas = ["kb-sync", "parser"]
+phase = "45"
+rule = ""
+reviewed_fp = "a8dcd90cf782ffb1"
+
+[L-078]
+areas = ["kb-sync", "appian-integration", "collaboration-hub"]
+phase = "45"
+rule = ""
+reviewed_fp = "4ba9ced1f034b58a"
+
+[L-079]
+areas = ["kb-sync", "parser"]
+phase = "45"
+rule = ""
+reviewed_fp = "321267bde438e7e9"
+
+[L-080]
+areas = ["kb-sync", "collaboration-hub"]
+phase = "45"
+rule = ""
+reviewed_fp = "05a1b5d7db9fd156"
+
+[L-081]
+areas = ["kb-sync", "config-secrets", "runs-worker"]
+phase = "45"
+rule = ""
+reviewed_fp = "7841932ff8151a6f"
+
+[L-082]
+areas = ["collaboration-hub", "kb-sync", "features-stages"]
+phase = "46"
+rule = ""
+reviewed_fp = "c9c3692b0516bf60"
+
+[L-083]
+areas = ["features-stages", "stories-workbench"]
+phase = "46"
+rule = ""
+reviewed_fp = "8836a124d950bbe5"
+
+[L-084]
+areas = ["collaboration-hub", "appian-integration", "features-stages"]
+phase = "46"
+rule = ""
+reviewed_fp = "a7ed5d07e82c175a"
+
+[L-085]
+areas = ["collaboration-hub", "features-stages", "stories-workbench"]
+phase = "46"
+rule = ""
+reviewed_fp = "8f75f77523abe3c0"
+
+[L-086]
+areas = ["features-stages", "chat"]
+phase = "46"
+rule = ""
+reviewed_fp = "b961006a5eb959b3"

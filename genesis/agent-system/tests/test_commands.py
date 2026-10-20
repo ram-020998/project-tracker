@@ -112,6 +112,36 @@ def test_pack_chain_pulls_amended_adr_from_other_area(env):
     assert "ADR-031 | chain via ADR-033" in text
 
 
+def test_pack_closure_changers_transitive_amends_one_hop_from_seeds(env):
+    # 47-01 §5 round 5: amended_by / superseded_by are followed transitively; amends only one hop from seeds.
+    env.write("context/tags/adr.toml", "\n".join([
+        '[ADR-031]', 'areas = ["chat"]', 'amended_by = ["ADR-033"]', '',
+        '[ADR-033]', 'areas = ["api"]', 'amends = ["ADR-031"]', 'amended_by = ["ADR-076"]', '',
+        '[ADR-076]', 'areas = ["api"]', 'amends = ["ADR-033"]', '',
+        '[ADR-026]', 'areas = ["db"]', 'amended_by = ["ADR-063"]', '',
+        '[ADR-063]', 'areas = ["api"]', 'amends = ["ADR-026"]', 'amended_by = ["ADR-064"]', '',
+        '[ADR-064]', 'areas = ["api"]', 'amends = ["ADR-063", "ADR-061"]', '',
+        '[ADR-061]', 'areas = ["api"]', 'amended_by = ["ADR-064"]', '',
+        '[ADR-053]', 'areas = ["core-engine"]', 'superseded_by = "ADR-054"', '',
+        '[ADR-054]', 'areas = ["api"]', '']))
+    env.run("pack", "--areas", "chat", "--out", str(env.root / "chat.md"))
+    chat = (env.root / "chat.md").read_text()
+    assert "ADR-033 | chain via ADR-031" in chat and "ADR-076 | chain via ADR-033" in chat   # transitive changers
+    env.run("pack", "--areas", "db", "--out", str(env.root / "db.md"))
+    db = (env.root / "db.md").read_text()
+    assert "ADR-063 | chain via ADR-026" in db and "ADR-064 | chain via ADR-063" in db
+    assert "ADR-061 |" not in db                  # 064 is chain-added: its `amends` are not followed
+    env.edit("context/tags/adr.toml", '[ADR-064]\nareas = ["api"]', '[ADR-064]\nareas = ["stories-workbench"]')
+    env.run("pack", "--areas", "stories-workbench", "--out", str(env.root / "sw.md"))
+    sw = (env.root / "sw.md").read_text()
+    assert "ADR-061 | chain via ADR-064" in sw and "ADR-063 | chain via ADR-064" in sw  # seed: amends one hop
+    assert "ADR-026 |" not in sw                  # 063 was added by amends, so its own `amends` are not followed
+    env.run("pack", "--areas", "core-engine", "--out", str(env.root / "ce.md"))
+    assert "ADR-054 | chain via ADR-053" in (env.root / "ce.md").read_text()               # superseded_by
+    _, out, _ = env.run("adr", "ADR-026")
+    assert "ADR-061" in out                       # `adr` keeps the full chain
+
+
 def test_pack_budget_warn_and_fail(env, monkeypatch):
     from genesis_ctx import config
     monkeypatch.setattr(config, "PACK_WARN", 50)

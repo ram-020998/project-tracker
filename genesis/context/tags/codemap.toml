@@ -16,3 +16,141 @@
 # Example shape (do not keep as a real entry):
 #   ["genesis/genesis/  chat/"]
 #   areas = ["chat"]
+
+["genesis-core/genesis_core/  types.py"]
+areas = ["core-engine"]
+
+["genesis-core/genesis_core/  state.py"]
+areas = ["core-engine"]
+
+["genesis-core/genesis_core/  workspace.py"]
+areas = ["core-engine"]
+
+["genesis-core/genesis_core/  validators.py"]
+areas = ["core-engine"]
+
+["genesis-core/genesis_core/  mcp/registry.py"]
+areas = ["core-engine", "config-secrets"]
+
+["genesis-core/genesis_core/  mcp/custom_store.py"]
+areas = ["core-engine", "config-secrets"]
+
+["genesis-core/genesis_core/  mcp/introspect.py"]
+areas = ["core-engine", "config-secrets"]
+
+["genesis-core/genesis_core/  clis/registry.py"]
+areas = ["core-engine", "config-secrets"]
+
+["genesis-core/genesis_core/  clis/custom_store.py"]
+areas = ["core-engine", "config-secrets"]
+
+["genesis-core/genesis_core/  nodes/"]
+areas = ["core-engine", "sdk-acp", "workflows-library"]
+
+["genesis-core/genesis_core/  state.py #2"]
+areas = ["core-engine", "observability-credits"]
+
+["genesis/genesis/  db/"]
+areas = ["db"]
+
+["genesis/genesis/  kb/"]
+areas = ["kb-sync", "appian-integration", "documents", "features-stages", "stories-workbench", "parser"]
+
+["genesis/genesis/  integrations/gws/"]
+areas = ["documents"]
+
+["genesis/genesis/  cli_tools/native/"]
+areas = ["appian-integration", "config-secrets", "documents", "distribution"]
+
+["genesis/genesis/  runtime/"]
+areas = ["collaboration-hub", "config-secrets", "distribution", "memory", "runs-worker", "observability-credits", "kb-sync"]
+
+["genesis/genesis/  dist/"]
+areas = ["distribution"]
+
+["genesis/genesis/  config/"]
+areas = ["config-secrets"]
+
+["genesis/genesis/  runs/"]
+areas = ["runs-worker", "observability-credits"]
+
+["genesis/genesis/  chat/"]
+areas = ["chat", "features-stages", "stories-workbench"]
+
+["genesis/genesis/  mcp/"]
+areas = ["config-secrets", "appian-integration", "memory", "chat", "kb-sync"]
+
+["genesis/genesis/  skills/"]
+areas = ["chat", "workflows-library"]
+
+["genesis/genesis/  api/"]
+areas = ["api", "appian-integration", "collaboration-hub", "config-secrets"]
+
+["genesis/genesis/  cli/"]
+areas = ["distribution", "db"]
+
+["genesis/genesis/  (scripts/"]
+areas = ["distribution"]
+
+["genesis/genesis/  lint/"]
+areas = ["workflows-library", "core-engine"]
+
+["genesis/genesis/  web/"]
+areas = ["web-shell", "web-runs", "chat", "features-stages", "stories-workbench", "documents", "memory", "config-secrets"]
+
+["genesis-workflows/  registry.json"]
+areas = ["workflows-library", "config-secrets"]
+
+["genesis-workflows/  skills/{gam/SKILL.md"]
+areas = ["workflows-library", "chat"]
+
+["── Phase 25 — Architectural Foundation Hardening (genesis v0.49.0 + genesis-core v0.9.4)"]
+areas = ["core-engine", "observability-credits", "api", "features-stages", "documents", "sdk-acp"]
+
+["── Global ⌘K search (genesis v0.56.0)"]
+areas = ["api", "web-shell", "documents", "features-stages", "kb-sync"]
+
+["── Phase 29 — UX Design stage (grounded mockup→implementation analysis; ADR-057)"]
+areas = ["features-stages", "chat", "workflows-library"]
+
+["── Phase 31 — Feature Breakdown stage (grounded, Jira-ready backlog; ADR-059)"]
+areas = ["features-stages", "chat", "workflows-library", "stories-workbench"]
+
+["── Phase 32 — Finalize Stories (the finalized backlog; ADR-060)"]
+areas = ["api", "db", "features-stages", "stories-workbench"]
+
+["── Phase 33 — The Workbench (per-application Kanban execution board; ADR-061)"]
+areas = ["stories-workbench", "api", "db", "web-shell"]
+
+["── Phase 34 — Design Lane Automation (Workbench Design + Design Review; ADR-062)"]
+areas = ["stories-workbench", "workflows-library", "features-stages"]
+
+["── Phase 35 — Collaboration Foundations & Identity (local-first → shared Hub; ADR-063)"]
+areas = ["collaboration-hub", "api", "config-secrets"]
+
+["── Phase 37 — Hub Wire-up (AppianHubProvider + KB sharing + identity/teams + sync-UX; genesis v0.64.0)"]
+areas = ["collaboration-hub", "kb-sync", "config-secrets"]
+
+["── Phase 38 — Collaborative SDLC (features/stories/boards publish-pull + UX + adoption; genesis v0.65.0)"]
+areas = ["collaboration-hub", "stories-workbench", "features-stages"]
+
+["── ADR-065 — Two-toggle collaboration enablement (Settings switch + Hub availability; genesis v0.66.0/v0.66.1)"]
+areas = ["collaboration-hub", "config-secrets"]
+
+["── Collaboration auto-pull: frontend driver (v0.67.0/1) + backend loop (v0.68.0) + sticky board"]
+areas = ["collaboration-hub", "stories-workbench"]
+
+["── v0.69.0 — Workbench board fixes (explicit membership + to-do default + drag guard)"]
+areas = ["stories-workbench", "collaboration-hub"]
+
+["── Phase 39 — Run inspection & node observability (SHIPPED genesis v0.70.0 + genesis-core v0.9.7; ADR-066 Accepted)"]
+areas = ["runs-worker", "core-engine", "web-runs", "observability-credits"]
+
+["── Phase 40 — Self-Healing Reliability: the second reliability tier (SHIPPED genesis-core v0.9.7 + genesis-workflows v0.17.0; ADR-067 Accepted)"]
+areas = ["core-engine", "workflows-library"]
+
+["Phase 45 — Incremental Delta Sync (genesis-appian-parser v0.3.0 · genesis v0.76.0 · genesis-workflows v0.21.0)"]
+areas = ["kb-sync", "config-secrets", "runs-worker", "appian-integration", "parser", "collaboration-hub"]
+
+["Phase 46 — Spec Change Requests & Story Traceability (genesis v0.77.0 · genesis-workflows v0.22.0 · Hub addition)"]
+areas = ["features-stages", "chat", "stories-workbench", "collaboration-hub", "workflows-library"]

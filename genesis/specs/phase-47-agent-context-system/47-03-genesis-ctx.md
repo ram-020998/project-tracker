@@ -76,8 +76,9 @@ note    = "From Phase 47 on: ≤ 5 lines per phase; detail lives in `progress/`.
 ```
 inputs : manifest M (from the sub-spec's "## Context manifest" TOML block; empty if --areas only)
 areas  = M.areas ∪ --areas ∪ areas_matching(M.code paths) ∪ {always-on areas: security, release-ci}
-adrs   = M.adrs ∪ {a | a.areas ∩ areas ≠ ∅} ∪ {a | a.paths match M.code}
-adrs   = closure(adrs, amends ∪ amended_by ∪ superseded_by)        # whole chain, both directions
+adrs   = M.adrs ∪ {a | a.areas ∩ areas ≠ ∅} ∪ {a | a.paths match M.code}          # the seeds
+adrs   = seeds ∪ {amends of a seed}  (one hop, from seeds only)
+adrs   = closure(adrs, amended_by ∪ superseded_by ∪ reverse-amends)   # transitive: everything that changes a loaded rule
 lessons= M.lessons ∪ {l | l.areas ∩ areas ≠ ∅}
 codemap= {s | s.areas ∩ areas ≠ ∅}
 docs   = M.docs ∪ area.docs ∪ M.upstream sub-specs (their files) ∪ the umbrella spec
@@ -92,8 +93,13 @@ Pack layout (Markdown):
 5. **Code map — the matching sections** verbatim.
 6. **Read next** — the docs and code paths (paths only, with reasons): the agent opens them itself, in ranges.
 
-Budget: warn at 40K tokens (chars ÷ 4), fail at 80K with a hint to narrow `areas`. Excluded items remain visible in L0
-as one-liners, so narrowing never hides a rule.
+**Closure rule (amended S4, 2026-10-20 — 47-01 §5.6):** `pack` and `check` follow `amended_by` / `superseded_by`
+transitively from every loaded ADR, but `amends` only one hop and only from the seeds, so a chain-added ADR never pulls
+in what *it* amends (ADR-026 → 063 no longer reaches 047). `genesis-ctx adr <id>` still prints the whole chain in both
+directions.
+
+Budget: warn at 60K tokens (chars ÷ 4), fail at 120K with a hint to narrow `areas` (raised from 40K / 80K in S4,
+47-01 §5.6). Excluded items remain visible in L0 as one-liners, so narrowing never hides a rule.
 
 ## 5. Lint
 

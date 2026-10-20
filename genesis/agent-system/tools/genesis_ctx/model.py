@@ -153,6 +153,40 @@ class Corpus:
                     queue.append(n)
         return out
 
+    def pack_chain(self, seeds) -> dict[str, str]:
+        """Closure used by `pack` and `check` (47-03 §4, 47-01 §5 round 5).
+
+        From the seeds, follow `amended_by` and `superseded_by` TRANSITIVELY (everything that changes a
+        loaded rule), and `amends` ONE hop from the seeds only (never from chain-added ADRs).
+        Returns id -> reason ("" for the seeds).
+        """
+        out = {i: "" for i in seeds}
+        reverse_amends: dict[str, set[str]] = defaultdict(set)     # X -> ADRs that list X in `amends`
+        reverse_super: dict[str, set[str]] = defaultdict(set)      # X -> ADRs that X supersedes
+        for k, t in self.adr_tags.items():
+            for a in t.get("amends", []) or []:
+                reverse_amends[a].add(k)
+            if t.get("superseded_by"):
+                reverse_super[k].add(t["superseded_by"])
+
+        def changers(i: str) -> set[str]:
+            t = self.adr_tags.get(i, {})
+            got = {x for x in (t.get("amended_by", []) or []) if isinstance(x, str)}
+            return got | reverse_amends.get(i, set()) | reverse_super.get(i, set())
+
+        for s in list(seeds):
+            for a in sorted(self.adr_tags.get(s, {}).get("amends", []) or []):
+                if a not in out:
+                    out[a] = f"chain via {s}"
+        queue = list(out)
+        while queue:
+            cur = queue.pop(0)
+            for n in sorted(changers(cur)):
+                if n not in out:
+                    out[n] = f"chain via {cur}"
+                    queue.append(n)
+        return out
+
     @staticmethod
     def _edges(tag: dict) -> list[str]:
         edges = list(tag.get("amends", []) or []) + list(tag.get("amended_by", []) or [])
