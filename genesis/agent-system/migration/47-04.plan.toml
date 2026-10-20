@@ -1,0 +1,18 @@
+# 47-04 scripted migration plan (schema: 47-03 §3.1). Run one step at a time:
+#   genesis-ctx archive --plan agent-system/migration/47-04.plan.toml --step N [--apply]
+# Steps 4 (mark) and 5 (propose-tags) are genesis-ctx commands, not archive entries.
+# BASELINE for verify-lossless: d89f763efe69d424c99290ebbae892a5c112c75e (13 baseline files unchanged since b127a4d).
+date = "2026-10-20"
+
+# Step 1 — tracker.md §6 body. The newest entry (2026-10-20, Phase 47) stays as §6's first short entry;
+# everything after it, to EOF, moves.
+[[step]]
+n       = 1
+name    = "Status log"
+source  = "tracker.md"
+dest    = "archive/tracker-status-log.md"
+start   = '^- \*\*2026-10-20 — Phase 47 \(Agent Context System\)'
+include_start = false
+end     = "EOF"
+pointer = "each"
+note    = "From Phase 47 on: ≤ 5 lines per phase; detail lives in `progress/`."
