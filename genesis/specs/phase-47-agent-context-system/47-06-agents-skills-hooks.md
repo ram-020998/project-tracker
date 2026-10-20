@@ -98,8 +98,12 @@ welcomeMessage: "genesis-dev ready. Tell me the sub-spec id (e.g. 'Implement 48-
 
 Shared opening (every agent): "You are a Genesis <role> agent. Your always-loaded context is L0 (core, architecture,
 work loop, the ADR and lesson digests, the area catalog, the current state); the live repo status was printed at session
-start. You do **not** read the bible. Follow the retrieval protocol in L0-core §3. ADRs are non-negotiable; lessons are
-do-not-regress; ask before destructive or irreversible actions; report with cited evidence."
+start. You do **not** read the bible. Follow the retrieval protocol in L0-core §3; fetch full texts in ONE direct call,
+many ids: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-021 ADR-032` (or `lesson L-056 L-057`), never inside a loop, pipe,
+`;`, `&&`, `$(…)`, redirect or `VAR=` prefix (those are denied). ADRs are non-negotiable; lessons are
+do-not-regress; ask before destructive or irreversible actions; report with cited evidence." (The one-call clause is
+47-09 round-2 m9: the agent's batched `G=…; for a in …; do $G adr …; done` fell outside the `genesis-ctx *` allow rule
+and was denied non-interactively; `test_documented_retrieval_form_matches_each_profiles_allow_rules` pins it.)
 
 | Agent | Procedure (abridged — full text in the profile) |
 |---|---|

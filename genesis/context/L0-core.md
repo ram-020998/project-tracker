@@ -36,6 +36,10 @@ the Chat `/` palette (or auto-activated by description).
 
 - The digests below list **every** ADR and lesson. Before acting on an area, get the full text:
   `genesis-ctx pack <sub-spec>` (or `--areas …`), or `genesis-ctx adr <id>` / `lesson <id>`.
+- **Standard retrieval form — one direct call, many ids:** `<abs>/genesis-ctx adr ADR-021 ADR-032 ADR-035`
+  (likewise `lesson L-056 L-057`), where `<abs>` is the absolute `bin/` path from your role prompt. Never wrap it in a
+  loop, pipe, `;`/`&&`, `$(…)`, redirect or `VAR=` prefix: those fall outside the shell allow rule and are denied in a
+  non-interactive session. Need only part of a long output? Use `pack --out <file>` plus a ranged read.
 - Never open `reference/decision-log.md`, `bible/03`, `bible/04`, `bible/06` or `archive/**` whole; use
   `genesis-ctx` or ranged reads.
 - For history ("when/why did we…"), use `genesis-ctx search <term> --archive`, then the `progress/` doc.

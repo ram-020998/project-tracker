@@ -417,3 +417,64 @@ def test_genesis_docs_allows_read_only_git_on_code_repos(tmp_path, monkeypatch):
         assert f"git -C {repos}/* {sub}*" in allow, f"missing read-only git -C {sub}"
     # no push/tag crept into an allow rule for genesis-docs
     assert not any("push" in m or "tag" in m for m in allow)
+
+
+# ── 47-09 m9: the documented retrieval form matches every profile's allow rules ───────────────────────────────
+SHELL_META = set("|;&$`()<>\n")
+
+
+def _shell_rule_matches(pattern: str, cmd: str) -> bool:
+    """V3 shell-rule glob: `*` matches any run of characters (spaces included); everything else is literal."""
+    import re
+    return re.fullmatch(".*".join(re.escape(p) for p in pattern.split("*")), cmd, re.S) is not None
+
+
+def _rendered_profiles(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    (home / ".kiro" / "agents").mkdir(parents=True)
+    monkeypatch.setenv("HOME", str(home))
+    tracker = tmp_path / "tracker"
+    src = tracker / "agent-system"
+    for sub in ("agents", "skills", "hooks"):
+        shutil.copytree(REAL_SOURCE / sub, src / sub, ignore=shutil.ignore_patterns("__pycache__", ".DS_Store"))
+    cfg = gi.Config(source=src, tracker=tracker, repos=tmp_path / "repos", home=home / ".kiro" / "genesis",
+                    agents_dir=home / ".kiro" / "agents", model="")
+    desired = gi.build_desired(cfg)
+    return cfg, {p.stem: json.loads(i.data) for p, i in desired.items() if p.parent == cfg.agents_dir}
+
+
+def test_documented_retrieval_form_matches_each_profiles_allow_rules(tmp_path, monkeypatch):
+    import re
+    import shlex
+    import subprocess
+    cfg, profiles = _rendered_profiles(tmp_path, monkeypatch)
+    assert len(profiles) == 5
+    ctx = f"{cfg.home}/bin/genesis-ctx"
+    for name, prof in profiles.items():
+        # the role prompt documents the one-call multi-id form with the rendered absolute path
+        forms = re.findall(r"`(" + re.escape(ctx) + r" adr [^`]+)`", prof["prompt"])
+        lessons = re.findall(r"`(lesson L-\d{3}(?: L-\d{3})+)`", prof["prompt"])
+        assert forms and lessons, f"{name}: one-call multi-id retrieval form not documented in the prompt"
+        forms += [f"{ctx} {lsn}" for lsn in lessons]
+        rules = [r for r in prof["permissions"]["rules"] if r["capability"] == "shell"]
+        guard = next(h["action"]["command"] for h in prof["hooks"] if h["name"] == "shell-guard")
+        for form in forms:
+            ids = form.split()[2:]
+            assert len(ids) >= 2 and all(re.fullmatch(r"(ADR|L)-\d{3}", i) for i in ids), form
+            assert not (set(form) & SHELL_META), f"{name}: documented form has shell metacharacters: {form}"
+            allow = [m for r in rules if r["effect"] == "allow" for m in r["match"] if _shell_rule_matches(m, form)]
+            other = [m for r in rules if r["effect"] != "allow" for m in r["match"] if _shell_rule_matches(m, form)]
+            assert allow, f"{name}: `{form}` matches no shell allow rule"
+            assert not other, f"{name}: `{form}` also matches ask/deny rule(s) {other}"
+            # and the shell-guard hook (same args as the profile renders) lets it through
+            args = shlex.split(guard)[1:]
+            payload = json.dumps({"tool_input": {"command": form, "cwd": str(cfg.repos)}})
+            r = subprocess.run(["bash", str(REAL_SOURCE / "hooks" / "shell-guard.sh"), *args],
+                               input=payload, capture_output=True, text=True)
+            assert r.returncode == 0, f"{name}: shell-guard blocked `{form}`: {r.stderr}"
+    # L0-core §3 carries the same rule
+    l0 = (REAL_SOURCE.parent / "context" / "L0-core.md").read_text(encoding="utf-8")
+    sec3 = l0.split("## 3. Retrieval protocol", 1)[1].split("\n## ", 1)[0]
+    assert re.search(r"genesis-ctx adr ADR-\d{3} ADR-\d{3}", sec3) and "one direct call" in sec3
+    for word in ("loop", "pipe", "redirect"):
+        assert word in sec3
