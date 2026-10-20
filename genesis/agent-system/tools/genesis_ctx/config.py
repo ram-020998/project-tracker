@@ -11,11 +11,14 @@ INSTALL_JSON = Path.home() / ".kiro" / "genesis" / "install.json"
 # The five Genesis code repos under {{REPOS}} (47-02 §3).
 REPO_NAMES = ("genesis", "genesis-core", "genesis-workflows", "kiro-agent-sdk", "genesis-appian-parser")
 
-# Budgets (umbrella Q2), in estimated tokens (chars / 4).
+# Budgets (umbrella Q2), in estimated tokens. The estimator is calibrated to the real tokenizer measured
+# in the 47-09 §4 review: dense ADR/pack prose tokenises at ≈ 2.5 characters/token (chars/4 under-counted
+# packs ~1.6×, so WARN/FAIL lied). The ratio is conservative — it over-counts the terse, id-heavy L0
+# digests — so the L0/state caps below are rescaled from their chars/4 values to keep the same headroom.
 PACK_WARN = 60_000
 PACK_FAIL = 120_000
-L0_BUDGET = 15_000
-STATE_BUDGET = 4_000
+L0_BUDGET = 24_000
+STATE_BUDGET = 6_400
 RULE_MAX_CHARS = 220
 
 # The baseline mandatory corpus (47-01 §2.1), relative to project-tracker/genesis/.
@@ -52,8 +55,12 @@ class CtxError(Exception):
 
 
 def tokens(text: str) -> int:
-    """Token estimate used for every budget: characters / 4, rounded up."""
-    return (len(text) + 3) // 4
+    """Token estimate used for every budget: characters / 2.5, rounded up.
+
+    Calibrated to the real tokenizer measured in the 47-09 §4 review (dense ADR/pack prose is
+    ≈ 2.5 chars/token). This replaced the old chars/4, which under-counted packs ~1.6× and made the
+    pack WARN/FAIL verdict lie. It is conservative (over-counts) for terse, id-heavy digest text."""
+    return (len(text) * 2 + 4) // 5
 
 
 def default_tracker() -> Path:
