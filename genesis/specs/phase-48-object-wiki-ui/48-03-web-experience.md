@@ -1,6 +1,6 @@
 # 48-03 — Web: the Object Wiki tab and the object page
 
-> **Status:** 🟡 SPEC-DRAFTED 2026-10-21. Repo: **genesis** (`web/`). Parent: `specs/phase-48-object-wiki-ui.md`.
+> **Status:** ✅ DONE 2026-10-21 (genesis `01288c9` + `5789f88` + `0b2ecec`, local; review SHIP — see As built). Repo: **genesis** (`web/`). Parent: `specs/phase-48-object-wiki-ui.md`.
 > Decisions: 48-01 D1–D4, D6, D7. Upstream: **48-02** (read its As built — the real response samples — first).
 > Existing stack, tokens and primitives only (ADR-027/055): no new dependency.
 
@@ -129,3 +129,75 @@ code     = ["genesis/web/src/features/applications/ApplicationDetail.tsx",
             "genesis/web/src/types/objectWiki.ts", "genesis/web/static/**"]
 upstream = ["48-02"]
 ```
+
+## As built (genesis-dev, 2026-10-21)
+
+**Status:** ✅ DONE. Review **SHIP** (`reviews/48-03-review.md`), plus a delta SHIP on 5789f88. Committed locally only: not pushed, not tagged (48-05).
+
+### Commits (genesis, base `148c064`)
+
+| Commit | Message |
+|---|---|
+| `01288c9` | feat(web): Object Wiki tab + object page, URL-addressable application tabs (48-03) |
+| `5789f88` | fix(web): 48-03 review follow-ups — tests for replace/404-retry/other-type options, safe copy, 404 copy, comments (48-03) |
+| `0b2ecec` | test(web): deterministic 404-not-retried check (retryDelay 0) (48-03 review n5) |
+
+Every commit that touched the bundle includes the rebuilt `web/static/`. The reviewer diffed a fresh build against it and found it identical.
+
+### Changed (all under `genesis/web/src/`)
+
+- `features/applications/ApplicationDetail.tsx`: the tabs are now a controlled `Tabs` bound to `?tab=` (`APP_TABS` and `resolveTab`; an absent or unknown value → `business-map`). A tab change calls functional `setSearchParams` with `replace: true` and keeps other params. A new "Object Wiki" tab sits after Overview and renders `<ObjectWikiTab>`.
+- `app/router.tsx`: `applications/:appUuid/wiki` → `WikiRedirect` (to `?tab=object-wiki`), and `applications/:appUuid/wiki/:objectUuid` → `ObjectWikiPage`.
+- `shared/layout/breadcrumbs.ts`: adds the `/applications/:appUuid/wiki` crumb ("Object Wiki") and the `/…/wiki/:objectUuid` crumb (`wiki:<uuid>` label, else "Object").
+- `types/objectWiki.ts` (new): `WikiObjectRow`, `WikiEntry`, `WikiStoryRef`, `WikiListResponse`, `WikiObjectResponse`, `WikiChangeKind`.
+- `lib/api/objectWiki.ts` (new): `objectWikiApi.list` and `.get`, with no `/api` prefix and both ids encoded. It is exported from `lib/api/index.ts`.
+- `lib/query/keys.ts`: `qk.objectWiki.list(appUuid)` and `qk.objectWiki.detail(appUuid, objectUuid)`.
+- `shared/ui/appian-object-types.ts` (new; re-exported from `shared/ui/index.ts`): `APPIAN_OBJECT_TYPES` for the 17 canonical keys, plus `objectTypeMeta(key, raw)`. `shared/ui/icons.ts` adds BarChart3, BookOpen, Box, Braces, Cable, Folder, Hash, Languages, LayoutTemplate, PanelsTopLeft, Split and SquareFunction.
+- `features/object-wiki/` (new):
+  - `hooks.ts`: `useObjectWiki`, `useObjectWikiPage`, `isNotFound`.
+  - `wiki-logic.ts`: pure change-kind meta, filter, type options, sort and `nextSort`.
+  - `badges.tsx`: `ChangeKindBadge` and `BugFixBadge`.
+  - `ObjectWikiTab.tsx`, `ObjectWikiTable.tsx`, `ObjectWikiPage.tsx`, `HistoryTimeline.tsx`.
+  - `fixtures.ts`: the 48-02 samples, verbatim.
+  - `objectWiki.test.tsx`.
+
+### Tests
+
+- `features/object-wiki/objectWiki.test.tsx` (34 tests) covers all of §6 items 1–5:
+  - URL tabs: open, fallback, `?tab` write, params kept, and `replace` (Back leaves the app page).
+  - The tab: rows, labels and badges, search, the Type and Change filters, sort with `aria-sort`, the empty, no-match/Clear-filters and error states, row click, and Enter on the name button.
+  - The page: header and metadata, Deprecated and "Not in the KB yet", newest-first entries, the Business/Technical switch, "Not recorded.", plain-text rendering, the story link vs an unresolved key, Back, 404, and a 404 not retried while a 500 is retried once.
+  - `objectTypeMeta`; pure sort/filter (mixed `Z`/`+05:30` instants, unparseable values last, two `other` raw types kept apart).
+  - jest-axe on both the tab and the page.
+- `shared/layout/breadcrumbs.test.tsx`: +1 (Home › Application › Object Wiki).
+- Mutation checks: the replace test fails with `replace:false`, and the 404 test fails when 404s are retried. The reviewer also mutation-checked the retry test.
+- Gates: `npm run typecheck` is clean. `npm run lint` has 0 errors and 20 warnings; the one new warning is the react-refresh rule on `WikiRedirect`, the same as the existing `StoryRedirect`. `npm test` → 46 files, **367 passed** (332 at v0.77.0). `npm run build` OK. Backend untouched.
+
+### Review
+
+`genesis-review` gave **SHIP** on 01288c9: no blockers or majors, minors m1–m2, nits n1–n4. m2 and n1–n4 are fixed in 5789f88, which got a delta **SHIP** with a new nit n5; n5 is fixed in 0b2ecec. **m1 is open for the user (a D3 product question):** the `story-implementation` workflow writes `change_reason` on *every* entry (`genesis-workflows/workflows/story-implementation/graph.py:668`, stored at `:395`). Under D3 the UI shows it only on bug fixes, so the "why" of ordinary created/updated entries is never shown. The option on the table is to show the reason as muted text whenever it is present and keep the Bug fix badge for `is_bugfix` only. It should be decided before 48-04.
+
+### Decisions / deviations (spec refinements; no ADR deviation)
+
+1. **Focus refetch is turned on explicitly in the wiki hooks.** The app's QueryClient defaults to `refetchOnWindowFocus: false` (`lib/query/client.ts:9`), but D7 asks for refetch-on-focus/mount so that teammates' pulled entries show up.
+2. **A 404 on the detail query is not retried.** Other errors keep the app's single retry.
+3. **The Type filter matches by display label, not key**, so `other` rows with different `type_raw` values show up and filter as separate types.
+4. **Sorting:** clicking a new column starts it in its natural direction (Last change and Changes descending, the others ascending), and a second click flips it. Unparseable or blank timestamps sort last in both directions, which matches the API's rule. Ties break by name, then uuid.
+5. **Shared `Select` takes `ariaLabel`.** The Type and Change filters use it and are named "Filter by type" / "Filter by change".
+6. **Small additions beyond the spec:**
+   - "No changes recorded yet." for a page with 0 entries.
+   - A broader 404 description ("…or the application isn't tracked here").
+   - A copy failure shows an error toast.
+   - Singular forms: "1 object" and "1 change".
+
+### Lesson candidates
+
+- **The shared `Select` silently drops `aria-label`.** It takes `ariaLabel`, and TypeScript does not check hyphenated JSX attributes, so `<Select aria-label=…>` type-checks but leaves the trigger with no accessible name. `features/features/StoriesTab.tsx:155,158` does this today, so its two filter triggers are unnamed. This is a pre-existing bug outside this sub-spec and should be filed for follow-up. One fix is to make `Select` accept and forward `aria-label`.
+- **When a hook sets its own `retry`, the test QueryClient's `retry:false` doesn't apply.** Tests then wait out the real retry delay, and an "it wasn't retried" assertion becomes a timing race. Set `retryDelay: 0` in the test client and assert the call count.
+
+### Code-map changes (for genesis-docs)
+
+- `web/src/features/object-wiki/` (new): the Object Wiki tab (`ObjectWikiTab`/`ObjectWikiTable`), the object page (`ObjectWikiPage`/`HistoryTimeline`, route `/applications/:appUuid/wiki/:objectUuid`), the pure view logic `wiki-logic.ts`, and the hooks.
+- `web/src/shared/ui/appian-object-types.ts` (new): the shared Appian object-type map (canonical key → label + icon; `objectTypeMeta`).
+- `web/src/features/applications/ApplicationDetail.tsx`: the application tabs are URL-addressable through `?tab=` (ids: `business-map`, `overview`, `object-wiki`, `features`, `syncs`, `releases`, `business-artifacts`).
+- `web/src/types/objectWiki.ts`, `web/src/lib/api/objectWiki.ts` and `qk.objectWiki` (new): the Object Wiki contract, client and query keys.
