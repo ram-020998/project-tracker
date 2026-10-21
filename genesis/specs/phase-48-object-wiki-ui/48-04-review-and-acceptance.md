@@ -25,6 +25,22 @@
 
 Findings are fixed before release; each fix gets a regression test.
 
+### 1.1 Hardening (built by **genesis-dev** before the review runs; the reviewer checks it like the rest)
+
+- **H1 — show the change reason on every entry (48-01 D8, from 48-03 review m1).** In
+  `genesis/web/src/features/object-wiki/HistoryTimeline.tsx`: when `change_reason` is present, render it under the
+  entry's badge row as a muted plain-text line "Why: <reason>" for **every** change kind; the `Bug fix` badge renders
+  only when `is_bugfix` and no longer carries the reason; absent reason → no line. Independent of the Business /
+  Technical / Both switch (always shown). Tests: a `created` entry with a reason shows "Why: …"; a bug-fix entry shows
+  the badge **and** the line once (not twice); an entry without a reason shows no line; jest-axe still clean. Gates as
+  §2, rebuild + commit `web/static/`. Record in this sub-spec's As built.
+
+### 1.2 Out of scope here
+
+The shared `Select` `aria-label` bug found during 48-03 (9 pre-existing call sites) is **not** fixed in Phase 48 —
+backlog `specs/backlog/phase-48-follow-ups.md` item 1. The Object Wiki tab's own selects are named correctly (48-03
+review).
+
 ## 2. Gates
 
 genesis: `pytest` + `ruff`; web: `lint`, `typecheck`, `vitest` (incl. jest-axe), `npm run build` byte-identical to the
@@ -61,9 +77,10 @@ _(filled by genesis-review)_
 areas    = ["api", "web-shell", "stories-workbench"]
 adrs     = ["ADR-027", "ADR-028", "ADR-037", "ADR-055", "ADR-063", "ADR-070", "ADR-071"]
 lessons  = ["L-011", "L-030", "L-039", "L-069", "L-083", "L-084"]
-docs     = ["tracker:specs/phase-48-object-wiki-ui.md"]
+docs     = ["tracker:specs/phase-48-object-wiki-ui.md",
+            "tracker:specs/phase-48-object-wiki-ui/48-01-findings.md"]
 code     = ["genesis/genesis/kb/object_wiki.py", "genesis/genesis/kb/object_types.py",
             "genesis/genesis/api/object_wiki.py", "genesis/web/src/features/object-wiki/**",
-            "genesis/web/src/features/applications/ApplicationDetail.tsx"]
+            "genesis/web/src/features/applications/ApplicationDetail.tsx", "genesis/web/static/**"]
 upstream = ["48-02", "48-03"]
 ```

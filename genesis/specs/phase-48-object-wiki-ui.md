@@ -31,6 +31,7 @@ written on every implementation and then is invisible.
 | D5 | No cross-links this phase (story → wiki, ⌘K) — backlog `specs/backlog/wiki-story-cross-link.md`. |
 | D6 | Story references resolved server-side to the canonical story page (ADR-071); unresolved → plain key. |
 | D7 | Tab "Object Wiki"; all rows returned, client-side search/filter/sort; refetch on focus; deprecated shown; genesis-only minor v0.78.0. |
+| D8 | (amends D3, after the 48-03 review) Every entry shows its `change_reason` as a muted "Why: …" line; the Bug fix badge is for bug fixes only. Built in 48-04 (H1). |
 
 ## 4. Current state (code-grounded — full detail in `48-01-findings.md` §2)
 

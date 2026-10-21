@@ -86,6 +86,7 @@ other detail pages.
   state) on the right; then `<ol aria-label="Change history">`, newest first. Each item = a card on a vertical rail
   (dot coloured by change kind, as `ActivityFeed.tsx`):
   - top row: change-kind badge · `Bug fix` badge (+ `change_reason` as text when present) · "v<object_version>" ·
+    *(amended by 48-01 D8: the reason shows on every entry as a muted "Why: …" line — built in 48-04 H1)* ·
     `RelativeTime(created_at)` · author;
   - story: resolved → `Link` to `/applications/<appUuid>/stories/<story.id>` reading "<key> · <title>" (ADR-071);
     unresolved with a `story_key` → the key as text inside a `Tooltip` "Story not available on this machine"; neither →
