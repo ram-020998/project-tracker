@@ -34,8 +34,11 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
 - [25-11 — Per-Story Execution & WorkflowRun Linkage](../specs/backlog/phase-25-11-per-story-execution.md)
 - [25-12 — AI Cost & Performance Pass](../specs/backlog/phase-25-12-ai-cost-and-performance-pass.md)
 - [Backlog — Phase 46 follow-ups (recorded 2026-10-15 at the v0.77.0 release)](../specs/backlog/phase-46-follow-ups.md)
+- [Backlog — Phase 47 follow-ups (agent system known limits, e.g. write-through-flag commands)](../specs/backlog/phase-47-follow-ups.md)
+- [Backlog — Phase 48 follow-ups (item 1: the shared `Select` drops `aria-label` → 9 unnamed dropdowns)](../specs/backlog/phase-48-follow-ups.md)
 - [Backlog — Skill → Workflow Migration Program (formerly Phase 8)](../specs/backlog/skill-migration-program.md)
 - [Backlog — The Object Wiki as agent grounding/memory](../specs/backlog/wiki-as-agent-memory.md)
+- [Backlog — Story → Object Wiki cross-link ("Objects changed" on the story Implementation tab; ⌘K over wiki objects)](../specs/backlog/wiki-story-cross-link.md)
 
 **Deferred inside shipped phases (not in `specs/backlog/`):**
 
@@ -61,7 +64,7 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
   secrets); **rotate the shared `GITLAB_PUSH_TOKEN`** + refresh the expired Artifactory npm token; the
   `lcp` MCP image placeholder (`<lcp-image>`) in `mcp-registry.json`.
 
-**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-10-15 there is NO active build — Phases 1–46 are shipped (Phase 46: genesis v0.77.0 + genesis-workflows v0.22.0; follow-ups in `specs/backlog/phase-46-follow-ups.md`). The Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
+**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-10-21 there is NO active build — Phases 1–48 are shipped (Phase 48 Object Wiki UI: genesis v0.78.0; follow-ups in `specs/backlog/phase-48-follow-ups.md` and `specs/backlog/wiki-story-cross-link.md`). The Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
 human's go-ahead — specs are pushed and 16-01/16-02 are shipped + CI-green; continue in the build order per §9's Phase-16
 block. This does not authorize starting any phase *beyond* 16 or any `specs/backlog/` work.)
 

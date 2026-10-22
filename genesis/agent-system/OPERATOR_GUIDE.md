@@ -1,7 +1,7 @@
 # Genesis Agents — Operator Guide
 
 > **Status:** FINAL 2026-10-20 (Phase 47 shipped; ADR-077). Verified live on this machine (Kiro CLI with the V3 engine,
-> KAS 0.66.43). The first real phase built with these agents (Phase 48) doubles as the pilot — note anything unclear
+> KAS 0.66.43). Piloted end to end on Phase 48 (2026-10-21) — what changed as a result is in §10. Note anything unclear
 > here and ask `genesis-docs` to fix it. Known limits: `specs/backlog/phase-47-follow-ups.md`.
 
 This guide is for you, the human running Genesis development. It tells you which agent to start, when, with what
@@ -359,3 +359,25 @@ You can also ask `genesis-docs` to make these edits: `Change the release skill s
 | An agent wants to push/tag and you didn't ask | Say no; only `genesis-release` may, and only with your yes |
 | You're tempted to pass `--trust-all-tools` | Don't (golden rule 7). `shell-guard.sh` still blocks `git push`/`tag` (non-release) and writes outside the agent's roots under trust-all, but trust-all drops the "ask" gate for everything else. Relaunch without it. |
 | `shell-guard` refused a command | It blocks `git push`/`tag` for every agent but `genesis-release`, and shell writes (`>`, `tee`, `cp`, `mv`, `rm`, `sed -i`, `dd of=`) outside the agent's write roots. Use the `write` tool, or a path under `/tmp` or the agent's repo; let `genesis-release` do pushes/tags |
+
+---
+
+## 10. Pilot notes (Phase 48, 2026-10-21)
+
+Phase 48 ran spec → dev ×3 → review → release → docs end to end; the 48-0x As built / review files report no role-boundary
+breach and no rule a pack failed to load. What to do differently:
+
+- **Give the reviewer the real commit.** One delta-review brief named a sha that didn't exist; the reviewer fell back to
+  HEAD. When you brief a review yourself, paste `git -C <repo> log -1 --oneline` (or just say "HEAD").
+- **UI layout needs a browser.** Expect the reviewer to drive the API and headless Playwright (read-only route guard);
+  the *look* (both themes, narrow windows) and a two-machine collaboration pull still need you. For table/list UI, ask
+  the dev for a real-browser width probe up front (L-090) — Phase 48 spent five delta reviews on narrow-width fixes.
+- **One mutating step per tool call.** A parallel edit + build + commit shipped a stale bundle once (48-04 B1), and a
+  parallel `gsm provision` + `gsm restart` ran in the wrong order (L-089). The dev, release and review skills now say so;
+  if you see an agent batch dependent commands, stop it.
+- **Live acceptance may need a server restart on unreleased code.** In 48-04 the dev backed up the DB and restarted :8760
+  on the branch so the new routes existed; that is fine when no run is active — the agents ask first.
+- **Fleet:** agents call `gsm` by its absolute path (`~/repo-gitlab/ramaswamy.u/genesis-fleet/bin/gsm`) and read the
+  running version from `/openapi.json` (`info.version`).
+- **As built after the review:** a dev's sub-agent review flags "As built not written yet" as a minor; that's expected
+  — the dev writes it after the verdict.

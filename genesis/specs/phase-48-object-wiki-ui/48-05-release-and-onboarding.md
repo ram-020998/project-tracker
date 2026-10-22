@@ -1,7 +1,7 @@
 # 48-05 — Release and onboarding
 
-> **Status:** 🟡 §1–§2 DONE 2026-10-21 — genesis **v0.78.0** released (`df9011d`, CI 7140928 / 7141042 green) and
-> deployed to main + userb; §3 docs write-back pending (genesis-docs). Repos: genesis, project-tracker. Parent: `specs/phase-48-object-wiki-ui.md`.
+> **Status:** ✅ DONE 2026-10-21 — genesis **v0.78.0** released (`df9011d`, CI 7140928 / 7141042 green) and
+> deployed to main + userb (§1–§2); §3 docs write-back done by genesis-docs (see As run). Repos: genesis, project-tracker. Parent: `specs/phase-48-object-wiki-ui.md`.
 > After 48-04 = SHIP. **genesis-release** asks before every tag and push; then **genesis-docs** does the write-back.
 
 ## 1. Release — genesis v0.78.0 only
@@ -90,6 +90,12 @@ operator guide if anything changed. `genesis-ctx index && lint` green.
   4. **`ruff check .`** (whole repo) reports 28 pre-existing findings in `tests/` and `scripts/` (E702, F401, F811,
      E401). CI runs `ruff check genesis`, which is clean; nothing changed there in Phase 48.
 - **Deferred / follow-ups:** none from the release. Docs write-back (§3) is genesis-docs'.
+
+### Docs write-back (2026-10-21, genesis-docs) — §3 ✅ DONE
+
+State, code map (Phase 48 block + the `api/` entry's stale version), progress doc, changelog, README row, tracker §6,
+`bible/08` §9 pointers; lessons L-089/L-090 added, L-039/L-056/L-084 extended; release/web-dev/code-review/spec-authoring
+skills + operator guide updated (pilot notes). Detail and lesson decisions: `progress/phase-48-object-wiki-ui.md`.
 
 ## Context manifest
 

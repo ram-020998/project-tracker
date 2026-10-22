@@ -154,3 +154,6 @@ areas = ["kb-sync", "config-secrets", "runs-worker", "appian-integration", "pars
 
 ["Phase 46 — Spec Change Requests & Story Traceability (genesis v0.77.0 · genesis-workflows v0.22.0 · Hub addition)"]
 areas = ["features-stages", "chat", "stories-workbench", "collaboration-hub", "workflows-library"]
+
+["Phase 48 — The Object Wiki in the application page (genesis v0.78.0; read-only, no migration)"]
+areas = ["stories-workbench", "api", "kb-sync", "web-shell"]

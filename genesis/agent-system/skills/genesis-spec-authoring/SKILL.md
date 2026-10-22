@@ -16,7 +16,8 @@ Layout + manifest rules: `{{TRACKER}}/specs/phase-47-agent-context-system/47-02-
 ## Mandatory sub-spec set (every phase)
 1. **NN-01 findings** — measurements, research, options, and **every decision** (one row each, with the reason).
 2. **API** sub-spec — or record **"N/A"** in the umbrella's sub-phase ledger when the phase has no HTTP API.
-3. **review & acceptance** — code review + hardening + live acceptance.
+3. **review & acceptance** — code review + hardening + live acceptance. For table/list UI, budget a real-browser
+   width probe (several widths, both themes) in the acceptance table — jsdom can't see layout (L-090).
 4. **release & onboarding** — release steps + the docs write-back.
 5. **feature sub-specs** — one per cohesive feature.
 

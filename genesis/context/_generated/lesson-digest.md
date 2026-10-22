@@ -91,3 +91,5 @@ Full text: `genesis-ctx lesson <ID>`.
 - L-086 [features-stages,chat] — Program-owned IDs inside agent-authored HTML stay stable when the normalizer edits only start tags (Phase 46-02).
 - L-087 [release-ci] — Migrate a large doc corpus by MOVING text with scripts and adding a sidecar index — never by having an agent read and rewrite it; probe the real CLI before designing against its docs (Phase 47).
 - L-088 [security,release-ci] — Guard agent shells with a command-parsing PreToolUse hook, not prefix globs, and test every guard with a bypass corpus AND a positive corpus (Phase 47).
+- L-089 [release-ci,web-shell] — Never put dependent mutating steps (edit → build → commit, gsm provision → restart) in one parallel tool batch; after a bundle commit, prove it fresh with a rebuild + an empty git status (Phase 48).
+- L-090 [web-shell,web-runs,documents,stories-workbench,features-stages] — Size table columns from a real-browser geometry probe at several widths, not percentages chosen by eye — jsdom computes no layout, so class-level tests only pin a fix (Phase 48).

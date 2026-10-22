@@ -14,6 +14,11 @@ Standard: `{{TRACKER}}/reference/coding-standards.md` §1 (already in your L0) a
 2. Read the **diff** (`git -C <repo> diff <base-rev>`), not whole files; pull any rule's full text with
    `{{GENESIS_HOME}}/bin/genesis-ctx adr|lesson <id>`.
 3. Run the gate commands the check lists (tests, ruff, typecheck, build) to verify the author's claims yourself.
+   - Resolve the brief's commit first (`git -C <repo> rev-parse --short <sha>`); if it doesn't exist, review HEAD and
+     say so in the report (48-04: a brief named a non-existent sha).
+   - Stale-bundle check without touching the tree: `npx vite build --outDir /tmp/<id>-static` then
+     `diff -r /tmp/<id>-static web/static` (identical = fresh). An in-tree build dirties `web/static`, and `git clean`
+     is denied to you.
 4. Answer EVERY checklist line **OK / VIOLATION / N/A**, each with cited evidence (file:line, a test name, command output).
 
 ## Severity scale

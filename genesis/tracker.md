@@ -14,7 +14,7 @@
 | **Agent adapter** | `kiro-agent-sdk` (Kiro ACP node adapter — already built) |
 | **Engine** | LangGraph (v1) |
 | **Users** | Internal Solutions dept — Dev, Tester, PO, UX |
-| **Status** | 🟢 **Phases 1–46 COMPLETE — no active build** (as of 2026-10-15). Shipped state (2026-10-15): Latest release: **Phase 46 Spec Change Requests & Story Traceability** — genesis **v0.77.0**, genesis-workflows **v0.22.0** + the Genesis Hub contract addition (CI green; ADR-075/076 Accepted; DB v24). Current tags: kiro-agent-sdk **v0.7.1**, genesis-core **v0.9.8**, genesis **v0.77.0**, genesis-workflows **v0.22.0**, genesis-appian-parser **v0.3.0**. Tests at release: genesis pytest 1105, web vitest 332, genesis-workflows validate_library 13 + pytest 256, parser all pass (unchanged). Follow-ups: `specs/backlog/phase-46-follow-ups.md`. Running history: §6 below; current state: `bible/01-current-state.md`. (Phase 1–7 era detail is in §6 + `progress/`.) |
+| **Status** | 🟢 **Phases 1–48 COMPLETE — no active build** (as of 2026-10-21). Latest release: **Phase 48 Object Wiki UI** — genesis **v0.78.0** (other repos unchanged). Current tags, DB version, test counts and what works: [`context/state/current.md`](context/state/current.md) (the one home for those facts). Follow-ups: `specs/backlog/phase-48-follow-ups.md`. Running history: §6 below + [`context/changelog.md`](context/changelog.md). (Phase 1–7 era detail is in `archive/` + `progress/`.) |
 | **Agent onboarding** | [`AGENT_ONBOARDING.md`](AGENT_ONBOARDING.md) — paste into any new agent session working on fixes/enhancements |
 | **Supersedes** | solutions-copilot (retired) — Genesis realizes its deferred doc-19 orchestrator |
 | **Created** | 2026-07-07 |
@@ -193,7 +193,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   integrates **no** external memory service. Repos: **genesis** + **genesis-workflows** (genesis-core likely unchanged).
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
 
-- **Phases 27–46** — see the full phase table in [`README.md`](README.md) (each row links its `specs/phase-NN-*.md`; as-built in `progress/`). Latest: **Phase 46 Spec Change Requests & Story Traceability** ✅ SHIPPED 2026-10-15 (genesis v0.77.0 + genesis-workflows v0.22.0).
+- **Phases 27–48** — see the full phase table in [`README.md`](README.md) (each row links its `specs/phase-NN-*.md`; as-built in `progress/`). Latest: **Phase 48 The Object Wiki in the application page** ✅ SHIPPED 2026-10-21 (genesis v0.78.0).
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
 
@@ -244,6 +244,10 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 From Phase 47 on: ≤ 5 lines per phase; detail lives in `progress/`.
 
+- **2026-10-21 — Phase 48 (Object Wiki UI): ✅ SHIPPED genesis v0.78.0 (no migration, DB v24; pins unchanged).** Object
+  Wiki tab + per-object history page, URL-addressable app tabs, two read-only wiki endpoints; pytest 1187, vitest 380.
+  First phase run end to end by the five agents (pilot); 48-04 took 6 review rounds (narrow-width table, stale bundle B1).
+  Lessons L-089/L-090. Details: `progress/phase-48-object-wiki-ui.md`.
 - **2026-10-20 — Phase 47 (Agent Context System): ✅ SHIPPED (project-tracker only; ADR-077 Accepted).** Tiered context
   (always-loaded core ≈1.5 % of a 1M window; per-task packs via `genesis-ctx`) + five CLI-3 role agents installed from
   `agent-system/`; move-only migration proven lossless (0 of 1,338 baseline units missing); 47-09 review SHIP after 3 rounds.

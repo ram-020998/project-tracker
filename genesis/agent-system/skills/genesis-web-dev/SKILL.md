@@ -19,6 +19,12 @@ plus `{{GENESIS_HOME}}/bin/genesis-ctx area web-shell`. Conventions live in `{{T
 When you change the SPA, rebuild and commit the built assets the backend serves:
 `cd {{REPOS}}/genesis/web && npm run build`, then commit the regenerated `web/static` (or the repo's built-assets
 path) in the SAME commit as the source. A release that ships stale `web/static` is a known regression.
+Run edit → build → commit as separate, sequential tool calls — never in one parallel batch (L-089: 48-04 B1 built the
+old source). After the commit, prove it: a fresh `npm run build` must leave `git status --short --untracked-files=all` empty.
+
+## Layout (tables, lists)
+jsdom computes no layout. For table/list UI, size columns from a real-browser geometry probe at several widths
+(Playwright, 1440 → 768 px, both themes), not from percentages chosen by eye; keep class-level tests as pins (L-090).
 
 ## Gates
 - `cd {{REPOS}}/genesis/web && npx tsc --noEmit` (types), `npx eslint .` (lint), `npx vitest run` (unit + jest-axe).

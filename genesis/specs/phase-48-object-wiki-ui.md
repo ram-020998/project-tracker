@@ -1,6 +1,7 @@
 # Phase 48 — The Object Wiki in the application page
 
-> **Status:** 🟡 **SPEC-DRAFTED 2026-10-21** (awaiting build sign-off). · **Author:** genesis-spec agent.
+> **Status:** ✅ **SHIPPED 2026-10-21** — genesis **v0.78.0** (`df9011d`, CI green), deployed to main + userb; docs
+> write-back done ([progress](../progress/phase-48-object-wiki-ui.md)). Spec drafted + approved 2026-10-21 · **Author:** genesis-spec agent.
 > Sub-specs: `phase-48-object-wiki-ui/48-01..48-05`. Findings (code facts + every decision): `48-01-findings.md`.
 > Repo: **genesis** only (backend + web). No new ADR (applies ADR-070/071/027/055/028). No migration (DB stays v24).
 > Also the first real phase run end to end with the Phase-47 agent system (pilot).

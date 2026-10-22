@@ -135,7 +135,7 @@ genesis/genesis/
             service.py (facade + reload hook). dist/skill_catalog.py + dist/skill_install.py pull a library
             skill into the workspace + record Lockfile.skills. Chat auto-discovers the workspace (cwd/.kiro/skills)
             + writes documents to the per-session skill-output sandbox (SDK fs_write_root).
-  api/      app.py (create_app FastAPI; version 0.48.4; **`_resolve_web_static` serves the SPA from packaged `genesis/web_static` [installed wheel] with a repo `web/static` fallback [dev]**; instantiates ChatManager + ChatRunSupervisor + SkillService + **Scheduler (Phase 23)**; registers chat/copilot/skills + **native-mcp** + **applications** + **documents** + **features** + **system** + **schedules** routes + per-session skill-output endpoints).
+  api/      app.py (create_app FastAPI; its `version` = the package version, bumped every release — the running server reports it as `/openapi.json` `info.version`; **`_resolve_web_static` serves the SPA from packaged `genesis/web_static` [installed wheel] with a repo `web/static` fallback [dev]**; instantiates ChatManager + ChatRunSupervisor + SkillService + **Scheduler (Phase 23)**; registers chat/copilot/skills + **native-mcp** + **applications** + **documents** + **features** + **system** + **schedules** routes + per-session skill-output endpoints).
             ALL routes on an APIRouter at prefix="/api" (ADR-028) + a catch-all SPA fallback. Routes:
             catalog(+available), library install|update|DELETE; workflows/{id}(+/graph); config/health,
             gitlab-token, mcp-cards, cli-cards, mcp-cards/{server}/test, secrets, environments;
@@ -753,4 +753,39 @@ genesis-workflows/
                        (unresolved), spec clauses this story implements.
 Genesis Hub (Appian):  GH Spec Change Request (kind spec_change_request), GH Story Item item types
                        spec_ref / answer / change; GH_records_upsert passes rawBody (contract/spec-change-contract-addition.md).
+```
+
+**Phase 48 — The Object Wiki in the application page (genesis v0.78.0; read-only, no migration):**
+```
+genesis/genesis/
+  kb/object_types.py   (new, pure) normalize_object_type(raw) -> canonical key (lower-case, drop non-alphanumerics,
+                       one alias table; unknown/empty → "other") + CANONICAL_TYPES (record_type, interface,
+                       expression_rule, process_model, constant, integration, connected_system, web_api, data_type,
+                       site, group, translation_set, document, folder, decision, report, other).
+  kb/object_wiki.py    ObjectWikiStore read model (writes unchanged, ADR-070): list_objects(app_uuid) — ONE statement
+                       (pages ⟕ current kb_objects row [MAX(id), L-032] + correlated entry aggregates);
+                       get_object(app_uuid, object_uuid) — row + entries newest first + one batched, app-scoped story
+                       query (_resolve_stories: sync_uuid, else a UNIQUE key; ambiguous → null). One row builder
+                       _object_row (L-039); _NAME/_FIRST_AT/_LAST_AT computed once in SQL and reused by ORDER BY;
+                       latest change derived from entries by julianday(created_at), never latest_entry_id (null on
+                       pulled pages; L-084).
+  api/object_wiki.py   (new) register_object_wiki_routes(api, settings, kb_store): GET /applications/{app}/wiki →
+                       {app_uuid, app_name, objects:[WikiObjectRow]}; GET /applications/{app}/wiki/{object_uuid} →
+                       {…, object, entries:[WikiEntry]}; 404 "Application '…' not tracked" / "No wiki page for object".
+                       Registered in api/app.py after register_search_routes.
+genesis/web/src/
+  features/applications/ApplicationDetail.tsx  application tabs are URL-addressable: ?tab= business-map (default for
+                       absent/unknown) · overview · object-wiki · features · syncs · releases · business-artifacts;
+                       APP_TABS + resolveTab; tab change = setSearchParams(…, {replace:true}), other params kept.
+  features/object-wiki/  ObjectWikiTab + ObjectWikiTable (search, Type/Change filters, sortable aria-sort headers,
+                       fixed-px metric columns, min-w 600 px, scrolls inside its card) · ObjectWikiPage + HistoryTimeline
+                       (route /applications/:appUuid/wiki/:objectUuid; Business/Technical/Both switch; "Why: <reason>"
+                       on every entry; story → canonical story page, ADR-071) · wiki-logic.ts (pure filter/sort/
+                       nextSort) · badges.tsx · hooks.ts (useObjectWiki/useObjectWikiPage, refetch on focus, 404 not
+                       retried) · fixtures.ts (the 48-02 samples).
+  shared/ui/appian-object-types.ts  APPIAN_OBJECT_TYPES (canonical key → label + lucide icon) + objectTypeMeta(key, raw)
+                       (other → raw label); re-exported from shared/ui/index.ts.
+  types/objectWiki.ts · lib/api/objectWiki.ts (objectWikiApi.list/get) · lib/query/keys.ts qk.objectWiki.list/detail.
+  app/router.tsx       applications/:appUuid/wiki → WikiRedirect (?tab=object-wiki); …/wiki/:objectUuid → ObjectWikiPage.
+  shared/layout/breadcrumbs.ts  "Object Wiki" crumb + the wiki:<uuid> object crumb.
 ```

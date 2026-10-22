@@ -253,7 +253,7 @@ reviewed_fp = "f92e6093f72be11a"
 areas = ["documents", "api", "db"]
 phase = "19"
 rule = ""
-reviewed_fp = "587873530771771f"
+reviewed_fp = "22ab515c33788626"
 
 [L-040]
 areas = ["documents", "kb-sync"]
@@ -355,7 +355,7 @@ reviewed_fp = "4fb811ad28670af1"
 areas = ["release-ci"]
 phase = ""
 rule = ""
-reviewed_fp = "0568896876a7eb38"
+reviewed_fp = "6e9ca8546a30da8b"
 
 [L-057]
 areas = ["release-ci"]
@@ -523,7 +523,7 @@ reviewed_fp = "8836a124d950bbe5"
 areas = ["collaboration-hub", "appian-integration", "features-stages"]
 phase = "46"
 rule = ""
-reviewed_fp = "a7ed5d07e82c175a"
+reviewed_fp = "a4c959d231a0f1bf"
 
 [L-085]
 areas = ["collaboration-hub", "features-stages", "stories-workbench"]
@@ -548,3 +548,15 @@ areas = ["security", "release-ci"]
 phase = "47"
 rule = ""
 reviewed_fp = "7ce0c1185e37e6c6"
+
+[L-089]
+areas = ["release-ci", "web-shell"]
+phase = "48"
+rule = ""
+reviewed_fp = "5fc857dac0af9f11"
+
+[L-090]
+areas = ["web-shell", "web-runs", "documents", "stories-workbench", "features-stages"]
+phase = "48"
+rule = ""
+reviewed_fp = "68cef8529a4e8c31"
