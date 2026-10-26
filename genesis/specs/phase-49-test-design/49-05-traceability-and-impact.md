@@ -104,3 +104,104 @@ code     = ["genesis/genesis/services/testimpact.py", "genesis/genesis/kb/_graph
 docs     = ["tracker:specs/phase-49-test-design/49-01-findings.md", "tracker:specs/phase-49-test-design/49-02-data-model.md"]
 upstream = ["49-02"]
 ```
+
+## As built (genesis-dev, 2026-10-26)
+
+**Commits:** genesis `454db1f`, "feat(kb): 49-05 test traceability + impact engine…" (base `b9e9487`, the 49-02 commit).
+The commit is local only; nothing was pushed or tagged.
+
+**Changed**
+- `genesis/services/testimpact.py` (new) adds `TestImpactService` with:
+  - resolution: `resolve_object` and `resolver()`
+  - the D7 linker: `implemented_objects`, `link_implemented_objects` and `link_feature_implemented`
+  - sync handling and reconcile: `resolve_unresolved` and `reconcile_all`
+  - impact: `changed_from_objects`, `changed_from_story`, `changed_from_sync`, `list_syncs` and `impact`
+
+  The file also adds `SyncLinkObserver`, the errors `ImpactNotFoundError` (→ 404) and `ImpactConflictError` (→ 409), and
+  the `ChangedSet` / `ChangedObject` TypedDicts. `services/__init__.py` exports these.
+- `kb/_graph_reads_mixin.py`: the adjacency builder is now the module-level `current_adjacency(conn, app_uuid,
+  direction)`. `KbGraphReadsMixin._adjacency` delegates to it, so behaviour is unchanged. The impact walk uses it with
+  no 200-object cap.
+- `kb/testdesign.py`: two new helpers that run inside the caller's transaction, `_resolve_object_link` and
+  `_delete_object_link`. Both touch only rows where `object_uuid IS NULL`. Together with `_link_object` they are now the
+  only code that writes `kb_test_case_objects` (review m4).
+- `chat/story_implementation_finalizer.py`: after the `submit-review` move it calls `_link_tests(story_id)`. This is
+  best-effort, and a failure is logged with `exc_info`. The constructor takes an optional `test_impact=` (the shared
+  instance).
+- `api/app.py`: builds one `TestImpactService` (`app.state.test_impact`), attaches `SyncLinkObserver`, passes the
+  service to the finalizer, and adds a startup hook that runs `await asyncio.to_thread(test_impact.reconcile_all)`
+  (L-026). It also adds a module logger.
+
+**Tests:** `tests/test_test_impact.py` has 44 tests and covers every §6 item. The genesis suite is at **1266 passed**
+(was 1222). `ruff check genesis tests/test_test_impact.py` is clean. **Performance:** a 3-hop impact query over 2 500
+objects, 10 000 edges and 1 000 links takes **21 ms** on the dev machine (the reviewer measured 19 ms; the limit is 1 s).
+
+**Review:** genesis-review, `reviews/49-05-review.md`. Round 1 was **SHIP** with minors m1–m4 and nits n1–n5. I fixed
+m1, m4, n1 and n5. Round 2 was **SHIP** and raised r2-n1 and r2-n2. I fixed both after round 2: `merged` now counts
+deleted rows, and a test covers the resolve-one-spelling-and-drop-the-other branch. That last change was not
+re-reviewed.
+
+**Decisions / deviations** (no ADR deviation):
+1. A sync counts as "done" when `kb_syncs.status = 'succeeded'`, the only success value `KbStore.finish_sync` writes.
+   This applies to both `changed_from_sync` and `list_syncs`. `list_syncs` also returns `hub-pull` syncs, with their
+   `kind`.
+2. The linker passes every changed object through §2 resolution. A wiki or `implementation.json` uuid becomes a resolved
+   link only when the KB has a current row for it. A NEW object that has not been synced stays an **unresolved** link
+   (name + type, origin `implementation`), and the sync resolver resolves it later. Storing the uuid directly would make
+   the link read as *removed* under 49-02's `object_link_state`, and §2 forbids uuids the KB has not confirmed.
+3. Resolving a link (linker or sync resolver) also copies the KB row's name and type, the same as rule 1, and keeps the
+   origin. An unresolved link that duplicates the same object on the same case is deleted (merged). That happens when
+   the case already has the resolved link, or when there are two spellings such as "Foo" and "foo".
+   `link_implemented_objects` returns `{resolved, added, merged}` (the spec's `{resolved, added}` plus `merged`).
+   `resolve_unresolved` returns `{resolved, merged}`.
+4. Matching is name `strip().casefold()` plus `normalize_object_type`. Two types the normalizer doesn't know (both
+   `other`) compare by their squashed raw text, so "Widget" never matches "Gadget".
+5. `resolver()` returns a caching `ObjectResolver` that loads each app's current objects once. 49-04 should pass
+   `resolve_object=svc.resolver()` to `create_from_design` and `apply_topup`.
+6. Ordering follows §5 literally: direct before indirect, then priority, then key. Indirect hops are not sub-ordered by
+   hop. Scenarios sort by (indirect?, key) and suites by (indirect?, feature name).
+7. Fields added to the §5 result: `hop` on suites, `hop` and `object_removed` on each `via` entry, and `object_removed`
+   on cases (the R1 label).
+8. For the sync source, an object removed in that sync is a hop-0 hit (R1). For the other sources, a link whose object
+   has no current row is excluded (F8). `changed_from_story` keeps not-yet-synced objects in `changed` (they reach
+   nothing), and `unknown` is used only by the `objects` source.
+9. Write transactions take the lock with `BEGIN IMMEDIATE` at the start. 49-02 used a no-op UPDATE for the same purpose.
+10. `link_feature_implemented(feature_id)` runs the linker for the feature's stories that have test cases and a
+    completed `implementation` story stage. 49-04 calls it after Finalize and after top-up apply. `reconcile_all` uses
+    the same query for every app.
+
+**Hand-offs**
+- **49-04:** use `svc.resolver()` as `resolve_object`, call `link_feature_implemented(feature_id)` after Finalize and
+  after top-up apply, and run both off the event loop.
+- **49-06:** map `ImpactNotFoundError` → 404 and `ImpactConflictError` → 409. A non-`objects|story|sync` source is a
+  `ValueError` → 422. Mirror the added result fields (decision 7) in `web/src/types` and the fixtures (L-011). Call
+  `impact` and `list_syncs` via `asyncio.to_thread`. Review **m3**: give the sync resolver an on-demand path, a
+  best-effort `resolve_unresolved(app_uuid)` on the impact or suite read, because today its only recovery is at
+  startup (L-058). Review **m2**: KB snapshots pulled from the Hub (`hub-pull`, `kb/store.py:363`) never trigger the
+  resolver. §4 names only `sync-application`, so either call it after a successful hub-pull apply or record it in the
+  backlog. Review **n2**: `changed_from_sync` labels an object that was removed and later re-added as `modified`; say so
+  in the UI copy.
+- **genesis-docs:** `context/areas.toml` maps `genesis/services/testimpact.py` and `genesis/kb/_graph_reads_mixin.py`
+  to no area, so `genesis-ctx check` missed the kb-sync ADRs and lessons for them. Suggested mapping: kb-sync and
+  stories-workbench.
+- **Pre-existing, not changed:** `StoryImplementationFinalizer.reconcile()` is never called at startup (`app.py` only
+  reconciles the supervisor, the stage finalizer and the design finalizer). The board GET recovery covers it, and
+  `reconcile_all` covers the test-link part.
+- Review **n3**: serving waits for the startup reconcile. The work is bounded and fast; if it grows, make it a
+  background task.
+
+**Lesson candidates**
+- A "resolve by uuid" step must not trust a uuid the local KB doesn't confirm. Do that check before you store a link,
+  or derived state turns a fresh, correct link into *removed*. Keep the link unresolved by name + type until a sync
+  provides the row.
+- When a service writes rows that a store owns, route every write through the store's in-transaction helpers. A second
+  hand-written INSERT drifts, for example when a later Hub publish expects the store's columns (review m4, the L-085
+  pattern).
+
+**Code-map changes:**
+- `services/` gains `testimpact.py`: `TestImpactService` (resolution, D7 linker, sync resolver, startup reconcile, impact
+  engine) and `SyncLinkObserver`.
+- `kb/_graph_reads_mixin.py` exports `current_adjacency`.
+- `kb/testdesign.py` gains `_resolve_object_link` and `_delete_object_link`.
+- `chat/story_implementation_finalizer.py` runs the D7 linker after submit-review.
+- `api/app.py` wires `app.state.test_impact`, the sync observer and a startup `reconcile_all`.
