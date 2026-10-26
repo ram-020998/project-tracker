@@ -25,7 +25,8 @@
 11. **Web** — existing primitives/tokens only (ADR-027/055), no `<Button asChild>` (L-069), `/api` central (ADR-028),
     types = contract fixtures (L-011), jest-axe clean, `aria-sort` on sortable headers.
 12. **Naming** — no new `test_*.py` / `*_test.py` modules outside test folders (R6).
-13. **No Hub / collab change** (D12); collab columns present.
+13. **No Hub / collab change** (D12); collab columns present. The `test_design` stage artifact is refused on publish,
+    left out of the bulk publish of existing work, and skipped on pull (49-04 As built) — check all three paths.
 
 ## 2. Gates
 
