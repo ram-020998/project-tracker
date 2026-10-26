@@ -115,3 +115,116 @@ code     = ["genesis-workflows/workflows/test-design-analysis/**", "genesis-work
 docs     = ["tracker:specs/phase-49-test-design/49-01-findings.md"]
 upstream = []
 ```
+
+## As built (genesis-dev, 2026-10-26)
+
+**Status:** ✅ DONE. Review **SHIP**, then SHIP again on the fix delta (`reviews/49-03-review.md`, incl. its "Re-review"
+section). Committed locally only: not pushed, not tagged (49-09).
+
+### Commits (genesis-workflows, base `a19153a`)
+
+| Commit | Message |
+|---|---|
+| `325cc23` | feat(test-design-analysis): 0.1.0 - new workflow (Phase 49-03, ADR-078 proposed) |
+
+No other repo changed (no genesis, genesis-core or SDK change; `heal_check` already exists in genesis-core v0.9.8).
+
+### Changed
+
+- `workflows/test-design-analysis/graph.py` (new): `META` (v0.1.0), `TDState(PlatformState)` (`epics`, `epic_queue`,
+  `current_epic`), program nodes `_resolve_inputs`, `_load_inputs`, `_plan_epics`, `_next_epic`, `_advance_epic`,
+  `_assemble`, `_reassemble`, `_present`, `_cleanup`; agent prompts `design_cases_prompt`, `compose_scenarios_prompt`,
+  `verify_prompt`, `heal_prompt`; validators `check_cases` (v_cases), `check_scenarios` (v_scenarios), `check_heal`
+  (v_heal, passed as `attach_healing(heal_check=)`), `check_suite`, `check_html`; normalizers `_norm_stories`,
+  `_norm_existing`, `_norm_case`, `_tidy_suite`, `_normalize_suite`, `_apply_patches`; renderers `_build_test_design`,
+  `_build_proposals`, `_build_document`, `_build_topup_document`. Topology exactly as §3; node names = `graph:` ids.
+- `workflows/test-design-analysis/workflow.yaml` (new): mirrors META + the `graph:` block (every node described).
+- `workflows/test-design-analysis/tests/test_workflow.py` (new) + `tests/fixtures/*.json` (8 golden files).
+- `registry.json`: the `test-design-analysis` entry (§7).
+
+Blackboard artifacts: `stories.json`, `existing.json`, `spec.txt`, `uxdesign.txt`, `techdesign.txt`, `notes.txt`,
+`epics.json`, `case_pool.json`, `scenarios.json`, `suite.json` (the granular aggregate), `test-design.json` +
+`test-design.html` (design) or `proposals.json` + `topup.html` (top-up), `verify.json`, `heal.json`, `result.json`
+(+ the per-epic scratch `epic_cases.json`, kept by cleanup).
+
+### Tests
+
+- 75 tests in `workflows/test-design-analysis/tests/test_workflow.py`: input validation (design + top-up, epic cap,
+  schema accepts the genesis launch shapes); program plan (Task-only epic skipped, top-up keeps target epics, orphan
+  stories group); loop pump + retry resets; `v_cases` good + each bad shape §6 names (no `then`, no `when`, bad
+  type/priority, unknown/other-epic story, object without type, uncovered Story, Task-only epic with zero cases OK,
+  top-up duplicate of an existing case); `v_scenarios` (unresolved ref, unused case, single step without reason,
+  e2e cases, top-up TC-/add-steps); assemble (JSON contract, HTML has exactly one `<script>` = the embedded JSON,
+  no JS, stable ordering, escaping of agent text, uncovered stories, dangling steps dropped); top-up produces only
+  `proposals.json` and never re-emits existing cases; heal patches (in-place, new case wired into a scenario, remove,
+  add-step patches with clamped positions, `check_heal` rejects each bad patch); healing bounds from META; META ↔
+  yaml parity; registry entry = META; topology (graph ids = node names, declared edges = compiled edges, every node
+  reachable, every node described); build compiles. **Golden contract tests** drive `resolve_inputs` +
+  `load_inputs` over `tests/fixtures/stories.json` / `existing.json` and assert `test-design.json` / `proposals.json`
+  equal the fixture files exactly (L-011).
+- Gates: `../genesis/.venv/bin/python -m pytest -q workflows --ignore=workflows/_fixtures` → **331 passed** (256 + 75);
+  `python ci/validate_library.py` → **PASSED (14 workflows)**; `ruff check workflows/test-design-analysis` → clean.
+
+### Review
+
+`genesis-review` SHIP on the first pass (no blockers/majors). Fixed before commit: **m1** (the heal patch path could
+emit a case/scenario the validators reject → `check_heal` simulates the patch against the strengthened
+`check_suite`), **m2** (on-disk golden fixtures), **n1** (`MAX_EPICS` 16 = breakdown cap 15 + orphan group), **n4**
+(add-step position clamped to `len(steps)+1`), **n5** (binary upload placeholder names its path), **n6** (L-021 line in
+every prompt), **n7** (top-up heal test), **r2** (replacement patches with unknown story keys or dangling steps are
+rejected, not silently pruned). Re-review: SHIP. Left open: r1 (see Decisions 9), r3 (the wiring test reads the source
+of `build`), n2/n3 (below), P1/P2 (lesson candidates).
+
+### Decisions / deviations (spec refinements; no ADR deviation)
+
+1. **Task-only epics get no agent turn.** `plan_epics` skips epics with no Story in scope (reported in
+   `decisions.skipped_epics`); `v_cases` still accepts zero cases for one (§6). The HTML cases view still lists them.
+2. **`suite.json` is the program-owned aggregate** for both modes, with run-local refs `case-N` / `scn-N` / `add-N`.
+   verify/heal target those refs or a `GNS_` key (uncovered story); heal adds items as `new-case-N` / `new-scn-N` /
+   `new-add-N` and drops them with `"remove": true`.
+3. **proposals.json (for 49-04):** a `new_case` item's `case.ref` is its own `p-N`; a `new_scenario` step or an
+   `add_step.case` that uses a new case names that `p-N` (the dependency). Additive top-level keys beside `items`:
+   `metadata` (as 4.2, `mode: "topup"`), `openQuestions`, `storySuggestions`. `add_step.position` is 1-based and at most
+   `len(existing steps)+1`.
+4. **test-design.json (for 49-04):** exactly the §4.2 shape. `metadata.sources` gains `"uploaded-docs"` when docs were
+   attached (n3; don't assert an exact list). A scenario's single-step reason is folded into `description` as
+   `"Single step: …"` (no extra key). Case refs may have gaps after a heal removed a case; they are unique, not
+   necessarily contiguous.
+5. **Embedded block** is literally `<script id="genesis-test-design" type="application/json">` (id first, as §5
+   writes it; the breakdown's parser regex is type-first, so 49-04 must match this order or be order-agnostic). Every
+   `<` in the JSON is written as `\u003c`, so the page has exactly one `<script` even when agent text contains one;
+   plain `json.loads` reads it.
+6. **Bulk context as files (L-042):** spec/UX/TD/notes/all stories are named by blackboard path; the epic's stories +
+   AC, the case-pool index, the suite and the report are inline. This is the first workflow that relies on agents
+   opening files instead of inlined text — 49-08 should confirm `fs_read` calls in the turn explorer.
+7. **Tools:** `design_cases`, `compose_scenarios` and `heal` get the six genesis-kb read tools of §2; only `verify`
+   also gets the read-only appian-dev tools.
+8. **Inputs:** `mode` is `type: string, enum [design, topup]` (no null — the web launch form renders an enum as a select);
+   `target_story_keys` accepts an array, a JSON-array string or a CSV string; unknown/Task targets are ignored (recorded in
+   `decisions.ignored_targets`), none valid → fail fast. `result.json.status` is `in-review` (design) or `proposed`
+   (top-up).
+9. **recursion_limit stays 300** as §2 says. The reviewer estimates the absolute worst case (every agent call at every
+   epic exhausting its retries in both passes, at 16 epics) at ~300–320 supersteps (r1); raising it to 400 is free if a
+   live run ever hits `GraphRecursionError`.
+10. **No run-label mechanism exists** in genesis or the web app (§7's "Test Design Preparation" is stale, n2); the
+    registry name is "Test Design Analysis".
+
+### Lesson candidates
+
+- **A `tests/__init__.py` in two workflow packages makes pytest import both as `tests.test_workflow`, so one file's
+  tests run twice and the other's never run** (P1, pre-existing): in the CI full-library command,
+  `generate-business-map`'s 11 tests are replaced by `feature-breakdown-analysis`'s 37. Fix (separate item): delete both
+  `tests/__init__.py` files and add a CI guard on duplicate test module names. 49-03 ships without one.
+- **A heal patch must be validated against the same invariants as the agent turn it corrects** — a generic
+  HealDecision shape check lets a patch produce what `v_cases`/`v_scenarios` would reject. Simulate the patch on a copy
+  and run the program invariants in a workflow `heal_check`.
+- P2 (genesis-core follow-up): `attach_healing` never resets the verify/heal retry counters across a restart; after a
+  patch + restart, a pass-2 verify failure still pays for a heal turn that can only escalate.
+
+### Code-map changes
+
+- Add under `genesis-workflows/`: `workflows/test-design-analysis/` — `graph.py` (META v0.1.0; program epic plan →
+  per-epic `design_cases` loop → one `compose_scenarios` turn → deterministic `assemble` (suite.json → test-design.json
+  + test-design.html, or proposals.json + topup.html) → `verify` + `attach_healing` with `check_heal`), `workflow.yaml`,
+  `tests/fixtures/` (golden §4.1–4.3 contracts shared with genesis 49-04).
+- `registry.json`: + `test-design-analysis` 0.1.0.
