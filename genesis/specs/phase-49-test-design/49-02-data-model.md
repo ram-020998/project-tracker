@@ -100,3 +100,75 @@ code     = ["genesis/genesis/db/migrations/**", "genesis/genesis/kb/testdesign.p
 docs     = ["tracker:specs/phase-49-test-design/49-01-findings.md"]
 upstream = []
 ```
+
+## As built (genesis-dev, 2026-10-26)
+
+**Commits:** genesis `b9e9487` — "feat(db): 49-02 test design data model — m0025, TestDesignStore, TC-/TS- ids, test
+lifecycle" (base `df9011dc`). Local only; not pushed or tagged.
+
+**Changed**
+- `genesis/db/migrations/m0025_test_design.py` (new; Migration object `testdesign`, name `test_design`, version 25) +
+  `migrations/__init__.py`. Seven tables as §2, the partial unique indexes, a unique `sync_uuid` index per table, and
+  the two `kb_sequences` seed rows. Enum columns are validated in the store, not by `CHECK` (the same approach as
+  `kb_feature_stages.status`), so part 2 can add values without rebuilding a table.
+- `genesis/kb/testdesign.py` (new): `TestDesignStore`, `LinkRef`, `ObjectResolver`, `story_fingerprint`,
+  `object_link_state`.
+- `genesis/domain/`: `EntityKind.TEST_CASE/TEST_SCENARIO`; `LifecycleState.READY/RETIRED`; `TestStatus`;
+  `TEST_TRANSITIONS` + the per-kind preconditions/reasons + `TEST_FILTERING_PRECONDITIONS`; `build_test_lifecycle[_service]`;
+  `ConflictError`; `AlreadyFinalizedError(what=)`. `LifecycleService` gets two additive features:
+  `EntityLifecycle.context`, a store-derived precondition ctx that overrides the caller's ctx so it cannot be bypassed,
+  and callable `precondition_reasons`.
+- Tests pinned to schema version 24 bumped to 25 (9 files; the synthetic next migration in `test_db.py` → 26).
+
+**Tests:** `tests/test_test_design_store.py` has 35 tests covering every §6 item, plus the review regressions. The
+genesis suite is at **1222 passed** (was 1187). `ruff check genesis` is clean.
+
+**Review:** genesis-review, `reviews/49-02-review.md`. Round 1 was NEEDS_CHANGES (M1, M2, m1–m4, n1–n4). Round 2 was
+**SHIP**, and it raised a new m5, which is fixed in the same commit.
+
+**Decisions / deviations** (no ADR deviation):
+1. The test states live on `LifecycleState`, because the transition tables are typed on it. `TestStatus` is the store's
+   validation set, and a test pins `TestStatus ⊆ LifecycleState`.
+2. Preconditions come from the store (`TestDesignStore.lifecycle_context`), so no caller can skip them. No test
+   precondition filters `allowed()`, so Retire, Approve and Restore stay offered and a refusal carries the reason
+   (review M2; 49-06/07/08 rely on this).
+3. Added precondition: restoring a scenario is refused while any of its step cases is retired (review M1). `set_status`
+   re-checks both invariants after its UPDATE, inside the same transaction. `set_steps`, `delete_case` and `apply_topup`
+   take the write lock before they validate (review m4/m5).
+4. Step `position` is **1-based**; case and scenario `position` is 0-based.
+5. `create_from_design(feature_id, stage_id, design, *, story_ids_by_key, resolve_object, upstream=None)` is rigid. An
+   unknown story key, an unknown step ref, a scenario with no steps, or a bad type/priority/gherkin raises `ValueError`
+   and nothing is written. Objects are resolved before the transaction opens (`resolve_object(app_uuid, ref) -> LinkRef`).
+   F10 order: scenarios in document order, then cases sorted by (epic position, first linked story's position,
+   document index). Returns `{suite_id, finalized_at, case_keys, scenario_keys}` (ref → key). The suite title is the
+   feature name.
+6. Methods added beyond §3: `get_case`, `get_scenario` (single-gets, L-039), `create_topup`, `get_topup`,
+   `set_topup_status` (edges running → ready|failed, ready → discarded; `applied` only through `apply_topup`).
+   `apply_topup(topup_id, accepted_refs, *, story_ids_by_key, resolve_object, decisions=None)` defaults
+   `decisions_json` to `{accepted, rejected}` and returns `{case_keys, scenario_keys, added_steps}`.
+7. Object links created by a top-up keep origin `design`, because the object-origin set has no `topup`.
+8. `cases_for_story` and `cases_for_object` leave out retired cases unless `include_retired=True` (D15).
+9. `story_fingerprint` reuses `spec_clauses.normalize_text` (NFKC + whitespace collapse), so a newline-only change to an
+   acceptance criterion does not flag the case.
+10. `add_case_object` follows its unique keys strictly. It does not turn an unresolved link into a resolved one; that
+    is 49-05's linker.
+
+**Hand-offs**
+- **49-04 (m1):** after dropping steps that point at dropped cases, also drop (and report) any scenario left with no
+  steps. Otherwise `create_from_design` refuses the whole Finalize.
+- **49-03 (decision 4):** the top-up `add_step.position` is 1-based. Say so in the workflow prompt.
+- **49-06 (n3):** if `ScenarioDto.steps` gains `case_title`/`case_status`, add them in both `suite_tree` and
+  `get_scenario`; the equality test will catch a drift. Map `ConflictError` to 409.
+- **genesis-docs (n4):** `context/areas.toml` maps `genesis/domain/**` and `genesis/kb/testdesign.py` to no area, so
+  `genesis-ctx check` misses ADR-050 for them.
+
+**Lesson candidates**
+- With Python `sqlite3`'s default transaction control, the transaction opens at the first DML. A `with db.tx()` block
+  that SELECTs to validate and then writes is not atomic against a concurrent writer. Put the CAS write first, or use a
+  no-op UPDATE to take the lock, then validate (review m4/m5).
+- A module or symbol named `test_*` (here, the Migration object) can be collected by pytest once a test imports it.
+  Name it differently and set `__test__ = False` on `Test*` classes (R6).
+
+**Code-map changes:** `db/migrations/` adds m0025 `test_design` (7 tables + 2 counters; DB → v25). `kb/` adds
+`testdesign.py` (`TestDesignStore`). `domain/` adds the test kinds, `TEST_TRANSITIONS`, `build_test_lifecycle_service`
+and `ConflictError`.
