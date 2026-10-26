@@ -50,6 +50,83 @@
   6. Own genesis commit; gates `pytest` + `ruff`; As built in this sub-spec; lesson candidate for genesis-docs
      ("announce a terminal event only after the state it describes is stored").
 
+#### H1 — As built (genesis-dev, 2026-10-22)
+
+**Commits:** genesis `d62ae03`, "fix(runs): 49-08 H1 — store the run status before announcing run.final (terminal +
+gate/pause paths)" (base `73b3bd3`, the 49-06 commit). 9 files; `git status` clean after the commit (L-056). Local only;
+nothing pushed or tagged. No other repo changed.
+
+**Changed**
+- `genesis/runs/manager.py`: new `_store_status(run_id, status, *, detail=None)` wraps `store.set_status(…, enforce=False)`;
+  a failure is logged at ERROR (`exc_info`) and swallowed so the caller still announces. `_finalize`: guard unchanged →
+  optional `error` event → `_store_status` → `run.final` → bus close → tool-store purge. The gate/pause branch of
+  `_spawn.on_event`: `_store_status` → `run.final` marker; bus stays open. Module logger added; docstring updated.
+- `genesis/chat/supervisor.py` (review M1): `ChatRunSupervisor.reconcile`'s terminal branch now back-fills a note only
+  when `eventlog.latest(run_id, "run.final")` exists **and** its payload status equals the record's; the dedup seq comes
+  from that event (the seq-0 fallback is gone). Without this, a notification-stream connect landing in the new
+  one-write gap (status stored, `run.final` not yet appended) would key the note differently from the live one and post
+  "finished" twice.
+- `genesis/services/testdesign_stage.py`: `settle_topup` docstring only (the store now holds the status when observers
+  run; settling on the payload status still works and was kept).
+
+**Observer audit (H1.3).** Six observers are registered on the app `RunManager`, all in `api/app.py`:
+`ChatRunSupervisor` (:101, payload status + `rec.workflow_id`), `StageFinalizer` (:106, needs `rec.status == "done"`),
+`SyncLinkObserver` (:142, payload status + `rec.workflow_id`/`inputs`), `TopupRunObserver` (:149, payload status),
+`StoryDesignFinalizer` (:164, needs `done`) and `StoryImplementationFinalizer` (:170, needs `done`). The recovery-only
+`StageFinalizer` in `api/features.py:349` is never attached. The only bus subscriber is `api/run_routes.py`
+`events_stream` (bus + durable log only). No live observer relied on the old order; the three `done`-checking finalizers
+were broken by it. One **level-triggered** path did interact with the new order (`ChatRunSupervisor.reconcile`, fixed above).
+
+**Tests** (genesis **1355 passed**, base 1346 + 9 new; `ruff check genesis` clean;
+`ruff check .` shows the same 28 pre-existing errors in `tests/`/`scripts/` as the base):
+- `tests/test_runs.py` +5: a `_ScriptedSupervisor` replays real worker event shapes (incl. the trailing `worker_exit` on a
+  non-zero exit) through the **real** `RunManager.on_event/on_exit`, with an observer that reads `store.get(run_id).status`
+  on `run.final` — done, failed (`error` + `worker_exit`, `detail` not clobbered, L-008), gate (`awaiting_input:gate`,
+  `pending_gate` works, bus open), and a failing status write (one `run.final`, bus closed, ERROR logged); plus a
+  real-subprocess-worker variant.
+- Live-path tests per finalizer family that no longer hand-set `done` (the run is created `running` and ended with
+  `rm._finalize(run_id, "done")`, so `run.final` reaches the attached finalizer): stage — `test_features_api.py` UX, TD
+  and Breakdown finalizer tests and `test_test_design_stage.py::test_finalizer_binds_a_design_run_and_ignores_a_topup_run`
+  (also drives the top-up skip through the live path); story design —
+  `test_story_design.py::test_finalizer_live_run_final_moves_to_review` (real `RunManager`); story implementation —
+  `test_story_implementation.py::test_finalizer_live_run_final_advances_to_code_review` (real `RunManager`).
+- `tests/test_supervisor.py` +2: reconcile back-fills a missed terminal and the live event dedups; reconcile in the gap
+  (no `run.final` yet / only the earlier gate marker) creates no note.
+- Before-fix evidence: with the base `manager.py`, all 5 new `test_runs` tests and the 6 live-path tests fail (e.g.
+  `[('failed', 'running')] != [('failed', 'failed')]`); with the base `supervisor.py`, the gap test fails (2 duplicate
+  notes). The reviewer reproduced both in a `/tmp` copy.
+- Kept on purpose: the `_FakeRM`-based direct `_finalize` unit tests (finalize logic, not the live path) and the
+  reconcile/self-heal tests that legitimately use a `done` run (H1.5 — `reconcile*`, `reconcile_stage` untouched).
+
+**Review:** genesis-review, `reviews/49-08-H1-review.md`. Round 1 **SHIP** with M1–M3, N1–N3. Fixed M1 (supervisor
+reconcile), N1 (stale comment in `_ready_topup`) and N3 (scripted `worker_exit`). Re-review **SHIP**, nothing new. M2 =
+this commit + As built. N2 (tests read the private `EventBus._closed`, as existing `test_runs.py` style does) left as is.
+
+**Decisions / deviations** (no ADR deviation):
+1. A failed status write still emits `run.final` and closes the bus (never leave a run without its terminal event). The
+   record then stays non-terminal in this process until a restart, when `reconcile_status` adopts the durable
+   `run.final` (it skips runs whose worker is still tracked here).
+2. M1 trade-off (accepted by the reviewer): a terminal run with **no** matching durable `run.final` is no longer
+   back-filled by chat reconcile. That happens only after retention reclaimed its events (the old seq-0 key would have
+   re-posted a stale duplicate), for legacy pre-07-02 runs, or when `eventlog.append` itself raised (then the live
+   observers never ran either). Every normal terminal write appends a `run.final` with the same status.
+3. 49-04 As built decision 2 ("`_finalize` calls the observers before it writes the run status") is superseded; top-ups
+   keep settling on the payload status, which remains correct.
+
+**Lesson candidates (for genesis-docs)**
+- "Announce a terminal event only after the state it describes is stored" — observers re-read the store on the event;
+  announce-then-store made every live finalizer a silent no-op that L-058's recoveries masked for months.
+- Corollary: when you reorder store vs announce, audit the **level-triggered** readers too — a reconcile keyed on the
+  event (dedup by seq) can now see the state without the event and must wait for the event.
+
+**Follow-ups (backlog, not built):** review M3 — `_finalize`'s idempotency guard is check-then-act with no lock; a
+`cancel()` and a worker-exit finalize can still both pass it (window narrowed by H1 to one write). A per-run lock or a
+conditional `UPDATE … WHERE status NOT IN (terminal)` would close it.
+
+**Code-map changes:** `runs/manager.py` — `_store_status` (stop-status write ahead of `run.final`; logged, never blocks
+the announcement); stop paths are now store → announce. `chat/supervisor.py` — `reconcile` back-fills a terminal note only
+from a durable `run.final` whose status matches the record.
+
 ## 2. Gates
 
 genesis: `pytest` + `ruff`; fresh DB migrates to **v25**, a v24 DB upgrades with rows preserved. web: `lint`,
