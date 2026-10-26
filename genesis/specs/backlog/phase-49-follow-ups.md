@@ -24,3 +24,15 @@
    let a release record "what we re-ran for change X"; pairs naturally with part 2 test runs.
 7. **Test data and test steps.** Out of scope in D3 (part 2 boundary): parameterized test data sets and step-level
    detail when manual execution or script generation needs them.
+
+## Pre-existing defects found during the Phase 49 build (not caused by it)
+
+8. **`RunManager._finalize` check-then-act race (49-08 H1 review M3).** A cancel and a worker exit can both pass the
+   "already terminal?" guard at the top of `_finalize` (`genesis/genesis/runs/manager.py`), because the check and the
+   write are not under one lock. H1 made the window smaller, not zero. Suggested fix: a per-run lock around the guard +
+   status write + `run.final`, or a compare-and-set status write that only the first caller wins; regression test with two
+   concurrent terminal events.
+9. **`StoryImplementationFinalizer.reconcile()` is never called at startup (49-05 As built).** The board page's on-read
+   recovery hides it, and Phase 49's startup reconcile covers the test links, but a story whose implementation finished
+   while `serve` was down stays in the Implementation lane until someone opens the board. Suggested fix: call it from the
+   app startup alongside the other finalizers' `reconcile()` (L-058).

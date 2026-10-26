@@ -21,6 +21,18 @@ The seven screens of D13, built only from existing primitives, layouts and token
   `applications/:appUuid/test-scenarios/:scenarioId`. App tab id `test-impact` (`?tab=test-impact`).
 - Never `<Button asChild>` (L-069). New feature folder `web/src/features/test-design/`.
 
+Added after the 49-06 build (49-06 As built — the API as shipped in genesis `73b3bd3`):
+- **Contract fixtures:** type against the nine fixtures in `web/src/test/fixtures/testdesign/`; the API tests already
+  compare live responses to them, so web types that mirror them can't drift silently (L-011).
+- **Allowed actions:** case and scenario reads and both transition responses return the allowed lifecycle actions.
+  Render the header's action buttons from that list; don't compute them in the web.
+- **Refusals:** a refused transition is 409 with the stage-actions body and a reason naming the blocking scenarios — show
+  that reason as-is. A stale write is 409 `{error: "stale_write", expected, actual}` → "changed elsewhere — reload".
+  A refused upload is **400**.
+- **Lists:** story and object test-case lists include retired cases, last; show them muted with their status.
+- **Scenario steps** carry `case_title` and `case_status`, so the steps list needs no extra case fetch.
+- **Impact** responses include `hop` on suites and `object_removed` on cases and path entries (49-05 As built).
+
 ## 3. Screen 1 — the Test Design stage
 
 - `STAGE_DEFS` row (`web/src/features/features/stages.ts:47`): `{key: "test-design", name: "Test Design", icon:

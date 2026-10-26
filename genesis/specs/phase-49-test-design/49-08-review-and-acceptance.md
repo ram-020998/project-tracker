@@ -18,7 +18,8 @@
 6. **Links** — no FK to `wiki_object_pages`; no stub wiki pages created (D5, ADR-070); a hallucinated UUID can't become
    resolved (R3); derived states computed on read (R2).
 7. **D7 linker** — deterministic, idempotent, never blocks the implementation lane move; startup reconcile (L-058).
-8. **Impact** — read-only; current edges only; no 200 cap; depth clamp; retired excluded; R1 honoured.
+8. **Impact** — stores no impact data, no Hub call (it may resolve pending links first, R8); current edges only; no 200
+   cap; depth clamp; retired excluded; R1 honoured.
 9. **Workflow** — reliability trio on every agent node (ADR-011, `validate_library`); healing bounds; read-only
    allowlists; no giant emission (L-064); per-epic map + single scenario turn (L-076); JSON contract = 49-03 §4.
 10. **Chat** — read-only + sandboxed fs only (ADR-031/045); `_STEERING_TEST` keeps JSON ↔ HTML in sync.
