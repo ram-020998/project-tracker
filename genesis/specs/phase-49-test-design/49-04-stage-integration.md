@@ -117,3 +117,106 @@ code     = ["genesis/genesis/services/testdesign_stage.py", "genesis/genesis/kb/
 docs     = ["tracker:specs/phase-49-test-design/49-01-findings.md", "tracker:specs/phase-49-test-design/49-03-workflow.md"]
 upstream = ["49-02", "49-03", "49-05"]
 ```
+
+## As built (genesis-dev, 2026-10-26)
+
+**Commits:** genesis `a8ba5b8`, "feat(features): 49-04 Test Design stage integration — start/re-run, StageFinalizer
+binding, test_design chat mode, Finalize, top-up, CSV" (base `454db1f`, the 49-05 commit). Local only; nothing was
+pushed or tagged. No other code repo changed.
+
+**Changed**
+- `genesis/services/testdesign_stage.py` (new). `TestDesignStageService(settings, *, run_manager, test_impact)`:
+  `prereqs_ready`, `is_finalized`, `start`, `rerun`, `launch_test_design(row, feat, notes, files, *, mode, targets)`,
+  `finalize_test_design`, `start_topup`, `latest_topup`, `reconcile_topup`, `reconcile_topups`, `settle_topup`,
+  `apply_topup`, `discard_topup`, `suite_csv`, `suite_csv_filename`. It also holds `TopupRunObserver`, the errors
+  `TestDesignError` → `TestDesignNotFoundError` (404), `TestDesignConflictError` (409) and `TestDesignInvalidError`
+  (422, or 400 for more than 3 docs), each with a `.status`, and the pure helpers `parse_embedded_test_design`,
+  `clean_design`, `validate_design`, `expand_topup_decisions`, `suite_csv_rows`, `csv_filename`, `stories_document`,
+  `existing_document`. `services/__init__.py` exports the service, the observer and the errors.
+- `api/app.py` builds ONE `TestDesignStageService` over the shared `app.state.test_impact` (as the user asked:
+  `resolver()` for Finalize and top-up apply, then `link_feature_implemented(feature_id)` after each). It exposes it as
+  `app.state.test_design`, attaches `TopupRunObserver`, and runs `reconcile_topups` at startup via
+  `asyncio.to_thread` (L-026).
+- Stage registration: `StageStore.VALID_STAGES` += `test_design`; `ArtifactKind.TEST_DESIGN`;
+  `stage_artifacts.STAGE_ARTIFACT_FILE["test_design"] = "test-design.html"` (this is the map features.py uses);
+  `chat/store.py` `STAGE_CHAT_MODES` += `test_design`.
+- `chat/stage_finalizer.py`: `_Binding` gains `skip_modes`. The new `test-design-analysis` binding (stage
+  `test_design`, artifact `test-design.html`, chat mode `test_design`, `_seed_test`) skips `mode == "topup"` runs. All
+  existing guards are kept.
+- `chat/mode_profile.py`: the `test_design` `ChatModeProfile` (read_only, auto_deny, cwd sandbox, fs_read/fs_write)
+  and `_STEERING_TEST`.
+- `services/spec_change.py` `stage_ctx`: for `test_design`, `downstream_locked` = the suite is finalized (R5). Reopen
+  is then refused and not offered.
+- `services/stage_artifacts.py`: `spec_version()` is the shared copy of `features.py`'s `_spec_version`, which now
+  delegates to it.
+- `kb/testdesign.py`: additive reads `topup_for_run(run_id)` and `list_topups(feature_id=None, *, status=None)`.
+  `get_topup` shares `_topup_dict` with them (L-039).
+- `collab/service.py` (review m1): `LOCAL_ONLY_STAGES = {"test_design"}`. `publish()` refuses such a stage, adoption
+  leaves it out, and a pulled one is skipped (cursor advances, L-082). This enforces 49-01 D12.
+
+**Tests:** `tests/test_test_design_stage.py` has 44 tests over the real app (`create_app`). Runs are real `RunRecord`s
+and are ended through the real `RunManager._finalize`. They cover every §8 item plus the D12 guards.
+`tests/test_chat_mode_profile.py` has +1 posture test. The 49-03 golden fixtures are vendored byte-identically into
+`tests/fixtures/test_design_contract/`, with a drift test that skips when the sibling checkout is absent (L-011).
+Genesis suite: **1311 passed** (was 1266). `ruff check genesis` is clean.
+
+**Review:** genesis-review, `reviews/49-04-review.md`. Round 1: **SHIP** with m1–m3 and n1–n5. I fixed m1 (D12), n1
+(exact `id` match) and n2's message part. The re-review was **SHIP** with no new findings. m2 and m3 are recorded
+below. n3–n5 are recorded decisions.
+
+**Decisions / deviations** (no ADR deviation):
+1. No routes here. 49-06 maps the `TestDesignError` family via `.status` and calls every method off the event loop.
+2. **Top-ups settle on the `run.final` payload status.** `RunManager._finalize` calls the observers before it writes
+   the run status (`runs/manager.py:134-140`), so re-reading `rec.status` in a live observer sees `running`. The
+   reconcile paths use the run record.
+3. `start` refuses: prerequisites (F2); a finalized suite (R5); an existing completion chat ("use re-run"); a bound run
+   that is still active, or done whose document is not open yet. A failed or cancelled bound run does not block a fresh
+   start. Draft → in-progress goes through the stage `LifecycleService` (`start`). `rerun` mirrors the breakdown
+   (`reset_for_reupload`) and also has no active-run guard (n2, same as breakdown/TD).
+4. Finalize reads `current_stage_html` (sandbox first, L-073). The block is matched on `id` whatever the attribute
+   order. The pre-clean order is: unknown story keys, then steps to unknown cases, then empty scenarios. A case left
+   with no story is kept. `validate_design` enforces title, ≥ 1 when and ≥ 1 then, type, priority, object name and
+   type, and unique refs, and reports them as 422. Dropped lists: `dropped_story_keys: [{case, story_key}]`,
+   `dropped_steps: [{scenario, case, position}]`, `dropped_scenarios: [{scenario, title}]`. The result also carries
+   `links` (the `link_feature_implemented` counts, or null if linking failed; it is best-effort and logged).
+5. `upstream_json` = the launch snapshot `<stage_dir>/upstream.json`: `{run_id, mode, spec: {revision_no,
+   content_hash}, stories: {GNS_key: fingerprint}}`.
+6. Top-up: target ids must be Story-type stories of the feature (a Task → 422). Stale `running` rows are reconciled
+   before the "already running" guard. Snapshots go to `<stage_dir>/topups/<hex>/`, so the design snapshot is never
+   overwritten. `existing.json` holds non-retired records only (49-03 §4.3; the fixture's retired case is a workflow
+   test input). Apply also rejects an item whose step names a TC-/TS- that is no longer live. `decisions_json` =
+   `{accepted, rejected: [{ref, reason}]}` with reasons `rejected` / `depends on p-N` / `… is not a live …`. A done run
+   without a readable `proposals.json` → `failed`.
+7. CSV: the Scenarios column lists non-retired scenarios only. Cells are not escaped against spreadsheet formulas,
+   consistent with the Jira export (n3).
+8. The steering adds one rule beyond §4: in the embedded JSON, write `<` as `\u003c` (the 49-03 convention), so a
+   chat edit cannot end the `<script>` early.
+
+**Hand-offs**
+- **49-06 (m2):** a dedicated test-design status/read GET must call `StageFinalizer.reconcile_stage` (the generic
+  feature and stage GETs already do), or the stage stays "in progress" after the run ends (see the m3 backlog item).
+  Register `/stages/test_design/start|rerun|finalize` BEFORE the generic `/stages/{stage}/start|rerun` in
+  `features.py`, or the generic route (TD only → 400) catches them. Map `ConflictError` from the store to 409, and
+  the `ValueError` from a collab publish of a test-design stage is already a 409 there.
+- **49-07:** `latest_topup` reconciles on read, so polling it is enough to see `ready`/`failed`.
+- **49-08:** run the fixture drift test once with both repos checked out (n4).
+- **Backlog (m3, pre-existing, needs the user's sign-off):** every run→artifact finalizer's live path is a no-op.
+  `StageFinalizer`, `StoryDesignFinalizer` and `StoryImplementationFinalizer` return on `rec.status != "done"` inside
+  `_observe`, but the status is written after the observers run. Stages finalize only on the next read or at startup.
+  The existing tests call `_finalize` after a manual `set_status("done")`, which hides it. Fix: pass the payload status
+  into `_finalize`, or write the status before emitting `run.final`, plus a regression test through
+  `RunManager._finalize`.
+- **Backlog (n3):** formula escaping for both CSV exports. **(n5):** a DB guard for one running top-up per feature,
+  for the Hub phase.
+
+**Lesson candidates**
+- An observer that bridges a run's end into app state must take the terminal status from the event, not re-read the
+  run store: `RunManager` notifies observers before it writes the status. Test such bridges through the real
+  `RunManager._finalize`, not by setting the status by hand and calling the bridge.
+- Adding a value to a generic registry (`VALID_STAGES`) silently opts it into every consumer of that registry (here
+  the Hub publish, adoption and pull). Grep the consumers when you add one.
+
+**Code-map changes:** `services/` gains `testdesign_stage.py` (`TestDesignStageService`, `TopupRunObserver`).
+`chat/stage_finalizer.py` binds `test-design-analysis` (skips top-ups). `chat/mode_profile.py` adds `test_design`.
+`kb/stages.py` adds the `test_design` stage. `collab/service.py` adds `LOCAL_ONLY_STAGES`. `api/app.py` wires
+`app.state.test_design`. `services/stage_artifacts.py` exports `spec_version`.
