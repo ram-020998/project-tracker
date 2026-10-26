@@ -216,6 +216,9 @@ of `build`), n2/n3 (below), P1/P2 (lesson candidates).
   tests run twice and the other's never run** (P1, pre-existing): in the CI full-library command,
   `generate-business-map`'s 11 tests are replaced by `feature-breakdown-analysis`'s 37. Fix (separate item): delete both
   `tests/__init__.py` files and add a CI guard on duplicate test module names. 49-03 ships without one.
+  **Fixed 2026-10-26 in genesis-workflows `9cb061f`** (follow-up after 49-03): both files removed; `validate_library`
+  gate 8 fails on any `workflows/*/tests/__init__.py`. Full-library collection 331 → **305** (37 duplicates gone, 11
+  business-map tests now run), 0 duplicate ids, every workflow collects the same tests alone and in the full run.
 - **A heal patch must be validated against the same invariants as the agent turn it corrects** — a generic
   HealDecision shape check lets a patch produce what `v_cases`/`v_scenarios` would reject. Simulate the patch on a copy
   and run the program invariants in a workflow `heal_check`.
