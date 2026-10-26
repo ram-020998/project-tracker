@@ -57,7 +57,7 @@ startup reconcile (§4).
 |---|---|---|
 | objects | `changed_from_objects(app_uuid, uuids)` | the given uuids (must be current rows; unknown → reported) |
 | story | `changed_from_story(story_id)` | the objects of §3 step 1 for that story |
-| sync | `changed_from_sync(app_uuid, sync_id)` | rows with `valid_from_sync = sync_id` (added if no earlier row for the uuid, else modified) + uuids whose row has `valid_to_sync = sync_id` and no successor (**removed**). Sync must be `status` done for the app. |
+| sync | `changed_from_sync(app_uuid, sync_id)` | rows with `valid_from_sync = sync_id` (added if no earlier row for the uuid, else modified) + uuids whose row has `valid_to_sync = sync_id` and no successor (**removed**). Sync must have `kb_syncs.status = 'succeeded'` for the app (the value the table actually records — 49-05 As built). |
 
 **Walk:** build the inbound adjacency once per call from **current** `kb_dependencies` (`valid_to_sync IS NULL`)
 for the app — reuse the adjacency helper behind `get_transitive_dependencies` (`genesis/genesis/kb/_graph_reads_mixin.py:18-31`)

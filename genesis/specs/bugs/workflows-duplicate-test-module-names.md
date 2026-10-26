@@ -1,7 +1,9 @@
 # Bug — genesis-workflows: two workflows' tests share a module name, so 11 tests never run in CI
 
-> **Status:** 📝 OPEN (not scheduled). · **Found:** 2026-10-26, 49-03 review (genesis-workflows `325cc23`) ·
-> **Repo:** genesis-workflows · Pre-existing; not caused by Phase 49.
+> **Status:** ✅ FIXED 2026-10-26 in genesis-workflows `9cb061f` (recorded in 49-03 As built): both `tests/__init__.py`
+> removed; `validate_library` gate 8 now fails on any `workflows/*/tests/__init__.py`; full-library collection 331 →
+> 305, no duplicate ids. Ships with the 49-09 genesis-workflows release. · **Found:** 2026-10-26, 49-03 review
+> (genesis-workflows `325cc23`) · **Repo:** genesis-workflows · Pre-existing; not caused by Phase 49.
 
 ## Symptom
 

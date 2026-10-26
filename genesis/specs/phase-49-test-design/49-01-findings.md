@@ -187,6 +187,7 @@ mirror of the ISTQB glossary); [IEEE 29119-3](https://standards.ieee.org/ieee/29
 | R5 | After test-design Finalize the stage document is history: **Re-run** returns 409 and **Reopen** is blocked through the existing `downstream_locked` precondition (`transitions.py`). | Records are authoritative after Finalize (as for stories, ADR-060). |
 | R6 | New Python modules must **not** be named `test_*.py` / `*_test.py` (pytest would collect them): use `kb/testdesign.py`, `services/testimpact.py`, `api/testdesign.py`. | Avoids accidental test collection. |
 | R7 | The D7 / F6 updates are **idempotent** and also run in a **startup reconcile** sweep (level-triggered, L-058). | A missed terminal event must not leave links stale. |
+| R8 | (after the 49-05 build) The suite, case and impact reads also call `resolve_unresolved(app_uuid)` on demand. KB rows pulled from the Hub get resolved by these reads; no separate pull trigger. | Recovery shouldn't depend on a restart (49-05 review m3); one idempotent call covers both the restart gap and Hub pulls (m2). |
 
 ## Context manifest
 

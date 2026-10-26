@@ -69,10 +69,11 @@ Model on `_launch_breakdown` (`genesis/genesis/api/features.py:981-1031`):
    an unknown step reference or a scenario with no steps). In this order: drop unknown story keys from cases (a case
    left with no story is kept — *no linked story*); drop steps whose case ref no longer exists; then **drop scenarios
    left with no steps**. Report all three lists. Validate the remaining shape with the `v_cases`/`v_scenarios` rules.
-4. `TestDesignStore.create_from_design(...)` with `resolve_object` = 49-05 §2 (R3). One transaction; ids in document
-   order (F10). Write `upstream_json` from the launch snapshot.
-5. Then (outside the tx, idempotent) run the D7 implementation linker for every linked story already implemented
-   (F5; 49-05 §3).
+4. `TestDesignStore.create_from_design(...)` with `resolve_object = TestImpactService.resolver()`
+   (`genesis/genesis/services/testimpact.py:166`; R3). One transaction; ids in document order (F10). Write
+   `upstream_json` from the launch snapshot.
+5. Then (outside the tx, idempotent) call `TestImpactService.link_feature_implemented(feature_id)`
+   (`testimpact.py:238`) for stories already implemented (F5; 49-05 §3).
 6. Return the suite tree + `{dropped_story_keys, dropped_steps, dropped_scenarios}` so the UI can report them.
 
 ## 6. Top-up apply (`apply_topup(topup_id, accepted_refs)`)
@@ -82,7 +83,9 @@ Model on `_launch_breakdown` (`genesis/genesis/api/features.py:981-1031`):
 that same `p-N`; `add_step.position` is **1-based** (the 49-02 store's step positions are 1-based too); never assert an
 exact `metadata.sources` list (it may include `"uploaded-docs"`). Expand dependencies: an accepted
 `new_scenario`/`add_step` whose referenced `new_case` was not accepted → rejected with reason "depends on p-N". Resolve
-objects (R3), call `TestDesignStore.apply_topup`, run the D7 linker for affected stories. `discard_topup(topup_id)` →
+objects with `TestImpactService.resolver()` (R3), call `TestDesignStore.apply_topup`, then
+`TestImpactService.link_feature_implemented(feature_id)`. Use the shared service instance (49-05 As built), not a new
+one per call. `discard_topup(topup_id)` →
 `discarded`. Created records are **Ready** (D15), origin `topup`; their object links keep origin `design` (49-02 As
 built — `topup` is not an object-link origin). Use the shared contract fixtures in
 `genesis-workflows/workflows/test-design-analysis/tests/fixtures/` as the golden inputs for these tests (L-011).
