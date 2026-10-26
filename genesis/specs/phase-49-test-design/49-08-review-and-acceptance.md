@@ -28,6 +28,28 @@
 13. **No Hub / collab change** (D12); collab columns present. The `test_design` stage artifact is refused on publish,
     left out of the bulk publish of existing work, and skipped on pull (49-04 As built) — check all three paths.
 
+### 1.1 Hardening (built by **genesis-dev** before the review runs; the reviewer checks it like the rest)
+
+- **H1 — record the terminal status before announcing `run.final` (49-01 D17).** Today `RunManager._finalize`
+  (`genesis/genesis/runs/manager.py:122-142`) calls `self._log(run_id, RUN_FINAL, …)`, which notifies every observer,
+  and only then `self.store.set_status(…)`. Every finalizer that checks `rec.status == "done"` on the event returns
+  early: `StageFinalizer` (UX, Technical Design, Breakdown, Test Design), `StoryDesignFinalizer` and
+  `StoryImplementationFinalizer`. Those stages finish only on the next level-triggered read or at restart (L-058 masked it).
+  1. In `_finalize`, call `store.set_status(run_id, status, …)` **before** `_log(run_id, RUN_FINAL, …)`. Keep the
+     idempotency guard at the top as is. If `set_status` raises, still emit `run.final` and close the bus (never leave a
+     run without its terminal event), and log loudly.
+  2. Same order in the non-terminal `final` branch of `_spawn.on_event` (gate / pause): `set_status` first, then the
+     `run.final` marker.
+  3. Grep every observer registration (`_observers`) and confirm none relies on the old order (record the list in As
+     built).
+  4. Tests: a regression test with a real `RunManager` and a fake worker event stream, where an observer reads
+     `store.get(run_id).status` at the moment it receives `run.final` → `done` (fails before the fix); a live-path test per
+     finalizer family (stage, story design, story implementation) that does **not** set `done` by hand first; fix the
+     existing tests that pre-set `done` so they no longer hide the order (a stub must mirror reality).
+  5. Keep the level-triggered recoveries (`reconcile*`, 49-06's `reconcile_stage` on reads) as the safety net.
+  6. Own genesis commit; gates `pytest` + `ruff`; As built in this sub-spec; lesson candidate for genesis-docs
+     ("announce a terminal event only after the state it describes is stored").
+
 ## 2. Gates
 
 genesis: `pytest` + `ruff`; fresh DB migrates to **v25**, a v24 DB upgrades with rows preserved. web: `lint`,
@@ -58,10 +80,10 @@ genesis-workflows: `validate_library` + `pytest workflows`.
 ## Context manifest
 
 ```toml
-areas    = ["features-stages", "stories-workbench"]
-adrs     = ["ADR-011", "ADR-031", "ADR-045", "ADR-050", "ADR-056", "ADR-060", "ADR-067", "ADR-070", "ADR-072"]
-lessons  = ["L-011", "L-058", "L-063", "L-064", "L-069", "L-076", "L-089", "L-090"]
-code     = ["genesis/genesis/kb/testdesign.py", "genesis/genesis/services/testimpact.py"]
+areas    = ["features-stages", "stories-workbench", "runs-worker"]
+adrs     = ["ADR-011", "ADR-012", "ADR-031", "ADR-045", "ADR-050", "ADR-056", "ADR-060", "ADR-067", "ADR-070", "ADR-072"]
+lessons  = ["L-005", "L-011", "L-058", "L-061", "L-063", "L-064", "L-069", "L-076", "L-089", "L-090"]
+code     = ["genesis/genesis/kb/testdesign.py", "genesis/genesis/services/testimpact.py", "genesis/genesis/runs/manager.py"]
 docs     = ["tracker:specs/phase-49-test-design.md"]
 upstream = ["49-02", "49-03", "49-04", "49-05", "49-06", "49-07"]
 ```
