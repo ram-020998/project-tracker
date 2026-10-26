@@ -61,20 +61,31 @@ Model on `_launch_breakdown` (`genesis/genesis/api/features.py:981-1031`):
 
 1. Stage `test_design` must be `completed` → else 409. Suite already finalized → 409.
 2. Parse the embedded JSON from the **current** stage HTML (`_current_stage_html`, L-073); missing/garbled or zero cases
-   → 422. Validate shape with the same rules as `v_cases`/`v_scenarios` (unknown story keys dropped and reported;
-   a scenario step pointing at a dropped case removed; a case left with no story kept, flagged *no linked story*).
-3. `TestDesignStore.create_from_design(...)` with `resolve_object` = 49-05 §2 (R3). One transaction; ids in document
+   → 422. The parser must **not depend on attribute order**: 49-03 emits
+   `<script id="genesis-test-design" type="application/json">` (`id` first), unlike the breakdown block that
+   `_BACKLOG_RE` expects with `type` first (`features.py:75-88`) — match on the `id` attribute (BeautifulSoup is already
+   a pinned dependency, ADR-075) or an order-independent regex.
+3. **Pre-clean, then write** (49-02 As built: `create_from_design` refuses the *whole* document on an unknown story key,
+   an unknown step reference or a scenario with no steps). In this order: drop unknown story keys from cases (a case
+   left with no story is kept — *no linked story*); drop steps whose case ref no longer exists; then **drop scenarios
+   left with no steps**. Report all three lists. Validate the remaining shape with the `v_cases`/`v_scenarios` rules.
+4. `TestDesignStore.create_from_design(...)` with `resolve_object` = 49-05 §2 (R3). One transaction; ids in document
    order (F10). Write `upstream_json` from the launch snapshot.
-4. Then (outside the tx, idempotent) run the D7 implementation linker for every linked story already implemented
+5. Then (outside the tx, idempotent) run the D7 implementation linker for every linked story already implemented
    (F5; 49-05 §3).
-5. Return the suite tree + `{dropped_story_keys, dropped_steps}` so the UI can report them.
+6. Return the suite tree + `{dropped_story_keys, dropped_steps, dropped_scenarios}` so the UI can report them.
 
 ## 6. Top-up apply (`apply_topup(topup_id, accepted_refs)`)
 
-`ready` only (else 409). Expand dependencies: an accepted `new_scenario`/`add_step` whose referenced `new_case` was not
-accepted → rejected with reason "depends on p-N". Resolve objects (R3), call `TestDesignStore.apply_topup`, run the D7
-linker for affected stories. `discard_topup(topup_id)` → `discarded`. Created records are **Ready** (D15), origin
-`topup`.
+`ready` only (else 409). `proposals.json` shape as built (49-03 As built): `items[]` plus `metadata`, `openQuestions`,
+`storySuggestions`; a proposed case's ref **is** its `p-N`, and a `new_scenario` step or an `add_step` that uses it names
+that same `p-N`; `add_step.position` is **1-based** (the 49-02 store's step positions are 1-based too); never assert an
+exact `metadata.sources` list (it may include `"uploaded-docs"`). Expand dependencies: an accepted
+`new_scenario`/`add_step` whose referenced `new_case` was not accepted → rejected with reason "depends on p-N". Resolve
+objects (R3), call `TestDesignStore.apply_topup`, run the D7 linker for affected stories. `discard_topup(topup_id)` →
+`discarded`. Created records are **Ready** (D15), origin `topup`; their object links keep origin `design` (49-02 As
+built — `topup` is not an object-link origin). Use the shared contract fixtures in
+`genesis-workflows/workflows/test-design-analysis/tests/fixtures/` as the golden inputs for these tests (L-011).
 
 ## 7. CSV export (`suite_csv(feature_id) -> str`) — D16
 
@@ -101,5 +112,5 @@ lessons  = ["L-033", "L-041", "L-042", "L-058", "L-061", "L-062", "L-063", "L-07
 code     = ["genesis/genesis/services/testdesign_stage.py", "genesis/genesis/kb/stages.py", "genesis/genesis/domain/**",
             "genesis/genesis/chat/stage_finalizer.py", "genesis/genesis/chat/mode_profile.py", "genesis/genesis/api/features.py"]
 docs     = ["tracker:specs/phase-49-test-design/49-01-findings.md", "tracker:specs/phase-49-test-design/49-03-workflow.md"]
-upstream = ["49-02", "49-03"]
+upstream = ["49-02", "49-03", "49-05"]
 ```

@@ -29,7 +29,9 @@ Never restart while a run is active (`GET /api/runs?status=running` per instance
   stories-workbench, workflows-library` / `stories-workbench, kb-sync, features-stages`.
 - **Areas:** add the new code paths to `context/areas.toml` so path routing finds them
   (`genesis/genesis/kb/testdesign.py`, `services/testdesign_stage.py`, `services/testimpact.py`, `api/testdesign.py`
-  → features-stages + stories-workbench; `web/src/features/test-design/**` → features-stages;
+  → features-stages + stories-workbench; **`genesis/genesis/domain/**`** — unmapped today, so `genesis-ctx check` misses
+  ADR-050 on lifecycle changes (49-02 As built) → features-stages + stories-workbench;
+  `web/src/features/test-design/**` → features-stages;
   `genesis-workflows/workflows/test-design-analysis/**` is already under workflows-library). Consider a new
   `testing` area if Part 2 is next.
 - `context/state/current.md` (versions, DB v25, test counts, "what works": Test Design stage, Tests tab, case/scenario

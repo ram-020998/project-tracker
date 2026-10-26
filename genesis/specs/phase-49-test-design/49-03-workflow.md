@@ -102,7 +102,8 @@ cases; healing bounds from META. Use real story shapes (Gherkin AC strings, `GNS
 ## 7. Registry
 
 `registry.json` entry `{id: test-design-analysis, name: "Test Design Analysis", version: 0.1.0, roles: [developer,
-tester, product-owner], required_mcp: [genesis-kb, appian-dev], …}`; run label "Test Design Preparation".
+tester, product-owner], required_mcp: [genesis-kb, appian-dev], …}`. Runs show under the workflow's `name`
+("Test Design Analysis"); Genesis has no separate run-label mechanism (corrected 2026-10-26 after the 49-03 build).
 
 ## Context manifest
 

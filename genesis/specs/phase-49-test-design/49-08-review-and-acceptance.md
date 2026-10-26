@@ -38,7 +38,7 @@ genesis-workflows: `validate_library` + `pytest workflows`.
 | # | Step | Expected |
 |---|---|---|
 | 1 | Open a feature whose stories are **not** finalized | Test Design card locked "Stories must be finalized"; `POST …/test_design/start` → 409 |
-| 2 | Feature with finalized stories → Start (notes + 1 doc) | Run starts ("Test Design Preparation"); graph shows the per-epic loop + scenario node |
+| 2 | Feature with finalized stories → Start (notes + 1 doc) | Run starts ("Test Design Analysis"); graph shows the per-epic loop + scenario node; in the turn explorer the `design_cases` / `compose_scenarios` agents **open the input files** (spec/UX/TD/stories) rather than answering without them (first workflow to pass all inputs only as files — 49-03 As built). Note the run's superstep count against `recursion_limit: 300`; raise to 400 if it is hit. |
 | 3 | Run completes | Stage in-review; completion chat opens with `test-design.html`; document shows scenarios + cases + embedded JSON |
 | 4 | Ask the chat to add a negative case and move it into a scenario | Visible cards **and** embedded JSON both updated |
 | 5 | Mark completed → **Finalize tests** | `TC-`/`TS-` ids in document order; Tests tab shows the tree; dropped keys reported (if any) |

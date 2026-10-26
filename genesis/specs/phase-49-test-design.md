@@ -92,10 +92,11 @@ API (49-06) ─► web (49-07): stage · Tests tab · case/scenario pages · sto
 
 ## 6. Session plan
 
-S1 = 49-02 (genesis-dev) → S2 = 49-03 (genesis-dev, genesis-workflows; can run in parallel with S1 — it only needs
-the JSON contract in 49-03 §4) → S3 = 49-04 (reads 49-02 + 49-03 As built) → S4 = 49-05 (reads 49-02) → S5 = 49-06
-(reads 49-02/04/05) → S6 = 49-07 (reads 49-06) → S7 = 49-08 (genesis-review) → S8 = 49-09 (genesis-release, then
-genesis-docs).
+S1 = 49-02 (genesis-dev) and S2 = 49-03 (genesis-dev, genesis-workflows) in parallel → S3 = 49-05 (reads 49-02 As
+built; provides `resolve_object` + the D7 linker that 49-04 calls) → S4 = 49-04 (reads 49-02, 49-03 and 49-05 As
+built) → S5 = 49-06 (reads 49-02/04/05) → S6 = 49-07 (reads 49-06) → S7 = 49-08 (genesis-review) → S8 = 49-09
+(genesis-release, then genesis-docs). S3 onwards run **one at a time**: they share the genesis checkout. *(Order of
+49-04/49-05 swapped 2026-10-26 after the 49-02/49-03 builds: 49-04 depends on 49-05's functions.)*
 
 ## 7. Sub-phase ledger
 
