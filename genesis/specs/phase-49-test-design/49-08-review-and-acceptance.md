@@ -128,6 +128,17 @@ conditional `UPDATE … WHERE status NOT IN (terminal)` would close it.
 the announcement); stop paths are now store → announce. `chat/supervisor.py` — `reconcile` back-fills a terminal note only
 from a durable `run.final` whose status matches the record.
 
+- **H2 — feature roll-up status: Draft only when nothing has started (49-01 D18).** Change `deriveFeatureStatus`
+  (`genesis/web/src/features/features/stages.ts:139-145`), the only roll-up (used by `FeaturePage.tsx`; no backend copy):
+  over the **available** stages — **Completed** if every one is `completed`; **Draft** if every one is `not-started` or
+  `draft`; otherwise **In progress** (this includes `in-progress`, `in-review`, `under-change`, and any mix of completed
+  with not-started). Keep the existing tones (success / neutral / info) and the function signature.
+  Tests in `stages.test.ts`: all completed → Completed; all not-started → Draft; all draft → Draft; four completed +
+  Test Design not-started → In progress (the case that showed Draft); Spec completed + rest not-started → In progress;
+  any under-change → In progress; a not-available stage is ignored. Gates: `npm run lint && npm run typecheck && npm test`,
+  then `npm run build` and commit `web/static/` as a separate sequential step, then rebuild and confirm an empty
+  `git status` (L-089). Own genesis commit; As built under this item.
+
 ## 2. Gates
 
 genesis: `pytest` + `ruff`; fresh DB migrates to **v25**, a v24 DB upgrades with rows preserved. web: `lint`,
