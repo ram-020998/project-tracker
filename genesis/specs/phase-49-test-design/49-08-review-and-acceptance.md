@@ -152,8 +152,10 @@ genesis-workflows: `validate_library` + `pytest workflows`.
 | 12 | Object Wiki page of an implemented object | Tests section lists its cases; "Check test impact" pre-picks it |
 | 13 | Generate tests for uncovered stories (add a story manually first) | Proposals list; reject a new case → its dependent step auto-rejected; Apply creates Ready records with new ids |
 | 14 | Export CSV | Opens in a spreadsheet: one row per case, multi-line Gherkin intact |
-| 15 | **Real-browser width probe (L-090):** Tests tab Cases table and the Test Impact table at 1280, 1440, 1920 px, light and dark | No clipped key/title columns, no horizontal scroll at ≥ 1280; record measured column widths |
+| 15 | **Real-browser width probe (L-090):** at 1280, 1440, 1920 px, light and dark — (a) the Tests tab Cases table, (b) the Test Impact table, (c) the feature Overview's **5-card stage grid**, (d) the case page's **Objects** table | No clipped key/title columns, no horizontal scroll at ≥ 1280, the five stage cards wrap cleanly; record measured column widths and card widths |
 | 16 | Restart `serve` mid top-up run (no active design run) | Top-up row reconciles to ready/failed on startup (L-058) |
+| 17 | The extra live checks listed in the **49-07 As built** (e.g. a scenario with a step whose case is retired can't be reordered until that step is removed; a Tasks-only feature's Test Design start page shows why it is locked) | Each behaves as the As built describes |
+| 18 | H1 live: start any stage run (UX / TD / Breakdown / Test Design) and **stay on the page** until it finishes | The stage reaches in-review without a reload or restart (D17) |
 
 ## Context manifest
 
