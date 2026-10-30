@@ -125,3 +125,99 @@ code     = ["genesis/web/src/features/test-design/**", "genesis/web/src/features
 docs     = ["tracker:specs/phase-49-test-design/49-06-api.md"]
 upstream = ["49-06"]
 ```
+
+## As built (genesis-dev, 2026-10-30)
+
+**Commits** (genesis, base `d62ae03`; local only, nothing pushed or tagged; no other code repo changed):
+- `8a7ca96` feat(web): the seven screens, types, client, hooks, tests, rebuilt `web/static`.
+- `5d69eb7` fix(web): review round 1 m1–m3, n4.
+- `66d7dce` fix(web): review round 2 nits n8, n10 (source only — see Decisions 9).
+- `45be579` build(web): the `web/static` for `66d7dce`.
+
+**Changed** (all under `genesis/web/src`)
+- New `types/testdesign.ts`: every 49-06 DTO (`SuiteTree`, `CaseDto`, `ScenarioDto`, `CaseDetail`, `ScenarioDetail`,
+  `TopupDto` with the three `ProposalItem` kinds, `FinalizeTestsResult`, `TopupApplyResult`, `ImpactResult`,
+  `ImpactSync`, request bodies). `types/features.ts`: `ArtifactKind` += `"test_design"`.
+- New `lib/api/testdesign.ts` (`testDesignApi`, relative paths; only `exportCsvUrlFor` is absolute, for `<a download>`,
+  as `featuresApi.exportCsvUrlFor`). `lib/query/keys.ts`: `qk.testDesign.*`; every mutation invalidates
+  `qk.testDesign.all` (+ the feature detail where the stage row can change).
+- New `features/test-design/`: `hooks.ts`, `logic.ts` (labels/tones, `serverMessage`/`isStaleWrite`, Gherkin
+  lines, Cases filters/sort, `suiteSummary`, `previewDecisions` = a mirror of `expand_topup_decisions`,
+  `groupImpact`, `hopLabel`, `moveItem`, `finalizeSummary`), `paths.ts`, `badges.tsx`, `format.ts`,
+  `NotesAndFiles.tsx`, `StageControls.tsx` (Re-run, Finalize tests, finalized banner, Generate tests),
+  `TestDesignCardActions.tsx`, `TestDesignEntry.tsx`, `TopupDialog.tsx`, `TopupPanel.tsx`, `TestsTab.tsx`,
+  `CasesTable.tsx`, `LifecycleActions.tsx`, `ObjectPicker.tsx`, `TestCasePage.tsx`, `TestScenarioPage.tsx`,
+  `TestsSections.tsx`, `TestImpactTab.tsx`.
+- New `shared/ui/popover.tsx` (over the already-installed `@radix-ui/react-popover`; the impact "Via" path).
+  `shared/ui/icons.ts` += `ArrowDown`.
+- `features/features/stages.ts`: `StageKey` += `"test-design"`; optional `StageDescriptor.gate(detail) → reason | null`
+  evaluated by `deriveAvailability` after `requires`, which now also returns `reason`; `storiesFinalized` gate; the
+  Test Design `STAGE_DEFS` row (`requires: ["breakdown"]`, FlaskConical). `stage-registry.tsx`: the `test-design`
+  entry. `StageBuilderPage.tsx`: the test-design entry state, header Finalize tests / Re-run (hidden after Finalize),
+  the finalized banner. `FeaturePage.tsx`: Tests tab (+ `/tests` route opens it), stage grid
+  `sm:2 · lg:3 · xl:5` columns, `test_design` artifact label.
+- `app/router.tsx`: `…/features/:featureId/tests`, `…/test-cases/:caseId`, `…/test-scenarios/:scenarioId`.
+  `shared/layout/breadcrumbs.ts`: the case/scenario trail (Home › Application › Feature › Tests) from the
+  `tc-feature:<id>` / `ts-feature:<id>` labels the pages register; a "Tests" crumb.
+- `applications/ApplicationDetail.tsx`: `?tab=test-impact`. `workbench/StoryWorkspacePage.tsx` (Overview) and
+  `object-wiki/ObjectWikiPage.tsx`: the Tests sections.
+
+**Tests:** new `test-design/contract.test.ts` (9: the nine fixtures ↔ `Exact<T>` key maps, value domains, real key
+shapes), `logic.test.ts` (18), `testDesign.test.tsx` (31, jest-axe on every screen); `stages.test.ts` (+4 gate tests,
+roll-up includes Test Design), `breadcrumbs.test.tsx` (+3), `features.test.tsx` (3 Locked stages),
+`objectWiki.test.tsx` and `StoryWorkspacePage.test.tsx` (handlers/mocks for the new reads). Web: **49 files / 445
+tests** (was 46 / 380); `npm run lint` 0 errors (20 pre-existing warnings); `npm run typecheck` clean. Backend
+untouched: `pytest -q` 1355 passed. After the last commit a fresh `npm run build` left `git status
+--short --untracked-files=all` empty.
+
+**Review:** genesis-review, `reviews/49-07-review.md`. Round 1 (8a7ca96): **SHIP**, m1–m4 + n1–n7. Round 2 (delta
+5d69eb7): **SHIP**, m1–m3 + n4 resolved, nits n8–n10. n8 and n10 were fixed after round 2 (`66d7dce`, not
+re-reviewed).
+
+**Decisions / deviations** (no ADR deviation):
+1. Lifecycle buttons render only from the server's `allowed`. A refusal shows `detail.reason` as-is in a
+   `role="alert"` notice; an illegal action lists `detail.allowed`; a CAS 409 `stale_write` reads "This record changed
+   elsewhere — reload and try again." with Reload; a refused upload (400) toasts the server text.
+2. The top-up review previews dependency auto-rejects with `previewDecisions`; the server stays authoritative and its
+   `rejected` list is in the apply toast. Every proposal defaults to Accept.
+3. No app-wide stories endpoint exists, so the impact Story source is a two-step picker: a feature with finalized
+   stories, then one of its stories. "No test suites in this application yet" reads each finalized-stories feature's
+   suite (one request per feature, cached; review n2).
+4. The top-up picker lists every Story-type story (Tasks excluded — the server 422s them); uncovered pre-checked,
+   needs-review ones unchecked with a count.
+5. A case object's name links to the Object Wiki page only when the app's wiki list holds that object.
+6. **Two review flags (review m1, 49-01 R2):** "Needs review" (story changed, the server's `needs_review`) and
+   "Object changed" (a suspect link) are separate badges and filters; the "Needs review" filter equals the summary's
+   `coverage.needs_review`. Mark reviewed shows for either (F7 clears both).
+7. **Tasks-only feature (review m2, L-063):** the descriptor gate stays pure on `FeatureDetail`
+   (`stories_finalized_at`); the entry page reads the stories and shows "The feature has no Story-type stories"
+   instead of Start. **Remaining difference:** the Overview card still offers Start for a Tasks-only feature; it opens
+   the locked entry page. Start also stays offered while the stories read is loading or failed (the server's 409 toast
+   then explains, review n9).
+8. The breadcrumb ends at "Tests"; the current page (`TC-…`) is dropped as on every other route (review n5).
+9. **L-089 recurrence:** the build for `66d7dce` had not finished writing when the commit ran (the build log's mtime is
+   20 s after the commit), so `66d7dce` holds source only. The post-commit fresh rebuild caught it; `45be579` commits
+   the matching bundle and a second rebuild left `git status` empty.
+10. Accepted as-is: the Breakdown entry keeps its inline notes+files copy (n1, fold it into `NotesAndFiles` when next
+    touched); the roll-up of a pre-Phase-49 feature with four completed stages is now "Draft" (n6, a product call).
+
+**Hand-offs**
+- **genesis-spec → 49-08 (review m4):** add to the L-090 real-browser width probe the 5-card stage grid
+  (`FeaturePage.tsx`, `xl:grid-cols-5`) and the case page's Objects table (`TestCasePage.tsx`, `min-w-[520px]` in a
+  2/3 column), beside the Cases and Test Impact tables (1280/1440/1920 and 768, both themes).
+- **49-08 live checks:** a scenario with a retired-case step cannot be reordered until that step is removed (the server
+  422s a retired case in `set_steps`, review n3); the Tasks-only card → locked entry path; both review badges in a real
+  table; drag-to-reorder by pointer; the CSV download; the top-up run → proposals → apply loop.
+- **genesis-docs:** ADR-056's "stage MAY declare prerequisites" now has a second form, the descriptor `gate`.
+
+**Lesson candidates**
+- Even one-call-per-step sequencing did not guarantee the build finished before the commit (Decisions 9). The
+  post-commit rebuild + empty `git status` check (L-089) is what caught it; keep it mandatory, after every bundle
+  commit.
+- A web "needs review" helper that ORs two server flags made the table disagree with the server's count. Mirror each
+  server flag one-to-one and combine them only where the server's own action (Mark reviewed) combines them.
+
+**Code-map changes:** `web/src/features/test-design/` (the Test Design screens, hooks, pure logic); `web/src/types/
+testdesign.ts`; `web/src/lib/api/testdesign.ts`; `web/src/shared/ui/popover.tsx`; `StageDescriptor.gate` in
+`features/features/stages.ts`; routes `…/features/:id/tests`, `…/test-cases/:caseId`, `…/test-scenarios/:scenarioId`;
+app tab `test-impact`.
