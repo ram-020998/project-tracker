@@ -139,6 +139,46 @@ from a durable `run.final` whose status matches the record.
   then `npm run build` and commit `web/static/` as a separate sequential step, then rebuild and confirm an empty
   `git status` (L-089). Own genesis commit; As built under this item.
 
+#### H2 — As built (genesis-dev, 2026-10-26)
+
+**Commits:** genesis `f0df126`, "fix(web): 49-08 H2 — feature roll-up is Draft only when no stage has started (49-01
+D18); any partial progress is In progress; tests; rebuilt web/static" (base `45be579`). 63 files: the 2 source files +
+`web/static` (new `index-tAipGU80.js`, `index.html`, and the 55 lazy mermaid chunks whose hashes follow the index chunk).
+Local only; nothing pushed or tagged. No other repo changed.
+
+**Changed**
+- `web/src/features/features/stages.ts` `deriveFeatureStatus`: over the available stages, Completed if every one is
+  `completed` (unchanged); then **Draft** if every one is `not-started` or `draft`; otherwise **In progress** (tone
+  `info`). The old order defaulted to Draft unless some stage was `in-progress`/`in-review`, so a mix of completed and
+  not-started stages, and `under-change`, showed Draft. Signature and tones unchanged; docstring updated. The only caller
+  is `FeaturePage.tsx:72` (no backend copy, as the spec says).
+
+**Tests** (`stages.test.ts`, the old `deriveFeatureStatus` block replaced by 8 tests that cover all 7 listed cases plus
+in-progress/in-review): all completed → Completed/success; all not-started → Draft/neutral; all draft (and draft +
+not-started) → Draft; four completed + Test Design not-started → In progress/info; Spec completed + rest not-started →
+In progress; under-change with the rest completed, and with the rest not-started → In progress; a `available: false`
+stage with status `not-available` is ignored (all-not-started + it → Draft, all-completed + it → Completed).
+- Before-fix evidence: with the base `stages.ts` (stashed), 3 of the new tests fail (`expected { label: 'Draft' … } to
+  deeply equal { label: 'In progress' … }` for the four-completed case, the Spec-completed case and the under-change case).
+- Gates: `npm run lint` 0 errors (20 warnings, all in files this change does not touch; `eslint` on the two changed files
+  is clean); `npm run typecheck` clean; `npm test` **49 files / 450 tests passed**.
+- Bundle (L-089): `npm run build` ran as its own call after the edits; the built `index-tAipGU80.js` contains
+  `every(o=>o==="not-started"||o==="draft")?{label:"Draft"…}:{label:"In progress"…}`; committed; then a fresh
+  `npm run build` followed by a separate `git status --short --untracked-files=all` → empty (0 lines).
+
+**Review:** not run separately. The user asked for H2 without the 49-08 review, and §1.1 has the 49-08 reviewer check
+the hardening items with the rest.
+
+**Decisions / deviations:** none; no ADR deviation. With zero available stages the roll-up is still Draft (same as before).
+
+**Lesson candidates:** none new. Process note for genesis-docs: twice this session the agent batched a read-only
+`git status` with `npm run build` in one parallel call (L-089's pattern). No commit was affected because each status
+was re-run alone before it was relied on. L-089 could say explicitly that the proof's `git status` must also run in a
+separate call after the build.
+
+**Code-map changes:** `features/stages.ts` `deriveFeatureStatus`: Completed (all completed) → Draft (none started) →
+else In progress.
+
 ## 2. Gates
 
 genesis: `pytest` + `ruff`; fresh DB migrates to **v25**, a v24 DB upgrades with rows preserved. web: `lint`,
