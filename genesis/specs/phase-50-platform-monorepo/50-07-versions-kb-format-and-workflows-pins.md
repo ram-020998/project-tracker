@@ -71,11 +71,11 @@ ci/validate_library.py`, `ci/validate_skills.py`, `pytest -q workflows --ignore=
 
 ## 6. Acceptance
 
-- [ ] Version-sync test passes and fails on a deliberate mismatch (shown once in the As built).
-- [ ] `install-packages.sh --dev` installs every package's own `[dev]` extra; the four CI package jobs still pass.
-- [ ] `KB_FORMAT_VERSION` exported and pinned by a test.
-- [ ] `sync-application` tests cover the five cases; no forced full sync for a KB built by parser 0.3.x.
-- [ ] genesis-workflows pins all on one tag; `registry.json` updated.
+- [x] Version-sync test passes and fails on a deliberate mismatch (shown once in the As built).
+- [x] `install-packages.sh --dev` installs every package's own `[dev]` extra; the four CI package jobs still pass.
+- [x] `KB_FORMAT_VERSION` exported and pinned by a test.
+- [x] `sync-application` tests cover the five cases; no forced full sync for a KB built by parser 0.3.x.
+- [x] genesis-workflows pins all on one tag; `registry.json` updated.
 - [ ] Untested by the spike (50-02 deviations), proven here or in 50-09: a **tag** ref combined with
       `#subdirectory=` (locally against a scratch tag the user creates, or in 50-09 once v0.80.0 exists), and the
       **HTTPS** partial clone that CI's `insteadOf` token rewrite uses (genesis-workflows' first CI run, 50-09 §1).
@@ -197,6 +197,8 @@ mutation, needs a yes). In 50-09, install 0.3.1 in the same step as the v0.80.0 
   the commit, not at release.
 - Map "no recorded marker" to the lowest format the recorded evidence guarantees (≥ 0.3 → format 1), not to an exact
   version match: that mapping can only cause an extra full sync, never skip one.
+- L-089 recurrence: the project-tracker As built edit, `git add` and `git commit` went out in one tool batch. The
+  commit (`2329322`) turned out complete (`git diff` empty afterwards), but a batched status read showed a stale view.
 
 ### Code-map changes (for genesis-docs)
 
