@@ -1,7 +1,7 @@
 # 50-04 — Agent-system routing
 
 > **Status:** ✅ DONE 2026-10-31 (genesis-docs) — lint green with the new error rule, agent-system tests 247 passed,
-> recall identical for all three libraries; `update.sh` pending the operator (see §5). Agent: **genesis-docs** (maintains the agent system, L0 §6; skill
+> recall identical for all three libraries; `update.sh` run by the operator. Agent: **genesis-docs** (maintains the agent system, L0 §6; skill
 > `genesis-agent-system`). Repo: **project-tracker** (`agent-system/`, `context/`, `bible/03`). Parent:
 > `specs/phase-50-platform-monorepo.md`. Decisions: **D12**, **D16** (`50-01-findings.md` §6, §2.5). Run **immediately after
 > 50-03**, with the local genesis checkout on `phase-50-monorepo`, so every later pack routes the moved code.
@@ -39,7 +39,7 @@ new path after) and diff the ADR/lesson lists: they must be identical. Record bo
 - [x] `genesis-ctx lint` green (full, not only `--specs-only`) with the new error rule.
 - [x] `agent-system` tests green, including the three new ones.
 - [x] Recall check identical for all three libraries.
-- [ ] `update.sh` run (operator); `genesis-ctx status` shows the new repo set (done: the shim runs from source).
+- [x] `update.sh` run (operator, 2026-10-31; `update.sh --dry-run` afterwards: 21 unchanged); `genesis-ctx status` shows the new repo set.
 
 ## 5. As built
 
@@ -85,7 +85,8 @@ workflows-library (ADR-011 and ADR-014 now load for them).
   All checks passed (the core and parser gates are the ones 50-03 ran).
 - `update.sh --dry-run`: preflight ok, "2 repos"; 3 changed (skills genesis-backend-dev, genesis-ctx, genesis-release),
   18 unchanged. The installed `genesis-ctx` is the source shim, so `status --brief` already prints the three rows.
-  **`update.sh` itself is for the operator** (it writes `~/.kiro/genesis`, outside the docs agent's write roots).
+  **`update.sh` itself was run by the operator** (it writes `~/.kiro/genesis`, outside the docs agent's write roots);
+  a dry run afterwards: 0 changed, 21 unchanged.
 
 ### Review
 
