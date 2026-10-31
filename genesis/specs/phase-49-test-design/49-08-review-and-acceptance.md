@@ -222,6 +222,191 @@ else In progress.
   Gates: genesis `pytest` + `ruff`; web `lint` + `typecheck` + `vitest`; `npm run build` and commit `web/static/` as
   separate sequential steps, then a fresh build + empty `git status` (L-089).
 
+#### H3 — As built (genesis-dev, 2026-10-31)
+
+**Commits** (genesis only; base `f0df126` = H2; local, nothing pushed or tagged; `git status` empty after each):
+- `9324a76` backend: M3, m2, n1–n4 + tests.
+- `b4a9f09` web: M1, M2, m1, m3, m4 + tests + rebuilt `web/static`.
+- `3dacbf5` backend, review round 1: MJ1 run-owner lock, mi2 adopt rule, tests.
+- `d138078` web, review round 1: mi1 pickers, ni1 + tests + rebuilt `web/static`.
+
+Ship all four together (release is 49-09).
+
+**Changed**
+- **M3**: `runs/manager.py` `RunManager.fail_orphaned_runs()`.
+  - Startup only, wired first in the `_bind_supervisor` startup hook (`api/app.py`, after `bind_loop`, via
+    `asyncio.to_thread`). So it runs before the supervisor, stage and story reconciles and before
+    `_reconcile_test_links` / `reconcile_topups`; FastAPI runs startup hooks in registration order.
+  - It first takes an exclusive non-blocking `flock` on `state_dir/run/runs.lock` (`_hold_run_owner_lock`) and holds
+    it for the process lifetime. If a live peer holds the lock, it does nothing and logs a WARNING (review MJ1).
+  - It then looks at every `pending`/`running` run with no worker tracked in this process:
+    - latest `run.final` terminal, or an `awaiting_input:gate` marker that is the run's last event → adopted via
+      `reconcile_status`;
+    - anything else (no `run.final`, a gate marker followed by later events = resumed then lost, or a non-terminal
+      `running` stop, review mi2) → `_finalize(FAILED, detail=error="worker lost across a server restart")`. That
+      writes `error` → the stored status → `run.final` → bus close (the H1 order).
+  - Paused, awaiting-gate and terminal runs are never listed. A run that fails to sweep is logged at ERROR and does not
+    stop the sweep; the list of failed ids is logged at WARNING.
+  - `ORPHANED_DETAIL` constant.
+- **m2**: `domain/transitions.py` — `SPEC_PRECONDITION_REASONS[(COMPLETED,"reopen")]` is now a callable,
+  `_reopen_locked_reason`. For `ctx["stage"] == "test_design"` it returns `TEST_DESIGN_REOPEN_REASON` ("the test
+  design is finalized — its records are authoritative; use Generate tests for uncovered stories"); otherwise the
+  spec's message, unchanged. `services/spec_change.py` `stage_ctx` adds `"stage"`.
+- **n1**: comments in `api/testdesign.py` (`_heal_stage`) and `tests/test_test_design_stage.py` (module docstring).
+- **n2**: `GET /test-scenarios/{id}` runs `_resolve(app_uuid)` first (R8).
+- **n3**: `kb/testdesign.py` `_check_step_cases` refusals name the case key: "test case TC-000018 is retired — remove
+  its step first". A row that doesn't exist still says `#id`.
+- **n4**: `kb/testdesign.py` `_suite_stories(…, keep=)` refuses a NEW Task link ("GNS_000124: Tasks get no own test
+  cases — link Stories" → 422) on `create_case` and `set_case_stories`. Links the case already has are exempt. Web
+  (review mi1): the case page story picker (`TestCasePage.tsx`) offers `state !== "task"` stories plus any Task the
+  case already links, so it can be unticked. The Tests tab **Add case** dialog (`TestsTab.tsx`) offers Stories only.
+- **M1**:
+  - `CasesTable.tsx`: columns sized from a real-browser probe of their widest content (header, one badge, or one key
+    per line). Key 96, Type 108, Priority 88, Status 80, Stories 92, Scenarios 100, Review 136 px; the narrow columns
+    use `px-2`.
+  - Title has no width. Its 16rem floor is the table's `min-w-[956px]` (= 700 + 256), because a cell `min-width` is
+    ignored under `table-fixed`.
+  - Story and scenario keys render one per line (`KeyList`). The comma-joined list had wrapped a lone "," onto its
+    own line.
+  - `TestsTab.tsx`: below `2xl` the coverage panel stacks under the views. From `2xl` it sits in a fixed 16rem column
+    (`2xl:grid-cols-[minmax(0,1fr)_16rem]`). When stacked, the coverage list is a `md:2 / xl:3` grid.
+- **M2**:
+  - `FeaturePage.tsx` stage grid: `sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5`; the card footer is `flex-wrap`.
+  - `SpecChangedBanner.tsx` compact chip: actions wrap, and "CR-01" and the date are `whitespace-nowrap` (they had
+    broken as "CR- / 01").
+- **m1**: `stages.ts` `StageDescriptor.localOnly` (`true` on the `test-design` row) and `isLocalOnlyStage(kind)`.
+  `StageArtifactWorkspace.tsx` renders no `PublishToTeamButton` for a local-only stage.
+- **m3**: `stages.ts` `stageRunInFlight(detail)` (some stage row has `run_id` and no `chat_session_id`) and
+  `STAGE_RUN_POLL_MS = 5000`. `features/hooks.ts` `useFeature` uses `refetchInterval` while that is true and stops
+  otherwise.
+- **m4**: `TestImpactTab.tsx` Key header `w-[120px]`; the key cell is `whitespace-nowrap` (indent `pl-9` + `TC-000000`
+  = 113 px).
+
+**Who else benefits from the M3 sweep** (each used to wait forever on an orphaned `running` run):
+- `TopupRunObserver` / `reconcile_topups`: the top-up settles `failed` and a new top-up is allowed. This was row 16.
+- `StageFinalizer` (UX, Technical Design, Breakdown, Test Design bindings): the orphaned stage run shows `failed`. The
+  stage stays in-progress, so the user can re-run it.
+- `StoryDesignFinalizer` / `StoryImplementationFinalizer`: the card's run is no longer "running" forever.
+- `ChatRunSupervisor`: a copilot-linked run gets its "finished: failed" note.
+- `ApplicationSyncService.is_sync_running`: an orphaned `sync-application` run no longer blocks every new sync
+  (409 "already running") or the KB auto-pull.
+- Retention: the run becomes terminal, so it is reclaimable. The Runs list has no permanent "running" rows.
+
+**Not done by the sweep (recorded on purpose)**
+- The orphaned OS process is not killed: no pid is stored, and it exits when its pipe closes (about 2 min, live row 16).
+- Its `_toolcalls/` scratch store is purged at finalize, so tool captures from that window are lost (review ni2;
+  diagnostics only, the run is already failed).
+- The lock decides who sweeps, not who runs workers (review mi4). A second `genesis serve` that fails to get the lock
+  still starts and spawns workers. If the lock holder then restarts while the second server has a run in flight, the
+  new holder fails that run. This needs two servers on one home at once. The full fix would be to refuse to start
+  without the lock (follow-up).
+
+**Tests**
+- genesis **1366 passed** (base 1355 + 11); `ruff check genesis` clean. `ruff check .` shows the same 28 pre-existing
+  errors in tests/scripts.
+- web: lint 0 errors (the same 20 pre-existing warnings, none in changed files); typecheck clean; vitest **50 files /
+  459 passed** (base 49 / 450).
+- `tests/test_runs.py` +6 (real `RunManager`):
+  - an orphaned `running` and a `pending` run → `failed`, with exactly one `error` and one `run.final{failed}`;
+    observers read the stored FAILED; idempotent;
+  - paused / awaiting-gate / terminal / tracked-worker runs are untouched;
+  - a stale `running` record with a durable `run.final{done}` is adopted (real worker), not failed;
+  - a last gate marker is adopted, a resumed-then-lost run is failed;
+  - a last non-terminal `running` stop is failed (mi2);
+  - a live peer holding the lock blocks the sweep; it runs after the peer releases it, and is re-entrant for the
+    holder (MJ1).
+- `tests/test_test_design_stage.py` +2 and 1 extended:
+  - row 16 end to end: a `running` top-up → the real app startup hooks (`with TestClient`) → run `failed` with the
+    detail, top-up `failed`, a new top-up allowed;
+  - the level-triggered half alone: a sweep by a bare `RunManager`, then `reconcile_topups` settles it;
+  - `test_rerun_and_reopen_are_refused_after_finalize` now asserts `detail.reason` (m2).
+- `tests/test_test_design_api.py` +2:
+  - the scenario read resolves a planned object after a KB sync (n2);
+  - a new Task link is a 422 on the story edit and on create, nothing is written, and an existing Task link survives an
+    edit (n4).
+- `tests/test_test_design_store.py`: the set-steps refusals assert the key text (n3).
+- `tests/test_domain_transitions.py` +1: the reason callable for spec, test design and default (m2).
+- Web:
+  - `testDesign.test.tsx` +6 and 1 extended:
+    - Cases layout pin: Title has no width class; table min-w = Σ fixed + 256; the 2xl grid template; no
+      comma-joined keys;
+    - stage-grid pin: `2xl:grid-cols-5`, not `xl:`; the footer is `flex-wrap`;
+    - no "Publish to team" on a completed Test Design with collab on (waits for the config read; jest-axe);
+    - the Add case dialog offers Stories only;
+    - the case-page picker offers Stories plus an already-linked Task;
+    - the Test Impact test now pins the key `nowrap` + `w-[120px]`.
+  - `stages.test.ts` +2: `isLocalOnlyStage`, `stageRunInFlight`.
+  - New `useFeaturePoll.test.tsx` (fake timers): it polls every 5 s while a run is in flight, stops once the chat
+    exists, and does not poll when idle.
+- Before-fix evidence: with the source stashed and the tests kept, 11 backend + 5 web (round 0) and 2 + 2 (round 1) of
+  the new or changed tests fail. All pass with the fix.
+- Bundle (L-089): each `npm run build` ran as its own call after the edits and before its commit. After each commit, a
+  fresh build followed by a separate `git status --short --untracked-files=all` gave 0 lines. The reviewer's
+  `vite build` into `/tmp` is identical to `web/static`.
+
+**Width re-measure (M1/M2, L-090)**
+- Method: the reviewer's `/tmp/genesis-review/row15-*.js`, copied to `/tmp/genesis-h3/row15-*.js` with `BASE` and
+  `WIDTHS` taken from the environment and output going to `/tmp/genesis-h3/row15/`.
+- Dev server: `/tmp/genesis-h3/with-dev-server.mjs` starts a short-lived Vite dev server (:5199) over the web working
+  tree, proxying `/api` to main :8760 (GET reads plus the impact Analyze POST, feature 6). It `chdir`s to `web/`;
+  without that, Tailwind finds no config and the CSS has no utilities, so the measurements are wrong.
+- Results, light = dark:
+  - **Cases table** at 1280 / 1440 / 1920: table = container 982 / 1142 / 1074 px, no scroll, Title **282 / 442 / 374**
+    px (was 0 / 0 / 85). At 1536 / 1600: Title 262 / 326. No badge, key or header wraps (`badge-wrap.js`). Column
+    widths are as listed above.
+  - **Stage cards** 320 / 373 / 261 px at 1280 / 1440 / 1920 (238 / 251 at 1536 / 1600). No control is past its card
+    edge at 1280 / 1440 / 1536 / 1600 / 1760 / 1920 (`row15-footer.js`, `row15-spill.js`). The probe's
+    `clipped: true` on the UX and TD cards is an `sr-only` "(opens in a new tab)" span, a false positive (the reviewer
+    confirmed it).
+  - **Test Impact** Key is 120 px with `TC-000007` on one line; no scroll.
+  - **Case Objects** table: no scroll.
+- The formal row-15 re-acceptance stays with the 49-08 re-review.
+
+**Review:** genesis-review, `reviews/49-08-H3-review.md`.
+- Round 1 **NEEDS_CHANGES**: MJ1 (the sweep failed a live peer server's runs); mi1 (picker half of n4 not built); mi2;
+  mi3; ni1; ni2.
+- Fixed MJ1, mi1 (plus the Add case dialog), mi2 and ni1.
+- Round 2 **SHIP**, with mi4 and ni3 as notes. mi3, ni2 and mi4 are recorded here. ni3 (a discarded `RunManager`
+  keeps its lock fd) is harmless: production has one manager per process.
+
+**Decisions / deviations** (no ADR deviation)
+1. **M1 coverage column at 2xl**: a fixed 16rem column instead of the spec's literal 2/3 split. At 1920 the 2/3 column
+   is 893 px, below the table's 956 px minimum, so the split cannot meet the spec's own acceptance (Title ≥ 240, no
+   scroll at 1920). Accepted by the reviewer.
+2. **M1 column widths**: the narrow columns use `px-2` cells (−8 px each) so that 700 + 256 fits the stacked 980 px
+   container at 1280. Keys are one per line.
+3. **n4 `keep=` rule**: a Task link the case already has (pre-fix data, e.g. live TC-000003 → GNS_000001) is not
+   refused on a story edit and stays in the picker, so it can be removed. New Task links are refused everywhere.
+   Finalize and top-up link through `_link_story` directly, so an agent-authored Task link can't 422 a Finalize.
+4. **MJ1**: a home-level `flock`, not a documented one-process-per-home constraint. Known limit: mi4 above.
+5. **mi3 (follow-up for genesis-spec)**: the m3 poll keeps the spec's predicate, so it never stops on a stage whose run
+   failed or escalated without a draft. That stage keeps its `run_id` and gets no chat, so the open page re-reads
+   `GET /features/{id}` every 5 s. Stopping on a terminal bound run needs the run status in the feature detail (a
+   contract + fixture change) or extra run reads.
+6. **Small extras inside the touched UI**: the compact spec-changed chip's `nowrap` label/date (M2) and the stacked
+   coverage grid (M1).
+
+**Lesson candidates (for genesis-docs)**
+- "A startup sweep that reads 'no worker tracked here' as 'orphaned' must first prove it is the only live owner of the
+  DB (an exclusive lock), or it fails a live peer's runs. A recovery that writes a terminal state is not harmless the
+  way an adopt-only reconcile is." (MJ1, mi4)
+- L-090 corollary: a dev-server probe started from outside `web/` measures CSS with no Tailwind utilities. Run it
+  with cwd = `web/` and check that a known class resolves before you trust any number.
+- L-089 corollary (seen again this session): a read-only `git status` or `grep` issued in the same turn as `npm run
+  build` can report the pre-build tree. Re-run the proof alone after the build has finished.
+
+**Code-map changes**
+- `runs/manager.py`: `fail_orphaned_runs` (startup orphaned-run sweep behind the `state_dir/run/runs.lock` run-owner
+  `flock`; adopt terminal or last-gate, else fail with `ORPHANED_DETAIL`), `_hold_run_owner_lock`,
+  `_run_owner_lock_path`.
+- `api/app.py`: the sweep is the first step of the `_bind_supervisor` startup hook.
+- `domain/transitions.py`: stage-aware reopen reason `_reopen_locked_reason` / `TEST_DESIGN_REOPEN_REASON`;
+  `stage_ctx` carries `stage`.
+- `kb/testdesign.py` `_suite_stories(keep=)`: the Task-link refusal.
+- `web/features/features/stages.ts`: `localOnly`, `isLocalOnlyStage`, `stageRunInFlight`, `STAGE_RUN_POLL_MS`.
+- `features/hooks.ts` `useFeature` polls while a stage run is in flight.
+- `test-design/CasesTable.tsx` `KeyList`.
+
 ## 2. Gates
 
 genesis: `pytest` + `ruff`; fresh DB migrates to **v25**, a v24 DB upgrades with rows preserved. web: `lint`,
