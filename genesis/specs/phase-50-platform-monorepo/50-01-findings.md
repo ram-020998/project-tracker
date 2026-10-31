@@ -1,6 +1,6 @@
 # 50-01 — Findings: merge the platform repos into one repository
 
-> **Status:** SPEC-DRAFTED 2026-10-31 — research and decisions D1–D16 locked with the user (D15 after the 50-02 spike, D16 after the 50-03 review).
+> **Status:** SPEC-DRAFTED 2026-10-31 — research and decisions D1–D17 locked with the user (D15 after the 50-02 spike, D16 after the 50-03 review, D17 after the 50-05 review).
 > Parent: `specs/phase-50-platform-monorepo.md`. Proposed ADR: **ADR-080** (platform monorepo; amends ADR-019 and
 > ADR-046).
 >
@@ -235,6 +235,7 @@ Each decision row in §6 names the alternatives considered and why they were rej
 | D14 | ADR-080 amends **ADR-046** as well as ADR-019 (distribution stays clone + venv + install + git-tag self-update; only the install step changes to the one install command over the local packages). Defaults F1–F6 (umbrella §10) accepted as written. (User, 2026-10-31, on review of the spec set.) | D6 changes the two things ADR-046's rule text names (`pip install .`, `git+ssh` tag pins); the deviation was flagged and confirmed. |
 | D15 | Missing-library behaviour (replaces default F2): the first thing `genesis/cli/main.py` does, before any import that reaches an internal library, is check for `genesis_core`, `kiro_agent_sdk`, `genesis_appian_parser`; if one is missing it prints one line naming them and `scripts/install-packages.sh`, and exits 1. No preflight item, no startup log. Making Genesis start without the libraries rejected. (User, 2026-10-31, after the 50-02 spike.) | 50-02 Q4: the CLI dies at import (`cli/main.py:8` → `cli/test_workflow.py:16` → `runtime/context.py:6`) before any command runs, so "serve still starts" would need guarded imports across the app for a case that only a manual mistake causes; a missing library is an install error, not a state to run in. |
 | D16 | Agent-system routing for the CLI files that route to no area (found by the 50-03 review): `genesis/genesis/cli/main.py` → `distribution`; `genesis/genesis/cli/create_workflow.py` and `cli/test_workflow.py` → `workflows-library`; done in 50-04 with a routing test. The app's `tests/**` stay unmapped. Leaving the CLI unmapped rejected. (User, 2026-10-31.) | A change to `cli/main.py` (the entry point, launcher commands, the D15 check; edited again in 50-05) loaded no ADRs or lessons in `pack`/`check`. The scaffolder and reliability lint fall under ADR-014 and ADR-011. Tests are reviewed with the code they test, which carries the rules. |
+| D17 | The updater's `scope` label (50-05 review m1: always `deps` after 50-07) is left as it is in Phase 50; retiring it is a backlog item (`specs/backlog/phase-50-follow-ups.md` §1). Removing or redefining it now rejected. (User, 2026-10-31.) | Only `genesis update --check-only` prints it (`cli/main.py:183`); no web screen shows it; `apply()` always reinstalls. Removing it is an API contract change (L-011) unrelated to the merge. |
 
 ## Context manifest
 

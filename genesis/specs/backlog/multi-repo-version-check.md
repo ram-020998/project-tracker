@@ -1,6 +1,10 @@
 # Backlog — Multi-repo update version check
 
 > **Status:** 📝 BACKLOG (not scheduled). · **Created:** 2026-08-18 · **Repo:** genesis (+ `runtime/updater.py`, `api/system`, `web/features/system`)
+>
+> **Phase 50 note (2026-10-31):** from genesis v0.80.0 the three libraries live in the genesis repo and are released
+> with every genesis tag (ADR-080 proposed, 50-01 D1/D8), so the library half of this gap no longer exists. Only the
+> **genesis-workflows** case remains (a library tag with no genesis release). Re-scope to that when picked up.
 
 ## Problem
 The one-click **Update** (v0.48.4) already *applies* a whole-stack upgrade — `pip install .` re-pulls the pinned

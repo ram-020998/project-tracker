@@ -46,6 +46,7 @@ Genesis uses the libraries (D2). One repo gives one change, one review, one tag 
 | D14 | ADR-080 amends ADR-046 as well as ADR-019 (confirmed); defaults F1–F6 accepted. |
 | D15 | A missing library makes the `genesis` CLI exit with one clear message before any other import (replaces F2's "serve still starts"); no preflight item. |
 | D16 | Map the unmapped CLI files in 50-04: `cli/main.py` → distribution; `cli/create_workflow.py`, `cli/test_workflow.py` → workflows-library; app `tests/**` stay unmapped. |
+| D17 | The updater `scope` label stays (always `deps` after 50-07); retiring it is backlog (`specs/backlog/phase-50-follow-ups.md`). |
 
 ## 4. Current state (code-grounded — full detail in `50-01-findings.md` §2)
 
@@ -134,7 +135,8 @@ Versions assume Phase 49 ships genesis v0.79.0 + genesis-workflows v0.23.0 (49-0
 - **Out:** moving genesis-workflows; moving the app under `packages/` (D5 option B); uv or any new packaging tool;
   path-filtered CI (D10); publishing packages to any index; branch/tag protection on GitLab (may be added by the
   user any time).
-- **Deferred:** none planned. A later phase may revisit layout B or CI path filters if they become worth it.
+- **Deferred:** retire the updater `scope` label (D17, [backlog](backlog/phase-50-follow-ups.md)). A later phase may
+  revisit layout B or CI path filters if they become worth it.
 
 ## 10. Defaults (proposed by the spec writer, accepted by the user 2026-10-31 — D14)
 

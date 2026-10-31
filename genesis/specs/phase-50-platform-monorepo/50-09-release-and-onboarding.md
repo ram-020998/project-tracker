@@ -19,7 +19,9 @@
 
 - No run active on either fleet instance. The dev venv was rebuilt in 50-03; reinstall it once more from `master`
   (`scripts/install-packages.sh --editable --dev`).
-- Any managed install (`~/.genesis/dist.json` present): fresh `scripts/install.sh`. No in-place update from ≤ v0.79.0.
+- Any managed install (`~/.genesis/dist.json` present): fresh `scripts/install.sh`. No in-place update from ≤ v0.79.0:
+  **do not click the update banner** on a v0.79.0 install. Its old updater runs `pip install .`, which installs the
+  v0.80.0 app but keeps the old libraries (50-05 As built). Say so in the release notes / changelog too.
 - Fleet: `gsm provision --all --no-mcp --no-env --force`, `gsm restart --all`, `genesis install` of genesis-workflows
   v0.24.0 on each instance. Verify `/openapi.json` `info.version` = 0.80.0 and an incremental sync stays incremental.
 
