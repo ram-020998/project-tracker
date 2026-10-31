@@ -96,7 +96,8 @@ S1 = 49-02 (genesis-dev) and S2 = 49-03 (genesis-dev, genesis-workflows) in para
 built; provides `resolve_object` + the D7 linker that 49-04 calls) → S4 = 49-04 (reads 49-02, 49-03 and 49-05 As
 built) → S5 = 49-06 (reads 49-02/04/05) → S5b = 49-08 §1.1 **H1** (genesis-dev; the RunManager ordering fix, D17) →
 S6 = 49-07 (reads 49-06) → S6b = 49-08 §1.1 **H2** (genesis-dev; feature roll-up status, D18) → S7 = 49-08
-(genesis-review) → S8 = 49-09 (genesis-release, then genesis-docs). S3 onwards
+(genesis-review; verdict NEEDS_CHANGES 2026-10-30) → S7b = 49-08 §1.1 **H3** (genesis-dev; D19) → S7c = 49-08 focused
+re-review + re-acceptance of rows 6, 15, 16, 18 (genesis-review) → S8 = 49-09 (genesis-release, then genesis-docs). S3 onwards
 run **one at a time**: they share the genesis checkout. *(Order of
 49-04/49-05 swapped 2026-10-26 after the 49-02/49-03 builds: 49-04 depends on 49-05's functions.)*
 

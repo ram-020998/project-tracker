@@ -179,6 +179,49 @@ separate call after the build.
 **Code-map changes:** `features/stages.ts` `deriveFeatureStatus`: Completed (all completed) → Draft (none started) →
 else In progress.
 
+- **H3 — fixes for the 49-08 live acceptance (49-01 D19; findings in `reviews/49-08-review.md` §4).** Built by
+  genesis-dev in one session, own genesis commit(s); As built under this item. Then genesis-review re-reviews H3 and
+  re-runs §3 rows **6, 15, 16 and 18** (the width scripts are in `/tmp/genesis-review/row15-*.js`).
+  1. **M1 — Cases table Title collapses (row 15a).** `web/src/features/test-design/CasesTable.tsx:73-83`: the seven fixed
+     columns (808 px) don't fit the 647–754 px container at 1280/1440. Give **Title** no fixed width and a floor
+     (`min-w-[16rem]`); narrow the other columns to what their content needs (measure); and below `2xl` stack the Story
+     coverage panel **under** the table instead of beside it, so the table gets the full width. Acceptance: Title
+     ≥ 240 px and no horizontal scroll at 1280, 1440 and 1920, light and dark; keep a class-level pin test (L-090).
+  2. **M2 — controls spill out of the five stage cards (row 15c).** `FeaturePage.tsx:168` `xl:grid-cols-5` gives
+     187–261 px cards. Use `xl:grid-cols-3 2xl:grid-cols-5` **and** make the card footer actions wrap (`flex-wrap`,
+     `FeaturePage.tsx:269`). Acceptance: no control past its card edge at 1280, 1440, 1920, both themes.
+  3. **M3 — a run orphaned by a restart stays `running` forever (row 16).** In genesis's run layer: at app startup,
+     after the stores are open and **before** the finalizers' and `TestDesignStageService`'s startup reconciles run,
+     sweep every run whose status needs a live worker (`running`, and any pre-running state) and that has no durable
+     `run.final` — a fresh process tracks no workers, so each such run is orphaned — and finalize it through
+     `RunManager._finalize(run_id, FAILED, detail="worker lost across a server restart", error=…)`. Never touch
+     `paused` / `awaiting_gate` runs (they have no worker by design, ADR-012) or terminal runs. Startup only — not on
+     read (a read could race a run that is still spawning). The orphaned OS process is not killed here (no pid is
+     stored; it exits when its pipe closes) — record that in As built. Tests: a real `RunManager` with a recorded
+     `running` run, no worker, no `run.final` → startup sweep → `failed` + one `run.final`; a `paused` and an
+     `awaiting_gate` run untouched; a `running` run **with** a durable `run.final` adopts it (existing
+     `reconcile_status`), not failed; `TestDesignStageService` startup reconcile then settles the top-up `failed` and a
+     new top-up is allowed. List every other feature that benefits (stage / story finalizers, chat supervisor) in As
+     built.
+  4. **m1 — "Publish to team" on the Test Design workspace.** Add `localOnly: true` to the `test-design` `STAGE_DEFS` row
+     and have `StageArtifactWorkspace.tsx:211-218` skip `PublishToTeamButton` for local-only stages; Vitest with collab
+     enabled.
+  5. **m2 — Reopen refusal after test Finalize names the spec.** Make the reopen refusal reason stage-aware: for
+     `test_design` → "the test design is finalized — its records are authoritative; use Generate tests for uncovered
+     stories" (R5). Extend `test_rerun_and_reopen_are_refused_after_finalize` to assert `detail.reason`.
+  6. **m3 — running stage pages don't refresh themselves.** `useFeature` (`web/src/features/features/hooks.ts:30-36`)
+     polls every ~5 s while any stage row has a `run_id` and no `chat_session_id` (UX, Technical Design, Breakdown and
+     Test Design all share this), and stops otherwise — the same pattern as the busy change-request poll
+     (`hooks.ts:384`). Vitest with fake timers (polls while running, stops after).
+  7. **m4 — Test Impact Key wraps.** `whitespace-nowrap` on the key cells (`TestImpactTab.tsx:200`) and size the column
+     to fit `TC-000000` at 1440.
+  8. **n1** fix the two pre-H1 comments (`api/testdesign.py:224-226`, `tests/test_test_design_stage.py:4-5`); **n2** add
+     the R8 `_resolve` to `GET /test-scenarios/{id}`; **n3** the retired-step refusal names the case key (`TC-000018`), not
+     `#18`; **n4** the case page's story picker offers Story-type stories only (D14), and the API refuses a Task link with
+     422.
+  Gates: genesis `pytest` + `ruff`; web `lint` + `typecheck` + `vitest`; `npm run build` and commit `web/static/` as
+  separate sequential steps, then a fresh build + empty `git status` (L-089).
+
 ## 2. Gates
 
 genesis: `pytest` + `ruff`; fresh DB migrates to **v25**, a v24 DB upgrades with rows preserved. web: `lint`,

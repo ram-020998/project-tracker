@@ -36,3 +36,9 @@
    recovery hides it, and Phase 49's startup reconcile covers the test links, but a story whose implementation finished
    while `serve` was down stays in the Implementation lane until someone opens the board. Suggested fix: call it from the
    app startup alongside the other finalizers' `reconcile()` (L-058).
+10. **Orphaned worker processes keep running after a server restart (49-08 M3 follow-up).** H3 marks the orphaned
+    *run* failed at startup, but the worker *process* is not killed (no pid is stored); it exits only when its pipe
+    closes (about 2 minutes live). An orphaned `story-implementation` worker could keep writing to the Appian dev
+    environment in that window. Suggested fix: store the worker pid (and start time) on the run record, and at startup
+    terminate a still-alive orphan before finalizing the run. Until then the L-061 rule stands: never restart `serve`
+    while a run is active.
