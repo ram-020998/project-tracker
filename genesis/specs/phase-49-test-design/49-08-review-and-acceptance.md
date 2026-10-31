@@ -435,6 +435,114 @@ Ship all four together (release is 49-09).
   Gates: web `lint` + `typecheck` + `vitest`; `npm run build` and commit `web/static/` as separate sequential steps, then
   a fresh build + empty `git status` (L-089).
 
+#### H4 — As built (genesis-dev, 2026-10-31)
+
+**Commits:** genesis `5da9916`, "feat(web): 49-08 H4 — Story coverage as an SVG donut …" (base `d138078` = H3 head). It
+holds the source, the tests and the rebuilt `web/static` (67 files). Local only; nothing pushed or tagged. No other repo
+changed. Ships with H1–H3 in 49-09.
+
+**Changed** (web only, no API, type or fixture change; the data is `tree.coverage.stories`)
+- New `web/src/features/test-design/CoveragePanel.tsx`. It replaces the per-story list that was in `TestsTab.tsx`.
+  - `Donut`: plain SVG with one `<circle pathLength=100>` per slice, sized by `strokeDasharray`/`strokeDashoffset`,
+    starting at 12 o'clock. A 0.8 % gap separates slices when more than one is drawn. A zero-count slice is not drawn.
+    Colours are `stroke-success` / `stroke-warning` / `stroke-danger`, i.e. `var(--success|warning|danger)`, so both
+    themes follow. The SVG is `aria-hidden`. Each circle has `onClick`; the stroke is the hit area, the hole is not.
+    The centre is an HTML overlay: the covered % and "n of m stories".
+  - Legend: one `<button aria-haspopup="dialog">` per slice (swatch, label, count, %). Its accessible name is
+    "Covered: 2 stories, 33%". It is disabled at 0. Below the legend, a separate Tasks line button ("14 Tasks — covered
+    through objects or scenarios").
+  - `CategoryDialog` (the existing `Dialog`): titled "<Category> (n)", with a short description. It lists each
+    story's key, title, *Needs review* badge and case count (no count for Tasks). Each story links to
+    `storyPath(app, id, feature)` (ADR-071). No generate or top-up button (D20).
+  - Empty states: no stories → "No finalized stories."; Tasks only → only the Tasks line (no donut, no legend).
+  - Layout: `flex flex-wrap … 2xl:flex-col`. Below 2xl the donut sits left-aligned beside a `sm:max-w-sm` legend. In
+    the 2xl 16rem column the donut is centred above the legend.
+- `logic.ts`: `coverageSliceOf` (Task → none, uncovered → Not covered, covered with `needs_review > 0` → Needs review
+  only, else Covered), `sharePct` and `coverageBreakdown` (three slices in a fixed order, Tasks, total, covered,
+  coveredPct). `sharePct` never rounds a partial share to 0 % or 100 %, so 199 of 200 shows as 99 %.
+- `TestsTab.tsx`: drops the old panel and its imports and passes `tree.coverage.stories`.
+
+**Tests:** web lint 0 errors (the same 20 pre-existing warnings, none in `features/test-design`); typecheck clean;
+vitest **50 files / 467 passed** (base 459, +8).
+- `logic.test.ts` +3:
+  - exclusive slices on the fixture plus one uncovered story, with GNS_000123 (covered, 3 needs-review cases)
+    counted only under Needs review; Tasks excluded; 67 %;
+  - zero-count, Tasks-only and empty inputs;
+  - `sharePct` edges.
+- `testDesign.test.tsx` +5 (`Tests tab → Story coverage donut`):
+  - slice counts from the circles' `data-count`, the centre "67%" / "2 of 3 stories", the legend names; no link and no
+    generate button in the panel;
+  - each legend button opens a dialog with exactly its stories' hrefs; case counts but none for Tasks; no
+    generate/top-up button; jest-axe clean with the Needs review dialog open; a dialog link navigates to the story page;
+  - a slice click opens its dialog; a zero-count slice is not drawn and its row is disabled;
+  - Tasks-only and no-stories empty states;
+  - a layout pin.
+- Two existing tests now find the panel by its region name: the after-Finalize test (which now asserts the legend) and
+  the H3 M1 layout pin.
+- Before-fix evidence: with the source stashed (and `CoveragePanel.tsx` moved away) and the tests kept, 10 tests fail
+  (the 8 new ones plus the 2 updated ones). All pass with the change.
+- Bundle (L-089):
+  - `npm run build` ran as its own call, after the edits and before the commit.
+  - After the commit, a fresh build, then a separate `git status --short --untracked-files=all` → 0 lines. The first
+    proof had shared a batch with the build, so I re-ran it alone.
+  - The reviewer's out-of-tree `vite build` is identical to `web/static`.
+
+**Width probe (L-090, spec item 4)**
+- Method: `/tmp/genesis-h4/coverage-probe.js`, adapted from `/tmp/genesis-h3/row15-probe.js`. It runs through
+  `/tmp/genesis-h4/with-dev-server.mjs` (Vite :5199 with cwd `web/`, `/api` → serve v0.78.0 :8760).
+  - It is read-only: the feature-6 suite GET is rewritten in the browser to 2 Covered, 2 Needs review, 2 Not covered
+    and 14 Tasks. Real long titles.
+  - The 4-width record is the reviewer's re-run, `/tmp/genesis-h4-review/out/probe.json` (review mi1). My own 4-width
+    run gave the same numbers, but a later 2-width screenshot re-run overwrote its `/tmp/genesis-h4/out/probe.json`.
+- Results: light and dark give the same numbers; the computed strokes differ per theme.
+
+  | Width | Layout | Panel w×h | Donut | Legend w | Tasks line |
+  |---|---|---|---|---|---|
+  | 1280 | side by side | 984×215 | 144 | 384 | 1 line |
+  | 1440 | side by side | 1144×215 | 144 | 384 | 1 line |
+  | 1536 | stacked (2xl) | 256×395 | 144 | 214 | 2 lines, breaks at a space |
+  | 1920 | stacked (2xl) | 256×395 | 144 | 214 | 2 lines, breaks at a space |
+
+- At every width:
+  - Slice labels stay on one line (`whitespace-nowrap`). No element overflows the panel, none sits outside it, and
+    the page has no horizontal scroll.
+  - Centre text 48 px ("67%") and 70 px ("4 of 6 stories") wide, inside the 98 px hole.
+  - Dialogs are 576 px wide: Tasks 576×666 (the list scrolls), Needs review 576×286, both inside the 900 px viewport.
+    No key wraps and no badge or count goes past its row. The only "clipped" element is the close button's `sr-only`
+    label.
+  - A real pointer click on the Not covered arc opens "Not covered (2)".
+- The panel height no longer depends on the story count: 215 or 395 px with 20 stories.
+- One probe-driven fix before the commit: the first run showed the donut centred in the free space at 1280/1440 (donut at
+  x=484, legend at x=851). `sm:mx-0 2xl:mx-auto` puts it beside the legend.
+
+**Review:** genesis-review, `reviews/49-08-H4-review.md`, **SHIP** (no blockers, no majors).
+- mi1 (the probe file) and mi2 (this As built) are closed here.
+- n1 (the area-map gap) is for genesis-docs.
+- n2 and n3 are not done (below).
+
+**Decisions / deviations** (no ADR deviation)
+1. **Slice colours:** Covered = success, Needs review = warning, Not covered = danger. The spec names no colours. The
+   existing `NeedsReviewBadge` is warning-toned and the `Uncovered` badge is warning too, so reusing the badge tones
+   would make two slices the same colour. Accepted by the reviewer.
+2. **Label "Not covered"** follows the spec. The `CoverageBadge` elsewhere (top-up dialog) still says "Uncovered"
+   (review n2). Aligning them would touch other screens, so it is left for a later pass.
+3. **Centre text is HTML** over the aria-hidden SVG, so screen readers also get the % and "n of m stories".
+4. **`sharePct`** clamps partial shares to 1–99 %, so the centre never reads 100 % while a story is uncovered.
+5. Review n3 (the `find(...)!` lookups in `CoveragePanel`) is not done. The lookups are safe, and changing them would
+   need another rebuild and review for no behaviour change.
+
+**Lesson candidates (for genesis-docs)**
+- L-090 corollary: a probe output file is evidence. Write each run to its own path (or name it by run), or a narrower
+  re-run overwrites the full one. Also wait out a dialog's open animation before measuring it; mid-zoom it read as
+  outside the viewport.
+- L-089 recurrence: once again a `git status` proof was batched with the build it proves. Re-run it alone.
+
+**Code-map changes**
+- `web/features/test-design/CoveragePanel.tsx` (new): the Tests tab Story coverage panel (`Donut`, `LegendButton`,
+  `CategoryDialog`).
+- `test-design/logic.ts`: `coverageSliceOf`, `sharePct`, `coverageBreakdown` (`CoverageSlice`, `CoverageBreakdown`).
+- For genesis-docs (review n1): `web/src/features/test-design/**` maps to no area in `context/areas.toml`.
+
 ## 2. Gates
 
 genesis: `pytest` + `ruff`; fresh DB migrates to **v25**, a v24 DB upgrades with rows preserved. web: `lint`,
