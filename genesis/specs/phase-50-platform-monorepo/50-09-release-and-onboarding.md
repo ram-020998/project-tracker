@@ -44,7 +44,9 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
 - `context/state/current.md`: one platform row (genesis v0.80.0, packages at 0.80.0, `CORE_MAJOR=1`) + genesis-workflows
   v0.24.0; the new dependency chain; test counts per package; "what works" line for the monorepo.
 - Code map (already moved in 50-04) — add `scripts/install-packages.sh`, `tests/test_version_sync.py`, the CLI missing-library check (D15). `progress/phase-50-platform-monorepo.md`; `changelog.md`; README row 50 → SHIPPED; tracker §6.
-- Lessons from the build via `genesis-ctx add lesson`. `genesis-ctx index && lint` green.
+- Lessons from the build via `genesis-ctx add lesson`. Record the Phase 50 **L-089 recurrences** on the existing
+  lesson (not a new one): 50-03 sent the three subtree merges in one batch; 50-04 twice ran the clean-tree check in
+  the same batch as the commit. All were verified correct afterwards. `genesis-ctx index && lint` green.
 
 ## 5. Acceptance
 
