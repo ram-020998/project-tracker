@@ -407,6 +407,34 @@ Ship all four together (release is 49-09).
 - `features/hooks.ts` `useFeature` polls while a stage run is in flight.
 - `test-design/CasesTable.tsx` `KeyList`.
 
+- **H4 — Story coverage as a donut chart (49-01 D20).** Built by genesis-dev after the 49-08 SHIP and before 49-09;
+  own genesis commit(s); As built under this item; then a short genesis-review of H4 only (static review + gates + the
+  width probe below). Web only, no API change: the data is `tree.coverage.stories` (49-06 §3).
+  1. Replace the per-story list in `CoveragePanel` (`web/src/features/test-design/TestsTab.tsx:196-227`) with:
+     - **Donut** (plain SVG, no chart library — L-015; colours from design tokens, not raw palette classes — ADR-027/055;
+       light and dark) over **Story-type** stories, three mutually exclusive slices: **Covered** (`state` covered and
+       `needs_review == 0`), **Needs review** (covered and `needs_review > 0`), **Not covered** (`state` uncovered). A
+       zero-count slice is not drawn. Pointer click on a slice opens its dialog.
+     - **Centre text:** the covered percentage, where Covered + Needs review count as covered, and "n of m stories".
+     - **Legend:** one `<button>` per slice (colour swatch, label, count, percentage), keyboard-reachable; plus a
+       separate **Tasks** line ("N Tasks — covered through objects or scenarios", D14) that is also a button. Rows with
+       0 stories are shown disabled. The SVG itself is `aria-hidden`; the legend carries the accessible names.
+     - **Dialog** (existing `Dialog` primitive) titled "<Category> (n)" listing each story: key, title, case count (not
+       for Tasks), *Needs review* badge where relevant, each linked to the canonical story page (ADR-071). **No**
+       generate/top-up button (D20).
+     - Empty states: no finalized stories → the current "No finalized stories." text; Tasks only → no donut, the Tasks
+       line only.
+  2. Layout: at 2xl the panel stays in its 16rem column (donut above the legend); below 2xl, where it stacks under the
+     test list, donut and legend sit side by side. The panel's height no longer grows with the number of stories.
+  3. Tests (Vitest + RTL + jest-axe): slice counts for a mixed fixture (real shapes, L-083) incl. a covered story with
+     needs-review cases counted only under Needs review; Tasks excluded from the donut and the percentage; each legend
+     button opens the dialog with exactly its stories; zero-count rows disabled; links point at the story page;
+     jest-axe clean with the dialog open.
+  4. Width probe (L-090) in a real browser at 1280, 1440, 1920, light and dark: the panel and the dialog fit, no text
+     clipped, legend labels don't wrap mid-word; record the measured sizes.
+  Gates: web `lint` + `typecheck` + `vitest`; `npm run build` and commit `web/static/` as separate sequential steps, then
+  a fresh build + empty `git status` (L-089).
+
 ## 2. Gates
 
 genesis: `pytest` + `ruff`; fresh DB migrates to **v25**, a v24 DB upgrades with rows preserved. web: `lint`,

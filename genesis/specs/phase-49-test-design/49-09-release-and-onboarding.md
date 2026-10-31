@@ -6,8 +6,9 @@
 
 ## 1. Release order
 
-What ships (49-08 = SHIP 2026-10-30, `reviews/49-08-review.md`): **genesis** `b9e9487..d138078` — 14 commits ahead of
-`origin/master` (49-02, 49-05, 49-04, 49-06, H1, 49-07 ×4, H2, H3 ×4); **genesis-workflows** `325cc23` + `9cb061f` — 2
+What ships (49-08 = SHIP 2026-10-30, `reviews/49-08-review.md`, plus H4 once its short review is SHIP): **genesis**
+`b9e9487..d138078` — 14 commits ahead of `origin/master` (49-02, 49-05, 49-04, 49-06, H1, 49-07 ×4, H2, H3 ×4) — **plus
+the H4 commit(s)**; **genesis-workflows** `325cc23` + `9cb061f` — 2
 commits (49-03 and the duplicate-test-module fix, `specs/bugs/workflows-duplicate-test-module-names.md`). All are
 local only; GitLab has a backup copy on `backup/phase-49-wip` (genesis at `d62ae03`, genesis-workflows at `9cb061f`).
 
