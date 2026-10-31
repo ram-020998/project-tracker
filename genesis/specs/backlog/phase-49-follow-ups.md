@@ -52,3 +52,7 @@
     Suggested fix without a contract change: while polling, also read the bound run (`GET /api/runs/{id}`, existing)
     and stop when it is terminal; or add the bound run's status to the stage row in the feature detail (a contract
     addition). Show "the run failed — Re-run" on the entry page either way.
+13. **Coverage wording and badge colours (49-08 H4 review n2/n3).** The top-up dialog's badge still says "Uncovered"
+    while the coverage donut says "Not covered"; pick one term everywhere. The shared `CoverageBadge` uses amber for both
+    "Uncovered" and "Needs review"; align it with the donut (Covered green, Needs review amber, Not covered red). Also
+    the style tidy of the slice lookups in `CoveragePanel.tsx` (no behaviour change).

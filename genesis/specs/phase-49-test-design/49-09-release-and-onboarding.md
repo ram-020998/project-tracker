@@ -6,9 +6,9 @@
 
 ## 1. Release order
 
-What ships (49-08 = SHIP 2026-10-30, `reviews/49-08-review.md`, plus H4 once its short review is SHIP): **genesis**
-`b9e9487..d138078` — 14 commits ahead of `origin/master` (49-02, 49-05, 49-04, 49-06, H1, 49-07 ×4, H2, H3 ×4) — **plus
-the H4 commit(s)**; **genesis-workflows** `325cc23` + `9cb061f` — 2
+What ships (49-08 = SHIP 2026-10-30, `reviews/49-08-review.md`; H4 = SHIP, `reviews/49-08-H4-review.md`): **genesis**
+`b9e9487..5da9916` — **15** commits ahead of `origin/master` (49-02, 49-05, 49-04, 49-06, H1, 49-07 ×4, H2, H3 ×4,
+H4 `5da9916`); **genesis-workflows** `325cc23` + `9cb061f` — 2
 commits (49-03 and the duplicate-test-module fix, `specs/bugs/workflows-duplicate-test-module-names.md`). All are
 local only; GitLab has a backup copy on `backup/phase-49-wip` (genesis at `d62ae03`, genesis-workflows at `9cb061f`).
 
@@ -45,7 +45,7 @@ local install); verify `/openapi.json` `info.version` = 0.79.0, DB v25, and `GET
   → features-stages + stories-workbench; **`genesis/genesis/domain/**`** — unmapped today, so `genesis-ctx check` misses
   ADR-050 on lifecycle changes (49-02 As built) → features-stages + stories-workbench; `services/testimpact.py` and the
   already-unmapped `kb/_graph_reads_mixin.py` → **kb-sync** too (49-05 As built: `check` missed the kb-sync rules);
-  `web/src/features/test-design/**` → features-stages;
+  `web/src/features/test-design/**` → features-stages (still unmapped after H4 — H4 review n1);
   `genesis-workflows/workflows/test-design-analysis/**` is already under workflows-library). Consider a new
   `testing` area if Part 2 is next.
 - `context/state/current.md` (versions, DB v25, test counts, "what works": Test Design stage, Tests tab, case/scenario
