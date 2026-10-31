@@ -42,3 +42,13 @@
     environment in that window. Suggested fix: store the worker pid (and start time) on the run record, and at startup
     terminate a still-alive orphan before finalizing the run. Until then the L-061 rule stands: never restart `serve`
     while a run is active.
+11. **A second `genesis serve` on the same home can still lose its runs (49-08 H3 As built).** H3's startup sweep runs
+    only in the process holding `state_dir/run/runs.lock`, but a second server that can't get the lock still starts and
+    runs workers; if the first server restarts, its sweep fails the second server's in-flight runs. Suggested fix:
+    refuse to start `serve` (clear error) when another live process holds the lock for the same state dir. The fleet
+    is unaffected (each `gsm` instance has its own home).
+12. **The running-stage poll never stops after a run fails (49-08 H3 As built).** `useFeature` polls every ~5 s while
+    a stage has a `run_id` and no `chat_session_id`; a failed run leaves exactly that, so an open page keeps polling.
+    Suggested fix without a contract change: while polling, also read the bound run (`GET /api/runs/{id}`, existing)
+    and stop when it is terminal; or add the bound run's status to the stage row in the feature detail (a contract
+    addition). Show "the run failed — Re-run" on the entry page either way.
