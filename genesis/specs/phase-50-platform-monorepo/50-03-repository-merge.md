@@ -42,14 +42,17 @@ imported. Run these one at a time (L-089).
   over the genesis repo (excluding `.venv`, `node_modules`, `web/static`) must return nothing except docs that 50-05
   rewrites.
 
-## 4. Missing-library check (D6, F2)
+## 4. Missing-library check (D6, D15)
 
-- `genesis/runtime/preflight.py`: a **required** item `platform-packages` that checks
-  `importlib.util.find_spec` for `genesis_core`, `kiro_agent_sdk`, `genesis_appian_parser`, with the hint
-  "run scripts/install-packages.sh" (the script lands in 50-05; the hint text can name it now).
-- At app startup (`create_app` or `serve`): log one `error` naming each missing module; do not crash so the
-  preflight page can show it.
-- Tests for both (missing module simulated with a patched `find_spec`).
+- `genesis/cli/main.py`: before any import that reaches an internal library (today `from .create_workflow …` /
+  `from .test_workflow …`, `cli/main.py:7-8`), check `importlib.util.find_spec` for `genesis_core`,
+  `kiro_agent_sdk`, `genesis_appian_parser`. If any is missing, print one line to stderr — "Missing Genesis packages:
+  <names>. Run scripts/install-packages.sh from the genesis repo." — and exit with status 1. Keep it stdlib-only and
+  above every other `genesis.*` import; a comment says why (50-02 Q4: the CLI otherwise dies with a bare
+  `ModuleNotFoundError` at `cli/main.py:8` → `cli/test_workflow.py:16` → `runtime/context.py:6`).
+- No preflight item and no startup log: without the libraries Genesis cannot start (D15).
+- Tests: a patched `find_spec` returning `None` for one library → `main()` exits 1 and the message names it; all
+  present → normal argparse behaviour.
 
 ## 5. Rebuild the dev venv
 
@@ -72,16 +75,18 @@ then in site-packages — so the test asserts only when an env var `GENESIS_DEV_
 `ruff check genesis`, `pytest -q` (app), plus each library's own tests from its folder:
 `cd packages/genesis-core && ../../.venv/bin/python -m pytest -q`, same for the SDK and the parser
 (`../../.venv/bin/ruff check .` for the parser and core). Record counts; they must equal the pre-merge counts
-(core 91, SDK 93 minus the removed ERD test, parser as recorded in 50-02 Q8, app per `context/state/current.md`
-after Phase 49).
+(the per-package counts recorded in the 50-02 As built — genesis-core runs **96**, not the 91 in
+`context/state/current.md`; the SDK minus the removed ERD test; the app 1366 as in 50-02 Q8).
 
 ## 7. Acceptance
 
-- [ ] Three subtree merges; `git log -- packages/genesis-core` shows the original SHAs.
+- [ ] Three subtree merges, not squashed. History check (50-02 As built: a path-limited `git log -- packages/…` shows
+      only the merge, because the original commits touched root paths): `git blame packages/genesis-core/genesis_core/state.py`
+      and `git log --oneline <merge>^2 -- genesis_core/` show the original SHAs; same for the SDK and the parser.
 - [ ] No internal dependency entry in any `pyproject.toml`.
 - [ ] SDK aligned; POC files gone.
 - [ ] Parser-fixture tests run (not skipped).
-- [ ] Preflight item + startup log + tests.
+- [ ] CLI missing-library check + tests (D15).
 - [ ] Dev venv rebuilt; library imports resolve into `packages/`.
 - [ ] All gates green; counts recorded.
 
@@ -96,7 +101,7 @@ areas    = ["distribution", "core-engine", "sdk-acp", "parser", "kb-sync", "runs
 adrs     = ["ADR-002", "ADR-012", "ADR-016", "ADR-019", "ADR-024", "ADR-036", "ADR-037", "ADR-046"]
 lessons  = ["L-025", "L-027", "L-056", "L-061", "L-089"]
 docs     = ["tracker:specs/phase-50-platform-monorepo/50-01-findings.md"]
-code     = ["genesis/pyproject.toml", "genesis/packages/**", "genesis/genesis/runtime/preflight.py",
+code     = ["genesis/pyproject.toml", "genesis/packages/**", "genesis/genesis/cli/main.py",
             "genesis/genesis/api/app.py", "genesis/tests/test_kb_server.py", "genesis/tests/test_kb_store.py",
             "genesis/tests/test_kb_incremental.py"]
 upstream = ["50-02"]

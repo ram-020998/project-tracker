@@ -25,7 +25,7 @@ changed), `clean-install`. Record the pipeline id. genesis-workflows CI cannot p
 | # | Check | Pass |
 |---|---|---|
 | 1 | Fresh clone of the pushed branch into a temp dir → `scripts/install.sh --dir <tmp> --branch phase-50-monorepo` with a temp state dir and a free port | Installs, migrates, `genesis up` serves the SPA (200) and `/api/config/health` |
-| 2 | Preflight on that install | `platform-packages` ok; uninstall `genesis-appian-parser` → the item reports it missing and the startup log names it; reinstall |
+| 2 | Missing library on that install | Uninstall `genesis-appian-parser` → `genesis status` exits 1 with one line naming `genesis_appian_parser` and the fix command (D15); reinstall with the script → works |
 | 3 | `pip install --dry-run --report` of the install command | No index lookup for an internal name (D6) |
 | 4 | Dev venv | `genesis_core.__file__`, `kiro_agent_sdk.__file__`, `genesis_appian_parser.__file__` are under `genesis/packages/`; the three parser-fixture tests **ran** (not skipped) in the pytest output |
 | 5 | Fleet (main + userb) on the dev venv, after checking no run is active | Both healthy; a workflow run with an agent step completes (proves the worker imports the libraries) |

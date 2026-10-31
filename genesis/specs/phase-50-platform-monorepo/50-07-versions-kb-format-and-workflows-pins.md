@@ -70,6 +70,9 @@ ci/validate_library.py`, `ci/validate_skills.py`, `pytest -q workflows --ignore=
 - [ ] `KB_FORMAT_VERSION` exported and pinned by a test.
 - [ ] `sync-application` tests cover the five cases; no forced full sync for a KB built by parser 0.3.x.
 - [ ] genesis-workflows pins all on one tag; `registry.json` updated.
+- [ ] Untested by the spike (50-02 deviations), proven here or in 50-09: a **tag** ref combined with
+      `#subdirectory=` (locally against a scratch tag the user creates, or in 50-09 once v0.80.0 exists), and the
+      **HTTPS** partial clone that CI's `insteadOf` token rewrite uses (genesis-workflows' first CI run, 50-09 §1).
 
 ## 7. As built
 

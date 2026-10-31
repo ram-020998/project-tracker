@@ -44,6 +44,7 @@ Genesis uses the libraries (D2). One repo gives one change, one review, one tag 
 | D12 | Area names kept, paths and gates repointed; an empty area glob becomes a lint error; repo lists shrink. |
 | D13 | Old repos archived with a pointer commit after genesis-workflows is re-pinned; local checkouts moved to `_archived/`; ask before each. |
 | D14 | ADR-080 amends ADR-046 as well as ADR-019 (confirmed); defaults F1–F6 accepted. |
+| D15 | A missing library makes the `genesis` CLI exit with one clear message before any other import (replaces F2's "serve still starts"); no preflight item. |
 
 ## 4. Current state (code-grounded — full detail in `50-01-findings.md` §2)
 
@@ -107,9 +108,9 @@ genesis-release pushes the scratch branch for CI, asking first) → S8 = 50-09 (
 |---|---|---|
 | 50-01 | project-tracker | Findings, decisions D1–D13 |
 | 50-02 | (throwaway copies) | Start gate; prove the pip behaviour of D6, hatchling for the SDK, subdirectory pins, editable installs |
-| 50-03 | genesis | Subtree imports ×3, SDK alignment + POC removal, internal deps removed, fixture paths, missing-library check, dev venv rebuild |
+| 50-03 | genesis | Subtree imports ×3, SDK alignment + POC removal, internal deps removed, fixture paths, CLI missing-library check, dev venv rebuild |
 | 50-04 | project-tracker | `areas.toml` paths + gates, empty-glob lint error, routing test, repo lists, code map + `bible/03` headers, skills |
-| 50-05 | genesis | The install script, `install.sh`, updater `_scope` + `apply`, preflight item, README + `docs/INSTALL.md` |
+| 50-05 | genesis | The install script, `install.sh`, updater `_scope` + `apply`, README + `docs/INSTALL.md` |
 | 50-06 | genesis | Four parallel package jobs, `clean-install` rule, `insteadOf` removal, SDK lint fixes |
 | 50-07 | genesis, genesis-workflows | Shared version + sync test, `KB_FORMAT_VERSION`, `sync-application` switch, genesis-workflows pins + `registry.json` |
 | 50-08 | all | Independent review + gates + live acceptance |
@@ -139,7 +140,7 @@ Versions assume Phase 49 ships genesis v0.79.0 + genesis-workflows v0.23.0 (49-0
 | # | Default |
 |---|---|
 | F1 | Install script: `scripts/install-packages.sh [--editable] [--dev]`, the only place that lists the four paths, in dependency order SDK → core → parser → app. |
-| F2 | Missing-library check: a required preflight item `platform-packages` plus a startup log error naming the missing module; `genesis serve` still starts. |
+| F2 | Missing-library check: **superseded by D15** — the `genesis` CLI checks for the three libraries before any internal import and exits 1 with one message naming them and the fix command; no preflight item. |
 | F3 | Updater `_scope` = `deps` when `git diff --name-only <deployed tag>..<target tag>` touches `pyproject.toml`, `packages/**` or `scripts/install-packages.sh`; else `code`. Unknown → `deps`. |
 | F4 | `KB_FORMAT_VERSION = 1` represents today's parser 0.3.x output; a recorded `parser_version` with minor 3 and no `kb_format_version` counts as format 1, so no app is forced into a full sync. |
 | F5 | Version-sync test checks the four `pyproject.toml` versions, the parser `__version__`, the `create_app` version and `web/src/version.ts`. |

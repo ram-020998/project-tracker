@@ -43,8 +43,7 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
   the ≤ 4K-token budget.
 - `context/state/current.md`: one platform row (genesis v0.80.0, packages at 0.80.0, `CORE_MAJOR=1`) + genesis-workflows
   v0.24.0; the new dependency chain; test counts per package; "what works" line for the monorepo.
-- Code map (already moved in 50-04) — add `scripts/install-packages.sh`, `tests/test_version_sync.py`, the preflight
-  item. `progress/phase-50-platform-monorepo.md`; `changelog.md`; README row 50 → SHIPPED; tracker §6.
+- Code map (already moved in 50-04) — add `scripts/install-packages.sh`, `tests/test_version_sync.py`, the CLI missing-library check (D15). `progress/phase-50-platform-monorepo.md`; `changelog.md`; README row 50 → SHIPPED; tracker §6.
 - Lessons from the build via `genesis-ctx add lesson`. `genesis-ctx index && lint` green.
 
 ## 5. Acceptance

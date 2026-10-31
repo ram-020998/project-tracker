@@ -70,7 +70,7 @@ areas    = ["distribution", "security"]
 adrs     = ["ADR-026", "ADR-046"]
 lessons  = ["L-048", "L-051", "L-052", "L-068"]
 docs     = ["tracker:specs/phase-50-platform-monorepo/50-01-findings.md", "tracker:specs/phase-22-distribution-and-shipping.md"]
-code     = ["genesis/scripts/**", "genesis/genesis/runtime/updater.py", "genesis/genesis/runtime/preflight.py",
+code     = ["genesis/scripts/**", "genesis/genesis/runtime/updater.py",
             "genesis/tests/test_updater.py", "genesis/README.md", "genesis/docs/INSTALL.md"]
 upstream = ["50-03"]
 ```
