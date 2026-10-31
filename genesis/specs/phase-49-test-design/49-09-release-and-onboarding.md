@@ -6,21 +6,33 @@
 
 ## 1. Release order
 
+What ships (49-08 = SHIP 2026-10-30, `reviews/49-08-review.md`): **genesis** `b9e9487..d138078` — 14 commits ahead of
+`origin/master` (49-02, 49-05, 49-04, 49-06, H1, 49-07 ×4, H2, H3 ×4); **genesis-workflows** `325cc23` + `9cb061f` — 2
+commits (49-03 and the duplicate-test-module fix, `specs/bugs/workflows-duplicate-test-module-names.md`). All are
+local only; GitLab has a backup copy on `backup/phase-49-wip` (genesis at `d62ae03`, genesis-workflows at `9cb061f`).
+
 1. **genesis v0.79.0** (minor; m0025, DB 24 → 25). Bump `pyproject.toml` `[project].version`, the `create_app`
    version, `web/src/version.ts`; `npm run build` + commit `web/static/` (separate sequential steps, L-089). Pins
    unchanged: genesis-core v0.9.8, kiro-agent-sdk v0.7.1, genesis-appian-parser v0.3.0. Without the new workflow the
    stage start returns the friendly "not installed" 409 (L-033).
-2. **genesis-workflows v0.23.0**: new `test-design-analysis` v0.1.0 + `registry.json` entry; move its genesis **dev pin**
-   to v0.79.0 and keep `genesis-core@v0.9.8` (L-057).
+2. **genesis-workflows v0.23.0**: new `test-design-analysis` v0.1.0 + `registry.json` entry (already committed in
+   `325cc23`); move its genesis **dev pin** to v0.79.0 and keep `genesis-core@v0.9.8` (L-057).
 3. For each: verify the release commit contains every changed file (L-056); tag; push on the user's go-ahead; CI green
-   (genesis: genesis, frontend, clean-install; workflows: validate + pytest).
+   (genesis: genesis, frontend, clean-install; workflows: validate + pytest — its full-library count is now **305**, down
+   from 331, because the duplicate-module fix stopped double-running 37 tests and started 11 that never ran).
+4. After both `master` pushes and green CI, delete the backup branches (`git push origin --delete
+   backup/phase-49-wip` + `git branch -D backup/phase-49-wip` in each repo) — ask first.
 
 ## 2. Deploy
 
+State before deploy: **main** already runs the `d138078` checkout with its DB at **v25** (migrated during 49-08; v24
+backup at `/tmp/genesis-review/backup/genesis-v24.db`); **userb** still runs v0.78.0 on DB v24 and migrates on its
+first v0.79.0 start. Main holds 49-08 acceptance data on features 4 and 6 (the user decides whether to keep it).
+
 Never restart while a run is active (`GET /api/runs?status=running` per instance). Fleet update as usual
 (`gsm provision --all --no-mcp --no-env --force`, `gsm restart --all`), then `genesis install` of
-`test-design-analysis` on each instance; verify `/openapi.json` `info.version` = 0.79.0, DB v25, and
-`GET /api/features/<id>/test-suite` answers.
+`test-design-analysis` on each instance (from the released library, replacing main's `--from ../genesis-workflows`
+local install); verify `/openapi.json` `info.version` = 0.79.0, DB v25, and `GET /api/features/<id>/test-suite` answers.
 
 ## 3. Docs write-back (genesis-docs)
 

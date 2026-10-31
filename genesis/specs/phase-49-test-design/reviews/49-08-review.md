@@ -300,3 +300,116 @@ all pass. H1 is proven live (row 3). Three live acceptance rows fail, so the pha
 These three, plus m1–m4 and n1–n4, are for genesis-spec to turn into one fix item. Each fix needs a regression test,
 and the two layout fixes need a re-run of the row-15 probe (`/tmp/genesis-review/row15-*.js`). Rows 15 and 16 must be
 re-accepted live after the fix.
+
+---
+
+## Re-review after H3 — genesis `f0df126..d138078` (genesis-review, 2026-10-31)
+
+Scope: the H3 commits `9324a76`, `b4a9f09`, `3dacbf5`, `d138078` (spec §1.1 H3, `reviews/49-08-H3-review.md`), the §2
+gates, and live §3 rows 6, 15, 16 and 18 on main (:8760) with feature 6. genesis-workflows is unchanged since `9cb061f`.
+HEAD resolves to `d138078`; `git status --short --untracked-files=all` gives 0 lines in both repos.
+
+Main was already running the H3 code when this re-review started: `genesis serve` (pid 87078) started 12:10:53 IST,
+after `d138078` (11:58:41), `~/.genesis/run/runs.lock` existed, and `/` served `index-DSkW34-u.js`, the committed
+bundle. The genesis package is imported from the checkout (`genesis/genesis/__init__.py`).
+Evidence is under `/tmp/genesis-review/rereview/`.
+
+### Code review of H3
+
+The four commits were reviewed in `reviews/49-08-H3-review.md`: round 1 NEEDS_CHANGES (MJ1, mi1–mi3, ni1, ni2), round 2
+**SHIP** at `d138078`. There are no commits after `d138078`, so that review covers the code under test here. The H3 As
+built now records everything round 2 asked for: mi3 as a genesis-spec follow-up (decision 5), ni2 and mi4 under "Not done
+by the sweep", the run-owner lock, the 2xl coverage deviation (decision 1), the n4 `keep=` rule (decision 3) and the
+list of features that benefit from the sweep. `genesis-ctx check --since f0df126 --repo genesis` gives the same areas
+(api, features-stages, runs-worker, release-ci, security) and the same ADR/lesson lines as the H3 review. That review's
+answers stand. The lines the live rows below change are:
+
+- [OK] **L-058** (was VIOLATION in §3 above): live row 16 shows the level-triggered recovery now settles an orphaned
+  top-up at startup.
+- [OK] **L-090** (was VIOLATION): live row 15 at 1280 / 1440 / 1920 in both themes measures no collapsed column and no
+  spilled control.
+- [OK] ADR-009 / L-081: the sweep failed only the `running` top-up. No paused or gated run existed on main, so the live
+  "never touch paused/gated" half rests on `test_startup_sweep_never_touches_paused_gated_terminal_or_tracked_runs`.
+
+### §2 gates (re-run by the reviewer at `d138078`)
+
+| Gate | Result | Evidence |
+|---|---|---|
+| genesis `pytest -q -p no:warnings` | **1366 passed** (246.6 s) | `pytest-genesis.txt` |
+| `ruff check genesis` (ruff 0.15.20) | All checks passed | console |
+| fresh DB → v25 | migrations 1–25 applied; `kb_sequences` story 1, test_case 1, test_scenario 1 | console, `freshdb/` |
+| v24 → v25, rows preserved | on a copy of `/tmp/genesis-review/backup/genesis-v24.db`: pending `[25]` → applied; kb_features 4, kb_stories 141, kb_feature_stages 12, kb_objects 3347, runs 357, run_events 229149, chat_sessions 29 identical; story sequence still 20; 7 `kb_test_*` tables; `integrity_check` ok; `foreign_key_check` empty | `v24-copy.db` |
+| web `npm run lint` | 0 errors, 20 warnings (the same pre-existing `react-refresh` warnings) | `web-lint.txt` |
+| web `npm run typecheck` | clean | `web-tsc.txt` |
+| web `npm test` (incl. jest-axe) | **50 files / 459 passed** | `web-vitest.txt` |
+| bundle fresh | `npx vite build --outDir /tmp/genesis-review/rereview/static-d138078` then `diff -r … web/static`: **IDENTICAL** | console |
+| genesis-workflows `validate_library` | PASSED (14 workflows; the fixture correctly fails) | console |
+| genesis-workflows `pytest workflows` | **305 passed** | console |
+
+### Live rows
+
+| # | Result | Evidence |
+|---|---|---|
+| 6 | **PASS** (m2 fixed) | Feature 6 Test Design: `completed`, suite finalized 2026-10-30 17:06:53, `allowed` = `[]`. `POST …/test_design/rerun` → 409 "test design is finalized — use Generate tests for uncovered stories"; `…/start` → the same 409; `…/finalize` → 409 "…already finalized for this feature — this is a one-time action"; `…/actions/reopen` → 409 `precondition_failed` with reason **"the test design is finalized — its records are authoritative; use Generate tests for uncovered stories"** (was the spec's "the breakdown is complete — use Initiate change request"). After the calls the stage is still `completed`, `row_version` 6, `updated_at` unchanged, and no run was started. |
+| 15 | **PASS** (M1, M2, m4 fixed) | Probed main's shipped bundle directly (no dev server), with the H3 scripts copied to `/tmp/genesis-review/rereview/row15-*.js` (output paths changed only) plus `row15-shots.js`. Light and dark give identical numbers. No page h-scroll on any of the 4 screens at any width. **(a) Cases table** 1280 / 1440 / 1920: table = container 982 / 1142 / 1074 px, no container scroll, no clipped cell, no header wraps, Title **282 / 442 / 374 px** (was 0 / 0 / 85). The other columns are Key 96, Type 108, Priority 88, Status 80, Stories 92, Scenarios 100, Review 136. `row15-spill.js`: no leaf past its cell. **(b) Test Impact**: table = container 982 / 1142 / 1350, Key **120 px**, Title 526 / 686 / 894, no clipped cell; all 35 `TC-` keys render on one line at every width and theme (`impact-keys.json`; was "TC-" / "000007" on two lines). **(c) Stage grid**: 3 + 2 cards of 320 / 373 px at 1280 / 1440, one row of 5 × 261 px at 1920; `row15-footer.js` and `row15-spill.js` find **no control clipped or past its card edge** (was up to 98 px past). This time the probe's `clipped` flag is false on every card. **(d) Case Objects** (TC-000009): table = container 607 / 714 / 853, Name 254 / 336 / 413, no clipping, no scroll. Screenshots: `row15/a-cases-*.png`, `b-impact-*.png`, `c-overview-settled-*.png` (taken after the card fade-in; the probe's own `c-overview-*.png` catch it mid-animation), `d-case-objects-*.png`; data: `probe.json`, `footer.jsonl`, `spill.jsonl`. |
+| 16 | **PASS** (M3 fixed) | DB backed up first: `.backup` → `/tmp/genesis-review/rereview/backup-pre-row16.db` (integrity ok, v25, 363 runs, none active). Started top-up 3 for GNS_000020 (`POST …/test-suite/topups` → 200, run `r-dfc474e2a4dd`). 45 s later it was the **only active run**, in its first `design_cases` turn (`agent.tool_update` events), worker pid 90499 (ppid 87078). `gsm stop main` at 06:49:35Z (pre-approved). With main down, the record was still `running`, there was no `run.final`, the top-up was `running`, and the worker had been re-parented to ppid 1. `gsm start main` → pid 91165. Startup log: `WARNING genesis.runs.manager: RunManager: failed 1 run(s) orphaned by a restart: r-dfc474e2a4dd`, before "Application startup complete". DB: `error` seq 246491 "worker lost across a server restart" → stored `failed` with that detail → **one** `run.final{failed}` seq 246492 (06:49:43.721) → top-up 3 `failed` at 06:49:43.722. `GET …/topups/latest` → 3 `failed`; `GET /api/runs/r-dfc474e2a4dd` → `failed`, "worker lost across a server restart". **A new top-up is allowed:** `POST …/topups` → **200** (top-up 4, run `r-2c783066f859`; was 409 "already running"). I cancelled it at once (`POST /api/runs/r-2c783066f859/cancel`), which settled top-up 4 `failed`. Nothing was left active. The orphaned worker pid 90499 had exited by the next check (within about 2 minutes), as the As built says. |
+| 18 | **PASS** (H1 + m3 fixed) | Feature 4 "Document Builder" (operator's choice; it had no Test Design stage, so nothing was overwritten). DB backed up first: `backup-pre-row18.db`. A headless Chromium page (`row18-f4.js`, 1440 px) opened `…/features/4/test-design`, filled the notes and clicked **Start test design** at 07:02:53Z (run `r-cbf4ee22a3da`, stage draft → in-progress). From there the page was **never reloaded or navigated** (0 main-frame navigations after the start, `watch.log`). While the run was in flight the page made a `GET /api/features/4` every 5 s (936 in 78 min), which is the m3 poll. The run went through the healing ladder (83 `node.completed`, against `recursion_limit` 300) and then **escalated** at 08:17:10. The operator approved that gate at 08:21:00.33; the reviewer never answered it. Then: `run.final{done}` 08:21:01.499 → completion chat `c-797ca51a5dcd` created 08:21:01.504 (5 ms later) → stage `submit` in-progress → in-review 08:21:01.518. That is the live `StageFinalizer` path with no read in between (H1). The page's next poll, at 08:21:02.846, picked it up, and by the 08:21:17 check the page had moved from "Designing the tests…" to the completion chat with `test-design.html` (339 KB) under Session outputs, without a reload (`row18/c-after-finish-no-reload.png`; before: `a-entry.png`, `b-running.png`). The poll **stopped** once the chat existed: no `GET /api/features/4` after 08:21:02.846. In the first pass the same page made no request after its first load and was still stale 321 s after `run.final`. |
+
+### Finding from the live rows (pre-existing, not Phase 49)
+
+- **Minor — a user cancel of a run with a live worker can end `failed` with two terminal `run.final` events.**
+  Cancelling top-up 4 above wrote `error` "worker exited abnormally" (seq 246500), `run.final{cancelled}` (246501), then
+  `run.final{failed}` (246502). The record ended `failed` / "worker exited abnormally". `RunManager.cancel`
+  (`runs/manager.py:313-319`) kills the worker and calls `_finalize(CANCELLED)`, while the worker reader thread handles
+  the resulting `worker_exit` with `_finalize(FAILED)` (`:224-229`). Both pass the check-then-act guard at `:140-142`
+  before either one stores its status. This is the follow-up the H1 As built already records (H1 review M3: no lock on
+  the guard). H3 did not change it, and the DB shows the same pattern on 11 runs since 2026-07-13 (for example
+  `r-0bdd08eb2777`, `r-6545274053db`, `r-d18b37366f3e`). It does not block 49-08. It is now seen live on a Test Design
+  top-up (the top-up still settled correctly from the first `run.final`). I recommend genesis-spec take it from the
+  backlog: a per-run lock or a conditional `UPDATE runs SET status=? WHERE run_id=? AND status NOT IN (terminal)`,
+  with a test that cancels a run while its scripted worker emits `worker_exit`.
+
+### State this re-review left on main (features 6 and 4)
+
+- Top-up 3 `failed` (row 16, run `r-dfc474e2a4dd`, "worker lost across a server restart"). Top-up 4 `failed` (the
+  cancelled proof, run `r-2c783066f859`). Because top-up 4 is the latest, the Tests tab shows "The last test generation
+  failed — nothing was proposed". That is correct for this data, and the banner clears at the next top-up.
+- No change to the suite (34 cases, 7 scenarios), the stages, or the stories. No run is active.
+- DB backup taken before the restart: `/tmp/genesis-review/rereview/backup-pre-row16.db`.
+- Feature 4 (row 18): a new Test Design stage, run `r-cbf4ee22a3da` (done, escalation approved by the operator). After
+  the run the operator approved the stage, reopened it and approved it again (08:21:23 → 08:21:38,
+  `lifecycle_transitions`), so it is **completed and not finalized**: there are no `TC-`/`TS-` records for feature 4.
+  Nothing else on feature 4 changed. No run is active.
+- DB backup taken before row 18: `/tmp/genesis-review/rereview/backup-pre-row18.db`.
+
+### Re-review findings
+
+- Blockers: none. Majors: none.
+- Minor (pre-existing, outside Phase 49): the cancel / `worker_exit` double-finalize race described above. It goes to
+  the backlog as the H1 review M3 follow-up.
+- Accepted follow-ups already in the H3 As built: mi3 (the m3 poll keeps polling on a stage whose run failed without a
+  draft, for genesis-spec), mi4 (the lock decides who sweeps, not who runs workers), ni2 (`_toolcalls/` is purged while an
+  orphan may still run), and the orphaned OS process is not killed.
+
+The §4 findings are resolved as follows (each verified live where a row covers it, otherwise by the H3 review and its
+tests):
+
+| Finding | Status |
+|---|---|
+| M1 Cases Title collapses | Fixed: row 15a, Title 282 / 442 / 374 px |
+| M2 stage-card controls spill | Fixed: row 15c, nothing past a card edge |
+| M3 orphaned top-up stays running | Fixed: row 16 |
+| m1 Publish to team on Test Design | Fixed (H3 review; Vitest with collab on) |
+| m2 Reopen reason | Fixed: row 6 |
+| m3 stage page doesn't refresh itself | Fixed: row 18 |
+| m4 Test Impact key wraps | Fixed: row 15b |
+| n1–n4 | Fixed (H3 review; n4 includes both pickers) |
+| L-058 / L-090 VIOLATIONs | Now OK (rows 16, 15) |
+
+## Final verdict (49-08, after H3): **SHIP**
+
+There are no blockers or majors. Every §2 gate is green at `d138078`: pytest 1366, ruff, vitest 459, lint, typecheck,
+a fresh bundle, the v25 migrations, `validate_library` and workflows 305. The three live rows that failed (15 and 16)
+or carried a minor (6, 18) all pass on main. Every remaining §4 finding is fixed with a regression test, and the
+remaining notes are recorded follow-ups. Phase 49 can go to release (49-09). At release, ship all of genesis
+`b9e9487..d138078` and genesis-workflows `325cc23..9cb061f` together (L-056).
