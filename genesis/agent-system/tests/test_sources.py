@@ -90,10 +90,10 @@ def test_codemap_sections_all_kinds(env):
     c = env.corpus()
     keys = [s.key for s in c.sections]
     assert keys == [
-        "genesis-core/genesis_core/  types.py",
-        "genesis-core/genesis_core/  state.py",
-        "genesis-core/genesis_core/  nodes/",
-        "genesis-core/genesis_core/  state.py #2",
+        "genesis/packages/genesis-core/genesis_core/  types.py",
+        "genesis/packages/genesis-core/genesis_core/  state.py",
+        "genesis/packages/genesis-core/genesis_core/  nodes/",
+        "genesis/packages/genesis-core/genesis_core/  state.py #2",
         "genesis/genesis/  db/",
         "genesis/genesis/  chat/",
         "genesis-workflows/  registry.json",
@@ -115,7 +115,7 @@ def test_codemap_base_ends_at_first_block_inside_fence(env):
     assert "Phase 45" not in p31.text  # stops at the bold line
     p45 = c.section("Phase 45 — Incremental Delta Sync (genesis v0.76.0)")
     assert p45.kind == "bold" and "apply(mode='incremental')" in p45.text
-    assert "CORE_MAJOR=1." in c.section("genesis-core/genesis_core/  types.py").text
+    assert "CORE_MAJOR=1." in c.section("genesis/packages/genesis-core/genesis_core/  types.py").text
 
 
 def test_codemap_wrapped_prose_lines_continue_the_entry(env):

@@ -6,7 +6,7 @@
 ## 4. Codebase map (where things live)
 
 ```
-genesis-core/genesis_core/
+genesis/packages/genesis-core/genesis_core/
   types.py        PlatformContext; ValidationResult;
                   CORE_MAJOR=1.
   state.py        PlatformState TypedDict + reducers.

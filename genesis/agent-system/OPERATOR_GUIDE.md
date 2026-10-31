@@ -46,8 +46,11 @@ cp /Users/ramaswamy.u/repo/project-tracker/genesis/agent-system/install.conf.exa
 
 # 4. Check
 kiro-cli --v3 agent list | grep genesis-     # five agents
-~/.kiro/genesis/bin/genesis-ctx status --brief
+~/.kiro/genesis/bin/genesis-ctx status --brief   # three rows: genesis, genesis-workflows, project-tracker
 ```
+
+The installer needs two code repos under the repos root, `genesis` and `genesis-workflows`. Since Phase 50 the
+libraries (genesis-core, kiro-agent-sdk, genesis-appian-parser) live in `genesis/packages/`.
 
 **Launching.** The profiles are V3-format JSON (`~/.kiro/agents/genesis-*.json`), so every launch line in this guide
 uses **`kiro-cli --v3 chat --agent <name>`**. *Optional:* `kiro-cli settings chat.agentEngine v3` makes plain
@@ -140,7 +143,7 @@ Implement NN-0X (specs/phase-NN-<slug>/NN-0X-<name>.md).
 That's usually enough. Optional additions:
 
 ```text
-Constraints for this session: <e.g. "backend only, the web part is NN-07" / "don't touch genesis-core">.
+Constraints for this session: <e.g. "backend only, the web part is NN-07" / "don't touch packages/genesis-core">.
 ```
 
 What it does on its own: `genesis-ctx pack NN-0X` → reads the pack + the upstream As-built sections → restates the
@@ -175,7 +178,7 @@ cd ~/repo-gitlab/ramaswamy.u && kiro-cli --v3 chat --agent genesis-review
 
 ```text
 Whole-phase review of Phase NN (specs/phase-NN-<slug>.md). Base revisions: genesis vX.Y.Z,
-genesis-workflows vA.B.C (the last released tags), others unchanged. Run genesis-ctx check on each changed repo,
+genesis-workflows vA.B.C (the last released tags). Run genesis-ctx check on each changed repo,
 run all gates, and write the review report with a SHIP / NEEDS_CHANGES verdict.
 ```
 
@@ -204,7 +207,8 @@ cd ~/repo-gitlab/ramaswamy.u && kiro-cli --v3 chat --agent genesis-release
 Release Phase NN per NN-<release sub-spec>. Review verdict is SHIP (reviews/NN-review.md).
 ```
 
-It bumps versions in the right order (ADR-019), shows you the release commit, and **asks before every tag and push**.
+It bumps versions in the right order (genesis, whose one tag covers the app and its three packages, then
+genesis-workflows; ADR-019), shows you the release commit, and **asks before every tag and push**.
 Answer `yes` per repo. Then it watches CI (`glab ci list`) and records the pipeline ids. Fleet refresh only if you say:
 
 ```text

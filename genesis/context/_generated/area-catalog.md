@@ -10,7 +10,7 @@ Detail: `genesis-ctx area <name>`. Always-on areas are part of every pack.
 - **config-secrets** — Settings, secrets, environments, MCP/CLI registries, managed-native · 6 path globs · skills: genesis-backend-dev, genesis-web-dev · 4 gates
 - **core-engine** — genesis-core: LangGraph nodes, state, validators, reliability, healing · 1 path globs · skills: genesis-backend-dev · 2 gates
 - **db** — genesis DB layer and migrations · 1 path globs · skills: genesis-db-migration · 2 gates
-- **distribution** — Install, lockfile, shipping, launcher, update · 4 path globs · skills: genesis-backend-dev · 2 gates
+- **distribution** — Install, lockfile, shipping, launcher, update · 5 path globs · skills: genesis-backend-dev · 2 gates
 - **documents** — Document library, rendering, GWS/document integrations · 8 path globs · skills: genesis-backend-dev, genesis-web-dev · 4 gates
 - **features-stages** — Feature workspace, spec, UX/TD/breakdown stages, stage finalizers, spec change requests · 24 path globs · skills: genesis-backend-dev, genesis-web-dev · 4 gates
 - **kb-sync** — Appian KB store, sync, delta sync, business map · 6 path globs · skills: genesis-backend-dev · 2 gates
@@ -19,9 +19,9 @@ Detail: `genesis-ctx area <name>`. Always-on areas are part of every pack.
 - **parser** — genesis-appian-parser: Appian object/XML parsing · 1 path globs · skills: genesis-backend-dev · 2 gates
 - **release-ci** — Versioning, pins, tags, CI pipelines · always-on
 - **runs-worker** — Run manager, subprocess worker, HITL gates, events/SSE, checkpoints, scheduler · 7 path globs · skills: genesis-backend-dev · 2 gates
-- **sdk-acp** — kiro-agent-sdk: ACP client/session, tool bridge · 1 path globs · skills: genesis-backend-dev · 1 gates
+- **sdk-acp** — kiro-agent-sdk: ACP client/session, tool bridge · 1 path globs · skills: genesis-backend-dev · 2 gates
 - **security** — Localhost guardrail, read-only chat, trust, secrets handling · always-on
 - **stories-workbench** — Stories, boards, design/implementation lanes, story workspace, object wiki · 13 path globs · skills: genesis-backend-dev, genesis-web-dev · 4 gates
 - **web-runs** — Runs list, run detail graph, run inspection (web) · 2 path globs · skills: genesis-web-dev · 2 gates
 - **web-shell** — Web app shell, design system, tokens, theming, system pages · 5 path globs · skills: genesis-web-dev · 2 gates
-- **workflows-library** — genesis-workflows: workflows, skills, registries, CI publish gates · 9 path globs · skills: genesis-workflow-authoring · 2 gates
+- **workflows-library** — genesis-workflows: workflows, skills, registries, CI publish gates · 11 path globs · skills: genesis-workflow-authoring · 4 gates

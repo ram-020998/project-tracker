@@ -346,9 +346,9 @@ def test_validation_catches_unknown_subagent_and_missing_permissions(inst, capsy
 def test_preflight_fails_on_missing_repo_and_notes_v3_engine(inst, capsys):
     rc, out = inst.run("install", "--dry-run", capsys=capsys)
     assert "kiro-cli 2.32.0 + V3 engine (launch with `kiro-cli --v3" in out
-    shutil.rmtree(inst.repos / "genesis-core")
+    shutil.rmtree(inst.repos / "genesis-workflows")
     rc, out = inst.run("install", capsys=capsys)
-    assert rc == 1 and "missing: genesis-core" in out and not inst.ghome.exists()
+    assert rc == 1 and "missing: genesis-workflows" in out and not inst.ghome.exists()
 
 
 def test_preflight_warns_without_v3_engine(inst, capsys, monkeypatch):

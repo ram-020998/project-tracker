@@ -81,14 +81,14 @@ def test_unknown_area(env):
     _fail(env, "unknown-area")
 
 
-def test_area_invalid_and_glob_warning(env):
+def test_area_invalid_and_glob_error(env):
     env.write("context/areas.toml", env.read("context/areas.toml")
               + '\n[area.Bad_Name]\ntitle = "x"\npaths = ["nothing/**"]\ncolour = "red"\n\n[area.nopaths]\ntitle = "y"\n')
     code, errors, warnings, d = codes(env)
     msgs = [f["message"] for f in d["findings"] if f["code"] == "area-invalid"]
     assert any("[a-z0-9-]+" in m for m in msgs) and any("unknown key `colour`" in m for m in msgs)
     assert any("no paths" in m for m in msgs)
-    assert "area-glob-empty" in warnings
+    assert "area-glob-empty" in errors and "area-glob-empty" not in warnings  # an error since 50-04 (D12)
 
 
 def test_amends_asymmetric(env):

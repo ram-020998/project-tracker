@@ -5,19 +5,26 @@ description: Use when releasing Genesis — the ADR-019 order, every version loc
 
 # Release
 
-Order & rules: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-019` (genesis-core semver + CORE_MAJOR compat gate) and
+Order & rules: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-019` (the CORE_MAJOR compat gate; amended by ADR-080, the
+platform monorepo — proposed in `{{TRACKER}}/specs/phase-50-platform-monorepo.md` §12 until recorded) and
 `{{TRACKER}}/bible/05-dev-loop-and-release.md` §6; precedent in the latest release sub-spec
 (`{{GENESIS_HOME}}/bin/genesis-ctx search "release" --archive`). Record CI ids and hashes in the release sub-spec's **As run**, not in L0/state.
 
-## Order (ADR-019)
-Release upstream→downstream so the compat gate holds: `genesis-core` first (its `CORE_MAJOR` is the gate key), then the
-libraries/consumers that declare `genesis_core_major`, then `genesis`. A library whose `genesis_core_major != CORE_MAJOR`
-is refused by the loader — bump deliberately, additive-only within a major.
+## Repos and order
+Two code repos. **genesis** is the platform: the app at the root plus `packages/genesis-core`, `packages/kiro-agent-sdk`
+and `packages/genesis-appian-parser`, all released by ONE tag `vX.Y.Z` (no per-library tags; the archived library repos
+keep their old tags). **genesis-workflows** pins that tag. Release genesis first, then genesis-workflows. The loader
+refuses a library whose `genesis_core_major != CORE_MAJOR` — bump `CORE_MAJOR` deliberately, additive-only within a major.
 
 ## Version locations (bump EVERY one — missing one is a known regression)
-- `genesis-core`: its package version + `CORE_MAJOR` when the major changes.
-- each consumer's declared `genesis_core_major` / pinned core version.
-- `genesis` app version; the web build (`web/static`) rebuilt + committed when the SPA changed (genesis-web-dev).
+- genesis, one shared version: the root and the three `packages/*/pyproject.toml`, the parser `__version__`, the
+  `create_app` version and `web/src/version.ts`. `tests/test_version_sync.py` fails on any mismatch — run it before
+  the release commit. `CORE_MAJOR` (`packages/genesis-core/genesis_core/types.py`) and the parser `KB_FORMAT_VERSION`
+  do NOT follow the version: change them only on a core major change / a parse-output change that needs a full re-sync.
+- genesis-workflows, every pin on the SAME genesis tag (L-057): `genesis-core`, `kiro-agent-sdk` (runtime) and
+  `genesis-appian-parser` (dev) as `…/genesis.git@vX.Y.Z#subdirectory=packages/<name>`, the dev `genesis` pin without
+  `#subdirectory`; `registry.json` `genesis_core_version` (= the genesis version) and `genesis_core_major`.
+- `web/static` rebuilt + committed when the SPA changed (genesis-web-dev).
 - any lockfile/pin the dev-loop doc lists. Grep for the current version string before bumping to catch them all.
 
 ## Sequencing (one mutating step per tool call — L-089)
@@ -43,7 +50,7 @@ Only on the operator's explicit go-ahead; back up data first (genesis-live-accep
 ## Release notes template (in the release sub-spec)
 ```
 ## As run (<date>, genesis-release)
-- Versions: genesis-core vX, genesis vY, <libs> …
+- Versions: genesis vX.Y.Z (app + the three packages), genesis-workflows vA.B.C
 - Tags: <repo> <tag> (asked+confirmed)  · Commits: <repo> <hash>
 - CI: <repo> pipeline <id> green
 - Deferred / follow-ups: …

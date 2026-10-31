@@ -8,8 +8,9 @@ from pathlib import Path
 DEFAULT_REPOS = Path("/Users/ramaswamy.u/repo-gitlab/ramaswamy.u")
 INSTALL_JSON = Path.home() / ".kiro" / "genesis" / "install.json"
 
-# The five Genesis code repos under {{REPOS}} (47-02 §3).
-REPO_NAMES = ("genesis", "genesis-core", "genesis-workflows", "kiro-agent-sdk", "genesis-appian-parser")
+# The Genesis code repos under {{REPOS}} (47-02 §3; Phase 50 D12: genesis-core, kiro-agent-sdk and
+# genesis-appian-parser now live in genesis/packages/). project-tracker is handled separately.
+REPO_NAMES = ("genesis", "genesis-workflows")
 
 # Budgets (umbrella Q2), in estimated tokens. The estimator is calibrated to the real tokenizer measured
 # in the 47-09 §4 review: dense ADR/pack prose tokenises at ≈ 2.5 characters/token (chars/4 under-counted

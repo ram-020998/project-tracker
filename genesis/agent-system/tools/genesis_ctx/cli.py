@@ -33,7 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--since", metavar="REV")
     g.add_argument("--files", nargs="+", metavar="F")
     g.add_argument("--staged", action="store_true")
-    s.add_argument("--repo", help="limit to one repo (genesis, genesis-core, …)")
+    s.add_argument("--repo", help="limit to one repo (genesis or genesis-workflows)")
     s.add_argument("--json", action="store_true")
 
     s = sub.add_parser("adr", help="full text of ADR(s) + bible/04 bullets + amendment chain")

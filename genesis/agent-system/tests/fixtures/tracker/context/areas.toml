@@ -2,12 +2,12 @@
 
 [area.core-engine]
 title    = "genesis-core engine"
-paths    = ["genesis-core/genesis_core/**"]
+paths    = ["genesis/packages/genesis-core/genesis_core/**"]
 keywords = ["node", "state", "validator"]
 
 [area.chat]
 title    = "Chat, copilot"
-paths    = ["genesis/genesis/chat/**", "kiro-agent-sdk/src/**"]
+paths    = ["genesis/genesis/chat/**", "genesis/packages/kiro-agent-sdk/src/**"]
 keywords = ["chat", "copilot"]
 skills   = ["genesis-backend-dev"]
 docs     = ["tracker:reference/hitl-design.md"]

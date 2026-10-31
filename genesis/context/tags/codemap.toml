@@ -17,37 +17,37 @@
 #   ["genesis/genesis/  chat/"]
 #   areas = ["chat"]
 
-["genesis-core/genesis_core/  types.py"]
+["genesis/packages/genesis-core/genesis_core/  types.py"]
 areas = ["core-engine"]
 
-["genesis-core/genesis_core/  state.py"]
+["genesis/packages/genesis-core/genesis_core/  state.py"]
 areas = ["core-engine"]
 
-["genesis-core/genesis_core/  workspace.py"]
+["genesis/packages/genesis-core/genesis_core/  workspace.py"]
 areas = ["core-engine"]
 
-["genesis-core/genesis_core/  validators.py"]
+["genesis/packages/genesis-core/genesis_core/  validators.py"]
 areas = ["core-engine"]
 
-["genesis-core/genesis_core/  mcp/registry.py"]
+["genesis/packages/genesis-core/genesis_core/  mcp/registry.py"]
 areas = ["core-engine", "config-secrets"]
 
-["genesis-core/genesis_core/  mcp/custom_store.py"]
+["genesis/packages/genesis-core/genesis_core/  mcp/custom_store.py"]
 areas = ["core-engine", "config-secrets"]
 
-["genesis-core/genesis_core/  mcp/introspect.py"]
+["genesis/packages/genesis-core/genesis_core/  mcp/introspect.py"]
 areas = ["core-engine", "config-secrets"]
 
-["genesis-core/genesis_core/  clis/registry.py"]
+["genesis/packages/genesis-core/genesis_core/  clis/registry.py"]
 areas = ["core-engine", "config-secrets"]
 
-["genesis-core/genesis_core/  clis/custom_store.py"]
+["genesis/packages/genesis-core/genesis_core/  clis/custom_store.py"]
 areas = ["core-engine", "config-secrets"]
 
-["genesis-core/genesis_core/  nodes/"]
+["genesis/packages/genesis-core/genesis_core/  nodes/"]
 areas = ["core-engine", "sdk-acp", "workflows-library"]
 
-["genesis-core/genesis_core/  state.py #2"]
+["genesis/packages/genesis-core/genesis_core/  state.py #2"]
 areas = ["core-engine", "observability-credits"]
 
 ["genesis/genesis/  db/"]

@@ -28,8 +28,8 @@ from pathlib import Path
 
 SOURCE_DEFAULT = Path(__file__).resolve().parents[2]  # .../agent-system
 DEFAULT_REPOS = "/Users/ramaswamy.u/repo-gitlab/ramaswamy.u"
-# The five Genesis code repos under {{REPOS}} (47-02 §3; same list as genesis_ctx.config.REPO_NAMES).
-REPO_NAMES = ("genesis", "genesis-core", "genesis-workflows", "kiro-agent-sdk", "genesis-appian-parser")
+# The Genesis code repos under {{REPOS}} (same list as genesis_ctx.config.REPO_NAMES; Phase 50 D12).
+REPO_NAMES = ("genesis", "genesis-workflows")
 CONF_KEYS = ("TRACKER", "REPOS", "GENESIS_HOME", "MODEL")
 PLACEHOLDER = re.compile(r"\{\{[A-Z][A-Z0-9_]*\}\}")
 MANIFEST_VERSION = 1

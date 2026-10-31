@@ -36,9 +36,9 @@ REPO_FILES = [
     "genesis/genesis/kb/stories.py",
     "genesis/genesis/kb/store.py",
     "genesis/genesis/kb/boards.py",
-    "genesis-core/genesis_core/types.py",
-    "genesis-core/genesis_core/nodes/agent.py",
-    "kiro-agent-sdk/src/kiro_agent_sdk/client.py",
+    "genesis/packages/genesis-core/genesis_core/types.py",
+    "genesis/packages/genesis-core/genesis_core/nodes/agent.py",
+    "genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py",
 ]
 
 

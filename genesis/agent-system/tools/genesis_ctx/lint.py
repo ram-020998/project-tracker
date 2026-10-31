@@ -61,8 +61,9 @@ class Lint:
                 if not isinstance(v, list) or not all(isinstance(x, str) for x in v):
                     self.err("area-invalid", f"area `{name}`: `{k}` must be an array of strings", w)
             for g in a.get("paths", []) or []:
+                # An error since 50-04 (D12): a stale glob silently stops a pack/check loading the area's rules.
                 if isinstance(g, str) and not self.c.expand(g):
-                    self.warn("area-glob-empty", f"area `{name}`: glob `{g}` matches no file", w)
+                    self.err("area-glob-empty", f"area `{name}`: glob `{g}` matches no file", w)
 
     def _areas_known(self, names, where, owner):
         if not isinstance(names, list):

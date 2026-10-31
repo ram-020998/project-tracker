@@ -1,15 +1,15 @@
 # Fixture code-map tags (schema: 47-02 §4.3).
 
-["genesis-core/genesis_core/  types.py"]
+["genesis/packages/genesis-core/genesis_core/  types.py"]
 areas = ["core-engine"]
 
-["genesis-core/genesis_core/  state.py"]
+["genesis/packages/genesis-core/genesis_core/  state.py"]
 areas = ["core-engine"]
 
-["genesis-core/genesis_core/  nodes/"]
+["genesis/packages/genesis-core/genesis_core/  nodes/"]
 areas = ["core-engine"]
 
-["genesis-core/genesis_core/  state.py #2"]
+["genesis/packages/genesis-core/genesis_core/  state.py #2"]
 areas = ["core-engine"]
 
 ["genesis/genesis/  db/"]

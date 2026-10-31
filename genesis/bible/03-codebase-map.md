@@ -9,7 +9,7 @@
 ## 4. Codebase map (where things live)
 
 ```
-genesis-core/genesis_core/
+genesis/packages/genesis-core/genesis_core/
   types.py        PlatformContext (run_id, workspace, mcp, clis, settings, emit, secrets,
                   environments, checkpointer, extras); ValidationResult; Node(name,fn,kind);
                   CORE_MAJOR=1; CompatError; check_compat; CTX_KEY="genesis_ctx"; ctx_from_config.
@@ -199,7 +199,7 @@ genesis-workflows/
   (self-contained pyyaml validator: registry+manifest+parity+fixture gate; a `skills-validate` CI job) — Phase 14-02.
 
 # ── Phase 25 — Architectural Foundation Hardening (genesis v0.49.0 + genesis-core v0.9.4) ──
-genesis-core/genesis_core/
+genesis/packages/genesis-core/genesis_core/
   util/atomic_json.py   (25-03) path_lock / atomic_write_json (temp+os.replace) / read_modify_write_json —
                         the shared atomic-write primitive the custom MCP/CLI stores + genesis config use.
   agents/               (25-05, ADR-051) AgentProvider Protocol + KiroAcpProvider (wraps nodes/agent._load_real)
@@ -229,7 +229,7 @@ genesis/genesis/
   db/migrations/        m0013_lifecycle (lifecycle_transitions audit, 25-01) + m0014_row_version (optimistic-lock
                         CAS column on kb_features/kb_feature_specs, 25-08); current_version=14.
   runs/manager.py       RunManager.start(idempotency_key=…) — in-memory dedupe of a double-submit (25-08, §17).
-genesis-core/genesis_core/
+genesis/packages/genesis-core/genesis_core/
   nodes/reliable.py     (25-10) reliable_agent_step(...) + add_reliable_step(g, step, …) — compose the ADR-011
                         trio (kiro_node agent + validator_node + retry/escalation) in one call; ReliableStep.
 genesis/genesis/
@@ -249,10 +249,10 @@ genesis/genesis/api/search.py   register_search_routes: GET /search?q= → typed
   + shared/layout/CommandPalette.tsx (debounced entity search merged into the palette groups).
 
 # ── Phase 29 — UX Design stage (grounded mockup→implementation analysis; ADR-057) ──
-kiro-agent-sdk/src/kiro_agent_sdk/
+genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/
   __init__.py           query/collect/collect_streaming gain an optional `images` kwarg → client.prompt(images=)
                         (passed ONLY when present → byte-identical for image-unaware peers). Additive.
-genesis-core/genesis_core/
+genesis/packages/genesis-core/genesis_core/
   nodes/agent.py        kiro_node(image_docs=[blackboard png names]) → _load_image_parts base64→ACP image parts
                         (missing files skipped); AgentProvider.collect/collect_streaming + KiroAcpProvider gain
                         `images` (passed only when present; SDK gates on promptCapabilities.image). Additive.
@@ -613,7 +613,7 @@ genesis/web/src/features/workbench/
 
 # ── Phase 39 — Run inspection & node observability (SHIPPED genesis v0.70.0 + genesis-core v0.9.7; ADR-066 Accepted) ──
 # Additive; no DB migration. Released core→genesis→workflows.
-genesis-core/genesis_core/
+genesis/packages/genesis-core/genesis_core/
   nodes/agent.py   kiro_node writes each turn's rendered prompt to a blackboard file `_prompts/<node>-p<pass>[-i<idx>]-a<attempt>-<ms>.txt`
                    + emits `agent.prompt` {prompt_ref, model, mcp, tools(effective), image_docs, iteration, attempt};
                    adds attempt+iteration to agent.result. POINTER-ONLY (prompt bytes never inlined — ADR-010/018).
@@ -642,7 +642,7 @@ genesis-workflows/  a `description` on EVERY graph node of all 12 workflows (175
 # ── Phase 40 — Self-Healing Reliability: the second reliability tier (SHIPPED genesis-core v0.9.7 + genesis-workflows v0.17.0; ADR-067 Accepted) ──
 # Additive; CORE_MAJOR unchanged; no DB migration. genesis needs NO code change (the run-detail graph renders
 # the new heal/reassemble nodes from the workflow topology). Released core→genesis→workflows.
-genesis-core/genesis_core/
+genesis/packages/genesis-core/genesis_core/
   nodes/healing.py   attach_healing(g, *, verify, heal, reassemble, restart_target, nxt, gate, retry_max,
                      max_heal=1, max_restart=1, verdict_artifact="verify.json", heal_artifact="heal.json",
                      guidance_key="_healing", verify_check=check_verification_report, heal_check=check_heal_decision)
@@ -673,7 +673,7 @@ genesis-workflows/   all four analysis workflows adopt attach_healing (verify→
 
 **Phase 45 — Incremental Delta Sync (genesis-appian-parser v0.3.0 · genesis v0.76.0 · genesis-workflows v0.21.0):**
 ```
-genesis-appian-parser/
+genesis/packages/genesis-appian-parser/
   api.py               parse(source, *, known_objects=, known_edges=) — KB-aware incremental parse (objects/edges =
                        package only; bundles + stats.derived whole-app; stats.incremental{…skipped_entry_points,
                        incomplete_flow_bundles}); delta_roots(known_objects); _stub(KnownObject).

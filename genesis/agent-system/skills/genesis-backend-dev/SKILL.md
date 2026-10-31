@@ -1,6 +1,6 @@
 ---
 name: genesis-backend-dev
-description: Use when writing or changing Python in the Genesis backend (genesis, genesis-core, genesis-workflows, kiro-agent-sdk, genesis-appian-parser) — the venv, the test/ruff commands, Python conventions and the regression-test rule. For the genesis-dev agent.
+description: Use when writing or changing Python in the Genesis backend (the genesis repo — app plus packages/genesis-core, packages/kiro-agent-sdk, packages/genesis-appian-parser — and genesis-workflows) — the layout, the venv, the install command, the test/ruff commands, Python conventions and the regression-test rule. For the genesis-dev agent.
 ---
 
 # Backend development (Python)
@@ -11,14 +11,21 @@ Authoritative sources (read in ranges, do not read whole):
 - Tests: `{{TRACKER}}/reference/testing-strategy.md`.
 - For the rules that apply to the files you touch: `{{GENESIS_HOME}}/bin/genesis-ctx pack <sub-spec>` (or `--areas …`).
 
-## Environment
-- One shared venv for ALL Python repos: `{{REPOS}}/genesis/.venv`.
+## Layout and environment
+- Two code repos: `{{REPOS}}/genesis` (the app at the root; the libraries in `packages/genesis-core`,
+  `packages/kiro-agent-sdk`, `packages/genesis-appian-parser`, each with its own `pyproject.toml`, `tests/` and ruff
+  config) and `{{REPOS}}/genesis-workflows`. No internal package declares another one as a dependency.
+- One shared venv for everything: `{{REPOS}}/genesis/.venv` (the SDK's own venv is retired).
 - Run Python as `{{REPOS}}/genesis/.venv/bin/python …` (not a bare `python`).
-- `kiro-agent-sdk` has its own venv: `{{REPOS}}/kiro-agent-sdk/.venv` — use it for that repo's tests.
+- Install / refresh the dev venv with the one install command, from `{{REPOS}}/genesis`:
+  `scripts/install-packages.sh --editable --dev` (the three packages + the app, editable). Never `pip install` an
+  internal package by name — an internal name must never be resolved against a package index.
 
 ## Gates (run before you hand off; `{{GENESIS_HOME}}/bin/genesis-ctx check` lists the exact ones per area)
-- `{{REPOS}}/genesis/.venv/bin/python -m pytest -q` (narrow to the touched package while iterating).
-- `{{REPOS}}/genesis/.venv/bin/ruff check .` (line-length and lint per each repo's config).
+- App: in `{{REPOS}}/genesis`, `.venv/bin/python -m pytest -q` and `.venv/bin/ruff check genesis` (narrow while iterating).
+- A library: in `{{REPOS}}/genesis/packages/<name>`, `../../.venv/bin/python -m pytest -q` and
+  `../../.venv/bin/ruff check <scope>` (`genesis_core` · `src tests` · `.`).
+- genesis-workflows: `../genesis/.venv/bin/python ci/validate_library.py` and its pytest (see `check`).
 - Type/parity checks where the area defines them (workflow META↔yaml parity, etc.).
 
 ## Conventions

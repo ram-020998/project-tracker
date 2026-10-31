@@ -22,33 +22,36 @@
 #   Any other key is a lint error. Globs: `**` = any number of path segments (incl. none),
 #   `*` / `?` = within one segment.
 #
-# The five repos under {{REPOS}}: genesis (app: genesis/genesis + genesis/web),
-# genesis-core, genesis-workflows, kiro-agent-sdk, genesis-appian-parser.
+# The two code repos under {{REPOS}} (Phase 50, D12): genesis (app: genesis/genesis + genesis/web; libraries:
+# genesis/packages/{genesis-core,kiro-agent-sdk,genesis-appian-parser}) and genesis-workflows.
+# Library gates run from the package directory with the shared venv (genesis/.venv).
+# An area glob that matches no file is a lint error (50-04).
 
 # ───────────────────────────── engine & SDK ─────────────────────────────
 
 [area.core-engine]
 title    = "genesis-core: LangGraph nodes, state, validators, reliability, healing"
-paths    = ["genesis-core/genesis_core/**"]
+paths    = ["genesis/packages/genesis-core/genesis_core/**"]
 keywords = ["node", "graph", "state", "validator", "reliability", "healing", "subgraph", "langgraph", "gate"]
 skills   = ["genesis-backend-dev"]
-gates    = ["cd genesis-core && ../genesis/.venv/bin/python -m pytest -q -p no:warnings",
-            "cd genesis-core && ../genesis/.venv/bin/ruff check genesis_core"]
+gates    = ["cd genesis/packages/genesis-core && ../../.venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis/packages/genesis-core && ../../.venv/bin/ruff check genesis_core"]
 
 [area.sdk-acp]
 title    = "kiro-agent-sdk: ACP client/session, tool bridge"
-paths    = ["kiro-agent-sdk/src/**"]
+paths    = ["genesis/packages/kiro-agent-sdk/src/**"]
 keywords = ["acp", "sdk", "session", "agent client", "tool bridge", "mcp env"]
 skills   = ["genesis-backend-dev"]
-gates    = ["cd kiro-agent-sdk && .venv/bin/python -m pytest -q"]
+gates    = ["cd genesis/packages/kiro-agent-sdk && ../../.venv/bin/python -m pytest -q",
+            "cd genesis/packages/kiro-agent-sdk && ../../.venv/bin/ruff check src tests"]
 
 [area.parser]
 title    = "genesis-appian-parser: Appian object/XML parsing"
-paths    = ["genesis-appian-parser/genesis_appian_parser/**"]
+paths    = ["genesis/packages/genesis-appian-parser/genesis_appian_parser/**"]
 keywords = ["parser", "appian", "xml", "sail parse", "object parse"]
 skills   = ["genesis-backend-dev"]
-gates    = ["cd genesis-appian-parser && ../genesis/.venv/bin/python -m pytest -q",
-            "cd genesis-appian-parser && ../genesis/.venv/bin/ruff check ."]
+gates    = ["cd genesis/packages/genesis-appian-parser && ../../.venv/bin/python -m pytest -q",
+            "cd genesis/packages/genesis-appian-parser && ../../.venv/bin/ruff check ."]
 
 [area.workflows-library]
 title    = "genesis-workflows: workflows, skills, registries, CI publish gates"
@@ -56,13 +59,17 @@ paths    = ["genesis-workflows/workflows/**", "genesis-workflows/skills/**",
             "genesis-workflows/ci/**", "genesis-workflows/schemas/**",
             "genesis-workflows/registry.json", "genesis-workflows/bundles.json",
             "genesis-workflows/skills-registry.json", "genesis-workflows/mcp-registry.json",
-            "genesis-workflows/cli-registry.json"]
+            "genesis-workflows/cli-registry.json",
+            # Phase 50 (D16): the workflow scaffolder and test harness in the app (ADR-014, ADR-011)
+            "genesis/genesis/cli/create_workflow.py", "genesis/genesis/cli/test_workflow.py"]
 keywords = ["workflow", "registry", "bundle", "publish gate", "skill package", "langgraph.json"]
 skills   = ["genesis-workflow-authoring"]
+gates    = ["cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_library.py",
+            "cd genesis-workflows && ../genesis/.venv/bin/python -m pytest -q workflows --ignore=workflows/_fixtures",
+            "cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis"]
 
 # ───────────────────────────── genesis backend ─────────────────────────────
-gates    = ["cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_library.py",
-            "cd genesis-workflows && ../genesis/.venv/bin/python -m pytest -q workflows --ignore=workflows/_fixtures"]
 
 [area.runs-worker]
 title    = "Run manager, subprocess worker, HITL gates, events/SSE, checkpoints, scheduler"
@@ -94,10 +101,10 @@ gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
 [area.chat]
 title    = "Chat, copilot, chat modes, skills-in-chat"
 paths    = ["genesis/genesis/chat/**", "genesis/genesis/skills/**",
-            "genesis/web/src/features/chat/**", "kiro-agent-sdk/src/**"]
+            "genesis/web/src/features/chat/**", "genesis/packages/kiro-agent-sdk/src/**"]
 keywords = ["chat", "copilot", "chat mode", "skill", "steering", "session"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
-gates    = ["cd kiro-agent-sdk && .venv/bin/python -m pytest -q",
+gates    = ["cd genesis/packages/kiro-agent-sdk && ../../.venv/bin/python -m pytest -q",
             "cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
             "cd genesis && .venv/bin/ruff check genesis",
             "cd genesis/web && npm run lint && npm run typecheck && npm test",
@@ -207,7 +214,9 @@ gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
 [area.distribution]
 title    = "Install, lockfile, shipping, launcher, update"
 paths    = ["genesis/genesis/dist/**", "genesis/genesis/runtime/launcher.py",
-            "genesis/genesis/runtime/updater.py", "genesis/genesis/cli/install.py"]
+            "genesis/genesis/runtime/updater.py", "genesis/genesis/cli/install.py",
+            # Phase 50 (D16): the CLI entry point (launcher commands, the D15 missing-library check)
+            "genesis/genesis/cli/main.py"]
 keywords = ["install", "lockfile", "ship", "launcher", "update", "distribution", "catalog"]
 skills   = ["genesis-backend-dev"]
 gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
