@@ -43,6 +43,7 @@ Genesis uses the libraries (D2). One repo gives one change, one review, one tag 
 | D11 | kiro-agent-sdk aligned (hatchling, Python 3.13, pinned ruff, `src/` kept); its POC files removed. |
 | D12 | Area names kept, paths and gates repointed; an empty area glob becomes a lint error; repo lists shrink. |
 | D13 | Old repos archived with a pointer commit after genesis-workflows is re-pinned; local checkouts moved to `_archived/`; ask before each. |
+| D14 | ADR-080 amends ADR-046 as well as ADR-019 (confirmed); defaults F1–F6 accepted. |
 
 ## 4. Current state (code-grounded — full detail in `50-01-findings.md` §2)
 
@@ -133,7 +134,7 @@ Versions assume Phase 49 ships genesis v0.79.0 + genesis-workflows v0.23.0 (49-0
   user any time).
 - **Deferred:** none planned. A later phase may revisit layout B or CI path filters if they become worth it.
 
-## 10. Defaults (assumed by the spec writer; change on request)
+## 10. Defaults (proposed by the spec writer, accepted by the user 2026-10-31 — D14)
 
 | # | Default |
 |---|---|
