@@ -56,3 +56,15 @@
     while the coverage donut says "Not covered"; pick one term everywhere. The shared `CoverageBadge` uses amber for both
     "Uncovered" and "Needs review"; align it with the donut (Covered green, Needs review amber, Not covered red). Also
     the style tidy of the slice lookups in `CoveragePanel.tsx` (no behaviour change).
+
+## Added at the Phase 49 write-back (genesis-docs, 2026-10-31)
+
+14. **`attach_healing` keeps its verify/heal retry counters across a guided restart (49-03 As built P2, genesis-core).**
+    After a patch and a restart, a pass-2 `verify` failure still pays for a `heal` turn that can only escalate. Both
+    live Test Design runs in 49-08 went through the full ladder and escalated (65 and 83 nodes). Suggested fix: reset
+    the counters (or skip the heal turn when no patch budget is left) and add a genesis-core test; a `CORE_MAJOR`-safe,
+    additive change.
+15. **CSV formula escaping (49-04 review n3).** Neither the Jira export nor the test-suite CSV escapes cells that start
+    with `=`, `+`, `-` or `@`. Fix both exports together.
+16. **One running top-up per feature, enforced in the DB (49-04 review n5).** Today the service guards it; the Hub phase
+    (item 2) needs a partial unique index.

@@ -58,7 +58,7 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Untagged = not ye
 - ADR-053 [memory,chat,core-engine] — The Agentic Memory Layer distills persistent memory from stored conversations in two scopes; personal memory is never shared.
 - ADR-054 [memory,runs-worker,core-engine,db] — Memory lives in a separate `~/.genesis/memory.db` with its own migrations (genesis.db untouched) and a local embedder.
 - ADR-055 [web-shell,web-runs,chat,features-stages,stories-workbench,documents] — Light-first, MUI-inspired design language by evolving the existing tokens + Tailwind + shadcn-style primitives — NOT adopting `@mui/material`.
-- ADR-056 [features-stages] (amends 044; amended by 057,058) — A Feature is a workspace of parallel, independently-advanceable, plug-in stage containers over a shared substrate; each stage has its own lifecycle.
+- ADR-056 [features-stages] (amends 044; amended by 057,058,078) — A Feature is a workspace of parallel, independently-advanceable, plug-in stage containers over a shared substrate; each stage has its own lifecycle.
 - ADR-057 [features-stages,workflows-library] (amends 056; amended by 058) — The UX Design stage turns an uploaded PDF mockup into a grounded UX Implementation Analysis via the deterministic `ux-design-analysis` workflow.
 - ADR-058 [features-stages,workflows-library] (amends 056,057) — The Technical Design stage turns the finalized Spec + UX analysis into a grounded, workstream-decomposed, object-level design; a stage MAY declare prerequisites.
 - ADR-059 [features-stages,workflows-library,stories-workbench] (amended by 075) — The Feature Breakdown stage turns Spec + UX + Technical Design into a grounded, workstream-decomposed, Jira-ready backlog.
@@ -80,3 +80,5 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Untagged = not ye
 - ADR-075 [features-stages,stories-workbench,chat] (amends 042,059,060) — Every spec section/clause carries a hidden `data-cid` that PROGRAM code owns and repairs; stories trace to spec clauses.
 - ADR-076 [features-stages,chat,stories-workbench] (amends 031,045,050) — A locked spec changes only through a change request: chat drafts the CR, program code applies the plan.
 - ADR-077 [release-ci,security] — Agents load L0 + role + a genesis-ctx task pack, never the bulk docs whole; rules are selected by program (tags/areas/paths), never by search; history is archived verbatim; never run with --trust-all-tools.
+- ADR-078 [features-stages,stories-workbench,workflows-library] (amends 056) — A fifth feature stage, Test Design, starts after stories are finalized; Finalize once into ordered TS- scenarios that reference reusable TC- cases; Draft → Ready → Retired, retire not delete.
+- ADR-079 [stories-workbench,kb-sync,features-stages] — Cases link to stories (fingerprinted → Needs review) and to KB-confirmed objects by (app_uuid, object_uuid); impact walks kb_dependencies inbound on demand (direct + N hops, default 2) and stores nothing.

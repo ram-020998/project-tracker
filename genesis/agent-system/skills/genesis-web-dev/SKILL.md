@@ -20,7 +20,12 @@ When you change the SPA, rebuild and commit the built assets the backend serves:
 `cd {{REPOS}}/genesis/web && npm run build`, then commit the regenerated `web/static` (or the repo's built-assets
 path) in the SAME commit as the source. A release that ships stale `web/static` is a known regression.
 Run edit → build → commit as separate, sequential tool calls — never in one parallel batch (L-089: 48-04 B1 built the
-old source). After the commit, prove it: a fresh `npm run build` must leave `git status --short --untracked-files=all` empty.
+old source). After the commit, prove it: a fresh `npm run build`, then — in a **separate** call after the build has
+finished — `git status --short --untracked-files=all` must be empty. Never batch that `git status` (or any `grep` of the
+bundle) with the build it checks: it can report the pre-build tree (L-089; 49-07, H2, H3, H4).
+
+When you run a dev-server width probe, start it with cwd = `web/` and confirm a known Tailwind class resolves first;
+write each probe run to its own output file (L-090).
 
 ## Layout (tables, lists)
 jsdom computes no layout. For table/list UI, size columns from a real-browser geometry probe at several widths

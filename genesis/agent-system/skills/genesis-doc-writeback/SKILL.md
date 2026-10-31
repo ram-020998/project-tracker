@@ -27,7 +27,9 @@ One home per fact. Move a finished phase's knowledge into those homes, keep the 
 Run every `{{GENESIS_HOME}}/bin/genesis-ctx …` command **unpiped** — no `| grep`, `| head`, `> file` or other pipe — and
 read files with the built-in `read`/`grep` tools, never a shell `cat`/`grep` pipe. The shell allow list is tight
 (47-06) and shell writes are gated by `shell-guard.sh`, so a piped or redirected helper will be refused or dropped; an
-unpiped command's full output comes straight back to you (47-09 fix m8).
+unpiped command's full output comes straight back to you (47-09 fix m8). Run each `genesis-ctx add|index` call alone,
+one per tool call: they write the same files and each assigns the next id; a verifying read goes in its own later call
+(L-089, hit in the Phase 49 write-back).
 1. **Gather:** the umbrella; each sub-spec's **As built**/**As run**; `specs/<phase>/reviews/*`;
    `git log <prev-tag>..<new-tag> --oneline` per changed repo; `{{GENESIS_HOME}}/bin/genesis-ctx status`.
 2. **ADRs:** each proposed ADR → **Accepted** (Status line) in the decision-log; new ones via `{{GENESIS_HOME}}/bin/genesis-ctx add adr`;

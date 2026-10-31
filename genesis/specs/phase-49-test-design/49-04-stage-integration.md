@@ -169,6 +169,9 @@ below. n3–n5 are recorded decisions.
 2. **Top-ups settle on the `run.final` payload status.** `RunManager._finalize` calls the observers before it writes
    the run status (`runs/manager.py:134-140`), so re-reading `rec.status` in a live observer sees `running`. The
    reconcile paths use the run record.
+   > **Superseded by 49-08 H1 (genesis `d62ae03`, shipped in v0.79.0; noted by genesis-docs 2026-10-31):** `_finalize`
+   > now stores the status **before** it announces `run.final`, so a live observer re-reading `rec.status` sees the
+   > terminal value. Settling top-ups on the payload status was kept and is still correct. Lesson L-093.
 3. `start` refuses: prerequisites (F2); a finalized suite (R5); an existing completion chat ("use re-run"); a bound run
    that is still active, or done whose document is not open yet. A failed or cancelled bound run does not block a fresh
    start. Draft → in-progress goes through the stage `LifecycleService` (`start`). `rerun` mirrors the breakdown
@@ -206,6 +209,9 @@ below. n3–n5 are recorded decisions.
   The existing tests call `_finalize` after a manual `set_status("done")`, which hides it. Fix: pass the payload status
   into `_finalize`, or write the status before emitting `run.final`, plus a regression test through
   `RunManager._finalize`.
+  **Resolved in Phase 49 (genesis-docs note, 2026-10-31):** the user signed off on fixing this inside the phase (49-01
+  D17); 49-08 H1 writes the status before `run.final` and adds the live-path tests, so this is no longer a backlog item.
+  The lesson candidates below are recorded as L-093 (the observer one, merged with H1's) and L-094 (the registry one).
 - **Backlog (n3):** formula escaping for both CSV exports. **(n5):** a DB guard for one running top-up per feature,
   for the Hub phase.
 

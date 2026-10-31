@@ -789,3 +789,75 @@ genesis/web/src/
   app/router.tsx       applications/:appUuid/wiki → WikiRedirect (?tab=object-wiki); …/wiki/:objectUuid → ObjectWikiPage.
   shared/layout/breadcrumbs.ts  "Object Wiki" crumb + the wiki:<uuid> object crumb.
 ```
+
+**Phase 49 — Test Design: test suites, scenarios, cases and test impact analysis (genesis v0.79.0 · genesis-workflows v0.23.0; m0025):**
+```
+genesis/genesis/
+  db/migrations/m0025_test_design.py  Migration `testdesign` (name test_design, v25): kb_test_suites, kb_test_scenarios,
+                       kb_test_cases, kb_test_scenario_steps (ordered refs, 1-based), kb_test_case_stories (fingerprint),
+                       kb_test_case_objects (app_uuid, object_uuid|NULL, name/type, diff_hash, origin), kb_test_topups;
+                       partial unique indexes, sync_uuid per table, kb_sequences rows test_case / test_scenario (DB v25).
+  kb/testdesign.py     TestDesignStore (enums validated in the store, no CHECK): create_from_design (rigid; F10 order;
+                       TC-/TS- inside the tx), get_case/get_scenario + _scenario_dtos (one builder; steps carry
+                       case_title/case_status), cases_for_story/object/scenario (retired last or excluded),
+                       create_case/create_scenario (+ links, one tx), set_steps, set_case_stories, set_status (re-checks
+                       invariants), lifecycle_context (store-derived preconditions), topups (create/get/list/topup_for_run/
+                       set_topup_status/apply_topup); _suite_stories(keep=) refuses a NEW Task link; _check_step_cases
+                       (refusals name TC- keys); the only writers of kb_test_case_objects: _link_object,
+                       _resolve_object_link, _delete_object_link. LinkRef, ObjectResolver, story_fingerprint
+                       (normalize_text), object_link_state (resolved/unresolved/suspect/removed, derived on read).
+  domain/              EntityKind.TEST_CASE/TEST_SCENARIO; LifecycleState.READY/RETIRED; TestStatus; TEST_TRANSITIONS +
+                       preconditions/reasons; build_test_lifecycle_service; ConflictError; AlreadyFinalizedError(what=);
+                       LifecycleService: EntityLifecycle.context (store ctx overrides the caller's) + callable
+                       precondition_reasons. transitions.py _reopen_locked_reason / TEST_DESIGN_REOPEN_REASON (stage-aware).
+  services/testimpact.py  TestImpactService: resolve_object + resolver() (caching; keeps a UUID only with a current
+                       kb_objects row, else name+type, else unresolved), link_implemented_objects / link_feature_implemented
+                       (the D7 linker), resolve_unresolved (read-only _has_unresolved first) / reconcile_all (startup),
+                       changed_from_objects|story|sync, list_syncs, impact (inbound walk over current_adjacency, no cap,
+                       hop labels, depth 1–5); SyncLinkObserver; ImpactNotFoundError (404) / ImpactConflictError (409).
+  services/testdesign_stage.py  TestDesignStageService: prereqs_ready, start/rerun/launch_test_design (multipart,
+                       upstream.json snapshot), finalize_test_design (sandbox-first HTML, id-matched embedded JSON, pre-clean,
+                       validate_design → 422), suite_view/suite_coverage, start_topup/latest_topup/reconcile_topup(s)/
+                       settle_topup/apply_topup/discard_topup (snapshots under <stage_dir>/topups/<hex>/), suite_csv;
+                       TopupRunObserver; TestDesignError family with .status.
+  api/testdesign.py    register_testdesign_routes (registered BEFORE register_features_routes so
+                       /stages/test_design/start|rerun|finalize beat /stages/{stage}/…): suite, coverage, export.csv,
+                       top-ups, case/scenario CRUD + transition (+ allowed), story/object test-case reads, POST
+                       /applications/{app}/test-impact + /test-impact/syncs; one _call error map; on-read _resolve (R8).
+  api/app.py           one TestImpactService (app.state.test_impact) + TestDesignStageService (app.state.test_design),
+                       their observers, startup reconcile_all + reconcile_topups (to_thread); the startup hook's first step
+                       is RunManager.fail_orphaned_runs.
+  runs/manager.py      _store_status (status stored BEFORE run.final, terminal + gate/pause paths; logged, never blocks the
+                       announcement); fail_orphaned_runs (startup sweep behind the state_dir/run/runs.lock flock —
+                       _hold_run_owner_lock/_run_owner_lock_path; adopt terminal run.final or last gate, else fail with
+                       ORPHANED_DETAIL).
+  chat/supervisor.py   reconcile back-fills a terminal note only from a durable run.final whose status matches.
+  chat/stage_finalizer.py  _Binding.skip_modes; the test-design-analysis binding (test-design.html, chat mode
+                       test_design, _seed_test; skips mode == "topup").
+  chat/mode_profile.py the test_design ChatModeProfile + _STEERING_TEST (embedded JSON ↔ cards, `<` as \u003c).
+  chat/story_implementation_finalizer.py  runs the D7 linker (_link_tests) best-effort after submit-review.
+  kb/stages.py / chat/store.py / stage_artifacts.py  test_design in VALID_STAGES, STAGE_CHAT_MODES, STAGE_ARTIFACT_FILE;
+                       ArtifactKind.TEST_DESIGN; stage_artifacts.spec_version (shared).
+  services/spec_change.py  stage_ctx: test_design downstream_locked = suite finalized; carries "stage".
+  collab/service.py    LOCAL_ONLY_STAGES = {"test_design"}: publish refuses, adoption skips, pull skips (cursor advances).
+  kb/_graph_reads_mixin.py  module-level current_adjacency(conn, app_uuid, direction) (the mixin delegates).
+genesis/web/src/
+  features/test-design/  TestDesignEntry, StageControls (Re-run, Finalize tests, banner, Generate tests),
+                       TestDesignCardActions, NotesAndFiles, TopupDialog/TopupPanel, TestsTab (+ CoveragePanel: SVG donut
+                       Covered/Needs review/Not covered, legend buttons, Tasks line, CategoryDialog), CasesTable (probe-sized
+                       columns, KeyList), LifecycleActions (server `allowed` only), ObjectPicker, TestCasePage,
+                       TestScenarioPage, TestsSections (story + Object Wiki), TestImpactTab; logic.ts (filters/sort,
+                       previewDecisions, groupImpact, coverageBreakdown/sharePct), hooks.ts, paths.ts, badges.tsx.
+  features/features/stages.ts  StageKey "test-design"; StageDescriptor.gate + localOnly; isLocalOnlyStage;
+                       stageRunInFlight + STAGE_RUN_POLL_MS (useFeature polls while a stage run is in flight);
+                       deriveFeatureStatus: Completed → Draft (none started) → else In progress.
+  FeaturePage.tsx      Tests tab (/tests), stage grid sm:2 · lg:3 · 2xl:5, wrapping card footers.
+  types/testdesign.ts · lib/api/testdesign.ts · qk.testDesign.* · shared/ui/popover.tsx · test/fixtures/testdesign/ (9).
+  app/router.tsx       …/features/:id/tests, …/test-cases/:caseId, …/test-scenarios/:scenarioId; app tab ?tab=test-impact.
+genesis-workflows/
+  workflows/test-design-analysis 0.1.0  resolve_inputs → load_inputs → plan_epics → per-epic design_cases loop (v_cases)
+                       → compose_scenarios (v_scenarios) → assemble (suite.json → test-design.json + test-design.html, or
+                       proposals.json + topup.html) → verify + attach_healing(heal_check=check_heal) → present; modes
+                       design | topup; tests/fixtures = the golden contracts vendored by genesis.
+  ci/validate_library.py  gate 8: no workflows/*/tests/__init__.py.
+```

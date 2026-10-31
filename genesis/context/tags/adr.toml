@@ -704,10 +704,10 @@ status = "accepted"
 areas = ["features-stages"]
 paths = []
 amends = ["ADR-044"]
-amended_by = ["ADR-057", "ADR-058"]
+amended_by = ["ADR-057", "ADR-058", "ADR-078"]
 superseded_by = ""
 rule = "A Feature is a workspace of parallel, independently-advanceable, plug-in stage containers over a shared substrate; each stage has its own lifecycle."
-reviewed_fp = "c55d6ae5253a6473"
+reviewed_fp = "826c21e11acb1001"
 b04 = "skip"
 
 [ADR-057]
@@ -960,3 +960,25 @@ amended_by = []
 superseded_by = ""
 rule = "Agents load L0 + role + a genesis-ctx task pack, never the bulk docs whole; rules are selected by program (tags/areas/paths), never by search; history is archived verbatim; never run with --trust-all-tools."
 reviewed_fp = "f390b21498029d86"
+
+[ADR-078]
+title = "The Test Design stage and the test model (Phase 49)"
+status = "accepted"
+areas = ["features-stages", "stories-workbench", "workflows-library"]
+paths = []
+amends = ["ADR-056"]
+amended_by = []
+superseded_by = ""
+rule = "A fifth feature stage, Test Design, starts after stories are finalized; Finalize once into ordered TS- scenarios that reference reusable TC- cases; Draft → Ready → Retired, retire not delete."
+reviewed_fp = "209898e516fbd672"
+
+[ADR-079]
+title = "Test traceability and test impact analysis (Phase 49)"
+status = "accepted"
+areas = ["stories-workbench", "kb-sync", "features-stages"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Cases link to stories (fingerprinted → Needs review) and to KB-confirmed objects by (app_uuid, object_uuid); impact walks kb_dependencies inbound on demand (direct + N hops, default 2) and stores nothing."
+reviewed_fp = "d51ef6d1127e3685"

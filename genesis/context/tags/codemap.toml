@@ -157,3 +157,6 @@ areas = ["features-stages", "chat", "stories-workbench", "collaboration-hub", "w
 
 ["Phase 48 — The Object Wiki in the application page (genesis v0.78.0; read-only, no migration)"]
 areas = ["stories-workbench", "api", "kb-sync", "web-shell"]
+
+["Phase 49 — Test Design: test suites, scenarios, cases and test impact analysis (genesis v0.79.0 · genesis-workflows v0.23.0; m0025)"]
+areas = ["features-stages", "stories-workbench", "kb-sync", "runs-worker", "db", "api", "workflows-library"]

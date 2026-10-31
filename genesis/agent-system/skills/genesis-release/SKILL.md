@@ -23,7 +23,10 @@ is refused by the loader — bump deliberately, additive-only within a major.
 ## Sequencing (one mutating step per tool call — L-089)
 Never put order-dependent mutating commands in one parallel tool batch; the tool may run them in any order. Strictly
 in sequence: bump → `npm run build` → `git add`/`commit` → fresh `npm run build` + `git status --short
---untracked-files=all` empty → tag; `gsm stop|provision|restart|start` one per call. Batch only read-only commands.
+--untracked-files=all` empty → tag; `gsm stop|provision|restart|start` one per call. Batch only read-only commands, and
+only with other reads: a verifying read (`git status`, `git rev-list`, `ls` of a backup, a run or health check) runs in
+its **own** call after the step it proves, never in the same batch as that step (L-089; the 49-09 As run batched tag +
+`rev-list`, mkdir + backup, provision + run check, restart + status).
 
 ## Tag / push protocol (irreversible — ALWAYS ask)
 Ask the operator before EACH `git tag` and EACH `git push`. Never force-push or reset --hard. After pushing, verify CI:

@@ -1,6 +1,8 @@
 # Phase 49 — Test Design: test suites, scenarios, cases and test impact analysis
 
-> **Status:** SPEC-DRAFTED 2026-10-26 · **Author:** genesis-spec agent.
+> **Status:** ✅ SHIPPED 2026-10-31 — genesis v0.79.0 (`908e5d4`) → genesis-workflows v0.23.0 (`04c242e`), CI green,
+> fleet deployed (DB v25); ADR-078/079 **Accepted**; as built `progress/phase-49-test-design.md`. Spec-drafted 2026-10-26
+> · **Author:** genesis-spec agent.
 > Sub-specs: `phase-49-test-design/49-01..49-09`. Findings (code facts, research, every decision): `49-01-findings.md`.
 > Repos: **genesis** (backend + web, migration **m0025**) and **genesis-workflows** (new `test-design-analysis`).
 > Proposed ADRs: **ADR-078** (Test Design stage + test model) and **ADR-079** (test↔object traceability + impact
@@ -149,7 +151,7 @@ Appian; default impact depth 2 hops; Finalize creates **Ready** records, manual 
 | New module names collected by pytest | R6 naming rule; reviewer checks |
 | Version skew (genesis released before the workflow) | Friendly 409 when not installed (L-033); `_workflow_declares` for optional inputs |
 
-## 12. ADR summaries (proposed — genesis-docs records them on Accept)
+## 12. ADR summaries (Accepted 2026-10-31 — full text in `reference/decision-log.md`)
 
 - **ADR-078 — The Test Design stage and the test model.** A fifth feature stage (after finalized stories) produces a
   Test Suite of ordered Test Scenarios referencing reusable Test Cases (ISTQB / ISO 29119 terms); Finalize once into

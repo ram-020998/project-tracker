@@ -85,7 +85,7 @@ reviewed_fp = "d0dcbced8ea8ff12"
 areas = ["web-runs", "web-shell"]
 phase = ""
 rule = "Mirror the event/gate/topology/steps contract shapes in `web/src/types` + the golden fixtures; a contract drift must fail a test (stubs must not hide the contract)."
-reviewed_fp = "d5d27e73565d8284"
+reviewed_fp = "a584b4ae710eb532"
 
 [L-012]
 areas = ["config-secrets", "web-shell"]
@@ -367,7 +367,7 @@ reviewed_fp = "0f7ec9a4c16ded45"
 areas = ["features-stages", "runs-worker", "chat"]
 phase = "29"
 rule = ""
-reviewed_fp = "7cc40c320e5cf7fb"
+reviewed_fp = "1d46e578831adfad"
 
 [L-059]
 areas = ["web-runs", "runs-worker", "core-engine"]
@@ -469,7 +469,7 @@ reviewed_fp = "a87e50fd24a8340e"
 areas = ["core-engine", "workflows-library", "features-stages"]
 phase = "40"
 rule = ""
-reviewed_fp = "f357c1c4e45af00e"
+reviewed_fp = "fd39c9f3be70b6ed"
 
 [L-076]
 areas = ["core-engine", "workflows-library", "features-stages"]
@@ -553,10 +553,52 @@ reviewed_fp = "7ce0c1185e37e6c6"
 areas = ["release-ci", "web-shell"]
 phase = "48"
 rule = ""
-reviewed_fp = "5fc857dac0af9f11"
+reviewed_fp = "96872b0ce33da6af"
 
 [L-090]
 areas = ["web-shell", "web-runs", "documents", "stories-workbench", "features-stages"]
 phase = "48"
 rule = ""
-reviewed_fp = "68cef8529a4e8c31"
+reviewed_fp = "0d28799cca0f2192"
+
+[L-091]
+areas = ["db", "kb-sync", "stories-workbench"]
+phase = "49"
+rule = ""
+reviewed_fp = "8da255f23e4d8874"
+
+[L-092]
+areas = ["release-ci", "workflows-library", "db"]
+phase = "49"
+rule = ""
+reviewed_fp = "8c2a0e91443805ef"
+
+[L-093]
+areas = ["runs-worker", "features-stages", "stories-workbench", "chat"]
+phase = "49"
+rule = ""
+reviewed_fp = "d717824b00e1f558"
+
+[L-094]
+areas = ["features-stages", "collaboration-hub"]
+phase = "49"
+rule = ""
+reviewed_fp = "ab092c20e8417481"
+
+[L-095]
+areas = ["stories-workbench", "kb-sync", "features-stages"]
+phase = "49"
+rule = ""
+reviewed_fp = "0d97f4e7359a51ed"
+
+[L-096]
+areas = ["api", "features-stages"]
+phase = "49"
+rule = ""
+reviewed_fp = "26c920907f1f656a"
+
+[L-097]
+areas = ["runs-worker"]
+phase = "49"
+rule = ""
+reviewed_fp = "f40bb12a28fd820a"

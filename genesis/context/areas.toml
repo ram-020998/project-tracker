@@ -106,8 +106,10 @@ gates    = ["cd kiro-agent-sdk && .venv/bin/python -m pytest -q",
 [area.kb-sync]
 title    = "Appian KB store, sync, delta sync, business map"
 paths    = ["genesis/genesis/kb/store.py", "genesis/genesis/kb/blob.py",
-            "genesis/genesis/kb/doc_sync.py", "genesis/genesis/services/application_sync.py"]
-keywords = ["kb", "knowledge base", "sync", "delta sync", "business map", "store"]
+            "genesis/genesis/kb/doc_sync.py", "genesis/genesis/services/application_sync.py",
+            # Phase 49: the impact engine walks the KB dependency graph (49-05)
+            "genesis/genesis/kb/_graph_reads_mixin.py", "genesis/genesis/services/testimpact.py"]
+keywords = ["kb", "knowledge base", "sync", "delta sync", "business map", "store", "dependency graph", "impact"]
 skills   = ["genesis-backend-dev"]
 gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
             "cd genesis && .venv/bin/ruff check genesis"]
@@ -135,8 +137,13 @@ paths    = ["genesis/genesis/kb/features.py", "genesis/genesis/kb/stages.py",
             "genesis/genesis/services/spec_clauses.py", "genesis/genesis/services/stage_artifacts.py",
             "genesis/genesis/chat/stage_finalizer.py", "genesis/genesis/api/features.py",
             "genesis/genesis/api/change_requests.py", "genesis/web/src/features/features/**",
-            "genesis/web/src/features/applications/**", "genesis/web/src/features/catalog/**"]
-keywords = ["feature", "spec", "ux", "technical design", "breakdown", "stage", "finalizer", "change request", "cr"]
+            "genesis/web/src/features/applications/**", "genesis/web/src/features/catalog/**",
+            # Phase 49 (Test Design, ADR-078/079) + the lifecycle domain (ADR-050)
+            "genesis/genesis/kb/testdesign.py", "genesis/genesis/services/testdesign_stage.py",
+            "genesis/genesis/services/testimpact.py", "genesis/genesis/api/testdesign.py",
+            "genesis/genesis/domain/**", "genesis/web/src/features/test-design/**"]
+keywords = ["feature", "spec", "ux", "technical design", "breakdown", "stage", "finalizer", "change request", "cr",
+            "test design", "test case", "test scenario", "test suite"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
 gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
             "cd genesis && .venv/bin/ruff check genesis",
@@ -149,8 +156,13 @@ paths    = ["genesis/genesis/kb/stories.py", "genesis/genesis/kb/story_stages.py
             "genesis/genesis/kb/story_trace.py", "genesis/genesis/kb/boards.py",
             "genesis/genesis/kb/object_wiki.py", "genesis/genesis/chat/story_design_finalizer.py",
             "genesis/genesis/chat/story_implementation_finalizer.py",
-            "genesis/web/src/features/workbench/**"]
-keywords = ["story", "board", "lane", "workbench", "object wiki", "design lane", "implementation lane"]
+            "genesis/web/src/features/workbench/**",
+            # Phase 49 (test traceability, ADR-079) + the lifecycle domain (ADR-050)
+            "genesis/genesis/kb/testdesign.py", "genesis/genesis/services/testdesign_stage.py",
+            "genesis/genesis/services/testimpact.py", "genesis/genesis/api/testdesign.py",
+            "genesis/genesis/domain/**"]
+keywords = ["story", "board", "lane", "workbench", "object wiki", "design lane", "implementation lane",
+            "test case", "test impact", "traceability"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
 gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
             "cd genesis && .venv/bin/ruff check genesis",
