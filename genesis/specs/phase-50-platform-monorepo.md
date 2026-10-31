@@ -45,6 +45,7 @@ Genesis uses the libraries (D2). One repo gives one change, one review, one tag 
 | D13 | Old repos archived with a pointer commit after genesis-workflows is re-pinned; local checkouts moved to `_archived/`; ask before each. |
 | D14 | ADR-080 amends ADR-046 as well as ADR-019 (confirmed); defaults F1–F6 accepted. |
 | D15 | A missing library makes the `genesis` CLI exit with one clear message before any other import (replaces F2's "serve still starts"); no preflight item. |
+| D16 | Map the unmapped CLI files in 50-04: `cli/main.py` → distribution; `cli/create_workflow.py`, `cli/test_workflow.py` → workflows-library; app `tests/**` stay unmapped. |
 
 ## 4. Current state (code-grounded — full detail in `50-01-findings.md` §2)
 
@@ -159,6 +160,9 @@ Versions assume Phase 49 ships genesis v0.79.0 + genesis-workflows v0.23.0 (49-0
 | Version skew: old genesis-workflows with the new parser, or new workflows with the old parser | `KB_FORMAT_VERSION` read with a fallback (F4); release order genesis → workflows; at worst one full sync |
 | SDK first-ever lint run needs many fixes | Fix in 50-06; scope is formatting only, no behaviour change |
 | Archiving too early breaks genesis-workflows' old pins | Archive is read-only, still clonable; done only after the re-pin is green (D13) |
+| The fleet runs the editable dev venv from the genesis checkout, which is on `phase-50-monorepo` from 50-03 on; a restart runs branch code | Don't restart the fleet before 50-08 row 5 (deliberate) and 50-09 §2; check for active runs first (L-061) |
+| A non-editable install (wheel or git URL) of the libraries fails `tests/test_platform_packages.py` by design | CI package jobs install editable (50-06 §1) |
+| `phase-50-monorepo` is not installable from 50-03 until 50-05 (no `scripts/install-packages.sh` yet; `pip install .` omits the libraries) | Nothing is pushed, tagged or released before 50-08 §2 |
 
 ## 12. ADR summaries (proposed — genesis-docs records them on Accept)
 

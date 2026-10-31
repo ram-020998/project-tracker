@@ -2,7 +2,7 @@
 
 > **Status:** SPEC-DRAFTED 2026-10-31. Agent: **genesis-docs** (maintains the agent system, L0 §6; skill
 > `genesis-agent-system`). Repo: **project-tracker** (`agent-system/`, `context/`, `bible/03`). Parent:
-> `specs/phase-50-platform-monorepo.md`. Decision: **D12** (`50-01-findings.md` §6, §2.5). Run **immediately after
+> `specs/phase-50-platform-monorepo.md`. Decisions: **D12**, **D16** (`50-01-findings.md` §6, §2.5). Run **immediately after
 > 50-03**, with the local genesis checkout on `phase-50-monorepo`, so every later pack routes the moved code.
 
 ## 1. Why first
@@ -14,12 +14,13 @@ load the core-engine, sdk-acp or parser rules, and nothing fails (an empty glob 
 
 | File | Change |
 |---|---|
-| `context/areas.toml` | `core-engine.paths` → `genesis/packages/genesis-core/genesis_core/**`; `sdk-acp.paths` and the SDK glob in `chat.paths` → `genesis/packages/kiro-agent-sdk/src/**`; `parser.paths` → `genesis/packages/genesis-appian-parser/genesis_appian_parser/**`. Gates run from the package dir with the shared venv: `cd genesis/packages/genesis-core && ../../.venv/bin/python -m pytest -q -p no:warnings`, `… && ../../.venv/bin/ruff check genesis_core`; SDK `cd genesis/packages/kiro-agent-sdk && ../../.venv/bin/python -m pytest -q` (+ `ruff check src`); parser likewise. Area names, titles, keywords, skills unchanged. |
+| `context/areas.toml` | `core-engine.paths` → `genesis/packages/genesis-core/genesis_core/**`; `sdk-acp.paths` and the SDK glob in `chat.paths` → `genesis/packages/kiro-agent-sdk/src/**`; `parser.paths` → `genesis/packages/genesis-appian-parser/genesis_appian_parser/**`. Gates run from the package dir with the shared venv: `cd genesis/packages/genesis-core && ../../.venv/bin/python -m pytest -q -p no:warnings`, `… && ../../.venv/bin/ruff check genesis_core`; SDK `cd genesis/packages/kiro-agent-sdk && ../../.venv/bin/python -m pytest -q` (+ `ruff check src tests`, as 50-06); parser likewise. Area names, titles, keywords, skills unchanged. |
+| `context/areas.toml` — unmapped CLI files (D16) | Add `genesis/genesis/cli/main.py` to `distribution.paths` (beside `cli/install.py`), and `genesis/genesis/cli/create_workflow.py` + `genesis/genesis/cli/test_workflow.py` to `workflows-library.paths`. App `tests/**` stay unmapped. |
 | `genesis_ctx` lint | `area-glob-empty` becomes an **error** (was a warning). |
 | `genesis_ctx/config.py:8,12` | Repo list → `genesis`, `genesis-workflows` (project-tracker handled as today). `status` then shows three rows. |
 | `agent-system/.../genesis_installer.py:32` | Same repo list; the missing-repo preflight (`:581-583`) then no longer needs the old checkouts. |
 | `context/tags/codemap.toml` + `bible/03` repo headers (L12, 202, 232, 252, 255, 616, 645, 676) | Move the genesis-core / SDK / parser sections under `genesis/packages/<name>/…` keys, in lockstep (lint errors on a mismatch). Move text by script or exact edits, never by rewriting (L-087). |
-| Tests (`agent-system/tests/`) | (a) a changed file `genesis/packages/genesis-core/genesis_core/nodes/agent.py` maps to `core-engine`; SDK → `sdk-acp` + `chat`; parser → `parser`; (b) an area whose glob matches nothing fails lint; (c) `status` lists the new repo set. Update fixtures that name the old repos. |
+| Tests (`agent-system/tests/`) | (a) a changed file `genesis/packages/genesis-core/genesis_core/nodes/agent.py` maps to `core-engine`; SDK → `sdk-acp` + `chat`; parser → `parser`; `genesis/genesis/cli/main.py` → `distribution`, `genesis/genesis/cli/create_workflow.py` → `workflows-library` (D16); (b) an area whose glob matches nothing fails lint; (c) `status` lists the new repo set. Update fixtures that name the old repos. |
 | Skills | `genesis-release`: one repo + one tag for the platform, the shared version (D8), the version-sync test, genesis-workflows pins by `#subdirectory=` (D6), no per-library tags. `genesis-backend-dev`: the repo layout, the shared venv, the one install command. `grep -rn "genesis-core\|kiro-agent-sdk\|genesis-appian-parser"` over `agent-system/skills/` and fix every stale instruction. |
 | `OPERATOR_GUIDE.md`, `AGENT_ONBOARDING.md` | Repo list and setup lines. |
 | Install | `agent-system/update.sh`; confirm the installed `genesis-ctx` matches. |
@@ -46,9 +47,9 @@ new path after) and diff the ADR/lesson lists: they must be identical. Record bo
 ## Context manifest
 
 ```toml
-areas    = ["release-ci", "security", "core-engine", "sdk-acp", "parser", "chat"]
-adrs     = ["ADR-077"]
-lessons  = ["L-087", "L-088"]
+areas    = ["release-ci", "security", "core-engine", "sdk-acp", "parser", "chat", "distribution", "workflows-library"]
+adrs     = ["ADR-011", "ADR-014", "ADR-046", "ADR-077"]
+lessons  = ["L-087", "L-088", "L-089"]
 docs     = ["tracker:specs/phase-50-platform-monorepo/50-01-findings.md", "tracker:context/areas.toml",
             "tracker:agent-system/OPERATOR_GUIDE.md"]
 code     = ["tracker:agent-system/tools/genesis_ctx/**", "tracker:agent-system/tests/**",
