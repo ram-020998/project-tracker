@@ -60,3 +60,20 @@ must be merged to run the full CI.
 
 **When.** Any time after Phase 50's release (genesis-workflows v0.24.0); doing it before 50-09 is also safe, because 50-09
 pushes only `master` and the `v0.24.0` tag.
+
+## 5. Stop agents from batching dependent steps (L-089 kept recurring)
+
+**Context.** L-089 forbids sending dependent steps (edit → run → commit, stop → check, push → check) in one parallel
+tool batch. In Phase 50 it recurred in almost every session despite being in the agents' rules: the 50-03 subtree
+merges, the 50-04 and spec-agent check+commit batches, the 50-08 push+check, and about a dozen times in the 50-09
+release (incl. an active-run check sent with the fleet stop; it ran first and found 0 runs). Every result was
+re-checked and correct, but the rule alone does not hold. The 50-09 As run lists the cases.
+
+**Open question first.** A `PreToolUse` hook (L-088) sees one command at a time, not the batch it arrived in, so it
+cannot tell "parallel" from "sequential" directly. Spike what the Kiro CLI exposes (a batch id, timestamps, a
+`PostToolUse` ordering) before designing a guard; probe the installed CLI, not its docs (L-044, L-087).
+
+**Possible shapes.** (a) A hook that refuses `git commit`, `git push`, `gsm stop|restart` and `genesis down` when
+another tool call of the same turn is still in flight; (b) a lighter rule in the role prompts and skills: mutating
+commands are always sent alone, and a check is always a separate later turn; (c) both. Any guard needs a bypass
+corpus and a positive corpus (L-088). Owner: genesis-docs (agent system).
