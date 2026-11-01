@@ -37,6 +37,7 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
 - [Backlog — Phase 47 follow-ups (agent system known limits, e.g. write-through-flag commands)](../specs/backlog/phase-47-follow-ups.md)
 - [Backlog — Phase 48 follow-ups (item 1: the shared `Select` drops `aria-label` → 9 unnamed dropdowns)](../specs/backlog/phase-48-follow-ups.md)
 - [Backlog — Phase 49 follow-ups (Test Design deferrals: clause↔story↔test matrix, Hub sync + machine-unique ids, regression suites, tool exports; run-layer defects found in the build)](../specs/backlog/phase-49-follow-ups.md)
+- [Backlog — Phase 50 follow-ups (updater `scope` label, `genesis status` port, ruff pin in genesis-workflows, protect its refs + CI token, guards against batched steps and the CI-variables API)](../specs/backlog/phase-50-follow-ups.md)
 - [Backlog — Skill → Workflow Migration Program (formerly Phase 8)](../specs/backlog/skill-migration-program.md)
 - [Backlog — The Object Wiki as agent grounding/memory](../specs/backlog/wiki-as-agent-memory.md)
 - [Backlog — Story → Object Wiki cross-link ("Objects changed" on the story Implementation tab; ⌘K over wiki objects)](../specs/backlog/wiki-story-cross-link.md)
@@ -62,10 +63,10 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
   (needs a `genesis serve` restart on ≥ v0.20.2 + the connected jarvis/jira secrets) to confirm per-object
   findings, checklist coverage, SQL checks, the diff baseline rule, and metered credits; restart the
   running `genesis serve` to load v0.20.x; harden the other JSON stores' writes to be atomic (like
-  secrets); **rotate the shared `GITLAB_PUSH_TOKEN`** + refresh the expired Artifactory npm token; the
+  secrets); **rotate the shared `GITLAB_PUSH_TOKEN`** (done 2026-11-01, Phase 50 D20: revoked, the new token set only in genesis-workflows) + refresh the expired Artifactory npm token; the
   `lcp` MCP image placeholder (`<lcp-image>`) in `mcp-registry.json`.
 
-**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-10-31 there is NO active build — Phases 1–49 are shipped (Phase 49 Test Design: genesis v0.79.0 → genesis-workflows v0.23.0; follow-ups in `specs/backlog/phase-49-follow-ups.md`). Phase 50 (platform monorepo, `specs/phase-50-platform-monorepo.md`) is spec-drafted and not started. The Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
+**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-11-01 there is NO active build — Phases 1–50 are shipped (Phase 50 platform monorepo: genesis v0.80.0 → genesis-workflows v0.24.0, ADR-080; follow-ups in `specs/backlog/phase-50-follow-ups.md`). No next phase is specced. The Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
 human's go-ahead — specs are pushed and 16-01/16-02 are shipped + CI-green; continue in the build order per §9's Phase-16
 block. This does not authorize starting any phase *beyond* 16 or any `specs/backlog/` work.)
 

@@ -160,3 +160,6 @@ areas = ["stories-workbench", "api", "kb-sync", "web-shell"]
 
 ["Phase 49 — Test Design: test suites, scenarios, cases and test impact analysis (genesis v0.79.0 · genesis-workflows v0.23.0; m0025)"]
 areas = ["features-stages", "stories-workbench", "kb-sync", "runs-worker", "db", "api", "workflows-library"]
+
+["Phase 50 — Platform monorepo (genesis v0.80.0 · genesis-workflows v0.24.0; no migration)"]
+areas = ["distribution", "release-ci", "parser", "kb-sync", "workflows-library", "core-engine"]

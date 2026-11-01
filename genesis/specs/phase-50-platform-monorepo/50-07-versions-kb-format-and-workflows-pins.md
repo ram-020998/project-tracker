@@ -1,6 +1,7 @@
 # 50-07 — Shared version, KB format version, genesis-workflows pins
 
-> **Status:** SPEC-DRAFTED 2026-10-31. Agent: **genesis-dev**. Repos: **genesis** (branch `phase-50-monorepo`) and
+> **Status:** ✅ DONE 2026-11-01 (genesis-dev) — review SHIP (`reviews/50-07-review.md`); D18 fleet install of
+> `sync-application` 0.3.1 done; released in genesis v0.80.0 → genesis-workflows v0.24.0 (50-09). Was: SPEC-DRAFTED 2026-10-31. Agent: **genesis-dev**. Repos: **genesis** (branch `phase-50-monorepo`) and
 > **genesis-workflows** (local branch `phase-50-monorepo`). Parent: `specs/phase-50-platform-monorepo.md`.
 > Decisions: D6, D8 and defaults F4, F5 (`50-01-findings.md` §6; umbrella §10).
 

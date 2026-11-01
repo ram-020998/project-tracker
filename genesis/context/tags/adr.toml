@@ -260,9 +260,9 @@ status = "accepted"
 areas = ["core-engine", "workflows-library", "distribution"]
 paths = []
 amends = []
-amended_by = []
+amended_by = ["ADR-080"]
 superseded_by = ""
-rule = "genesis-core is semver; the loader refuses a library whose `genesis_core_major != CORE_MAJOR` (=1, not the pip version); changes within a major are additive-only."
+rule = "The loader refuses a library whose `genesis_core_major != CORE_MAJOR` (=1, independent of the shared pip version); changes within a major are additive-only."
 reviewed_fp = "8545f98c3222e9f1"
 b04 = "include"
 
@@ -584,9 +584,9 @@ status = "accepted"
 areas = ["distribution", "config-secrets"]
 paths = []
 amends = []
-amended_by = []
+amended_by = ["ADR-080"]
 superseded_by = ""
-rule = "Genesis ships as a local, browser-based app: clone + venv + `pip install .`, launched by `genesis up`, self-updated by git tag."
+rule = "Genesis ships as a local, browser-based app: clone + venv + `scripts/install-packages.sh`, launched by `genesis up`, self-updated by git tag."
 reviewed_fp = "9a0c685c6495cc28"
 b04 = "include"
 
@@ -982,3 +982,14 @@ amended_by = []
 superseded_by = ""
 rule = "Cases link to stories (fingerprinted → Needs review) and to KB-confirmed objects by (app_uuid, object_uuid); impact walks kb_dependencies inbound on demand (direct + N hops, default 2) and stores nothing."
 reviewed_fp = "d51ef6d1127e3685"
+
+[ADR-080]
+title = "The platform is one repository (Phase 50)"
+status = "accepted"
+areas = ["distribution", "release-ci", "core-engine", "sdk-acp", "parser"]
+paths = []
+amends = ["ADR-019", "ADR-046"]
+amended_by = []
+superseded_by = ""
+rule = "The platform is one repo: the app at the root, genesis-core, kiro-agent-sdk and the parser under packages/; no internal package lists another as a dependency; one install command; one shared version = the tag."
+reviewed_fp = "3a6025192e8361a1"

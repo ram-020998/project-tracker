@@ -193,7 +193,7 @@ wiring, analysis-doc handoff), reimplemented natively in Genesis.
   integrates **no** external memory service. Repos: **genesis** + **genesis-workflows** (genesis-core likely unchanged).
   distribution; wheel+index deferred as a phase-2 transport; Docker/native-app out). genesis-only release → **v0.47.0**.
 
-- **Phases 27–49** — see the full phase table in [`README.md`](README.md) (each row links its `specs/phase-NN-*.md`; as-built in `progress/`). Latest: **Phase 49 Test Design** ✅ SHIPPED 2026-10-31 (genesis v0.79.0 → genesis-workflows v0.23.0).
+- **Phases 27–50** — see the full phase table in [`README.md`](README.md) (each row links its `specs/phase-NN-*.md`; as-built in `progress/`). Latest: **Phase 50 Platform monorepo** ✅ SHIPPED 2026-11-01 (genesis v0.80.0 → genesis-workflows v0.24.0).
 
 **Build order per Q13:** Phases 1–6 constitute the "complete application + ERD workflow" milestone (Studio as interim UI). Phase 7 (custom workbench) + the 07-code-review-fixes program follow. **Phase 8 is the Settings & Integrations Revamp** (enterprise-polish track); a few more polish phases are planned before the **skill-migration program** (backlog) resumes.
 
@@ -243,6 +243,11 @@ Detailed, evidence-backed records of what was actually built each phase live in
 ## 6. Status log
 
 From Phase 47 on: ≤ 5 lines per phase; detail lives in `progress/`.
+
+- **2026-11-01 — Phase 50 (Platform monorepo): ✅ SHIPPED genesis v0.80.0 → genesis-workflows v0.24.0 (no migration; ADR-080).**
+  genesis-core, kiro-agent-sdk and the parser moved under `genesis/packages/` with history; one install script, one
+  shared version, `KB_FORMAT_VERSION`, per-package CI; pytest 1418 + 96/79/53, workflows 317. Reviews SHIP (H1, H2).
+  User: GitLab archive, `_archived/` moves, Monday sync check. Lessons L-098–L-100. Details: `progress/phase-50-platform-monorepo.md`.
 
 - **2026-10-31 — Phase 49 (Test Design): ✅ SHIPPED genesis v0.79.0 → genesis-workflows v0.23.0 (m0025, DB v25; ADR-078/079).**
   Test Design stage → `TC-`/`TS-` records, Tests tab, case/scenario pages, Test Impact tab; pytest 1366, vitest 467,

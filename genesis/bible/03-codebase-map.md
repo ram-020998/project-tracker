@@ -861,3 +861,46 @@ genesis-workflows/
                        design | topup; tests/fixtures = the golden contracts vendored by genesis.
   ci/validate_library.py  gate 8: no workflows/*/tests/__init__.py.
 ```
+
+**Phase 50 — Platform monorepo (genesis v0.80.0 · genesis-workflows v0.24.0; no migration):**
+```
+genesis/                       one repo, one tag vX.Y.Z = the version of the app and all three packages (ADR-080)
+  packages/genesis-core/ · packages/kiro-agent-sdk/ (src/ layout, hatchling) · packages/genesis-appian-parser/
+                       each with its own pyproject.toml ([dev] = pytest + ruff==0.15.20), README, tests/; no internal
+                       dependency entries; the old repos are archived pointers (history imported by git subtree, unsquashed).
+  scripts/install-packages.sh  THE one install command [--editable] [--dev] [--python PATH]: one pip install of
+                       ./packages/kiro-agent-sdk ./packages/genesis-core ./packages/genesis-appian-parser . (--dev = each
+                       path with its own [dev]); the only file listing the four paths; --python defaults to <repo>/.venv
+                       (a relative path is made absolute before the cd). Called by install.sh, the updater, CI, dev setup.
+  scripts/install.sh   REPOS=(genesis); SSH preflight of the genesis repo only; step 5 calls install-packages.sh.
+  genesis/cli/main.py  _INTERNAL_PACKAGES + missing_packages() (importlib.util.find_spec), first in main(): exit 1 with
+                       "Missing Genesis packages: <folders>. Run scripts/install-packages.sh …" (D15); create_workflow/
+                       test_workflow imported inside main() after the check.
+  genesis/runtime/updater.py  apply = checkout tag → bash <repo>/scripts/install-packages.sh --python sys.executable (the
+                       target tag's script) → db upgrade → genesis install → detached restart; _scope = git diff
+                       --name-only v<current>..<tag> touching pyproject.toml, packages/ or the script → deps, else code
+                       (unknown → deps; label only, backlog phase-50-follow-ups §1).
+  .gitlab-ci.yml       .python-packages template (python:3.13, editable install via the script) → jobs genesis,
+                       genesis-core, kiro-agent-sdk, genesis-appian-parser (always run, parallel); frontend (changes
+                       web/**); clean-install (non-editable via the script; changes include packages/**). No insteadOf.
+  tests/test_version_sync.py   the seven version sources (four pyproject.toml, parser __version__, create_app version,
+                       web/src/version.ts) must match; collected by the genesis job.
+  tests/test_no_internal_dependencies.py  no pyproject in this repo lists genesis/genesis-core/kiro-agent-sdk/
+                       genesis-appian-parser in any form (stdlib PEP 508 name parse, PEP 503-normalized).
+  tests/test_platform_packages.py  each library's PEP 610 direct_url.json = this repo's packages/<name> (L-098).
+  tests/test_cli_missing_packages.py · tests/test_install_packages_script.py (the real script, fake interpreter).
+  packages/genesis-appian-parser/genesis_appian_parser/__init__.py  KB_FORMAT_VERSION = 1 (exported; 1 = parser 0.3.x
+                       output; bump only when the parse output needs a full re-sync); pinned by tests/test_kb_format_version.py.
+  packages/genesis-core/genesis_core/types.py  CORE_MAJOR = 1, independent of the package version (ADR-019 as amended).
+genesis-workflows/
+  pyproject.toml       genesis-core, kiro-agent-sdk (runtime) + genesis-appian-parser (dev) @ git+ssh://…/genesis.git@vX.Y.Z
+                       #subdirectory=packages/<name>; dev genesis @ …/genesis.git@vX.Y.Z — all on ONE tag (L-057).
+  registry.json        genesis_core_version = the genesis version; genesis_core_major = 1.
+  ci/check_internal_pins.py  gate 9 (stdlib only): the four names only as direct genesis.git references on one vX.Y.Z tag,
+                       subdir packages/<name> for the libraries, none for the app; self-proof on 9 bad + 1 good tables.
+                       CI .setup runs it (python -I) before the GITLAB_PUSH_TOKEN insteadOf line and pip install.
+  ci/validate_library.py  gate 9 delegates to check_internal_pins.run_gate.
+  workflows/sync-application 0.3.1  KB_FORMAT = getattr(parser, "KB_FORMAT_VERSION", None); _recorded_kb_format
+                       (details.kb_format_version, else 1 when parser_version ≥ 0.3); full_sync_reason compares formats
+                       (no constant → the Phase 45 minor rule); kb_syncs.details.kb_format_version recorded.
+```

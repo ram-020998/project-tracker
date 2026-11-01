@@ -1,6 +1,7 @@
 # 50-09 — Release and onboarding
 
-> **Status:** SPEC-DRAFTED 2026-10-31. Agents: **genesis-release** (asks before every tag, push, archive and move),
+> **Status:** ✅ DONE 2026-11-01 — release §1–§2 and the docs write-back §4 done; §3 pointer commits done, GitLab archive
+> and `_archived/` moves left to the user; §5 Monday sync check (D22) left to the user. Was: SPEC-DRAFTED 2026-10-31. Agents: **genesis-release** (asks before every tag, push, archive and move),
 > then **genesis-docs**. Repos: genesis, genesis-workflows, project-tracker; GitLab projects genesis-core,
 > kiro-agent-sdk, genesis-appian-parser. Parent: `specs/phase-50-platform-monorepo.md`. After 50-08 = SHIP.
 > Decisions: D3, D7, D8, D13.
@@ -59,13 +60,14 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
 
 ## 5. Acceptance
 
-- [ ] genesis v0.80.0 and genesis-workflows v0.24.0 tagged, CI green (pipeline ids recorded).
-- [ ] Fleet on 0.80.0 with `sync-application` 0.3.1 on both instances.
+- [x] genesis v0.80.0 and genesis-workflows v0.24.0 tagged, CI green (pipeline ids recorded).
+- [x] Fleet on 0.80.0 with `sync-application` 0.3.1 on both instances.
 - [ ] **After the release (D22, user):** on the first weekday scheduled sync (Monday 2026-11-02), each instance's newest
       `kb_syncs` row is incremental with `details.kb_format_version` = 1; record it in §6 As run. A full re-export
       instead → open a follow-up fix (not a rollback).
-- [ ] Three projects archived with the pointer commit; local checkouts in `_archived/`.
-- [ ] ADR-080 recorded; docs write-back done; lint green.
+- [ ] Three projects archived with the pointer commit; local checkouts in `_archived/`. *(Pointer commits done; the
+      GitLab archive and the moves are the user's — glab's token is read-only.)*
+- [x] ADR-080 recorded; docs write-back done; lint green.
 
 ## 6. As run
 
@@ -127,6 +129,25 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
     in a parallel batch).
   - README of genesis still says "migrations m0001–m0024 (DB v24)" (stale since Phase 49; genesis-docs).
   - Row 6 / §5 Monday sync check (D22) stays with the user.
+
+### As run (2026-11-01, genesis-docs) — §4 write-back
+
+- **ADR-080** recorded Accepted via `genesis-ctx add adr --amends ADR-019 ADR-046` (areas distribution, release-ci,
+  core-engine, sdk-acp, parser); ADR-019 and ADR-046 one-liners reviewed and updated (CORE_MAJOR independent of the
+  shared version; install via `scripts/install-packages.sh`).
+- **Lessons:** added L-098 (no internal deps → CLI presence check + PEP 610 origin test), L-099 (move version-keyed
+  behaviour to its own constant; editable venv makes bumps live), L-100 (never call the CI-variables API, D20).
+  Extended L-089 (the Phase 50 recurrences, incl. this write-back's own batched `add lesson` calls, each verified
+  afterwards) and L-088 (a checker's self-proof must cover its cross-entry rules, 50-08 H1). Others dropped or routed
+  elsewhere: see `progress/phase-50-platform-monorepo.md`.
+- **Code map:** `bible/03` + `tags/codemap.toml` block "Phase 50 — Platform monorepo".
+- **Docs:** `context/L0-core.md` §2 (repo list), `context/state/current.md` overwritten, `bible/05` §6 (dev venv, gates,
+  versioning, CI), `reference/coding-standards.md` (moved path), `bible/08` (status line, backlog pointer, token
+  rotation done), the `genesis-release` skill (ADR-080 pointer, CI-green job set, GitLab API limits; operator runs
+  `update.sh`), backlog `phase-50-follow-ups.md` §6 (shell-guard rule for the CI-variables API), progress doc,
+  changelog, tracker §6 + §3, README row 50.
+- **Not done (outside the docs agent's write roots):** the genesis repo `README.md:18` still says "migrations
+  m0001–m0024 (DB v24)"; it needs a genesis commit (m0001–m0025, DB v25).
 
 ## Context manifest
 

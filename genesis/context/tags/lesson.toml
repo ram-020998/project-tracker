@@ -547,13 +547,13 @@ reviewed_fp = "6d681ecfb9a75d7b"
 areas = ["security", "release-ci"]
 phase = "47"
 rule = ""
-reviewed_fp = "7ce0c1185e37e6c6"
+reviewed_fp = "15017f4c4ff5a63d"
 
 [L-089]
 areas = ["release-ci", "web-shell"]
 phase = "48"
 rule = ""
-reviewed_fp = "96872b0ce33da6af"
+reviewed_fp = "4cb9f57dba72f3a3"
 
 [L-090]
 areas = ["web-shell", "web-runs", "documents", "stories-workbench", "features-stages"]
@@ -602,3 +602,21 @@ areas = ["runs-worker"]
 phase = "49"
 rule = ""
 reviewed_fp = "f40bb12a28fd820a"
+
+[L-098]
+areas = ["distribution", "release-ci"]
+phase = "50"
+rule = ""
+reviewed_fp = "ac10055c5f86f52e"
+
+[L-099]
+areas = ["kb-sync", "parser", "release-ci"]
+phase = "50"
+rule = ""
+reviewed_fp = "e3027ae3cd7cc0ab"
+
+[L-100]
+areas = ["security", "release-ci"]
+phase = "50"
+rule = ""
+reviewed_fp = "8d965bbb4bff709a"

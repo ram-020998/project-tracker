@@ -126,7 +126,7 @@ disable a lint to make a commit pass.
 ## 7. "When in doubt, match these" (canonical exemplars)
 - Backend repository + durable store: `genesis/runs/eventlog.py`, `store.py`.
 - Config facade + secret handling: `genesis/config/service.py`, `secrets.py`.
-- Agent node + reliability: `genesis-core/nodes/agent.py`, `reliability.py`.
+- Agent node + reliability: `genesis/packages/genesis-core/genesis_core/nodes/agent.py`, `reliability.py`.
 - Frontend data hook + resource: `web/src/features/*/hooks.ts` + `web/src/lib/api/*`.
 - Pure fold + its test: `web/src/features/run-detail/{node-states.ts, conversation.ts}` + tests.
 - Screen composition: `web/src/features/settings/**` (master-detail), `run-detail/**` (tabs + SplitPane).

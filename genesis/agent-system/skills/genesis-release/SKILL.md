@@ -5,8 +5,8 @@ description: Use when releasing Genesis — the ADR-019 order, every version loc
 
 # Release
 
-Order & rules: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-019` (the CORE_MAJOR compat gate; amended by ADR-080, the
-platform monorepo — proposed in `{{TRACKER}}/specs/phase-50-platform-monorepo.md` §12 until recorded) and
+Order & rules: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-019 ADR-080` (the CORE_MAJOR compat gate, as amended by
+ADR-080, the platform monorepo) and
 `{{TRACKER}}/bible/05-dev-loop-and-release.md` §6; precedent in the latest release sub-spec
 (`{{GENESIS_HOME}}/bin/genesis-ctx search "release" --archive`). Record CI ids and hashes in the release sub-spec's **As run**, not in L0/state.
 
@@ -37,7 +37,14 @@ its **own** call after the step it proves, never in the same batch as that step 
 
 ## Tag / push protocol (irreversible — ALWAYS ask)
 Ask the operator before EACH `git tag` and EACH `git push`. Never force-push or reset --hard. After pushing, verify CI:
-`glab ci list` and `glab ci trace <id>`; record the pipeline ids.
+`glab ci list` and `glab ci trace <id>`; record the pipeline ids. genesis "CI green" = the four package jobs
+(`genesis`, `genesis-core`, `kiro-agent-sdk`, `genesis-appian-parser`) plus `frontend` / `clean-install` when their
+`changes` rules match (a new tag runs all six).
+
+## GitLab API limits
+glab's token has read scope only: archiving a project, settings and variables are the operator's, in the GitLab UI
+(the 50-09 archive call returned 403). **Never call `glab api …/variables`** or any CI-variables API: it returns values
+in clear (L-100).
 
 ## Fleet refresh
 Only on the operator's explicit go-ahead; back up data first (genesis-live-acceptance), unless the operator waives it.

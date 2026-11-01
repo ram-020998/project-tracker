@@ -1,6 +1,9 @@
 # Phase 50 — Platform monorepo: genesis-core, kiro-agent-sdk and the parser move into the genesis repo
 
-> **Status:** SPEC-DRAFTED 2026-10-31 · **Author:** genesis-spec agent.
+> **Status:** ✅ SHIPPED 2026-11-01 — genesis v0.80.0 (`080ef7c`) → genesis-workflows v0.24.0 (`a365e60`); ADR-080
+> Accepted (amends ADR-019, ADR-046); no migration (DB v25). Left with the user: GitLab archive of the three old projects,
+> the `_archived/` moves, the Monday 2026-11-02 sync check (D22). As built: `progress/phase-50-platform-monorepo.md`.
+> Was: SPEC-DRAFTED 2026-10-31 · **Author:** genesis-spec agent.
 > Sub-specs: `phase-50-platform-monorepo/50-01..50-09`. Findings (code facts, research, every decision): `50-01-findings.md`.
 > Repos: **genesis** (receives the three libraries), **genesis-workflows** (re-pins, KB format check),
 > **project-tracker** (agent system). Proposed ADR: **ADR-080** (amends ADR-019 and ADR-046).

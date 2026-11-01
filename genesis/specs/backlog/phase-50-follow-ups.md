@@ -77,3 +77,13 @@ cannot tell "parallel" from "sequential" directly. Spike what the Kiro CLI expos
 another tool call of the same turn is still in flight; (b) a lighter rule in the role prompts and skills: mutating
 commands are always sent alone, and a check is always a separate later turn; (c) both. Any guard needs a bypass
 corpus and a positive corpus (L-088). Owner: genesis-docs (agent system).
+
+## 6. Refuse the CI-variables API in `shell-guard.sh` (L-100)
+
+**Context (D20, 50-09 §4).** A spec-agent `glab api projects/<id>/variables` call printed `GITLAB_PUSH_TOKEN` in clear
+on 2026-11-01; the token was revoked and rotated. L-100 forbids the call, but like L-089 a rule alone may not hold.
+
+**When picked up.** Add a `shell-guard.sh` rule that refuses any `glab api` call whose path contains `/variables`
+(project, group and instance level, any HTTP method, with or without `-X`, quoted or not, through `env`/absolute paths)
+and `glab variable …`. Test it with a bypass corpus and a positive corpus (`glab ci list`, `glab ci trace`, `glab api
+projects/<id>/pipelines`) per L-088, then `agent-system/update.sh`. Owner: genesis-docs (agent system).
