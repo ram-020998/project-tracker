@@ -32,7 +32,8 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
 
 1. In the old local checkout, one commit replacing `README.md` with: "Moved into the genesis repo at
    `packages/<name>/` (history preserved) as of genesis v0.80.0. This repository is archived; old tags remain for
-   installs of genesis ≤ v0.79.0." Push it (ask).
+   installs of genesis ≤ v0.79.0." Push it (ask). For **genesis-core** the commit message must contain `[skip ci]`:
+   its `GITLAB_PUSH_TOKEN` variable was deleted (D20), so its pipeline could no longer clone kiro-agent-sdk.
 2. Archive the GitLab project (ask): `glab api -X POST projects/<id>/archive` (ids: genesis-core 14328,
    kiro-agent-sdk 14306, genesis-appian-parser 14520). Confirm `archived: true`.
 3. Move the local checkout to `~/repo-gitlab/ramaswamy.u/_archived/<name>` (ask). Confirm `genesis-ctx status` and
