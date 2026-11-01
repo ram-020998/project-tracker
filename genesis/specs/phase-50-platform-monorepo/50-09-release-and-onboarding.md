@@ -23,7 +23,8 @@
   **do not click the update banner** on a v0.79.0 install. Its old updater runs `pip install .`, which installs the
   v0.80.0 app but keeps the old libraries (50-05 As built). Say so in the release notes / changelog too.
 - Fleet: `gsm provision --all --no-mcp --no-env --force`, `gsm restart --all`, `genesis install` of genesis-workflows
-  v0.24.0 on each instance. Verify `/openapi.json` `info.version` = 0.80.0 and an incremental sync stays incremental.
+  v0.24.0 on each instance **in the same step** (it carries `sync-application` 0.3.1; an instance running the v0.80.0
+  parser with the old 0.3.0 workflow would re-export every app in full, 50-07 As built). Verify `/openapi.json` `info.version` = 0.80.0 and an incremental sync stays incremental.
 
 ## 3. Archive the old repos (D13) — ask before each project
 

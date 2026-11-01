@@ -145,7 +145,7 @@ Versions assume Phase 49 ships genesis v0.79.0 + genesis-workflows v0.23.0 (49-0
 | F1 | Install script: `scripts/install-packages.sh [--editable] [--dev]`, the only place that lists the four paths, in dependency order SDK → core → parser → app. |
 | F2 | Missing-library check: **superseded by D15** — the `genesis` CLI checks for the three libraries before any internal import and exits 1 with one message naming them and the fix command; no preflight item. |
 | F3 | Updater `_scope` = `deps` when `git diff --name-only <deployed tag>..<target tag>` touches `pyproject.toml`, `packages/**` or `scripts/install-packages.sh`; else `code`. Unknown → `deps`. |
-| F4 | `KB_FORMAT_VERSION = 1` represents today's parser 0.3.x output; a recorded `parser_version` with minor 3 and no `kb_format_version` counts as format 1, so no app is forced into a full sync. |
+| F4 | `KB_FORMAT_VERSION = 1` represents today's parser 0.3.x output; a recorded `parser_version` with no `kb_format_version` counts as format 1 when it is **0.3 or later** (as built in 50-07, widened from "minor 3" so a re-sync by the old workflow on the new parser — which records 0.79.0 — does not force a second full sync), so no app is forced into a full sync by the new workflow. |
 | F5 | Version-sync test checks the four `pyproject.toml` versions, the parser `__version__`, the `create_app` version and `web/src/version.ts`. |
 | F6 | Each library keeps its own `README.md`, `.gitignore`, `tests/` and tool config inside `packages/<name>/`; their CI files are dropped. |
 

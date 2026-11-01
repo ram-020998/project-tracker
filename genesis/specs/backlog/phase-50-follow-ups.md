@@ -27,3 +27,12 @@ use appears (e.g. "needs a DB migration").
 **When picked up.** Have `up` record the host/port it started on next to its pid file and let `status` (and `down`,
 `logs` if they share the assumption) read it when `--port` is not given. Small; distribution area (L-052: keep it in
 the one launcher module).
+
+## 3. Pin ruff in genesis-workflows
+
+**Context (50-07 As built).** genesis-workflows' dev extra floats `ruff>=0.6`, against L-025/L-027. Pinning
+`ruff==0.15.20` (the platform's pin) finds 20 existing problems, and the repo's CI does not run ruff at all, so 50-07
+left the float in place rather than churn workflow code inside the monorepo phase.
+
+**When picked up.** Fix the 20 findings (no behaviour change), pin `ruff==0.15.20`, and add `ruff check` to the
+`library-validate` CI job so the pin is enforced.
