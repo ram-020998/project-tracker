@@ -146,6 +146,64 @@ still waits for the v0.80.0 tag (50-07 §4 / 50-09). The fleet was not touched.
   (14) with the gate-9 line; workflow tests unchanged (317). Separate steps for edit, run and revert (L-089).
 - Remote proof comes with genesis-workflows' first CI run in 50-09 §1.
 
+#### H2 — As built (genesis-dev, 2026-11-01)
+
+**Commit** (local, on `phase-50-monorepo`; not pushed): genesis-workflows `e4af068` (base `6968bb8`):
+`ci(50-08 H2): run the internal-pin check (gate 9) before anything is installed (D20) …`. `git show --stat` lists all
+three files (L-056). genesis is unchanged.
+
+**Changed**
+- `ci/check_internal_pins.py` (new, 131 lines, stdlib only: `re`, `sys`, `tomllib`, `pathlib`). Gate 9 moved verbatim:
+  `INTERNAL_SUBDIRS`, `_REQ_NAME` / `_DIRECT_REF` / `_GENESIS_URL`, `_pin`, `_BAD_PINS` / `_GOOD_PINS`, `_normalize`,
+  `check_internal_pins`. The old gate-9 body of `main()` (parse + self-proof) is now `run_gate(pyproject)`, which
+  returns `([pins] …` failure lines, the OK line or None)`. `main()` prints the OK line, then
+  `INTERNAL-PIN CHECK FAILED:` with the failure lines (exit 1) or `INTERNAL-PIN CHECK PASSED` (exit 0).
+- `ci/validate_library.py`: the gate-9 code is removed; it imports `run_gate` from the sibling module and adds its
+  failures and OK line at the same point as before. The unused `re` / `tomllib` imports are dropped. Docstring item 9
+  notes the move.
+- `.gitlab-ci.yml`: the shared `.setup` `before_script` runs `python -I ci/check_internal_pins.py` first, then the
+  `GITLAB_PUSH_TOKEN` `insteadOf` line, then `pip install -e ".[dev]"`. All three jobs inherit it.
+
+**Evidence** (each edit, run and revert its own call, L-089):
+
+| Step | Result |
+|---|---|
+| `/opt/homebrew/bin/python3.13 -I ci/check_internal_pins.py` (no venv) | `OK: internal-pin check correctly rejects 9 known-bad tables and accepts a good one` · `INTERNAL-PIN CHECK PASSED`, exit 0 |
+| same with `-I -S` (no site-packages); `runpy` import listing non-stdlib modules | passes, exit 0; `[]` |
+| bad line `"genesis-core",` first in `[project].dependencies` → check | exit 1: `[pins] pyproject.toml [project].dependencies: 'genesis-core' — genesis-core must be a direct reference 'genesis-core @ git+ssh://…/genesis.git@vX.Y.Z#subdirectory=packages/genesis-core'` |
+| same bad line → `validate_library.py` | `LIBRARY VALIDATION FAILED` with the same `[pins]` line, exit 1 |
+| revert → `git status --short` | only the three intended files; check passes again |
+
+**Gates** (final tree, genesis venv): `ci/validate_library.py` → gate-9 OK line + `LIBRARY VALIDATION PASSED (14
+workflow(s) validated)`, same output as at H1. `ci/validate_skills.py` PASSED (3). `pytest -q workflows
+--ignore=workflows/_fixtures` → 317 passed (unchanged). `ruff check ci/check_internal_pins.py ci/validate_library.py` →
+clean. Parsed CI YAML: `before_script` = `[pin check, git config … insteadOf, pip install]`.
+
+**Review:** `reviews/50-08-H2-review.md`, verdict **SHIP** (no blockers or majors). The reviewer confirmed the move with
+`difflib` (code lines identical, only two comments reworded or moved) and re-ran the bad-pin and broken-TOML cases on
+temp copies.
+- Minor m1 (outside H2, for the user): `pip install` still fetches `hatchling` and third-party deps from PyPI while the
+  token rewrite is active, and an MR can edit the CI YAML or the check itself. Protection against a hostile MR still
+  rests on GitLab settings. **Manual check for the user** in the GitLab UI (agents must not call the CI-variables API,
+  D20): `GITLAB_PUSH_TOKEN` in genesis-workflows is Protected and Masked.
+- Nit n2: `python -I ci/validate_library.py` would not find the sibling module. CI does not use `-I` for that script,
+  and a comment at the import says why. No action.
+
+**Decisions / deviations** (no ADR deviation):
+- The standalone `main()` wraps the same `[pins]` lines in its own `INTERNAL-PIN CHECK FAILED/PASSED` header, so a CI
+  log shows which step failed. The failure lines and the OK line are unchanged.
+- `validate_library.py` finds the module through `sys.path[0]` (the script's directory) instead of a `sys.path` edit
+  or a `ci/__init__.py`. That keeps the change small and matches how CI and the area gate run it.
+- No pytest file was added. The gate still proves itself in-process on every run (9 bad tables + 1 good), as in H1.
+
+**Lesson candidates:** none new. D20's own lesson (do not call `glab api …/variables`; it prints values) is already
+recorded for 50-09.
+
+**Code-map changes:** genesis-workflows `ci/check_internal_pins.py` (new: gate 9, stdlib only, CI runs it before any
+install); `ci/validate_library.py` gate 9 now delegates to it; `.gitlab-ci.yml` `.setup` runs it first.
+
+**Next (not this item):** remote proof comes with genesis-workflows' first CI run in 50-09 §1 (after the v0.80.0 tag).
+
 ## 6. As built
 
 *(filled by genesis-review)*
