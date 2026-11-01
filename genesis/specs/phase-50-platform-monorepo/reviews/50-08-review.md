@@ -1,7 +1,9 @@
 # Review 50-08 — Phase 50 whole-phase review and acceptance (genesis-review, 2026-11-01)
 
-> **Status: IN PROGRESS — code review, §2 CI (pipeline #7258881, green) and rows 1–5, 7–9 done; H1 and row 6 open
-> (D19).** The verdict stays pending until H1 is built and re-reviewed.
+> **Status: FINAL (2026-11-01) — SHIP.** Code review, §2 CI (pipeline #7258881), H1 CI (pipeline #7259044 on
+> `77ea3117`), rows 1–5 and 7–9, and the H1 + H2 re-reviews are done. Row 6 is **DEFERRED** past the release (D22).
+> Closed without re-running the gates; the H1/H2 evidence is the two focused reviews plus the read-only pipeline check
+> below.
 
 Ranges reviewed:
 
@@ -10,6 +12,8 @@ Ranges reviewed:
 | genesis | `908e5d4` (= `master` = `origin/master` = v0.79.0) | `34d6dab` (`phase-50-monorepo`, dirty 0) | 13 first-parent (3 subtree merges + 10) |
 | genesis-workflows | `04c242e` (= `master` = v0.23.0) | `7e42fc9` (`phase-50-monorepo`, dirty 0) | 2 |
 | project-tracker | `ab93480` (Phase 49 write-back) | `382a417` (`main`) | agent-system code in `34aaec6`; the rest is specs |
+| genesis (H1) | `34d6dab` | `77ea311` | 1 (`tests/test_no_internal_dependencies.py`, +133; `git show --stat`) |
+| genesis-workflows (H1, H2) | `7e42fc9` | `e4af068` | 2 (`6968bb8` H1 gate 9, `e4af068` H2 `ci/check_internal_pins.py`) |
 
 `genesis-ctx check --since 908e5d4 --repo genesis` (146 files; areas chat, core-engine, distribution, parser,
 release-ci, sdk-acp, security), `--since 04c242e --repo genesis-workflows` (7 files; release-ci, security,
@@ -175,7 +179,7 @@ state dirs, scripts).
 | 3 | `pip install --dry-run --report` of the install command | **PASS**: fresh venv, `pip install -v --dry-run --ignore-installed --report` of the four paths, exit 0; the four internal distributions resolve from `file:///…/packages/<name>` and `file:///…/clone` at 0.79.0, `requested: true`; none of the 68 resolved distributions has a `requires_dist` naming an internal package, so pip has no reason to query an index for one; the verbose log shows no `/simple/<internal>/` URL | `/tmp/g5008/report.json`, `/tmp/g5008/dryrun.log` |
 | 4 | Dev venv | **PASS**: `genesis_core`, `kiro_agent_sdk`, `genesis_appian_parser` `__file__` under `genesis/packages/…`; the three parser-fixture tests ran (`test_kb_store.py`, `test_kb_incremental.py`, `test_kb_server.py::test_real_package_via_server` in a 50-passed run; full app run 1400 passed, 0 skipped with `-rs`) | this report |
 | 5 | Fleet on the dev venv + a workflow run with an agent step (D19 (2): back up, restart with `gsm`, `hello-appian`) | **PASS**. Before: `GET /api/runs?status=active` total 0 on :8760 and :8761; the servers (pids 87926/87938) had started Sat 31 Oct 19:42, before the branch's first commit (`c8c6982`, 21:43), so they ran pre-merge app code. `gsm stop --all` → no `-wal`/`-shm` left; backups of `genesis.db` + `memory.db` of both instances, SHA-256 equal to the sources, `pragma integrity_check` ok on all four. `gsm start --all` → main pid 90882, userb pid 90884 (started Sun 1 Nov 11:31), both healthy, openapi 0.79.0, `hello-appian` 0.1.0 and `sync-application` 0.3.1 installed on both (no install needed). Run **`r-dc3a0619cbde`** (`hello-appian` on main): `run.started` 06:01:54Z → `agent.result` `make_result` ok, **0.384 credits, provenance metered** → `validator.result` ok → `v_result`, `finish` completed → `run.final` status **done** 06:02:18Z (24 s); `result.json` in the run folder; no error in `genesis.log`. The worker runs `genesis/.venv`, whose three libraries import from `genesis/packages/…` (row 4) | `db-backup/{main,userb}/`, `row5-start.json`, `row5-run.json`, `row5-events.json` |
-| 6 | Incremental sync with `sync-application` 0.3.1 (D19 (3): Monday's scheduled sync, `kb_syncs` on both instances) | **PENDING** until the first weekday scheduled sync (Mon 2026-11-02). Pre-read: both instances report 0.3.1; main's last full sync (`kb_syncs` 50, 2026-10-30) recorded parser 0.3.0 and no format, 2 days old (full every 7) → expected **incremental** with `details.kb_format_version` = 1 | |
+| 6 | Incremental sync with `sync-application` 0.3.1 (D19 (3): Monday's scheduled sync, `kb_syncs` on both instances) | **DEFERRED** past the release (D22): the dev-tagged Appian environment is down on 2026-11-01, so no sync can run. Pre-read: both instances report 0.3.1; main's last full sync (`kb_syncs` 50, 2026-10-30) recorded parser 0.3.0 and no format, 2 days old (full every 7) → expected **incremental** with `details.kb_format_version` = 1. Covered meanwhile by 50-07's sync tests (`test_incremental_sync.py`, incl. "a KB recorded by 0.3.0 stays incremental"). **The user checks it** on the first weekday scheduled sync (Mon 2026-11-02): each instance's newest `kb_syncs` row is incremental and `details.kb_format_version` = 1. A full re-export instead is extra cost, not wrong data → a follow-up fix release, not a rollback (D22). 50-09 §5 carries the check | D22 |
 | 7 | genesis-workflows local gates | **PASS**: validate_library 14, validate_skills 3, 317 passed | gates table |
 | 8 | Updater + `genesis update --check-only` on a managed temp install | **PASS**: unit tests in the 1400; throwaway `dist.json` (repo = local clone, branch `phase-50-monorepo`): deployed 0.78.0 → "update available → v0.79.0 (scope: deps)"; deployed 0.79.0 → "already up to date."; deployed 0.70.9 (no such tag) → scope `deps` via the git-failure fallback; `_scope('0.79.0', 'phase-50-monorepo')` = deps (diff touches `packages/…`). No crash. A `code` result cannot be shown on real tags because every release bumps the root `pyproject.toml` (50-05 m1, D17); it is covered by `test_scope_*`. The shell guard refused a throwaway `git tag`, so no synthetic tag was made | `row8-updater-check.txt` |
 | 9 | `genesis-ctx status`, `pack 50-07`, `check --files …/nodes/agent.py` | **PASS**: status rows genesis, genesis-workflows, project-tracker; pack 58,522 tokens (OK) with core-engine and parser routed by path `genesis/packages/…`; check → core-engine with 40 ADRs + 31 lessons | `pack-50-07.md` |
@@ -211,6 +215,40 @@ checkout present, all 1400 pass with 0 skipped.
 
 genesis-workflows CI was not run, as planned (50-07 §4): its pins need the v0.80.0 tag (50-09).
 
+## CI on the H1 commit (§5 H1)
+
+genesis-release pushed `phase-50-monorepo` again after H1. Read by me with `glab api` (read only, no re-run):
+
+**Pipeline #7259044** (IID 287, ref `phase-50-monorepo`, sha `77ea31175a3b…` = `77ea3117`, `before_sha` `34d6dabc…`,
+source push, 07:18:49Z → 07:33:01Z, 851 s): **success**.
+<https://gitlab.appian-stratus.com/ramaswamy.u/genesis/-/pipelines/7259044>
+
+| Job | Job id | Status | Duration | From the job log |
+|---|---|---|---|---|
+| `genesis` | 81450201 | success | 851 s | ruff "All checks passed!"; **1411 passed, 7 skipped** (1393 + 18 new; the same 7 environmental skips as #7258881; 1411 + 7 = the 1418 the H1 review ran locally) |
+| `genesis-core` | 81450202 | success | 115 s | — |
+| `kiro-agent-sdk` | 81450203 | success | 110 s | — |
+| `genesis-appian-parser` | 81450204 | success | 180 s | — |
+
+`frontend` and `clean-install` did not run, which is correct: `77ea311` changes only `tests/test_no_internal_dependencies.py`,
+and their `changes:` rules (`web/**/*`; the distribution surface) do not match `tests/`. Both ran green on #7258881 for
+the code this commit builds on.
+
+The genesis-workflows commits `6968bb8` (H1) and `e4af068` (H2) have no remote pipeline yet; by the spec their first
+CI run is in 50-09 §1, after the v0.80.0 tag.
+
+## Focused re-reviews (§5)
+
+- **H1** (`reviews/50-08-H1-review.md`): **SHIP**. Every H1 requirement met; gates re-run green there (genesis 1418,
+  workflows validate_library 14 / skills 3 / 317). Its minor 1 (self-proof missed the L-057 split) was fixed before
+  the commit and proven by a weakened-checker run (50-08 §5 H1 As built); nit 4 done; minor 2 became H2 (D20); nit 3
+  (host not pinned) stays open, see n3 below.
+- **H2** (`reviews/50-08-H2-review.md`): **SHIP**. Gate 9 moved verbatim into stdlib-only `ci/check_internal_pins.py`,
+  run first in the shared `.setup` `before_script`, before the token rewrite and `pip install`. Its m1 (protection
+  against a hostile MR rests on GitLab settings) is handled by D20 (token removed from genesis and genesis-core,
+  rotated, a `read_repository` token only in genesis-workflows) and D21 (Protected flag + ref protection deferred to
+  `specs/backlog/phase-50-follow-ups.md` §4; Masked only for now).
+
 ## Findings
 
 ### Blockers
@@ -230,6 +268,8 @@ genesis-workflows CI was not run, as planned (50-07 §4): its pins need the v0.8
   **Accepted by the user as hardening item H1 (D19 (4), 50-08 §5)**, which also adds a direct-reference-only check
   for the four names to genesis-workflows' `ci/validate_library.py`. H1 is built after §2 and row 5, pushed again,
   and re-reviewed before the final verdict.
+  **RESOLVED** by H1: genesis `77ea311` (`tests/test_no_internal_dependencies.py`, green in pipeline #7259044) and
+  genesis-workflows `6968bb8` gate 9, moved before install by H2 `e4af068`. Both re-reviews SHIP.
 
 ### Minors
 - **m1 — the install command and the dependency lists route to no area.** `genesis-ctx check` maps
@@ -247,9 +287,25 @@ genesis-workflows CI was not run, as planned (50-07 §4): its pins need the v0.8
   which it does only without `--repo`. Worth one line in the genesis-ctx skill.
 - n2 — Carried, not new: 50-07 §6's open box (a tag ref with `#subdirectory=` and the HTTPS partial clone) is proven
   only in 50-09 §1; the D18 lockfiles read `libraryRef: local` until the 50-09 library reinstall.
+- n3 — Carried from the H1 review (nit 3): gate 9's `_GENESIS_URL` accepts any `…/genesis.git` host as long as all
+  four pins agree. Optional; a candidate for `specs/backlog/phase-50-follow-ups.md`.
+- n4 — `50-08-H1-review.md`'s header is dated 2026-10-31; H1 was built and reviewed on 2026-11-01 (H1 As built).
+  Cosmetic.
 
-## Verdict: PENDING (code review alone: NEEDS_CHANGES for M1 → H1)
+## Verdict: SHIP
 
-Done: code review, gates, §2 pipeline #7258881 (all six jobs green), rows 1–5 and 7–9. Open before the final verdict
-(D19): H1 built by genesis-dev on the branch → genesis-release pushes again (asks first) → its own green pipeline →
-focused re-review of H1 → row 6 from Monday's (2026-11-02) scheduled `kb_syncs` rows on both instances.
+No blockers. The one major (M1) is resolved by H1 and hardened by H2, both re-reviewed SHIP. Every gate is green:
+the local gate run in this review, pipeline #7258881 on `34d6dab` (six jobs), and pipeline #7259044 on `77ea3117`
+(four jobs, genesis 1411 passed / 7 environmental skips). Rows 1–5 and 7–9 PASS. Row 6 is **DEFERRED** by user
+decision D22 (dev environment down); it is an acceptance check, not a gate, and its behaviour is covered by 50-07's
+sync tests.
+
+Carried into 50-09 (not blocking this verdict):
+- **Row 6 (D22):** the user reads each instance's newest `kb_syncs` row after the first weekday scheduled sync
+  (Mon 2026-11-02): incremental, `details.kb_format_version` = 1. A full re-export → follow-up fix release.
+- **genesis-workflows remote CI** for `6968bb8` + `e4af068` runs first in 50-09 §1 (after the v0.80.0 tag), including
+  the `python -I ci/check_internal_pins.py` step and the 50-07 §6 open box (n2).
+- **L-056 before tagging:** `git show --stat` of the release commits must list every changed file.
+- **Write-back (genesis-docs):** m1 (`distribution.paths`), m2 (`current.md`), ADR-080, n1, and the H1 lesson
+  candidate (a checker's self-proof must cover its cross-entry rules).
+- **D21 backlog:** protect genesis-workflows `master` + `v*` and mark `GITLAB_PUSH_TOKEN` Protected.

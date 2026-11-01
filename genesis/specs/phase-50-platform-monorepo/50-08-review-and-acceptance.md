@@ -1,6 +1,6 @@
 # 50-08 — Review and acceptance
 
-> **Status:** SPEC-DRAFTED 2026-10-31. Agent: **genesis-review** (never edits code); **genesis-release** pushes the
+> **Status:** ✅ DONE 2026-11-01 — verdict **SHIP** (`reviews/50-08-review.md`); row 6 deferred (D22). Agent: **genesis-review** (never edits code); **genesis-release** pushes the
 > scratch branches for CI, asking first. Repos: genesis, genesis-workflows, project-tracker. Parent:
 > `specs/phase-50-platform-monorepo.md`. Reads every As built 50-02..50-07.
 
@@ -206,7 +206,17 @@ install); `ci/validate_library.py` gate 9 now delegates to it; `.gitlab-ci.yml` 
 
 ## 6. As built
 
-*(filled by genesis-review)*
+**Verdict: SHIP (FINAL, 2026-11-01).** The full record is `reviews/50-08-review.md` (one home); H1 and H2 have their own
+reports, `reviews/50-08-H1-review.md` and `reviews/50-08-H2-review.md` (both SHIP).
+
+- Pipelines on `phase-50-monorepo`: **#7258881** at `34d6dabc` (all six jobs) and **#7259044** at `77ea3117` (H1; the four
+  package jobs; `frontend`/`clean-install` correctly not triggered).
+- Acceptance: rows 1–5 and 7–9 PASS; **row 6 DEFERRED** (D22) to the user's check of the first weekday scheduled sync,
+  carried in 50-09 §5.
+- Findings: M1 RESOLVED by H1; H2 closed H1's Minor 2 together with D20; D21 put ref/variable protection in the backlog;
+  nits n3 (unpinned git host in the pin check) and n4 (H1 review header date) left open, no action needed.
+- Carried to 50-09: row 6; genesis-workflows' first remote CI run (H1 `6968bb8`, H2 `e4af068`); the L-056 check before
+  tagging; the genesis-docs write-back; the D21 backlog item.
 
 ## Context manifest
 
