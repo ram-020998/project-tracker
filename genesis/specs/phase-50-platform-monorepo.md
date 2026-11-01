@@ -51,6 +51,7 @@ Genesis uses the libraries (D2). One repo gives one change, one review, one tag 
 | D19 | 50-08: push the scratch branch for CI; restart the fleet on branch code and run `hello-appian` (row 5); row 6 waits for Monday's scheduled sync; M1 → hardening item H1. |
 | D20 | User deleted `GITLAB_PUSH_TOKEN` from genesis and genesis-core and rotated the token (new value in genesis-workflows only; genesis-core pointer commit uses `[skip ci]`); agents never call the CI-variables API; H2 runs the genesis-workflows pin check before any install. |
 | D21 | Protecting genesis-workflows' refs and its token variable is deferred to backlog (`phase-50-follow-ups.md` §4); the variable stays Masked only. |
+| D22 | Release without the live row-6 sync (dev environment down 2026-11-01); row 6 DEFERRED; the user checks Monday's scheduled sync after the release. |
 
 ## 4. Current state (code-grounded — full detail in `50-01-findings.md` §2)
 

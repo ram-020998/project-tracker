@@ -24,7 +24,9 @@
   v0.80.0 app but keeps the old libraries (50-05 As built). Say so in the release notes / changelog too.
 - Fleet: `gsm provision --all --no-mcp --no-env --force`, `gsm restart --all`, `genesis install` of genesis-workflows
   v0.24.0 on each instance **in the same step** (it carries `sync-application` 0.3.1; an instance running the v0.80.0
-  parser with the old 0.3.0 workflow would re-export every app in full, 50-07 As built). Verify `/openapi.json` `info.version` = 0.80.0 and an incremental sync stays incremental.
+  parser with the old 0.3.0 workflow would re-export every app in full, 50-07 As built). Verify `/openapi.json`
+  `info.version` = 0.80.0 and `GET /api/workflows/sync-application` = 0.3.1 on both. The live incremental-sync check
+  is **not** done here (D22, dev environment down): see §5.
 
 ## 3. Archive the old repos (D13) — ask before each project
 
@@ -58,7 +60,10 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
 ## 5. Acceptance
 
 - [ ] genesis v0.80.0 and genesis-workflows v0.24.0 tagged, CI green (pipeline ids recorded).
-- [ ] Fleet on 0.80.0; incremental sync still incremental.
+- [ ] Fleet on 0.80.0 with `sync-application` 0.3.1 on both instances.
+- [ ] **After the release (D22, user):** on the first weekday scheduled sync (Monday 2026-11-02), each instance's newest
+      `kb_syncs` row is incremental with `details.kb_format_version` = 1; record it in §6 As run. A full re-export
+      instead → open a follow-up fix (not a rollback).
 - [ ] Three projects archived with the pointer commit; local checkouts in `_archived/`.
 - [ ] ADR-080 recorded; docs write-back done; lint green.
 
