@@ -129,6 +129,23 @@ cross-entry ones. The first version proved only the per-entry paths, and a broke
 its own green pipeline. Then comes the focused re-review entry in `50-08-review.md` and row 6. genesis-workflows CI
 still waits for the v0.80.0 tag (50-07 §4 / 50-09). The fleet was not touched.
 
+### H2 — Run the genesis-workflows pin check before anything is installed (H1 review Minor 2; D20)
+
+**Agent:** genesis-dev, on `phase-50-monorepo` in **genesis-workflows** only. Then a short re-review.
+
+- Move gate 9 (`INTERNAL_SUBDIRS`, the regexes, `_normalize`, `check_internal_pins`, `_BAD_PINS` / `_GOOD_PINS` and
+  the self-proof) out of `ci/validate_library.py` into a new **stdlib-only** `ci/check_internal_pins.py` with a
+  `main()` that reads `pyproject.toml`, runs the self-proof and exits 0/1 with the same messages. No import of
+  `genesis` or any third-party module.
+- `ci/validate_library.py` imports and calls it (gate 9 still reported there, so local runs are unchanged).
+- `.gitlab-ci.yml`: in the shared `.setup` `before_script`, run `python ci/check_internal_pins.py` **before** the
+  `git config … insteadOf` line and before `pip install -e ".[dev]"`, so a bad pin fails with nothing downloaded and
+  before the token is used.
+- Evidence in the As built: `python -I ci/check_internal_pins.py` passes in a bare Python 3.13 with no venv
+  (proves stdlib-only); fails once on a bare `genesis-core` line (then reverted); `validate_library.py` still PASSED
+  (14) with the gate-9 line; workflow tests unchanged (317). Separate steps for edit, run and revert (L-089).
+- Remote proof comes with genesis-workflows' first CI run in 50-09 §1.
+
 ## 6. As built
 
 *(filled by genesis-review)*
@@ -142,6 +159,7 @@ lessons  = ["L-030", "L-048", "L-051", "L-056", "L-057", "L-061", "L-089"]
 docs     = ["tracker:specs/phase-50-platform-monorepo.md", "tracker:specs/phase-50-platform-monorepo/50-01-findings.md"]
 code     = ["genesis/packages/**", "genesis/scripts/**", "genesis/genesis/runtime/updater.py", "genesis/.gitlab-ci.yml",
             "genesis-workflows/workflows/sync-application/**", "genesis-workflows/ci/validate_library.py",
+            "genesis-workflows/ci/check_internal_pins.py", "genesis-workflows/.gitlab-ci.yml",
             "genesis/tests/test_no_internal_dependencies.py", "tracker:context/areas.toml"]
 upstream = ["50-02", "50-03", "50-04", "50-05", "50-06", "50-07"]
 ```

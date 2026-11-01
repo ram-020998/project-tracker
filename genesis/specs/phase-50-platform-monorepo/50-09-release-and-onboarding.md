@@ -49,7 +49,10 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
 - Code map (already moved in 50-04) — add `scripts/install-packages.sh`, `tests/test_version_sync.py`, the CLI missing-library check (D15). `progress/phase-50-platform-monorepo.md`; `changelog.md`; README row 50 → SHIPPED; tracker §6.
 - Lessons from the build via `genesis-ctx add lesson`. Record the Phase 50 **L-089 recurrences** on the existing
   lesson (not a new one): 50-03 sent the three subtree merges in one batch; 50-04 twice ran the clean-tree check in
-  the same batch as the commit. All were verified correct afterwards. `genesis-ctx index && lint` green.
+  the same batch as the commit. All were verified correct afterwards. Also a **new lesson** (D20): `glab api
+  projects/<id>/variables` returns CI/CD variable **values** in clear (masking applies only to job logs) — never call
+  it from an agent; and consider a `shell-guard.sh` rule that refuses `glab api …/variables` (L-088: test it with a
+  bypass and a positive corpus). `genesis-ctx index && lint` green.
 
 ## 5. Acceptance
 
