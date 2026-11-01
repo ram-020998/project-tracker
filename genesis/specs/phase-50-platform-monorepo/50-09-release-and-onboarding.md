@@ -71,6 +71,63 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
 
 *(filled by genesis-release / genesis-docs)*
 
+### As run (2026-11-01, genesis-release) — §1–§3
+
+- **Versions:** genesis **v0.80.0** (the app and the three packages, one shared version: the four `pyproject.toml`,
+  the parser `__version__`, `create_app`, `web/src/version.ts`; `tests/test_version_sync.py` 6 passed); `CORE_MAJOR` 1
+  and `KB_FORMAT_VERSION` 1 unchanged. genesis-workflows **v0.24.0** (`pyproject.toml` only; the four pins on
+  `genesis.git@v0.80.0` and `registry.json` `genesis_core_version` 0.80.0 / major 1 came from 50-07).
+- **Commits:** genesis `080ef7c` (release: the 7 version locations + README status line + rebuilt `web/static`, 69
+  files; web source unchanged in Phase 50 apart from `version.ts`, which the sidebar renders). After the commit a fresh
+  `npm run build` left `git status --short --untracked-files=all` empty (own call, L-056/L-089). genesis-workflows
+  `a365e60`. Both `master` branches fast-forwarded from the `phase-50-monorepo` branches (genesis 74 + 1 commits on
+  `908e5d4`; genesis-workflows 4 + 1 on `04c242e`).
+- **Gates before tagging:** genesis app pytest **1418** passed; packages: genesis-core **96**, kiro-agent-sdk **79**,
+  genesis-appian-parser **53** + 1 skipped (`test_diff_hash`: two real exports not provided); `ruff` as CI runs it
+  (`genesis`, `genesis_core`, `src tests`, `.`) clean; web vitest **467** (50 files). genesis-workflows (dev venv):
+  `validate_library` PASSED (14, gate 9 OK), `validate_skills` PASSED (3), workflow tests **317** passed.
+- **Tags** (annotated, asked + confirmed each): genesis `v0.80.0` → `080ef7c`; genesis-workflows `v0.24.0` → `a365e60`.
+- **Pushes** (asked + confirmed each): genesis `master` + `v0.80.0` (`908e5d4..080ef7c`, fast-forward);
+  genesis-workflows `master` + `v0.24.0` (`04c242e..a365e60`, fast-forward).
+- **CI:**
+  - genesis **#7259141** (`master`) and **#7259142** (`v0.80.0`) — success; all six jobs green (`genesis`,
+    `genesis-core`, `kiro-agent-sdk`, `genesis-appian-parser`, `frontend`, `clean-install`).
+  - genesis-workflows **#7259218** (`master`) and **#7259219** (`v0.24.0`) — success (`library-validate`,
+    `skills-validate`, `workflow-tests`). The first remote run of the subdirectory pins: the `library-validate` log
+    shows `INTERNAL-PIN CHECK PASSED` before the token rewrite and the install (H2 remote proof), then all four internal
+    packages collected from `genesis.git@v0.80.0` (three with `#subdirectory=packages/<name>`), then `LIBRARY
+    VALIDATION PASSED (14 workflow(s) validated)`.
+- **Scratch branches** (asked + confirmed): `origin/phase-50-monorepo` of genesis deleted; local `phase-50-monorepo`
+  deleted in genesis and genesis-workflows (`-d`; the genesis-workflows branch was never pushed). `genesis-ctx status`:
+  both repos on `master`, 0 dirty, 0 ahead.
+- **§2 fleet** (go-ahead given): no run active on :8760/:8761; `gsm stop --all` (no `-wal`/`-shm` left); `genesis.db`
+  + `memory.db` of both instances copied to **`/tmp/genesis-50-09-backup/{main,userb}/`** (the shell guard refuses
+  `~/genesis-backups`; `/tmp` as in D18; cleared on reboot), SHA-256 equal to the sources, `integrity_check` ok on all
+  four; dev venv reinstalled from `master` (`scripts/install-packages.sh --editable --dev`: all four at 0.80.0,
+  imports from `genesis/packages/…`); `gsm provision --all --no-mcp --no-env --force` (genesis-workflows v0.24.0,
+  `sync-application` 0.3.1); `gsm start --all` → main pid 93609, userb pid 93671. Both: `/openapi.json`
+  `info.version` **0.80.0**, `GET /api/workflows/sync-application` **0.3.1**, `/api/config/health` 200, 0 running runs,
+  no pending migration. No managed install (`~/.genesis/dist.json` absent), so no `install.sh` reinstall.
+- **§3 archive:**
+  - Pointer commits (README replaced with the §3 text; asked + confirmed each push): genesis-core `661ae8c`
+    (`[skip ci]`; pipeline **#7259247** skipped), kiro-agent-sdk `b40c560` (no CI configured), genesis-appian-parser
+    `38f0832` (pipeline **#7259260** success).
+  - **GitLab archive: DEFERRED to the user.** `glab api -X POST projects/14328/archive` returned **HTTP 403**: glab's
+    token has read scope only (no `api` scope; the user is Owner, access level 50). The user archives genesis-core
+    (14328), kiro-agent-sdk (14306) and genesis-appian-parser (14520) in the GitLab UI.
+  - Local moves to `_archived/`: **DEFERRED by the user** (checkouts left in place until the projects are archived).
+- **Deviations / follow-ups:**
+  - **L-089 recurrences (for genesis-docs, on the existing lesson):** genesis-release batched order-dependent steps
+    or a verifying read with its step about a dozen times in this release: build + status, add + status, add + commit,
+    checkout/ff + verify (both repos), tag + verify, push + `ci list` (both repos), remote branch delete + local
+    `-d`, run check + `gsm stop`, `mkdir` + `cp`, `cp` + checksum, `gsm start` + `gsm provision`, README write + add,
+    commit + log. Each outcome was re-verified in its own call and was correct. The riskiest one, the run check
+    batched with `gsm stop`, ran before the stop and still read 0 runs on both instances. A rule in the prompt does
+    not stop the agent from batching; a structural guard may be needed (e.g. a hook that refuses a mutating command
+    in a parallel batch).
+  - README of genesis still says "migrations m0001–m0024 (DB v24)" (stale since Phase 49; genesis-docs).
+  - Row 6 / §5 Monday sync check (D22) stays with the user.
+
 ## Context manifest
 
 ```toml
