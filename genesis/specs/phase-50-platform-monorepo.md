@@ -47,6 +47,7 @@ Genesis uses the libraries (D2). One repo gives one change, one review, one tag 
 | D15 | A missing library makes the `genesis` CLI exit with one clear message before any other import (replaces F2's "serve still starts"); no preflight item. |
 | D16 | Map the unmapped CLI files in 50-04: `cli/main.py` → distribution; `cli/create_workflow.py`, `cli/test_workflow.py` → workflows-library; app `tests/**` stay unmapped. |
 | D17 | The updater `scope` label stays (always `deps` after 50-07); retiring it is backlog (`specs/backlog/phase-50-follow-ups.md`). |
+| D18 | Install `sync-application` 0.3.1 on both fleet instances now (genesis-dev, no active run, before the weekday sync); undo = reinstall 0.3.0. |
 
 ## 4. Current state (code-grounded — full detail in `50-01-findings.md` §2)
 
