@@ -189,6 +189,54 @@ parser (need >= 0.79.0)"). The result is correct and 0.3.1 then reads that recor
 once per app. The default schedule runs on weekdays (ADR-074), and 2026-11-01 is a Sunday. Options for the user:
 accept it; disable the scheduled sync until 50-09; or install sync-application 0.3.1 on the fleet early (a fleet
 mutation, needs a yes). In 50-09, install 0.3.1 in the same step as the v0.80.0 fleet update.
+**Resolved 2026-11-01 by D18** (the third option, user decision): see the next section.
+
+### Fleet install of sync-application 0.3.1 (D18, 2026-11-01)
+
+Done by genesis-dev on Sunday 2026-11-01, before the first weekday scheduled sync. The fleet was **not** restarted and
+the dev venv `genesis/.venv` was **not** reinstalled. Source: the local genesis-workflows checkout, branch
+`phase-50-monorepo` at `7e42fc9`, clean tree. The fleet venv's parser reports `0.79.0`, `KB_FORMAT_VERSION` 1, so the
+workers take 0.3.1's format rule.
+
+1. **No active run on either instance.** `GET /api/runs?status=running` and `GET /api/runs?status=active` (pending,
+   running, awaiting gate, paused) both returned `{"runs":[],"total":0,…}` on :8760 and :8761. Before the install,
+   `GET /api/workflows/sync-application` reported `"version":"0.3.0"` on both.
+2. **Backup** (instance library entry, shared registry, lockfile), copied before the install:
+   `/tmp/genesis-d18-backup/{main,userb}/{sync-application/,registry.json,installed.lock.json}`.
+3. **Install** (main uses the default state dir `~/.genesis`; userb's state and artifacts dirs come from
+   `~/.genesis-fleet/config.json`):
+   ```
+   genesis/.venv/bin/genesis install --from …/genesis-workflows sync-application
+   env GENESIS_STATE_DIR=~/.genesis-fleet/instances/userb/state \
+       GENESIS_ARTIFACTS_DIR=~/.genesis-fleet/instances/userb/artifacts \
+       genesis/.venv/bin/genesis install --from …/genesis-workflows sync-application
+   ```
+   Each printed `installed 1 workflow(s) @ ref 'local' into <state>/library:` / `- sync-application (0.3.1)`.
+4. **Confirmed**: `GET /api/workflows/sync-application` returns 200 with `"version":"0.3.1"` on :8760 and :8761
+   (responses saved as `/tmp/genesis-d18-backup/{main,userb}-after.json`); the installed `graph.py` on both is
+   byte-identical to the branch file (`diff -q`). `GET /api/workflows/test-design-analysis` still returns 200 on both,
+   so the loader's `CORE_MAJOR` gate still passes.
+
+Side effects of `install` (it always rewrites the shared files and the lockfile header, `dist/install.py:59-82`):
+each instance's `library/registry.json` now has sync-application `0.3.1` and `genesis_core_version` `0.80.0` (the only
+two diffs against the backup; `mcp-registry.json`, `cli-registry.json` and `bundles.json` are identical between
+v0.23.0 and the branch). In each lockfile, `libraryRef` changed `v0.23.0` → `local` and `genesis_core.version`
+`0.9.8` → `0.80.0` (major stays 1). Nothing reads these two for behaviour (the loader checks only `major`,
+`dist/loader.py:43-45`; `libraryRef` is echoed by the catalog install/remove responses only). 50-09's fleet update
+reinstalls the library from the v0.24.0 tag, which rewrites them.
+
+**Undo** (if 0.3.1 must come off before 50-09): with no run active, reinstall 0.3.0 from genesis-workflows v0.23.0 on
+each instance, for example from a v0.23.0 worktree:
+```
+git -C …/genesis-workflows worktree add /tmp/gw-v0.23.0 v0.23.0
+genesis/.venv/bin/genesis install --from /tmp/gw-v0.23.0 sync-application
+env GENESIS_STATE_DIR=~/.genesis-fleet/instances/userb/state \
+    GENESIS_ARTIFACTS_DIR=~/.genesis-fleet/instances/userb/artifacts \
+    genesis/.venv/bin/genesis install --from /tmp/gw-v0.23.0 sync-application
+```
+(or `genesis install --ref v0.23.0 sync-application` from GitLab with a token), then confirm
+`GET /api/workflows/sync-application` reports 0.3.0. The exact pre-install files are also in the backup above.
+After an undo the D18 risk returns: the next sync of every app is a full re-export.
 
 ### Lesson candidates
 
