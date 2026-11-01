@@ -50,6 +50,7 @@ Genesis uses the libraries (D2). One repo gives one change, one review, one tag 
 | D18 | Install `sync-application` 0.3.1 on both fleet instances now (genesis-dev, no active run, before the weekday sync); undo = reinstall 0.3.0. |
 | D19 | 50-08: push the scratch branch for CI; restart the fleet on branch code and run `hello-appian` (row 5); row 6 waits for Monday's scheduled sync; M1 → hardening item H1. |
 | D20 | User deleted `GITLAB_PUSH_TOKEN` from genesis and genesis-core and rotated the token (new value in genesis-workflows only; genesis-core pointer commit uses `[skip ci]`); agents never call the CI-variables API; H2 runs the genesis-workflows pin check before any install. |
+| D21 | Protecting genesis-workflows' refs and its token variable is deferred to backlog (`phase-50-follow-ups.md` §4); the variable stays Masked only. |
 
 ## 4. Current state (code-grounded — full detail in `50-01-findings.md` §2)
 
@@ -138,7 +139,8 @@ Versions assume Phase 49 ships genesis v0.79.0 + genesis-workflows v0.23.0 (49-0
 - **Out:** moving genesis-workflows; moving the app under `packages/` (D5 option B); uv or any new packaging tool;
   path-filtered CI (D10); publishing packages to any index; branch/tag protection on GitLab (may be added by the
   user any time).
-- **Deferred:** retire the updater `scope` label (D17, [backlog](backlog/phase-50-follow-ups.md)). A later phase may
+- **Deferred:** retire the updater `scope` label (D17) and protect genesis-workflows' release refs + CI token (D21),
+  both in [backlog](backlog/phase-50-follow-ups.md). A later phase may
   revisit layout B or CI path filters if they become worth it.
 
 ## 10. Defaults (proposed by the spec writer, accepted by the user 2026-10-31 — D14)

@@ -36,3 +36,27 @@ left the float in place rather than churn workflow code inside the monorepo phas
 
 **When picked up.** Fix the 20 findings (no behaviour change), pin `ruff==0.15.20`, and add `ruff check` to the
 `library-validate` CI job so the pin is enforced.
+
+## 4. Protect genesis-workflows' release refs and its CI token
+
+**Context (50-08 H2, D21).** Since D20 the only project holding `GITLAB_PUSH_TOKEN` is **genesis-workflows**, whose CI
+uses it to clone the genesis repo for its `#subdirectory=` pins. The variable is masked but **not protected**, so every
+pipeline gets it — including a branch or merge-request pipeline, and an MR can edit `.gitlab-ci.yml` itself.
+genesis-workflows accepts contributions from anyone (ADR-014). H2 stops a bad internal pin from being downloaded, but
+`pip install` still fetches hatchling and third-party packages while the token is present. No branch or tag in any
+Genesis project is protected today (`50-01-findings.md` §2.6).
+
+**What to do (user, in the GitLab UI — agents must not call the CI-variables API, D20).**
+
+1. genesis-workflows → Settings → Repository → **Protected branches**: `master`, push and merge = Maintainers.
+2. Same page → **Protected tags**: `v*`, allowed to create = Maintainers.
+3. Settings → CI/CD → Variables → `GITLAB_PUSH_TOKEN`: tick **Protected** (keep **Masked**).
+4. Push a no-op or wait for the next `master` pipeline: `library-validate`, `skills-validate`, `workflow-tests` green.
+5. Optional, same pattern for genesis (`master`, `v*`) — it holds no CI secret now, so this only guards history.
+
+**Effect to know about.** Pipelines on any **other** branch no longer get the token, so their `pip install` of the
+genesis pins fails. Library changes are validated on `master` (and locally), so this is accepted; a contributor branch
+must be merged to run the full CI.
+
+**When.** Any time after Phase 50's release (genesis-workflows v0.24.0); doing it before 50-09 is also safe, because 50-09
+pushes only `master` and the `v0.24.0` tag.
