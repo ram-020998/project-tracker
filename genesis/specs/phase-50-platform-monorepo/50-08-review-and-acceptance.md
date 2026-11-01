@@ -29,7 +29,7 @@ changed), `clean-install`. Record the pipeline id. genesis-workflows CI cannot p
 | 3 | `pip install --dry-run --report` of the install command | No index lookup for an internal name (D6) |
 | 4 | Dev venv | `genesis_core.__file__`, `kiro_agent_sdk.__file__`, `genesis_appian_parser.__file__` are under `genesis/packages/`; the three parser-fixture tests **ran** (not skipped) in the pytest output |
 | 5 | Fleet (main + userb) on the dev venv, after checking no run is active | Both healthy; a workflow run with an agent step completes (proves the worker imports the libraries) |
-| 6 | Incremental sync of a tracked app on main with the new `sync-application` installed from the local checkout | Runs **incremental** (no forced full sync); `details.kb_format_version` = 1 |
+| 6 | Incremental sync of a tracked app on main with `sync-application` 0.3.1 (installed on both instances before 50-08, D18; check `GET /api/workflows/sync-application` = 0.3.1) | Runs **incremental** (no forced full sync); `details.kb_format_version` = 1. A scheduled weekday sync on either instance since D18 counts as evidence: read its `kb_syncs` row instead of starting a new sync |
 | 7 | genesis-workflows local gates against the dev venv | validate_library, validate_skills, workflow tests green |
 | 8 | Updater unit tests + a manual `genesis update --check` style read on a managed temp install | scope computed by path diff; no crash |
 | 9 | `genesis-ctx status`, `pack 50-07`, `check --files genesis/packages/genesis-core/genesis_core/nodes/agent.py` | New repo set; core-engine rules load |
