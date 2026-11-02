@@ -62,9 +62,9 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
 
 - [x] genesis v0.80.0 and genesis-workflows v0.24.0 tagged, CI green (pipeline ids recorded).
 - [x] Fleet on 0.80.0 with `sync-application` 0.3.1 on both instances.
-- [ ] **After the release (D22, user):** on the first weekday scheduled sync (Monday 2026-11-02), each instance's newest
+- [x] **After the release (D22, user):** on the first weekday scheduled sync (Monday 2026-11-02), each instance's newest
       `kb_syncs` row is incremental with `details.kb_format_version` = 1; record it in §6 As run. A full re-export
-      instead → open a follow-up fix (not a rollback).
+      instead → open a follow-up fix (not a rollback). *(PASS 2026-11-02 — see §6 "D22 sync check".)*
 - [ ] Three projects archived with the pointer commit; local checkouts in `_archived/`. *(Pointer commits done; the
       GitLab archive and the moves are the user's — glab's token is read-only.)*
 - [x] ADR-080 recorded; docs write-back done; lint green.
@@ -148,6 +148,15 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
   changelog, tracker §6 + §3, README row 50.
 - **Not done (outside the docs agent's write roots):** the genesis repo `README.md:18` still says "migrations
   m0001–m0024 (DB v24)"; it needs a genesis commit (m0001–m0025, DB v25).
+
+### D22 sync check (2026-11-02, user-started sync; read by genesis-spec, read-only)
+
+**PASS.** On **main**, `kb_syncs` row **53**: `kind` = `incremental`, `status` = `succeeded`, 2026-11-02 05:46:36Z,
+`details.requested_mode` = `auto`, `details.kb_format_version` = **1**, `details.parser_version` = `0.80.0`,
+`fallback_reason` none, `changed_count` 1 (0 added / 0 modified / 0 removed). The row before it (52, 2026-10-30) was
+recorded by parser 0.3.0 **without** a format, so this sync is the F4 case: a KB built by parser 0.3.x counted as
+format 1 and stayed incremental (no forced full re-export). **userb** has no environment syncs of its own (its rows
+are `hub-pull`, newest 10 at 05:46:50Z, succeeded), so the check applies to main only.
 
 ## Context manifest
 
