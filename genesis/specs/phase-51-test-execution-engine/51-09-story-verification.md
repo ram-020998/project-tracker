@@ -14,7 +14,7 @@ report.
 ## 2. Lane order and transitions (D6, D7)
 
 - `STORY_LANES` (`genesis/genesis/domain/transitions.py:124-127`) becomes `… CODE_REVIEW, DEPLOYMENT, VERIFICATION,
-  DONE`. `STORY_STAGE_TRANSITIONS` (`:105-120`): replace `(code-review, approve) → verification`, `(verification,
+  DONE`. `STORY_STAGE_TRANSITIONS` (`genesis/genesis/domain/transitions.py:105-123`): replace `(code-review, approve) → verification`, `(verification,
   verify) → deployment`, `(deployment, deployed) → done` with `(code-review, approve) → deployment`, `(deployment,
   deployed) → verification`, `(verification, verify) → done`; keep `(verification, reject) → implementation`.
 - **Every consumer of the lane order** (L-094): `kb/boards.py:30` (`LANE_VALUES`, order from `STORY_LANES`), the board

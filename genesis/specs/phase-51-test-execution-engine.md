@@ -6,7 +6,8 @@
 > Repos: **genesis** (backend + web, migration **m0026**), **genesis-workflows** (three new workflows + one skill),
 > **playwright-appian** (joins the agent system, D19; additive changes as needed), **project-tracker** (agent system).
 > Proposed ADRs: **ADR-081** (test automation architecture), **ADR-082** (the QA environment and test data writes),
-> **ADR-083** (workflow agents get no shell; browser access through a Genesis MCP server), **ADR-084** (lane order +
+> **ADR-083** (Phase 51 browser agents drive `apwt` through Kiro's shell on program-owned QA sessions; isolation
+> deferred to Phase 52 — accepted risk), **ADR-084** (lane order +
 > Verification lane automation).
 > Part 2 of the testing framework (part 1 = Phase 49 Test Design).
 

@@ -1,16 +1,25 @@
-# 51-03 — Spike: a sandboxed Kiro shell driving `apwt` (the D3 gate)
+# 51-03 — Spike: agent access to `apwt` (started as the sandboxed-shell gate; now the D3c loop)
 
-> **Status:** SPEC-DRAFTED 2026-11-02. Repos: **genesis** (spike harness under `genesis/scripts/spikes/` + notes in
-> the As built; no product code), **playwright-appian** (only if a gap needs a change, D19). Built by genesis-dev; a
-> genesis-review pass checks the evidence. Parent: `specs/phase-51-test-execution-engine.md`. Decisions: 51-01 D3,
-> D4, D5, D8, D13.
+> **Status:** IN PROGRESS (PARTIAL As built below) — S1, S5, S6 done (sandbox evidence, kept as ADR-083 / Phase 52
+> input); S2/S3 and §2a dropped; **the remaining work is §2b** (D3c: ordinary shell + the workspace's own `apwt` on
+> program-owned QA sessions). Read §2b and the spec-agent note at the top of the Resume note first. Repos: **genesis**
+> (spike harness under `genesis/scripts/spikes/51-03/` + notes in the As built; no product code), **playwright-appian**
+> (only if a gap needs a change, D19). Built by genesis-dev; a genesis-review pass checks the evidence. Parent:
+> `specs/phase-51-test-execution-engine.md`. Decisions: 51-01 D3 → D3a → D3b → **D3c (current)**, D4, D5, D8, D13.
+> (The file name keeps "sandboxed-shell" so existing links resolve.)
 
 ## 1. Goal
 
-Prove, on the user's macOS machine with the installed `kiro-cli` (2.37.1 at spec time), that a Genesis workflow agent
+*(Original goal, kept for the record; the current goal is §2b.)* Prove, on the user's macOS machine with the installed
+`kiro-cli` (2.37.1 at spec time), that a Genesis workflow agent
 can drive `apwt` through Kiro's shell inside Kiro's local command sandbox with no way to reach secrets, other hosts or
 files outside its run folder — or show that it cannot, so the D3 fallback (an `appian-browser` MCP server) replaces it
 before 51-07/51-09 are built. Also settle the signed-in recording mechanism (D13) and the Chromium choice (D4).
+
+**Current goal (D3c):** prove the full Phase 51 agent loop on QA — a program step opens and logs in a role's session,
+an ordinary agent turn drives it with `npx --no-install apwt` from the workspace, the produced spec replays — with no
+credential in the agent's view; settle signed-in recording and Chromium everywhere; measure timing; confirm skills and
+the blackboard work; answer P10 for Phase 52.
 
 ## 2. Questions the spike must answer (each with evidence: commands, outputs, files)
 
@@ -73,10 +82,14 @@ Outcome rule: M1–M3, S4 and S11 must pass; a failure stops the phase for a re-
 
 ## 3. Outcome rules
 
-- **All of S1–S7 pass** → D3 stands. The As built records the exact sandbox files, the shell tool name to trust, the
+> **Superseded by §2b (D3c, 2026-11-02).** The current outcome rule is in §2b: L1, S4 and S11 must pass; a failure
+> stops the phase for a re-spec (there is **no** MCP fallback any more; agent isolation is Phase 52); S8/S9 gaps are
+> additive `playwright-appian` changes. The original rules are kept below for the record.
+
+- *(superseded)* **All of S1–S7 pass** → D3 stands. The As built records the exact sandbox files, the shell tool name to trust, the
   clean-environment allow list, the session-ownership recipe and any `playwright-appian` change made (with its D-row in
   `playwright-appian/planning/DECISIONS.md`). 51-05/51-09 build on it.
-- **Any of S1–S6 fails without a safe fix** → stop. Report to the user; the spec agent re-specs the agent-access parts
+- *(superseded)* **Any of S1–S6 fails without a safe fix** → stop. Report to the user; the spec agent re-specs the agent-access parts
   of 51-05 §5, 51-07 §5 and 51-09 §3 on the fallback (`appian-browser` MCP server, managed entry like `genesis-kb`,
   per-node allowlist; 51-01 D3).
 - S8/S9 gaps are fixed in `playwright-appian` (additive; minor version bump; its own tests) during this spike or listed
@@ -162,6 +175,9 @@ the Kiro CLI credential store under `~/Library/Application Support/kiro-cli`), s
 keeps the user's real `~/.kiro` untouched and the agent still authenticates.
 
 ### The working recipe (for 51-05/51-09 and the ADR)
+
+> *(Spec-agent note, after D3c: this sandbox recipe is **not** used by Phase 51 product code; it is kept as evidence for
+> ADR-083 and as input for Phase 52, `specs/phase-52-agent-runtime-isolation/52-01-findings.md` §7 option B.)*
 
 - Launch: `kiro-cli acp --agent-engine v3` (no `--trust-all-tools`). `kiro-agent-sdk`
   `KiroAgentOptions(cwd=<run-folder>, agent_engine="v3", trust_all_tools=False, trust_tools=None,
@@ -370,7 +386,29 @@ extended (W14/W15/W16 policy-file + skills writes, E01 self-widen attempt, N09/N
 R21–R24). The OS-layer corpus command: `sandbox-exec -D HOME_DIR=$HOME -f /tmp/51-03-profile.sb bash
 sandbox-probe.sh <other-run> <dev-host> <qa-host> <kiro-home>` from the run folder.
 
-**Not done — next session, in order:**
+> **Spec-agent note (2026-11-02, after D3c) — read this instead of the list below.** The design changed after this
+> Resume note was written: Phase 51 browser agents use Kiro's **ordinary shell** (no sandbox, no V3, no `KIRO_HOME`,
+> no `applyConfig`, no MCP fallback) and run `npx --no-install apwt` from the run's workspace export on sessions a
+> program step opened and logged in (51-01 D3c, 51-05 §4a). The next session does **§2b** only, in this order:
+> 1. **L1** — the full loop on QA: program `open --login` (credentials only in that subprocess's env,
+>    `PLAYWRIGHT_APPIAN_HOME` in the run folder, `--allow-host <QA host> --mode full --browser chromium`), then an
+>    ordinary `kiro_node`-style turn (default engine) with the CLI `playwright-appian` skill provisioned runs
+>    `npx --no-install apwt -s <role> snapshot/find/fill/select/click/wait/expect/record-start/record-stop/spec/log`
+>    from a copy of the workspace template (`~/.genesis/testing/spike-51-03-template`); `npx playwright test` of the
+>    produced spec replays green.
+> 2. **S4** — scan the turn's shell `env`, `ps -Eww`, the session's control files and every tool result: no password.
+> 3. **S8/S9** — signed-in recording as a role (`record start --cdp` into a program-opened headed Chromium, or an
+>    additive `playwright-appian` option) and Playwright Chromium for sessions, recording and generated specs (item 5
+>    below still applies as written).
+> 4. **S10** — explore-turn timing (item 6 below).
+> 5. **S11** — a skill in `<cwd>/.kiro/skills/` is activated and a blackboard tool works in that ordinary turn.
+> 6. **P10** — does a workflow turn load the user's global `~/.kiro/settings/mcp.json` servers? (input for Phase 52)
+> 7. Spawn `genesis-review` on 51-03; fix to SHIP; finish the As built (final recipe, S-results table, timings).
+> If L1, S4 or S11 fails with no safe fix: STOP and report to the user. Items 1–4, 7 and open problems (a)–(e) of the
+> list below are **superseded** (sandbox work; the S6 sandbox evidence is kept as Phase 52 input). No bypass corpus is
+> required for the shell in this phase (accepted risk, ADR-083).
+
+**Not done — next session, in order:** *(superseded by the note above, except items 5 and 6)*
 1. **Wire `test_bypass_corpus.py`** (small): drive `capture-profile` to grab the live profile, run the
    corpus under `sandbox-exec`, parse the lines, assert every must-stay-blocked id is DENIED/ABSENT and the
    positives (W01/W02/W03, R22, N05 loopback) ALLOWED; use `bypass-nosandbox` as the positive control
