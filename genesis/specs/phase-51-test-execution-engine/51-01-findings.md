@@ -82,9 +82,14 @@ Paths: `genesis/` = `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/genesis`, `workf
 - `CliRegistry` (`packages/genesis-core/genesis_core/clis/registry.py`) resolves a binary; `run()` passes no env and
   `cli_node` (`nodes/cli.py:26`) passes **no timeout**. Child processes of a killed worker are not reaped
   (`genesis/runs/supervisor.py:30-37`; no process group).
-- Workflow agent nodes (`kiro_node`, `nodes/agent.py:195`) get **MCP tools only** (per-node, trust =
-  `node.tools ∩ server.allowlist`, ADR-029) plus provisioned skills (ADR-069); **no shell tool** reaches a workflow
-  agent today. `sail` is a program-only seam (`ctx.extras['sail']`), with no workflow consumer.
+- Workflow agent nodes (`kiro_node`, `nodes/agent.py:195`) get per-node MCP tools (trust = `node.tools ∩
+  server.allowlist`, ADR-029) plus provisioned skills (ADR-069). **Correction (2026-11-02, found after D3b):** this
+  section originally said "no shell tool reaches a workflow agent today"; that is wrong. `kiro_node` never sets
+  `permission_mode`, so the SDK default `auto_approve` (`kiro_agent_sdk/client.py:53`, `:450-452`) approves every
+  permission request for an untrusted tool, including Kiro's shell; and a node with no `tools=` and no server
+  allowlist (e.g. `mcp=[]`) gets `trust_all_tools=True` (`nodes/agent.py:157-158`, `:299-300`), i.e. `kiro-cli acp
+  --trust-all-tools`. So existing workflow agents can run shell commands as the user today. See §7 D20.
+  `sail` is a program-only seam (`ctx.extras['sail']`), with no workflow consumer.
 - The blackboard (`RunWorkspace`, ADR-010/022) is `<artifacts_root>/<workflow>/<run>/`. The generic artifact preview
   serves json/markdown/mermaid/csv/text only; images and HTML download but do not preview (`genesis/api/_shared.py`).
 
