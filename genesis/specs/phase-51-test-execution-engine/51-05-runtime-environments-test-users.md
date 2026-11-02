@@ -57,6 +57,27 @@ The program-side seam (like `SailClient`, `genesis/genesis/integrations/sail/cli
 - Wired for workflows as `ctx.extras['apwt']` with a `TestCredentialResolver` (§6), the `sail` pattern; the worker
   builds it, the app never imports workflow code (ADR-012).
 
+## 4a. The sandboxed-shell agent node (D3, D3a — the 51-03 recipe)
+
+- **`kiro-agent-sdk`** (`packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py`), additive: an `env=` option on
+  `KiroAgentOptions` used instead of `os.environ.copy()` when set (`client.py:182-190`); `ext_request(method, params)`
+  to send an ACP extension request and await its result; a notification hook that surfaces `_kiro/sandbox/status`
+  (today non-turn notifications are dropped). Tests with a fake ACP peer.
+- **`genesis-core` `kiro_node`** (`packages/genesis-core/genesis_core/nodes/agent.py:195`), additive: a
+  `sandboxed_shell=SandboxedShell(network_hosts=[…], read_deny=[…], write_allow=[…])` option. When set, the node:
+  starts Kiro with `agent_engine="v3"`, the clean environment (S5 list) and a **per-run `KIRO_HOME`** (inside the run
+  folder) holding `settings/permissions.yaml` (`fs_read` deny: `~/.ssh`, `~/.aws`, `~/.genesis`, Keychains,
+  `~/.kiro`, the `apwt` saved-login `states/`; `fs_write` allow: the run folder; `sandbox_network` allow: the QA host
+  only, ordered before any wildcard); after `session/new` sends `_kiro/sandbox/applyConfig` (`sandboxNetworkMode` =
+  `default_blocked`, then `sandbox` = `enabled`, `mcpSandboxing` = `disabled`) and **fails the turn** unless
+  `_kiro/sandbox/status` reports `active` within the startup timeout; runs `permission_mode="ask"` with a policy that
+  allows only tool calls of kind `execute` (correlated by `toolCallId`) and the blackboard MCP tools, denying
+  everything else (fail-closed, L-017). It never passes `--trust-all-tools` or `--trust-tools` (V3 rejects the
+  latter). The ADR-029 MCP intersection still applies to any MCP server the node declares.
+- Skills keep provisioning into `<cwd>/.kiro/skills/` (ADR-069) — 51-03 S11 confirms V3 with a custom `KIRO_HOME`
+  still discovers them.
+- Every sandboxed node's run records the `_kiro/sandbox/status` payload in its telemetry (evidence the boundary was on).
+
 ## 5. Environment types (D5, F3)
 
 `genesis/genesis/config/environments.py`: `type` becomes an enum `dev | qa | uat | production | other` (labels Dev, QA,
@@ -96,6 +117,6 @@ areas    = ["config-secrets", "distribution", "runs-worker", "security"]
 adrs     = ["ADR-012", "ADR-013", "ADR-020", "ADR-036", "ADR-038", "ADR-040", "ADR-046", "ADR-048"]
 lessons  = ["L-019", "L-029", "L-048", "L-053", "L-070", "L-097", "L-098"]
 docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md", "tracker:specs/phase-51-test-execution-engine/51-03-spike-sandboxed-shell.md"]
-code     = ["genesis/genesis/config/environments.py", "genesis/genesis/config/secrets.py", "genesis/genesis/api/config_routes.py", "genesis/genesis/runtime/preflight.py", "genesis/genesis/integrations/sail/**", "genesis/genesis/integrations/apwt/**", "genesis/genesis/testexec/**"]
+code     = ["genesis/genesis/config/environments.py", "genesis/genesis/config/secrets.py", "genesis/genesis/api/config_routes.py", "genesis/genesis/runtime/preflight.py", "genesis/genesis/integrations/sail/**", "genesis/genesis/integrations/apwt/**", "genesis/genesis/testexec/**", "genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py", "genesis/packages/genesis-core/genesis_core/nodes/agent.py"]
 upstream = ["51-03", "51-04"]
 ```

@@ -39,12 +39,13 @@ The confirm dialog text (51-11) asks the user to confirm the story's changes are
 ## 4. `story-verification` workflow (genesis-workflows `workflows/story-verification/`)
 
 Every agent node: ADR-011 trio; skills `playwright-appian` + `genesis-test-authoring` (51-07 §7) provisioned per
-ADR-069; the **sandboxed shell** per D3/51-03 (or the fallback MCP tools if 51-03 failed); bounds F10.
+ADR-069; the **sandboxed shell** per D3/D3a, i.e. `kiro_node(sandboxed_shell=…)` from 51-05 §4a with the QA host as
+the only network host (or the fallback MCP tools if 51-03 failed); bounds F10.
 
 | Node | Kind | Does |
 |---|---|---|
 | `resolve_inputs` | program | Load inputs; compute the affected roles (roles of the story's cases + their scenarios' setups) |
-| `open_sessions` | program | `ApwtClient` opens + logs in one session per role on QA (51-05 §4); writes the sandbox config into the run folder |
+| `open_sessions` | program | `ApwtClient` opens + logs in one session per role on QA (51-05 §4); the sandboxed node prepares its per-run `KIRO_HOME` permission rules (51-05 §4a) |
 | `explore` | agent | Per role, visits the screens the story changed (story + cases + implementation report as files, L-042); no tests; `record-start`/`record-stop` captures; writes `exploration.json` (screens, addresses, notes) |
 | `v_explore` | validator | Every role explored; captures present |
 | `author` | agent | Writes a case script per story case, data setups and new actions where the library lacks them, using library actions first (D2, §5.5 of findings); sets each scenario's setup + `changes_shared_data` |

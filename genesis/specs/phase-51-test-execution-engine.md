@@ -38,7 +38,7 @@ execution engine with results, and the Workbench Verification lane.
 |---|---|
 | D1 | Code = files in a per-application **git** workspace; catalog (ids, contracts, where-used, suites, results) in `genesis.db` with path + hash. |
 | D2 | Layers: Action ← data setup / case script ← scenario (generated spec) ← regression suite; references only. |
-| D3 | Agents drive `apwt` through Kiro's shell inside **Kiro's OS sandbox**; program nodes own sessions + credentials; a **spike** proves it first, MCP wrapper is the fallback. |
+| D3 | Agents drive `apwt` through Kiro's shell inside **Kiro's OS sandbox**; program nodes own sessions + credentials; a **spike** proves it first, MCP wrapper is the fallback. **D3a:** the sandbox is turned on over ACP (`_kiro/sandbox/applyConfig`) with a per-run `KIRO_HOME` `permissions.yaml`, not a `sandbox.json`; "trust only the shell" = an `ask` policy allowing tool kind `execute`. |
 | D4 | Node ≥ 20 prerequisite; `playwright-appian` tarball vendored in genesis; a self-contained npm project per app; Playwright's own Chromium. |
 | D5 | Environment **type** dropdown (Dev, QA, …) replaces the dev toggle; **all testing on QA**; QA site URL + test users by role in the app's Testing tab; every affected role recorded/explored. |
 | D6 | Lanes: … Code Review → **Deployment → Verification** → Done. |
@@ -186,9 +186,11 @@ machine (F7); 1 worker, 1 retry (F6); schedule off by default (F13); files kept 
   the application's test users only, never design objects; the Verification confirm and the schedule toggle are the
   approvals. Amends ADR-068 (Implementation stays the only lane that mutates design objects).
 - **ADR-083 — A sandboxed shell for workflow agents.** A workflow agent node may trust Kiro's shell tool only when it
-  runs inside Kiro's local command sandbox configured by Genesis (writes confined to the run, credential paths denied,
-  network limited to the QA host), with a clean environment and program-owned sessions; first user: `apwt`. Amends
-  ADR-029 (node trust beyond MCP allowlists).
+  runs inside Kiro's local command sandbox, turned on by Genesis over ACP (`_kiro/sandbox/applyConfig`, confirmed by
+  `_kiro/sandbox/status: active` before the first prompt) with a per-run `KIRO_HOME` whose permission rules confine
+  writes to the run, deny credential paths and allow network to the QA host only; a client `ask` policy allows only
+  tool calls of kind `execute` (V3 refuses `--trust-tools`); a clean environment and program-owned sessions; first
+  user: `apwt`. Amends ADR-029 (node trust beyond MCP allowlists).
 - **ADR-084 — Lane order and Verification lane automation.** Deployment precedes Verification; dragging into
   Verification launches `story-verification`; pass → Done, product defect → Implementation, blocked → gate; audited
   transitions. Amends ADR-061 (lane order) and extends ADR-062/068's lane-automation pattern.

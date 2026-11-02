@@ -26,6 +26,11 @@ before 51-07/51-09 are built. Also settle the signed-in recording mechanism (D13
 | S8 | Recording signed in as a role (D13): can Genesis open a **headed** Chromium logged in as the role and have `apwt record start` record into it (`--cdp`), or does `playwright-appian` need an additive option (e.g. `record start --state <saved login>` / `--login`)? | A recording started this way produces a trace whose spec replays |
 | S9 | Chromium everywhere (D4): can `record start`, agent `open` and generated specs all use Playwright Chromium (`--browser chromium`, config `channel`)? | One browser for all three, or the change list for `playwright-appian` |
 | S10 | Timing: explore-turn duration for a typical story screen (to size `turn_timeout`, F10) | Measured numbers |
+| S11 | *(added after S1, 2026-11-02)* With the V3 engine, a per-run `KIRO_HOME` and the sandbox on: are skills in `<cwd>/.kiro/skills/` still discovered (ADR-069), and does the ACP-injected blackboard MCP server still work (its tools allowed by the `ask` policy, `mcpSandboxing` disabled)? | The agent activates a provisioned skill and calls a blackboard tool in a sandboxed turn |
+
+> **Note (spec agent, 2026-11-02, after the partial As built):** S1's premise was wrong — `kiro-cli acp` ignores
+> `sandbox.json`; the sandbox is turned on with the `_kiro/sandbox/applyConfig` ACP request and a per-run `KIRO_HOME`
+> `permissions.yaml` (51-01 D3a). S2–S11 are answered with that recipe.
 
 ## 3. Outcome rules
 

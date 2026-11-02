@@ -17,8 +17,10 @@
    when the QA host equals another environment's (D5, D8); no MCP write tool, no deployment in any new workflow.
 5. **Secrets** — test passwords only in the SecretProvider; never in state, checkpoints, events, files, logs, API
    responses, the agent's environment (51-03 S4/S5 recipe followed); Kiro started with the clean environment.
-6. **Sandbox** (D3) — the sandbox config is written for every agent node that trusts the shell; the bypass corpus from
-   51-03 re-run against the built workflow (L-088); never `--trust-all-tools`.
+6. **Sandbox** (D3, D3a) — every agent node that trusts the shell uses `kiro_node(sandboxed_shell=…)`: V3 engine, the
+   `applyConfig` RPC with `_kiro/sandbox/status: active` checked before the first prompt (a turn without it fails), the
+   per-run `KIRO_HOME` permission rules, the kind-`execute`-only `ask` policy; the bypass corpus from 51-03 re-run
+   against the built workflow (L-088); never `--trust-all-tools` or `--trust-tools`.
 7. **Reliability** — the ADR-011 trio on every agent node; healing bounds (F10); `validate_library` green.
 8. **Lifecycle** — library items and scenarios change status only through `LifecycleService` (ADR-050); retire/delete
    preconditions; contract rule (D16.5).
