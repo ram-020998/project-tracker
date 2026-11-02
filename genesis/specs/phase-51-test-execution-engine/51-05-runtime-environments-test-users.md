@@ -57,26 +57,35 @@ The program-side seam (like `SailClient`, `genesis/genesis/integrations/sail/cli
 - Wired for workflows as `ctx.extras['apwt']` with a `TestCredentialResolver` (§6), the `sail` pattern; the worker
   builds it, the app never imports workflow code (ADR-012).
 
-## 4a. The sandboxed-shell agent node (D3, D3a — the 51-03 recipe)
+## 4a. The `appian-browser` MCP server and fail-closed browser agent nodes (D3b)
 
-- **`kiro-agent-sdk`** (`packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py`), additive: an `env=` option on
-  `KiroAgentOptions` used instead of `os.environ.copy()` when set (`client.py:182-190`); `ext_request(method, params)`
-  to send an ACP extension request and await its result; a notification hook that surfaces `_kiro/sandbox/status`
-  (today non-turn notifications are dropped). Tests with a fake ACP peer.
-- **`genesis-core` `kiro_node`** (`packages/genesis-core/genesis_core/nodes/agent.py:195`), additive: a
-  `sandboxed_shell=SandboxedShell(network_hosts=[…], read_deny=[…], write_allow=[…])` option. When set, the node:
-  starts Kiro with `agent_engine="v3"`, the clean environment (S5 list) and a **per-run `KIRO_HOME`** (inside the run
-  folder) holding `settings/permissions.yaml` (`fs_read` deny: `~/.ssh`, `~/.aws`, `~/.genesis`, Keychains,
-  `~/.kiro`, the `apwt` saved-login `states/`; `fs_write` allow: the run folder; `sandbox_network` allow: the QA host
-  only, ordered before any wildcard); after `session/new` sends `_kiro/sandbox/applyConfig` (`sandboxNetworkMode` =
-  `default_blocked`, then `sandbox` = `enabled`, `mcpSandboxing` = `disabled`) and **fails the turn** unless
-  `_kiro/sandbox/status` reports `active` within the startup timeout; runs `permission_mode="ask"` with a policy that
-  allows only tool calls of kind `execute` (correlated by `toolCallId`) and the blackboard MCP tools, denying
-  everything else (fail-closed, L-017). It never passes `--trust-all-tools` or `--trust-tools` (V3 rejects the
-  latter). The ADR-029 MCP intersection still applies to any MCP server the node declares.
-- Skills keep provisioning into `<cwd>/.kiro/skills/` (ADR-069) — 51-03 S11 confirms V3 with a custom `KIRO_HOME`
-  still discovers them.
-- Every sandboxed node's run records the `_kiro/sandbox/status` payload in its telemetry (evidence the boundary was on).
+> Replaces the sandboxed-shell design (D3/D3a, superseded by D3b 2026-11-02): agents get **no shell**.
+
+- **Server** `genesis/genesis/mcp/appian_browser_server.py` — stdlib newline-delimited JSON-RPC 2.0, the
+  `genesis/genesis/mcp/kb_server.py` pattern. Launched per node by the worker; registered in genesis-workflows
+  `mcp-registry.json` as a **managed** entry `appian-browser` (resolved to the module launch spec like `genesis-kb`)
+  with a `tool_allowlist`. Arguments set by Genesis, never by the agent: `--workspace <checkout>`, `--apwt-home
+  <run>/.apwt`, `--sessions <role sessions opened by the program node>`, `--artifacts <run folder>`. Its process
+  environment is the clean list (`PATH`, `HOME`, `TMPDIR`, `PLAYWRIGHT_BROWSERS_PATH`, `PLAYWRIGHT_APPIAN_HOME`) —
+  **no credentials** (sessions are already logged in, §4).
+- **Tools**, one-to-one onto `apwt -s <session> … --json` with argv lists: `snapshot` (optional scope), `find`, `read`,
+  `screenshot`, `errors`, `status`, `act` (one component call string), `fill`, `select`, `click`, `check`, `uncheck`,
+  `search`, `upload` (names under the upload root), `press`, `wait`, `expect`, `goto` (a **path** on the session's
+  host), `tab_list`, `tab_select`, `record_start`, `record_stop`, `log`, `spec`, and `read_artifact(path)` (a file under
+  the run folder only, bounded size — snapshots, reads, logs). **No** `open`, `login`, `close`, `attach`, `state-*`,
+  `--mode` or `--allow-host`: a session name outside `--sessions` is refused. Results are compact (change lines, page,
+  snapshot path + size); large content stays in files read by `read_artifact` (L-021). Errors keep `apwt`'s codes.
+- **Fail-closed node** (`genesis-core` `kiro_node`, `packages/genesis-core/genesis_core/nodes/agent.py:195`, additive
+  option e.g. `fail_closed=True`): `permission_mode="auto_deny"`, `trust_all_tools=False`, `trust_tools` = the node's
+  allowlisted `@appian-browser/…` tools (ADR-029 intersection) + the blackboard tools + the file-write tool, with
+  `fs_write_root` = the run folder (`kiro_agent_sdk/client.py:61-69`). Kiro's shell and any other untrusted tool is
+  refused. The spike (51-03, rescoped) proves which built-in tools still run without a permission request (e.g. a
+  file read outside the run folder) and how to deny them. Optional: an `env=` launch override in `kiro-agent-sdk`
+  (today `env=os.environ.copy()`, `client.py:182-190`) so Kiro itself starts with the clean list (proven in S5).
+- **Skill:** a `playwright-appian` MCP variant (same loop and rules, tool names instead of commands) in
+  genesis-workflows `skills/genesis-appian-browser/`, provisioned per ADR-069; the CLI skill stays the package's.
+- The browser itself is held on the QA host by `apwt`'s host allow-list (D8.1); 51-03 confirms it also refuses
+  loopback (`goto` / a link to `127.0.0.1:8760`).
 
 ## 5. Environment types (D5, F3)
 
@@ -117,6 +126,6 @@ areas    = ["config-secrets", "distribution", "runs-worker", "security"]
 adrs     = ["ADR-012", "ADR-013", "ADR-020", "ADR-036", "ADR-038", "ADR-040", "ADR-046", "ADR-048"]
 lessons  = ["L-019", "L-029", "L-048", "L-053", "L-070", "L-097", "L-098"]
 docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md", "tracker:specs/phase-51-test-execution-engine/51-03-spike-sandboxed-shell.md"]
-code     = ["genesis/genesis/config/environments.py", "genesis/genesis/config/secrets.py", "genesis/genesis/api/config_routes.py", "genesis/genesis/runtime/preflight.py", "genesis/genesis/integrations/sail/**", "genesis/genesis/integrations/apwt/**", "genesis/genesis/testexec/**", "genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py", "genesis/packages/genesis-core/genesis_core/nodes/agent.py"]
+code     = ["genesis/genesis/config/environments.py", "genesis/genesis/config/secrets.py", "genesis/genesis/api/config_routes.py", "genesis/genesis/runtime/preflight.py", "genesis/genesis/integrations/sail/**", "genesis/genesis/integrations/apwt/**", "genesis/genesis/testexec/**", "genesis/genesis/mcp/kb_server.py", "genesis/genesis/mcp/appian_browser_server.py", "genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py", "genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis-workflows/mcp-registry.json"]
 upstream = ["51-03", "51-04"]
 ```

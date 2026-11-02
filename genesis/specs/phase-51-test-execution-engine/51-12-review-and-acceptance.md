@@ -17,10 +17,10 @@
    when the QA host equals another environment's (D5, D8); no MCP write tool, no deployment in any new workflow.
 5. **Secrets** — test passwords only in the SecretProvider; never in state, checkpoints, events, files, logs, API
    responses, the agent's environment (51-03 S4/S5 recipe followed); Kiro started with the clean environment.
-6. **Sandbox** (D3, D3a) — every agent node that trusts the shell uses `kiro_node(sandboxed_shell=…)`: V3 engine, the
-   `applyConfig` RPC with `_kiro/sandbox/status: active` checked before the first prompt (a turn without it fails), the
-   per-run `KIRO_HOME` permission rules, the kind-`execute`-only `ask` policy; the bypass corpus from 51-03 re-run
-   against the built workflow (L-088); never `--trust-all-tools` or `--trust-tools`.
+6. **No shell for agents** (D3b) — every browser agent node uses the `appian-browser` MCP server in a fail-closed node
+   (`auto_deny`, `trust_all_tools=False`, explicit trust list, `fs_write_root` = the run folder); no new node trusts
+   Kiro's shell or runs with `trust_all_tools`; the server has no session/login/host/mode tools and starts with the
+   clean environment; the 51-03 M2 corpus re-run against the built workflows (L-088).
 7. **Reliability** — the ADR-011 trio on every agent node; healing bounds (F10); `validate_library` green.
 8. **Lifecycle** — library items and scenarios change status only through `LifecycleService` (ADR-050); retire/delete
    preconditions; contract rule (D16.5).
@@ -63,7 +63,7 @@ environment** with test users for two roles — provided by the user)
 | 16 | QA unreachable mid-run (block the host) | Blocked → escalation gate with Retry / Send back / Accept |
 | 17 | Accept verification proposals | One commit; library + regression updated |
 | 18 | Cancel a running execution | Run cancelled; no Chromium/apwt daemon left (`ps`) |
-| 19 | Security spot checks | `env` of an agent shell (from the turn log) has no secret; agent attempts outside the run folder denied |
+| 19 | Security spot checks | A verification turn's log shows no shell tool call allowed and no secret in any tool result; an agent attempt to read outside the run folder or reach `127.0.0.1:8760` through the browser is refused |
 | 20 | **Real-browser width probe (L-090):** 1280 / 1440 / 1920 px, light + dark — Library table, Executions table, execution results tree, Regression grouping, Setup users table | No clipped key/name columns, no horizontal scroll ≥ 1280; measured widths recorded |
 | 21 | Restart `serve` while an execution is queued and one is running | Startup reconcile: finished one finalized, queued one starts (L-058, L-097) |
 

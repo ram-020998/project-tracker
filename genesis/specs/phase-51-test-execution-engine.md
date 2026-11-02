@@ -3,10 +3,12 @@
 > **Status:** SPEC-DRAFTED 2026-11-02 · **Author:** genesis-spec agent.
 > Sub-specs: `phase-51-test-execution-engine/51-01..51-13`. Findings (code facts, research, every decision):
 > `51-01-findings.md`.
-> Repos: **genesis** (backend + web, migration **m0026**), **genesis-workflows** (three new workflows + one skill),
+> Repos: **genesis** (backend + web, migration **m0026**), **genesis-workflows** (three new workflows + two skills + the
+> `appian-browser` MCP registry entry),
 > **playwright-appian** (joins the agent system, D19; additive changes as needed), **project-tracker** (agent system).
 > Proposed ADRs: **ADR-081** (test automation architecture), **ADR-082** (the QA environment and test data writes),
-> **ADR-083** (a sandboxed shell for workflow agents), **ADR-084** (lane order + Verification lane automation).
+> **ADR-083** (workflow agents get no shell; browser access through a Genesis MCP server), **ADR-084** (lane order +
+> Verification lane automation).
 > Part 2 of the testing framework (part 1 = Phase 49 Test Design).
 
 ## 1. Why this phase exists
@@ -38,7 +40,7 @@ execution engine with results, and the Workbench Verification lane.
 |---|---|
 | D1 | Code = files in a per-application **git** workspace; catalog (ids, contracts, where-used, suites, results) in `genesis.db` with path + hash. |
 | D2 | Layers: Action ← data setup / case script ← scenario (generated spec) ← regression suite; references only. |
-| D3 | Agents drive `apwt` through Kiro's shell inside **Kiro's OS sandbox**; program nodes own sessions + credentials; a **spike** proves it first, MCP wrapper is the fallback. **D3a:** the sandbox is turned on over ACP (`_kiro/sandbox/applyConfig`) with a per-run `KIRO_HOME` `permissions.yaml`, not a `sandbox.json`; "trust only the shell" = an `ask` policy allowing tool kind `execute`. |
+| D3 | ~~Sandboxed shell~~ — **superseded by D3b:** agents reach `apwt` only through a Genesis-owned **`appian-browser` MCP server**; browser agent nodes run fail-closed (no shell); program nodes own sessions + credentials. The 51-03 spike proved Kiro's sandbox (D3a) but a sandboxed shell can still reach the unauthenticated local Genesis API over loopback. |
 | D4 | Node ≥ 20 prerequisite; `playwright-appian` tarball vendored in genesis; a self-contained npm project per app; Playwright's own Chromium. |
 | D5 | Environment **type** dropdown (Dev, QA, …) replaces the dev toggle; **all testing on QA**; QA site URL + test users by role in the app's Testing tab; every affected role recorded/explored. |
 | D6 | Lanes: … Code Review → **Deployment → Verification** → Done. |
@@ -88,7 +90,7 @@ Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`)
  Regression suite (51-08) ─ schedule (regression-run job)       ▼
  Test Impact ─ Run impacted tests                     results.json ─► finalizer ─► kb_test_results / automation_status
  Workbench: Deployment ─drag─► Verification ─► story-verification run (51-09)
-            explore (sandboxed shell, D3) → author → execute → triage/heal → decide → proposals → report
+            explore (appian-browser MCP, fail-closed node, D3b) → author → execute → triage/heal → decide → proposals → report
             pass ─► Done · product defect ─► Implementation · blocked ─► gate
 ```
 
@@ -96,7 +98,7 @@ Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`)
 |---|---|
 | Findings + decisions | 51-01 |
 | `playwright-appian` joins the agent system | 51-02 |
-| Spike: sandboxed shell + `apwt` + Chromium (gate) | 51-03 |
+| Spike: sandbox evidence (done) + `appian-browser` MCP prototype, fail-closed node, sessions, recording, Chromium (gate) | 51-03 |
 | ADRs + data model (m0026), stores, ids, lifecycle | 51-04 |
 | Runtime, workspaces, environment types, test users | 51-05 |
 | Execution engine (generation, setups, runs, results, queue, impact run, schedule job) | 51-06 |
@@ -110,8 +112,9 @@ Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`)
 
 ## 6. Session plan
 
-S1 = 51-02 (**genesis-docs**, project-tracker agent system) → S2 = 51-03 spike (genesis-dev; **gate**: if it fails,
-stop and re-spec the agent-access parts of 51-07/51-09 on the D3 fallback before continuing) → S3 = 51-04 → S4 = 51-05
+S1 = 51-02 (**genesis-docs**, project-tracker agent system) → S2 = 51-03 spike (genesis-dev; **gate**: if the
+`appian-browser` MCP prototype or the fail-closed node cannot hold, stop and re-spec 51-05 §4a / 51-07 / 51-09 before
+continuing) → S3 = 51-04 → S4 = 51-05
 → S5 = 51-06 → S6 = 51-07 (genesis + genesis-workflows) → S7 = 51-08 → S8 = 51-09 (genesis + genesis-workflows) → S9 =
 51-10 (API completion + contract fixtures; each backend sub-spec adds its own routes, 51-10 owns the contract table and
 the cross-cutting tests) → S10 = 51-11 → S11 = 51-12 (genesis-review) → S12 = 51-13 (genesis-release, then
@@ -124,9 +127,9 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 |---|---|---|
 | 51-01 | project-tracker | Findings, decisions D1–D19, defaults F1–F14 |
 | 51-02 | project-tracker (agent-system) | Repo list, new `browser-testing` area + gates, agent allow rules, release flow, invariants |
-| 51-03 | genesis (spike code + notes), playwright-appian (if needed) | Prove D3 (V3 ACP sandbox, Chromium in Seatbelt, proxy, clean env, bypass corpus) + the D13 signed-in recording mechanism |
+| 51-03 | genesis (spike code + notes), playwright-appian (if needed) | Sandbox evidence S1/S5/S6 (done; ADR-083 rationale); then the D3b items: `appian-browser` MCP prototype loop on QA, fail-closed node corpus, program-owned sessions, loopback refused by the browser, signed-in recording, Chromium everywhere, timing, skills + blackboard under the trust list |
 | 51-04 | genesis | m0026 (catalog, executions, results, test users, settings, suite rebuild), stores, `ACT-`/`DS-`/`TE-` ids, lifecycle, ADR texts |
-| 51-05 | genesis, playwright-appian (if needed) | Node/Chromium detection + install, vendored tarball, `TestWorkspace`, `ApwtClient`, environment types + QA, test users, test settings |
+| 51-05 | genesis, playwright-appian (if needed) | Node/Chromium detection + install, vendored tarball, `TestWorkspace`, `ApwtClient`, the `appian-browser` MCP server + fail-closed agent node (D3b), environment types + QA, test users, test settings |
 | 51-06 | genesis, genesis-workflows | Spec generator, setup projects, execution checkout, `test-execution` workflow + finalizer, queue, Run impacted tests, `regression-run` job, subprocess hygiene |
 | 51-07 | genesis, genesis-workflows | Library service (save/typecheck/commit/retire/delete/revert/adopt, refs), `lib/` helper, recording service, `action-capture` workflow + finalizer, proposals, `genesis-test-authoring` skill |
 | 51-08 | genesis | Regression suite (own scenarios, references, grouping), schedule settings + job handler, latest/trend |
@@ -140,7 +143,8 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 
 If `playwright-appian` changed: release it first (tag `vX.Y.Z` → its CI publishes) and vendor that exact tarball into
 genesis. Then **genesis v0.81.0** (minor; m0026, DB 25 → 26). Then **genesis-workflows v0.25.0** (`test-execution`,
-`action-capture`, `story-verification`, the `genesis-test-authoring` skill) pinned on `genesis.git@v0.81.0` (L-057).
+`action-capture`, `story-verification`, the `genesis-test-authoring` and `genesis-appian-browser` skills, the
+`appian-browser` MCP registry entry) pinned on `genesis.git@v0.81.0` (L-057).
 Without the workflows installed, every start returns the friendly "not installed" 409 (L-033). No Hub change. Detail:
 51-13.
 
@@ -163,8 +167,8 @@ machine (F7); 1 worker, 1 retry (F6); schedule off by default (F13); files kept 
 
 | Risk | Mitigation |
 |---|---|
-| The sandbox does not hold for ACP sessions or breaks Chromium (D3) | 51-03 is a gate; the MCP fallback is designed (51-01 §7 D3) |
-| An agent shell leaks a secret | Program-owned sessions; clean Kiro environment; bypass corpus in 51-03 and 51-12 (L-088) |
+| A browser agent escapes its tools (shell, file reads outside the run, the local Genesis API) | D3b: no shell; fail-closed node (`auto_deny`, explicit trust list); the 51-03 corpus for the node; `apwt` host allow-list refuses loopback |
+| An agent sees a secret | Program-owned sessions; the MCP server and Kiro start with a clean environment; corpus in 51-03 and 51-12 (L-088) |
 | Shared data setups couple scenarios (one scenario breaks the next) | Read-only first ordering, "changes shared data" private instances, Blocked vs Failed (D10) |
 | Library edits break many tests at once | Contracts + breaking-change refusal, where-used re-run, git revert, proposals for agent changes (D12, D16) |
 | Flaky Appian UI timing | `playwright-appian`'s Appian waits; 1 retry + flaky history (D14) |
@@ -185,12 +189,12 @@ machine (F7); 1 worker, 1 retry (F6); schedule off by default (F13); files kept 
   browser sessions run on the single QA environment, may create/change/delete application data there through the UI as
   the application's test users only, never design objects; the Verification confirm and the schedule toggle are the
   approvals. Amends ADR-068 (Implementation stays the only lane that mutates design objects).
-- **ADR-083 — A sandboxed shell for workflow agents.** A workflow agent node may trust Kiro's shell tool only when it
-  runs inside Kiro's local command sandbox, turned on by Genesis over ACP (`_kiro/sandbox/applyConfig`, confirmed by
-  `_kiro/sandbox/status: active` before the first prompt) with a per-run `KIRO_HOME` whose permission rules confine
-  writes to the run, deny credential paths and allow network to the QA host only; a client `ask` policy allows only
-  tool calls of kind `execute` (V3 refuses `--trust-tools`); a clean environment and program-owned sessions; first
-  user: `apwt`. Amends ADR-029 (node trust beyond MCP allowlists).
+- **ADR-083 — Workflow agents get no shell; browser access goes through a Genesis MCP server.** A workflow agent that
+  drives an Appian UI does so only through the Genesis-owned `appian-browser` MCP server (typed tools over `apwt
+  --json`, no session/login/host/mode tools; sessions opened and logged in by program nodes), in a fail-closed node
+  (`auto_deny`, explicit trust list, writes confined to the run folder). Rationale recorded from the 51-03 spike: Kiro's
+  local sandbox confines files and remote hosts but always allows loopback, so a shell could reach the
+  unauthenticated local Genesis API (ADR-026). Amends ADR-029 (fail-closed trust for these nodes).
 - **ADR-084 — Lane order and Verification lane automation.** Deployment precedes Verification; dragging into
   Verification launches `story-verification`; pass → Done, product defect → Implementation, blocked → gate; audited
   transitions. Amends ADR-061 (lane order) and extends ADR-062/068's lane-automation pattern.

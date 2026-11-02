@@ -32,6 +32,25 @@ before 51-07/51-09 are built. Also settle the signed-in recording mechanism (D13
 > `sandbox.json`; the sandbox is turned on with the `_kiro/sandbox/applyConfig` ACP request and a per-run `KIRO_HOME`
 > `permissions.yaml` (51-01 D3a). S2–S11 are answered with that recipe.
 
+### 2a. Rescope after D3b (spec agent, 2026-11-02, after the S6 session)
+
+The user chose the MCP design (51-01 **D3b**): agents get **no shell**; they drive `apwt` through a Genesis-owned
+`appian-browser` MCP server in a fail-closed node (51-05 §4a). S1, S5 and S6 stay as done (they are ADR-083's
+evidence). **Dropped:** S2/S3 (no browser in a sandbox). The remaining questions:
+
+| # | Question | Pass criterion |
+|---|---|---|
+| M1 | A **prototype** `appian-browser` MCP server (spike-quality, under `scripts/spikes/51-03/`, the 51-05 §4a tool list) injected into a `kiro_node`-style turn over the **default** ACP engine: does the full skill loop work through tools only (program `open --login`, then agent `snapshot/find/fill/select/click/wait/expect/record_start/record_stop/spec/log`, `read_artifact` for snapshot files) against QA, and does `npx playwright test` of the produced spec replay green? | The loop completes; the spec replays (old S7, via MCP) |
+| M2 | **Fail-closed node corpus:** with `permission_mode="auto_deny"`, `trust_all_tools=False`, `trust_tools` = the `@appian-browser/…` tools + blackboard tools + the write tool, `fs_write_root` = the run folder: which Kiro built-in tools still run **without** a permission request (shell, file read inside/outside cwd, web fetch, grep/glob, …)? Each corpus item — a shell command (`curl 127.0.0.1:8760/api/…`), reading `~/.genesis/secrets.json` / `genesis.db` / `~/.ssh` via the read tool, a write outside the run folder, a web fetch — must be **refused**. If Kiro's read tool runs untrusted outside cwd, find the deny mechanism (e.g. V3 `permissions.yaml` `fs_read` rules from S1's per-run `KIRO_HOME`, or a launch option) and prove it | Every item refused; positives (MCP tools, writes in the run folder, reads in the run folder) pass |
+| M3 | **The browser cannot reach loopback:** with `--allow-host <QA host>`, `goto http://127.0.0.1:8760/…`, a link or form to `127.0.0.1`, and `act` calls that navigate elsewhere are refused (`HOST_NOT_ALLOWED`) | Refused, evidence recorded (page scripts on QA calling localhost are the separate browser-CSRF gap, out of scope) |
+| S4 | (unchanged intent) Program-owned sessions: the program node logs in; the MCP server's environment and every tool result carry no credential (password fields masked in snapshots/reads) | No credential in env, tool results, files, `ps` |
+| S8/S9 | (unchanged) Signed-in recording + Chromium everywhere | As in §2 |
+| S10 | (unchanged) Timing of an explore turn **over MCP** | Measured |
+| S11 | (rescoped) Under the M2 trust list on the default engine: a skill in `<cwd>/.kiro/skills/` is activated and a blackboard tool works | Both work |
+
+Outcome rule: M1–M3, S4 and S11 must pass; a failure stops the phase for a re-spec. S8/S9 gaps are additive
+`playwright-appian` changes.
+
 ## 3. Outcome rules
 
 - **All of S1–S7 pass** → D3 stands. The As built records the exact sandbox files, the shell tool name to trust, the
@@ -56,7 +75,7 @@ areas    = ["sdk-acp", "security", "runs-worker", "core-engine"]
 adrs     = ["ADR-002", "ADR-004", "ADR-012", "ADR-020", "ADR-029", "ADR-031", "ADR-069", "ADR-077"]
 lessons  = ["L-001", "L-017", "L-041", "L-044", "L-088", "L-100"]
 docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md"]
-code     = ["genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py", "genesis/packages/genesis-core/genesis_core/nodes/agent.py", "playwright-appian/src/agent/**", "playwright-appian/src/cli/**", "playwright-appian/src/recorder/**"]
+code     = ["genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py", "genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/genesis/mcp/kb_server.py", "playwright-appian/src/agent/**", "playwright-appian/src/cli/**", "playwright-appian/src/recorder/**"]
 upstream = ["51-02"]
 ```
 

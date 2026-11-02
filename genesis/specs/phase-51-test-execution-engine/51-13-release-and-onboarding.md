@@ -17,7 +17,8 @@
    file, including the vendored tarball as package data (L-056, L-048); tag; push on go-ahead; CI green (genesis,
    frontend, clean-install).
 4. **genesis-workflows v0.25.0**: `test-execution`, `action-capture`, `story-verification` (each v0.1.0) + `registry.json`
-   entries + skill `genesis-test-authoring` in `skills-registry.json`; pins on `genesis.git@v0.81.0` (+
+   entries + skills `genesis-test-authoring` and `genesis-appian-browser` in `skills-registry.json`, and the managed
+   `appian-browser` entry in `mcp-registry.json`; pins on `genesis.git@v0.81.0` (+
    `#subdirectory=packages/<name>`, gate 9, L-057); CI green.
 
 ## 2. Deploy
@@ -33,8 +34,9 @@ restart --all`); `genesis install test-execution action-capture story-verificati
   ADR-068 / ADR-029 / ADR-061) and areas (`browser-testing` + the relevant existing areas); an ADR-047 note for the
   per-app cadence inside `regression-run`'s options (51-06 §8).
 - **Areas:** extend `browser-testing` (51-02) with every new path; map `genesis/genesis/testexec/**`,
-  `api/testing.py`, `integrations/apwt/**`, `chat/story_verification_finalizer.py`, `web/src/features/testing/**`, the
-  three workflows and the skill to their areas so `check` routes them.
+  `api/testing.py`, `integrations/apwt/**`, `mcp/appian_browser_server.py`, `chat/story_verification_finalizer.py`,
+  `web/src/features/testing/**`, the three workflows and the skills `genesis-test-authoring` and `genesis-appian-browser`
+  to their areas so `check` routes them.
 - `context/state/current.md` (versions incl. `playwright-appian`, DB v26, test counts, "what works": Testing tab,
   environment types, Verification lane, lane order), code map, `progress/phase-51-test-execution-engine.md`,
   `changelog.md`, README row 51 → SHIPPED, tracker §6, `bible/08` §9 pointer to the new
