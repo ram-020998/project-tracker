@@ -65,8 +65,8 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
 - [x] **After the release (D22, user):** on the first weekday scheduled sync (Monday 2026-11-02), each instance's newest
       `kb_syncs` row is incremental with `details.kb_format_version` = 1; record it in §6 As run. A full re-export
       instead → open a follow-up fix (not a rollback). *(PASS 2026-11-02 — see §6 "D22 sync check".)*
-- [ ] Three projects archived with the pointer commit; local checkouts in `_archived/`. *(Pointer commits done; the
-      GitLab archive and the moves are the user's — glab's token is read-only.)*
+- [x] Three projects archived with the pointer commit; local checkouts in `_archived/`. *(Pointer commits by
+      genesis-release; GitLab archive and the moves by the user, 2026-11-02 — see §6 "Archive check".)*
 - [x] ADR-080 recorded; docs write-back done; lint green.
 
 ## 6. As run
@@ -157,6 +157,16 @@ Only after §1 step 2 is green. For each of genesis-core, kiro-agent-sdk, genesi
 recorded by parser 0.3.0 **without** a format, so this sync is the F4 case: a KB built by parser 0.3.x counted as
 format 1 and stayed incremental (no forced full re-export). **userb** has no environment syncs of its own (its rows
 are `hub-pull`, newest 10 at 05:46:50Z, succeeded), so the check applies to main only.
+
+### Archive check (2026-11-02, genesis-spec, read-only)
+
+- GitLab (`glab api projects/ramaswamy.u%2F<name>`, `archived` field only): **genesis-core**, **kiro-agent-sdk** and
+  **genesis-appian-parser** all `archived = true`. Still clonable: `git ls-remote` on genesis-core returns `master` at
+  the pointer commit `661ae8c`, so old tag pins (genesis ≤ v0.79.0) keep resolving.
+- Local checkouts at `~/repo-gitlab/ramaswamy.u/_archived/{genesis-core,kiro-agent-sdk,genesis-appian-parser}`, each
+  clean and in sync with its remote. (A wrapped paste first moved genesis-core and kiro-agent-sdk *into* the parser
+  checkout as untracked folders; nothing was lost or committed, and they were moved out.) `genesis-ctx status` and the
+  `genesis` CLI work without the old paths.
 
 ## Context manifest
 
