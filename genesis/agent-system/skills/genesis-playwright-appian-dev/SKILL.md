@@ -42,7 +42,7 @@ version (BIBLE §10.4). Releases are genesis-release's job (genesis-release skil
 - No LLM inside the framework; what it cannot decide is an explicit `// TODO` (D-02).
 - Appian element knowledge only in `src/core/taxonomy.ts` (D-05).
 - Generated code is label-only: `appian.<factory>('<label>')…`, never raw locators (D-04).
-- One npm package with subpath exports and one bin (D-01).
+- One npm package with subpath exports and one bin file, `apwt`, with the `playwright-appian` alias (D-01, D-69).
 - The trace schema `playwright_appian.trace.v1` is additive-only within v1 (`src/core/trace-schema.ts`, BIBLE §1.5):
   removing, renaming or re-meaning a field is a v2.
 - Exact dependency pins; publish only to this project's registry (`package-meta.test.ts`).

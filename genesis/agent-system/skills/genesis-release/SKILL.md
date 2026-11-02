@@ -20,6 +20,7 @@ refuses a library whose `genesis_core_major != CORE_MAJOR` — bump `CORE_MAJOR`
 ## playwright-appian (its BIBLE §10.4–§10.5, D-37/D-38)
 - Tag `vX.Y.Z` = `package.json` version = `VERSION` in `src/core/version.ts`; move the CHANGELOG `[Unreleased]` notes and
   the README tarball URLs; run its gates (`npm run lint && npm run typecheck && npm test`, `npm run build`).
+- Run its CLI as `npx --no-install apwt …`, never a bare `npx apwt` (in a non-TTY shell it installs from the registry).
 - Push `main` and wait for green, then the tag (ask before each). Its tag pipeline publishes to the GitLab npm registry
   of project 13864 only after that pipeline's gates (`publish`, then `verify-published`, both green;
   `glab ci list -R ramaswamy.u/playwright-appian`). Never publish by hand, never republish a version or move a tag.

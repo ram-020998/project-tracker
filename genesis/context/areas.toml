@@ -77,9 +77,11 @@ gates    = ["cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_lib
 # genesis/genesis/testexec/, genesis/genesis/integrations/apwt/, genesis/web/src/features/testing/,
 # genesis-workflows/workflows/{test-execution,action-capture,story-verification}/ or
 # genesis-workflows/skills/genesis-test-authoring/ adds that glob here (51-05/51-06/51-07/51-09/51-11).
-# Invariants (never weaken without the user; text in planning/DECISIONS.md): no LLM inside the framework (D-02);
-# Appian element knowledge only in src/core/taxonomy.ts (D-05); generated code is label-only (D-04); one npm
-# package with subpath exports (D-01); trace schema playwright_appian.trace.v1 is additive-only within v1.
+# Invariants (never weaken without the user; text in planning/DECISIONS.md): no LLM inside the framework (D-02,
+# enforced by assertNoDroppedActions); Appian element knowledge only in src/core/taxonomy.ts (D-05); generated code is
+# label-only (D-04); one npm package with subpath exports (D-01); trace schema playwright_appian.trace.v1 is
+# additive-only within v1. tests/invariants/ (run by `npm test`) guards D-01, D-04 and D-05; tests/core/trace-schema
+# guards the trace contract.
 [area.browser-testing]
 title    = "playwright-appian (apwt) + Genesis test execution"
 paths    = ["playwright-appian/src/**", "playwright-appian/skills/**", "playwright-appian/tests/**",
@@ -90,7 +92,7 @@ skills   = ["genesis-playwright-appian-dev", "genesis-backend-dev"]
 docs     = ["tracker:agent-system/skills/genesis-playwright-appian-dev/SKILL.md",
             "playwright-appian/planning/BIBLE.md", "playwright-appian/planning/DECISIONS.md",
             "playwright-appian/planning/TRACKER.md"]
-gates    = ["cd playwright-appian && npm run lint && npm run typecheck && npm test   # incl. tests/invariants: D-01 D-04 D-05, trace v1; D-02 no LLM inside",
+gates    = ["cd playwright-appian && npm run lint && npm run typecheck && npm test",
             "cd playwright-appian && npm run build   # a release only (tag vX.Y.Z = package.json version)"]
 
 # ───────────────────────────── genesis backend ─────────────────────────────

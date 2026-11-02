@@ -11,9 +11,26 @@
 #   (b) a shell WRITE — output redirection (`>`/`>>`/`>|`/`N>`/`&>`/`>&file`), `tee`, `cp`, `mv`, `rm`,
 #       `sed -i`, `dd of=` — whose target resolves OUTSIDE the agent's write roots (passed per agent at
 #       install as --write-root <dir>…), or cannot be resolved statically (an unknown `$VAR`, `$(…)`).
-#   (c) (51-02) data fed into a network client (`curl`, `wget`, `nc`, `ssh`, `scp`, `rsync`, … — also via `xargs` or
-#       `sh -c`): a pipe into it, a here-doc/here-string, or a `<` redirect from a file other than /dev/null. Applies to
-#       every agent. A network client run on its own (`curl -s http://127.0.0.1:8760/…`) is not refused here.
+#   (c) (51-02) data fed through STDIN into a network client (`curl`, `wget`, `nc`, `ssh`, `scp`, `rsync`, `socat`, …,
+#       `openssl s_client`, `busybox nc|wget|…`), for every agent: a pipe into it — conservatively, any command after a
+#       `|` in the same pipeline, including every command of a subshell, `{ … }` or if/while/until/for/case body the
+#       pipe feeds, across a newline or comment after the `|` — a here-doc/here-string, a `<` redirect from anything
+#       but /dev/null, a `>(…)` body, the program run by `xargs`/`parallel`, and fed `sh -c`/`eval`/`env -S` bodies
+#       (lexed, so `c""url` is still curl). A fed program that cannot be resolved statically (`| $(echo curl)`,
+#       `| ${C:-curl}`) is refused, and so is a shell that reads its script from a pipe (`echo '…' | sh`, `| bash -s`).
+#       A pipeline ends at `;`, `&&`, `||`, `&` or a newline at its own nesting level. A client run on its own
+#       (`curl -s http://127.0.0.1:8760/…`) or piping OUT of one is not refused.
+#       STDIN FEEDS ONLY: data passed as an argument or a file name (`curl -d "$(cat …)"`, `curl -d @file`,
+#       `curl -T <(…)`, `scp file host:`) is NOT blocked here; it relies on those clients not being allow-listed in
+#       any profile (an unlisted command asks, and is denied in a non-interactive session).
+#   (d) (51-02) a bare `npx apwt` / `npx playwright-appian` / `npm exec apwt` (no `--no-install`, or with `--yes`/`-y`),
+#       for every agent: in a non-TTY shell npx assumes --yes and installs a missing package from the registry. The
+#       message names `npx --no-install apwt`.
+#
+# Best effort, known open (backlog specs/backlog/phase-51-follow-ups.md): a `<&N` from an fd opened on a file
+# (`exec 3< f; curl -d @- x <&3`); wrappers it does not know (`caffeinate -i curl`, `nice -n 5 …` is known);
+# interpreters that run code from stdin or an argument (`… | python3 -`, `node -e`); a shell or interpreter running a
+# script FILE (`bash x.sh`, `python3 x.py`), which is not inspected.
 #
 # The command is lexed like a shell (M5): quotes, escapes and comments are honoured, so a `>` inside a quoted
 # string (`grep '2>/dev/null'`, a Python f-string `{v:>7}`, a commit message) is NOT a redirect; fd
@@ -107,11 +124,12 @@ class Word:
 
 
 class Cmd:
-    __slots__ = ("words", "redirs", "heredocs", "herestrings", "nested", "piped")
+    __slots__ = ("words", "redirs", "heredocs", "herestrings", "nested")
 
     def __init__(self):
+        # nested: (body, kind) — kind "sub" for $(…)/backtick/<(…) (stdin inherited from the command),
+        # "out" for >(…) (its stdin is what the command writes into it)
         self.words, self.redirs, self.heredocs, self.herestrings, self.nested = [], [], [], [], []
-        self.piped = False           # its stdin is the previous command's output (`a | b`, `a |& b`)
 
     def text(self):
         s = " ".join(w.text() for w in self.words)
@@ -120,7 +138,8 @@ class Cmd:
 
 
 def lex(s):
-    """Split shell text into a flat list of Cmd objects and '(' / ')' subshell markers."""
+    """Split shell text into a flat list of Cmd objects, '(' / ')' subshell markers, and the operator tokens
+    '|' (a pipe: `|`, `|&`), ';' (a list separator: `;`, `&&`, `||`, `&`, newline) and ';;' (a case-arm end)."""
     n = len(s)
     out, heredoc_q = [], []
     st = {"cmd": Cmd(), "word": None, "pending": None}
@@ -198,11 +217,11 @@ def lex(s):
             return j
         if s.startswith("$(", i):
             j = match_paren(i + 1)
-            st["cmd"].nested.append(s[i + 2:j - 1])
+            st["cmd"].nested.append((s[i + 2:j - 1], "sub"))
             w().add("dyn", s[i:j])
             return j
         j = backtick_end(i + 1)      # backtick
-        st["cmd"].nested.append(s[i + 1:j])
+        st["cmd"].nested.append((s[i + 1:j], "sub"))
         w().add("dyn", s[i:j + 1])
         return j + 1
 
@@ -270,7 +289,7 @@ def lex(s):
             i = substitution(i)
         elif c in "<>" and s.startswith("(", i + 1) and st["word"] is None:   # process substitution
             j = match_paren(i + 1)
-            st["cmd"].nested.append(s[i + 2:j - 1])
+            st["cmd"].nested.append((s[i + 2:j - 1], "out" if c == ">" else "sub"))
             w().add("dyn", s[i:j])
             i = j
         elif c == "#" and st["word"] is None:
@@ -306,8 +325,7 @@ def lex(s):
             two = s[i:i + 2]
             op = two if two in ("&&", "||", "|&", ";;", ";&") else c
             end_cmd()
-            if op in ("|", "|&"):
-                st["cmd"].piped = True
+            out.append("|" if op in ("|", "|&") else ";;" if op in (";;", ";&") else ";")
             i += len(op)
             if op == "\n" and heredoc_q:
                 i = read_heredocs(i)
@@ -470,50 +488,220 @@ def check_target(cands, dyn, shown, cwd, allow_sink, cmd):
 
 NET_TOOLS = {"curl", "wget", "nc", "ncat", "netcat", "socat", "telnet", "ssh", "scp", "sftp", "rsync", "ftp",
              "http", "https", "xh"}
-# Programs that run another program named in their arguments (`… | xargs curl`, `… | sh -c "curl …"`).
-NET_LAUNCHERS = {"xargs", "parallel", "eval"} | SHELLS
+# Multi-call programs that are a network client only for some subcommands (their first argument).
+NET_SUBCOMMANDS = {"openssl": {"s_client", "s_server", "s_time"},
+                   "busybox": NET_TOOLS | {"ftpget", "ftpput", "tftp", "httpd", "nslookup", "whois"}}
+# xargs / parallel run the first non-option word with stdin data as arguments; options that take a separate value:
+LAUNCHER_OPTS = {
+    "xargs": {"-I", "-J", "-R", "-S", "-n", "-P", "-L", "-s", "-d", "-E", "-a", "--max-args", "--max-procs",
+              "--max-lines", "--max-chars", "--delimiter", "--eof", "--arg-file", "--process-slot-var"},
+    "parallel": {"-j", "--jobs", "-S", "--sshlogin", "-a", "--arg-file", "-C", "--colsep", "-d", "--delimiter",
+                 "-I", "-n", "-N", "--max-args", "--joblog", "--results", "--tmpdir", "--timeout"},
+}
+# Compound commands: an opener's body runs until its closer, so a pipe into the opener feeds the whole body.
+OPENERS = {"if", "while", "until", "for", "case", "select", "{"}
+OPENERS_WITH_ARGS = {"for", "case", "select"}       # the words after these are arguments, not a command
+CLOSERS = {"fi", "done", "esac", "}"}
+APWT_BINS = {"apwt", "playwright-appian"}
 
 
-def check_net_feed(cmd, prog, rest, env):
-    """Refuse a network client whose stdin carries data: a pipe into it, a here-doc/here-string, or a `<` redirect
-    from a file other than /dev/null. Best effort: a client that reads a file by name (`curl -d @f`) is not seen."""
-    fed = cmd.piped or bool(cmd.heredocs) or bool(cmd.herestrings)
+def net_client(prog, rest, env):
+    """The client name when `prog rest…` is a network client; '?' when it cannot be resolved statically."""
+    if prog in NET_TOOLS:
+        return prog
+    if prog in NET_SUBCOMMANDS:
+        sub = value(rest[0], env) if rest else ""
+        if sub is None:
+            return "?"
+        if sub in NET_SUBCOMMANDS[prog]:
+            return f"{prog} {sub}"
+    return None
+
+
+def launched(prog, rest, env):
+    """For xargs/parallel: the words of the program they run (the first non-option word on), else None."""
+    opts = LAUNCHER_OPTS.get(prog)
+    if opts is None:
+        return None
+    k = 0
+    while k < len(rest):
+        v = value(rest[k], env)
+        if v is None or not v.startswith("-") or v == "-":
+            return rest[k:]
+        k += 2 if v in opts else 1
+    return []
+
+
+def check_net_feed(cmd, args, prog, rest, env, fed):
+    """(c) Refuse a network client whose stdin carries data. `fed` = a pipe (or an enclosing pipe, compound or fed
+    body) feeds this command; a here-doc/here-string or a `<` redirect from anything but /dev/null also feeds it."""
+    own = bool(cmd.heredocs) or bool(cmd.herestrings)
     for op, wd in cmd.redirs:
         if op in ("<", "<>"):
             cands, dyn = expand(wd, env)
-            fed = fed or dyn or any(c != "/dev/null" for c in cands)
-    if not fed:
+            own = own or dyn or any(c != "/dev/null" for c in cands)
+    if not (fed or own):
         return
-    hit = prog if prog in NET_TOOLS else None
-    if hit is None and prog in NET_LAUNCHERS:
-        for wd in rest:
-            for tok in (value(wd, env) or wd.text()).split():
-                if os.path.basename(tok) in NET_TOOLS:
-                    hit = os.path.basename(tok)
-                    break
-            if hit:
-                break
+    where = "a pipe, compound, here-doc or `<` file"
+    if args and value(args[0], env) is None:
+        block(f"refusing `{cmd.text()[:160]}` — data is fed ({where}) into a program that cannot be resolved "
+              "statically; it could be a network client (blocked even under --trust-all-tools)")
+    hit = net_client(prog, rest, env)
+    sub = launched(prog, rest, env) if fed or own else None
+    if hit is None and sub:
+        inner = strip_wrappers(sub, env)
+        if inner:
+            iv = value(inner[0], env)
+            hit = "?" if iv is None else net_client(os.path.basename(iv), inner[1:], env)
+    if hit == "?":
+        block(f"refusing `{cmd.text()[:160]}` — data is fed ({where}) into a program that cannot be resolved "
+              "statically; it could be a network client (blocked even under --trust-all-tools)")
     if hit:
-        block(f"refusing to feed data into the network client `{hit}` (a pipe, here-doc or `<` file) — a possible "
-              f"exfiltration path (blocked even under --trust-all-tools). Command: {cmd.text()[:160]}")
+        block(f"refusing to feed data into the network client `{hit}` ({where}) — a possible exfiltration path "
+              f"(blocked even under --trust-all-tools). Command: {cmd.text()[:160]}")
 
 
-def analyze(text, cwd, env, depth=0):
+def check_piped_shell(cmd, prog, rest, env):
+    """A shell reading its script from a pipe (`echo '…' | sh`, `… | bash -s`) runs code the guard never sees."""
+    has_c = has_s = has_script = False
+    for wd in rest:
+        v = value(wd, env)
+        if v is None:
+            has_script = True
+            break
+        if v.startswith("-") and not v.startswith("--") and len(v) > 1:
+            has_c = has_c or "c" in v[1:]
+            has_s = has_s or "s" in v[1:]
+        elif not v.startswith("-"):
+            has_script = True
+            break
+    if not has_c and (has_s or not has_script):
+        block(f"refusing to pipe a script into `{prog}` (it reads its commands from stdin, which the guard cannot "
+              f"inspect). Use `{prog} -c '…'` or a script file. Command: {cmd.text()[:160]}")
+
+
+def env_split_bodies(words, env):
+    """`env -S STRING rest…` / `--split-string=STRING`: the shell code env would run (STRING + rest)."""
+    out = []
+    for j, wd in enumerate(words):
+        v = value(wd, env)
+        if not v or os.path.basename(v) != "env":
+            continue
+        k = j + 1
+        while k < len(words):
+            f = value(words[k], env)
+            if f is None:
+                break
+            body = None
+            if f in ("-S", "--split-string") and k + 1 < len(words):
+                body, k = (value(words[k + 1], env) or words[k + 1].text()), k + 1
+            elif f.startswith("--split-string="):
+                body = f.split("=", 1)[1]
+            elif f.startswith("-S") and len(f) > 2:
+                body = f[2:]
+            if body is not None:
+                tail = " ".join(w2.text() for w2 in words[k + 1:])
+                out.append((body + " " + tail).strip())
+                break
+            if not f.startswith("-") or f == "-":
+                break
+            k += 1
+    return out
+
+
+def check_npx(cmd, prog, rest, env):
+    """A bare `npx apwt` (or `npm exec apwt`) in a non-TTY shell assumes --yes and installs a missing package
+    named `apwt` from the registry. Only `npx --no-install apwt …` may run it (51-02 m3)."""
+    if prog == "npm":
+        k = 0
+        while k < len(rest) and (value(rest[k], env) or "").startswith("-"):
+            k += 1
+        if k >= len(rest) or value(rest[k], env) not in ("exec", "x"):
+            return
+        rest = rest[k + 1:]
+    elif prog != "npx":
+        return
+    no_install = yes = False
+    names = set()
+    k = 0
+    while k < len(rest):
+        v = value(rest[k], env)
+        if v is None:
+            break
+        nxt = (value(rest[k + 1], env) or "") if k + 1 < len(rest) else ""
+        if v == "--":
+            names.add(os.path.basename(nxt))
+            break
+        if v in ("--no-install", "--no", "--yes=false"):
+            no_install = True
+        elif v in ("-y", "--yes", "--yes=true"):
+            yes = True
+        elif v in ("-p", "--package"):
+            names.add(re.sub(r"(?<=.)@[^/]*$", "", nxt))
+            k += 1
+        elif v.startswith("--package="):
+            names.add(re.sub(r"(?<=.)@[^/]*$", "", v.split("=", 1)[1]))
+        elif v in ("-c", "--call"):
+            names.add(os.path.basename(nxt.split()[0]) if nxt.split() else "")
+            break
+        elif not v.startswith("-"):
+            names.add(os.path.basename(v))
+            break
+        k += 1
+    if names & APWT_BINS and (yes or not no_install):
+        block(f"refusing a bare `npx apwt` — in a non-TTY shell npx assumes --yes and would install a missing "
+              f"`apwt` package from the registry. Run `npx --no-install apwt …` (or `node dist/cli/index.js …` in "
+              f"the playwright-appian checkout). Command: {cmd.text()[:160]}")
+
+
+def analyze(text, cwd, env, depth=0, fed_in=False):
+    """`fed_in`: the text is shell code whose stdin carries data (a fed `sh -c`/`eval`/`env -S` body, a `>(…)`)."""
     if depth > 5:
         return
     stack = []
+    level = 0              # compound nesting: ( … ), { … }, if/while/until/for/case/select … closer
+    pipe_level = None      # the nesting level of the current pipeline's first `|`; every command after it is fed
+    after_pipe = False     # the last token was `|` (a newline or comment after it continues the pipeline)
     for item in lex(text):
+        if item == "|":
+            pipe_level = level if pipe_level is None else min(pipe_level, level)
+            after_pipe = True
+            continue
+        if item == ";":
+            if not after_pipe and pipe_level is not None and level <= pipe_level:
+                pipe_level = None
+            continue
+        if item == ";;":                    # a case arm ends; the case (and its pipeline) goes on
+            continue
         if item == "(":
             stack.append((cwd, dict(env)))
+            level += 1
+            after_pipe = False
             continue
         if item == ")":
             if stack:
                 cwd, env = stack.pop()
+            level = max(0, level - 1)
             continue
         cmd = item
-        for body in cmd.nested:
-            analyze(body, cwd, dict(env), depth + 1)
+        after_pipe = False
         words = cmd.words
+        # leading compound keywords: `{ {`, `do if`, `} }` … move the nesting level
+        for wd in words:
+            v = value(wd, env)
+            if v in CLOSERS:
+                level = max(0, level - 1)
+            elif v in OPENERS:
+                level += 1
+                if v in OPENERS_WITH_ARGS:
+                    break
+            elif v not in KEYWORDS:
+                break
+        fed = fed_in or pipe_level is not None
+        for body, kind in cmd.nested:
+            analyze(body, cwd, dict(env), depth + 1, fed_in=fed or kind == "out")
+        for body in env_split_bodies(words, env):
+            analyze(body, cwd, dict(env), depth + 1, fed_in=fed)
 
         # assignments: a command of only NAME=… sets shell variables
         if words and all(is_assign(wd) for wd in words):
@@ -530,7 +718,11 @@ def analyze(text, cwd, env, depth=0):
         single = [c[0] if (not d and len(c) == 1) else None for c, d in vals]
 
         # (c) feeding data into a network client (51-02): `… | curl -d @- …`, `… | nc host`, `nc host < file`
-        check_net_feed(cmd, prog, rest, env)
+        check_net_feed(cmd, args, prog, rest, env, fed)
+        if fed and prog in SHELLS:
+            check_piped_shell(cmd, prog, rest, env)
+        # (d) a bare `npx apwt` installs from the registry (51-02 m3)
+        check_npx(cmd, prog, rest, env)
 
         if prog in ("export", "declare", "local", "readonly", "typeset"):
             for wd in rest:
@@ -543,7 +735,8 @@ def analyze(text, cwd, env, depth=0):
                 ldyn = ldyn or d
             env[single[0]] = None if (ldyn or len(loop) > MAX_CANDS) else loop
 
-        # wrapped shell code: sh -c BODY (any position, e.g. `xargs sh -c`), eval, shell heredoc / here-string
+        # wrapped shell code: sh -c BODY (any position, e.g. `xargs sh -c`), eval, shell heredoc / here-string.
+        # A fed command's body is analysed as fed (51-02 m1), so a quoted or escaped client name is still lexed.
         for j, wd in enumerate(words):
             v = value(wd, env)
             if not v or os.path.basename(v) not in SHELLS:
@@ -551,7 +744,8 @@ def analyze(text, cwd, env, depth=0):
             for k in range(j + 1, len(words) - 1):
                 f = value(words[k], env) or ""
                 if f.startswith("-") and not f.startswith("--") and "c" in f[1:]:
-                    analyze(value(words[k + 1], env) or words[k + 1].text(), cwd, dict(env), depth + 1)
+                    analyze(value(words[k + 1], env) or words[k + 1].text(), cwd, dict(env), depth + 1,
+                            fed_in=fed)
                     break
         if prog in SHELLS:
             for body in cmd.heredocs:
@@ -560,7 +754,7 @@ def analyze(text, cwd, env, depth=0):
                 analyze(value(hs, env) or hs.text(), cwd, dict(env), depth + 1)
         if prog == "eval":
             analyze(" ".join(s if s is not None else wd.text() for s, wd in zip(single, rest)),
-                    cwd, dict(env), depth + 1)
+                    cwd, dict(env), depth + 1, fed_in=fed)
 
         # (b) writes — redirections first ([[ a > b ]] is a string comparison, not a redirect)
         if prog != "[[":

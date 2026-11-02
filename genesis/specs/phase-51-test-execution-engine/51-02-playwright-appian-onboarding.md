@@ -40,7 +40,7 @@ review and release discipline as the Genesis repos, without moving it into the `
 5. **Invariants written into the area's docs** (so `pack`/`check` carry them): no LLM inside the framework (its D-02);
    Appian element knowledge only in `src/core/taxonomy.ts` (D-05); generated code is label-only (D-04); one npm
    package with subpath exports (D-01); trace schema `playwright_appian.trace.v1` is additive-only within v1
-   (`src/core/trace-schema.ts:15`). Area `docs`: `playwright-appian/planning/BIBLE.md`, `DECISIONS.md`,
+   (`src/core/trace-schema.ts:11` `$id`, `:20` `const`). Area `docs`: `playwright-appian/planning/BIBLE.md`, `DECISIONS.md`,
    `TRACKER.md` (ranged reads).
 6. `agent-system/update.sh`, then `genesis-ctx index && genesis-ctx lint` green; `genesis-ctx status` shows four repos.
 
@@ -138,3 +138,56 @@ src/core/taxonomy.ts` → `browser-testing` + its two gates.
 only `npx --no-install <bin>` for internal tools (a dependency-confusion path like ADR-080's PyPI case).
 
 **Code-map changes:** none in Genesis code; agent-system only (record in the Phase 51 write-back).
+
+### Review fixes (2026-11-02, genesis-docs; `reviews/51-02-review.md` NEEDS_CHANGES)
+
+**Changed** (`agent-system/hooks/shell-guard.sh` unless noted)
+- **M1a.** The lexer now emits operator tokens (`|`, `;` for `;`/`&&`/`||`/`&`/newline, `;;` for a case arm) instead of
+  a per-command `piped` flag. `analyze()` tracks the compound nesting level (`( … )`, `{ … }`, if/while/until/for/
+  case/select up to fi/done/esac/`}`, counted over a command's leading keywords so `do if …` nests) and the level of
+  the pipeline's first `|`. Every command after that `|` is fed until a list separator at or above that level; a
+  newline or comment directly after `|` continues the pipeline. Conservative form, as agreed.
+- **M1b.** A fed command whose program cannot be resolved statically is refused (`| $(echo curl)`, `| ${C:-curl}`,
+  `` | `which curl` ``, `| xargs $(echo curl)`), like `check_git` does for `$X push`.
+- **M1c.** `env -S STRING` / `--split-string STRING` / `--split-string=STRING` / `-SSTRING` is analysed as shell code
+  with the fed state (`env_split_bodies`). This also closes `env -S 'git push …'` for rule (a).
+- **m1.** `sh -c`/`bash -c`/`eval`/`xargs … sh -c` bodies are analysed with `fed_in` set; the raw token scan is gone,
+  so `c""url` and `c\url` are lexed to `curl` and refused.
+- **m2 (the cheap part).** Nested bodies carry a kind: `>(…)` is fed; `$(…)`, backticks and `<(…)` inherit the
+  command's fed state. A shell fed by a pipe with no `-c` and no script argument (or with `-s`) is refused
+  (`check_piped_shell`), which also closes `echo 'git push …' | sh` for rule (a). `openssl` (`s_client`, `s_server`,
+  `s_time`) and `busybox` (its client applets) count as clients only for those subcommands, so `| openssl base64`
+  and `| busybox sha256sum` still pass.
+- **m3 (user's choice: guard + skill line).** New rule (d), every agent: a bare `npx apwt` / `npx playwright-appian` /
+  `npm exec|x apwt` (no `--no-install`/`--no`, or with `-y`/`--yes`; also `-p`/`--package` naming the package) is
+  refused with a hint naming `npx --no-install apwt`. `genesis-release.json` keeps `npx *`.
+  `skills/genesis-release/SKILL.md` playwright-appian section: "Run its CLI as `npx --no-install apwt …`, never a bare
+  `npx apwt`".
+- **m4.** For `xargs`/`parallel` only the program they run counts (the first non-option word, skipping options that
+  take a value, then the usual wrappers), not every argument.
+- **m5.** Hook header rule (c) and the `OPERATOR_GUIDE.md` troubleshooting row say rule (c) covers stdin only, and that
+  argument / file-name exfiltration (`curl -d "$(cat …)"`, `curl -T <(…)`, `scp file host:`) relies on those clients
+  not being allow-listed. The header's best-effort note lists what stays open.
+- **Nits.** n1 `tools/genesis_ctx/cli.py` `--repo` help names the three repos. n2 the browser-testing gate has no
+  shell comment; the invariant note moved to the TOML comment, which now says D-02 is enforced by
+  `assertNoDroppedActions` and `tests/invariants/` covers D-01/D-04/D-05. n3 the skill says "one bin file, `apwt`, with
+  the `playwright-appian` alias (D-01, D-69)". n5 §2.5 now cites `trace-schema.ts:11` (`$id`) and `:20` (`const`).
+  n4 left to the operator (backlog §6).
+- New `specs/backlog/phase-51-follow-ups.md`; proposal `l0-budget-proposal.md` (not applied).
+
+**Tests:** agent-system suite **389 passed** (was 289). `test_shell_guard.py` 223 (was 123): 45 new network-feed
+bypass cases (every M1/m1/m2 probe case plus `else`, `until`, `for`, `case`, nested compounds, `env
+--split-string`, `xargs -I {} bash -c`, `| echo $(curl …)`), 3 push/tag cases through a piped shell or `env -S`,
+39 positive cases (the review's legitimate list, `xargs grep -n curl`, `xargs grep -ln http`, `parallel -j 4 grep …`,
+pipelines that end before a later loopback `curl`, piped `bash -c`/`sh script`, `openssl base64`, `busybox sha256sum`,
+`npx --no-install …`, `npm exec --no -- apwt`, `npx tsc/vitest/eslint`), 12 bare-npx cases + 1 release case. Against
+the pre-fix hook (`6f549da`) the new cases fail as they should: 32 of 45 bypass cases allowed, 0 of 3 push/tag and 0
+of 12 npx cases blocked, 4 of 39 positive cases over-blocked. The reviewer's `/tmp/51-02-probe.py`: every bypass
+case blocked except the open ones below; all 22 positive cases allowed. `genesis-ctx lint` OK, L0 ~23,845 / 24,000
+(unchanged). `update.sh` not run (as asked).
+
+**Stays open** (hook header note + backlog §1–§5): `<&N` from an fd opened on a file; wrappers it does not know
+(`caffeinate -i curl`); interpreters reading code from stdin (`| python3 -`); argument / file-name exfiltration (rule
+(c) is stdin only); the conservative pipe rule refuses a later loopback client in a fed loop
+(`git ls-files | while read f; do curl -s http://127.0.0.1:8760/…; done`); `check --repo project-tracker`; the
+allow-vs-ask precedence probe; n4.
