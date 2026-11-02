@@ -5,6 +5,7 @@ Detail: `genesis-ctx area <name>`. Always-on areas are part of every pack.
 
 - **api** — FastAPI /api surface · 1 path globs · skills: genesis-backend-dev · 2 gates
 - **appian-integration** — Appian integration: Dev MCP, SAIL CLI, DevOps, write tools · 7 path globs · skills: genesis-backend-dev · 2 gates
+- **browser-testing** — playwright-appian (apwt) + Genesis test execution · 4 path globs · skills: genesis-playwright-appian-dev, genesis-backend-dev · 2 gates
 - **chat** — Chat, copilot, chat modes, skills-in-chat · 4 path globs · skills: genesis-backend-dev, genesis-web-dev · 5 gates
 - **collaboration-hub** — Collaboration, Hub provider, collab sync · 5 path globs · skills: genesis-backend-dev · 4 gates
 - **config-secrets** — Settings, secrets, environments, MCP/CLI registries, managed-native · 6 path globs · skills: genesis-backend-dev, genesis-web-dev · 4 gates

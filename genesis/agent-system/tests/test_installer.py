@@ -393,7 +393,7 @@ def test_real_agent_system_renders_and_validates(tmp_path, monkeypatch):
     assert gi.validate(cfg, desired) == []
     names = sorted(p.stem for p in desired if p.parent == cfg.agents_dir)
     assert names == ["genesis-dev", "genesis-docs", "genesis-release", "genesis-review", "genesis-spec"]
-    assert len({p.parts[-2] for p in desired if p.name == "SKILL.md"}) == 12
+    assert len({p.parts[-2] for p in desired if p.name == "SKILL.md"}) == 13   # 51-02: + genesis-playwright-appian-dev
 
 
 def test_genesis_docs_allows_read_only_git_on_code_repos(tmp_path, monkeypatch):

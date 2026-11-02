@@ -1,6 +1,6 @@
 # 51-02 — `playwright-appian` joins the Genesis agent system
 
-> **Status:** SPEC-DRAFTED 2026-11-02. Repo: **project-tracker** (`genesis/agent-system/`, `genesis/context/`). Built by
+> **Status:** BUILT 2026-11-02 (genesis-docs; As built below). Repo: **project-tracker** (`genesis/agent-system/`, `genesis/context/`). Built by
 > **genesis-docs** (it maintains the agent system; skill `genesis-agent-system`). Parent:
 > `specs/phase-51-test-execution-engine.md`. Decisions: 51-01 D19, D4.
 
@@ -67,3 +67,74 @@ docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md", "t
 code     = ["tracker:agent-system/tools/genesis_ctx/config.py", "tracker:agent-system/tools/installer/genesis_installer.py", "tracker:agent-system/agents/**", "tracker:agent-system/hooks/shell-guard.sh", "tracker:context/areas.toml"]
 upstream = []
 ```
+
+## As built (2026-11-02, genesis-docs)
+
+**Commits:** project-tracker, one local commit "51-02: playwright-appian joins the agent system" (not pushed).
+
+**Changed**
+- Repo list: `REPO_NAMES` = genesis, genesis-workflows, playwright-appian in `tools/genesis_ctx/config.py` and
+  `tools/installer/genesis_installer.py` (status, `check` with and without `--repo`, `--since`, installer preflight).
+  `status` already read each repo's own HEAD branch; no code change was needed there, only a test.
+- `context/areas.toml`: new area `browser-testing`, **playwright-appian globs only** (`src/**`, `skills/**`, `tests/**`,
+  `package.json`); a comment names the Genesis globs and the sub-specs that add each one when they create its first
+  file (51-05/51-06/51-07/51-09/51-11). Gates: `npm run lint && npm run typecheck && npm test` (the comment names the
+  invariant tests and D-ids, so `check` prints them) and `npm run build` for a release. Docs: the new skill, then
+  `planning/BIBLE.md`, `DECISIONS.md`, `TRACKER.md`. Skills: the new skill + `genesis-backend-dev`.
+- Agents `genesis-dev` and `genesis-review`: allow `npx playwright test*`, `npx playwright install chromium*`,
+  `npx --no-install apwt *`, `node dist/cli/index.js *`; the new skill as a `skill://` resource and in the prompt's
+  Skills paragraph. `genesis-release` unchanged (it already allows `npx *`; its release flow is in its skill).
+- `hooks/shell-guard.sh` rule **(c)**, every agent including genesis-release: refuse data fed into a network client
+  (`curl`, `wget`, `nc`/`ncat`/`netcat`, `socat`, `telnet`, `ssh`, `scp`, `sftp`, `rsync`, `ftp`, `http`/`https`,
+  `xh`): a pipe into it (also through `xargs`, `parallel`, `eval`, `sh -c`), a here-doc/here-string, or a `<` from a
+  file other than `/dev/null`. The lexer marks a command that follows `|`/`|&` as `piped`.
+- New skill `skills/genesis-playwright-appian-dev/SKILL.md` (§3: layout, gates, e2e rule, decision rows, versions,
+  invariants, git). `skills/genesis-release/SKILL.md`: three repos, order playwright-appian → genesis →
+  genesis-workflows, a playwright-appian section (tag = version, CI publishes after the tag pipeline's gates, tarball
+  URL in the As run, vendor before the genesis release, never publish by hand, L-100), the template line.
+  `skills/genesis-ctx/SKILL.md`: status row.
+- `context/L0-core.md` §2: one line for the repo. `OPERATOR_GUIDE.md` §2 (four status rows, three repos) and the
+  shell-guard troubleshooting row. `context/state/current.md`: active phase and the status line only.
+
+**Tests:** agent-system suite **289 passed** (`…/genesis/.venv/bin/python -m pytest -q agent-system/tests`). New:
+`test_shell_guard.py` 13 positive + 15 bypass cases + release case; `test_routing.py` status lists four repos and reads
+each repo's own branch (genesis `master`, playwright-appian `main`), real areas route five playwright-appian paths to
+`browser-testing` and leave `planning/`, `node_modules/`, `dist/` unmapped, the area's gates/docs/skills, `check --repo
+playwright-appian --since <rev>` routes `src/core/taxonomy.ts` to `browser-testing` with its gates, dev/review profiles
+carry the four allow rules and the skill and no bare `npx apwt`. `test_installer.py`: skill count 12 → 13. The bypass
+corpus was run against the previous hook: its 6 chain/substitution/write cases were already blocked, its 9
+network-feed cases were not (all 9 now blocked). `genesis-ctx index` + `lint` green (L0 ~23,845 / 24,000);
+`update.sh --dry-run`: preflight 3 repos, validation 5 profiles / 13 skills / 3 hooks, plan 1 added · 5 changed.
+Live: `genesis-ctx status --brief` shows `playwright-appian main v0.2.0`; `check --repo playwright-appian --files
+src/core/taxonomy.ts` → `browser-testing` + its two gates.
+
+**Review:** no independent review (genesis-docs cannot spawn one). The guard change is security-relevant: a
+`genesis-review` pass over this commit is recommended.
+
+**Decisions / deviations**
+- **No bare `npx apwt *` allow** (§2.3 listed it). npm's own docs (`npm help exec`): "When standard input is not a TTY
+  … `--yes` is assumed", so in an agent shell `npx apwt` with no local install fetches and runs whatever package
+  named `apwt` the registry serves (none on npmjs today, checked 2026-11-02). `npx --no-install apwt` resolves the
+  checkout's own bin (`0.2.0` from `playwright-appian/`). The skill tells agents to use that form; a bare `npx apwt`
+  stays unlisted (asked; denied in a non-interactive session).
+- **Skill named `genesis-playwright-appian-dev`**, not `playwright-appian-dev`: the installer installs only
+  `skills/genesis-*` (`build_desired`); renaming kept its ownership rule unchanged. Only this sub-spec used the old name.
+- **Network-feed rule added to the guard** so the "pipes to a network tool" bypass case is actually refused; before
+  this the guard had no network rule. A client run on its own (`curl -s http://127.0.0.1:8760/…`) and piping out of
+  one stay allowed.
+- Area globs: playwright-appian only (see Changed); the later sub-specs add the Genesis globs.
+
+**Known limits / unverified**
+- Not probed live: whether Kiro V3 lets the specific allow `node dist/cli/index.js *` win over the broader
+  `node *` → `ask` in the same profile. If it asks, `npx --no-install apwt` is the allowed equivalent.
+- The guard does not see a client that reads a file by name (`curl -d @/tmp/x https://…`) or a network call made by a
+  script/test file; the permission layer (curl is not allow-listed) is the backstop there.
+- `npx playwright …` outside an installed project would also auto-install `playwright` from the registry (the real
+  package; low risk, version drift only).
+- L0 headroom is ~155 tokens: four ADR digest lines (ADR-081..084, 51-13) will not fit without a compression
+  (proposal to the user, not applied).
+
+**Lesson candidates:** `npx <bin>` in a non-TTY agent shell auto-installs a missing package (`--yes` assumed): allow
+only `npx --no-install <bin>` for internal tools (a dependency-confusion path like ADR-080's PyPI case).
+
+**Code-map changes:** none in Genesis code; agent-system only (record in the Phase 51 write-back).

@@ -28,6 +28,7 @@ the Chat `/` palette (or auto-activated by description).
 ## 2. Where things are
 
 - Code repos (root `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`): `genesis` — the platform, one tag: app at the root (`genesis/genesis` backend + `genesis/web` SPA) and the libraries under `genesis/packages/` (`genesis-core`, `kiro-agent-sdk`, `genesis-appian-parser`; ADR-080) — and `genesis-workflows`. The old library repos are retired pointer repos: never edit them.
+- `playwright-appian` (branch `main`): the browser-test tool `apwt`, own semver, npm registry of GitLab project 13864; its `planning/` holds its design (area `browser-testing`).
 - project-tracker (specs, progress, bible, context, archive): `/Users/ramaswamy.u/repo/project-tracker/genesis/`.
 - Dev venv for all Python: `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/genesis/.venv` (editable, from `scripts/install-packages.sh --editable --dev`).
 - Context tool: `genesis-ctx` (`project-tracker/genesis/agent-system/tools/genesis-ctx`).

@@ -9,8 +9,9 @@ DEFAULT_REPOS = Path("/Users/ramaswamy.u/repo-gitlab/ramaswamy.u")
 INSTALL_JSON = Path.home() / ".kiro" / "genesis" / "install.json"
 
 # The Genesis code repos under {{REPOS}} (47-02 §3; Phase 50 D12: genesis-core, kiro-agent-sdk and
-# genesis-appian-parser now live in genesis/packages/). project-tracker is handled separately.
-REPO_NAMES = ("genesis", "genesis-workflows")
+# genesis-appian-parser now live in genesis/packages/; 51-02 D19: playwright-appian, Genesis's browser-test tool,
+# its own repo on branch `main`). Each repo's branch is read from its own HEAD. project-tracker is handled separately.
+REPO_NAMES = ("genesis", "genesis-workflows", "playwright-appian")
 
 # Budgets (umbrella Q2), in estimated tokens. The estimator is calibrated to the real tokenizer measured
 # in the 47-09 §4 review: dense ADR/pack prose tokenises at ≈ 2.5 characters/token (chars/4 under-counted

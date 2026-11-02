@@ -11,10 +11,21 @@ ADR-080, the platform monorepo) and
 (`{{GENESIS_HOME}}/bin/genesis-ctx search "release" --archive`). Record CI ids and hashes in the release sub-spec's **As run**, not in L0/state.
 
 ## Repos and order
-Two code repos. **genesis** is the platform: the app at the root plus `packages/genesis-core`, `packages/kiro-agent-sdk`
+Three code repos. **genesis** is the platform: the app at the root plus `packages/genesis-core`, `packages/kiro-agent-sdk`
 and `packages/genesis-appian-parser`, all released by ONE tag `vX.Y.Z` (no per-library tags; the archived library repos
-keep their old tags). **genesis-workflows** pins that tag. Release genesis first, then genesis-workflows. The loader
+keep their old tags). **genesis-workflows** pins that tag. **playwright-appian** (branch `main`) is the browser-test tool
+genesis vendors as a tarball. Order: playwright-appian (when it changed) → genesis → genesis-workflows. The loader
 refuses a library whose `genesis_core_major != CORE_MAJOR` — bump `CORE_MAJOR` deliberately, additive-only within a major.
+
+## playwright-appian (its BIBLE §10.4–§10.5, D-37/D-38)
+- Tag `vX.Y.Z` = `package.json` version = `VERSION` in `src/core/version.ts`; move the CHANGELOG `[Unreleased]` notes and
+  the README tarball URLs; run its gates (`npm run lint && npm run typecheck && npm test`, `npm run build`).
+- Push `main` and wait for green, then the tag (ask before each). Its tag pipeline publishes to the GitLab npm registry
+  of project 13864 only after that pipeline's gates (`publish`, then `verify-published`, both green;
+  `glab ci list -R ramaswamy.u/playwright-appian`). Never publish by hand, never republish a version or move a tag.
+- Record the published tarball URL in the As run:
+  `https://gitlab.appian-stratus.com/api/v4/projects/13864/packages/npm/playwright-appian/-/playwright-appian-X.Y.Z.tgz`.
+  Then vendor that exact tarball into genesis (the 51-05 procedure) before the genesis release that ships it (L-057).
 
 ## Version locations (bump EVERY one — missing one is a known regression)
 - genesis, one shared version: the root and the three `packages/*/pyproject.toml`, the parser `__version__`, the
@@ -57,7 +68,7 @@ Only on the operator's explicit go-ahead; back up data first (genesis-live-accep
 ## Release notes template (in the release sub-spec)
 ```
 ## As run (<date>, genesis-release)
-- Versions: genesis vX.Y.Z (app + the three packages), genesis-workflows vA.B.C
+- Versions: genesis vX.Y.Z (app + the three packages), genesis-workflows vA.B.C, playwright-appian vP.Q.R (if released; tarball URL)
 - Tags: <repo> <tag> (asked+confirmed)  · Commits: <repo> <hash>
 - CI: <repo> pipeline <id> green
 - Deferred / follow-ups: …

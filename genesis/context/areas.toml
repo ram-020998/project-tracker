@@ -22,8 +22,9 @@
 #   Any other key is a lint error. Globs: `**` = any number of path segments (incl. none),
 #   `*` / `?` = within one segment.
 #
-# The two code repos under {{REPOS}} (Phase 50, D12): genesis (app: genesis/genesis + genesis/web; libraries:
-# genesis/packages/{genesis-core,kiro-agent-sdk,genesis-appian-parser}) and genesis-workflows.
+# The code repos under {{REPOS}} (Phase 50, D12): genesis (app: genesis/genesis + genesis/web; libraries:
+# genesis/packages/{genesis-core,kiro-agent-sdk,genesis-appian-parser}), genesis-workflows, and (51-02, D19)
+# playwright-appian (Genesis's browser-test tool: own repo, own Node toolchain and semver).
 # Library gates run from the package directory with the shared venv (genesis/.venv).
 # An area glob that matches no file is a lint error (50-04).
 
@@ -68,6 +69,29 @@ gates    = ["cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_lib
             "cd genesis-workflows && ../genesis/.venv/bin/python -m pytest -q workflows --ignore=workflows/_fixtures",
             "cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
             "cd genesis && .venv/bin/ruff check genesis"]
+
+# ───────────────────────────── browser testing (Phase 51) ─────────────────────────────
+
+# playwright-appian (`apwt`) and, as Phase 51 creates them, the Genesis test-execution paths. 51-02 lands the
+# playwright-appian globs only (an empty glob is a lint error); the sub-spec that creates the first file under
+# genesis/genesis/testexec/, genesis/genesis/integrations/apwt/, genesis/web/src/features/testing/,
+# genesis-workflows/workflows/{test-execution,action-capture,story-verification}/ or
+# genesis-workflows/skills/genesis-test-authoring/ adds that glob here (51-05/51-06/51-07/51-09/51-11).
+# Invariants (never weaken without the user; text in planning/DECISIONS.md): no LLM inside the framework (D-02);
+# Appian element knowledge only in src/core/taxonomy.ts (D-05); generated code is label-only (D-04); one npm
+# package with subpath exports (D-01); trace schema playwright_appian.trace.v1 is additive-only within v1.
+[area.browser-testing]
+title    = "playwright-appian (apwt) + Genesis test execution"
+paths    = ["playwright-appian/src/**", "playwright-appian/skills/**", "playwright-appian/tests/**",
+            "playwright-appian/package.json"]
+keywords = ["playwright", "apwt", "browser test", "test execution", "recorder", "trace", "taxonomy", "e2e",
+            "regression", "action library"]
+skills   = ["genesis-playwright-appian-dev", "genesis-backend-dev"]
+docs     = ["tracker:agent-system/skills/genesis-playwright-appian-dev/SKILL.md",
+            "playwright-appian/planning/BIBLE.md", "playwright-appian/planning/DECISIONS.md",
+            "playwright-appian/planning/TRACKER.md"]
+gates    = ["cd playwright-appian && npm run lint && npm run typecheck && npm test   # incl. tests/invariants: D-01 D-04 D-05, trace v1; D-02 no LLM inside",
+            "cd playwright-appian && npm run build   # a release only (tag vX.Y.Z = package.json version)"]
 
 # ───────────────────────────── genesis backend ─────────────────────────────
 

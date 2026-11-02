@@ -11,6 +11,9 @@
 #   (b) a shell WRITE — output redirection (`>`/`>>`/`>|`/`N>`/`&>`/`>&file`), `tee`, `cp`, `mv`, `rm`,
 #       `sed -i`, `dd of=` — whose target resolves OUTSIDE the agent's write roots (passed per agent at
 #       install as --write-root <dir>…), or cannot be resolved statically (an unknown `$VAR`, `$(…)`).
+#   (c) (51-02) data fed into a network client (`curl`, `wget`, `nc`, `ssh`, `scp`, `rsync`, … — also via `xargs` or
+#       `sh -c`): a pipe into it, a here-doc/here-string, or a `<` redirect from a file other than /dev/null. Applies to
+#       every agent. A network client run on its own (`curl -s http://127.0.0.1:8760/…`) is not refused here.
 #
 # The command is lexed like a shell (M5): quotes, escapes and comments are honoured, so a `>` inside a quoted
 # string (`grep '2>/dev/null'`, a Python f-string `{v:>7}`, a commit message) is NOT a redirect; fd
@@ -104,10 +107,11 @@ class Word:
 
 
 class Cmd:
-    __slots__ = ("words", "redirs", "heredocs", "herestrings", "nested")
+    __slots__ = ("words", "redirs", "heredocs", "herestrings", "nested", "piped")
 
     def __init__(self):
         self.words, self.redirs, self.heredocs, self.herestrings, self.nested = [], [], [], [], []
+        self.piped = False           # its stdin is the previous command's output (`a | b`, `a |& b`)
 
     def text(self):
         s = " ".join(w.text() for w in self.words)
@@ -302,6 +306,8 @@ def lex(s):
             two = s[i:i + 2]
             op = two if two in ("&&", "||", "|&", ";;", ";&") else c
             end_cmd()
+            if op in ("|", "|&"):
+                st["cmd"].piped = True
             i += len(op)
             if op == "\n" and heredoc_q:
                 i = read_heredocs(i)
@@ -462,6 +468,36 @@ def check_target(cands, dyn, shown, cwd, allow_sink, cmd):
               f"Command: {cmd.text()[:160]}")
 
 
+NET_TOOLS = {"curl", "wget", "nc", "ncat", "netcat", "socat", "telnet", "ssh", "scp", "sftp", "rsync", "ftp",
+             "http", "https", "xh"}
+# Programs that run another program named in their arguments (`… | xargs curl`, `… | sh -c "curl …"`).
+NET_LAUNCHERS = {"xargs", "parallel", "eval"} | SHELLS
+
+
+def check_net_feed(cmd, prog, rest, env):
+    """Refuse a network client whose stdin carries data: a pipe into it, a here-doc/here-string, or a `<` redirect
+    from a file other than /dev/null. Best effort: a client that reads a file by name (`curl -d @f`) is not seen."""
+    fed = cmd.piped or bool(cmd.heredocs) or bool(cmd.herestrings)
+    for op, wd in cmd.redirs:
+        if op in ("<", "<>"):
+            cands, dyn = expand(wd, env)
+            fed = fed or dyn or any(c != "/dev/null" for c in cands)
+    if not fed:
+        return
+    hit = prog if prog in NET_TOOLS else None
+    if hit is None and prog in NET_LAUNCHERS:
+        for wd in rest:
+            for tok in (value(wd, env) or wd.text()).split():
+                if os.path.basename(tok) in NET_TOOLS:
+                    hit = os.path.basename(tok)
+                    break
+            if hit:
+                break
+    if hit:
+        block(f"refusing to feed data into the network client `{hit}` (a pipe, here-doc or `<` file) — a possible "
+              f"exfiltration path (blocked even under --trust-all-tools). Command: {cmd.text()[:160]}")
+
+
 def analyze(text, cwd, env, depth=0):
     if depth > 5:
         return
@@ -492,6 +528,9 @@ def analyze(text, cwd, env, depth=0):
         rest = args[1:]
         vals = [expand(wd, env) for wd in rest]
         single = [c[0] if (not d and len(c) == 1) else None for c, d in vals]
+
+        # (c) feeding data into a network client (51-02): `… | curl -d @- …`, `… | nc host`, `nc host < file`
+        check_net_feed(cmd, prog, rest, env)
 
         if prog in ("export", "declare", "local", "readonly", "typeset"):
             for wd in rest:

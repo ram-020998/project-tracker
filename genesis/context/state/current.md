@@ -1,4 +1,4 @@
-Active phase: none in build — Phase 50 (platform monorepo) complete (2026-11-01); no next phase specced
+Active phase: Phase 51 (test execution engine) in build — 51-02 done 2026-11-02; next 51-03 (spike, gate)
 
 <!-- context/state/current.md — the current-state snapshot (47-05 §4). OVERWRITTEN every phase by genesis-docs:
      current values only, no history, no CI ids. History lives in progress/ and archive/. Keep ≤ 4K tokens. -->
@@ -32,7 +32,7 @@ still serve genesis ≤ v0.79.0).
 - **Agent system (Phase 47):** five role agents `genesis-spec/dev/review/release/docs` (Kiro CLI V3, JSON profiles,
   `claude-opus-5.5`) installed from `project-tracker/genesis/agent-system/` (`install.sh` / `update.sh` /
   `uninstall.sh`); launch with `kiro-cli --v3 chat --agent genesis-<role>` from `~/repo-gitlab/ramaswamy.u`; context via
-  `genesis-ctx` (`status` shows genesis, genesis-workflows, project-tracker; an area glob matching nothing is a lint
+  `genesis-ctx` (`status` shows genesis, genesis-workflows, playwright-appian, project-tracker; an area glob matching nothing is a lint
   error); never `--trust-all-tools`.
 - **Platform monorepo (Phase 50):** one clone of `genesis`; `scripts/install.sh` and the dev setup
   (`scripts/install-packages.sh --editable --dev`) install all four packages offline from the checkout; the CLI exits 1
@@ -77,4 +77,4 @@ still serve genesis ≤ v0.79.0).
   row incremental with `details.kb_format_version` = 1 on each instance; archive GitLab projects 14328 / 14306 / 14520
   in the UI; move the three old checkouts to `_archived/`.
 - genesis `README.md` still says "m0001–m0024 (DB v24)" (code repo; fix with the next genesis change).
-- No next phase is specced. Backlog: `specs/backlog/phase-50-follow-ups.md` §1–§6; the rest in `bible/08` §9.
+- Phase 51 specs: `specs/phase-51-test-execution-engine.md` (51-01..51-13). Backlog: `specs/backlog/phase-50-follow-ups.md` §1–§6; the rest in `bible/08` §9.

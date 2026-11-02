@@ -15,7 +15,7 @@ Long output: write it with `--out <file>` (pack) and read the file in ranges.
 
 | Command | Use it for |
 |---|---|
-| `status [--brief] [--json]` | Branch, latest tag, dirty count, ahead count for genesis, genesis-workflows + project-tracker; the active phase. Sub-agents (no SessionStart hook) run `status --brief` first. |
+| `status [--brief] [--json]` | Branch, latest tag, dirty count, ahead count for genesis, genesis-workflows, playwright-appian + project-tracker (each on its own branch); the active phase. Sub-agents (no SessionStart hook) run `status --brief` first. |
 | `pack <id\|path> [--areas a,b] [--out F]` | The task's context. `<id>` = sub-spec (`48-03`), umbrella (`48`) or a path. `--areas` alone (no id) for bugs / small tasks. Default output `context/.packs/<id>.md`. |
 | `adr <ID> <ID> … [--no-chain]` | Full text: decision-log section(s) + amendment sections + the `bible/04` bullet + the amendment chain. Many ids in ONE call. |
 | `lesson <L-NNN> …` | Lesson bullets verbatim. |

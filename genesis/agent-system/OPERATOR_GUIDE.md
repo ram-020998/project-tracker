@@ -46,11 +46,12 @@ cp /Users/ramaswamy.u/repo/project-tracker/genesis/agent-system/install.conf.exa
 
 # 4. Check
 kiro-cli --v3 agent list | grep genesis-     # five agents
-~/.kiro/genesis/bin/genesis-ctx status --brief   # three rows: genesis, genesis-workflows, project-tracker
+~/.kiro/genesis/bin/genesis-ctx status --brief   # four rows: genesis, genesis-workflows, playwright-appian, project-tracker
 ```
 
-The installer needs two code repos under the repos root, `genesis` and `genesis-workflows`. Since Phase 50 the
-libraries (genesis-core, kiro-agent-sdk, genesis-appian-parser) live in `genesis/packages/`.
+The installer needs three code repos under the repos root, `genesis`, `genesis-workflows` and (since 51-02)
+`playwright-appian`. Since Phase 50 the libraries (genesis-core, kiro-agent-sdk, genesis-appian-parser) live in
+`genesis/packages/`.
 
 **Launching.** The profiles are V3-format JSON (`~/.kiro/agents/genesis-*.json`), so every launch line in this guide
 uses **`kiro-cli --v3 chat --agent <name>`**. *Optional:* `kiro-cli settings chat.agentEngine v3` makes plain
@@ -362,7 +363,7 @@ You can also ask `genesis-docs` to make these edits: `Change the release skill s
 | Agent missed a rule | Tell `genesis-docs`: `ADR-0NN/L-0NN should apply to <area/path>; fix the tags.` — then it's fixed for every future pack |
 | An agent wants to push/tag and you didn't ask | Say no; only `genesis-release` may, and only with your yes |
 | You're tempted to pass `--trust-all-tools` | Don't (golden rule 7). `shell-guard.sh` still blocks `git push`/`tag` (non-release) and writes outside the agent's roots under trust-all, but trust-all drops the "ask" gate for everything else. Relaunch without it. |
-| `shell-guard` refused a command | It blocks `git push`/`tag` for every agent but `genesis-release`, and shell writes (`>`, `tee`, `cp`, `mv`, `rm`, `sed -i`, `dd of=`) outside the agent's write roots. Use the `write` tool, or a path under `/tmp` or the agent's repo; let `genesis-release` do pushes/tags |
+| `shell-guard` refused a command | It blocks `git push`/`tag` for every agent but `genesis-release`, shell writes (`>`, `tee`, `cp`, `mv`, `rm`, `sed -i`, `dd of=`) outside the agent's write roots, and (51-02, every agent) data fed into a network client (`… \| curl`, `… \| nc`, `ssh host < file`, also via `xargs`/`sh -c`). Use the `write` tool, or a path under `/tmp` or the agent's repo; let `genesis-release` do pushes/tags |
 
 ---
 
