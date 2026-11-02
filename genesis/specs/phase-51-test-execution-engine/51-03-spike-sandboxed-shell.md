@@ -32,7 +32,27 @@ before 51-07/51-09 are built. Also settle the signed-in recording mechanism (D13
 > `sandbox.json`; the sandbox is turned on with the `_kiro/sandbox/applyConfig` ACP request and a per-run `KIRO_HOME`
 > `permissions.yaml` (51-01 D3a). S2–S11 are answered with that recipe.
 
-### 2a. Rescope after D3b (spec agent, 2026-11-02, after the S6 session)
+### 2b. Rescope after D3c (spec agent, 2026-11-02) — supersedes §2a
+
+The user dropped the MCP design (51-01 **D3c**): Phase 51 browser agents use Kiro's shell like every other workflow
+agent and run `npx --no-install apwt` from the run's workspace export; program nodes own the sessions; isolation for
+all agents is **Phase 52** (`specs/phase-52-agent-runtime-isolation/52-01-findings.md`). §2a's M1–M3 and the S11
+trust-list wording no longer apply. Remaining questions:
+
+| # | Question | Pass criterion |
+|---|---|---|
+| L1 | **The full loop on QA, D3c style:** a program step opens + logs in a role's session (`apwt -s <role> open <QA> --login --allow-host <QA host> --mode full --browser chromium`, credentials only in that subprocess's env, `PLAYWRIGHT_APPIAN_HOME` inside the run folder); then a normal `kiro_node`-style turn (default engine, today's `auto_approve`) with the CLI `playwright-appian` skill provisioned runs `npx --no-install apwt -s <role> snapshot/find/fill/select/click/wait/expect/record-start/record-stop/spec/log` from the run's workspace export; `npx playwright test` of the produced spec replays green | Loop completes; spec replays |
+| S4 | No credential in the agent's view: the turn's shell `env`, `ps -Eww`, the session's control files and every tool result carry no password | Scan finds none |
+| S8/S9 | (unchanged) Signed-in recording as a role (`record start --cdp` into a program-opened browser, or an additive `playwright-appian` option) + Playwright Chromium for agent sessions, recording and generated specs | As in §2 |
+| S10 | (unchanged) Explore-turn timing | Measured |
+| S11 | Skills in `<cwd>/.kiro/skills/` (CLI `playwright-appian` + `genesis-test-authoring`) are activated and the blackboard tools work in that turn | Both work |
+| P10 | (for Phase 52, cheap to answer here) Does a Genesis workflow turn load the user's global `~/.kiro/settings/mcp.json` servers? | Answered with evidence |
+
+Outcome rule: L1, S4 and S11 must pass (a failure stops for a re-spec); S8/S9 gaps are additive `playwright-appian`
+changes. No bypass corpus is required for the shell in this phase (accepted risk, ADR-083); S6's sandbox evidence is
+kept as Phase 52 input.
+
+### 2a. Rescope after D3b (spec agent, 2026-11-02, after the S6 session) — superseded by §2b
 
 The user chose the MCP design (51-01 **D3b**): agents get **no shell**; they drive `apwt` through a Genesis-owned
 `appian-browser` MCP server in a fail-closed node (51-05 §4a). S1, S5 and S6 stay as done (they are ADR-083's

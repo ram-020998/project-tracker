@@ -55,8 +55,8 @@ Inputs: `capture_id`, `app_uuid`, `role_key`, `intent`, `trace_path`, `library_p
 catalog: keys, names, contracts, paths) and `checkout_dir` (an export of the workspace HEAD). Nodes (agent nodes carry
 the ADR-011 trio; healing tier ADR-067 on the replay check):
 - `generate` (program) — `apwt generate <trace>` → the flat spec + `analyze` plan (deterministic, D-02).
-- `segment` (agent, fail-closed node per D3b / 51-05 §4a — no shell, no browser needed; skills `genesis-test-authoring`
-  + `genesis-appian-browser` provisioned per ADR-069; tools: file reads and writes inside the run folder only) — writes
+- `segment` (agent, an ordinary `kiro_node` per D3c; no browser needed; skills `genesis-test-authoring` + the CLI
+  `playwright-appian` skill provisioned per ADR-069; works on files inside the run folder) — writes
   `proposals.json`
   `[{kind: action|setup, match: reuse|update|new, key?, name, area, role, contract, path, code, reason}]` and the code
   files under `<run>/proposed/`. Rules in the skill: split at business boundaries (dialog opened/closed, Create/Save,
@@ -80,10 +80,10 @@ with the raw trace. Items whose replay passed at that code become **Ready**, oth
 ## 7. Skill `genesis-test-authoring` (genesis-workflows `skills/`)
 
 The workspace conventions an agent must follow (both here and in 51-09): folder layout, the `lib/` API, contract rules,
-label-only code, unique values, how to read the catalog snapshot, how to write proposals. The `playwright-appian` CLI skill itself stays the package's (`node_modules/playwright-appian/skills/playwright-appian`);
-Genesis agents use the MCP variant **`genesis-appian-browser`** in genesis-workflows `skills/` (same loop and rules,
-`@appian-browser/…` tool names instead of `apwt` commands; D3b). Keep the two in step when `playwright-appian` adds a
-command (a new tool in 51-05 §4a + a skill line).
+label-only code, unique values, how to read the catalog snapshot, how to write proposals. The `playwright-appian` CLI skill is provisioned from the workspace's installed package
+(`node_modules/playwright-appian/skills/playwright-appian`, exact version) by extending the `skill_source` resolver for
+that id (one home for that skill, ADR-069; D3c). `genesis-test-authoring` adds the Genesis rules on top (use only the
+given sessions; no `open`/`login`/`attach`/`state-save`; no other host; never print environment variables).
 
 ## 8. Tests
 

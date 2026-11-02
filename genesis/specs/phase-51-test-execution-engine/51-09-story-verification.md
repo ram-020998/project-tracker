@@ -38,14 +38,15 @@ The confirm dialog text (51-11) asks the user to confirm the story's changes are
 
 ## 4. `story-verification` workflow (genesis-workflows `workflows/story-verification/`)
 
-Every agent node: ADR-011 trio; skills `genesis-appian-browser` (the MCP variant of the `playwright-appian` skill) +
-`genesis-test-authoring` (51-07 §7) provisioned per ADR-069; the **`appian-browser` MCP server in a fail-closed node**
-(D3b, 51-05 §4a: no shell, `auto_deny`, explicit trust list, writes confined to the run folder); bounds F10.
+Every agent node: ADR-011 trio; skills: the CLI `playwright-appian` skill (from the workspace's package) +
+`genesis-test-authoring` (51-07 §7) provisioned per ADR-069; ordinary `kiro_node` agents running `npx --no-install
+apwt` from the run's workspace export on the program-opened sessions (D3c, 51-05 §4a; accepted risk until Phase 52);
+bounds F10.
 
 | Node | Kind | Does |
 |---|---|---|
 | `resolve_inputs` | program | Load inputs; compute the affected roles (roles of the story's cases + their scenarios' setups) |
-| `open_sessions` | program | `ApwtClient` opens + logs in one session per role on QA (51-05 §4); passes the session names to the `appian-browser` server's launch arguments (51-05 §4a) |
+| `open_sessions` | program | `ApwtClient` opens + logs in one session per role on QA (51-05 §4, §4a); the session names and the exact `npx --no-install apwt -s <name>` prefix go into the agents' prompts |
 | `explore` | agent | Per role, visits the screens the story changed (story + cases + implementation report as files, L-042); no tests; `record-start`/`record-stop` captures; writes `exploration.json` (screens, addresses, notes) |
 | `v_explore` | validator | Every role explored; captures present |
 | `author` | agent | Writes a case script per story case, data setups and new actions where the library lacks them, using library actions first (D2, §5.5 of findings); sets each scenario's setup + `changes_shared_data` |
