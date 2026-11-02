@@ -1,7 +1,8 @@
 # 51-07 — Action Library, Record workflow and `action-capture`
 
 > **Status:** SPEC-DRAFTED 2026-11-02. Repos: **genesis** (backend), **genesis-workflows** (`action-capture` v0.1.0 +
-> skill `genesis-test-authoring`), **playwright-appian** (if 51-03 S8/S9 listed a gap). Parent:
+> skill `genesis-test-authoring`), **playwright-appian** (0.3.0 from 51-03 is the base; fix recorder gaps in §4 item 4
+> only if they block acceptance). Parent:
 > `specs/phase-51-test-execution-engine.md`. Decisions: 51-01 D2, D3, D5.6, D13, D16; F1, F5.
 
 ## 1. Goal
@@ -40,14 +41,27 @@ Over `TestWorkspace` (51-05 §3) and `TestLibraryStore` (51-04 §3):
 ## 4. Record workflow (D13)
 
 `RecordingService` (`genesis/genesis/testexec/recording.py`, app process; human-driven, so not a workflow run):
-1. `start(app_uuid, role_key, intent, start_path?)` → `readiness` → open a **headed** Chromium on the QA site signed in
-   as the role, and start the `apwt` recorder on it — the exact mechanism is 51-03 S8's outcome (`record start --cdp`
-   into a program-opened signed-in browser, or a `playwright-appian` option added then). Creates a `kb_test_captures`
-   row (`recording`).
-2. `stop(capture_id)` (the UI's Stop button) or the browser closing (`apwt record list` shows it stopped) → trace path
-   stored under `captures/<capture-id>/` in the workspace (committed with the proposals' apply; the raw trace is kept,
-   D13.7) → starts the `action-capture` run (`analysing`).
+1. `start(app_uuid, role_key, intent, start_path?)` → `readiness` → the **settled mechanism** (51-03 S8/S9, D-114 in
+   `playwright-appian` 0.3.0; the recorder never holds the password):
+   1. `apwt -s rec-<capture-id> open <QA site> --login --browser chromium --allow-host <QA host>` (credentials only in
+      this subprocess's environment, 51-05 §4) → `apwt -s rec-<capture-id> state-save --file <ws>/.auth/<capture-id>.json`
+      → `apwt -s rec-<capture-id> close`;
+   2. `apwt record start --detach --browser chromium --state <ws>/.auth/<capture-id>.json --url <start page>
+      --out <ws>/captures/<capture-id>/trace.json` (headed; returns `SESSION`, `TRACE_PATH`, `PID`);
+   3. delete the state file as soon as `record start` returned (the browser context holds the login).
+   Creates a `kb_test_captures` row (`recording`). (`record start --cdp` cannot record signed in: the recorder opens a
+   fresh, cookie-less context — 51-03 S8. The two halves were proven separately in the spike; 51-12 runs this exact
+   sequence live.)
+2. `stop(capture_id)` (the UI's Stop button → `apwt record stop --session <id> --json`) or the browser closing (`apwt
+   record list` shows it stopped) → trace path stored under `captures/<capture-id>/` in the workspace (committed with
+   the proposals' apply; the raw trace is kept, D13.7; the trace carries `start_signed_in: true`, so `generate` writes
+   `await login(page)`) → starts the `action-capture` run (`analysing`).
 3. One recording at a time per machine; a stale recorder process is cleaned up through the 51-05 pgid registry.
+4. **Known recorder gaps** (51-03 findings 4–5, `playwright-appian` follow-ups): a recorded multi-select whose label the
+   recorder cannot resolve becomes `// TODO: no label for multi_dropdown`; `wait --for "grid(…)"` in an agent spec
+   becomes a `// TODO` (grids have no `isVisible()`). The `action-capture` agent resolves such TODOs from the snapshot
+   context where it can; fix them in `playwright-appian` during this sub-spec if they block 51-12's live acceptance,
+   else list them in `specs/backlog/phase-51-follow-ups.md`.
 
 ## 5. `action-capture` workflow (genesis-workflows `workflows/action-capture/`)
 
@@ -78,6 +92,9 @@ create the item (key allocated) from its code; `update` → a save of the existi
 with the raw trace. Items whose replay passed at that code become **Ready**, others **Draft** (D16.1).
 
 ## 7. Skill `genesis-test-authoring` (genesis-workflows `skills/`)
+
+Start from the spike's draft, `genesis/scripts/spikes/51-03/skills/genesis-test-authoring/SKILL.md` (51-03 S11 proved
+an agent reads and follows it).
 
 The workspace conventions an agent must follow (both here and in 51-09): folder layout, the `lib/` API, contract rules,
 label-only code, unique values, how to read the catalog snapshot, how to write proposals. The `playwright-appian` CLI skill is provisioned from the workspace's installed package

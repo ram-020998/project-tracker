@@ -90,7 +90,10 @@ module or symbol named `test_*` outside tests (L-092).
 
 Draft the four decision-log sections (Context / Decision / Alternatives / Consequences, house format) for ADR-081..084
 from the umbrella §12 and 51-01 §7, in `specs/phase-51-test-execution-engine/adr-drafts.md`, so 51-13 adds them with
-`genesis-ctx add adr` (`--amends ADR-078` / `ADR-068` / `ADR-029` / `ADR-061`).
+`genesis-ctx add adr` (`--amends ADR-078` / `ADR-068` / `ADR-029` / `ADR-061`). ADR-083's text comes from the
+umbrella §12 plus 51-01 D3a–D3d and the 51-03 As built (both sessions: the sandbox evidence S1/S5/S6 with residual 1 as
+the reason a sandboxed shell was not used; the D3c recipe; the accepted risks — inherited environment, password in the
+login/Playwright subprocess environment, global Kiro MCP servers with full trust); it names Phase 52 as the fix.
 
 ## Context manifest
 

@@ -41,7 +41,7 @@ The confirm dialog text (51-11) asks the user to confirm the story's changes are
 Every agent node: ADR-011 trio; skills: the CLI `playwright-appian` skill (from the workspace's package) +
 `genesis-test-authoring` (51-07 §7) provisioned per ADR-069; ordinary `kiro_node` agents running `npx --no-install
 apwt` from the run's workspace export on the program-opened sessions (D3c, 51-05 §4a; accepted risk until Phase 52);
-bounds F10.
+bounds F10 (`turn_timeout` 900 s on `explore` and `author`; re-measure on a write flow and record it in the As built).
 
 | Node | Kind | Does |
 |---|---|---|

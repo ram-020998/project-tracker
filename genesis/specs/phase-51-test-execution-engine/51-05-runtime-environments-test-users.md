@@ -13,7 +13,9 @@ with a single QA environment, the application's test settings and test users.
 
 - **Vendored package** (D4): `genesis/genesis/testexec/vendor/playwright-appian-<version>.tgz`, shipped as **package
   data** so an installed Genesis finds it (L-048); a `VENDORED_APWT_VERSION` constant beside it; the tarball's sha256
-  recorded and checked before use.
+  recorded and checked before use. **Minimum version 0.3.0** (51-03 D-114: `record start --browser` and `--state`,
+  needed for signed-in recording with Playwright's Chromium); 0.3.0 is committed in `playwright-appian` but not
+  released yet — 51-13 publishes it first (51-01 D19).
 - **Detection** (`genesis/genesis/testexec/runtime.py`): `node --version` (≥ 20), `npm --version`, the Chromium
   revision installed under `~/.genesis/testing/browsers` (`PLAYWRIGHT_BROWSERS_PATH`, F4), `git --version`. Exposed
   to preflight (`genesis/genesis/runtime/preflight.py`, warning not failure: Genesis runs without testing) and to the
@@ -49,7 +51,11 @@ The program-side seam (like `SailClient`, `genesis/genesis/integrations/sail/cli
   `PLAYWRIGHT_APPIAN_HOME` = a per-run or per-recording folder); role credentials are added **only** to the one `open
   --login` (or `login`) call that needs them, then dropped (D3, 51-03 S4).
 - **Session defaults** (D8): `--allow-host <QA host>`, `--mode full`, `--upload-root <workspace>/tests/resources`,
-  `--browser chromium` (or the setting), `--artifacts <run folder>`, `--idle-timeout 30`.
+  `--browser chromium` (or the setting), `--artifacts <run>/apwt-out/<role>`, `--idle-timeout 30`; cwd = the
+  workspace export; `PLAYWRIGHT_APPIAN_HOME=<run>/.apwt`. Proven in 51-03 L1 (the final recipe in its As built §2b):
+  `open --login` takes 10–13.5 s; `close` < 2 s (it also writes a running recording). Saved logins (`state-save`, for
+  recording, 51-07 §4) go under `<ws>/.auth/` (git-ignored) to avoid `apwt`'s "outside the working folder" warning
+  (51-03 finding 6), and are deleted as soon as they are used.
 - **Subprocess hygiene (F8)**: every call has a timeout; long-lived children (daemons, recorders, Playwright runs) start
   in their own process group, their pgid is written to `<run folder>/.pids/`; on timeout, cancel or pause the client
   (and, for a killed worker, the RunManager on `run.final`/cancel plus a startup sweep that holds the run-owner lock,
@@ -67,7 +73,10 @@ The program-side seam (like `SailClient`, `genesis/genesis/integrations/sail/cli
   workflow agent, 51-01 §2.3). No new MCP server, no fail-closed mode, no `kiro-agent-sdk` change in this phase.
 - **They run the workspace's own CLI**: `npx --no-install apwt …` from the run's workspace export (51-06 §3; the export
   has `node_modules` symlinked or installed), never a globally installed `apwt`. The prompt names the exact command
-  prefix and the session names.
+  prefix and the session names. **The prefix must set the session home** because the agent's shell inherits the
+  worker's environment, not the program step's: `cd <ws> && PLAYWRIGHT_APPIAN_HOME=<run>/.apwt npx --no-install apwt
+  -s <role> …` (51-03 recipe step 3). The agent's `cwd` stays the run folder (`kiro_node`), so skills land in
+  `<run>/.kiro/skills/` and the blackboard is `<run>`.
 - **Program nodes own the sessions** (via `ApwtClient`, §4): before the agent's turn, open and log in one session per
   role with `--allow-host <QA host>`, `--mode full`, `--browser chromium` (or the setting), `--artifacts` and
   `PLAYWRIGHT_APPIAN_HOME` inside the run folder, the role's credentials only in that one subprocess's environment
@@ -76,9 +85,17 @@ The program-side seam (like `SailClient`, `genesis/genesis/integrations/sail/cli
   (`node_modules/playwright-appian/skills/playwright-appian/SKILL.md`, exact version) provisioned into
   `<run>/.kiro/skills/` per ADR-069, by extending the `skill_source` resolver for this one id; plus Genesis's
   `genesis-test-authoring` (51-07 §7) which adds: use only the given sessions, never `open`/`login`/`attach`/
-  `state-save`, never another host, never print environment variables.
+  `state-save`, never another host, never print environment variables. (51-03 S11 proved both are discovered and
+  read; the spike's draft of `genesis-test-authoring` is at `genesis/scripts/spikes/51-03/skills/genesis-test-authoring/
+  SKILL.md` — the starting point for 51-07 §7; it overrides the CLI skill's "global `apwt`" and "`open --login`" advice.)
 - **Accepted risk until Phase 52** (ADR-083): these are conventions; the agent's shell can still do anything a
-  workflow agent can do today. Every command it runs is in `run_events` (`agent.tool_call`, kind `execute`).
+  workflow agent can do today. Every command it runs is in `run_events` (`agent.tool_call`, kind `execute`). Measured
+  in 51-03 and part of the accepted risk: (a) the agent's shell inherits the worker's **whole** environment (other API
+  keys, `SSH_AUTH_SOCK`); (b) the `open --login` subprocess holds the role password in its environment for its
+  ~10 s run (readable by a same-user `ps -Eww`), as does each Playwright execution subprocess for its run — moot while
+  any agent can read `~/.genesis/secrets.json` directly; both are Phase 52 items; (c) every workflow turn also loads the
+  user's global `~/.kiro/settings/mcp.json` servers with full trust (51-03 P10; e.g. Jira write tools) — accepted, not
+  changed in Phase 51 (51-01 D3d).
 
 ## 5. Environment types (D5, F3)
 

@@ -57,6 +57,7 @@ execution engine with results, and the Workbench Verification lane.
 | D17 | Local only; Hub-ready columns; sharing later via a GitLab remote per workspace. |
 | D18 | One phase, one release. |
 | D19 | `playwright-appian` joins the agent system as its own repo; its `planning/` stays the home of its internal design; publish it before the Genesis release that vendors it. |
+| D3d | The user's global Kiro MCP servers load into every workflow turn with full trust (51-03 P10) — accepted with D3c; Phase 52 fixes it. |
 
 Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`): `51-01-findings.md` §8.
 
@@ -127,7 +128,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 |---|---|---|
 | 51-01 | project-tracker | Findings, decisions D1–D19, defaults F1–F14 |
 | 51-02 | project-tracker (agent-system) | Repo list, new `browser-testing` area + gates, agent allow rules, release flow, invariants |
-| 51-03 | genesis (spike code + notes), playwright-appian (if needed) | Sandbox evidence S1/S5/S6 (done; ADR-083 and Phase 52 rationale); then the D3c items: the full loop on QA (program-owned login, agent shell + workspace `apwt`, spec replays), no credential in the agent's view, signed-in recording, Chromium everywhere, timing, skills + blackboard |
+| 51-03 | genesis (spike code + notes), playwright-appian (D-114, 0.3.0) | **DONE (SHIP 2026-11-02):** sandbox evidence S1/S5/S6 (ADR-083 / Phase 52 input); the D3c loop L1, S4, S11 PASS; S8/S9 via `record start --browser/--state` (0.3.0, unreleased); S10 timings; P10 = global Kiro MCP servers load into workflow turns |
 | 51-04 | genesis | m0026 (catalog, executions, results, test users, settings, suite rebuild), stores, `ACT-`/`DS-`/`TE-` ids, lifecycle, ADR texts |
 | 51-05 | genesis, playwright-appian (if needed) | Node/Chromium detection + install, vendored tarball, `TestWorkspace`, `ApwtClient`, program-owned sessions for agents (D3c), environment types + QA, test users, test settings |
 | 51-06 | genesis, genesis-workflows | Spec generator, setup projects, execution checkout, `test-execution` workflow + finalizer, queue, Run impacted tests, `regression-run` job, subprocess hygiene |
@@ -142,7 +143,8 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 ## 8. Release plan
 
 If `playwright-appian` changed: release it first (tag `vX.Y.Z` → its CI publishes) and vendor that exact tarball into
-genesis. Then **genesis v0.81.0** (minor; m0026, DB 25 → 26). Then **genesis-workflows v0.25.0** (`test-execution`,
+genesis. **It did change: 0.3.0 (51-03, D-114) is committed but unreleased**, so the release starts with
+`playwright-appian` v0.3.0 (plus anything later sub-specs add). Then **genesis v0.81.0** (minor; m0026, DB 25 → 26). Then **genesis-workflows v0.25.0** (`test-execution`,
 `action-capture`, `story-verification`, the `genesis-test-authoring` skill) pinned on `genesis.git@v0.81.0` (L-057).
 Without the workflows installed, every start returns the friendly "not installed" 409 (L-033). No Hub change. Detail:
 51-13.
@@ -193,7 +195,9 @@ machine (F7); 1 worker, 1 retry (F6); schedule off by default (F13); files kept 
   the QA host by program nodes; credentials never in the agent's environment. Recorded as an **accepted risk** until
   Phase 52: workflow agents have an unrestricted shell today (`auto_approve`, `--trust-all-tools` for nodes with no
   tool list; 51-01 §2.3), so these measures are conventions, not a boundary; a sandboxed shell (51-03 S1/S6) was
-  rejected because Kiro's sandbox always allows loopback to the unauthenticated local API. Phase 52 boxes every agent
+  rejected because Kiro's sandbox always allows loopback to the unauthenticated local API. The accepted risk also
+  covers, as measured in 51-03: the agent's shell inherits the worker's whole environment, and every workflow turn
+  loads the user's global Kiro MCP servers with full trust (P10, D3d). Phase 52 boxes every agent
   turn. Amends ADR-029 (documents that the allowlist does not cap untrusted tools under `auto_approve`).
 - **ADR-084 — Lane order and Verification lane automation.** Deployment precedes Verification; dragging into
   Verification launches `story-verification`; pass → Done, product defect → Implementation, blocked → gate; audited
