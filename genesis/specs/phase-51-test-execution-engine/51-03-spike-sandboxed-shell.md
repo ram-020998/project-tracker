@@ -1,10 +1,10 @@
 # 51-03 — Spike: agent access to `apwt` (started as the sandboxed-shell gate; now the D3c loop)
 
-> **Status:** IN PROGRESS (PARTIAL As built below) — S1, S5, S6 done (sandbox evidence, kept as ADR-083 / Phase 52
-> input); S2/S3 and §2a dropped; **the remaining work is §2b** (D3c: ordinary shell + the workspace's own `apwt` on
-> program-owned QA sessions). Read §2b and the spec-agent note at the top of the Resume note first. Repos: **genesis**
+> **Status:** §2b DONE (session 3, 2026-11-02) — L1, S4, S8/S9, S10, S11 and P10 answered; **L1, S4, S11 PASS**; one
+> additive `playwright-appian` change (0.3.0, D-114, committed locally, not released). See "As built — §2b" below. The
+> older PARTIAL As built (S1, S5, S6 sandbox evidence) is kept below it as ADR-083 / Phase 52 input. Repos: **genesis**
 > (spike harness under `genesis/scripts/spikes/51-03/` + notes in the As built; no product code), **playwright-appian**
-> (only if a gap needs a change, D19). Built by genesis-dev; a genesis-review pass checks the evidence. Parent:
+> (D-114). Built by genesis-dev; a genesis-review pass checks the evidence. Parent:
 > `specs/phase-51-test-execution-engine.md`. Decisions: 51-01 D3 → D3a → D3b → **D3c (current)**, D4, D5, D8, D13.
 > (The file name keeps "sandboxed-shell" so existing links resolve.)
 
@@ -111,6 +111,167 @@ docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md"]
 code     = ["genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py", "genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/genesis/mcp/kb_server.py", "playwright-appian/src/agent/**", "playwright-appian/src/cli/**", "playwright-appian/src/recorder/**"]
 upstream = ["51-02"]
 ```
+
+## As built — §2b (D3c), session 3 (2026-11-02, genesis-dev)
+
+**Task restated.** Prove the D3c agent loop on the QA site: a program step opens and signs in one `apwt` session
+per role (credentials only in that subprocess's environment, `PLAYWRIGHT_APPIAN_HOME` in the run folder); then an
+ordinary workflow agent turn — the real `genesis_core.nodes.agent.kiro_node` (default engine, trust-all as every
+workflow agent today, blackboard MCP injected, skills provisioned per ADR-069) — drives it with
+`npx --no-install apwt` from a copy of the workspace template in the run folder, and the spec it produces replays
+green. Show the agent never sees the password (S4); settle signed-in recording and one Chromium (S8/S9); measure the
+turn (S10); show skills + blackboard work (S11); answer P10. Spike code only (`genesis/scripts/spikes/51-03/`); a
+`playwright-appian` gap is an additive minor change, not released.
+
+**Applicable rules.** ADR-002/004 (agent = narrow Kiro turn over ACP, per-node MCP), ADR-012 (program steps own
+subprocesses), ADR-020 (no global Kiro mutation; see P10), ADR-029, ADR-031 (n/a: no chat), ADR-069 (skills into
+`<cwd>/.kiro/skills/`), ADR-077 (no `--trust-all-tools` for *role agents*; the workflow turn's `--trust-all-tools`
+is today's `kiro_node` behaviour, unchanged here), ADR-083 (accepted risk, D3c). Lessons L-001, L-017, L-021
+(save by reference — used), L-024 (skills are files), L-041, L-044 (spike the installed CLI), L-088 (no corpus
+needed this phase; S4's operator processes are the positive control), L-100 (no secret printed).
+
+### The final recipe (for 51-05 §4/§4a, 51-07, 51-09)
+
+1. **Workspace export:** the run's workspace at `<run>/workspace` (here a `cp -R` of the template with its
+   `node_modules`; 51-06 `export`). The agent's `cwd` stays the run folder (`kiro_node`), so skills go to
+   `<run>/.kiro/skills/` and the blackboard is `<run>`.
+2. **Program step `open`** (ApwtClient): `<ws>/node_modules/.bin/apwt -s <role> open <QA site> --login --browser
+   chromium --mode full --allow-host <QA host> --artifacts <run>/apwt-out/<role>`, cwd `<ws>`, env = the minimal
+   allow-list + `PLAYWRIGHT_BROWSERS_PATH=~/.genesis/testing/browsers` + `PLAYWRIGHT_APPIAN_HOME=<run>/.apwt` +
+   `APPIAN_USERNAME`/`APPIAN_PASSWORD` for this call only. 10.0–13.5 s (4 runs). The daemon it spawns has no
+   password variable (`client.ts:243`), proven by S4.
+3. **Agent turn:** `kiro_node(skills=["playwright-appian", "genesis-test-authoring"], turn_timeout=…)`; the
+   prompt gives the session name and the exact prefix
+   `cd <ws> && PLAYWRIGHT_APPIAN_HOME=<run>/.apwt npx --no-install apwt -s <role> …` (the agent's shell inherits the
+   worker's environment, so `PLAYWRIGHT_APPIAN_HOME` must be in the prefix). `playwright-appian` resolves to
+   `<ws>/node_modules/playwright-appian/skills/playwright-appian/` (exact version); the draft
+   `genesis-test-authoring` (spike: `scripts/spikes/51-03/skills/`) overrides the CLI skill's "global `apwt`, `open
+   --login`" advice. The agent used `snapshot`, `find`, `record-start`, `click`, `wait`, `select`, `expect`,
+   `record-stop`, `spec`, `log`, read snapshot files with the read tool, and saved the `log` result by reference.
+4. **Program step `close`** after the turn: `apwt -s <role> close` (writes a running recording, prints
+   TRACE_FILE/TEST_FILE).
+5. **Replay** (program): `npx --no-install playwright test <spec>` from `<ws>` with `SITE_URL` and the role's
+   credentials in that subprocess only; the generated spec signs in in `beforeEach`.
+6. **Recording as a role (D13, needs `playwright-appian` 0.3.0):** `apwt -s <rec> open <QA> --login …` →
+   `apwt -s <rec> state-save --file <run>/.auth/<rec>.json` → `close` → `apwt record start --detach --browser
+   chromium --state <file> --url <start page> --out <ws>/output/traces/<name>.json` → delete the state file once
+   `record start` returned (the context has it) → the person records → `record stop --session <id>` → `apwt generate
+   <trace>` → replay. The recorder process never holds the password. *(Live, the two halves were run separately:
+   `--cdp <probe browser> --state` for the signed-in recording, `--browser chromium` without `--state` for S9; both
+   use the same `newContext({storageState})`. Run this exact command in 51-07's live acceptance.)*
+
+### S-results
+
+| # | Result | Evidence (`genesis/scripts/spikes/51-03/evidence/`) |
+|---|---|---|
+| **L1** | **PASS.** Program `open --login` (10.6 s) → one `kiro_node` turn (194.2 s, 26 tool calls, `end_turn`) recorded `vendors-search` (Vendors link → `wait --for grid` → `select dropdown('SAM.gov Status') 'Not Synced'` → `expect --text`) → `npx playwright test output/tests/vendors-search.spec.ts`: **1 passed** (13.6 s). No `fill`: the Vendors page has no text box (the agent checked with `find` and `snapshot --all` and said so). | `d3c-l1.json` (`l1_turn`, `replay`, `spec_text`) |
+| **S4** | **PASS.** In an ordinary turn on an open session: the agent shell's `env` has no password and no `APPIAN_*`/`SPIKE_*` name; `ps -Eww` saw 925 processes, **0 of the 11 run processes** (the turn's kiro-cli and children, the `apwt` daemon and its Chromium) carry the password; the session's control files (`token`, `state.json`, `daemon.log`) have none; no tool result or file in either run
+(L1, S4) has it, and no event of the L1 run (S4's run was rescanned after the turn, so its events were not
+scanned). **Positive control:** the same scan found the password in 6 *operator* processes (this dev session's
+kiro-cli, its shell, the harness Python — they inherited the `SPIKE_*` exports; a product run has no such
+process). The `s4` block inside `d3c-l1.json` is a failed first attempt (terse prompt, no tool call); the result is
+`d3c-s4.json`. | `d3c-s4.json`, `d3c-l1.json` (`password_in_tool_results`, `password_in_events`, `files_with_password`) |
+| **S8** | **PASS with D-114.** `record start --cdp` alone cannot record signed in: `open` exposes no CDP port (`src/agent/core.ts:340-355`) and the recorder opens a **new** context with none of the attached browser's cookies (`src/recorder/index.ts`, `newContext()`). Added `record start --state <file>` (+`start_signed_in` in the trace). Live: state-save (5 cookies, no password) → `record start --detach --cdp … --state …` → the scripted person saw `SIGNED_IN: true` and filtered the Vendors list → trace `start_signed_in: true`, 3 actions, no password → `generate` → spec with `await login(page)` → **1 passed** (10.7 s). The replay covers sign-in + the Vendors navigation only: the
+person's filter became `// TODO: no label for multi_dropdown` (finding 5) and the spec has no assertion. | `d3c-s8.json` |
+| **S9** | **PASS with D-114.** Agent sessions: `open --browser chromium` (SESSION line "chromium"). Specs: `playwright.config.ts` sets no channel → `@playwright/test`'s Chromium from `PLAYWRIGHT_BROWSERS_PATH` (replays green). Recording: `record start` had no `--browser` and preferred the system Chrome (live: `/Applications/Google Chrome.app`); with 0.3.0 `--browser chromium` launched `~/.genesis/testing/browsers/chromium-1217/…/Google Chrome for Testing`. | `d3c-s8.json` (`s9`, `cdp_executable`) |
+| **S10** | Measured — see "Timings". | `d3c-l1.json` |
+| **S11** | **PASS.** `skills.provisioned` for both ids; the agent's first tool call read both `SKILL.md` files from `<run>/.kiro/skills/`; the reply ends with the `genesis-test-authoring` canary line (not in the prompt); `@blackboard/list_tool_outputs` + `@blackboard/save_tool_output` ran, `artifact.saved` was emitted and `l1/action-log.txt` exists. | `d3c-l1.json` (`skills_provisioned`, `tool_calls`, `canary_in_reply`, `saved_action_log`) |
+| **P10** | **YES — a workflow turn loads the user's global `~/.kiro/settings/mcp.json` servers.** With `jira` (docker) and `testcase-mcp` (bash) in the global file, the real `kiro_node` turn's kiro-cli started `docker run … JIRA_EMAIL --env JIRA_TOKEN … ` and the agent listed **testcase-mcp, jira and blackboard** tools (35 tools, incl. Jira write tools such as `add_jira_comment`); under trust-all it can call them without a prompt. (The evidence flags `testcase_mcp_started`/`blackboard_started`
+= false are poll false negatives: `_tree` cuts commands to 120 characters; the answer rests on the jira docker
+process and the tool list.) | `d3c-p10.json` |
+
+### Timings (S10, for `turn_timeout`, F10)
+
+- Explore + record turn (L1, one story screen, 3 recorded steps + exploration): **194.2 s** wall, 26 tool calls,
+  **8.44 credits** (metered), context 6 %. The `apwt` commands themselves took ~5 s in total (daemon log: `do` 1.8–2.1 s,
+  `snapshot` 0.2–0.3 s, `find`/`expect`/`record-*` < 10 ms); the rest is the model (~7 s per tool call) plus ~1 s of
+  `npx` start-up per command. An interrupted first attempt (killed by this session's tool timeout, not by Genesis)
+  reached the same step at the same pace.
+- Program steps: `open --login` 10.0–13.5 s; `close` < 2 s; replay of a 3–4 step spec 12–14 s (test 10.7–12.2 s);
+  scripted recording 16.8 s.
+- **Sizing:** ~7–8 s per agent tool call. A story screen needing ~50–60 calls is ~7–8 min, so `turn_timeout` 900 s
+  (kiro_node default is 420 s) with the prompt bounding the flow; one sample, so 51-09 should re-measure on a write flow.
+
+### Findings for later sub-specs (not failures)
+
+1. **Global MCP servers in workflow turns (P10)** — every workflow agent today gets the user's global Kiro MCP servers
+   with trust-all (here a Jira server fed `JIRA_TOKEN`, and testcase-mcp with Jira write tools). Not an ADR-020
+   *mutation*, but it defeats ADR-004's "only the MCP servers that step needs", and Phase 51 adds untrusted QA page
+   text to such turns. **For the spec agent now:** name it in ADR-083 (51-04) as part of the accepted risk, or scope a
+   51-xx mitigation (e.g. a Kiro agent config with no global servers, if Kiro supports one); Phase 52 input too.
+2. **The agent shell inherits the worker's full environment** (S4 saw e.g. `OPENAI_API_KEY`, `SSH_AUTH_SOCK`, Kiro
+   vars by name) — the S5 clean-env finding applies to every workflow agent (Phase 52).
+3. **`open --login` holds the password in its environment while it runs (~10 s)**; a same-user process (any agent
+   shell running then) can read it with `ps -Eww`. A `--password-stdin` (or fd) option in `playwright-appian` would
+   close that window — candidate for 51-05/Phase 52; the replay subprocess has the same window.
+4. `wait --for "grid('Vendors')"` becomes a `// TODO` (a grid has no `isVisible()`); the agent's spec still replayed.
+   Candidate `playwright-appian` follow-up (51-07).
+5. The person recording of the Vendors "SAM.gov Status" filter generated `// TODO: no label for multi_dropdown`
+   (the recorder could not resolve that multi-select's label; the agent path's `select` did). Recorder follow-up (51-07).
+6. `state-save --file <run>/.auth/…` warns "outside the working folder"; 51-05 can put it under `<ws>/.auth/`
+   (git-ignored) or accept the warning.
+7. A terse "run this, reply DONE" prompt for `env`/`ps -Eww` got **no tool call**; an honest prompt naming the check
+   and a readable script (`probes/s4-probe.sh`) was run (as in S6).
+
+### Changed
+
+- **playwright-appian** (0.2.0 → **0.3.0**, D-114): `src/recorder/index.ts` (`RecorderBrowser`, `recorderLaunchPlan`,
+  `browser`/`storageState` options), `src/recorder/consolidate.ts` (`buildTrace(…, {startSignedIn})`),
+  `src/core/types.ts` + `trace-schema.ts` + `trace-keys.ts` (optional `start_signed_in`, schema v1 additive),
+  `src/generator/analyze.ts` (signed-in start = login), `src/cli/index.ts` (`record start --browser`, `--state`,
+  forwarded to `__run`), `src/cli/sessions.ts` (`detachedRunArgs`), `src/core/version.ts`, `package.json`,
+  `package-lock.json`, `CHANGELOG.md` (Unreleased), `README.md` (Recording), `planning/DECISIONS.md` (D-114),
+  `planning/TRACKER.md`; tests `tests/recorder/recorder-state.test.ts`, `tests/cli/record-options.test.ts`.
+- **genesis** (spike only): `scripts/spikes/51-03/{d3c.py, run_d3c.py, README.md, skills/genesis-test-authoring/SKILL.md,
+  probes/{s4-probe.sh, s8-person.mjs, cdp-browser.mjs}, evidence/d3c-{l1,s4,s8,p10}.json}`. No product code.
+
+### Tests
+
+- playwright-appian: `npm run lint` clean, `npm run typecheck` clean, `npm run build` ok, `npm test` **95 files /
+  1399 tests passed**; new: 10 in `recorder-state.test.ts` (launch plan, detached args, `start_signed_in` in trace and
+  spec, a real-browser recording that loads a saved login vs one without), 3 in `record-options.test.ts` (missing
+  state exits 1 before a browser opens, unknown browser exits 2, help). Live e2e (`npm run e2e*`) not run; the live
+  S8 run above used the packed 0.3.0 tarball against QA.
+- genesis: `ruff check scripts/spikes/51-03/` clean. Spike runs are the evidence; no genesis test suite change.
+
+### Review / commits
+
+- **Review:** `specs/phase-51-test-execution-engine/reviews/51-03-review.md` (genesis-review, 2026-11-02), verdict
+  **SHIP** — no blockers or majors; the reviewer re-ran every gate (playwright-appian 95 files / 1399 tests; genesis
+  ruff clean) and an in-process secret scan of 29 changed + 78 related files (0 hits). Minors 1–5 (As built wording)
+  fixed in this section and the spike README; minor 6 (route P10) is finding 1 above, for the spec agent; nits 7–9
+  fixed in `5d7ae2d` (gates re-run green: 95 / 1399).
+- **genesis** (base `5a15d41`, local, not pushed): `87efc73` (D3c harness + evidence), `36cfe6f` (ruff fix in the
+  older `run_spike.py`), `55af523` (README evidence notes).
+- **playwright-appian** (base `2b1fbf9`, local, not pushed or tagged; version 0.3.0 unreleased): `395b2ac` (D-114),
+  `5d7ae2d` (review nits). Release order per 51-01 D19: publish 0.3.0 first, then the Genesis release that vendors it.
+- **project-tracker:** this As built and the status banner (commit below); `reviews/51-03-review.md` by the reviewer.
+
+### Decisions / deviations
+
+- **No ADR deviation.** The spike runs workflow turns exactly as `kiro_node` does today (trust-all, inherited env);
+  ADR-083 accepts that until Phase 52. P10 is a finding about today's behaviour, not a change.
+- **D13 mechanism settled:** saved login + `record start --state` (D-114), not `--cdp` (which cannot carry the login)
+  and not an env `--login` on the recorder (it would hold the password for the whole recording).
+- **Process slip (reported honestly):** once, while checking the spike folder for credentials, I passed the QA
+  password and user name as `grep` arguments (inside `$(…)`) for under a second. They were not printed or written, but
+  were briefly visible in this machine's process list. Every later scan reads them inside Python. The user may want to
+  rotate the QA test user's password.
+
+### Lesson candidates
+
+- **A Genesis workflow turn loads the user's global Kiro MCP servers** (`~/.kiro/settings/mcp.json`) and trusts them
+  all: per-node MCP injection adds servers, it does not restrict to them. Check the spawned processes, not the
+  injected list (P10).
+- **`browser.newContext()` over CDP is a fresh, cookie-less context**: attaching a recorder to a signed-in browser does
+  not record signed in; carry the login as a storage state instead (S8).
+- **To prove "the agent can't see X", scan from outside and keep a positive control**: the operator's own processes
+  that do hold X show the scan can see it (S4; extends L-088).
+
+### Code-map changes
+
+None in genesis (spike code is not product). `playwright-appian` documents its own change (D-114, CHANGELOG,
+README).
 
 ## As built (2026-11-02, genesis-dev) — PARTIAL, stopped at a context boundary
 
