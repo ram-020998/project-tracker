@@ -36,7 +36,8 @@ and execution pages, the Settings changes, the Workbench Verification flow and t
      workspace path + "Open folder", Update testing runtime).
 2. **Settings → Environments** (`web/src/features/settings/components/EnvironmentsSection.tsx`): the dev switch becomes
    a **Type** select (Dev, QA, UAT, Production, Other); the single-Dev and single-QA rules and the host-collision refusal
-   shown as field errors; a type badge in the list (F3).
+   shown as field errors; a type badge in the list (F3). The form sends `type` only and never `is_dev` (51-05 As built
+   3: the backend still honours an explicit `is_dev: false` from older clients).
 3. **Settings → CLI:** an "Appian browser testing" card beside `GwsConnectorCard`/`SailConnectorCard` (Node, npm,
    Chromium, vendored `playwright-appian` version, problems with fixes).
 4. **Workbench:** lanes in the API's new order (D6); dragging Deployment → Verification opens a confirm dialog ("The

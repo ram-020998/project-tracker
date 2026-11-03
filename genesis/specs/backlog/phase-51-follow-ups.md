@@ -59,3 +59,16 @@ Probe once with a throwaway profile (L-087: probe the installed CLI).
 **Context (51-02 review n4).** `npm run lint` in the checkout fails only because prettier checks the untracked
 `playwright-appian.code-workspace`. Options: add it to `.prettierignore`, or to `.git/info/exclude` plus a prettier
 ignore, before 51-03 runs the browser-testing gate.
+
+## 7. playwright-appian: `--json` for `close` and `close-all`
+
+**Context (51-05 As built, deviation 1).** apwt 0.3.0 prints `KEY: value` lines (`CLOSED`, `TRACE_FILE`, `TEST_FILE`)
+for `close` and `close-all` and has no `--json` for them, so `ApwtClient` parses text for these two only. Add `--json`
+in `playwright-appian` (additive, its `DECISIONS.md`), then drop the text parser in Genesis.
+
+## 8. Parser: promote a Site's own `url_stub`
+
+**Context (51-05 As built, deviation 5).** The Testing → Setup view suggests site paths from the KB, but the parser's
+object index stores the Site *pages'* `url_stub`, not the Site's own, so suggestions are empty on today's KBs. The
+Genesis side reads `metadata_json.url_stub` and is tested with a seeded value. Fix in `genesis-appian-parser`
+(mind ADR-074 / L-099: a parse-output change may need a `KB_FORMAT_VERSION` bump to reach existing KBs).

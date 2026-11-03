@@ -61,7 +61,13 @@ Over `TestWorkspace` (51-05 §3) and `TestLibraryStore` (51-04 §3):
    record list` shows it stopped) → trace path stored under `captures/<capture-id>/` in the workspace (committed with
    the proposals' apply; the raw trace is kept, D13.7; the trace carries `start_signed_in: true`, so `generate` writes
    `await login(page)`) → starts the `action-capture` run (`analysing`).
-3. One recording at a time per machine; a stale recorder process is cleaned up through the 51-05 pgid registry.
+3. One recording at a time per machine. The recorder daemon (the `PID` that `record start --detach` returns) is
+   recorded with `procs.record_group` in a pid folder outside the workspace (`~/.genesis/testing/recordings/.pids`;
+   markers: the workspace and the browsers folder), forgotten on a clean stop, and reaped at startup and on a stale
+   recording (51-05 As built 7 and lesson candidate 1: a detached child is not in the caller's group).
+   **Carried from 51-05 (review nit 12), checked live once** (a local test server is enough): during a running
+   recording, reap the pid folder and show with `ps` that neither the recorder nor its Chromium (which runs in its own
+   group) is left.
 4. **Known recorder gaps** (51-03 findings 4–5, `playwright-appian` follow-ups): a recorded multi-select whose label the
    recorder cannot resolve becomes `// TODO: no label for multi_dropdown`; `wait --for "grid(…)"` in an agent spec
    becomes a `// TODO` (grids have no `isVisible()`). The `action-capture` agent resolves such TODOs from the snapshot

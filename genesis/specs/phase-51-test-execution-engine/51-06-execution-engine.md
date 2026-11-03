@@ -48,7 +48,10 @@ Inputs: `execution_key`, `app_uuid`, `checkout_dir`, `qa_url`, `site_path`, `rol
 - `prepare_env` — builds the child environment: `SITE_URL`, `GENESIS_RUN_DATA`, `GENESIS_REPORT_DIR`,
   `GENESIS_TEST_USER_<ROLE>`/`GENESIS_TEST_PASSWORD_<ROLE>` from `TestCredentialResolver` — in memory only, never in
   state/checkpoints/events (ADR-010).
-- `run_playwright` — `npx playwright test --project … --grep …` in `checkout_dir`, own process group, timeout =
+- `run_playwright` — `npx playwright test --project … --grep …` in `checkout_dir`, started through
+  `procs.start_long_lived(argv, cwd=checkout_dir, env=…, pid_dir=<run>/.pids, markers=[checkout_dir,
+  settings.testing_browsers_dir])` (51-05 As built 7), so the RunManager's reap on cancel, pause and the startup sweep
+  stops it; timeout =
   `global_timeout_s` + 120 s (Playwright stops first and still writes its reports, per its CI guidance); off the event
   loop (L-026).
 - `parse_results` — the JSON report → `results.json` (normalized: per scenario status passed/failed/flaky/skipped,
@@ -105,6 +108,11 @@ commit → export (temp git repo); the workflow's nodes with a stub `npx playwri
 run + reconcile through the real `RunManager._finalize` (L-093); queue ordering; impact selection; schedule slot
 computation (daily/weekly, catch-up once, off); no credential in checkpoints/events (assert on the stored rows);
 process group killed on timeout.
+
+**Carried from 51-05 (review minor 7), checked live on this machine (no QA needed):** start one real `npx playwright
+test` run from an export whose `node_modules` is a symlink (`TestWorkspace.export` → `linked`), then show that
+`procs.reap(<run>/.pids)` recognises a process in its group by the export path or the browsers folder and that `ps`
+shows nothing of that run afterwards. Fix the marker check if it does not.
 
 ## Context manifest
 

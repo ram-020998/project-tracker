@@ -59,7 +59,7 @@ bounds F10 (`turn_timeout` 900 s on `explore` and `author`; re-measure on a writ
 | `propose` | agent | On `passed`: proposals = new/changed actions and setups, the story's case scripts, scenarios to add to the regression suite (`proposals.json`, the 51-07 §5 shape + `regression` items) |
 | `render_report` | program | `verification-report.html`: scenarios → cases → result, failures with expected vs actual, screenshot links, triage classes, a link to each session's action log, proposals summary |
 | `present` | program | `result.json` `{decision: passed|failed|accepted, execution, proposals}` |
-| `cleanup` | program | Close sessions; kill registered process groups (F8) |
+| `cleanup` | program | `ApwtFactory.cleanup_run(<run>)` (`close-all` + reap of `<run>/.pids`, 51-05 As built 11) |
 
 ## 5. `StoryVerificationFinalizer` (`genesis/genesis/chat/story_verification_finalizer.py`)
 
