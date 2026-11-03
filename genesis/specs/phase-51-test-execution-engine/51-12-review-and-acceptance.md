@@ -16,7 +16,10 @@
 4. **QA only** — the host allow-list is the QA host on every session; tests refuse to run without a QA environment or
    when the QA host equals another environment's (D5, D8); no MCP write tool, no deployment in any new workflow.
 5. **Secrets** — test passwords only in the SecretProvider; never in state, checkpoints, events, files, logs, API
-   responses, the agent's environment (51-03 S4/S5 recipe followed); Kiro started with the clean environment.
+   responses, or the agent's prompt, files and tool results (51-03 S4 recipe followed; the agent's inherited
+   environment is ADR-083's accepted risk). Every folder a run leaves (the Playwright report incl. the zip inside
+   `index.html` and trace zips, `<run>/apwt-out`, capture folders) scanned for each test password in raw, JSON- and
+   XML-escaped form (51-06 B1: Playwright titles fill steps `Fill "<value>"`).
 6. **Agent access to `apwt`** (D3c, ADR-083) — browser agents use `npx --no-install apwt` from the run's workspace
    export (never a global `apwt`) on sessions opened, logged in and closed by program nodes, pinned to the QA host;
    credentials appear only in those program subprocesses' environments, never in the agent's shell, tool results,

@@ -54,9 +54,13 @@ regression suite itself, so it writes no note) and route them through one helper
 ## 4. Schedule settings
 
 `get_schedule(app_uuid)` / `set_schedule(app_uuid, {cadence: off|daily|weekly, days, time})` read and write that app's
-entry in the `regression-run` job's `options_json` (51-06 §8; the scheduler store's `update_settings` is generalized
-for this job or a sibling method is added; `user_modified` respected, L-081). Default off (F13). The Setup view shows
-it; turning it on is the approval for unattended runs (D8.4).
+entry under `options.apps[<app_uuid>]` of the `regression-run` job (built in 51-06: enabled, hourly tick, no default
+options, so every app is off; per-app `{cadence, days, time, since?}`). Writes go through
+`ScheduleStore.update_settings` (it sets `user_modified`, L-081; generalize it for the nested per-app entry or add a
+sibling method, keeping other apps' entries). **Turning a schedule on (or changing its cadence/days/time) writes
+`since` = now**, so the job does not run the most recent past slot at its next tick (51-06 As built 6). The view says
+runs start within an hour of the set time (hourly tick). Default off (F13). The Setup view shows it; turning it on is
+the approval for unattended runs (D8.4).
 
 ## 5. Tests
 

@@ -30,6 +30,8 @@ and execution pages, the Settings changes, the Workbench Verification flow and t
    - **Executions:** table (key, kind, trigger, status incl. Queued, totals, duration, started); → **execution page**
      (`/applications/:appUuid/testing/executions/:key`): summary, scenarios → cases with status, flaky/blocked badges,
      failure detail (error, screenshot), **Open Playwright report** (served route, new tab), Cancel when queued/running.
+     Built in 51-06: the report folder is `<run>/report/{report.json, junit.xml, playwright.log, html/index.html,
+     test-results/…}`, result attachments are paths relative to it, and the report route serves any file under it.
    - **Setup:** QA environment (name + host, or the "no QA environment" warning linking to Settings → Environments);
      site URL; test users table (role key, label, username, password set/unset, set password field, admin-account
      warning); regression schedule (off / daily / weekly, days, time); runtime status (Node, Chromium + Install,
@@ -51,7 +53,9 @@ and execution pages, the Settings changes, the Workbench Verification flow and t
    HTML), defects when sent back, proposals review (as the Library panel).
 6. **Phase 49 pages:** case page — automation status, case script (read-only view + "Edit script" to an editor page),
    last results; scenario page — data setup picker + "changes shared data", automated flag, last results, Run; feature
-   Tests tab — automation badges; **Test Impact** tab — **Run impacted tests** + the "not covered by automation" list.
+   Tests tab — automation badges; **Test Impact** tab — **Run impacted tests** + the "not covered by automation" list,
+   the new **Regression suite** group (51-06: `regression` in the impact result; referenced scenarios marked), and a
+   "nothing automated is affected" message when the run returns `execution: null`.
 7. **Application header:** "Last regression: N failed" badge linking to the execution.
 
 ## 3. Rules

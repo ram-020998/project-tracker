@@ -12,14 +12,32 @@ one role and get reviewed action proposals back.
 
 ## 2. The workspace helper `lib/` (TypeScript, written by Genesis, versioned with the template)
 
-- `defineAction({ key, name, area, role?, inputs, outputs }, fn)` — `fn(ctx, input) → output`; `ctx = { page, appian:
-  createAppianPage(page), as(role) }`; inputs/outputs are typed objects whose shape equals `contract_json`.
-- `defineSetup({ key, name, role, outputs }, fn)` — an ordered list of action calls; returns its outputs.
-- `defineCase('<TC-key>', { role? }, fn)` — the When + Then of one case; reads setup data through `ctx.data`; uses
-  `expect` from `@playwright/test`.
+**Fixed by 51-06** (As built 1; `genesis/genesis/testexec/generator.py` `_support_ts`/`_auth_ts`/`_setup_ts`/
+`_scenario_ts`). The generated specs import only `loginAs` from `lib/`. `CaseContext`, `SetupData`, `setupData`,
+`saveSetupData`, `RolePages` and `authFile` live in the **generated** `suites/_support.ts`, which `lib/` and the
+scripts import from (never edited by hand or by an agent). This section must match that file:
+
+- `CaseContext = { page: Page, data: SetupData, as(role): Promise<Page> }` (from `suites/_support`). `as(role)` returns
+  that role's page, opening a context with the role's saved login when needed.
+- `defineAction({ key, name, area, role?, inputs, outputs }, fn)` → a function `(ctx: CaseContext, input) =>
+  Promise<output>`. Inside, `fn` receives `{ ...ctx, appian: createAppianPage(ctx.page) }`; inputs/outputs are typed
+  objects whose shape equals `contract_json`. Actions are imported by name (`export const createEvaluation =
+  defineAction(…)`), never run directly by the generator.
+- `defineSetup({ key, name, role, outputs }, fn)` → a function `(ctx: CaseContext) => Promise<outputs>`; `setups/*.ts`
+  **`export default`** it. The generator saves its return value as the instance's data. The role the generator uses is
+  `kb_test_setups.role_key`, not the `role` in the file: the library service keeps them equal on every save and
+  refuses a save where they differ.
+- `defineCase('<TC-key>', { role: '<role>' }, fn)` → a function `(ctx: CaseContext) => Promise<void>`; `cases/*.ts`
+  **`export default`** it. `fn` is the When + Then of one case; it reads setup data through `ctx.data` and uses
+  `expect` from `@playwright/test`. The generator reads the role from the file's text: write `role` **first** in the
+  options, as a plain string literal, and put no functions in the options object (the reader stops at the first
+  `async`, `function` or `=>`). A role written any other way, or missing, makes every scenario using the case **not
+  automated**; the save path checks this and shows it as a warning.
 - `loginAs(page, role)` — `login(page, { username, password })` from `playwright-appian` with
-  `GENESIS_TEST_USER_<ROLE>`/`GENESIS_TEST_PASSWORD_<ROLE>`; `setupData(instance)`; `unique(prefix)` for per-run values
-  (D8.6).
+  `GENESIS_TEST_USER_<ROLE>`/`GENESIS_TEST_PASSWORD_<ROLE>` (role upper-cased, `-` → `_`). It does **not** navigate:
+  the generated auth setup opens `SITE_URL` first. Keep its signature and these semantics; `lib/index.ts` today is a
+  51-05 placeholder that this sub-spec replaces.
+- `unique(prefix)` for per-run values (D8.6). `setupData` is **not** in `lib/`.
 - `lib/scan-refs.mjs` — uses the workspace's TypeScript compiler API to list, for each `actions/`, `setups/`, `cases/`
   file, the action/setup keys it imports; output JSON consumed by Python to rebuild `kb_test_refs` (51-04 §2.2).
 - Code stays label-based (`playwright-appian` D-04); raw locators only where its snapshot says no component covers the
@@ -41,19 +59,26 @@ Over `TestWorkspace` (51-05 §3) and `TestLibraryStore` (51-04 §3):
   names the commit), in the same workspace-locked operation as the commit. **Replay** on the item page runs the item's
   replay on QA (as for proposals, §5) and, on a pass at the current hash, approves it back to Ready. Status never gates
   executions or authoring. A metadata-only edit keeps the status.
-- Every write path is serialized per workspace (a lock) and runs off the event loop (L-026).
+- Every write path is serialized per workspace and runs off the event loop (L-026): use `TestWorkspace`'s existing
+  `path_lock(root)`, which 51-06's `write_generated` commits also take, so a library save and an execution's
+  regenerate-and-commit never interleave.
+- **Save checks for the generator's contract (§2, 51-06 As built 1):** a case script whose `defineCase` role is not a
+  readable literal saves but warns "scenarios using this case will not run"; a setup whose `defineSetup` role differs
+  from `kb_test_setups.role_key` is refused.
 
 ## 4. Record workflow (D13)
 
 `RecordingService` (`genesis/genesis/testexec/recording.py`, app process; human-driven, so not a workflow run):
 1. `start(app_uuid, role_key, intent, start_path?)` → `readiness` → the **settled mechanism** (51-03 S8/S9, D-114 in
    `playwright-appian` 0.3.0; the recorder never holds the password):
-   1. `apwt -s rec-<capture-id> open <QA site> --login --browser chromium --allow-host <QA host>` (credentials only in
+   1. `apwt -s rec-<capture-id> open <QA site> --login --browser chromium --allow-host <QA host> --artifacts <a temp
+      folder outside the workspace>` (credentials only in
       this subprocess's environment, 51-05 §4) → `apwt -s rec-<capture-id> state-save --file <ws>/.auth/<capture-id>.json`
       → `apwt -s rec-<capture-id> close`;
    2. `apwt record start --detach --browser chromium --state <ws>/.auth/<capture-id>.json --url <start page>
       --out <ws>/captures/<capture-id>/trace.json` (headed; returns `SESSION`, `TRACE_PATH`, `PID`);
-   3. delete the state file as soon as `record start` returned (the browser context holds the login).
+   3. delete the state file and the login session's temp artifacts folder as soon as `record start` returned (the
+      browser context holds the login; the login's own artifacts never reach the workspace's `output/` scratch folder).
    Creates a `kb_test_captures` row (`recording`). (`record start --cdp` cannot record signed in: the recorder opens a
    fresh, cookie-less context — 51-03 S8. The two halves were proven separately in the spike; 51-12 runs this exact
    sequence live.)
@@ -107,7 +132,9 @@ with the raw trace. Items whose replay passed at that code become **Ready**, oth
 Start from the spike's draft, `genesis/scripts/spikes/51-03/skills/genesis-test-authoring/SKILL.md` (51-03 S11 proved
 an agent reads and follows it).
 
-The workspace conventions an agent must follow (both here and in 51-09): folder layout, the `lib/` API, contract rules,
+The workspace conventions an agent must follow (both here and in 51-09): folder layout, the `lib/` API and the
+generated-spec contract of §2 (`export default` of `defineCase`/`defineSetup`, the role literal first in the options,
+`CaseContext` from `suites/_support`, never edit `suites/`), contract rules,
 label-only code, unique values, how to read the catalog snapshot, how to write proposals. The `playwright-appian` CLI skill is provisioned from the workspace's installed package
 (`node_modules/playwright-appian/skills/playwright-appian`, exact version) by extending the `skill_source` resolver for
 that id (one home for that skill, ADR-069; D3c). `genesis-test-authoring` adds the Genesis rules on top (use only the
@@ -116,7 +143,9 @@ given sessions; no `open`/`login`/`attach`/`state-save`; no other host; never pr
 ## 8. Tests
 
 Save/typecheck/commit, refused breaking contract, retire refused with names, delete only if never referenced, revert,
-outside edit → adopt, a code save/revert/adopt of a Ready item demotes it to Draft through the audited `changed` edge
+outside edit → adopt, the §3 generator-contract checks (unreadable case role warns, setup role mismatch refused), a
+`lib/` + template case + template setup that the 51-06 generator turns into a scenario that passes under the real
+Playwright against a local page, a code save/revert/adopt of a Ready item demotes it to Draft through the audited `changed` edge
 while a metadata-only edit does not, Replay pass re-approves at the current hash and a fail leaves it Draft (D20), refs rebuild from `scan-refs` output; recording start/stop with `apwt` stubbed (real `--json`
 fixtures); `action-capture` node tests with a recorded trace fixture from the sandbox repo
 (`/Users/ramaswamy.u/Documents/test/playwright-appian-test/output/traces/create-evaluation.json`), validator rejects bad
