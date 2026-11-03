@@ -9,7 +9,9 @@
 
 1. **No agent at execution** — `test-execution` has program nodes only; regression and impact runs spend no credits
    (D2, ADR-001).
-2. **Committed code only** — every execution records a commit and runs an export of it; un-adopted edits never run
+2. **Committed code only** — every execution records a commit and runs an export of it; un-adopted edits never run;
+   a verification execution adds only its recorded overlay (D24), and nothing the agent authored reaches the workspace
+   or DB before the proposals are accepted
    (D16.7).
 3. **References, never copies** — scenario specs are generated; no case/action code duplicated across files; the
    generator is deterministic (golden tests) (D2).
