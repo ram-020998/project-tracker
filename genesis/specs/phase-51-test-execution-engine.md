@@ -3,7 +3,7 @@
 > **Status:** SPEC-DRAFTED 2026-11-02 · **Author:** genesis-spec agent.
 > Sub-specs: `phase-51-test-execution-engine/51-01..51-13`. Findings (code facts, research, every decision):
 > `51-01-findings.md`.
-> Repos: **genesis** (backend + web, migration **m0026**), **genesis-workflows** (three new workflows + one skill),
+> Repos: **genesis** (backend + web, migrations **m0026** + **m0027**), **genesis-workflows** (three new workflows + one skill),
 > **playwright-appian** (joins the agent system, D19; additive changes as needed), **project-tracker** (agent system).
 > Proposed ADRs: **ADR-081** (test automation architecture), **ADR-082** (the QA environment and test data writes),
 > **ADR-083** (Phase 51 browser agents drive `apwt` through Kiro's shell on program-owned QA sessions; isolation
@@ -133,7 +133,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 | 51-05 | genesis, playwright-appian (if needed) | Node/Chromium detection + install, vendored tarball, `TestWorkspace`, `ApwtClient`, program-owned sessions for agents (D3c), environment types + QA, test users, test settings |
 | 51-06 | genesis, genesis-workflows | Spec generator, setup projects, execution checkout, `test-execution` workflow + finalizer, queue, Run impacted tests, `regression-run` job, subprocess hygiene |
 | 51-07 | genesis, genesis-workflows | Library service (save/typecheck/commit/retire/delete/revert/adopt, refs), `lib/` helper, recording service, `action-capture` workflow + finalizer, proposals, `genesis-test-authoring` skill |
-| 51-08 | genesis | Regression suite (own scenarios, references, grouping), schedule settings + job handler, latest/trend |
+| 51-08 | genesis | Regression suite (own scenarios, references, grouping), retired references + suite change notes (D21, m0027, DB v27), schedule settings + job handler, latest/trend |
 | 51-09 | genesis, genesis-workflows | Lane reorder + transitions, `start_verification`, `story-verification` workflow, `StoryVerificationFinalizer`, proposals, report, defects on the story |
 | 51-10 | genesis | API contract table + contract fixtures + cross-cutting tests |
 | 51-11 | genesis (web) | Testing tab, item pages + editor, execution page + report, Settings env dropdown + runtime card, Workbench dialog + Verification view, case/scenario/Test Impact additions, `web/static` |
@@ -144,7 +144,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 
 If `playwright-appian` changed: release it first (tag `vX.Y.Z` → its CI publishes) and vendor that exact tarball into
 genesis. **It did change: 0.3.0 (51-03, D-114) is committed but unreleased**, so the release starts with
-`playwright-appian` v0.3.0 (plus anything later sub-specs add). Then **genesis v0.81.0** (minor; m0026, DB 25 → 26). Then **genesis-workflows v0.25.0** (`test-execution`,
+`playwright-appian` v0.3.0 (plus anything later sub-specs add). Then **genesis v0.81.0** (minor; m0026 + m0027, DB 25 → 27). Then **genesis-workflows v0.25.0** (`test-execution`,
 `action-capture`, `story-verification`, the `genesis-test-authoring` skill) pinned on `genesis.git@v0.81.0` (L-057).
 Without the workflows installed, every start returns the friendly "not installed" 409 (L-033). No Hub change. Detail:
 51-13.

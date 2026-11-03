@@ -12,7 +12,7 @@
    CI variables (L-100).
 2. **Vendor** that exact tarball into `genesis/genesis/testexec/vendor/`, update `VENDORED_APWT_VERSION` + sha256, and
    the workspace template; re-run the genesis tests that use it.
-3. **genesis v0.81.0** (minor; m0026, DB 25 → 26): version in `pyproject.toml`, `create_app`, `web/src/version.ts`;
+3. **genesis v0.81.0** (minor; m0026 + m0027, DB 25 → 27): version in `pyproject.toml`, `create_app`, `web/src/version.ts`;
    `npm run build` + commit `web/static/` as separate steps (L-089); verify the release commit contains every changed
    file, including the vendored tarball as package data (L-056, L-048); tag; push on go-ahead; CI green (genesis,
    frontend, clean-install).
@@ -24,7 +24,7 @@
 
 Never restart while a run is active. Fleet update as usual (`gsm provision --all --no-mcp --no-env --force`, `gsm
 restart --all`); `genesis install test-execution action-capture story-verification` on each instance; verify
-`/openapi.json` `info.version` = 0.81.0 and DB v26. The `userb` instance keeps reading `environments.json` through the
+`/openapi.json` `info.version` = 0.81.0 and DB v27. The `userb` instance keeps reading `environments.json` through the
 `is_dev` mirror (51-05 §5). Node ≥ 20 and Chromium are per machine: note them in the user's checklist.
 
 ## 3. Docs write-back (genesis-docs)
@@ -36,7 +36,7 @@ restart --all`); `genesis install test-execution action-capture story-verificati
   `api/testing.py`, `integrations/apwt/**`, `chat/story_verification_finalizer.py`,
   `web/src/features/testing/**`, the three workflows and the skill `genesis-test-authoring`
   to their areas so `check` routes them.
-- `context/state/current.md` (versions incl. `playwright-appian`, DB v26, test counts, "what works": Testing tab,
+- `context/state/current.md` (versions incl. `playwright-appian`, DB v27, test counts, "what works": Testing tab,
   environment types, Verification lane, lane order), code map, `progress/phase-51-test-execution-engine.md`,
   `changelog.md`, README row 51 → SHIPPED, tracker §6, `bible/08` §9 pointer to the new
   `specs/backlog/phase-51-follow-ups.md` (Deferred list from the umbrella §9 + anything found in the build), lessons via

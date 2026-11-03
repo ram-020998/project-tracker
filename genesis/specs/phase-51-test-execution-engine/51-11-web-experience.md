@@ -23,7 +23,10 @@ and execution pages, the Settings changes, the Workbench Verification flow and t
      reasons); Run dependents; "changed outside Genesis" banner with diff + Adopt.
    - **Regression:** members grouped by data setup (shared and private instances), referenced feature scenarios with
      their feature, own regression scenarios, non-automated flagged; add reference (scenario picker), new regression
-     scenario, reorder; latest result + pass-rate trend (lazy chart, L-015); **Run now**.
+     scenario, reorder; latest result + pass-rate trend (lazy chart, L-015); **Run now**. Retired references show
+     **Retired, not run** with **Remove reference**; undismissed suite change notes (what a feature or case delete
+     removed) show above the list with Dismiss (D21). The Phase 49 scenario retire confirmation adds "used by the
+     regression suite" when `referenced_by_regression` is true.
    - **Executions:** table (key, kind, trigger, status incl. Queued, totals, duration, started); → **execution page**
      (`/applications/:appUuid/testing/executions/:key`): summary, scenarios → cases with status, flaky/blocked badges,
      failure detail (error, screenshot), **Open Playwright report** (served route, new tab), Cancel when queued/running.
