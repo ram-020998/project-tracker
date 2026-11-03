@@ -72,3 +72,50 @@ in `playwright-appian` (additive, its `DECISIONS.md`), then drop the text parser
 object index stores the Site *pages'* `url_stub`, not the Site's own, so suggestions are empty on today's KBs. The
 Genesis side reads `metadata_json.url_stub` and is tested with a seeded value. Fix in `genesis-appian-parser`
 (mind ADR-074 / L-099: a parse-output change may need a `KB_FORMAT_VERSION` bump to reach existing KBs).
+
+## 9. playwright-appian recorder: a multi-select with no resolvable label
+
+**Context (51-03 finding 5, 51-07 §4 item 4).** A person's recording of the Vendors "SAM.gov Status" filter generates
+`// TODO: no label for multi_dropdown`: the recorder cannot resolve that multi-select's label (the agent path's
+`select` can). Not blocking in 51-07: the `action-capture` agent resolves such TODOs from the trace and snapshot
+context where it can (genesis-test-authoring §5) and the replay shows the rest. Fix in the recorder's label
+resolution (additive, a `DECISIONS.md` row, its own tests); re-check in 51-12's live acceptance and move it into the
+51-12 scope if a QA flow it needs depends on it.
+
+## 10. playwright-appian: `wait --for "grid(…)"` in an agent spec
+
+**Context (51-03 finding 4, 51-07 §4 item 4).** `spec` turns `wait --for "grid('Vendors')"` into a `// TODO` because
+a grid has no `isVisible()`; the agent's spec still replayed. Give `Grid` an `isVisible()` (or emit a row/header
+wait) so the step survives. Not blocking 51-07 (agent specs are 51-09's).
+
+## 11. playwright-appian: `--json` for `record start --detach` and `generate`
+
+**Context (51-07, `ApwtClient.record_start` / `generate`).** Like item 7: apwt 0.3.0 prints `KEY: value` lines for
+`record start --detach` (`SESSION`, `SESSION_DIR`, `TRACE_PATH`, `PID`) and `generate` (`TEST_FILE`; `STEPS`,
+`TODOS` and `WARNINGS` share one line), so Genesis parses text there. Add `--json` and drop the parsers.
+
+## 12. A library replay outside a run is not reaped by the RunManager
+
+**Context (51-07 §3 Replay).** `TestLibraryService.replay` runs Playwright from the app process (an export under
+`<artifacts>/library-replays/…`, its group in that folder's `.pids`), bounded by a hard timeout and reaped in a
+`finally`; a server crash mid-replay is covered only by the startup `reap_stale_replays`. It also has no
+one-replay-per-item guard, no cancel, and nothing prunes `library-replays/` (51-07 review m5). Before 51-10 exposes
+it: one replay per item at a time (409), a cancel, and F11-style retention of `library-replays/`; consider making it
+a run (or a `test-execution` with a replay spec) so cancel and the orphan sweep cover it like every other Playwright
+child.
+
+## 13. The D20 audit row does not name the commit
+
+**Context (51-01 D20, 51-07 review m3).** D20 says the `ready --changed--> draft` transition's "reason names the new
+commit". `lifecycle_transitions` (m0013) has no reason column and `LifecycleEvent` no reason field, so the audit row
+carries `changed` + actor + time; the commit is found with `git log` on the item's path (its message names the item).
+Fix: an additive `detail` column on `lifecycle_transitions` (a migration) plus an optional `detail` on
+`LifecycleEvent` and `LifecycleService.transition(detail=)`; every entity kind gains it. Then pass the commit from
+`TestLibraryService._apply_save`.
+
+## 14. `ever_referenced` survives a refused commit
+
+**Context (51-07 re-review R-n4).** `replace_refs` marks every target `ever_referenced` in its transaction. When the
+commit that wrote those refs is then refused (a create whose later step fails, a refused proposal apply), the refs are
+removed but the flag stays, so a never-used item can only be retired, not deleted. Fix: mark targets only for
+committed refs (set the flag after the commit), or recompute the flag from the refs when compensating.
