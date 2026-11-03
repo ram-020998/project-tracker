@@ -1,0 +1,19 @@
+{"method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientInfo": {"name": "kiro", "version": "0.0.0"}, "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}}}
+{"method": "initialize", "params": {"protocolVersion": "2025-11-25", "capabilities": {"elicitation": {"form": {}, "url": {}}}, "clientInfo": {"name": "kiro", "version": "0.0.0"}}}
+{"method": "notifications/initialized", "params": null}
+{"method": "tools/list", "params": {}}
+{"method": "tools/call", "params": {"name": "echo", "arguments": {"text": "hello"}}}
+{"method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientInfo": {"name": "kiro", "version": "0.0.0"}, "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}}}
+{"method": "initialize", "params": {"protocolVersion": "2025-11-25", "capabilities": {"elicitation": {"form": {}, "url": {}}}, "clientInfo": {"name": "kiro", "version": "0.0.0"}}}
+{"method": "notifications/initialized", "params": null}
+{"method": "tools/list", "params": {}}
+{"method": "tools/call", "params": {"name": "secret", "arguments": {}}}
+{"method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientInfo": {"name": "kiro", "version": "0.0.0"}, "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}}}
+{"method": "initialize", "params": {"protocolVersion": "2025-11-25", "capabilities": {"elicitation": {"form": {}, "url": {}}}, "clientInfo": {"name": "kiro", "version": "0.0.0"}}}
+{"method": "notifications/initialized", "params": null}
+{"method": "tools/list", "params": {}}
+{"method": "tools/call", "params": {"name": "echo", "arguments": {"text": "home"}}}
+{"method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientInfo": {"name": "kiro", "version": "0.0.0"}, "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}}}
+{"method": "initialize", "params": {"protocolVersion": "2025-11-25", "capabilities": {"elicitation": {"form": {}, "url": {}}}, "clientInfo": {"name": "kiro", "version": "0.0.0"}}}
+{"method": "notifications/initialized", "params": null}
+{"method": "tools/list", "params": {}}
