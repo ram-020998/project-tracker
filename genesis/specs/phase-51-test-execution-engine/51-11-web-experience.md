@@ -1,7 +1,7 @@
 # 51-11 — Web experience
 
 > **Status:** SPEC-DRAFTED 2026-11-02. Repo: **genesis** (`web/`). Parent: `specs/phase-51-test-execution-engine.md`.
-> Decisions: 51-01 D5, D6, D7, D12, D13, D14, D15, D16; F2, F3.
+> Decisions: 51-01 D5, D6, D7, D12, D13, D14, D15, D16, D21, D23; F2, F3.
 
 ## 1. Goal
 
@@ -33,7 +33,11 @@ and execution pages, the Settings changes, the Workbench Verification flow and t
    - **Setup:** QA environment (name + host, or the "no QA environment" warning linking to Settings → Environments);
      site URL; test users table (role key, label, username, password set/unset, set password field, admin-account
      warning); regression schedule (off / daily / weekly, days, time); runtime status (Node, Chromium + Install,
-     workspace path + "Open folder", Update testing runtime).
+     workspace path + "Open folder", Update testing runtime). Install Chromium, Create workspace and Update testing
+     runtime start a setup job (D23): the button shows a spinner and polls `GET /testing/jobs/{id}` (TanStack Query
+     `refetchInterval`, about 2 s, stopped on a terminal status), then refreshes the setup read; a failure shows the
+     job's error; a 404 (server restarted) just refreshes the setup read. The Settings → CLI card's Install uses the
+     same job.
 2. **Settings → Environments** (`web/src/features/settings/components/EnvironmentsSection.tsx`): the dev switch becomes
    a **Type** select (Dev, QA, UAT, Production, Other); the single-Dev and single-QA rules and the host-collision refusal
    shown as field errors; a type badge in the list (F3). The form sends `type` only and never `is_dev` (51-05 As built
