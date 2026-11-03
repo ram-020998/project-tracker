@@ -81,6 +81,12 @@ affected case ids → every automated scenario (feature or regression) containin
 trigger = the impact source). The response also lists affected cases with no automated scenario ("not covered by
 automation").
 
+**From 51-04 (deviation 7):** `TestImpactService._scenario_steps` currently returns **feature** scenarios only, because
+`_assemble` keys suites by feature and a regression scenario (no feature) raised `KeyError` on `suites[None]`. This
+sub-spec removes that guard and adds the app's regression suite to the impact result as its own group (scenarios →
+cases, direct and indirect), with a test that an impact read covering a regression scenario returns it and does not
+raise.
+
 ## 8. `regression-run` schedule job (D11, F13)
 
 A new `DEFAULT_JOBS` entry (`genesis/genesis/runtime/sync_jobs.py:37`) with handler registration like

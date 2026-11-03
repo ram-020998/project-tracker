@@ -29,6 +29,9 @@
 10. **Finalizers** — bound run, idempotent, reconcile, status stored before announce (L-058, L-061, L-093).
 11. **Subprocesses** — timeouts and process groups everywhere (F8); nothing left running after cancel/pause.
 12. **DB** — m0026 upgrade from a populated v25 DB; the `kb_test_suites` rebuild preserves rows and cascades.
+    Re-review the 51-04 m1′ fix, which landed after that sub-spec's SHIP: the runner's `foreign_key_check` comparison
+    keys on `(table, rowid, parent)` (not `fkid`), so a pre-existing orphan in a table m0026 gives a new FK column is
+    tolerated, and a violation the migration adds is still refused.
 13. **Web** — primitives/tokens, no `<Button asChild>`, central `/api`, fixtures = contracts, jest-axe, lazy heavy libs.
 14. **`playwright-appian`** — any change is additive, recorded in its `DECISIONS.md`, invariants D-02/D-04/D-05 kept,
     its gates green.

@@ -129,7 +129,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 | 51-01 | project-tracker | Findings, decisions D1–D19, defaults F1–F14 |
 | 51-02 | project-tracker (agent-system) | Repo list, new `browser-testing` area + gates, agent allow rules, release flow, invariants |
 | 51-03 | genesis (spike code + notes), playwright-appian (D-114, 0.3.0) | **DONE (SHIP 2026-11-02):** sandbox evidence S1/S5/S6 (ADR-083 / Phase 52 input); the D3c loop L1, S4, S11 PASS; S8/S9 via `record start --browser/--state` (0.3.0, unreleased); S10 timings; P10 = global Kiro MCP servers load into workflow turns |
-| 51-04 | genesis | m0026 (catalog, executions, results, test users, settings, suite rebuild), stores, `ACT-`/`DS-`/`TE-` ids, lifecycle, ADR texts |
+| 51-04 | genesis | **DONE (SHIP 2026-11-03, genesis `316ac5a`):** m0026 (catalog, executions, results, test users, settings, suite rebuild; DB v26), runner flag `foreign_keys_off`, `kb/testexec_store.py`, `ACT-`/`DS-`/`TE-` ids, library lifecycle, `adr-drafts.md` |
 | 51-05 | genesis, playwright-appian (if needed) | Node/Chromium detection + install, vendored tarball, `TestWorkspace`, `ApwtClient`, program-owned sessions for agents (D3c), environment types + QA, test users, test settings |
 | 51-06 | genesis, genesis-workflows | Spec generator, setup projects, execution checkout, `test-execution` workflow + finalizer, queue, Run impacted tests, `regression-run` job, subprocess hygiene |
 | 51-07 | genesis, genesis-workflows | Library service (save/typecheck/commit/retire/delete/revert/adopt, refs), `lib/` helper, recording service, `action-capture` workflow + finalizer, proposals, `genesis-test-authoring` skill |
@@ -169,13 +169,13 @@ machine (F7); 1 worker, 1 retry (F6); schedule off by default (F13); files kept 
 | Risk | Mitigation |
 |---|---|
 | A browser agent goes beyond its sessions (opens another host, reads files, calls the local Genesis API) | **Accepted until Phase 52** (D3c, ADR-083): program-owned sessions pinned to QA, credentials never in the agent's environment, skill + prompt conventions; every shell command is in `run_events`; Phase 52 boxes every agent turn |
-| An agent sees a secret | Program-owned sessions; the MCP server and Kiro start with a clean environment; corpus in 51-03 and 51-12 (L-088) |
+| An agent sees a secret | Program-owned sessions: the test user's password goes only into the program's login subprocess environment, never the agent's prompt, files, tool results or logs (51-03 S4). The agent's shell still inherits the worker's environment: **accepted until Phase 52** (D3c, ADR-083). Corpus in 51-03 and 51-12 (L-088) |
 | Shared data setups couple scenarios (one scenario breaks the next) | Read-only first ordering, "changes shared data" private instances, Blocked vs Failed (D10) |
 | Library edits break many tests at once | Contracts + breaking-change refusal, where-used re-run, git revert, proposals for agent changes (D12, D16) |
 | Flaky Appian UI timing | `playwright-appian`'s Appian waits; 1 retry + flaky history (D14) |
 | Long browser runs block or orphan processes | Timeouts + process groups (F8); queue (F7); `globalTimeout` (F6) |
 | Lane reorder surprises a consumer | Grep every consumer of `STORY_LANES`/lane order (L-094); 51-09 §2 list |
-| SQLite table rebuild of `kb_test_suites` (D9) | SQLite's documented 12-step procedure with `foreign_keys` off and `foreign_key_check`; upgrade test on a v25 DB with data (51-04 §2) |
+| SQLite table rebuild of `kb_test_suites` (D9) | **Done in 51-04:** SQLite's documented procedure through the new runner flag `Migration.foreign_keys_off` (keys off before an explicit `BEGIN`; commit refused on a violation the migration adds); upgrade tests on a populated v25 DB and on copies of both live DBs |
 | QA data accumulates | Unique per-run values; cleanup is a later library feature (D8) |
 | Version skew (genesis vs workflows vs `playwright-appian`) | Vendored exact tarball; release order (§8); L-033 409s |
 
