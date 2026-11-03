@@ -189,7 +189,8 @@ machine (F7); 1 worker, 1 retry (F6); schedule off by default (F13); files kept 
 - **ADR-082 — The QA environment and test data.** Environments carry a type (Dev, QA, …); all test execution and agent
   browser sessions run on the single QA environment, may create/change/delete application data there through the UI as
   the application's test users only, never design objects; the Verification confirm and the schedule toggle are the
-  approvals. Amends ADR-068 (Implementation stays the only lane that mutates design objects).
+  approvals. Amends ADR-068 (Implementation stays the only lane that mutates design objects) and ADR-021 (those
+  approvals replace `pre_mutation` gates for these writes; D22).
 - **ADR-083 — Phase 51 browser agents and the isolation boundary.** Browser agents drive `apwt` through Kiro's shell
   with the workspace's own `playwright-appian` (`npx --no-install apwt`), on sessions opened, logged in and pinned to
   the QA host by program nodes; credentials never in the agent's environment. Recorded as an **accepted risk** until

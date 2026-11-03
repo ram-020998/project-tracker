@@ -22,7 +22,9 @@
    credentials appear only in those program subprocesses' environments, never in the agent's shell, tool results,
    files or logs (51-03 S4 recipe followed); no new node runs with `--trust-all-tools` beyond today's behaviour; the
    accepted risk is written into ADR-083 and Phase 52 is referenced.
-7. **Reliability** — the ADR-011 trio on every agent node; healing bounds (F10); `validate_library` green.
+7. **Reliability** — the ADR-011 trio on every agent node; healing bounds (F10); `validate_library` green. The
+   QA-writing workflows (`test-execution`, `action-capture`, `story-verification`) carry no `pre_mutation` gate
+   (ADR-082 amends ADR-021, D22), and the HITL lint passes them as written.
 8. **Lifecycle** — library items and scenarios change status only through `LifecycleService` (ADR-050); retire/delete
    preconditions; contract rule (D16.5).
 9. **Lane order** — every consumer listed in 51-09 §2 updated or proven order-free (L-094); audited transitions.

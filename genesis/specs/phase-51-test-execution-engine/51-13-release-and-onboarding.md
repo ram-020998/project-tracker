@@ -30,7 +30,7 @@ restart --all`); `genesis install test-execution action-capture story-verificati
 ## 3. Docs write-back (genesis-docs)
 
 - **ADRs:** add ADR-081..084 from `adr-drafts.md` (51-04 §6) via `genesis-ctx add adr` with `--amends` (ADR-078 /
-  ADR-068 / ADR-029 / ADR-061) and areas (`browser-testing` + the relevant existing areas); an ADR-047 note for the
+  ADR-068 + ADR-021 / ADR-029 / ADR-061; D22) and areas (`browser-testing` + the relevant existing areas); an ADR-047 note for the
   per-app cadence inside `regression-run`'s options (51-06 §8).
 - **Areas:** extend `browser-testing` (51-02) with every new path; map `genesis/genesis/testexec/**`,
   `api/testing.py`, `integrations/apwt/**`, `chat/story_verification_finalizer.py`,

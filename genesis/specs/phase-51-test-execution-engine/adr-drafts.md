@@ -6,9 +6,8 @@
 > Sources: umbrella `../phase-51-test-execution-engine.md` §12, `51-01-findings.md` §7–§8 (D1–D19, D3a–D3d, F1–F14),
 > `51-03-spike-sandboxed-shell.md` (both As built sections), `51-04-adrs-and-data-model.md` As built.
 >
-> **Open point for genesis-docs:** ADR-082 makes the Verification confirm the blanket approval for QA data writes, the
-> way ADR-068 replaced ADR-021's per-object `pre_mutation` gates. ADR-068 already amends ADR-021; decide whether ADR-082
-> should also carry `--amends ADR-021` (this draft names the relation in its Consequences either way).
+> **Settled (D22, user 2026-11-03):** ADR-082 amends **both** ADR-068 and ADR-021 (`--amends ADR-068,ADR-021`; if
+> `genesis-ctx add adr` takes one id per flag, repeat the flag). The ADR-021 chain then shows the QA-data exception.
 
 ---
 
@@ -89,7 +88,7 @@
 | `--title` | `The QA environment and test data writes (Phase 51)` |
 | `--areas` | `config-secrets,browser-testing,appian-integration,security` |
 | `--rule` | `All test execution and agent browser sessions run only on the single QA environment, as the app's test users, changing application data through the UI only — never design objects, deployments or MCP writes.` |
-| `--amends` | `ADR-068` (see the open point at the top about ADR-021) |
+| `--amends` | `ADR-068,ADR-021` (D22) |
 | `--status` / `--phase` | `proposed` / `51` |
 
 - **Status:** **Proposed** — 2026-11-03 (Phase 51; `51-01-findings.md` D5, D7, D8, F2, F3, F12; built in 51-05).
@@ -120,10 +119,13 @@
   account as the test user (a privileged identity driving the UI); a confirm on destructive-looking agent actions
   (QA exists to be written to — the host allow-list and the test-user rule are the boundary; the user dropped it);
   Genesis deploying dev → QA now (needs ADR-068/073 amendments, a rollback design and its own gate — deferred).
-- **Consequences.** Amends ADR-068: Implementation stays the only lane that mutates **design objects**; QA
-  **application data** written through the UI by the test users is a second, narrower sanctioned write, on a different
-  environment. Like ADR-068 for the Implementation lane, the Verification confirm (and the schedule toggle) stands in
-  for ADR-021's `pre_mutation` gate for these writes. ADR-036/048's single Dev environment is unchanged; the
+- **Consequences.** Amends ADR-068 and ADR-021 (D22). ADR-068: Implementation stays the only lane that mutates
+  **design objects**; QA **application data** written through the UI by the test users is a second, narrower
+  sanctioned write, on a different environment. ADR-021: like ADR-068 for the Implementation lane, the Verification
+  confirm (and, for scheduled regression runs, the schedule toggle) replaces the `pre_mutation` gate for these writes;
+  `story-verification`, `test-execution` and the `regression-run` job carry no `pre_mutation` gate, and ADR-021's
+  "required before any write" no longer covers QA application data written through the UI as test users. ADR-036/048's
+  single Dev environment is unchanged; the
   environment model gains a type. A Settings → Applications "Testing → Setup" view holds the QA site path and the test
   users (D15). Automated dev → QA deployment and QA data cleanup are later phases.
 
