@@ -1,6 +1,6 @@
 # 51-05 — Runtime, workspaces, environment types and test users
 
-> **Status:** SPEC-DRAFTED 2026-11-02. Repos: **genesis** (backend), **playwright-appian** (only for gaps 51-03 lists).
+> **Status:** DONE 2026-11-03 — genesis `c18d1a7` (local), review SHIP; see **As built**. Spec drafted 2026-11-02. Repos: **genesis** (backend), **playwright-appian** (only for gaps 51-03 lists).
 > Parent: `specs/phase-51-test-execution-engine.md`. Decisions: 51-01 D1, D3, D4, D5, D8; F3, F4, F5, F8, F12.
 
 ## 1. Goal
@@ -139,3 +139,234 @@ docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md", "t
 code     = ["genesis/genesis/config/environments.py", "genesis/genesis/config/secrets.py", "genesis/genesis/api/config_routes.py", "genesis/genesis/runtime/preflight.py", "genesis/genesis/integrations/sail/**", "genesis/genesis/integrations/apwt/**", "genesis/genesis/testexec/**", "genesis/packages/genesis-core/genesis_core/nodes/agent.py"]
 upstream = ["51-03", "51-04"]
 ```
+
+
+## As built (2026-11-03, genesis-dev)
+
+**Task restated.** Build everything a test needs before the first script exists, in genesis only:
+- the Node/Chromium detection and the explicit Chromium install into `~/.genesis/testing/browsers`;
+- the vendored `playwright-appian` 0.3.0 tarball as package data, sha256-checked before use;
+- one git `TestWorkspace` per application;
+- `ApwtClient`, with bounded subprocesses and program-owned `open --login` / `close` sessions pinned to the QA host,
+  credentials only in that one subprocess's environment;
+- the environment `type` enum with a single QA environment;
+- the application's test settings and test users, with passwords in the SecretProvider only.
+
+No web change, no migration, no workflow change.
+
+**Applicable rules.** ADR-012 (the worker builds `ctx.extras['apwt']`; the app never imports workflow code), ADR-010
+(no credential in state, events, files or logs), ADR-020 (nothing global touched), ADR-022 (run files under the run
+folder), ADR-028 (routes under `/api`), ADR-036/048 (exactly one dev env, single-select; core creds still resolved from
+the dev env only), ADR-038/040 (vendored, versioned, sha-checked; no Node download, no auto-update), ADR-046/080
+(ships inside the package; no new internal dependency). Lessons: L-019 (secret writes through the provider), L-026
+(sync handlers in the threadpool), L-029/L-053/L-070 (the Dev-account check goes through `resolve_var`), L-048
+(package data, proven from a built wheel), L-056 (commit check), L-083 (real fixtures), L-092 (no collectable
+`test*` names), L-093 (reap after the terminal status is stored), L-097 (the sweep reaps under the run-owner lock),
+L-098 (no internal dependency entry).
+
+### Commits
+
+- **genesis** (base `316ac5a`, local, not pushed or tagged): `c18d1a7` feat(testexec,51-05) is the whole change,
+  including the review fixes. After the commit, a separate `git status` was empty.
+- **playwright-appian:** no change. The tarball was packed from the existing local commit `5d7ae2d` (0.3.0,
+  unreleased) via `git archive` into `/tmp`, then `npm ci` and `npm pack`. The repo's own working tree was not
+  touched; its pre-existing `.gitignore` edit is not mine.
+- **project-tracker:** this As built plus `reviews/51-05-review.md`, committed in one commit.
+
+### Changed (genesis)
+
+- `genesis/config/environments.py`:
+  - `ENV_TYPES` (`dev qa uat production other`) and `ENV_TYPE_LABELS`.
+  - `normalize_record` / `_normalize_all` for compatible reads. `is_dev: true` reads as `dev`. A free-text
+    `prod`/`production` reads as `production`. Any other text reads as `other`, with `(type: <text>)` added to `notes`
+    once. `type: dev` without the flag reads as `other`. An edited file holding two dev or two QA environments reads as
+    one of each.
+  - `upsert`: `type` is the home and `is_dev` is written as a mirror. `is_dev` is now `None` when not sent:
+    - `True` means dev.
+    - An explicit `False` wins over a typed `dev`, so the current web form's Dev switch still untags.
+    - With no type sent, the existing type is kept.
+  - Dev is still single-select: the previous dev env becomes `other`.
+  - Refused: a second QA; Dev and QA on one environment; a QA host shared with any other environment, checked both
+    ways.
+  - `set_dev_environment` writes `type` and refuses the QA environment.
+  - New: `qa_environment(_label)`, `qa_host_conflicts`, `host_of`.
+- `genesis/api/_shared.py`: `EnvBody.is_dev: Optional[bool] = None`.
+- `genesis/runtime/settings.py`: `testing_dir` (override `GENESIS_TESTING_DIR`), `testing_browsers_dir`,
+  `testing_apps_dir`.
+- `genesis/testexec/` (new):
+  - `vendor.py`: `VENDORED_APWT_VERSION = "0.3.0"` and `VENDORED_APWT_SHA256 =
+    5712a7a55c9fd83776b9eb225c471b7e3dc2da9de4baac0f0ae2ceb80750f0ed`. Source commit `5d7ae2d`, `MIN_APWT_VERSION`
+    (0, 3, 0). `vendored_tarball()` refuses a missing or altered tarball.
+  - `vendor/playwright-appian-0.3.0.tgz` (744 kB).
+  - `procs.py`:
+    - `minimal_env`: the S5 allow-list plus `PATH`, proxies and `NODE_EXTRA_CA_CERTS`. `npm_config_*` is passed for
+      npm calls only.
+    - `run_bounded`: own session/process group; the pgid is recorded in `<run>/.pids` while it runs; the group is
+      killed on timeout.
+    - `start_long_lived`, `record_group` / `forget` (named records for detached daemons), `kill_group` (TERM, 3 s
+      grace, KILL).
+    - `reap`: kills only groups in which some process still names a recorded marker, so a recycled pgid is never
+      signalled.
+  - `runtime.py`:
+    - `detect()`: node ≥ 20, npm, git, and Chromium build 1217 (both `chromium-1217` and
+      `chromium_headless_shell-1217`, from `@playwright/test` 1.59.1's `browsers.json`). Also the vendored tarball,
+      with `problems` plus aligned `problem_codes`.
+    - `install_chromium()`: explicit only and serialized by `path_lock`. It runs `npx --no-install playwright install
+      chromium` from a scratch project at `testing/runtime`, pinned to `@playwright/test` 1.59.1, with
+      `PLAYWRIGHT_BROWSERS_PATH` set.
+  - `templates/`: `package.json` (exact versions: `@playwright/test` 1.59.1, `typescript` 5.9.3, `playwright-appian`
+    `file:vendor/<tarball>`), `tsconfig.json`, `gitignore.txt`, `README.md`, and `lib/index.ts`. The last is a
+    placeholder so `tsc` has an input until 51-07 writes `lib/`.
+  - `workspace.py` — `TestWorkspace`:
+    - `create()` checks the tarball first, builds the repo in `<root>.creating`, then moves it into place.
+    - `install()` runs `npm install` the first time (the lockfile is committed) and `npm ci` after that.
+    - Also `ensure()`, and `update_runtime()` (never automatic).
+    - `write()` writes, typechecks, then commits. On a typecheck failure or exception it puts the file back and raises
+      `TypecheckError`, whose `errors` are `[{file, line, col, code, message}]`.
+    - `commit`, `head`, `log`, `show`, `revert_file` (a new commit), `file_hash`, `status`.
+    - `export(commit, dest)`: `git archive`. `node_modules` is a symlink when the lockfiles match; otherwise `npm ci`
+      runs there, or with `install=False` the result reports `missing`.
+    - Git runs with argv lists. The author is fixed (`Genesis <genesis@localhost>`) and a `Genesis-User:` trailer is
+      added. Signing and hooks are off.
+  - `settings_service.py`:
+    - `TestSettingsService`: site path and browser; `site_suggestions` from KB Site `url_stub`; users CRUD.
+    - `set_password` / `clear_password` / `password_set`, under `user_secret_scope(app)` = `testusers-<sha1[:16]>`,
+      var `<ROLE>_PASSWORD`.
+    - A warning when a username equals the Dev environment's `LCP_USERNAME`; `readiness(app, roles=)`; `setup()`.
+    - `TestCredentialResolver` and `TestCredentials`, whose repr redacts both values.
+- `genesis/integrations/apwt/` (new):
+  - `client.py` — `ApwtClient`:
+    - Uses the workspace's own `node_modules/.bin/apwt`, with `--json` where the command has it.
+    - `close` and `close-all` output is parsed from `KEY: value` lines.
+    - D8 defaults: `--browser`, `--mode full`, `--allow-host <QA>`, `--upload-root <ws>/tests/resources`,
+      `--artifacts <run>/apwt-out/<s>`, `--idle-timeout 30`.
+    - A URL on another host is refused before anything is spawned.
+    - `APPIAN_USERNAME`/`APPIAN_PASSWORD` are set only on `open --login` and `login`, and output is scrubbed of the
+      password.
+    - The session daemon's pid (from `<home>/browsers/<s>/state.json`) is recorded in `<run>/.pids`, even after a
+      failed open, and forgotten on `close` / `close_all`.
+    - Also `state_save` (to `<ws>/.auth/<name>.json`), `list_sessions`, `version`, and `agent_prefix` (the D3c prompt
+      prefix, shell-quoted).
+  - `errors.py`: typed errors by apwt code.
+  - `factory.py`: `ApwtFactory.for_run(app, workspace_dir=, run_dir=)` binds the QA host, the app's browser and the
+    app's credentials; also `cleanup_run`.
+- `genesis/runtime/context.py`: `ctx.extras['apwt'] = ApwtFactory(...)`.
+- `genesis/runs/manager.py`: `_reap_run_processes` runs from `_finalize`, `pause`, and the startup sweep's adopt
+  branch (under the lock). It is a no-op without `<run>/.pids`.
+- `genesis/runtime/preflight.py`: optional items `node` and `chromium`.
+- `genesis/api/testing.py` (new; registered in `app.py`): the 51-10 rows owned by 51-05.
+  - `GET /config/testing/runtime`, `POST /config/testing/runtime/chromium` (502 on failure).
+  - `GET`/`PUT /applications/{app}/testing/setup`.
+  - `POST /applications/{app}/testing/users`; `PATCH`/`DELETE …/users/{role}`.
+  - `PUT …/users/{role}/password` returns `{password_set}`; an empty string clears the password.
+  - `POST …/testing/workspace`, `POST …/workspace/update-runtime`.
+  - Errors: 404 unknown app or user, 400 bad input, 409 `{detail, problems}` at the top level, 502 a failed tool.
+
+### Tests
+
+- New:
+  - `tests/test_environment_types.py` (18): migration cases (is_dev, free text, missing type, a stale `type: dev`,
+    no double note); single Dev move; single QA refusal; host collision both ways; mirror written; the old form's Dev
+    switch, cases (a) and (b), through `POST /api/config/environments`; Dev+QA refusals.
+  - `tests/test_testexec_procs.py` (6): env allow-list; a timeout kills a real sleeping child and its grandchild;
+    reap kills only marked groups.
+  - `tests/test_testexec_workspace.py` (18): real git with npm stubbed; layout and ignore rules; typecheck refusal and
+    restore; path guards; history, revert and status; export linked / installed / missing; runtime update; a failed
+    create leaves nothing; sha check and package location.
+  - `tests/test_apwt_client.py` (20): argv and env; credentials only on login; host pin; error mapping from
+    `tests/fixtures/apwt/apwt-0.3.0-outputs.json`; usage and bad output; close parsing; scrub; timeout; daemon record
+    and reap with a real detached process.
+  - `tests/test_testexec_settings.py` (8): users and passwords; the Dev-account warning; the resolver never logs;
+    settings and suggestions; readiness; every route, with every response scanned for the password.
+  - `tests/test_runs.py` (+4): reap on cancel / pause / sweep, and no-op without `.pids`.
+- Gates (final): `.venv/bin/ruff check genesis` clean; `.venv/bin/python -m pytest -q -p no:warnings`: **1529
+  passed**, 1456 at 51-04 + 73. Web: no file changed.
+- Package data: `pip wheel --no-deps .` builds `genesis-0.80.0-py3-none-any.whl`, which lists the `.tgz` and the five
+  templates (L-048).
+- Live, on this machine (local only, not QA), all through the product code:
+  - A workspace `ensure()` ran a real `npm install` (26 s).
+  - A real `tsc` refused `TS2322`, and the export linked `node_modules`.
+  - `apwt --version` returned 0.3.0.
+  - `install_chromium()` into a temp testing folder took 44.6 s; both 1217 builds were installed and `detect()`
+    reported no problems.
+  - `ApwtClient.open_session` against a local `127.0.0.1` server took 3.1 s, and `close` took 0.3 s.
+  - After a second open, `reap()` signalled the daemon group, and `ps` then showed neither the daemon nor its Chromium.
+- **Not run:** a signed-in `open --login` on QA. It needs the QA test user; 51-03 L1/S4 proved that recipe.
+
+### Review
+
+`reviews/51-05-review.md`. The first pass was **NEEDS_CHANGES**:
+- **M1:** session daemons (and their Chromium) were never recorded, so cancel, pause and the sweep left them running.
+- **M2:** on write, a typed `dev` overrode the current form's Dev switch. Untagging failed and the tag could move:
+  ADR-036/048.
+- Minors 3–7 and nits 8–10.
+
+All were fixed with regression tests except minor 7 and nits 9–10. Minor 7 is deferred to 51-06 (see below). Nit 9 is
+noted for 51-11 there. Nit 10 is answered by deviations 1 and 2. The **re-review verdict is SHIP**. Its optional nit 11
+(a failure to record the daemon must not mask the open's outcome) was fixed before the commit, with the apwt tests
+re-run green (64 passed). Nit 12 is deferred to 51-06.
+
+### Decisions / deviations
+
+No ADR deviation. Recorded choices; those that affect later sub-specs are in **bold**:
+1. **`close` and `close-all` have no `--json` in apwt 0.3.0.** `ApwtClient` parses their `KEY: value` lines
+   (`CLOSED`, `TRACE_FILE`, `TEST_FILE`); everything else uses `--json`. A `playwright-appian` follow-up could add it.
+2. **Fixtures were recorded from the real 0.3.0 CLI, not 0.2.0**, because 0.3.0 is what Genesis vendors. One entry,
+   `version_mismatch`, could not be produced offline: it is marked `derived` and uses the source's message.
+3. Free-text `type` on write is mapped as on read, not refused, so the current web form (free-text Type plus the Dev
+   switch, until 51-11) keeps working. The exception: an explicit `is_dev: false` wins over `dev`.
+   **51-11:** send `type` only, and leave out `is_dev`.
+4. The workspace `.gitignore` also ignores `output/`, apwt's default scratch folder.
+5. **Site suggestions are empty on today's KBs.** The KB stores a Site's pages' `url_stub` but not the site's own: the
+   parser's object index does not promote it. The code reads `metadata_json.url_stub` and is tested with a seeded
+   value. Fixing it is a parser follow-up.
+6. **Web types and contract fixtures for the new routes are left to 51-10/51-11**, since there is no web client yet.
+   The response shapes are those in `api/testing.py` / `TestSettingsService.setup()`.
+7. **Paths and contracts later sub-specs use:**
+   - Per run: `<run>/.apwt` (`PLAYWRIGHT_APPIAN_HOME`), `<run>/apwt-out/<session>` and `<run>/.pids` (the folder the
+     RunManager reaps).
+   - The workspace export goes wherever 51-06 puts it; `ApwtFactory.for_run(workspace_dir=…)` takes the path. 51-03
+     used `<run>/workspace`.
+   - Saved logins: `<ws>/.auth/<name>.json`.
+   - Typecheck errors are `TypecheckError.errors` (51-10's 422 body).
+   - `TestWorkspace.export(commit, dest)` returns `node_modules` ∈ `linked | installed | missing`.
+   - Long-lived children (recorders, Playwright runs) must use `procs.start_long_lived(..., pid_dir=<run>/.pids,
+     markers=[<export path>, settings.testing_browsers_dir])`.
+8. `readiness(app, roles=)` lists every blocking problem. The order is: QA env, QA host clash, site path, no test
+   user, per role (missing user or password), Node, Chromium, workspace.
+9. **The Chromium build is a constant**, `CHROMIUM_REVISION = "1217"` for `@playwright/test` 1.59.1. Bump it together
+   with `PLAYWRIGHT_TEST_VERSION`.
+10. **The workspace and Chromium routes are synchronous**: 26–45 s live, with a 900 s timeout (review nit 9). 51-11 may
+    want a background job with polling.
+11. `ApwtFactory.cleanup_run` (`close-all` plus reap) is available to the program steps of 51-06/51-07/51-09. The
+    RunManager itself only reaps `.pids`; the daemon record makes that sufficient for sessions.
+
+### For 51-06 (carried from the review)
+
+- **Minor 7:** `reap()`'s marker check has not been tested against a real Playwright run's command line. Start one run
+  through `npx` from an export whose `node_modules` is a symlink, and check that a process in its group names the
+  export path or the browsers folder.
+- **Nit 12:** only the daemon's group is recorded. Chromium runs in its own group and is closed by the daemon's
+  SIGTERM handler, and `kill_group` sends SIGKILL after 3 s. Check once, live, while a recording is running, that the
+  browser does not outlive a reap.
+
+### Lesson candidates
+
+- **A detached child is not in your process group.** `apwt open` returns while its daemon, and the daemon's Chromium
+  in yet another group, keep running. Killing the CLI's group stops neither. Record the daemon's own pid from its
+  control file, and prove the reap from outside with `ps` (51-05 M1).
+- **When a compatibility mirror becomes the home, an older client's explicit flag must still win.** Tell "not sent"
+  apart from `false` (`Optional[bool]`), or a pre-filled field silently overrides the switch the user set (51-05 M2).
+- **pytest collects any `test*` function, not only `test_*`.** A helper named `testusers_scope` was collected as a
+  test. Name helpers so they don't start with "test" (extends L-092).
+
+### Code-map changes
+
+For bible/03 in the "Phase 51" block (genesis-docs):
+- `config/environments.py`: `ENV_TYPES`, `normalize_record`, `qa_environment()`, `qa_host_conflicts()`.
+- `runtime/settings.py`: `testing_dir` / `testing_browsers_dir` / `testing_apps_dir`.
+- `testexec/` (`vendor.py` + `vendor/`, `procs.py`, `runtime.py`, `templates/`, `workspace.py`, `settings_service.py`).
+- `integrations/apwt/` (`ApwtClient`, typed errors, `ApwtFactory`, i.e. `ctx.extras['apwt']`).
+- `runs/manager.py`: `_reap_run_processes`.
+- `api/testing.py`: `register_testing_routes`.
+- `runtime/preflight.py`: the `node` and `chromium` items.
