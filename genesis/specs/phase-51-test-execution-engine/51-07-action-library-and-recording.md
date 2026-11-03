@@ -3,7 +3,7 @@
 > **Status:** SPEC-DRAFTED 2026-11-02. Repos: **genesis** (backend), **genesis-workflows** (`action-capture` v0.1.0 +
 > skill `genesis-test-authoring`), **playwright-appian** (0.3.0 from 51-03 is the base; fix recorder gaps in §4 item 4
 > only if they block acceptance). Parent:
-> `specs/phase-51-test-execution-engine.md`. Decisions: 51-01 D2, D3, D5.6, D13, D16; F1, F5.
+> `specs/phase-51-test-execution-engine.md`. Decisions: 51-01 D2, D3, D5.6, D13, D16, D20; F1, F5.
 
 ## 1. Goal
 
@@ -36,6 +36,11 @@ Over `TestWorkspace` (51-05 §3) and `TestLibraryStore` (51-04 §3):
   **Adopt** = typecheck + commit + catalog update; un-adopted changes are never executed because executions export a
   commit), **run dependents** (an ad-hoc execution of every automated scenario whose steps use the item, via
   `kb_test_refs` transitively).
+- **Approval reset (D20, the 51-04 open point):** save, revert and adopt of a **Ready** item's code also move it to
+  Draft through a new `TEST_TRANSITIONS` edge `(READY, "changed") → DRAFT` via `LifecycleService` (audited; the reason
+  names the commit), in the same workspace-locked operation as the commit. **Replay** on the item page runs the item's
+  replay on QA (as for proposals, §5) and, on a pass at the current hash, approves it back to Ready. Status never gates
+  executions or authoring. A metadata-only edit keeps the status.
 - Every write path is serialized per workspace (a lock) and runs off the event loop (L-026).
 
 ## 4. Record workflow (D13)
@@ -105,7 +110,8 @@ given sessions; no `open`/`login`/`attach`/`state-save`; no other host; never pr
 ## 8. Tests
 
 Save/typecheck/commit, refused breaking contract, retire refused with names, delete only if never referenced, revert,
-outside edit → adopt, refs rebuild from `scan-refs` output; recording start/stop with `apwt` stubbed (real `--json`
+outside edit → adopt, a code save/revert/adopt of a Ready item demotes it to Draft through the audited `changed` edge
+while a metadata-only edit does not, Replay pass re-approves at the current hash and a fail leaves it Draft (D20), refs rebuild from `scan-refs` output; recording start/stop with `apwt` stubbed (real `--json`
 fixtures); `action-capture` node tests with a recorded trace fixture from the sandbox repo
 (`/Users/ramaswamy.u/Documents/test/playwright-appian-test/output/traces/create-evaluation.json`), validator rejects bad
 proposals, apply in one commit, Ready vs Draft; `validate_library` + `validate_skills` gates.
