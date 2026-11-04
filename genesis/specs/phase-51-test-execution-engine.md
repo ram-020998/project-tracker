@@ -63,7 +63,7 @@ execution engine with results, and the Workbench Verification lane.
 | D22 | ADR-082 amends ADR-021 as well as ADR-068: the Verification confirm / schedule toggle replace `pre_mutation` gates for QA data writes. |
 | D23 | Long setup actions (workspace create/update, Chromium install; library replay) run as background jobs: 202 + a polled status. |
 | D24 | A verification run executes committed HEAD plus its own recorded overlay; agent work reaches the library only when proposals are accepted. |
-| D25 | A queued verification is cancelled when its card leaves Verification (and re-checked at launch); board cards show Queued / Verifying / Not started from `verification_active` (51-14). |
+| D25 | A queued verification is cancelled when its card leaves Verification (and re-checked at launch); board cards show Queued (movable; dragging out asks first, Q25) / Verifying (locked) / Not started from `verification_active` (51-14). |
 
 Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`): `51-01-findings.md` §8.
 
@@ -145,7 +145,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 | 51-09 | genesis, genesis-workflows | **DONE (SHIP 2026-11-03, genesis `7daa505`, genesis-workflows `93e6e35`):** lane reorder, Verification launch (409 codes), `story-verification` 0.1.0 (D3c agents, D24 overlay, cleanup scrub), finalizer, report, `defects.json`, proposals as a verification capture |
 | 51-10 | genesis | **DONE (SHIP 2026-11-03, genesis `83fa255`):** reconciled contract table (§2, 15 groups of differences in its As built), the 51-07 routes, D23 setup jobs (+ `cancelled`), `library-replay` jobs, `expected_row_version`, recording readiness, the route-order and no-secret tests, `web/src/types/testing.ts` + 42 contract fixtures |
 | 51-11 | genesis (web) | **DONE (SHIP 2026-11-03, genesis `8f013be` + `0170834` web/static):** Testing tab, item pages + lazy CodeMirror editor, Record dialog + bar, proposals review, execution page + report iframe, job polling, Settings type select + testing card (top of the CLI tab), Workbench Verification dialog, story Verification section, Phase 49 additions; `ApiError` keeps the whole error body; backlog §16–§19 |
-| 51-14 | genesis (backend + web) | Queued verification guard (moves out of Verification cancel a queued run; `_launch` re-checks the lane) + board `verification_active` (Queued / Verifying / Not started); D25, backlog §16; built after 51-11, before 51-12 |
+| 51-14 | genesis (backend + web) | **DONE (SHIP 2026-11-03, genesis `9b258bb` + `b23337c`/`45e9827`, web/static `c74cbed`/`a1f7f3e`):** moves out of Verification (single, bulk, Design/Implementation start, Remove from board) cancel a queued verification; the lane is re-checked before readiness and again just before the run starts; board `verification_active` in one statement (Queued / Verifying / Not started); D25, backlog §16. **§5 follow-up (Q25): Queued movable with a confirm on drag out — SPEC-DRAFTED** |
 | 51-12 | genesis, genesis-workflows, playwright-appian | Independent review + gates + live acceptance on a real QA environment (incl. width probe, L-090) |
 | 51-13 | all four | Release order, deploy, docs write-back (ADR-081..084) |
 

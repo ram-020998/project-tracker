@@ -1,6 +1,7 @@
 # 51-14 — Queued verification guard and the board's verification state
 
-> **Status:** SPEC-DRAFTED 2026-11-03. Repo: **genesis** (backend + web). Parent:
+> **Status:** **DONE 2026-11-04** (§1–§4; genesis `9b258bb`…`a1f7f3e`, review SHIP). **§5 follow-up SPEC-DRAFTED
+> 2026-11-04** (D25 amended, Q25). Repo: **genesis** (backend + web). Parent:
 > `specs/phase-51-test-execution-engine.md`. Decision: 51-01 **D25**. Built **after 51-11 and before 51-12** (numbered
 > 14 so the review and release sub-specs keep their numbers). Takes backlog §16 into the release.
 
@@ -48,6 +49,25 @@ with nothing queued is unchanged; `_launch` cancels when the card is elsewhere a
 execution; the board field on list and single reads, one query; fixture parity; web card states (Queued locked,
 Verifying locked, Not started movable) with jest-axe. Gates: pytest + ruff; lint, tsc, vitest; `npm run build` and the
 `web/static` commit as separate steps, then a rebuild and an empty `git status` in its own call (L-089).
+
+## 5. Follow-up: a Queued card stays movable, and dragging it out asks first (D25 amended, Q25, 2026-11-04)
+
+§3 locked a Queued card, so the only way to withdraw a queued verification was Cancel on the execution page. The user
+chose: **Queued is not locked.** Web only; the §2 backend is unchanged.
+- `StoryCard` / the board's drag guard (`web/src/features/workbench/StoryCard.tsx` and the board's drop handler): a
+  card with `verification_active == "queued"` shows **Queued** and is **draggable**. Only `"running"` (Verifying…)
+  locks.
+- Dropping a Queued card on any lane other than Verification opens a confirm dialog, reusing the board's existing
+  confirm-dialog primitive (the Design/Implementation pattern, ADR-062/068): title "Cancel the queued verification?",
+  body "Moving this story out of Verification cancels its queued verification. Nothing has run yet.", buttons
+  **Move and cancel** / **Keep in Verification**. Confirm → the normal move route (the §2 backend cancels the queued
+  execution); Keep → no request, the card snaps back. The same dialog for a bulk move that includes a Queued card
+  (one dialog naming the count). Starting Design or Implementation and Remove from board, which already cancel (As
+  built), get the same sentence added to their existing confirm.
+- Tests: Queued is draggable and Verifying is not; the dialog on drop out, Confirm sends one move, Keep sends none;
+  the bulk-move variant; jest-axe on the dialog. Gates as §4, with the `web/static` commit proven by a rebuild and an
+  empty `git status` **after the build output has settled** (the 51-14 As built found the bundle can land on disk
+  after the build command returns).
 
 ## Context manifest
 
