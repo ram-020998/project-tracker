@@ -71,7 +71,7 @@ environment** with test users for two roles — provided by the user)
 | 10 | Make a setup fail (wrong input) | Its scenarios Blocked, other setups' scenarios run |
 | 11 | Test Impact → pick objects → Run impacted tests | Only scenarios containing affected automated cases run; uncovered cases listed |
 | 12 | Schedule daily at a near time; keep Genesis running | `regression-run` starts it once; header badge updates; turning schedule off stops it |
-| 13 | Workbench: drag a story Code Review → Deployment → Verification with no QA env configured (temporarily); then with Testing not ready; then while another verification runs | F2 warning, card stays in Deployment; a `not_ready` refusal lists the problems; a `busy` or queued start shows the card "Not started" and unlocked (51-11 As built; backlog §16) |
+| 13 | Workbench: drag a story Code Review → Deployment → Verification with no QA env configured (temporarily); then with Testing not ready; then while another verification runs | F2 warning, card stays in Deployment; a `not_ready` refusal lists the problems; a start while another execution runs shows the card **Queued** and locked; dragging a queued card back to Deployment cancels its verification ("the card left Verification before the run started"), and when the running execution ends nothing starts for that story — no QA writes, no agent turn (D25, 51-14) |
 | 14 | With QA: drag to Verification; confirm | The card goes "Not started" → "Verifying…"; the run explores as each affected role, authors scripts, executes; report on the story page; passing story → Done; proposals listed. **Re-measure F10 on this write flow:** record each `explore` and `author` turn's duration, tool calls and credits against the 900 s `turn_timeout` (51-09 As built), and change F10 if a turn comes within 20 % of it |
 | 15 | A story whose feature is genuinely broken in QA | Product defect → card back to Implementation with the defect list |
 | 16 | QA unreachable mid-run (block the host); separately, reach the `escalate` gate (a script defect that heal cannot fix) | `escalate_blocked` shows Retry / Send back / Accept as passed and `escalate` shows Send back / Accept as passed / Stop, both rendered from the gate's options; Stop leaves the card in Verification |
@@ -93,5 +93,5 @@ adrs     = ["ADR-001", "ADR-011", "ADR-012", "ADR-029", "ADR-050", "ADR-061", "A
 lessons  = ["L-058", "L-069", "L-088", "L-089", "L-090", "L-092", "L-093", "L-094", "L-097"]
 docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md", "tracker:agent-system/skills/genesis-live-acceptance/SKILL.md"]
 code     = ["genesis/genesis/testexec/**", "genesis/genesis/api/testing.py"]
-upstream = ["51-02", "51-03", "51-04", "51-05", "51-06", "51-07", "51-08", "51-09", "51-10", "51-11"]
+upstream = ["51-02", "51-03", "51-04", "51-05", "51-06", "51-07", "51-08", "51-09", "51-10", "51-11", "51-14"]
 ```

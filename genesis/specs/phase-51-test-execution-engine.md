@@ -63,6 +63,7 @@ execution engine with results, and the Workbench Verification lane.
 | D22 | ADR-082 amends ADR-021 as well as ADR-068: the Verification confirm / schedule toggle replace `pre_mutation` gates for QA data writes. |
 | D23 | Long setup actions (workspace create/update, Chromium install; library replay) run as background jobs: 202 + a polled status. |
 | D24 | A verification run executes committed HEAD plus its own recorded overlay; agent work reaches the library only when proposals are accepted. |
+| D25 | A queued verification is cancelled when its card leaves Verification (and re-checked at launch); board cards show Queued / Verifying / Not started from `verification_active` (51-14). |
 
 Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`): `51-01-findings.md` §8.
 
@@ -113,6 +114,7 @@ Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`)
 | Story verification (lanes, workflow, finalizer, proposals, report) | 51-09 |
 | HTTP API | 51-10 |
 | Web experience | 51-11 |
+| Queued verification guard + board verification state (D25; built after 51-11) | 51-14 |
 | Review, hardening, live acceptance | 51-12 |
 | Release + docs write-back | 51-13 |
 
@@ -123,7 +125,8 @@ D3c loop — program-owned sessions + agent `apwt` through the shell — cannot 
 51-07 / 51-09 before continuing) → S3 = 51-04 → S4 = 51-05
 → S5 = 51-06 → S6 = 51-07 (genesis + genesis-workflows) → S7 = 51-08 → S8 = 51-09 (genesis + genesis-workflows) → S9 =
 51-10 (API completion + contract fixtures; each backend sub-spec adds its own routes, 51-10 owns the contract table and
-the cross-cutting tests) → S10 = 51-11 → S11 = 51-12 (genesis-review) → S12 = 51-13 (genesis-release, then
+the cross-cutting tests) → S10 = 51-11 → S10b = **51-14** (genesis-dev; D25, added 2026-11-03) → S11 = 51-12
+(genesis-review) → S12 = 51-13 (genesis-release, then
 genesis-docs). One at a time: they share the genesis checkout. A `playwright-appian` change found in any session is
 made in that repo in the same session (D19), with its own tests, and recorded in the sub-spec's As built.
 
@@ -131,7 +134,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 
 | Sub-phase | Repo | Content |
 |---|---|---|
-| 51-01 | project-tracker | Findings, decisions D1–D24 (D3a–D3d), defaults F1–F14 |
+| 51-01 | project-tracker | Findings, decisions D1–D25 (D3a–D3d), defaults F1–F14 |
 | 51-02 | project-tracker (agent-system) | Repo list, new `browser-testing` area + gates, agent allow rules, release flow, invariants |
 | 51-03 | genesis (spike code + notes), playwright-appian (D-114, 0.3.0) | **DONE (SHIP 2026-11-02):** sandbox evidence S1/S5/S6 (ADR-083 / Phase 52 input); the D3c loop L1, S4, S11 PASS; S8/S9 via `record start --browser/--state` (0.3.0, unreleased); S10 timings; P10 = global Kiro MCP servers load into workflow turns |
 | 51-04 | genesis | **DONE (SHIP 2026-11-03, genesis `316ac5a`):** m0026 (catalog, executions, results, test users, settings, suite rebuild; DB v26), runner flag `foreign_keys_off`, `kb/testexec_store.py`, `ACT-`/`DS-`/`TE-` ids, library lifecycle, `adr-drafts.md` |
@@ -142,6 +145,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 | 51-09 | genesis, genesis-workflows | **DONE (SHIP 2026-11-03, genesis `7daa505`, genesis-workflows `93e6e35`):** lane reorder, Verification launch (409 codes), `story-verification` 0.1.0 (D3c agents, D24 overlay, cleanup scrub), finalizer, report, `defects.json`, proposals as a verification capture |
 | 51-10 | genesis | **DONE (SHIP 2026-11-03, genesis `83fa255`):** reconciled contract table (§2, 15 groups of differences in its As built), the 51-07 routes, D23 setup jobs (+ `cancelled`), `library-replay` jobs, `expected_row_version`, recording readiness, the route-order and no-secret tests, `web/src/types/testing.ts` + 42 contract fixtures |
 | 51-11 | genesis (web) | **DONE (SHIP 2026-11-03, genesis `8f013be` + `0170834` web/static):** Testing tab, item pages + lazy CodeMirror editor, Record dialog + bar, proposals review, execution page + report iframe, job polling, Settings type select + testing card (top of the CLI tab), Workbench Verification dialog, story Verification section, Phase 49 additions; `ApiError` keeps the whole error body; backlog §16–§19 |
+| 51-14 | genesis (backend + web) | Queued verification guard (moves out of Verification cancel a queued run; `_launch` re-checks the lane) + board `verification_active` (Queued / Verifying / Not started); D25, backlog §16; built after 51-11, before 51-12 |
 | 51-12 | genesis, genesis-workflows, playwright-appian | Independent review + gates + live acceptance on a real QA environment (incl. width probe, L-090) |
 | 51-13 | all four | Release order, deploy, docs write-back (ADR-081..084) |
 

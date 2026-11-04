@@ -135,6 +135,9 @@ not installed: `StoryVerificationService.check` (`not_installed`, 51-09) and `Re
 
 ## 16. The board cannot tell a queued verification from one that never launched (from 51-11 review R1)
 
+> **Taken into the release as 51-14** (D25, 2026-11-03): the board gains `verification_active`, and a queued
+> verification is cancelled when its card leaves Verification. Kept here for the context.
+
 The board read gives a Verification card only `verification_story_stage_id`, `verification_run_id`,
 `verification_run_status` and `verification_status`. The run is bound at launch (`verification_service.py` `_launch`
 → `prepare`), so a verification **queued** behind another execution and one that **never launched** (`pump` → `_fail`,
