@@ -97,7 +97,9 @@ wait) so the step survives. Not blocking 51-07 (agent specs are 51-09's).
 ## 12. A library replay outside a run is not reaped by the RunManager
 
 > **Taken into 51-10** (2026-11-03): the Replay route ships only as a `library-replay` job with single flight, cancel
-> and retention (51-10 §1). Kept here for the context.
+> and retention (51-10 §1). **Done in 51-10** (genesis `83fa255`): one replay per item, cancel reaps (and re-reaps until
+> the job ends), newest 20 replay folders kept per app. It is still not a run: a crash mid-replay is covered by the
+> startup reap only. Kept here for the context.
 
 **Context (51-07 §3 Replay).** `TestLibraryService.replay` runs Playwright from the app process (an export under
 `<artifacts>/library-replays/…`, its group in that folder's `.pids`), bounded by a hard timeout and reaped in a
@@ -123,3 +125,10 @@ Fix: an additive `detail` column on `lifecycle_transitions` (a migration) plus a
 commit that wrote those refs is then refused (a create whose later step fails, a refused proposal apply), the refs are
 removed but the flag stays, so a never-used item can only be retired, not deleted. Fix: mark targets only for
 committed refs (set the flag after the commit), or recompute the flag from the refs when compensating.
+
+## 15. A public "is this workflow installed?" on the RunManager
+
+**Context (51-10 review n4).** Two callers now probe the private `RunManager._meta` to refuse early when a workflow is
+not installed: `StoryVerificationService.check` (`not_installed`, 51-09) and `RecordingService.start` (the
+`action-capture` workflow, 51-10). Add a small public `RunManager.is_installed(workflow_id) -> bool` (or
+`installed_meta`) and use it in both, so a change to `_meta` cannot silently break the refusals.
