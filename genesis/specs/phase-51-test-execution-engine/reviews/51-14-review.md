@@ -248,3 +248,123 @@ The full backend suite was not re-run. The range changes only one test module an
 
 Minors 1–2 now have tests that would fail on a regression. Nits 5–6 are resolved without a string match. Every gate the
 brief asked for is green at `a1f7f3e`, and `web/static` equals a fresh build.
+
+---
+
+## §5 follow-up review — range `a1f7f3e..cca8ff8` (genesis-review, 2026-11-04)
+
+Commits: `209297a` (web source + tests, no `web/static`: `git show --stat 209297a -- web/static` is empty, and its
+message says the bundle is in the next commit) and `cca8ff8` (63 `web/static` files only; `git show --stat cca8ff8 --
+. ':!web/static'` is empty). HEAD = `cca8ff8`, working tree clean. Outside `web/static` the range changes
+`BoardPage.tsx` (+51), `QueuedVerificationDialog.tsx` (new, 38), `StoryCard.tsx`, `types/workbench.ts` and
+`verification.test.tsx` (+141). No backend change. `genesis-ctx check --since a1f7f3e --repo genesis`: 68 files, areas
+stories-workbench (+ always-on release-ci, security).
+
+### Gates (run by the reviewer)
+
+| Gate | Result |
+|---|---|
+| `npm run lint` | 0 errors, 20 warnings (same pre-existing count) |
+| `npx eslint` on the five changed source/test files | clean (no warning on the new file's exported constant) |
+| `npm run typecheck` | clean |
+| `npx vitest run` | **665 passed, 61 files** (matches the claim: 654 + 11) |
+| `npx vite build --outDir /tmp/51-14-s5-static --emptyOutDir` (own call) → `sleep 65` (own call) → `diff -r /tmp/51-14-s5-static web/static` (own call) | IDENTICAL |
+| `grep -c "Keep in Verification" web/static/assets/index-Zg3bwXYu.js` | 1 |
+| `git status --short --untracked-files=all` (own call, after the out-of-tree build and the wait) | empty |
+
+Not re-verified: the claim that 8 of the new/changed tests fail with the change stashed (stashing writes the tree).
+By reading, the drag-handle assert (`verification.test.tsx:224`) and every test in the new describe block depend on
+the `StoryCard` lock change and `move()`, so they cannot pass on `a1f7f3e`.
+
+### Spec §5 against the diff
+
+1. **Queued draggable, only Verifying locks — OK.** `StoryCard.tsx:161` drops `isVerificationQueued` from `locked`;
+   `isVerifying` stays. Tests: `verification.test.tsx:216-227` (Queued from the real `board.json` card: the "Drag
+   Score" handle is present, no View run link, axe clean) and `:229` (Verifying… locked, unchanged).
+2. **Dialog on drop out of Verification — OK.** `onDragEnd` (`BoardPage.tsx:173-175`) now calls `move()`, which
+   counts `queuedLeavingVerification` over the payload's `story_ids` (`:180-187`). That is the exact list the backend
+   withdraws for (`api/workbench.py:211`, `lane != "verification" and _withdraw_queued(app_uuid, body.story_ids)`), so
+   the dialog opens exactly when the route would cancel something. A move within Verification never asks
+   (`types/workbench.ts:93-95`). Title, description (via `DialogDescription`, checked with
+   `toHaveAccessibleDescription`) and both button labels match the spec text (`QueuedVerificationDialog.tsx:10-11,
+   24-34`). The dialog reuses the shared `Dialog` primitive like the Design/Implementation confirms.
+3. **Confirm sends one move, Keep / close sends none and snaps back — OK.** `resolveQueued` (`BoardPage.tsx:190-201`)
+   sends `reorder.mutate(p.move)` on confirm and `setItems(byLaneIds)` otherwise; `onOpenChange(false)` maps to Keep
+   (`QueuedVerificationDialog.tsx:21`). Tests `verification.test.tsx:276-284` (one PATCH to `…/lanes/deployment` with `story_ids: [1]`) and
+   `:286-296` (both "Keep in Verification" and "Close": zero lane PATCHes, card back in the Verification column). The
+   tests drive `onDragOver` then `onDragEnd` (`dragAcross`, `verification.test.tsx:119-125`), the real cross-lane sequence, so the payload is
+   the target lane's list as in a browser.
+4. **Extra guard (a verification that started while the dialog was open) — OK.** Re-reads `cardById` from the
+   refetched board and refuses to send when a listed card is `isVerifying` in Verification. Test `verification.test.tsx:298-310`. It sends
+   nothing and the card shows Verifying…, which is the safe side: the backend would leave a running verification alone
+   anyway, but the move would take a running card out of a locked state.
+5. **Design / Implementation confirms carry the sentence — OK.** `leavesQueued` (`:226-230`) and the two `<p>` lines
+   (`:309-311`, `:335-337`). Both their buttons already cancel server-side ("Yes" via the start routes, "Just move" via
+   the lane route; 51-14 As built decision 2). Tests `verification.test.tsx:321-336` (both lanes, sentence present, axe clean, Just move sends
+   one lane PATCH and no second dialog) and `:338-346` (no sentence for a card that is not Queued). Routing Design /
+   Implementation drops straight to their own confirm, not through `move()`, means no double dialog; correct.
+6. **Bulk-move variant (dev interpretation 1) — accepted.** The board's lane reorder route *is* the §2 "bulk route"
+   (it acts on every listed story). A single drag can make the count > 1 only if two listed cards both read
+   `lane == "verification"` on the server while the target lane is elsewhere, which a drag cannot produce: the other
+   listed cards are already in the target lane. The count reaches the dialog unchanged (`:182-185`, `:297`), the plural
+   copy is tested by rendering the dialog with `count=2` (`verification.test.tsx:348-361`, axe clean), and the helper is unit-tested
+   (`:363-368`). This meets the spec's wording ("one dialog naming the count") as far as the web can reach it.
+7. **Remove from board (dev interpretation 2) — accepted.** `grep useRemoveCard|removeCard\(|Remove from` over
+   `web/src/**/*.tsx` finds nothing; `useRemoveCard` (`hooks.ts:218`) has no caller. There is no confirm to add the
+   sentence to. The spec's premise ("which already cancel… get the same sentence added to their existing confirm") is
+   true only for the backend route; worth a line in the §5 As built so 51-12 does not look for it.
+8. **Bundle — OK.** Delayed out-of-tree build identical to `web/static`; the source/bundle split across two commits
+   is stated honestly in `209297a`'s message (no L-089 false claim this time).
+
+### Checklist (this range)
+
+- [OK] ADR-027 / ADR-055 — shared `Dialog`, `DialogContent`, `DialogDescription`, `DialogTitle`, `Button` from
+  `@/shared/ui`; tokens only (`text-fg`, `text-fg-muted`); no new dependency.
+- [OK] ADR-028 / L-010 — no URL or `/api` in components; the move uses the existing `useReorderLane` hook.
+- [OK] ADR-050 — no status write; a lane move remains a lane assignment, and the cancel stays server-side.
+- [OK] ADR-061 — eight lanes and explicit membership unchanged; no new movement rule except the confirm.
+- [OK] ADR-062 / ADR-068 — the Design and Implementation confirms keep their buttons and behaviour; only an
+  informational sentence is added. The Implementation confirm stays the single blanket approval.
+- [OK] ADR-071 — no story surface added.
+- [OK] ADR-077 — reviewer used `genesis-ctx`; no `--trust-all-tools`.
+- [N/A] ADR-011, 019, 021, 026, 031, 033, 034, 042, 045, 046, 049, 056–060, 063–065, 070, 072, 074–076, 078–080 —
+  web-only change in the workbench board; none touched.
+- [OK] L-011 / L-083 — the tests use the real `board.json` Queued card; the lane PATCH handler returns the real board
+  shape.
+- [OK] L-069 — no `<Button asChild>`.
+- [OK] L-030 — the range touches `web/**`, so the frontend CI job runs.
+- [OK] L-056 — HEAD holds every changed file (empty status; bundle identical).
+- [OK] L-089 — source and bundle in separate commits with an honest message; HEAD proven by a delayed out-of-tree
+  build, a separate diff and a separate status.
+- [OK] L-094 — `isVerificationQueued` consumers: `StoryCard.tsx` (face only now), `BoardPage.tsx` (`leavesQueued`),
+  `queuedLeavingVerification`; none rely on it meaning "locked" any more.
+- [N/A] L-017, L-025, L-027 (no Python change), L-045, L-051, L-057 (no tag), L-072, L-074, L-085, L-087, L-088,
+  L-090, L-091, L-092, L-093, L-095, L-098–L-100.
+- [OK] Gates — lint, typecheck, full vitest and the bundle check green (table above). pytest / ruff not re-run: no
+  Python file in the range.
+
+### Findings (§5)
+
+- **Blockers:** none.
+- **Majors:** none.
+- **Minors:** none.
+- **Nits:**
+  - **s5-n1. A refused confirm is silent.** `BoardPage.tsx:197-200`: when "Move and cancel" finds a listed card now
+    Verifying, the card snaps back with no message. The card's own "Verifying…" state explains it in most cases; a
+    `toast.info("The verification started; the card stays in Verification")` would make it explicit. Optional.
+  - **s5-n2. The board resync can snap the card back while the dialog is open.** `BoardPage.tsx:120-123`: with no drag
+    and no pending mutation, a background refetch resets `items` to the server lanes, so the card can jump back to
+    Verification behind the open dialog; Confirm still sends the stored move. Same pre-existing behaviour as the
+    Design / Implementation confirms, so no change asked; mention it if 51-12 sees it live.
+  - **s5-n3. The tracker needs a §5 As built.** The spec header still reads "§5 follow-up SPEC-DRAFTED" and As built
+    decision 8 ("A Queued card is locked…; 51-12: confirm with the user") is now superseded by D25 amended / Q25. The
+    dev's project-tracker commit should add the §5 As built (commits `209297a`, `cca8ff8`; interpretations 1 and 2;
+    test counts) and mark decision 8 superseded, and update the 51-12 live-acceptance note ("cannot be dragged" →
+    "drag out asks first; Move and cancel → the story page reads 'Cancelled: the card left Verification before the
+    run started.'").
+
+### §5 verdict: SHIP
+
+Every §5 requirement the web can reach is built and tested against the route's real payload; the two scope
+interpretations are correct readings of the code (the lane route is the bulk route; no Remove-from-board UI exists).
+All gates are green at `cca8ff8`, and `web/static` equals a fresh build compared after a 65 s wait.

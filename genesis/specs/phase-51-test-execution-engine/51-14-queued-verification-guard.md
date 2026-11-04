@@ -1,7 +1,7 @@
 # 51-14 — Queued verification guard and the board's verification state
 
-> **Status:** **DONE 2026-11-04** (§1–§4; genesis `9b258bb`…`a1f7f3e`, review SHIP). **§5 follow-up SPEC-DRAFTED
-> 2026-11-04** (D25 amended, Q25). Repo: **genesis** (backend + web). Parent:
+> **Status:** **DONE 2026-11-04** (§1–§4; genesis `9b258bb`…`a1f7f3e`, review SHIP). **§5 follow-up DONE 2026-11-04**
+> (D25 amended, Q25; genesis `209297a`, `cca8ff8`, review SHIP). Repo: **genesis** (backend + web). Parent:
 > `specs/phase-51-test-execution-engine.md`. Decision: 51-01 **D25**. Built **after 51-11 and before 51-12** (numbered
 > 14 so the review and release sub-specs keep their numbers). Takes backlog §16 into the release.
 
@@ -218,10 +218,11 @@ No ADR deviation. **Bold = for 51-12.**
 7. **Queued locks the card only in the Verification lane.** A queued execution of a card elsewhere (a collaboration
    pull moved it) is cancelled when the queue reaches it; locking that card would trap it behind a long execution.
    No on-read cancel was added for that case.
-8. **A Queued card is locked, so the board drag cannot take it out;** the way to withdraw it is Cancel on the
+8. ~~**A Queued card is locked, so the board drag cannot take it out;** the way to withdraw it is Cancel on the
    execution page (51-11), after which the card reads Not started and moves. The move-out cancel covers another tab or a
    stale board, the confirm dialogs and Remove from board. **51-12: confirm with the user that this is the intended
-   experience.**
+   experience.**~~ **Superseded by D25 amended (Q25, 2026-11-04) and §5:** a Queued card is draggable; dragging it out
+   of Verification asks first (As built — §5).
 9. `ExecutionRow.totals` gained `ExecutionEndNote` (the server already sent `{cancelled}` and `{error, problems}`
    there; the type said empty). `BoardCard` extends `Story`, whose columns the contract test does not pin; only the
    verification fields and list = single parity are pinned.
@@ -230,13 +231,14 @@ No ADR deviation. **Bold = for 51-12.**
     yet when the commit was staged, so a separate build commit (`c74cbed`, `a1f7f3e`) carries it (see Commits).
 
 **For 51-12 live acceptance (real browser, real QA):** queue a verification behind a long execution (e.g. Run impacted
-tests): the card shows Queued with the tooltip and cannot be dragged; Cancel it on the execution page → the card reads
+tests): the card shows Queued with the tooltip and can be dragged (§5; see "For 51-12" in As built — §5 for the
+drag-out confirm); Cancel it on the execution page → the card reads
 Not started and moves; the story page reads "Cancelled: before it started." — and for a move-out cancel "Cancelled: the
 card left Verification before the run started." (from a second tab: drag the
 card out while the first tab shows it Queued); restart the server while a verification is queued, move the card out by
 another tab or a collaboration pull, and check the queue skips it and starts the next execution; the queued card in both
 themes; decision 8; review n3 (a move by a non-route path in the instant between the last lane check and
-`set_running` still starts the run: decide whether that is acceptable).
+`set_running` still starts the run: decide whether that is acceptable; Q26 accepted it as a known limit).
 
 ### Lesson candidates
 
@@ -260,3 +262,121 @@ For bible/03 in the "Phase 51" block (genesis-docs): `TestExecutionService.cance
 `BoardStore.card_lane`; `api/workbench._withdraw_queued` (move, lane reorder, Design/Implementation start, remove);
 web `isVerificationQueued`, `VerificationActive`, `ExecutionEndNote`, `testing/logic.cancelledReason`; fixtures
 `board`, `board-card`, `verification-cancelled`.
+
+## As built — §5 (2026-11-04, genesis-dev)
+
+**Task restated.** Web only (D25 amended, Q25): a Queued card (`verification_active == "queued"` in the Verification
+lane) stays draggable and only Verifying locks. A move that takes a Queued card out of Verification asks first
+("Cancel the queued verification?", Move and cancel / Keep in Verification) through the board's shared `Dialog`
+primitive. Confirm sends the normal lane move, and the §2 route cancels the queued execution. Keep, or closing the
+dialog, sends nothing and the card snaps back. A move that lists several Queued cards gets one dialog naming the count.
+The Design and Implementation confirms add the same sentence for a Queued card. The §2 backend is unchanged.
+
+**Applicable rules.** ADR-027 / ADR-055 (shared `Dialog`/`DialogDescription`/`Button`, tokens only), ADR-028 (the move
+goes through the existing `useReorderLane` hook), ADR-050 / ADR-061 (a move stays a lane assignment; the cancel stays
+server-side), ADR-062 / ADR-068 (the Design and Implementation confirms keep their buttons and behaviour; only a
+sentence is added). Lessons L-011 / L-083 (the tests use the real `board.json` Queued card and return the real board
+shape), L-069 (no `<Button asChild>`), L-089 (build, commit and proof as separate calls, with the output left to
+settle), L-094 (the `isVerificationQueued` consumers were grepped; none rely on it meaning "locked" now).
+
+### Commits
+
+- **genesis** (base `a1f7f3e`, local, not pushed or tagged): `209297a` feat(web,51-14) §5, source and tests only (its
+  message says the bundle is in the next commit); `cca8ff8` build(web,51-14), `web/static` only (63 files).
+  **Bundle proof (L-089).** `npm run build`, then a 60 s wait, then a status read in its own call showed the 115-file
+  bundle change on disk, and the new `index-Zg3bwXYu.js` contained "Keep in Verification". After both commits: a
+  rebuild, then in its own call, after a 60 s wait, `git status --short --untracked-files=all` was empty. `git grep
+  "Keep in Verification" HEAD -- web/static/assets` → `index-Zg3bwXYu.js`. The reviewer separately ran an out-of-tree
+  build, waited 65 s and diffed it against `web/static`: identical. No L-089 recurrence this time.
+- **project-tracker:** this As built (plus decision 8 marked superseded and the 51-12 note updated) and the
+  "§5 follow-up review" section of `reviews/51-14-review.md`.
+
+### Changed (genesis web)
+
+- `types/workbench.ts`: `isVerificationQueued`'s doc says the card is not locked. New `queuedLeavingVerification(cards,
+  lane)` returns the Queued cards a move to `lane` takes out of Verification, and none for a move within Verification.
+- `StoryCard.tsx`: `locked` no longer includes `isVerificationQueued`. Verifying (and a running design or
+  implementation) still locks.
+- New `QueuedVerificationDialog.tsx` (shared `Dialog`). Its title, its `DialogDescription` (`QUEUED_CANCEL_SENTENCE`,
+  the §5 sentence) and the buttons Keep in Verification (outline) / Move and cancel follow §5. `count > 1` gives
+  "Cancel the queued verifications?" and "Moving these N stories out of Verification cancels their queued
+  verifications. Nothing has run yet." Closing the dialog counts as Keep.
+- `BoardPage.tsx`: `onDragEnd`'s plain lane move now goes through `move()`. `move()` counts
+  `queuedLeavingVerification` over the payload's `story_ids`, which is the list the lane route withdraws for
+  (`api/workbench.py:211`). A count above zero sets `pendingQueued` and opens the dialog; otherwise `move()` calls
+  `reorder.mutate`. `resolveQueued`: Confirm → `reorder.mutate(move)`; Keep → `setItems(byLaneIds)`, with no request.
+  Drops into Design and Implementation still open their own confirms (no second dialog). `leavesQueued(storyId)` adds
+  `QUEUED_CANCEL_SENTENCE` to each when the dragged card is Queued. "Just move" and "Start …" both cancel server-side
+  (As built decision 2).
+
+### Tests
+
+- `verification.test.tsx` (+11; 36 in the file). Changed: the Queued card has its drag handle (it was asserted
+  locked). New tests drive the real cross-lane sequence (`onDragOver`, then `onDragEnd`), so the payload is the target
+  lane's list:
+  - a drop on Deployment opens the dialog, with the title, the accessible description and both buttons, sends no
+    request and is axe clean;
+  - Move and cancel sends one PATCH to `…/lanes/deployment` with `story_ids: [1]`;
+  - Keep in Verification and Close send nothing, and the card is back in the Verification column;
+  - a verification that started while the dialog was open (board refetched to running) is not moved;
+  - a Not started card moves out with no confirm;
+  - the Design and Implementation confirms show the sentence (axe clean), Just move sends one PATCH, and no second
+    dialog opens;
+  - the Design confirm has no sentence for a card that is not Queued;
+  - the count variant: the dialog rendered with `count=2` (plural title and description, axe clean, both callbacks);
+  - `queuedLeavingVerification` returns `[1, 2]` from a mixed list and `[]` for the Verification lane.
+  With `BoardPage.tsx` and `StoryCard.tsx` stashed, 8 of the new or changed tests fail. The not-Queued, no-sentence,
+  count-dialog and helper tests pass on the old code too: they pin behaviour that stays the same or new standalone
+  code.
+- Gates (one call each): `npm run lint` 0 errors (the 20 existing warnings, none new), `npx tsc --noEmit` clean,
+  `npx vitest run` **665 passed, 61 files** (654 + 11), `npm run build` OK. pytest and ruff were not run, because no
+  Python changed.
+- **Not run:** a real browser drag (jsdom cannot drive a dnd-kit pointer drag; the tests call its handlers), and a
+  real queue.
+
+### Review
+
+`reviews/51-14-review.md` § "§5 follow-up review", range `a1f7f3e..cca8ff8`: **SHIP**, with no blockers, majors or
+minors. The reviewer re-ran lint, typecheck, the full vitest (665) and a delayed out-of-tree bundle diff (identical).
+It accepted both scope interpretations below. Nits (not changed):
+- s5-n1: a confirm refused because the verification started meanwhile snaps the card back with no message; the card's
+  "Verifying…" explains it, and a toast is optional.
+- s5-n2: a background refetch can snap the card back behind the open dialog; Confirm still sends the stored move.
+  The Design and Implementation confirms already behave this way.
+- s5-n3: the tracker updates, done in this As built.
+
+### Decisions / deviations
+
+No ADR deviation. **Bold = for 51-12.**
+1. **The "bulk move" is the lane reorder route.** The web board has no multi-card selection; every drag persists
+   through `PATCH …/lanes/{lane}`, the §2 bulk route, which withdraws for every listed story. So the guard counts over
+   that payload, and one dialog names the count. A single-card drag cannot list two Queued cards (the other listed
+   cards are already in the target lane), so the plural copy is reachable only through the shared guard. It is tested
+   on the dialog and the helper directly. No multi-select UI was built (not in §5).
+2. **Remove from board has no web confirm.** `useRemoveCard` has had no caller since Phase 43 (ADR-071: the story page
+   has no remove control), so there was no existing confirm to extend. The backend route still cancels (§2). **51-12:
+   do not look for it in the UI.**
+3. **The Design and Implementation drops keep their own confirm, with the sentence, and no Queued dialog first.** Both
+   of their buttons move the card out of Verification and cancel server-side, so one dialog says so. The sentence
+   shows only when the dragged card is Queued.
+4. **Confirm re-checks the card.** If the board refetched while the dialog was open and a listed card now reads
+   Verifying, Move and cancel sends nothing and the card snaps back (Verifying locks, §5). The move route would leave
+   a running verification alone anyway, but the card would leave a locked state.
+
+**For 51-12 live acceptance:** with a Queued card, drag it to Deployment. The confirm appears. Keep in Verification
+returns the card; Move and cancel moves it, and the story page reads "Cancelled: the card left Verification before the
+run started." Drag a Queued card into Design and into Implementation: the confirm carries the sentence. Check the
+dialog in both themes and watch for nits s5-n1 and s5-n2.
+
+### Lesson candidates
+
+- **A spec sentence about an "existing confirm" needs a grep for its caller first.** §5 named a Remove-from-board
+  confirm and a bulk move that the web does not have (the backend routes exist, the UI does not). Grepping the hook's
+  callers before building showed it, and the guard was put on the request payload the route acts on, not on a UI
+  gesture.
+
+### Code-map changes
+
+For bible/03 in the "Phase 51" block (genesis-docs): web `QueuedVerificationDialog` (+ `QUEUED_CANCEL_SENTENCE`),
+`types/workbench.queuedLeavingVerification`, `BoardPage.move()` / `resolveQueued` (the guard over the lane-move payload);
+a Queued card is no longer locked (`StoryCard`).
