@@ -18,12 +18,15 @@
    frontend, clean-install).
 4. **genesis-workflows v0.25.0**: `test-execution`, `action-capture`, `story-verification` (each v0.1.0) + `registry.json`
    entries + skill `genesis-test-authoring` in `skills-registry.json`; pins on `genesis.git@v0.81.0` (+
-   `#subdirectory=packages/<name>`, gate 9, L-057); CI green.
+   `#subdirectory=packages/<name>`, gate 9, L-057); CI green. The pin move is **required**, not only tidy: since 51-07
+   the genesis-workflows tests import Phase 51 genesis modules (`testexec`, `integrations/apwt`), so a pin on v0.80.0
+   reds CI.
 
 ## 2. Deploy
 
 Never restart while a run is active. Fleet update as usual (`gsm provision --all --no-mcp --no-env --force`, `gsm
-restart --all`); `genesis install test-execution action-capture story-verification` on each instance; verify
+restart --all`); `genesis install test-execution action-capture story-verification` and the `genesis-test-authoring` skill install on
+each instance (recording refuses to start without both the skill and `action-capture`, 51-07 As built 8); verify
 `/openapi.json` `info.version` = 0.81.0 and DB v27. The `userb` instance keeps reading `environments.json` through the
 `is_dev` mirror (51-05 §5). Node ≥ 20 and Chromium are per machine: note them in the user's checklist.
 

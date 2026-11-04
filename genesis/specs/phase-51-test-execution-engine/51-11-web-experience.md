@@ -20,7 +20,12 @@ and execution pages, the Settings changes, the Workbench Verification flow and t
    - **Item page** (`/applications/:appUuid/testing/actions/:key`, `/setups/:key`): contract form; **CodeMirror 6**
      editor, lazy-loaded on this route only (L-015); Save shows typecheck errors inline; breaking-change refusal offers
      Save as new action; where used; history with Revert; lifecycle buttons (Approve/Retire/Restore/Delete with refusal
-     reasons); Run dependents; "changed outside Genesis" banner with diff + Adopt.
+     reasons); **Replay** (a `library-replay` job: spinner + Cancel, then the result; 51-10); every save sends the
+     page's `expected_row_version` and a 409 stale reloads the item; Run dependents; "changed outside Genesis" banner
+     with diff + Adopt.
+   - **Record workflow readiness:** when recording start returns problems (no QA, no test user for the role, the
+     `genesis-test-authoring` skill or the `action-capture` workflow not installed), the dialog lists them, each with
+     its fix (a link to Settings → Skills / the Catalog install).
    - **Regression:** members grouped by data setup (shared and private instances), referenced feature scenarios with
      their feature, own regression scenarios, non-automated flagged; add reference (scenario picker), new regression
      scenario, reorder; latest result + pass-rate trend (lazy chart, L-015); **Run now**. Retired references show

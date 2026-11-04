@@ -96,6 +96,9 @@ wait) so the step survives. Not blocking 51-07 (agent specs are 51-09's).
 
 ## 12. A library replay outside a run is not reaped by the RunManager
 
+> **Taken into 51-10** (2026-11-03): the Replay route ships only as a `library-replay` job with single flight, cancel
+> and retention (51-10 §1). Kept here for the context.
+
 **Context (51-07 §3 Replay).** `TestLibraryService.replay` runs Playwright from the app process (an export under
 `<artifacts>/library-replays/…`, its group in that folder's `.pids`), bounded by a hard timeout and reaped in a
 `finally`; a server crash mid-replay is covered only by the startup `reap_stale_replays`. It also has no
