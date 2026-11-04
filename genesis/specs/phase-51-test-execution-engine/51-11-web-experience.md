@@ -99,3 +99,130 @@ docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md", "t
 code     = ["genesis/web/src/features/testing/**", "genesis/web/src/features/applications/**", "genesis/web/src/features/settings/**", "genesis/web/src/features/workbench/**", "genesis/web/src/features/test-design/**", "genesis/web/src/types/**"]
 upstream = ["51-10"]
 ```
+
+## As built (2026-11-04, genesis-dev)
+
+**Task restated.** Build every Phase 51 screen in `genesis/web` on the existing design system, against the 51-10
+contract (§2 table, `web/src/types/testing.ts`, the 42 fixtures): the application Testing tab and its four views, the
+item, case-script and execution pages, the D23 / library-replay job polling, the Settings changes, the Workbench
+Verification flow, the story page Verification section, the Phase 49 page additions and the header badge. Web only;
+change a backend shape only for a wrong fixture (none was wrong); don't change any working workflow.
+
+**Applicable rules.** ADR-027/055 (existing primitives and tokens), ADR-028/L-010 (`/api` only in the client),
+ADR-049 (one more application tab), ADR-061/062/068 (lane order only; Design/Implementation untouched), ADR-071 (one
+story page), ADR-036/048 (single Dev), ADR-026 (passwords write-only). Lessons L-011/L-083 (fixtures = contract, real
+shapes), L-014, L-015 (CodeMirror lazy), L-069 (no `<Button asChild>`), L-089 (build and bundle commit as separate
+steps, proven by a rebuild + empty status), L-090 (widths left to 51-12's probe), L-094 (lane consumers grepped).
+
+### Commits (genesis, base `83fa255`, local, not pushed or tagged)
+
+- `8f013be` feat(web,51-11): all source, tests, `package.json` + lockfile (73 files, +6702 / −52).
+- `0170834` build(web,51-11): the rebuilt `web/static` (68 files).
+- Proof (L-089): `npm run build` after the bundle commit, then `git status --short --untracked-files=all` in its own
+  call: empty.
+- genesis-workflows: no change. project-tracker: this As built, `reviews/51-11-review.md`, backlog
+  `phase-51-follow-ups.md` §16–§19.
+
+### Changed (genesis/web)
+
+- **Dependency:** `@codemirror/lang-javascript` 6.2.5 (the one new dependency; CodeMirror 6 itself,
+  `@uiw/react-codemirror`, was already used by `JsonEditor`). Installed from registry.npmjs.org, which the lockfile
+  already uses everywhere (the configured Artifactory host did not resolve). Its own 85 kB `CodeEditor` chunk;
+  `LazyCodeEditor` is the only importer.
+- **Shared:** `lib/api/client.ts` `ApiError.body` = the whole error body (additive; 51-10 §1 puts `problems`,
+  `typecheck`, `code` beside `detail`, which the client used to drop). `lib/api/testing.ts` `testingApi` (every §2
+  route; `reportUrl` is the one absolute `/api` URL, for a new tab or `<img>`). `qk.testing.*`,
+  `qk.workbench.verificationGate`. Breadcrumbs for `…/testing/:section/:key`. Routes `…/testing/actions/:key`,
+  `…/testing/setups/:key`, `…/testing/case-scripts/:caseKey`, `…/testing/executions/:key`.
+- **`features/testing/`:** `hooks.ts` (queries; `useTestingMutation` invalidates testing + testDesign; `useJobRunner`:
+  polls `GET /testing/jobs/{id}` every 2 s, stops on succeeded/failed/cancelled, a 404 just refreshes), `logic.ts`
+  (error-body readers, `VERIFICATION_CODE_MESSAGES`, tones, durations, `groupNotes`, `lineDiff`), `paths.ts`,
+  `TestingTab` (`?view=`), `LibraryView` + `NewItemDialog` + `RecordDialog` + `RecordingBar` + `CapturesPanel`,
+  `ProposalsReview` (shared with the story page), `LibraryItemPage` + `ContractForm` + `CodeEditor`/`LazyCodeEditor`,
+  `CaseScriptPage`, `RegressionView` + `ScenarioPicker` + lazy `PassRateChart`, `ExecutionsView`, `ExecutionPage`,
+  `SetupView` + `setup/*`, `AutomationBadge`, `RegressionBadge`.
+- **Settings:** `EnvironmentsSection` Type select (Dev, QA, UAT, Production, Other; sends `type` only, never
+  `is_dev`; refusals as field errors; the row "Set as dev" kept). `cli/TestingRuntimeCard` at the top of `CliTab`.
+- **Workbench:** `lanes.ts` order (D6), `BoardPage` Deployment → Verification opens `VerificationDialog` (per-code
+  messages, `no_qa` = the F2 warning, the card stays), `StoryCard` verification states, `VerificationSection` on
+  `StoryWorkspacePage`, `types/workbench.ts` helpers.
+- **Phase 49 pages:** case page (automation, read-only script + Edit script, last result), scenario page (data setup
+  picker + changes shared data with the CAS `row_version`, Run, retire confirm "used by the regression suite"),
+  `CasesTable` Automation column, `TestsTab` badges, `TestImpactTab` Run impacted tests + Regression suite group.
+- `types/testing.ts`: `PlanScenario.steps` is `number` (the server sends `len(s.steps)`; the fixture had `2`). The
+  only type correction; a value-shape test now pins it.
+
+### Tests
+
+- Web: vitest **647 passed, 61 files** (510 at 51-10 + 137). New files: `testing/{logic,library,item,regression,
+  executions,setup,phase49,testingTab}.test.ts(x)`, `workbench/verification.test.tsx`,
+  `settings/environments-type.test.tsx`; additions to `contract.test.ts`, `breadcrumbs.test.tsx`, and MSW handlers in
+  `settings`, `applications`, `objectWiki`, `testDesign` tests. Every handler answers with the 51-10 fixtures.
+  jest-axe on every new view and dialog (two popper-menu runs disable only axe's page-level `region` rule).
+- Gates (final, after the review fixes): `tsc --noEmit` clean; `npm run lint` 0 errors (20 warnings, all in files
+  that existed before); `npm run build` OK. No Python changed, so no pytest/ruff run.
+- **Not run:** a real browser, real QA, a real recording, replay, verification run or gate; jsdom computes no layout
+  (L-090). These are 51-12's.
+
+### Review
+
+`reviews/51-11-review.md`. First pass **NEEDS_CHANGES**: major 1 (a queued Verification card showed nothing and was
+not locked; the test used a shape the backend never sends, L-083), minors 2–8, nits 9–14. Fixed 1–6, 8, 9–13 with
+tests; 7 and 14 deferred (below). Re-review **NEEDS_CHANGES**: R1 major (the lock from fix 1 locked a never-launched
+card for good, because the board read can't tell queued from never launched), R3 nit (sort). Fixed with the
+reviewer's option (b), web-only. Second re-review **SHIP** (647 passed, fresh build identical to `web/static`).
+
+### Decisions / deviations
+
+No ADR deviation. **Bold = for 51-12 / 51-13.**
+1. **Verification card "Not started" does not lock** (review R1, option b). Queued and never-launched look the same
+   on the board read, so the card shows a neutral "Not started" with an either-way tooltip and stays movable; it
+   locks only while a run is pending/running/at a gate. Backlog §16 (needs a board-read field).
+2. **CLI card placement.** apwt is vendored in genesis, not a registry CLI, so it has no CLI detail page beside
+   gws/SAIL; the card sits at the top of the CLI tab. The spec's "beside `GwsConnectorCard`" needs a docs amendment.
+3. **No "Open folder".** The contract has no such route; the Setup view shows the workspace path with Copy (§19).
+4. **Scenario page:** `ScenarioDto` has no automated flag or last results; automation is derived from the cases'
+   `automation_status`, last results are not shown (§18). The setup picker maps `setup_id` → key via the setups list.
+5. **Verification read:** no launch problems in the contract; the section says the execution did not complete and
+   links it (§17).
+6. **Record dialog:** the server takes `intent` only, so the name is sent as `"<name> — <intent>"`.
+7. **Report iframe** uses `sandbox="allow-scripts allow-same-origin"`, which on a same-origin URL is no real sandbox
+   (review 7). **51-12: check whether the Playwright HTML report works without `allow-same-origin`; drop it if so.**
+8. A library item's role can be changed but not cleared (`ItemSave.role_key` has no null; review 14).
+9. Library filters and sort run client-side over the two list reads (the API's `area/role/status/q` are unused).
+10. The scenario/case pickers go feature → suite (`testDesignApi.suite`), since no all-scenarios-of-an-app route
+    exists.
+
+**For 51-12 live acceptance (real browser, real QA):** a recording end to end (dialog problems + fix links, the bar
+over the page, Stop → analysing → ready via the 3 s poll, proposals apply); a replay and a cancel on the item page;
+Create workspace / Update runtime / Install Chromium jobs (spinner, error, a server restart mid-job → 404 → refresh);
+the real CodeMirror editor (lazy load, both themes, aria-label), a typecheck 422, Save as new, Adopt after an outside
+edit, Revert; Deployment → Verification with no QA, Testing not ready, a busy story, then a real run: "Not started"
+while queued, Verifying…, a real `escalate` / `escalate_blocked` gate (buttons = the gate's options; Stop leaves the
+card in Verification), the report iframe (decision 7), proposals apply incl. a 400 → refetch; Run impacted tests;
+the header badge after a failed regression; the Settings Type select against the real single-Dev / single-QA /
+host refusals (the field mapping was built from the backend source, not a live 400).
+**For the L-090 width probe (several widths, both themes):** `LibraryView` (7 columns in `overflow-x-auto`),
+`ExecutionsView` (`table-fixed`, `min-w-[900px]`, fixed 110/110/130/110/100/130 px, Totals flexible),
+`CasesTable` (now `min-w-[1072px]`, Automation `w-[116px]`, set by eye), the Setup users table (password input
+`w-44`), the Regression member rows (wrapping badges), the execution page (screenshots, long error `<pre>`), the
+CLI tab with the card above the list, and the dialogs (Record, New item, environment, Verification).
+
+### Lesson candidates
+
+- **A fetch client that keeps only `detail` silently drops every reason a richer error body carries.** 51-10 put
+  `problems`, `typecheck` and `code` beside `detail`; the client's `ApiError` kept `detail` alone, so no screen could
+  have shown them. Keep the whole body on the error, and test a refusal through the real client.
+- **A state derived from "no run yet" is two states.** "Stage, no run" meant both queued and never launched; locking
+  on it trapped a failed launch in the lane with no way out (51-11 R1). Before locking or hiding a control on a
+  derived state, list every backend path that produces the shape; when the read cannot tell them apart, show it
+  neutrally and leave the user a way out.
+
+### Code-map changes
+
+For bible/03 in the "Phase 51" block (genesis-docs): `web/src/lib/api/testing.ts` (`testingApi`),
+`ApiError.body`, `qk.testing` + `qk.workbench.verificationGate`, `web/src/features/testing/**` (the files listed
+under Changed; `useJobRunner`, `ProposalsReview`, `LazyCodeEditor`), `settings/components/cli/TestingRuntimeCard.tsx`,
+`workbench/VerificationDialog.tsx` + `VerificationSection.tsx`, `types/workbench.ts`
+`isVerificationNotStarted`/`isVerifying`/`verificationFailed`/`verificationPassed`, the four new routes and the
+Testing breadcrumb.

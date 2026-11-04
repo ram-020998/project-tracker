@@ -132,3 +132,35 @@ committed refs (set the flag after the commit), or recompute the flag from the r
 not installed: `StoryVerificationService.check` (`not_installed`, 51-09) and `RecordingService.start` (the
 `action-capture` workflow, 51-10). Add a small public `RunManager.is_installed(workflow_id) -> bool` (or
 `installed_meta`) and use it in both, so a change to `_meta` cannot silently break the refusals.
+
+## 16. The board cannot tell a queued verification from one that never launched (from 51-11 review R1)
+
+The board read gives a Verification card only `verification_story_stage_id`, `verification_run_id`,
+`verification_run_status` and `verification_status`. The run is bound at launch (`verification_service.py` `_launch`
+→ `prepare`), so a verification **queued** behind another execution and one that **never launched** (`pump` → `_fail`,
+cancelled while queued, lost across a restart) look the same: a stage, no run, stage `draft`/`in-progress`. Neither
+`_fail` nor a queued cancel touches the stage. 51-11 therefore shows a neutral "Not started" and does **not** lock the
+card (`types/workbench.ts` `isVerificationNotStarted`), so a failed launch stays movable. Fix: annotate board cards
+with `verification_active: "queued" | "running" | null` from `StoryVerificationService.active` (a 51-10 contract
+addition + fixture), or move the stage to `failed` when a verification execution fails to launch or is cancelled while
+queued; then show "Queued" and lock only on a real queue entry.
+
+## 17. The story verification read carries no launch problems (from 51-11)
+
+After a failed launch, 51-11 §2.5 wants "the newest verification execution with its problems", but
+`GET …/stories/{story}/verification` returns the execution row only (the launch problems sit in the execution's totals
+or nowhere). The Verification section says "This execution did not complete — open it". Add the launch problems to the
+read (and its fixture) and render them.
+
+## 18. The Phase 49 scenario read has no automation flag or last results (from 51-11)
+
+51-11 §2.6 asks the scenario page for "automated flag, last results". `ScenarioDto` has neither (only
+`RegressionScenario` carries `automated`, `last_result`, `flaky`). The scenario page derives automation from its cases'
+`automation_status` and shows no last results. Add `automated`, `not_automated_reason`, `last_result` (and `flaky`) to
+the one scenario DTO builder (list = get, L-039) and its fixtures.
+
+## 19. No "Open folder" route for the testing workspace (from 51-11)
+
+51-11 §2.1 Setup lists "workspace path + Open folder". The contract has no route that opens a folder, so the Setup
+view shows the path with a Copy button. Add a loopback-only `POST …/testing/workspace/open` (macOS `open`, never a
+user-supplied path) if wanted.
