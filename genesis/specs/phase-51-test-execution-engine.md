@@ -58,6 +58,11 @@ execution engine with results, and the Workbench Verification lane.
 | D18 | One phase, one release. |
 | D19 | `playwright-appian` joins the agent system as its own repo; its `planning/` stays the home of its internal design; publish it before the Genesis release that vendors it. |
 | D3d | The user's global Kiro MCP servers load into every workflow turn with full trust (51-03 P10) — accepted with D3c; Phase 52 fixes it. |
+| D20 | A code change resets a Ready library item to Draft (audited `changed` edge in `LIBRARY_TRANSITIONS`); Replay re-approves; status never gates runs; the audit row does not name the commit (git history does). |
+| D21 | The regression suite keeps losses visible: retired references stay, shown and skipped; deletes that remove references or steps write suite change notes (m0027). |
+| D22 | ADR-082 amends ADR-021 as well as ADR-068: the Verification confirm / schedule toggle replace `pre_mutation` gates for QA data writes. |
+| D23 | Long setup actions (workspace create/update, Chromium install; library replay) run as background jobs: 202 + a polled status. |
+| D24 | A verification run executes committed HEAD plus its own recorded overlay; agent work reaches the library only when proposals are accepted. |
 
 Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`): `51-01-findings.md` §8.
 
@@ -126,7 +131,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 
 | Sub-phase | Repo | Content |
 |---|---|---|
-| 51-01 | project-tracker | Findings, decisions D1–D19, defaults F1–F14 |
+| 51-01 | project-tracker | Findings, decisions D1–D24 (D3a–D3d), defaults F1–F14 |
 | 51-02 | project-tracker (agent-system) | Repo list, new `browser-testing` area + gates, agent allow rules, release flow, invariants |
 | 51-03 | genesis (spike code + notes), playwright-appian (D-114, 0.3.0) | **DONE (SHIP 2026-11-02):** sandbox evidence S1/S5/S6 (ADR-083 / Phase 52 input); the D3c loop L1, S4, S11 PASS; S8/S9 via `record start --browser/--state` (0.3.0, unreleased); S10 timings; P10 = global Kiro MCP servers load into workflow turns |
 | 51-04 | genesis | **DONE (SHIP 2026-11-03, genesis `316ac5a`):** m0026 (catalog, executions, results, test users, settings, suite rebuild; DB v26), runner flag `foreign_keys_off`, `kb/testexec_store.py`, `ACT-`/`DS-`/`TE-` ids, library lifecycle, `adr-drafts.md` |
