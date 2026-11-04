@@ -49,7 +49,7 @@
 
 ## 2. Gates
 
-genesis: `pytest` + `ruff`; fresh DB → v26 and v25 → v26 with data. web: `lint`, `typecheck`, `vitest`, `npm run build`
+genesis: `pytest` + `ruff`; fresh DB → v27 and v25 → v27 with data. web: `lint`, `typecheck`, `vitest`, `npm run build`
 byte-identical to the committed `web/static`. genesis-workflows: `validate_library`, `validate_skills`, `pytest
 workflows`. playwright-appian: `npm run lint && npm run typecheck && npm test` (+ `npm run build`). project-tracker:
 agent-system tests, `genesis-ctx lint`.
@@ -72,12 +72,13 @@ environment** with test users for two roles — provided by the user)
 | 11 | Test Impact → pick objects → Run impacted tests | Only scenarios containing affected automated cases run; uncovered cases listed |
 | 12 | Schedule daily at a near time; keep Genesis running | `regression-run` starts it once; header badge updates; turning schedule off stops it |
 | 13 | Workbench: drag a story Code Review → Deployment → Verification with no QA env configured (temporarily) | F2 warning; card stays in Deployment |
-| 14 | With QA: drag to Verification; confirm | Run explores as each affected role, authors scripts, executes; report on the story page; passing story → Done; proposals listed |
+| 14 | With QA: drag to Verification; confirm | Run explores as each affected role, authors scripts, executes; report on the story page; passing story → Done; proposals listed. **Re-measure F10 on this write flow:** record each `explore` and `author` turn's duration, tool calls and credits against the 900 s `turn_timeout` (51-09 As built), and change F10 if a turn comes within 20 % of it |
 | 15 | A story whose feature is genuinely broken in QA | Product defect → card back to Implementation with the defect list |
 | 16 | QA unreachable mid-run (block the host) | Blocked → escalation gate with Retry / Send back / Accept |
 | 17 | Accept verification proposals | One commit; library + regression updated |
 | 18 | Cancel a running execution | Run cancelled; no Chromium/apwt daemon left (`ps`) |
-| 19 | Security spot checks | A verification turn's shell commands (turn explorer / `run_events`) show no credential in any output; the sessions used are the program-opened ones on the QA host |
+| 19 | Security spot checks | A verification turn's shell commands (turn explorer / `run_events`) show no credential in any output; the sessions used are the program-opened ones on the QA host; grep every run folder of the acceptance runs for each test password (raw, JSON- and XML-escaped), **including a failed or cancelled verification run's `apwt-out`**, which cleanup does not scrub (51-09 As built). Any hit is a blocker |
+| 22 | Known limits, confirm they hold as accepted | A paused or gated verification or execution does not hold the one-at-a-time queue (51-06/51-09 As built); resuming it while another runs overlaps them, and nothing else breaks |
 | 20 | **Real-browser width probe (L-090):** 1280 / 1440 / 1920 px, light + dark — Library table, Executions table, execution results tree, Regression grouping, Setup users table | No clipped key/name columns, no horizontal scroll ≥ 1280; measured widths recorded |
 | 21 | Restart `serve` while an execution is queued and one is running | Startup reconcile: finished one finalized, queued one starts (L-058, L-097) |
 

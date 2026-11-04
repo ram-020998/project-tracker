@@ -56,9 +56,17 @@ and execution pages, the Settings changes, the Workbench Verification flow and t
    Chromium, vendored `playwright-appian` version, problems with fixes).
 4. **Workbench:** lanes in the API's new order (D6); dragging Deployment → Verification opens a confirm dialog ("The
    story's changes are deployed to QA?" + readiness problems); with no QA environment the dialog is the F2 warning and
-   the card stays; card states while queued/running/failed/passed (the Design/Implementation patterns).
-5. **Story page** (ADR-071 canonical page): a **Verification** section — status, the report (iframe of the served
-   HTML), defects when sent back, proposals review (as the Library panel).
+   the card stays; a start refusal is a 409 with top-level `{detail, problems, code}` — show `problems` and a message
+   per `code` (`no_qa`, `no_cases`, `no_scenario`, `not_installed`, `not_ready`, `busy`); card states while
+   queued/running/failed/passed (the Design/Implementation patterns; queued = `active.status == "queued"`).
+5. **Story page** (ADR-071 canonical page): a **Verification** section built on 51-09's read (stage, run status,
+   execution, active, report, defects, result, proposals; after a failed launch, the newest verification execution with
+   its problems) — status, the report (iframe of the served HTML), defects when sent back (from the read's `defects`,
+   with each failed result's triage class), and the proposals review (as the Library panel) for the item kinds
+   action/setup (new or update), case, scenario_setup, regression and regression_scenario, each with code and hash.
+   After a 400 on apply, refetch before retrying (the decisions were stored, so `row_version` moved). A run waiting at a
+   gate shows the gate's own options, not hard-coded buttons: `escalate_blocked` offers Retry / Send back / Accept as
+   passed, `escalate` offers Send back / Accept as passed / Stop; Stop leaves the card in Verification.
 6. **Phase 49 pages:** case page — automation status, case script (read-only view + "Edit script" to an editor page),
    last results; scenario page — data setup picker + "changes shared data", automated flag, last results, Run; feature
    Tests tab — automation badges; **Test Impact** tab — **Run impacted tests** + the "not covered by automation" list,
