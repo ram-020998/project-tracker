@@ -15,11 +15,13 @@ and execution pages, the Settings changes, the Workbench Verification flow and t
    Feature code in `web/src/features/testing/**`.
    - **Library:** actions and data setups table (key, name, area, role, status, used by, last result), filters, search;
      **New action**, **Record workflow** (dialog: role, name + intent, start page; then a fixed "Recording as <role>…
-     Stop" bar while the capture is `recording`); a "Proposals to review" panel per capture (new / reused / updates,
-     code diff, replay result, accept/reject per item, Accept all).
+     Stop" bar while the capture is `recording`; start answers 409 for a conflict such as a recording already running,
+     400 for a bad request); a "Proposals to review" panel per recording capture (`/testing/captures`, recording
+     captures only; verification proposals stay on the story routes) with new / reused / updates, code diff, replay
+     result, accept/reject per item, Accept all, and Discard only while the capture is `recording` or `ready` (else 409).
    - **Item page** (`/applications/:appUuid/testing/actions/:key`, `/setups/:key`): contract form; **CodeMirror 6**
-     editor, lazy-loaded on this route only (L-015); Save shows typecheck errors inline; breaking-change refusal offers
-     Save as new action; where used; history with Revert; lifecycle buttons (Approve/Retire/Restore/Delete with refusal
+     editor, lazy-loaded on this route only (L-015); Save shows typecheck errors inline (422 `{detail, typecheck}`);
+     breaking-change refusal offers Save as new action (`POST …/{key}/save-as-new`, 51-10); where used; history with Revert; lifecycle buttons (Approve/Retire/Restore/Delete with refusal
      reasons); **Replay** (a `library-replay` job: spinner + Cancel, then the result; 51-10); every save sends the
      page's `expected_row_version` and a 409 stale reloads the item; Run dependents; "changed outside Genesis" banner
      with diff + Adopt.
@@ -45,9 +47,9 @@ and execution pages, the Settings changes, the Workbench Verification flow and t
      warning); regression schedule (off / daily / weekly, days, time); runtime status (Node, Chromium + Install,
      workspace path + "Open folder", Update testing runtime). Install Chromium, Create workspace and Update testing
      runtime start a setup job (D23): the button shows a spinner and polls `GET /testing/jobs/{id}` (TanStack Query
-     `refetchInterval`, about 2 s, stopped on a terminal status), then refreshes the setup read; a failure shows the
-     job's error; a 404 (server restarted) just refreshes the setup read. The Settings → CLI card's Install uses the
-     same job.
+     `refetchInterval`, about 2 s, stopped on `succeeded`, `failed` or `cancelled`, 51-10 As built), then refreshes the
+     setup read; a failure shows the job's error; a 404 (server restarted) just refreshes the setup read. The Settings →
+     CLI card's Install uses the same job.
 2. **Settings → Environments** (`web/src/features/settings/components/EnvironmentsSection.tsx`): the dev switch becomes
    a **Type** select (Dev, QA, UAT, Production, Other); the single-Dev and single-QA rules and the host-collision refusal
    shown as field errors; a type badge in the list (F3). The form sends `type` only and never `is_dev` (51-05 As built

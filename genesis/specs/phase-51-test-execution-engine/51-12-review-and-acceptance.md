@@ -78,9 +78,10 @@ environment** with test users for two roles — provided by the user)
 | 17 | Accept verification proposals | One commit; library + regression updated |
 | 18 | Cancel a running execution | Run cancelled; no Chromium/apwt daemon left (`ps`) |
 | 19 | Security spot checks | A verification turn's shell commands (turn explorer / `run_events`) show no credential in any output; the sessions used are the program-opened ones on the QA host; grep every run folder of the acceptance runs for each test password (raw, JSON- and XML-escaped), **including a failed or cancelled verification run's `apwt-out`**, which cleanup does not scrub (51-09 As built). Any hit is a blocker |
-| 22 | Known limits, confirm they hold as accepted | A paused or gated verification or execution does not hold the one-at-a-time queue (51-06/51-09 As built); resuming it while another runs overlaps them, and nothing else breaks |
 | 20 | **Real-browser width probe (L-090):** 1280 / 1440 / 1920 px, light + dark — Library table, Executions table, execution results tree, Regression grouping, Setup users table | No clipped key/name columns, no horizontal scroll ≥ 1280; measured widths recorded |
 | 21 | Restart `serve` while an execution is queued and one is running | Startup reconcile: finished one finalized, queued one starts (L-058, L-097) |
+| 22 | Known limits, confirm they hold as accepted | A paused or gated verification or execution does not hold the one-at-a-time queue (51-06/51-09 As built); resuming it while another runs overlaps them, and nothing else breaks |
+| 23 | Setup jobs and library Replay, live (51-10 review) | Install Chromium / Create workspace / Update testing runtime each answer 202 and the UI polls to `succeeded`; a second click returns the running job; a Replay on QA runs as a `library-replay` job, a repeat returns the same job, Cancel ends it `cancelled` with no result recorded and nothing left in `ps`; restarting `serve` mid-job gives 404 and the Setup view refreshes; no password in any job error or result |
 
 ## Context manifest
 
