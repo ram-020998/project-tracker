@@ -109,7 +109,8 @@ child.
 
 ## 13. The D20 audit row does not name the commit
 
-**Context (51-01 D20, 51-07 review m3).** D20 says the `ready --changed--> draft` transition's "reason names the new
+**Context (51-01 D20, 51-07 review m3). Accepted as built by the user 2026-11-03 (D20 amended, Q23); kept here for a
+later phase.** D20 said the `ready --changed--> draft` transition's "reason names the new
 commit". `lifecycle_transitions` (m0013) has no reason column and `LifecycleEvent` no reason field, so the audit row
 carries `changed` + actor + time; the commit is found with `git log` on the item's path (its message names the item).
 Fix: an additive `detail` column on `lifecycle_transitions` (a migration) plus an optional `detail` on

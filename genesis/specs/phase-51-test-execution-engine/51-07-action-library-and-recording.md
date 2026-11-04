@@ -55,8 +55,9 @@ Over `TestWorkspace` (51-05 §3) and `TestLibraryStore` (51-04 §3):
   commit), **run dependents** (an ad-hoc execution of every automated scenario whose steps use the item, via
   `kb_test_refs` transitively).
 - **Approval reset (D20, the 51-04 open point):** save, revert and adopt of a **Ready** item's code also move it to
-  Draft through a new `TEST_TRANSITIONS` edge `(READY, "changed") → DRAFT` via `LifecycleService` (audited; the reason
-  names the commit), in the same workspace-locked operation as the commit. **Replay** on the item page runs the item's
+  Draft through a new edge `(READY, "changed") → DRAFT` via `LifecycleService` (built in `LIBRARY_TRANSITIONS`, As built
+  1; audited with action, actor and time; the commit is found from git history, D20 as amended), in the same
+  workspace-locked operation as the commit. **Replay** on the item page runs the item's
   replay on QA (as for proposals, §5) and, on a pass at the current hash, approves it back to Ready. Status never gates
   executions or authoring. A metadata-only edit keeps the status.
 - Every write path is serialized per workspace and runs off the event loop (L-026): use `TestWorkspace`'s existing
