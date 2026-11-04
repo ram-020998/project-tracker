@@ -96,7 +96,11 @@ story-stage row; the move does not wait for them (D12.6).
 ## 6. Applying proposals
 
 Same apply path as 51-07 §6 (per item / Accept all, one commit) plus the regression items through
-`RegressionService.apply_verification_proposal` (51-08 §2). Accepted case scripts are bound in `kb_test_case_scripts`.
+`RegressionService.apply_verification_proposal(app_uuid, scenario_ids=[…], regression_scenarios=[{title,
+description?, case_ids}])` (built in 51-08, As built 7): it never refuses as a whole and returns what it added, what
+was already referenced and what it skipped (with reasons), and creates proposed regression scenarios as **Draft**.
+Call it after the case scripts are bound, show its three lists in the apply result, and pass `case_ids` of real
+(accepted) cases only. Accepted case scripts are bound in `kb_test_case_scripts`.
 
 ## 7. Tests
 
