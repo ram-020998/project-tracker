@@ -70,8 +70,11 @@ the intent.
 ## 6. Tests
 
 **From 51-15 (As built):** the composed setup must declare its `outputs` literally (a save without them is refused,
-D27); save results carry `changed`; reuse `promote_proven_actions` when the replay passes and `report_url` for its
-report link (D26).
+D27); save results carry `changed`; reuse `promote_proven_actions` when the replay passes, `report_url` for its
+report link (D26), the grid helpers (`web/src/features/testing/grid.tsx`, `grid-logic.ts`) for the library picker,
+and `FakeRunner(evidence=True)` in tests that need report files. The Library's kind filter lives in the URL
+(`?kind=`, `kindFromUrl` and `LIBRARY_KIND_LABEL` in `logic.ts`); the compose capture's "Composed" label goes there
+too.
 
 Generator golden files for a two-role setup; readiness per role; save checks; the dialog (picker, roles, end state,
 jest-axe); the route's refusals; the workflow's nodes with stubbed agent turns (a proposed setup, a `missing` result, a

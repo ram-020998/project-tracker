@@ -53,8 +53,10 @@ its outputs and its replay result, and disables Accept for it while a used actio
 
 **From 51-15 (As built):** a code save is refused unless the contract is declared literally (`outputs` in
 `defineSetup`), so the setup proposal must declare them; save results carry `changed`; reuse
-`promote_proven_actions` for "the actions it used are proven at that code" instead of a second rule, and `report_url`
-(the reports origin, D26) for the replay's report link.
+`promote_proven_actions` for "the actions it used are proven at that code" instead of a second rule, `report_url`
+(the reports origin, D26) for the replay's report link, the grid helpers (`web/src/features/testing/grid.tsx`,
+`grid-logic.ts`) for any list, and `FakeRunner(evidence=True)` (`tests/test_testing_api.py`) in tests that need report
+files.
 
 m0028; the dialog (checkbox, required fields, jest-axe); the API field + fixture; `segment`/`v_segment` with and without
 a request (refusals: two setups, a setup importing an unknown action, inputs on a setup, wrong role); the replay picks
