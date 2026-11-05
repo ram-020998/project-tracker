@@ -183,3 +183,22 @@ the CLI and the fleet tooling still work. A security change to every route, so i
 **Context.** The item and case-script pages' CodeMirror editor has no formatter. A **Format** button (Prettier on the
 TypeScript, run in the workspace so it uses the workspace's own config) would keep library code consistent. A feature
 request, not a defect; Prettier would be a new workspace dev dependency.
+
+## 22. Small leftovers from the 51-15 review (n-1, n-2, n-3, n-5, rn-1, rn-2, rn-3)
+
+From `specs/phase-51-test-execution-engine/reviews/51-15-review.md`, accepted as backlog by the reviewer:
+
+- **n-1** `api/testing.py` (the recordings route) reads `recordings._rm`, a private attribute; pass the run manager in
+  or add a public accessor.
+- **n-2** IPv6 loopback: `serve --host ::1` builds `GENESIS_REPORTS_URL=http://::1:8860` (no brackets) and the reports
+  origin's `Host` allow-list holds `::1:8860`, not `[::1]:8860` (`cli/main.py`, `testexec/reports_origin.py`); the same
+  pattern exists for `GENESIS_API_BASE`. Bracket IPv6 hosts in both.
+- **n-3** `reports_origin.py` reads a whole file (`read_bytes()`, e.g. a `trace.zip`) per request; stream it.
+- **n-5** `report_url` does not check that the file exists, so after the 20-per-app replay retention a setup's
+  `last_replay.report_url` and its inline screenshot 404; check `is_file()` before linking.
+- **rn-1** `web/src/types/testdesign.ts`: the `GET /test-scenarios/{sid}` doc comment now sits above `NoFeatureRef`
+  instead of `ScenarioDetail`; move it back.
+- **rn-2** The 409 for resume/respond of a terminal run is tested at `RunManager` only; add a route test
+  (`POST /api/runs/{id}/resume` on a done run).
+- **rn-3** No test renders the scenario page inside the layout and checks the breadcrumb trail (the page test and the
+  crumb test cover the halves; the 51-15 live check covered the whole).
