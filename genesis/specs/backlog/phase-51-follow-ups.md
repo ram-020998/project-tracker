@@ -177,3 +177,9 @@ only because FastAPI requires `application/json`, which forces a preflight that 
 to their own origin, which brings them down to this same posture, not below it. Fix: refuse mutating `/api` requests
 whose `Origin` (or `Sec-Fetch-Site: cross-site`) is not the app's own origin, with a test per method; check the SPA,
 the CLI and the fleet tooling still work. A security change to every route, so its own phase or Phase 52.
+
+## 21. A Format button for the code editor (51-12 review n3, user suggestion)
+
+**Context.** The item and case-script pages' CodeMirror editor has no formatter. A **Format** button (Prettier on the
+TypeScript, run in the workspace so it uses the workspace's own config) would keep library code consistent. A feature
+request, not a defect; Prettier would be a new workspace dev dependency.

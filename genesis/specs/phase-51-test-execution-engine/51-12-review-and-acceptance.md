@@ -28,7 +28,7 @@
    files or logs (51-03 S4 recipe followed); no new node runs with `--trust-all-tools` beyond today's behaviour; the
    accepted risk is written into ADR-083 and Phase 52 is referenced.
 7. **Reliability** — the ADR-011 trio on every agent node; healing bounds (F10); `validate_library` green. The
-   QA-writing workflows (`test-execution`, `action-capture`, `story-verification`) carry no `pre_mutation` gate
+   QA-writing workflows (`test-execution`, `action-capture`, `story-verification`, `setup-composer`) carry no `pre_mutation` gate
    (ADR-082 amends ADR-021, D22), and the HITL lint passes them as written.
 8. **Lifecycle** — library items and scenarios change status only through `LifecycleService` (ADR-050); retire/delete
    preconditions; contract rule (D16.5).
@@ -49,12 +49,12 @@
 
 ## 2. Gates
 
-genesis: `pytest` + `ruff`; fresh DB → v27 and v25 → v27 with data. web: `lint`, `typecheck`, `vitest`, `npm run build`
+genesis: `pytest` + `ruff`; fresh DB → v28 and v25 → v28 with data. web: `lint`, `typecheck`, `vitest`, `npm run build`
 byte-identical to the committed `web/static`. genesis-workflows: `validate_library`, `validate_skills`, `pytest
 workflows`. playwright-appian: `npm run lint && npm run typecheck && npm test` (+ `npm run build`). project-tracker:
 agent-system tests, `genesis-ctx lint`.
 
-## 3. Live acceptance (local `genesis serve`, the three workflows installed, a real tracked app, a **real QA
+## 3. Live acceptance (local `genesis serve`, the four workflows installed, a real tracked app, a **real QA
 environment** with test users for two roles — provided by the user)
 
 | # | Step | Expected |
@@ -84,6 +84,16 @@ environment** with test users for two roles — provided by the user)
 | 23 | Setup jobs and library Replay, live (51-10 review) | Install Chromium / Create workspace / Update testing runtime each answer 202 and the UI polls to `succeeded`; a second click returns the running job; a Replay on QA runs as a `library-replay` job, a repeat returns the same job, Cancel ends it `cancelled` with no result recorded and nothing left in `ps`; restarting `serve` mid-job gives 404 and the Setup view refreshes; no password in any job error or result |
 | 24 | Report iframe isolation (51-11 As built): open an execution's Playwright report on the execution page and the story page | The iframe works **without** `allow-same-origin`. If the report needs it, it must be served from a different origin than the SPA (with `allow-same-origin` on a same-origin URL the sandbox does nothing, so report scripts could call `/api`); record which. A report that can reach `/api` is a blocker |
 | 25 | Settings → Environments against the live backend (the 51-11 field mapping was built from source) | The Type select's single-Dev, single-QA and host-collision refusals show as field errors with the server's messages |
+| 26 | Record with **Also make a data setup** ticked (name + end state "an evaluation in In Progress; output its id") (51-16, D34) | Proposals: the actions plus one setup that uses them in order, `unique()` values, the id as an output; the capture replay runs the setup; Accept with an action rejected is refused naming it; Accept all → one commit, the setup and its actions Ready; a scenario using the setup passes in Run now |
+| 27 | Testing → New data setup → **Compose with AI**: pick a setup and an action of a second role, end state "an evaluation in Approved" (51-17, D35, D36) | A composed two-role setup (`roles: [...]`) proposed with its added items listed, replayed as both roles, accepted Ready; a scenario on it passes. A second compose whose end state needs a step no library item does ends `missing` with that step named and **Record workflow** prefilled |
+
+### Re-run scope (after 51-15–51-17)
+
+The re-run repeats §1 and §2 on the whole Phase 51 diff and runs **every** §3 step, including the ones the first pass
+could not run (12, 13–17 with the F10 re-measure, 19, the rest of 23 and the Verification dialog part of 20), and
+re-checks each first-pass finding against its 51-15 fix. Clean up the first pass's leftovers first, with the user:
+the `example-qa2` environment, `DS-000002`, `ACT-000005`, the edited `TC-000007`/`TC-000017` scripts (the user decides
+whether to revert them), and the "Genesis 51-12 regression" evaluations in QA (the user, in Appian).
 
 ## Context manifest
 
@@ -93,5 +103,5 @@ adrs     = ["ADR-001", "ADR-011", "ADR-012", "ADR-029", "ADR-050", "ADR-061", "A
 lessons  = ["L-058", "L-069", "L-088", "L-089", "L-090", "L-092", "L-093", "L-094", "L-097"]
 docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md", "tracker:agent-system/skills/genesis-live-acceptance/SKILL.md"]
 code     = ["genesis/genesis/testexec/**", "genesis/genesis/api/testing.py"]
-upstream = ["51-02", "51-03", "51-04", "51-05", "51-06", "51-07", "51-08", "51-09", "51-10", "51-11", "51-14"]
+upstream = ["51-02", "51-03", "51-04", "51-05", "51-06", "51-07", "51-08", "51-09", "51-10", "51-11", "51-14", "51-15", "51-16", "51-17"]
 ```

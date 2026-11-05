@@ -12,11 +12,11 @@
    CI variables (L-100).
 2. **Vendor** that exact tarball into `genesis/genesis/testexec/vendor/`, update `VENDORED_APWT_VERSION` + sha256, and
    the workspace template; re-run the genesis tests that use it.
-3. **genesis v0.81.0** (minor; m0026 + m0027, DB 25 → 27): version in `pyproject.toml`, `create_app`, `web/src/version.ts`;
+3. **genesis v0.81.0** (minor; m0026–m0028, DB 25 → 28): version in `pyproject.toml`, `create_app`, `web/src/version.ts`;
    `npm run build` + commit `web/static/` as separate steps (L-089); verify the release commit contains every changed
    file, including the vendored tarball as package data (L-056, L-048); tag; push on go-ahead; CI green (genesis,
    frontend, clean-install).
-4. **genesis-workflows v0.25.0**: `test-execution`, `action-capture`, `story-verification` (each v0.1.0) + `registry.json`
+4. **genesis-workflows v0.25.0**: `test-execution`, `story-verification`, `setup-composer` (each v0.1.0) and `action-capture` (v0.2.0, 51-16) + `registry.json`
    entries + skill `genesis-test-authoring` in `skills-registry.json`; pins on `genesis.git@v0.81.0` (+
    `#subdirectory=packages/<name>`, gate 9, L-057); CI green. The pin move is **required**, not only tidy: since 51-07
    the genesis-workflows tests import Phase 51 genesis modules (`testexec`, `integrations/apwt`), so a pin on v0.80.0
@@ -25,9 +25,12 @@
 ## 2. Deploy
 
 Never restart while a run is active. Fleet update as usual (`gsm provision --all --no-mcp --no-env --force`, `gsm
-restart --all`); `genesis install test-execution action-capture story-verification` and the `genesis-test-authoring` skill install on
+restart --all`); `genesis install test-execution action-capture story-verification setup-composer` and the `genesis-test-authoring` skill install on
 each instance (recording refuses to start without both the skill and `action-capture`, 51-07 As built 8); verify
-`/openapi.json` `info.version` = 0.81.0 and DB v27. The `userb` instance keeps reading `environments.json` through the
+`/openapi.json` `info.version` = 0.81.0 and DB v28. **Fleet state before the release (51-12 review O1):** the main instance has been running
+Phase 51 code from the editable dev venv, on DB v27, since 2026-11-04 (its `/openapi.json` still says 0.80.0); userb
+runs pre-Phase-51 code on DB v25. `context/state/current.md` does not say so; record the real state in the release's
+As run and let genesis-docs correct it. The `userb` instance keeps reading `environments.json` through the
 `is_dev` mirror (51-05 §5). Node ≥ 20 and Chromium are per machine: note them in the user's checklist.
 
 ## 3. Docs write-back (genesis-docs)
@@ -37,9 +40,9 @@ each instance (recording refuses to start without both the skill and `action-cap
   per-app cadence inside `regression-run`'s options (51-06 §8).
 - **Areas:** extend `browser-testing` (51-02) with every new path; map `genesis/genesis/testexec/**`,
   `api/testing.py`, `integrations/apwt/**`, `chat/story_verification_finalizer.py`,
-  `web/src/features/testing/**`, the three workflows and the skill `genesis-test-authoring`
+  `web/src/features/testing/**`, the four workflows and the skill `genesis-test-authoring`
   to their areas so `check` routes them.
-- `context/state/current.md` (versions incl. `playwright-appian`, DB v27, test counts, "what works": Testing tab,
+- `context/state/current.md` (versions incl. `playwright-appian`, DB v28, test counts, "what works": Testing tab,
   environment types, Verification lane, lane order), code map, `progress/phase-51-test-execution-engine.md`,
   `changelog.md`, README row 51 → SHIPPED, tracker §6, `bible/08` §9 pointer to the new
   `specs/backlog/phase-51-follow-ups.md` (Deferred list from the umbrella §9 + anything found in the build), lessons via

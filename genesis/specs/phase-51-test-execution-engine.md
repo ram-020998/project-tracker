@@ -3,7 +3,7 @@
 > **Status:** SPEC-DRAFTED 2026-11-02 · **Author:** genesis-spec agent.
 > Sub-specs: `phase-51-test-execution-engine/51-01..51-13`. Findings (code facts, research, every decision):
 > `51-01-findings.md`.
-> Repos: **genesis** (backend + web, migrations **m0026** + **m0027**), **genesis-workflows** (three new workflows + one skill),
+> Repos: **genesis** (backend + web, migrations **m0026**–**m0028**), **genesis-workflows** (four new workflows + one skill),
 > **playwright-appian** (joins the agent system, D19; additive changes as needed), **project-tracker** (agent system).
 > Proposed ADRs: **ADR-081** (test automation architecture), **ADR-082** (the QA environment and test data writes),
 > **ADR-083** (Phase 51 browser agents drive `apwt` through Kiro's shell on program-owned QA sessions; isolation
@@ -64,6 +64,17 @@ execution engine with results, and the Workbench Verification lane.
 | D23 | Long setup actions (workspace create/update, Chromium install; library replay) run as background jobs: 202 + a polled status. |
 | D24 | A verification run executes committed HEAD plus its own recorded overlay; agent work reaches the library only when proposals are accepted. |
 | D25 | A queued verification is cancelled when its card leaves Verification (and re-checked at launch); board cards show Queued (movable; dragging out asks first, Q25) / Verifying (locked) / Not started from `verification_active` (51-14). |
+| D26 | Playwright reports are served from a second loopback origin with no `/api` (51-12 B2). |
+| D27 | An action's or setup's contract lives only in its code; the item page shows it read-only; no-op saves say "No changes" (51-12 MJ2). |
+| D28 | Only data setups replay alone; an action becomes Ready by passing in use (51-12 m5). |
+| D29 | A setup's Replay shows its report and failure screenshot on the item page (51-12 m10). |
+| D30 | Testing has at most two navigation layers; Library's kind switch becomes a filter (51-12 m11c). |
+| D31 | Every Testing list follows the Stories grid pattern (51-12 m11b). |
+| D32 | The execution page is restructured like the other detail pages, with View run (51-12 m11d, m9). |
+| D33 | Two data-setup features join Phase 51: record-as-setup (51-16) and Compose with AI (51-17); the phase finishes everything. |
+| D34 | A recording makes a data setup only when the Record dialog's checkbox asks, with a name and end state. |
+| D35 | The setup composer uses library items only and names a missing step; no agent browser. |
+| D36 | A data setup may span several roles, declared in its code. |
 
 Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`): `51-01-findings.md` §8.
 
@@ -115,6 +126,9 @@ Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`)
 | HTTP API | 51-10 |
 | Web experience | 51-11 |
 | Queued verification guard + board verification state (D25; built after 51-11) | 51-14 |
+| Review fixes from 51-12 + D26–D32 | 51-15 |
+| A recording can also produce a data setup (D33, D34; m0028) | 51-16 |
+| Compose a data setup with AI (`setup-composer`) + multi-role setups (D33, D35, D36) | 51-17 |
 | Review, hardening, live acceptance | 51-12 |
 | Release + docs write-back | 51-13 |
 
@@ -126,7 +140,8 @@ D3c loop — program-owned sessions + agent `apwt` through the shell — cannot 
 → S5 = 51-06 → S6 = 51-07 (genesis + genesis-workflows) → S7 = 51-08 → S8 = 51-09 (genesis + genesis-workflows) → S9 =
 51-10 (API completion + contract fixtures; each backend sub-spec adds its own routes, 51-10 owns the contract table and
 the cross-cutting tests) → S10 = 51-11 → S10b = **51-14** (genesis-dev; D25, added 2026-11-03) → S11 = 51-12
-(genesis-review) → S12 = 51-13 (genesis-release, then
+(genesis-review; **NEEDS_CHANGES 2026-11-04**) → S11a = **51-15** review fixes → S11b = **51-16** → S11c = **51-17**
+(genesis-dev each; D33) → S11d = **51-12 re-run** (genesis-review: §1–§2 on the full diff, every live step) → S12 = 51-13 (genesis-release, then
 genesis-docs). One at a time: they share the genesis checkout. A `playwright-appian` change found in any session is
 made in that repo in the same session (D19), with its own tests, and recorded in the sub-spec's As built.
 
@@ -134,7 +149,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 
 | Sub-phase | Repo | Content |
 |---|---|---|
-| 51-01 | project-tracker | Findings, decisions D1–D25 (D3a–D3d), defaults F1–F14 |
+| 51-01 | project-tracker | Findings, decisions D1–D36 (D3a–D3d), defaults F1–F14 |
 | 51-02 | project-tracker (agent-system) | Repo list, new `browser-testing` area + gates, agent allow rules, release flow, invariants |
 | 51-03 | genesis (spike code + notes), playwright-appian (D-114, 0.3.0) | **DONE (SHIP 2026-11-02):** sandbox evidence S1/S5/S6 (ADR-083 / Phase 52 input); the D3c loop L1, S4, S11 PASS; S8/S9 via `record start --browser/--state` (0.3.0, unreleased); S10 timings; P10 = global Kiro MCP servers load into workflow turns |
 | 51-04 | genesis | **DONE (SHIP 2026-11-03, genesis `316ac5a`):** m0026 (catalog, executions, results, test users, settings, suite rebuild; DB v26), runner flag `foreign_keys_off`, `kb/testexec_store.py`, `ACT-`/`DS-`/`TE-` ids, library lifecycle, `adr-drafts.md` |
@@ -146,15 +161,18 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 | 51-10 | genesis | **DONE (SHIP 2026-11-03, genesis `83fa255`):** reconciled contract table (§2, 15 groups of differences in its As built), the 51-07 routes, D23 setup jobs (+ `cancelled`), `library-replay` jobs, `expected_row_version`, recording readiness, the route-order and no-secret tests, `web/src/types/testing.ts` + 42 contract fixtures |
 | 51-11 | genesis (web) | **DONE (SHIP 2026-11-03, genesis `8f013be` + `0170834` web/static):** Testing tab, item pages + lazy CodeMirror editor, Record dialog + bar, proposals review, execution page + report iframe, job polling, Settings type select + testing card (top of the CLI tab), Workbench Verification dialog, story Verification section, Phase 49 additions; `ApiError` keeps the whole error body; backlog §16–§19 |
 | 51-14 | genesis (backend + web) | **DONE (SHIP 2026-11-03, genesis `9b258bb` + `b23337c`/`45e9827`, web/static `c74cbed`/`a1f7f3e`):** moves out of Verification (single, bulk, Design/Implementation start, Remove from board) cancel a queued verification; the lane is re-checked before readiness and again just before the run starts; board `verification_active` in one statement (Queued / Verifying / Not started); D25, backlog §16. **§5 follow-up (Q25): Queued movable with a confirm on drag out — DONE 2026-11-04 (genesis `209297a` + `cca8ff8` web/static, SHIP)** |
-| 51-12 | genesis, genesis-workflows, playwright-appian | Independent review + gates + live acceptance on a real QA environment (incl. width probe, L-090) |
+| 51-15 | genesis, genesis-workflows | Review fixes from 51-12: B1 replay poll loop, B2 reports origin (D26), B3 + MJ3 run-manager stop handling, MJ1/m6 automation status, MJ2 contract from code (D27), D28 actions Ready in use, D29–D32 UI, m1–m4, m8, n1, n2, the stalled capture |
+| 51-16 | genesis, genesis-workflows | A recording can also produce a data setup (D34): Record dialog option, m0028 `request_json`, `action-capture` 0.2.0, setup-first replay, dependency rule on apply |
+| 51-17 | genesis, genesis-workflows | Compose with AI: `setup-composer` 0.1.0 (D35), compose dialog + route, multi-role setups (D36) in `lib/`, generator, readiness and save checks |
+| 51-12 | genesis, genesis-workflows, playwright-appian | Independent review + gates + live acceptance on a real QA environment (incl. width probe, L-090). **First pass NEEDS_CHANGES 2026-11-04** (`reviews/51-12-review.md`); re-run after 51-15–51-17 |
 | 51-13 | all four | Release order, deploy, docs write-back (ADR-081..084) |
 
 ## 8. Release plan
 
 If `playwright-appian` changed: release it first (tag `vX.Y.Z` → its CI publishes) and vendor that exact tarball into
 genesis. **It did change: 0.3.0 (51-03, D-114) is committed but unreleased**, so the release starts with
-`playwright-appian` v0.3.0 (plus anything later sub-specs add). Then **genesis v0.81.0** (minor; m0026 + m0027, DB 25 → 27). Then **genesis-workflows v0.25.0** (`test-execution`,
-`action-capture`, `story-verification`, the `genesis-test-authoring` skill) pinned on `genesis.git@v0.81.0` (L-057).
+`playwright-appian` v0.3.0 (plus anything later sub-specs add). Then **genesis v0.81.0** (minor; m0026–m0028, DB 25 → 28). Then **genesis-workflows v0.25.0** (`test-execution`,
+`action-capture` (0.2.0), `story-verification`, `setup-composer`, the `genesis-test-authoring` skill) pinned on `genesis.git@v0.81.0` (L-057).
 Without the workflows installed, every start returns the friendly "not installed" 409 (L-033). No Hub change. Detail:
 51-13.
 
@@ -197,7 +215,8 @@ machine (F7); 1 worker, 1 retry (F6); schedule off by default (F13); files kept 
   regression-owned scenarios across features).
 - **ADR-082 — The QA environment and test data.** Environments carry a type (Dev, QA, …); all test execution and agent
   browser sessions run on the single QA environment, may create/change/delete application data there through the UI as
-  the application's test users only, never design objects; the Verification confirm and the schedule toggle are the
+  the application's test users only, never design objects; the Verification confirm, the schedule toggle and each
+  run the person starts with a click (Record, Compose, Replay, Run now, Run impacted tests, Run dependents) are the
   approvals. Amends ADR-068 (Implementation stays the only lane that mutates design objects) and ADR-021 (those
   approvals replace `pre_mutation` gates for these writes; D22).
 - **ADR-083 — Phase 51 browser agents and the isolation boundary.** Browser agents drive `apwt` through Kiro's shell

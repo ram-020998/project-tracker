@@ -109,7 +109,9 @@
   view; Settings warns when a username matches the Dev-MCP service account. (4) **Application data through the UI
   only:** sessions are pinned to the QA site with `apwt --allow-host`; no design objects, no MCP write tools, no
   deployments. (5) **Approvals:** the Verification confirm dialog is the single blanket approval for a story's run;
-  turning a regression schedule on is the approval for its scheduled runs; there are no per-step gates and agent
+  turning a regression schedule on is the approval for its scheduled runs; every other run the person starts with a
+  click is its own approval — Record workflow (the `action-capture` replay), Compose with AI (`setup-composer`), a
+  data setup's Replay, Run now, Run impacted tests, Run dependents and an ad-hoc run (D33, D35); there are no per-step gates and agent
   sessions run in `apwt --mode full` (every step lands in the session's action log, which the run keeps). (6) Every
   run uses unique per-run values so runs never collide; there is no automatic cleanup this phase (QA data
   accumulates; cleanup actions can be library actions later). (7) The Deployment lane stays manual (D7): the user
@@ -123,7 +125,7 @@
   **design objects**; QA **application data** written through the UI by the test users is a second, narrower
   sanctioned write, on a different environment. ADR-021: like ADR-068 for the Implementation lane, the Verification
   confirm (and, for scheduled regression runs, the schedule toggle) replaces the `pre_mutation` gate for these writes;
-  `story-verification`, `test-execution` and the `regression-run` job carry no `pre_mutation` gate, and ADR-021's
+  `story-verification`, `test-execution`, `action-capture`, `setup-composer` and the `regression-run` job carry no `pre_mutation` gate, and ADR-021's
   "required before any write" no longer covers QA application data written through the UI as test users. ADR-036/048's
   single Dev environment is unchanged; the
   environment model gains a type. A Settings → Applications "Testing → Setup" view holds the QA site path and the test
