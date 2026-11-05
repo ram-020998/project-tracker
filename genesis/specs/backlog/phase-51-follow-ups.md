@@ -167,3 +167,13 @@ the one scenario DTO builder (list = get, L-039) and its fixtures.
 51-11 §2.1 Setup lists "workspace path + Open folder". The contract has no route that opens a folder, so the Setup
 view shows the path with a Copy button. Add a loopback-only `POST …/testing/workspace/open` (macOS `open`, never a
 user-supplied path) if wanted.
+
+## 20. Cross-origin POSTs to the local `/api` (pre-existing; found deciding 51-12 B2, D26)
+
+**Context.** Genesis has no auth (ADR-026). Any web page the user visits can send a cross-origin POST with no body (or
+a CORS-"simple" body) to `http://127.0.0.1:8760/api/...`; the browser sends it without a preflight, and routes such as
+"run now", "cancel" or "start" act on it even though the page cannot read the response. JSON-body routes are safe
+only because FastAPI requires `application/json`, which forces a preflight that fails. D26 moves Playwright reports
+to their own origin, which brings them down to this same posture, not below it. Fix: refuse mutating `/api` requests
+whose `Origin` (or `Sec-Fetch-Site: cross-site`) is not the app's own origin, with a test per method; check the SPA,
+the CLI and the fleet tooling still work. A security change to every route, so its own phase or Phase 52.
