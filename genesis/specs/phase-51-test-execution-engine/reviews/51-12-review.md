@@ -18,7 +18,7 @@ incl. As built §5), the 51-13 spec, the ADR-081..084 drafts. Evidence files: `/
 | 2 | Committed code only; D24 overlay; nothing agent-authored before accept | **OK** | `_launch` regenerates and commits only the generated paths, then `prepare` exports that commit (`execution_service.py:268-283`); `export` is `git archive` of the commit (`workspace.py:530-541`); the catalog reads case scripts with `ws.show(head, path)` (`execution_service.py:106-110`). Tests `test_uncommitted_script_does_not_count`, `test_regeneration_commits_only_the_generated_paths`. Verification exports HEAD + restores only its stored overlay (`verification_service.py:258-268`); `test_tools_generate_into_the_checkout_and_leave_the_workspace_and_db_alone`, `test_passed_moves_to_done_keeps_the_overlay_and_the_proposals` (asserts workspace HEAD and the script hash unchanged). The `automated` promotion after a verification needs a committed script binding (`finalizer.py:249-252` joins `kb_test_case_scripts`), so an overlay-only case is not marked automated. See **MJ1** for `broken`. |
 | 3 | References, never copies; deterministic generator | **OK** | Generated specs import cases (`tests/fixtures/testexec/generated/suites/DS-000001/002-TS-000007.spec.ts:4-5`, `TC_000001(await pages.ctx(...))`); golden files under `tests/fixtures/testexec/generated/**` checked by `test_testexec_generator.py` (7). |
 | 4 | QA only | **OK** | `ApwtClient` refuses a session without a QA host or on another host before spawning (`integrations/apwt/client.py:193-197`) and passes `--allow-host <QA>` (`:207`); `ApwtFactory.qa_host` refuses without a QA env (`factory.py:36-40`); readiness lists "No QA environment" and a host clash (`settings_service.py:244-250`); environment refusals in `config/environments.py` (`test_environment_types.py`, 18). None of the three workflows declares an MCP server (grep for `mcp`/`servers`/`tools=` in the three `graph.py`: none); no deployment node. |
-| 5 | Secrets | **OK (code)**; live step 19 pending | Passwords live under `testusers-<sha1>` in the SecretProvider (`settings_service.py:34-40`); reach only the Playwright child env (`runner.py:120`); the whole report folder is scrubbed in raw, JSON, `\u`-JSON and XML forms incl. the HTML report's embedded zip and nested trace zips (`runner.py:149-221`); apwt output scrubbed; `secret_values` is a scrub source only (`settings_service.py:207`). Tests: `test_scrub_reaches_the_html_reports_embedded_zip_and_trace_zips`, `test_scrub_catches_json_and_xml_escaped_passwords`, `test_every_phase_51_route_answers_without_a_secret` (`test_testing_api.py:533`), the workflow tests' state/checkpoint/event/file scans. A failed or cancelled verification run's `apwt-out` is not scrubbed by design (51-09 decision 11) — step 19 greps it. |
+| 5 | Secrets | **OK (code)**; live step 19 NOT RUN (skipped by the user) | Passwords live under `testusers-<sha1>` in the SecretProvider (`settings_service.py:34-40`); reach only the Playwright child env (`runner.py:120`); the whole report folder is scrubbed in raw, JSON, `\u`-JSON and XML forms incl. the HTML report's embedded zip and nested trace zips (`runner.py:149-221`); apwt output scrubbed; `secret_values` is a scrub source only (`settings_service.py:207`). Tests: `test_scrub_reaches_the_html_reports_embedded_zip_and_trace_zips`, `test_scrub_catches_json_and_xml_escaped_passwords`, `test_every_phase_51_route_answers_without_a_secret` (`test_testing_api.py:533`), the workflow tests' state/checkpoint/event/file scans. A failed or cancelled verification run's `apwt-out` is not scrubbed by design (51-09 decision 11) — step 19 greps it. |
 | 6 | Agent access to `apwt` (D3c, ADR-083) | **OK** | The prompt prefix is `cd <export> && PLAYWRIGHT_APPIAN_HOME=<run>/.apwt npx --no-install apwt -s <session>` (`client.py:372-377`, used at `story-verification/graph.py:681`); sessions are opened/closed by program nodes (`open_sessions`, `cleanup`); `kiro_node`'s trust-all is unchanged (`packages/genesis-core/genesis_core/nodes/agent.py:298-301`, no Phase 51 diff); ADR-083 draft names the accepted risks, P10 and Phase 52 (`adr-drafts.md:134-220`). |
 | 7 | Reliability; no `pre_mutation` on QA-writing workflows | **OK** | `attach_reliability` on `segment` (`action-capture/graph.py:701`), `explore`, `author`, `propose` (`story-verification/graph.py:1201-1212`); `attach_healing` on `replay/heal` and `triage/heal` with `META.healing {1,1}` (`action-capture/graph.py:86,703`; `story-verification/graph.py:107,1206`); `validate_library` PASSED (17), incl. the reliability and HITL lints, with no `pre_mutation` in the three (grep). |
 | 8 | Lifecycle | **OK** | Library status writes only through `TestLibraryStore.set_status` (`testexec_store.py:491-515`, the `LifecycleService` primitive, re-checks referrers in its transaction); no other `UPDATE … SET status` on actions/setups (grep); `LIBRARY_TRANSITIONS` keeps `TEST_TRANSITIONS` unchanged (`test_testexec_library.py`); captures/executions are CAS run records (51-04 decision 8); story lane edges via `build_story_lifecycle_service().transition` (`story_verification_finalizer.py:104,264-269`). |
@@ -26,7 +26,7 @@ incl. As built §5), the 51-13 spec, the ADR-081..084 drafts. Evidence files: `/
 | 10 | Finalizers | **OK** | Bound-run guards (`story_verification_finalizer.py:153-160`, `finalizer.py` `test_bound_run_guard`), CAS idempotency (`StaleWriteError` → no-op, `:194-197`), startup + on-read reconcile (`:120-148`; `test_get_reconciles_a_finished_run_on_read`, `test_routes_start_409_view_report_and_on_read_recovery`); live tests end runs through the real `RunManager._finalize`, which stores before announcing (`runs/manager.py:146-151`). |
 | 11 | Subprocesses: timeouts + process groups; nothing left after cancel/pause | **OK in genesis; minor gap in the workflows** | `run_bounded`/`start_long_lived` start every child with `start_new_session=True`, record the pgid in `<run>/.pids` and kill the group on timeout (`procs.py:9-11,158-190`); git, npm, tsc, scan-refs, apwt and Playwright all go through them (`workspace.py:126-139,294,416`); `RunManager` reaps `.pids` on finalize, pause and the sweep (`manager.py:154-169,337-344`). **m1:** the workflows' own `tsc` call (`story-verification/graph.py:549-551`, `action-capture/graph.py:279-281`) is a plain `subprocess.run` (no own group, not in `.pids`). Live step 18 checks `ps`. |
 | 12 | DB | **OK** | Fresh → v27 and real-data v25 → v27 (§2); m0027 from a populated v26 is in `test_testexec_regression.py`; the collab feature tombstone takes `BEGIN IMMEDIATE` and writes the note before the generic delete (`collab/service.py:589-596`). Re-reviewed post-SHIP fixes: 51-08 n1 — `run_now` reads the selection once and passes it (`regression_service.py:258-261`, `execution_service.py:190-198`); 51-08 n2 — `RegressionScenarioBody(ScenarioCreate)` (`api/testing.py:339`); 51-04 m1′ — `foreign_key_check` compared on `tuple(r)[:3]` = `(table, rowid, parent)` (`db/runner.py:69,76-78`), with the tolerance + "added violation refused" tests and a rollback test. See nit **n2**. |
-| 13 | Web | **OK, with m2 pending step 24** | Across the 57 changed web source files: no `<Button asChild>`, no `"/api` outside `lib/api/`, no `fetch(` outside `lib/api/`, no direct `lucide-react` import, no raw palette classes (grep); `LazyCodeEditor` and `PassRateChart` are `lazy()` (`LazyCodeEditor.tsx:7`, `RegressionView.tsx:25`); 9 new test files use jest-axe; `contract.test.ts` fixtures. **m2:** the story page report iframe (`VerificationSection.tsx:225`). |
+| 13 | Web | **VIOLATION** — B1, B2 (live), m2, m8 | Across the 57 changed web source files: no `<Button asChild>`, no `"/api` outside `lib/api/`, no `fetch(` outside `lib/api/`, no direct `lucide-react` import, no raw palette classes (grep); `LazyCodeEditor` and `PassRateChart` are `lazy()` (`LazyCodeEditor.tsx:7`, `RegressionView.tsx:25`); 9 new test files use jest-axe; `contract.test.ts` fixtures. **m2:** the story page report iframe (`VerificationSection.tsx:225`). |
 | 14 | `playwright-appian` | **OK** | Additive only: `record start --browser/--state`, optional `start_signed_in` (`trace-schema.ts`, `types.ts`, `trace-keys.ts` +1 optional key each); D-114 recorded (`planning/DECISIONS.md:107`); taxonomy untouched, generator still label-only; gates green (§2). Vendored tarball sha256 `5712a7a5…f0ed` = `VENDORED_APWT_SHA256` (`testexec/vendor.py:17`), its `package.json` is 0.3.0. |
 | 15 | Naming (L-092) | **OK, one nit** | No new `test_*`/`*_test` module outside tests (git diff `--diff-filter=A`); every `Test*` class in `genesis/**` passes the AST scan in `test_testexec_store.py:593`. **n1:** `TestExecutionState` in `genesis-workflows/workflows/test-execution/graph.py:91` has no `__test__ = False`. |
 
@@ -67,7 +67,7 @@ tracker:…`). "No change" = the Phase 51 diff touches nothing the rule governs.
 - [N/A] ADR-005 — no registry change.
 - [N/A] ADR-007 — no role gating change.
 - [N/A] ADR-008 — no change.
-- [OK] ADR-009 — the new workflows keep pause/resume/gates; gates `escalate`/`escalate_blocked` (`story-verification/graph.py:1180-1183`).
+- [VIOLATION] ADR-009 — ad-hoc pause fails a run instead of pausing it (B3, live TE-000011; pre-existing `RunManager` path). The new workflows' designed gates exist (`story-verification/graph.py:1180-1183`).
 - [OK] ADR-010 — state holds pointers (`_doc(ctx, …)` artifacts); bulk in the run folder; workflow tests scan state.
 - [OK] ADR-011 — §1.7.
 - [OK] ADR-012 — worker reaches Genesis only through `ctx.extras['apwt']`; graph.py files import only genesis_core/langgraph.
@@ -133,7 +133,7 @@ tracker:…`). "No change" = the Phase 51 diff touches nothing the rule governs.
 
 **Lessons**
 - [N/A] L-001 — no ACP env change.  [OK] L-002 — `kiro_node` unchanged.  [N/A] L-003 — SSE unchanged.
-- [OK] L-004 — SQLite.  [OK] L-005 — no new event kinds.  [N/A] L-007 — transcript unchanged.
+- [OK] L-004 — SQLite.  [VIOLATION] L-005 — a cancelled run emits two `run.final` (`cancelled`, then `failed`; MJ3).  [N/A] L-007 — transcript unchanged.
 - [N/A] L-008 — unchanged.  [OK] L-009 — async nodes, async checkpointer.  [OK] L-010 — `/api` only.
 - [OK] L-011 — `contract.test.ts` + 42 + 3 fixtures from real responses.  [N/A] L-012.
 - [OK] L-014 — jest-axe matchers via the existing setup.  [OK] L-015 — §1.13.  [N/A] L-016 (live step 14 records metered credits).
@@ -158,8 +158,8 @@ tracker:…`). "No change" = the Phase 51 diff touches nothing the rule governs.
 - [N/A] L-077/L-078/L-079/L-080.  [OK] L-081 — regression schedule off by default, `user_modified` kept.
 - [N/A] L-082/L-084/L-085/L-086.  [OK] L-083 — fixtures from real responses and the real 1.59.1 report.
 - [N/A] L-087.  [OK] L-088 — 51-02 corpora.  [OK] L-089 — settled-bundle proof (§2).
-- **[PENDING]** L-090 — live step 20.  [OK] L-091 — lock first (`BEGIN IMMEDIATE`/CAS).  [OK] L-092 — §1.15.
-- [OK] L-093 — store before announce; real `_finalize` tests.  [OK] L-094 — §1.9.  [N/A] L-095 (no object UUID written).
+- [VIOLATION] L-090 — CasesTable `min-w-[1072px]` set by eye scrolls at 1280 (m8, live probe).  [OK] L-091 — lock first (`BEGIN IMMEDIATE`/CAS).  [OK] L-092 — §1.15.
+- [VIOLATION] L-093 — store-before-announce holds, but cancel's two terminal writes race (MJ3).  [OK] L-094 — §1.9.  [N/A] L-095 (no object UUID written).
 - [OK] L-096 — whole-route-table shadow test (`test_testing_api.py`).  [OK] L-097 — sweeps under `holds_run_owner_lock()` (`api/app.py`).
 - [OK] L-098 — no internal dependency.  [N/A] L-099.  [OK] L-100 — no CI-variables call.
 
@@ -196,7 +196,7 @@ tracker:…`). "No change" = the Phase 51 diff touches nothing the rule governs.
 
 ## §3 Live acceptance
 
-_In progress — filled step by step with the user._
+Run with the user on 2026-11-04/05 (the user drove the browser; the reviewer read DB snapshots, the run log, `ps` and the workspace git log, and ran the step 20/24 real-browser probes).
 
 **Setup (HITL, 2026-11-04).** The user restarted main (:8760) on HEAD `cca8ff8` (pid 64742, 22:46 IST; no run active)
 and configured the QA environment `https://eng-test-gam-automation-site.appianpreview.com` and two test users
@@ -212,10 +212,10 @@ unpushed skill on GitLab; installed `SKILL.md` byte-identical to the checkout). 
 |---|---|---|---|
 | 1 | Environments: Dev via the select, second QA, QA on the Dev host, second Dev | **PASS** (user) | Dev unchanged in `environments.json` (`type: dev`, `is_dev: true`); second QA and host collision refused as field errors. Leftover test row `https://example-qa2.appianpreview.com` type `other` (user to delete). KB-sync re-check not run. |
 | 2 | CLI card; Install Chromium | **PASS** (user) | Card shows node/Chromium/apwt; Chromium 1217 + headless shell under `~/.genesis/testing/browsers`; afterwards no Playwright/npm process, `~/.genesis/testing/jobs/.pids` empty. |
-| 3 | Setup: site, users, workspace | **PASS** (user + reviewer); password grep PENDING | Readiness clear; workspace is a git repo (`b2462a1` Create the test workspace, `b2eeea7` Install the testing runtime) with the template (`lib/`, `suites/`, `cases/`, `setups/`, `actions/`, `vendor/`); `.gitignore` covers `.auth/`, `.env*`, `output/`. |
+| 3 | Setup: site, users, workspace | **PASS** (user + reviewer); password grep **NOT RUN** (skipped by the user) | Readiness clear; workspace is a git repo (`b2462a1` Create the test workspace, `b2eeea7` Install the testing runtime) with the template (`lib/`, `suites/`, `cases/`, `setups/`, `actions/`, `vendor/`); `.gitignore` covers `.auth/`, `.env*`, `output/`. |
 | 4 | Record as role A | **PASS** (user + reviewer) | Capture #1 as `contracting-officer`; `action-capture` run `r-8ee5d311c719` done in 11 min 45 s: `segment` 159 s, 8 tool calls, **4.84 credits** (metered); first replay failed → `heal` **482 s of the 600 s `turn_timeout` (80 %)**, 9 tool calls, **12.72 credits** → replay passed (healing tier worked, ADR-067). See m4. Untracked `captures/1/trace_debug.json` left in the workspace (m3). |
 | 5 | Accept / reject → one commit | **PASS (partial)** | The user accepted all four proposals (no reject exercised live; reject is covered by `test_testexec_recording.py`). One commit `eb64193` "Apply capture #1 …" = the 4 action files + `captures/1/trace.json`; ACT-000001..4 `ready` with audited `draft → ready approve` rows (replay passed at the code's hash). |
-| 6 | Edit an action: type error, save, history, revert, editor themes | **PASS** (user + reviewer) for the parts without a user; **breaking contract while used** and **Save as new** PENDING (nothing references an action yet: 0 case scripts, 0 refs) | On ACT-000002: type-error save refused inline, nothing committed; `e4fd785` Update + audited `ready → draft changed` (17:48:22 UTC); `200f4e0` Revert to `eb64193`; then `draft → ready approve`. CodeMirror legible in light and dark (user). |
+| 6 | Edit an action: type error, save, history, revert, editor themes | **PASS** (user + reviewer) for the parts without a user; the breaking-contract and Save-as-new parts are row 6 (part 2) | On ACT-000002: type-error save refused inline, nothing committed; `e4fd785` Update + audited `ready → draft changed` (17:48:22 UTC); `200f4e0` Revert to `eb64193`; then `draft → ready approve`. CodeMirror legible in light and dark (user). |
 | 7 | Edit outside Genesis → banner; execution before Adopt runs the old code; Adopt commits | **PASS** | "Changed outside Genesis" with the diff (user). The library Replay before Adopt ran the **committed** code: `…/library-replays/<app>/ACT-000003-20261104T175126255585/checkout/actions/evaluations/search-evaluations.ts` has no `// edited in VS Code`, the workspace file has it. Adopt → `7e3bf78` "Adopt ACT-000003 (edited outside Genesis)", status `draft`. |
 | 13–17 | Verification lane, verification run, product defect, gates, proposals | **NOT RUN** (deferred by the user) | No story with Ready cases in a scenario is in a lane that can reach Verification on this KB (Code Review stories have 0 Ready cases). The F10 write-flow re-measure (step 14) stays open. |
 | 6 (part 2) | Breaking contract while used; Save as new | **PASS via the code editor; FAIL via the contract form (MJ2)** | Form: adding a required input to ACT-000002 (used by TC-000007) → two `PUT` 200 "Saved", nothing written (MJ2). Code editor: the same change refused as breaking, naming TC-000007, **Save as new** → ACT-000005 "Open evaluations (tab)" Draft with input `tab` (`69bfa01`); ACT-000002 unchanged, Ready (user + DB). |
@@ -226,6 +226,11 @@ unpushed skill on GitLab; installed `SKILL.md` byte-identical to the checkout). 
 | 11 | Test Impact → Run impacted tests | **PASS** | Object "AS GSS Start Evaluation" (linked only to TC-000007): `TE-000006`/`TE-000007` kind `impact`, trigger `{impact_source: objects, max_hops: 2, changed: [0002ecdd…]}`, selection `[2, 24]` = exactly the scenarios containing TC-000007; `TE-000006` blocked (DS-000002), `TE-000007` passed after the user reset the setup. |
 | 12 | Schedule | **NOT RUN** (deferred by the user) | `regression-run` row: hourly window 00:00–23:00 IST, last tick 2026-11-05 00:00 "no application has a regression schedule". |
 | 20 | Real-browser width probe (L-090) | **PASS except CasesTable at 1280 (m8)**; Verification dialog NOT RUN | `/tmp/genesis-review/51-12/probe20.cjs`, `probe20b.cjs` → `step20/result.json`, `step20b/result.json` + 66 screenshots; Chromium 1217 headless, light + dark (`theme-*` class checked), Tailwind resolved (`table-fixed` computes `fixed`). No page-level horizontal scroll on any screen at 1280/1440/1920, no clipped header or cell in any table. Measured (light = dark): **LibraryView** 982/1142/1350 px — Key 97/112/133, Name 271/315/373, Area 106/123/146, Role 158/184/217, Status 83/96/114, Used by 69/80/94, Last result 199/231/273; **ExecutionsView** (fixed px) Key 110, Kind 110, Trigger 130, Status 110, Duration 100, Started 130, Totals 292/452/660; **Setup users** 940/1100/1308 — Role 186/217/258, Username 193/226/269, Password 126/147/175, Set password 334/391/465, Actions 102/119/141; **CasesTable** (92 rows) Key 96, Title 256/326/258, Type 108, Priority 88, Status 80, Stories 92, Scenarios 100, Review 136, Automation 116 — **at 1280 the table is 1072 px in a 982 px container: horizontal scroll** (m8); execution page, Regression view, CLI tab: no overflow (screenshots); dialogs Record 512×592, New action 448×492, Environment 512×900, all inside the 1000 px viewport, no inner overflow. The Verification dialog needs a card in Deployment (steps 13–17 deferred). |
+| 18 | Cancel a running execution | **FAIL (MJ3)**; no process left **PASS** | User cancelled `TE-000008` (run `r-a99b86a0a4b8`) while running; it ended **`error`** "worker exited abnormally" instead of cancelled. The run log has **two** `run.final` events 0.2 ms apart: `cancelled` (seq 275216) then `failed` (seq 275217); run stored `failed`; the reap ran twice ("stopped 1 leftover process group(s)", `genesis.log` 177143-4); `ps` afterwards: no Playwright/Chromium/apwt. |
+| 21 | Restart `serve` with one running and one queued | **PASS** | `TE-000009` (regression, run `r-93aab6c223e2`) running at the restart → `error` "worker lost across a server restart" (the L-097 startup sweep under the run-owner lock); the queued `TE-000010` (adhoc) started 0.3 s later (05:23:57.34 UTC) and passed. |
+| 19 | Security spot checks (password grep of every run folder) | **NOT RUN** (skipped by the user) | No password file was provided; the static scrub tests (§1.5) stand. Verification runs (whose failed `apwt-out` is not scrubbed) were not run either. |
+| 22 | Known limits: a paused execution does not hold the queue | **FAIL (B3)**; the queue part PASS | User paused `TE-000011` (run `r-daaa91b97cc3`, `POST …/pause` 200, `genesis.log` 177374): the run went **`failed`** "worker exited abnormally" (`run.final{failed}`, seq 275242), execution `error`; it can never be resumed. `TE-000012` (TS-000002 Run) started 26 s later and passed, so a stopped run does not hold the queue. The execution page has **no link to its run** (the user found the run through Runs; m9). The verification half (a paused verification, the collab-pull lane race) NOT RUN (13–17 deferred). |
+| 23 (rest) | Create workspace / Update testing runtime routes | **NOT RUN** | Buttons hidden while not applicable (correct); the reviewer did not call the route without the user's OK. |
 | 24 | Report isolation | **FAIL (B2)** | Real-browser probe `/tmp/genesis-review/51-12/probe24.cjs` → `step24/result.json` + screenshots on TE-000001's report: served with no CSP; **top-level tab** (how the execution page opens it): `fetch('/api/applications')` → 200 with the app's uuid; **iframe `sandbox="allow-scripts"`**: origin `null`, the report renders **blank** (`b-allow-scripts.png`); **iframe `allow-scripts allow-same-origin`**: renders, origin `http://127.0.0.1:8760`, reads `/api/applications` (200). The report needs `allow-same-origin` and is served from the SPA's origin, so it can reach `/api`. |
 | 23 | Setup jobs + library Replay jobs | **FAIL (B1)** for the Replay UI; job backend **PASS** | Replay job `caadd0ad…` 202 → `succeeded` in 28 s (17:51:26 → :54), result `failed` (m5), recorded once in `last_replay`; a repeat click returned the same job (one replay folder). Cancel: job `04478cc9…` 202 → DELETE → `cancelled` in 1 s, no result recorded, no Playwright/Chromium/apwt process in `ps` afterwards, `jobs/.pids` empty. **But the item page never showed either outcome and looped**: 70 job polls + 142 item reads in 10 s after the first replay; 731 job polls + 125 item reads after the cancel; stops only on reload (B1). Install Chromium job PASS (step 2). Create workspace / Update testing runtime are hidden while not applicable (`WorkspaceSection.tsx:38-45`); their routes not exercised live. |
 
@@ -259,6 +264,18 @@ unpushed skill on GitLab; installed `SKILL.md` byte-identical to the checkout). 
   does not today). Same for the story page's iframe (m2). Test: a route test for the header/origin and a real-browser
   check that the served report cannot read `/api`.
 
+- **B3 (runs-worker; pre-existing in `runs/manager.py`, surfaced by live step 22) — Pause fails the run instead of
+  pausing it (ADR-009 mode 2).** `RunManager.pause` kills the worker and stores `paused` (`runs/manager.py:337-344`);
+  the worker dies on SIGTERM with a non-zero code, the supervisor emits `worker_exit` (`runs/supervisor.py:83-87`), and
+  the event handler finalizes `failed` "worker exited abnormally" (`runs/manager.py:240-245`) because `_finalize`
+  refuses only TERMINAL statuses and `paused` is not one (`:142`). The same path exists at `v0.80.0` (`manager.py:224`).
+  Live: TE-000011 paused → `failed`, execution `error`, no resume possible. In this DB no run has ever ended `paused`
+  (`runs` statuses: done 284, failed 111, cancelled 17). ADR-009 makes ad-hoc pause/resume REQUIRED; 51-06/51-09 rely
+  on it (a paused execution or verification is a documented known limit, step 22). **Fix with MJ3:** record the
+  intended stop (pause / cancel) before `w.kill()` and ignore `worker_exit` for a run whose stored status is `paused`
+  or terminal; only an unexpected death fails the run. Regression test with a real subprocess worker that exits
+  non-zero on SIGTERM: pause → `paused`, resume → continues from the checkpoint.
+
 ### Majors
 - **MJ1 (51-06 / 51-09) — a case marked `broken` can never leave `broken`.** `StoryVerificationFinalizer._mark_broken`
   sets `automation_status = broken` for each triage-`script` case (`chat/story_verification_finalizer.py:236-247`). The
@@ -283,6 +300,20 @@ unpushed skill on GitLab; installed `SKILL.md` byte-identical to the checkout). 
   form edit the code's literal metadata (write the contract into the `defineAction` call), or refuse a save whose
   form contract differs from the code's declared one ("the contract is declared in the code — edit it there"), and
   never answer "Saved" for a save that changed nothing; a route + page test with a literal-declared item.
+
+- **MJ3 (51-06; root cause in `runs/manager.py`, pre-existing since `105d2c74`) — Cancel on a running execution ends it
+  `error`, with two `run.final` events (live step 18).** `RunManager.cancel` kills the worker and then calls
+  `_finalize(CANCELLED)` (`runs/manager.py:346-352`); the killed worker's `worker_exit` event, on the reader thread,
+  calls `_finalize(FAILED, "worker exited abnormally")` (`:240-245`) at the same moment. `_finalize`'s guard
+  (`rec.status in TERMINAL`, `:142-143`) is a read-then-write, so both pass it: `run_events` of `r-a99b86a0a4b8` hold
+  `run.final{cancelled}` then `run.final{failed}`, the run is stored `failed`, and `TestExecutionFinalizer` maps it to
+  `error` (TE-000008). Before Phase 51 a cancelled run ending `failed` was cosmetic; now the execution's status, the
+  Executions list, the header badge and the regression trend report a user's cancel as an error, and every observer
+  sees two terminal events (L-005, L-093). **Fix:** make the terminal transition single-shot — a CAS store
+  (`UPDATE runs SET status=? WHERE run_id=? AND status NOT IN (terminal)`) or a per-run lock in `_finalize`, emitting
+  `run.final` only for the write that won; mark the run as cancelling before `w.kill()` so `worker_exit` is ignored.
+  Regression test through the real `RunManager` with a worker that exits non-zero on SIGTERM: one `run.final{cancelled}`,
+  execution `cancelled`.
 
 ### Minors
 - **m1 (51-07 / 51-09, genesis-workflows) — the workflows' `tsc` runs outside the process-group/`.pids` rule (F8).**
@@ -331,12 +362,35 @@ unpushed skill on GitLab; installed `SKILL.md` byte-identical to the checkout). 
   would run them; they turned Automated only after TE-000001. **Fix with MJ1:** set `automated` when a case script is
   saved/accepted/adopted (and back to `not-automated` when its script is deleted); test.
 
+- **m9 (51-11) — the execution page has no link to its run.** `ExecutionPage.tsx` renders no `run_id` link (grep:
+  none in `features/testing/*.tsx`); to pause, inspect or read the run graph the user had to find the run in Runs
+  (live step 22). **Fix:** a "View run" link like the story page's.
+- **m10 (51-07 / 51-10, user question 6) — a library Replay creates no run and shows no evidence.** By design the
+  Replay is an in-app `library-replay` job, not a run and not a `TE-` (51-07 decision 3, 51-10 decision 7): nothing
+  appears in Runs or Executions. Its Playwright report and screenshot are written to
+  `~/Genesis/runs/library-replays/<app>/<key>-<stamp>/report` (live: `ACT-000003-20261104T175126255585`), but the item
+  page shows only the error string (`ReplayResultView`, `LibraryItemPage.tsx:430-442`; the stored `last_replay.detail`
+  keeps raw ANSI escapes such as `\x1b[2m`) and links nothing. **Fix (with genesis-spec):** link the replay's report and
+  failure screenshot from the item page (a report route for replay folders, under the B2 isolation rule), strip ANSI
+  from `detail`; or record replays as ad-hoc executions.
+- **m11 (51-11, user-reported UX) — the Testing screens do not match the application's established patterns.**
+  Reported by the user in live acceptance, to be designed by genesis-spec and built by genesis-dev:
+  (a) Action and Data setup item pages: the card section titles have too little space above them, so they look
+  misaligned; (b) the Library grid does not follow the grid style used elsewhere — the reference is the Stories grid on
+  the feature page (`/applications/<app>/features/6`); (c) the Testing tab adds two more layers of tabs (application
+  tabs → Testing views → in-view sub-tabs; three layers in total): simplify the navigation; (d) the execution page
+  (e.g. `/testing/executions/TE-000012`) needs a better layout. Screenshots of the current state:
+  `/tmp/genesis-review/51-12/step20/{library,execution-page,regression,setup}-1440-light.png`.
+
 ### Nits
 - **n1 (genesis-workflows) —** `TestExecutionState` (`workflows/test-execution/graph.py:91`) is a `Test*` class outside
   tests without `__test__ = False` (L-092 rule; not collected today because no test module imports the name).
 - **n2 (51-04) —** the m1′ tolerance key `(table, rowid, parent)` (`db/runner.py:69,76`) would also hide a *new*
   violation on the same row towards the same parent table through a different FK column. No current migration can
   produce one; a comment would do.
+
+- **n3 (51-11, user suggestion) —** a **Format** button for the code editor (e.g. Prettier on the TypeScript); a
+  feature request for the backlog, not a defect.
 
 ### Observations (not findings against the code)
 - **O1 — the fleet is not in the state `context/state/current.md` describes.** The main instance (:8760, pid 89692,
@@ -347,4 +401,24 @@ unpushed skill on GitLab; installed `SKILL.md` byte-identical to the checkout). 
 - **O2 — playwright-appian test timing.** `tests/cli/agent-act.test.ts` (not in the Phase 51 diff) hit vitest's 5 s
   default under parallel load; green alone and on a full re-run.
 
-## Verdict: PENDING (live acceptance in progress)
+## Verdict: NEEDS_CHANGES
+
+**Gates:** all green (§2). **Static review:** checks 1–4, 6–10, 12, 14 OK; 5 OK in code; 11 and 15 OK with m1 / n1;
+13 violated (B1, B2, m2, m8). **Live acceptance:** PASS — 1, 2, 3, 4, 5 (accept only), 6 (code path), 7, 8, 9, 10, 11,
+21, 25; FAIL — 6 via the contract form (MJ2), 18 (MJ3), 20 at 1280 for CasesTable (m8), 22 (B3), 23 Replay UI (B1),
+24 (B2); NOT RUN — 12, 13–17 (no story with Ready cases in a scenario; the F10 write-flow re-measure with them), 19,
+the rest of 23, the Verification dialog of 20.
+
+**Required before SHIP (each fix with a regression test; then a re-review and the NOT RUN steps live):**
+
+| Finding | Owner sub-spec | Fix in one line |
+|---|---|---|
+| B1 | 51-11 | the item page stops polling after the job ends and shows the result (no stale `replay_job` resume) |
+| B2 | 51-06 / 51-11 (user decision on the approach) | serve Playwright reports from an origin that cannot reach `/api` |
+| B3 | runs-worker (pre-existing; fix with MJ3) | an intended pause is not turned into `failed` by `worker_exit` |
+| MJ1 | 51-06 / 51-09 | `broken` can return to `automated` (passing run of a bound script, script save/accept) |
+| MJ2 | 51-07 / 51-11 | the contract form either edits the code's declared contract or is refused; no false "Saved" |
+| MJ3 | 51-06 + `runs/manager.py` | one terminal transition per run; cancel ends `cancelled` |
+
+Minors m1–m11 and nits n1–n3 should be fixed or moved to `specs/backlog/phase-51-follow-ups.md` by the user's choice
+(m11 and n3 need genesis-spec first). O1 is for genesis-docs/genesis-release (the fleet's real state) before 51-13.
