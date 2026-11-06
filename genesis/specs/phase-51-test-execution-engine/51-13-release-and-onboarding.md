@@ -24,8 +24,9 @@
 
 ## 2. Deploy
 
-Never restart while a run is active. Fleet update as usual (`gsm provision --all --no-mcp --no-env --force`, `gsm
-restart --all`); `genesis install test-execution action-capture story-verification setup-composer` and the `genesis-test-authoring` skill install on
+Never restart while a run is active. Back up each instance's `genesis.db` before the restart (DB 27 → 28, or 25 → 28 on
+userb). Fleet update as usual (`gsm provision --all --no-mcp --no-env --force`, `gsm
+restart --all`); `genesis install test-execution action-capture story-verification setup-composer` and the `genesis-test-authoring` skill (≥ the version 51-17 ships; 0.2.0 after 51-16) install on
 each instance (recording refuses to start without both the skill and `action-capture`, 51-07 As built 8); verify
 `/openapi.json` `info.version` = 0.81.0 and DB v28. **Fleet state before the release (51-12 review O1):** the main instance has been running
 Phase 51 code from the editable dev venv, on DB v27, since 2026-11-04 (its `/openapi.json` still says 0.80.0); userb

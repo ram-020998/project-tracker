@@ -76,6 +76,19 @@ and `FakeRunner(evidence=True)` in tests that need report files. The Library's k
 (`?kind=`, `kindFromUrl` and `LIBRARY_KIND_LABEL` in `logic.ts`); the compose capture's "Composed" label goes there
 too.
 
+**From 51-16 (As built):**
+- `request_json` (m0028) is in place: store the compose request there.
+- **Extend, don't copy, the dependency rule** (`dependency_problems`, `setup_uses`): it assumes `uses` holds proposal
+  ids; a composed setup uses library keys. One rule for both.
+- **The validator pattern** is `action-capture`'s setup checks (the same rules as the library save, 51-16 m-1); reuse
+  them for `v_compose` and extend them — and the library save checks — to accept D36's `roles: [...]`, so both
+  workflows and the save stay in step (keep the cross-repo comparison test passing).
+- Proving the actions a passing replay used goes through `promote_proven_actions`; a reused action whose code changed
+  since the replay is not proven, and neither is the setup that used it (51-16 m-2).
+- **Version gate:** as Record refuses a setup request unless `action-capture` ≥ 0.2.0, the compose route refuses unless
+  `setup-composer` ≥ 0.1.0 and the skill carries its compose section; bump the `genesis-test-authoring` skill to 0.3.0
+  (compose section + `roles`).
+
 Generator golden files for a two-role setup; readiness per role; save checks; the dialog (picker, roles, end state,
 jest-axe); the route's refusals; the workflow's nodes with stubbed agent turns (a proposed setup, a `missing` result, a
 `v_compose` refusal, a failing replay healed); the finalizer through the real `RunManager._finalize`; apply. Gates as

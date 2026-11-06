@@ -51,7 +51,8 @@
 
 genesis: `pytest` + `ruff`; fresh DB → v28 and v25 → v28 with data. web: `lint`, `typecheck`, `vitest`, `npm run build`
 byte-identical to the committed `web/static`. genesis-workflows: `validate_library`, `validate_skills`, `pytest
-workflows`. playwright-appian: `npm run lint && npm run typecheck && npm test` (+ `npm run build`). project-tracker:
+workflows`, plus the cross-repo test that compares `action-capture`'s setup checks with Genesis's save checks (51-16;
+it skips in CI because it needs both checkouts side by side, so run it locally). playwright-appian: `npm run lint && npm run typecheck && npm test` (+ `npm run build`). project-tracker:
 agent-system tests, `genesis-ctx lint`.
 
 ## 3. Live acceptance (local `genesis serve`, the four workflows installed, a real tracked app, a **real QA
@@ -84,12 +85,13 @@ environment** with test users for two roles — provided by the user)
 | 23 | Setup jobs and library Replay, live (51-10 review) | Install Chromium / Create workspace / Update testing runtime each answer 202 and the UI polls to `succeeded`; a second click returns the running job; a **data setup's** Replay on QA runs as a `library-replay` job (actions have no Replay; their page offers Run dependents, D28), a repeat returns the same job, Cancel ends it `cancelled` with no result recorded and nothing left in `ps`, and after either end the page stops polling and shows the result with Open report and the screenshot from the reports origin (51-15 B1, D29); an action becomes Ready after Run dependents passes; restarting `serve` mid-job gives 404 and the Setup view refreshes; no password in any job error or result |
 | 24 | Report iframe isolation (51-11 As built; D26 built in 51-15): run `genesis/scripts/probes/reports-origin-isolation.mjs` against each instance, then open an execution's Playwright report on the execution page and the story page | The iframe works **without** `allow-same-origin`. If the report needs it, it must be served from a different origin than the SPA (with `allow-same-origin` on a same-origin URL the sandbox does nothing, so report scripts could call `/api`); record which. A report that can reach `/api` is a blocker |
 | 25 | Settings → Environments against the live backend (the 51-11 field mapping was built from source) | The Type select's single-Dev, single-QA and host-collision refusals show as field errors with the server's messages |
-| 26 | Record with **Also make a data setup** ticked (name + end state "an evaluation in In Progress; output its id") (51-16, D34) | Proposals: the actions plus one setup that uses them in order, `unique()` values, the id as an output; the capture replay runs the setup; Accept with an action rejected is refused naming it; Accept all → one commit, the setup and its actions Ready; a scenario using the setup passes in Run now |
+| 26 | Record with **Also make a data setup** ticked (name + end state "an evaluation in In Progress; output its id") (51-16, D34). **Before:** install `action-capture` ≥ 0.2.0 and the `genesis-test-authoring` skill ≥ 0.2.0 (Record refuses a setup request otherwise) | Proposals: the actions plus one setup that uses them in order, `unique()` values, the id as an output; the replay runs **only the setup**; the panel shows "uses …" and "replay passed in P<n>"; Accept with an action rejected is refused naming it; Accept all → one commit with the actions' `ACT-` keys before the setup's `DS-` key, the setup and its actions Ready, reused Draft actions Ready with "capture #N" as evidence; a scenario using the setup passes in Run now |
 | 27 | Testing → New data setup → **Compose with AI**: pick a setup and an action of a second role, end state "an evaluation in Approved" (51-17, D35, D36) | A composed two-role setup (`roles: [...]`) proposed with its added items listed, replayed as both roles, accepted Ready; a scenario on it passes. A second compose whose end state needs a step no library item does ends `missing` with that step named and **Record workflow** prefilled |
 
 ### Re-run scope (after 51-15–51-17)
 
-Before the re-run, restart `serve` on each instance **with no run active** (L-061), so the reports listener (D26)
+Before the re-run, back up each instance's `genesis.db` and run `genesis db upgrade` (DB 27 → 28, m0028), then
+restart `serve` on each instance **with no run active** (L-061), so the reports listener (D26)
 starts on :8860 / :8861 and the 51-15 run-manager fixes (pause, cancel, mi-2 refusals on a finished run) are live
 (51-15 As built). The execution page has no Back button since 51-15; the breadcrumb is the way back.
 
