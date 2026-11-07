@@ -422,3 +422,334 @@ the rest of 23, the Verification dialog of 20.
 
 Minors m1–m11 and nits n1–n3 should be fixed or moved to `specs/backlog/phase-51-follow-ups.md` by the user's choice
 (m11 and n3 need genesis-spec first). O1 is for genesis-docs/genesis-release (the fleet's real state) before 51-13.
+
+---
+
+# Re-run — after 51-14, 51-15, 51-16, 51-17 (genesis-review, 2026-11-07)
+
+**Ranges reviewed** (every head resolved; each is the repo's current HEAD):
+
+| Repo | Range | Size |
+|---|---|---|
+| genesis | `v0.80.0..2b2cf9d` (37 commits, 372 files) | delta since the first pass: `cca8ff8..2b2cf9d` (16 commits, 97 source files) |
+| genesis-workflows | `v0.24.0..69bface` (8 commits, 48 files) | delta since the first pass: `93e6e35..69bface` (35 files) |
+| playwright-appian | `v0.2.0..5d7ae2d` | no commit since the first pass; the dirty `.gitignore` line is the user's own, pre-existing |
+| project-tracker agent-system | `6f549da`, `4e2220d` | no agent-system or `context/` commit since the first pass (`git log --since=2026-11-04`) |
+
+**What was read:**
+- The 51-12 pack (`genesis-ctx pack 51-12`, 50.2K tokens, OK).
+- The first pass above.
+- The As built and review of 51-14 (incl. §5), 51-15 (sessions 1 and 2), 51-16 and 51-17.
+- The full diffs of `runs/manager.py`, `runs/store.py`, `kb/testexec_store.py`, `testexec/{library_service, proposals, compose, capture_finalizer, recording, finalizer, execution_service, generator, replay, reports_origin, verification}.py`, `api/{testing, workbench, app, run_routes}.py`, `cli/main.py`, `chat/story_verification_finalizer.py`, m0028, the templates and the web job runner.
+- The new `workflows/setup-composer/graph.py` in full.
+- The action-capture 0.2.x, story-verification m1 and test-execution n1 diffs.
+
+Evidence folder: `/tmp/genesis-review/51-12-rerun/`.
+
+**Scope change, decided by the user on 2026-11-07.** The QA environment and the Dev environment are down: no `*.appianpreview.com` host resolves from this machine (`socket.gaierror` for both QA and Dev, while `gitlab.appian-stratus.com` resolves). The user therefore asked for the complete code-level review now, with live acceptance (§3) later. **§3 is NOT RUN in this re-run.** The setup it needs is done (below), so the next session can start at step 1.
+
+## Setup done for §3 (user-approved; each step recorded)
+
+1. **Backups.** Made with SQLite's online backup API from read-only sources; integrity ok on every copy. Index: `backup/backup-20261107-201211.json`.
+   - `backup/main-20261107-201211.genesis.db`: v27, 427 runs, 126 cases.
+   - `backup/userb-20261107-201211.genesis.db`: v25, 118 runs.
+   - Both `memory.db` files.
+2. **`genesis db upgrade`.**
+   - main: 27 → 28, applied `[28]`.
+   - userb (`gsm exec userb -- db upgrade`): 25 → 28, applied `[26, 27, 28]`.
+   - Afterwards both report `max(version)=28`, integrity ok and an empty `foreign_key_check`.
+3. **Installs on main.**
+   - `genesis install --from <genesis-workflows checkout>`: `test-execution` 0.1.0, `action-capture` 0.2.1, `story-verification` 0.1.0, `setup-composer` 0.1.0 (ref `local`); each `graph.py` is byte-identical to the checkout.
+   - Skill `genesis-test-authoring` 0.3.0 through `POST /api/skills` (source local; `SKILL.md` identical to the checkout; `version: 0.3.0`).
+   - userb has no Phase 51 workflows (not needed except for step 24's second instance).
+4. **Restarts** (`gsm restart main`, `gsm restart userb`), with no run active on either (L-061; checked by a DB read first).
+   - main: pid 14358, :8760, reports :8860.
+   - userb: pid 14393, :8761, reports :8861.
+   - Both serve `/api/applications/{app}/testing/compose` (HEAD code).
+   - `/openapi.json` still says 0.80.0 (pre-release).
+5. **Cleanup of the first pass's leftovers.**
+   - **DS-000002**: Delete was not offered, because it was used once (`ever_referenced = 1`). The user retired it in the UI, with an audit row `test_setup 2 draft → retired retire admin.user 14:49:34Z`.
+     - The user then clicked Restore twice; both answered 409, the D20 rule "replay it first" (`domain/transitions.py:231`).
+     - The user then replayed the retired setup (202; failed `ERR_NAME_NOT_RESOLVED`). This is the designed path to a restore.
+   - **ACT-000005** (never used): the user deleted it (`DELETE …/actions/ACT-000005` 204, workspace commit `f411090`).
+   - **The workspace's untracked `captures/1/trace_debug.json` and `captures/2/`**: deleted by the user. My shell guard refused the write: `~/.genesis/testing` is outside the reviewer's write roots, and I did not go around the guard. `git status` of the workspace is now empty.
+   - **The TC-000007 / TC-000017 scripts**: the user asked for a revert. **Genesis offers no way to remove a case script** (finding R-m5), so they stay; both cases read `automated`.
+   - **The `example-qa2` environment**: still present. It is part of live step 1.
+   - **The "Genesis 51-12 regression" evaluations in QA**: for the user in Appian (QA down).
+
+## §1 Independent review (re-run on the whole Phase 51 diff)
+
+| # | Check | Result | Evidence |
+|---|---|---|---|
+| 1 | No agent at execution | **OK** | `test-execution/graph.py:40` imports only `program_node`; its nodes are at `:361-363`. Regression, impact and ad-hoc executions launch `WORKFLOW_ID = "test-execution"` (`execution_service.py:39`); only `verification` goes through a launcher (`:93-95`). Nothing in the delta adds an agent to an execution path. D28's promotion is program code in the finalizer (`finalizer.py:199-232`). |
+| 2 | Committed code only; D24 overlay; nothing agent-authored before accept | **OK, with R-m2 (proof integrity)** | Exports stay `git archive` of a commit (`workspace.py:528-541`). A compose exports the HEAD it records in `request.commit` (`compose.py:205-216`). A verification's overlay cases (or every case, when the overlay changes an action or setup) are excluded from the automation update (`story_verification_finalizer.py:202-213`), and verification never promotes actions (`finalizer.py:199`). Composed and recorded setups reach the library only through `ProposalService.apply` after a person accepts them. **But** a replay runs from a checkout the agent can write to, and Genesis checks only direct uses against what ran (R-m2). |
+| 3 | References, never copies; deterministic generator | **OK** | Multi-role golden files `tests/fixtures/testexec/generated-roles/**` (two-role setup → `setup:DS-000001` depends on `auth:buyer`, `auth:approver`); the existing goldens are unchanged. The composer's replay generators are copies pinned by the cross-repo parity tests (100 passed locally, 0 skipped). See **R-MJ1**: the generator's roles reader disagrees with the scanner. |
+| 4 | QA only | **OK** | `ApwtClient._check_url` refuses a session without a QA host or on another host (`client.py:191-197`) and passes `--allow-host` (`:207`); `ApwtFactory.qa_host` refuses without a QA env (`factory.py:36-42`). `setup-composer` declares `required_mcp: []` (`setup-composer/graph.py:98`) and has no MCP, write or deploy node; its replay goes through the 51-06 runner on `inputs.qa_url`. The reports origin binds the app's host only (`cli/main.py:151-157`), after the ADR-026 bind guard. |
+| 5 | Secrets | **OK (code)**; live step 19 NOT RUN | The runner scrubs the whole report folder recursively (`runner.py:149-165`, `scrub_dir` `rglob`). That covers D29's new HTML report under `<replay>/report/html` and the composer's replay report (`setup-composer/graph.py:736` uses `_apwt(ctx).playwright(...)`). The composer removes `.auth` in a `finally` and again after the replay (`:739-747`). Its overlays copy the checkout without `.auth` (`overlay`, `ignore_patterns(".git", ".auth", "test-results")`). The compose agent gets file paths only and no session (`compose_prompt`: "Do not open a browser or run apwt sessions"). The reports origin serves only `…/report/**` and never a checkout (`reports_origin.py:47-53`; refusals `:56-81`). |
+| 6 | Agent access to `apwt` (D3c, ADR-083) | **OK** | No change to the D3c path since the first pass (`client.py`, `story-verification/graph.py` only gained m1). The composer's agent nodes open no session (prompt above); `kiro_node` is unchanged (no genesis-core diff). |
+| 7 | Reliability; no `pre_mutation` on QA-writing workflows | **OK** | `setup-composer`: `attach_reliability` on `compose` (`graph.py:851`) and `attach_healing` on `replay/heal/reassemble` with `META.healing {1,1}` (`:855`, `:103`). `hitl_points: ["escalate"]`, no `pre_mutation` (`:100`); the same holds for action-capture (`:113`), story-verification (`:105`) and test-execution (`:73`). `validate_library` **PASSED (18 workflows)**, including the reliability lint. F10: action-capture's heal is now 900 s (`action-capture/graph.py:137`, m4). The composer's turns are 900 s (`:122-123`); live timing is still to be measured. |
+| 8 | Lifecycle | **OK, with R-m4** | Library status is written only by `TestLibraryStore.set_status` (`testexec_store.py:514`, grep: the only `SET status` on the library tables). D28's promotion uses `self.lifecycle.transition(... "approve", actor=execution_key)` (`library_service.py:878-930`). The compose apply goes through `ProposalService` (origin `compose`). The action approve refusal follows D28 (`domain/transitions.py:198-207`). **R-m4:** a retired action can be restored only with a passing replay at its hash, which D28 can no longer produce. |
+| 9 | Lane order consumers (L-094) | **OK** | No lane or consumer change since the first pass. New registry values: `VALID_CAPTURE_KINDS += compose` and `VALID_LIBRARY_ORIGINS += compose` (`testexec_store.py:52,69`). Their consumers were grepped: the Library panel's `_LISTED_KINDS` (`api/testing.py:770`); the recording service's `kind == "recording"` guards (`recording.py:171,446`); the capture finalizers' kind guards (`capture_finalizer.py:139,170`); the web `origin` union (`types/testing.ts:176`). Verification captures stay apart (`verification_service.py:320`). The library is local-only, so there is no Hub consumer. |
+| 10 | Finalizers | **OK** | `ComposeFinalizer` checks the bound run, the workflow and the kind (`capture_finalizer.py:166-171`), moves with a CAS (`set_status(..., expected_status="analysing")`), has a kind-guarded startup reconcile (`:136-143`; wired at `api/app.py:356`) and an on-read settle for the list and single reads (`api/testing.py:780-830`). The tests run through the real `RunManager._finalize` (51-17 As built). Every terminal write is now single-shot (`RunStore.claim_status`, `runs/store.py:126-142`), and only the winner announces (`manager.py:130-151`). |
+| 11 | Subprocesses: timeouts + process groups; nothing left after cancel/pause | **OK** (first-pass m1 closed) | The workflows' `tsc` and `scan-refs` go through `ctx.extras['apwt'].run_bounded`: own group, pgid in `<run>/.pids`, group killed on timeout (`factory.py:86-97`; `action-capture/graph.py:455`; `setup-composer/graph.py` `_bounded`; `story-verification/graph.py:545-582`). The `_own_group` fallback uses `start_new_session` + `killpg`. `RunManager` reaps `<artifacts>/<workflow>/<run>/.pids` on finalize and on pause (`manager.py:166-178`), the same folder `ctx.workspace.root` names. Live step 18 (`ps`) is NOT RUN. |
+| 12 | DB | **OK** | m0028 is additive and guarded by `PRAGMA table_info` (`m0028_capture_request.py:17-20`). m0026/m0027 are unchanged since the first pass. The n2 comment is at `db/runner.py:74-77`. Probes in §2 below: fresh → 28; real main v27 → 28; real userb v25 → 28; rebuilt Phase-49 main v25 → 28. |
+| 13 | Web | **OK** (first-pass B1, B2, m2, m8 closed in code; live probes NOT RUN) | Over the 61 changed web source files: no `<Button asChild>`. The only `asChild` is the pre-existing `PopoverTrigger` in `TestImpactTab.tsx:289` (blame `8a7ca96e`, before v0.80.0). No `/api` or `fetch(` outside `lib/api/`, no direct `lucide-react` import, no raw palette class, no `dangerouslySetInnerHTML`. `LazyCodeEditor` and `PassRateChart` stay `lazy()`. Each of the 10 new test files runs jest-axe (1–11 checks each). The fixes: B1 `hooks.ts:84,97-98,131`; m2 `VerificationSection.tsx:227` (`allow-popups allow-popups-to-escape-sandbox`; the page is served with `script-src 'none'`, `api/workbench.py:518-519`); m8 `CasesTable.tsx:90` `min-w-[980px]`; m9 `ExecutionPage.tsx:269-276`; m7 `RegressionView.tsx:244`; D30 `LibraryView.tsx:52`; m11a `LibraryItemPage.tsx:241,249,297`. |
+| 14 | `playwright-appian` | **OK** | No change since the first pass. lint, typecheck and build are clean. `npm test` failed in 1–2 of 1399 tests, by timeout, in both full runs; the file passes alone. That test predates the range (R-O1). |
+| 15 | Naming (L-092) | **OK** (first-pass n1 closed) | `TestExecutionState.__test__ = False` (`test-execution/graph.py:91-92`; loaded standalone, `__test__` is False). No new `test_*` module or symbol outside tests in either repo (`git diff --diff-filter=A` + grep). `test_no_module_or_symbol_named_test_outside_tests` (`tests/test_testexec_store.py:597`) passes in the full run. `setup-composer/tests/` has no `__init__.py`. |
+
+## First-pass findings against their 51-15 fixes (code level)
+
+| Finding | Fix (where) | Regression test | Code verdict | Live |
+|---|---|---|---|---|
+| B1 Replay poll loop | The runner remembers job ids it saw end and never resumes one; on a terminal job it nulls `replay_job` in the cached reads and refetches with `cancelRefetch: false` (`hooks.ts:84-131`) | `item.test.tsx`: succeeded and cancelled; poll count stops, ≤ 1 item read after (shown failing on the old code, 51-15 As built) | **Fixed** | step 23 NOT RUN |
+| B2 report can call `/api` | `ReportsServer` on app port + 100: registered `report/` roots only, traversal/symlink/NUL/encoded refusals, 405 for non-GET/HEAD, 421 for a foreign `Host`, `nosniff`, `no-cache` on `index.html` (`reports_origin.py`); old route → 410 (`api/testing.py:293-303`) | `tests/test_reports_origin.py` (26, real socket) | **Fixed** | step 24 probe NOT RUN |
+| B3 pause fails the run | `_intend_stop` per worker before the kill; `worker_exit`/`error`/`on_exit` ignored for an intended stop (`manager.py:255-274,363-384`); `note_progress` never overwrites a stop (`store.py:144-153`) | `test_pause_of_a_running_worker_pauses_and_resume_continues_from_the_checkpoint` (real worker, non-zero SIGTERM exit; `first.count == 1` proves the checkpoint resume) + `test_a_late_worker_exit_of_a_paused_worker_cannot_fail_the_resumed_run` | **Fixed**; see R-m1 for a newly reachable edge | step 22 NOT RUN |
+| MJ1 `broken` forever | `_follow_script` is THE rule (`testexec_store.py:746-764`); bind → automated (`:677`), `record_run` passed → automated over broken (`:712-725`), triage → `mark_broken` (`:727-732`) | MJ1 paths through `RunManager._finalize` (51-15 As built) | **Fixed** | — |
+| MJ2 contract form ignored | The contract comes only from the code: a literal is required (`library_service.py:401-410`); a `contract` field is refused (`:625-627`); `changed=False` on a no-op (`:642`); read-only `ContractTable` on the page | route + page tests, no-op save | **Fixed** | step 6 NOT RUN |
+| MJ3 cancel → error, two `run.final` | Cancel claims `cancelled` by CAS before the kill and only the winner announces (`manager.py:386-400`, `store.py:126-142`) | `test_cancel_of_a_running_worker_ends_cancelled_with_exactly_one_run_final` (observer sees stored == announced, once), `test_finalize_is_single_shot_under_concurrent_callers` (8 threads), real-worker execution cancel in `test_testexec_execution.py` | **Fixed** | step 18 NOT RUN |
+| m1 workflows' tsc outside `.pids` | `run_bounded` / `_own_group` (row 11) | +3 workflow tests | **Fixed** | — |
+| m2 story iframe not sandboxed | no scripts, no same-origin; CSP on the served page | `verification.test.tsx` | **Fixed** | step 24 |
+| m3 `trace_debug.json` left | `_drop_debug_trace` after stop and discard (`recording.py:109-116,288,341`); template `.gitignore` (`templates/gitignore.txt`) | yes | **Fixed** for new recordings (existing workspaces get the delete, not the ignore line) | step 4 |
+| m4 heal near its bound | 600 → 900 s | — (a constant) | **Fixed** | step 4 re-measure |
+| m5 → D28 | Actions never replay alone; promotion when a dependent passes (`library_service.py:878-930`, `finalizer.py:206-232`) | promote / stale hash / failing / verification never | **Fixed**; see R-m3, R-m4 | step 23 |
+| m6 | with MJ1 | yes | **Fixed** | — |
+| m7 → D31, m11b | `grid.tsx`, `grid-logic.ts`; Regression row opens the scenario (`RegressionView.tsx:244`) | `regression.test.tsx` | **Fixed** | step 20 |
+| m8 CasesTable at 1280 | `min-w-[980px]`, fixed columns 780 (`CasesTable.tsx:90`); layout pin `min-w = fixed + 200 ≤ 982` | `testDesign.test.tsx` | **Fixed** (51-15 probe: 982 / Title 202 at 1280) | step 20 re-probe |
+| m9 → D32 | View run, Open report, Cancel (`ExecutionPage.tsx:269-276`) | `executions.test.tsx` | **Fixed** | step 20 |
+| m10 → D29 | `record_replay(report=, screenshot=)`, ANSI stripped (`testexec_store.py:46-47,379-395`); item read maps both onto the reports origin (`api/testing.py:655-661`) | mi-1 glue test, contract fixture re-recorded | **Fixed** | step 23 |
+| m11a/c/d → D30, D32 | `CardHeader`; `?kind=` filter; execution page layout | tests listed in 51-15 | **Fixed** | step 20 |
+| n1 / n2 | `__test__ = False`; runner comment | — | **Fixed** | — |
+| Capture #2 "lost" | Finding: it waited at its escalate gate. Capture reads now carry `run_status` (`api/testing.py:832-841`) | `capture` fixture + test | **Fixed** | — |
+
+## §2 Gates (all run by the reviewer, 2026-11-07)
+
+| Repo | Gate | Result |
+|---|---|---|
+| genesis | `.venv/bin/python -m pytest -q -p no:warnings` | **1785 passed** in 585 s (= 51-17 As built), `pytest-genesis.txt` |
+| genesis | `.venv/bin/ruff check genesis` | **All checks passed** |
+| genesis | ruff on every Phase 51-changed `tests/*.py` | only `tests/test_db.py:16` unused `tempfile`, pre-existing since `a9aac7ff` (as the first pass found) |
+| genesis | cross-repo tests run locally (`tests/test_testexec_library.py`, `test_testexec_compose.py`, `test_testexec_recording.py`, `-rs`) | **100 passed, 0 skipped**: the sibling checkout was found, so action-capture's and setup-composer's code rules ran against Genesis's save checks on the real scanner, and the replay generator parity and hash parity were checked. `gates/crossrepo.txt` |
+| genesis | DB fresh → v28 | m0001–m0028 applied, re-run `[]`, FK check empty, integrity ok, 59 tables. `db/fresh.json` |
+| genesis | DB real main v27 → v28 (copy of the backup) | applied `[28]`, re-run `[]`, FK empty before/after, integrity ok; only change `kb_test_captures.request_json`; every old column of every table hash-equal (only `schema_migrations` gained a row); 287 641 run events, 126 cases, 24 scenarios, 3 suites, 12 executions kept. `db/main-v27.json` |
+| genesis | DB real userb v25 → v28 (copy) | applied `[26, 27, 28]`, re-run `[]`, FK empty, integrity ok; 11 new tables, `kb_test_scenarios.{setup_id, changes_shared_data}` and `kb_test_suites.{kind, app_uuid}` added; every old value equal (only `kb_sequences` gained its 3 rows). `db/userb-v25.json` |
+| genesis | DB rebuilt main v25 with the Phase 49 data → v28 (the first pass's method, `db/rebuilt_v25.py`) | 126 cases, 24 scenarios, 136 steps, 139 story links, 448 object links, 287 641 events copied; applied `[26, 27, 28]`; old columns equal (only `kb_sequences` +3); suite high-water 139 kept; children still reference `kb_test_suites`; `RegressionStore.get_or_create` → id 140; the suite tree reads 34 cases; re-run `[]`. One FK orphan existed **before** m0026: my rebuild copied TS-000024 (a regression scenario) without its regression suite. The runner reported it as pre-existing and refused nothing, which is the m1′ tolerance working live. `db/main-rebuilt-v25.json` |
+| genesis/web | `npx eslint .` | 0 errors, 20 warnings (the base count) |
+| genesis/web | `npx tsc --noEmit` | clean |
+| genesis/web | `npx vitest run` | **721 passed, 62 files** (= 51-17 As built) |
+| genesis/web | bundle | `npx vite build --outDir /tmp/genesis-review/51-12-rerun/static-2b2cf9d`, then a 60 s wait, then `diff -r` against `web/static`: **IDENTICAL** (71 assets each); `git status --short web/static` empty |
+| genesis-workflows | `ci/validate_library.py` | **PASSED (18 workflows)**, incl. the reliability lint and the internal-pin check |
+| genesis-workflows | `ci/validate_skills.py` | **PASSED (4 skills)** |
+| genesis-workflows | `pytest -q workflows --ignore=workflows/_fixtures` | **421 passed** (= 51-17 As built) |
+| genesis-workflows | `ruff check` on the four testing workflows + `ci` | clean |
+| playwright-appian | `npm run lint`, `npm run typecheck`, `npm run build` | clean (`dist/` is git-ignored) |
+| playwright-appian | `npm test` | run 1 (sequential after the other gates): **2 failed / 1399**. `agent-act.test.ts` "a ref without an address…" and `agent-do.test.ts` "a new Appian error is a WARN…" both hit vitest's 5 s timeout; both files alone 25/25. Run 2 (idle apart from the two servers): **1 failed / 1399**, the same `agent-act` test; alone it takes 2.5 s. R-O1 |
+| project-tracker | `pytest agent-system/tests` | **389 passed** |
+| project-tracker | `genesis-ctx lint` | OK, 0 errors, 0 warnings, L0 ~23,845 / 24,000 |
+
+## `genesis-ctx check` checklists (re-run)
+
+Raw output: `check-genesis.txt` (372 files). genesis-workflows and playwright-appian printed in-session (48 and 25 files). project-tracker: no agent-system change since the first pass, so its checklist (OK ADR-077, L-088, L-100; the rest N/A) stands, with the gates re-run above. "As the first pass" = the line and its evidence are unchanged by the delta (re-checked against the delta diff).
+
+### genesis (`check --since v0.80.0 --repo genesis`)
+
+**ADRs**
+- [OK] ADR-001 (§1.1; setup-composer is LangGraph-routed, its agents are nodes).
+- [OK] ADR-002 (kiro_node turns).
+- [OK] ADR-003.
+- [OK] ADR-004 (no MCP on any new node).
+- [N/A] ADR-005 · 007 · 008.
+- [**OK, was VIOLATION**] ADR-009: pause now pauses and resume continues from the checkpoint (B3 fix + test). See R-m1 for an edge.
+- [OK] ADR-010 (composer state holds artifact pointers; picked/compose/replay/result are run-folder docs).
+- [OK] ADR-011 (§1.7).
+- [OK] ADR-012 (`setup-composer/graph.py` imports only langgraph/genesis_core; Genesis reads its META only through `RunManager._meta`, `compose.py:175`).
+- [N/A] ADR-013 · 016.
+- [OK] ADR-017.
+- [OK] ADR-018.
+- [OK] ADR-019 (no `CORE_MAJOR` change; no genesis-core diff).
+- [OK] ADR-020 (reports listener and testing dirs under Genesis's own roots).
+- [OK] ADR-021 (as amended by the drafted ADR-082; no `pre_mutation` on the 4 QA-writing workflows).
+- [OK] ADR-022 (replays pruned to 20; D29 evidence under `library-replays/`).
+- [OK] ADR-023.
+- [OK] ADR-024 (the composer's tsc/scanner/replay run under `asyncio.to_thread`; compose start is sync in the threadpool).
+- [N/A] ADR-025.
+- [OK] ADR-026 (the reports listener binds the same host after the bind guard, `cli/main.py:151-157`; `Host` check, 421).
+- [OK] ADR-027 (§1.13).
+- [**OK with R-m6**] ADR-028 (every API route is still under `/api`; the reports origin is a second static listener outside `/api`, a user decision D26 with no ADR amendment drafted yet).
+- [OK] ADR-029.
+- [OK] ADR-030 (m0028 forward-only, sync stores).
+- [N/A] ADR-031 · 032 · 033.
+- [OK] ADR-034 (skill 0.3.0 filesystem-provisioned; compose checks its version and section, `compose.py:165-173`).
+- [OK] ADR-035.
+- [OK] ADR-036.
+- [N/A] ADR-037 · 038 · 039.
+- [OK] ADR-040.
+- [N/A] ADR-041.
+- [OK] ADR-042.
+- [N/A] ADR-043 · 044 · 045.
+- [OK] ADR-046 (templates/scanner as package data; `sync_lib` brings old workspaces up).
+- [OK] ADR-047 · 048 · 049 · 050 (§1.8).
+- [OK] ADR-051.
+- [N/A] ADR-053 · 054.
+- [OK] ADR-055.
+- [N/A] ADR-056–060.
+- [OK] ADR-061 (ADR-084 draft) · 062 · 063.
+- [N/A] ADR-064 · 065.
+- [OK] ADR-066 · 067 (healing tier on the composer, `{1,1}`) · 068 (ADR-082 draft) · 069 (`skills=SKILLS` on compose/heal) · 071.
+- [N/A] ADR-070 · 072–076.
+- [OK] ADR-077 · 078 · 079 · 080 (no internal dependency entry added).
+
+**Lessons**
+- [N/A] L-001.
+- [OK] L-002.
+- [N/A] L-003 (the bus stays open on pause, asserted in the B3 test).
+- [OK] L-004.
+- [**OK, was VIOLATION**] L-005: one `run.final{cancelled}` per cancel.
+- [N/A] L-007.
+- [OK] L-008: an unexpected death still fails with its specific error (`test_an_unexpected_worker_death_still_fails_the_run`).
+- [OK] L-009 · 010.
+- [OK] L-011: compose, capture-setup and error-dependency fixtures recorded from real responses; `contract.test.ts`.
+- [N/A] L-012.
+- [OK] L-014 · 015.
+- [N/A] L-016.
+- [OK] L-017 (no chat change).
+- [N/A] L-018.
+- [OK] L-019 · 020 (composer `recursion_limit` 120) · 021 · 023 (`composed_from_run`, `proposals_from_run` defensive) · 024 · 025/027 · 026.
+- [N/A] L-028/029.
+- [OK] L-030.
+- [N/A] L-031/032.
+- [OK] L-033 (compose refuses without setup-composer ≥ 0.1.0 and the skill ≥ 0.3.0; Record refuses a setup request below action-capture 0.2.0, re-checked at Stop).
+- [N/A] L-034/035/037.
+- [OK] L-039.
+- [N/A] L-040.
+- [OK] L-041 · 042 (picked.json, library.json as files).
+- [N/A] L-043–047.
+- [OK] L-048.
+- [N/A] L-049–051.
+- [OK] L-053 (version skew handled by the gates above).
+- [N/A] L-054/055.
+- [OK] L-056 · 057 (owed at 51-13) · 058 (on-read settle + startup reconcile, failures logged) · 061 · 062.
+- [N/A] L-063.
+- [OK] L-064 · 065.
+- [N/A] L-066/067.
+- [OK] L-068 (reports origin `index.html` no-cache, `reports_origin.py:124-125`) · 069.
+- [N/A] L-070–074.
+- [OK] L-075 · 076.
+- [N/A] L-077–080.
+- [OK] L-081.
+- [N/A] L-082 · 084–087.
+- [OK] L-083 · 088 · 089 (settled out-of-tree bundle identical).
+- [**OK in code, was VIOLATION**] L-090: `min-w-[980px]` from the measurement; the live re-probe is in step 20.
+- [OK] L-091 (`claim_status`, `bind_run` and the compose lock are writes-first) · 092.
+- [**OK, was VIOLATION**] L-093: store-then-announce, single-shot.
+- [OK] L-094 (§1.9).
+- [N/A] L-095.
+- [OK] L-096 (`/testing/compose` adds no shadowing pair; the whole-route shadow test passes) · 097 (compose finalizer startup failure only under `holds_run_owner_lock`, `capture_finalizer.py:160`) · 098.
+- [N/A] L-099.
+- [OK] L-100.
+
+**Gates:** pytest, ruff, web lint/typecheck/test, build: §2. kiro-agent-sdk has no diff, so it was not re-run.
+
+### genesis-workflows (`check --since v0.24.0 --repo genesis-workflows`)
+
+- **OK:**
+  - ADR-001, 006 (`setup-composer/` folder package + `registry.json`), 010, 011, 012, 017, 018, 019, 021 (ADR-082 draft), 022, 029 (ADR-083 draft), 034, 035, 048 (no Appian credential read), 062, 067, 068 (ADR-082 draft), 069, 078, 080.
+  - L-006 (setup-composer `graph:` topology mirrors its compiled nodes; the workflow test asserts it), L-009, L-013, L-020, L-021, L-022 (no custom reducer keys, so `from __future__` is safe), L-023, L-024, L-026, L-033, L-042, L-064 (compose is one setup per turn), L-075, L-076, L-092 (n1 fixed; no `tests/__init__.py`).
+- **N/A:**
+  - ADR-003, 005, 007, 014, 015, 020, 026, 030, 031, 033, 036, 037, 038, 039, 041, 045, 046, 056, 057, 058, 059, 061, 063, 065, 073, 074, 075, 076, 077.
+  - L-017, L-025/027 (unchanged pin), L-029, L-030, L-045, L-049, L-051, L-053 (no core credential), L-056/057 (owed at 51-13), L-087, L-088, L-089, L-098, L-099, L-100.
+- **Gates:** `validate_library` PASSED (18), `validate_skills` PASSED (4), `pytest workflows` 421, genesis pytest/ruff (§2).
+
+### playwright-appian (`check --since v0.2.0 --repo playwright-appian`)
+
+- **OK:** L-056 (owed at 51-13), L-057 (vendor + pins at 51-13), L-100.
+- **N/A:**
+  - ADR-011, 019, 026, 046, 063, 065, 074, 077, 080 (no Genesis surface).
+  - L-017, 025, 027, 030, 045, 051, 087, 088, 089, 092, 098, 099.
+- **Gates:** lint, typecheck and build clean; `npm test` 1–2 timeouts in full runs (R-O1).
+
+## §3 Live acceptance — NOT RUN in this re-run
+
+The QA and Dev environments are down (DNS). The user deferred steps 1–27. The instances are ready for them: DB v28, HEAD code, workflows and skill installed on main, leftovers cleaned. The probes `scripts/probes/reports-origin-isolation.mjs` (step 24) and `scripts/probes/testing-widths.mjs` (step 20) are read-only: their only POST goes to the reports origin and expects 405, and the width probe drives a Vite on :5174. They do not need QA, so they can run before QA is back. What must be checked live because the code review cannot:
+- B1 (step 23).
+- B2 (24, both instances; userb has no execution yet, so the probe will exit 2 there unless given `--report-url`).
+- B3 (22).
+- MJ2 (6).
+- MJ3 (18).
+- m8 / D31 / D32 widths and screenshots (20).
+- F10 re-measure (14, and 26/27 for the 900 s composer and heal turns).
+- R-MJ1 and R-m1 live (below).
+
+## Findings (re-run)
+
+### Blockers
+None at code level.
+
+### Majors
+- **R-MJ1 (51-17): Genesis's reader of a data setup's extra roles disagrees with the scanner, so a valid multi-role setup can lose its extra roles everywhere but the save check.**
+  - **The cause.** `generator.setup_extra_roles` cuts the options at the first `\basync\b|\bfunction\b|=>` (`generator.py:156,164-180`). In `defineSetup({ key, name, role, roles, outputs }, …)`, `name` comes before `roles` and is free text. So a name containing the word `async` or `function`, or `=>`, hides `roles`.
+  - **Reproduced** (reviewer, `python -c` on the HEAD function):
+    - `name: 'Evaluation approved'` → `(['approver'], False)`.
+    - `name: 'Evaluation for async approval'` → `([], False)`.
+    - `name: 'Draft => Approved'` → `([], False)`.
+    - A comment inside the array, `roles: ['approver' /* … */]`, → `([], True)`.
+  - **The other reader** is the save check (`library_service._setup_roles_problems`, `:415-440`) and the composer (`setup-composer/graph.py:254-316`). Both read the same file with `lib/scan-refs.mjs` and see `['approver']`.
+  - **Effects.** For such a setup:
+    - the library Replay signs in no extra role (`library_service._setup_roles` → `[]`) and `ctx.as('approver')` fails;
+    - readiness does not require the approver test user (`Catalog.roles`);
+    - the generated `setup:` project does not depend on `auth:approver` (`_config_ts`), so the setup fails unless another scenario happens to create `.auth/approver.json`;
+    - verification scope misses the role (`verification.story_context`);
+    - compose's m-3 check misses a picked setup's extra roles (`compose._extra_roles`).
+  - **The worst path is a composed setup.** setup-composer's replay signs in the request's roles (`setup-composer/graph.py:731-744`), passes and is proven. Apply makes it a Ready `DS-` item, and then every execution blocks it.
+  - **Missing test.** The tests cover literal, constant and spread roles only (`tests/test_testexec_compose.py:71-79`). None uses a name with those words, and none compares the generator with the scanner. This repeats 51-16's own lesson candidate: "two readers of one contract must be the same reader".
+  - **Fix.** Read the extra roles from the scanner's output: the generator already has the committed files, and `RecordingService.library_snapshot` already reads `roles` that way (`recording.py:404-418`). Alternatively, parse the options object to its closing brace, skipping string literals and comments.
+  - **Tests to add.** Names containing `async`, `function` and `=>`, and a comment in the array, through the generator, Replay, readiness and compose. Also a parity test: generator reading = scanner reading on every setup fixture of both repos.
+
+### Minors
+- **R-m1 (runs-worker; the code predates Phase 51, but the B3 fix makes it reachable for the first time): a paused run turns back into "awaiting gate" on any read in a new server process when an earlier, already-answered gate is its latest `run.final`.**
+  - **The cause.** `pause()` stores `awaiting_input:paused` and logs no `run.final` (`manager.py:370-384`). After a restart no worker is tracked, so `reconcile_status` adopts the latest `run.final` (`manager.py:433-456`). If the run had answered a gate earlier, that marker is the gate marker.
+  - **Reproduced** with the public API on temp dirs (`/tmp/genesis-review/51-12-rerun/probe_paused_reconcile.py`): after `pause` the run reads `awaiting_input:paused`; after one `reconcile_status` in a fresh `RunManager` it reads `awaiting_input:gate`.
+  - **Where it bites.** action-capture, story-verification and setup-composer all have escalation gates with Retry. Retry at the gate, then Pause, then restart `serve`, and the run shows the old gate as pending instead of Resume. `fail_orphaned_runs` already says paused runs are never touched; the read-time reconcile does not keep that promise.
+  - **Fix.** Skip `reconcile_status` for a `paused` record (as the sweep does), or log a pause marker that the reconcile reads.
+  - **Tests to add.** That case, plus pause → restart → resume (step 22 should include a restart while paused).
+- **R-m2 (51-16 / 51-17; D24 spirit): a replay can prove code the agent changed in the checkout.**
+  - **Where the replay runs.** Both action-capture and setup-composer replay from an overlay of `<run>/checkout` (`setup-composer/graph.py:327-337,724`), a folder the agent can write. The prompts forbid it, but `kiro_node` trust is unchanged (ADR-083).
+  - **What Genesis checks.** Direct uses are hashed from that checkout and compared with git (`_stale_reuses`, `_stale_composed`). That is fail-safe: a changed direct use counts as stale.
+  - **What it does not check.** Everything further down the refs closure is compared only between Genesis's own git (`ws.show(commit, path)`, `proposals.py:315`) and the current hash, never with the bytes that ran. The same applies to `promote_proven_actions` after a recording's setup.
+  - **Consequence.** An agent edit to, for example, an action inside a picked data setup can make the replay pass. Genesis would then mark Ready code that never passed.
+  - **Fix.** Before `replay`, compare every library file in the checkout with the export commit, and fail the replay on any difference. Or replay from a fresh export the agent never saw.
+  - **Test to add.** An agent-modified transitive file must leave the setup Draft.
+- **R-m3 (D28 as built in 51-15/51-16/51-17): "used" means "imported".** `kb_test_refs` is the import index (`scan-refs.mjs`), and every proof walks it (`library_service.py:878-930`; action-capture's setup-first `replay_plan` gives every action in `uses` the setup's result, `action-capture/graph.py:510-523`). So an action that is imported but never called, or called only in a branch the run did not take, becomes Ready without ever running. The workspace `tsconfig.json` has no `noUnusedLocals` (`templates/tsconfig.json`), so even an unused import passes. **Fix (user decision):** add `noUnusedLocals` to the template (catches the plain case), and/or record per-action steps in the replay (`test.step` per action call) and prove only the actions whose step ran.
+- **R-m4 (51-15 D28): a retired action can be restored only with evidence D28 can no longer produce.**
+  - **Why.** Restore needs `replay_passed_at_hash` (`domain/transitions.py:231`). An action has no Replay (`library_service.py:944-947`), and `promote_proven_actions` touches only Draft actions (`:920`). A retired action is also not importable by a new save (51-07 §3, "non-retired catalog item").
+  - **Consequence.** An action retired while its last evidence was stale or failed can never be restored; the only way out is Save as new.
+  - **Fix (user decision).** Restore an action to Draft, or let Run dependents of a retired action's former users prove it.
+- **R-m5 (51-07 / 51-15 MJ1): a case script cannot be removed.** The case-script API is `GET` and `PUT` only (`api/testing.py:740-768`). `TestScriptStore.delete` and its `not-automated` rule (`testexec_store.py:690-702`) are reachable only from a refused apply's rollback (`library_service.py:557-559`). This re-run's cleanup hit it: the user asked to revert the TC-000007 and TC-000017 scripts, and there is no supported way to do it. A manual `git rm` would leave the DB binding and an import of a missing file. **Fix:** a "Remove script" on the case page (one commit + `delete`), or record that scripts are permanent (backlog).
+- **R-m6 (51-13 docs): D26's reports origin is a backend surface outside ADR-028 ("ALL backend endpoints live under /api").** It is a deliberate user decision (51-01 D26) and is safe by design (static files, no `/api`), but `adr-drafts.md` has no ADR-028 (or ADR-026) amendment for it. **Fix (genesis-docs at 51-13):** amend ADR-028 with the reports origin's scope and rules, and mention it in ADR-026's network-surface note.
+
+### Nits
+- **R-n1 (51-15):** the old worker's late events after a pause are not fully dropped. `on_event` returns early only for an intended **cancel** (`manager.py:221-222`). For a pause, a late `node` event from the killed worker is still logged as `node.completed` and moves the cursor (`note_progress`), even after the resume has spawned a new worker. The window is milliseconds; returning early for any intended stop would close it.
+- **R-n2 (51-15):** `_promote_actions` runs synchronously on the run reader thread (`finalizer.py:199-204`), with one `git show` per file of the closure. That is fine at today's library size; consider `self._defer` like the next-queued start.
+
+### Observations
+- **R-O1 (playwright-appian, outside the range):** `tests/cli/agent-act.test.ts` "a ref without an address acts on the element…" timed out at 5 s in both full runs (2.5 s alone). It was last changed in `e239bab`, before v0.2.0. Together with the first pass's O2 that is three of three full runs on this machine. 51-13's release gate runs this suite: give that test a longer timeout, or find why it slows under load, before tagging.
+- **R-O2 (fleet):** main and userb now run HEAD `2b2cf9d` code on DB v28. Only main has the Phase 51 workflows. `/openapi.json` reports 0.80.0. The genesis `README.md` DB line is still "m0001–m0024" (now v28). These are for genesis-docs / genesis-release.
+- **R-O3:** the composer's start lock covers the check and the capture insert. The run starts after the lock and `bind_run` follows. A run that ends before the bind is settled on the next read (51-17 decision j); the code matches the decision (`compose.py:188-228`).
+
+## Verdict: NEEDS_CHANGES
+
+- **Static review:** checks 1, 3–7 and 9–15 OK; 2 OK with R-m2; 8 OK with R-m4. Every first-pass blocker, major, minor and nit is fixed in code with a regression test. One new major (R-MJ1) and six new minors.
+- **Gates:** all green except playwright-appian `npm test` (1–2 timeouts per full run, a test outside the range, R-O1).
+- **Live acceptance:** NOT RUN (QA and Dev down). 51-12 cannot SHIP until steps 1–27 pass.
+
+| Finding | Owner | Fix in one line |
+|---|---|---|
+| R-MJ1 | 51-17 (genesis `generator.py` + callers) | one reader for a setup's extra roles (the scanner's), with tricky-name tests and a generator = scanner parity test |
+| R-m1 | runs-worker (`manager.py`) | the read-time reconcile never moves a `paused` run; test pause → restart → read → resume |
+| R-m2 | 51-16 / 51-17 (workflows) | a replay refuses a checkout whose library files differ from the export commit |
+| R-m3 | D28 (user decision) | prove only the actions a replay ran (per-call steps) and/or `noUnusedLocals` |
+| R-m4 | D28 (user decision) | a path back from Retired for an action |
+| R-m5 | 51-07 (user decision) | Remove script on the case page, or document scripts as permanent |
+| R-m6 | 51-13 genesis-docs | ADR-028 / ADR-026 amendment for the reports origin |
+| R-O1 | 51-13 / playwright-appian | stabilise `agent-act.test.ts` before the release gate |
+
+After R-MJ1 is fixed (and the minors are fixed or moved to `specs/backlog/phase-51-follow-ups.md`), the next step is a delta re-review of that fix, then §3 steps 1–27 live once QA is back.
