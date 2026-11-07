@@ -16,7 +16,7 @@
    `npm run build` + commit `web/static/` as separate steps (L-089); verify the release commit contains every changed
    file, including the vendored tarball as package data (L-056, L-048); tag; push on go-ahead; CI green (genesis,
    frontend, clean-install).
-4. **genesis-workflows v0.25.0**: `test-execution`, `story-verification`, `setup-composer` (each v0.1.0) and `action-capture` (v0.2.0, 51-16) + `registry.json`
+4. **genesis-workflows v0.25.0**: `test-execution`, `story-verification`, `setup-composer` (each v0.1.0) and `action-capture` (v0.2.1; 0.2.0 from 51-16, 0.2.1 from 51-17) + `registry.json`
    entries + skill `genesis-test-authoring` in `skills-registry.json`; pins on `genesis.git@v0.81.0` (+
    `#subdirectory=packages/<name>`, gate 9, L-057); CI green. The pin move is **required**, not only tidy: since 51-07
    the genesis-workflows tests import Phase 51 genesis modules (`testexec`, `integrations/apwt`), so a pin on v0.80.0
@@ -26,7 +26,7 @@
 
 Never restart while a run is active. Back up each instance's `genesis.db` before the restart (DB 27 → 28, or 25 → 28 on
 userb). Fleet update as usual (`gsm provision --all --no-mcp --no-env --force`, `gsm
-restart --all`); `genesis install test-execution action-capture story-verification setup-composer` and the `genesis-test-authoring` skill (≥ the version 51-17 ships; 0.2.0 after 51-16) install on
+restart --all`); `genesis install test-execution action-capture story-verification setup-composer` and the `genesis-test-authoring` skill (0.3.0, from 51-17) install on
 each instance (recording refuses to start without both the skill and `action-capture`, 51-07 As built 8); verify
 `/openapi.json` `info.version` = 0.81.0 and DB v28. **Fleet state before the release (51-12 review O1):** the main instance has been running
 Phase 51 code from the editable dev venv, on DB v27, since 2026-11-04 (its `/openapi.json` still says 0.80.0); userb

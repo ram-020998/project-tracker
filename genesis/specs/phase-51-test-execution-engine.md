@@ -163,7 +163,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 | 51-14 | genesis (backend + web) | **DONE (SHIP 2026-11-03, genesis `9b258bb` + `b23337c`/`45e9827`, web/static `c74cbed`/`a1f7f3e`):** moves out of Verification (single, bulk, Design/Implementation start, Remove from board) cancel a queued verification; the lane is re-checked before readiness and again just before the run starts; board `verification_active` in one statement (Queued / Verifying / Not started); D25, backlog §16. **§5 follow-up (Q25): Queued movable with a confirm on drag out — DONE 2026-11-04 (genesis `209297a` + `cca8ff8` web/static, SHIP)** |
 | 51-15 | genesis, genesis-workflows | **DONE (SHIP 2026-11-05, second pass; genesis `d8c1fc8`…`521910b`, genesis-workflows `daf3612`):** Review fixes from 51-12: B1 replay poll loop, B2 reports origin (D26; probe 12/12), B3 + MJ3 run-manager stop handling, MJ1/m6 automation status, MJ2 contract from code (D27), D28 actions Ready in use, D29–D32 UI (L-090 probe: 42 entries clean), m1–m4, m8, n1, n2, the stalled capture (was waiting at its gate) |
 | 51-16 | genesis, genesis-workflows | **DONE (SHIP 2026-11-05, genesis `8dd7b6b`…`4f6f283`, genesis-workflows `9970714`, `f6b9397`):** A recording can also produce a data setup (D34): Record dialog option, m0028 `request_json` (DB v28), `action-capture` 0.2.0 + skill 0.2.0, setup-first replay, dependency rule on apply, version gate at Record |
-| 51-17 | genesis, genesis-workflows | Compose with AI: `setup-composer` 0.1.0 (D35), compose dialog + route, multi-role setups (D36) in `lib/`, generator, readiness and save checks |
+| 51-17 | genesis, genesis-workflows | **DONE (SHIP 2026-11-05, genesis `96dceeb`…`2b2cf9d`, genesis-workflows `24145bf`, `69bface`):** Compose with AI: `setup-composer` 0.1.0 (D35, no screen steps enforced in code), compose dialog + route, multi-role setups (D36) in `lib/`, generator, readiness and save checks; `action-capture` 0.2.1, skill 0.3.0; apply checks every used item at the compose's commit |
 | 51-12 | genesis, genesis-workflows, playwright-appian | Independent review + gates + live acceptance on a real QA environment (incl. width probe, L-090). **First pass NEEDS_CHANGES 2026-11-04** (`reviews/51-12-review.md`); re-run after 51-15–51-17 |
 | 51-13 | all four | Release order, deploy, docs write-back (ADR-081..084) |
 
@@ -172,7 +172,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 If `playwright-appian` changed: release it first (tag `vX.Y.Z` → its CI publishes) and vendor that exact tarball into
 genesis. **It did change: 0.3.0 (51-03, D-114) is committed but unreleased**, so the release starts with
 `playwright-appian` v0.3.0 (plus anything later sub-specs add). Then **genesis v0.81.0** (minor; m0026–m0028, DB 25 → 28). Then **genesis-workflows v0.25.0** (`test-execution`,
-`action-capture` (0.2.0), `story-verification`, `setup-composer`, the `genesis-test-authoring` skill) pinned on `genesis.git@v0.81.0` (L-057).
+`action-capture` (0.2.1), `story-verification`, `setup-composer`, the `genesis-test-authoring` skill) pinned on `genesis.git@v0.81.0` (L-057).
 Without the workflows installed, every start returns the friendly "not installed" 409 (L-033). No Hub change. Detail:
 51-13.
 
