@@ -13,6 +13,7 @@
 2. **Vendor** that exact tarball into `genesis/genesis/testexec/vendor/`, update `VENDORED_APWT_VERSION` + sha256, and
    the workspace template; re-run the genesis tests that use it.
 3. **genesis v0.81.0** (minor; m0026–m0028, DB 25 → 28): version in `pyproject.toml`, `create_app`, `web/src/version.ts`;
+   the genesis `README.md` DB line (still "m0001–m0024 (DB v24)"; it becomes m0001–m0028, DB v28; 51-12 re-run R-O2);
    `npm run build` + commit `web/static/` as separate steps (L-089); verify the release commit contains every changed
    file, including the vendored tarball as package data (L-056, L-048); tag; push on go-ahead; CI green (genesis,
    frontend, clean-install).
@@ -37,7 +38,10 @@ As run and let genesis-docs correct it. The `userb` instance keeps reading `envi
 ## 3. Docs write-back (genesis-docs)
 
 - **ADRs:** add ADR-081..084 from `adr-drafts.md` (51-04 §6) via `genesis-ctx add adr` with `--amends` (ADR-078 /
-  ADR-068 + ADR-021 / ADR-029 / ADR-061; D22) and areas (`browser-testing` + the relevant existing areas); an ADR-047 note for the
+  ADR-068 + ADR-021 / ADR-029 / ADR-061; D22) and areas (`browser-testing` + the relevant existing areas). **Also
+  (51-12 re-run R-m6):** D26's reports origin is a backend surface outside ADR-028's "all endpoints under `/api`":
+  amend ADR-028 with its scope and rules (static report files only, no `/api`, its own loopback port) and note it in
+  ADR-026's network surface; an ADR-047 note for the
   per-app cadence inside `regression-run`'s options (51-06 §8).
 - **Areas:** extend `browser-testing` (51-02) with every new path; map `genesis/genesis/testexec/**`,
   `api/testing.py`, `integrations/apwt/**`, `chat/story_verification_finalizer.py`,

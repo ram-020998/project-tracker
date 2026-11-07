@@ -75,6 +75,7 @@ execution engine with results, and the Workbench Verification lane.
 | D34 | A recording makes a data setup only when the Record dialog's checkbox asks, with a name and end state. |
 | D35 | The setup composer uses library items only and names a missing step; no agent browser. |
 | D36 | A data setup may span several roles, declared in its code. |
+| D37 | Every 51-12 re-run finding is fixed in Phase 51 (51-18): one role reader (the scanner), paused runs kept, replays from untouched code, actions proven only by their own passed step, restore to Draft, Remove script, the playwright-appian timeout. |
 
 Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`): `51-01-findings.md` §8.
 
@@ -129,6 +130,7 @@ Defaults F1–F14 (confirmed) and the workspace location (`~/.genesis/testing/`)
 | Review fixes from 51-12 + D26–D32 | 51-15 |
 | A recording can also produce a data setup (D33, D34; m0028) | 51-16 |
 | Compose a data setup with AI (`setup-composer`) + multi-role setups (D33, D35, D36) | 51-17 |
+| Fixes from the 51-12 re-run (D37) | 51-18 |
 | Review, hardening, live acceptance | 51-12 |
 | Release + docs write-back | 51-13 |
 
@@ -141,7 +143,9 @@ D3c loop — program-owned sessions + agent `apwt` through the shell — cannot 
 51-10 (API completion + contract fixtures; each backend sub-spec adds its own routes, 51-10 owns the contract table and
 the cross-cutting tests) → S10 = 51-11 → S10b = **51-14** (genesis-dev; D25, added 2026-11-03) → S11 = 51-12
 (genesis-review; **NEEDS_CHANGES 2026-11-04**) → S11a = **51-15** review fixes → S11b = **51-16** → S11c = **51-17**
-(genesis-dev each; D33) → S11d = **51-12 re-run** (genesis-review: §1–§2 on the full diff, every live step) → S12 = 51-13 (genesis-release, then
+(genesis-dev each; D33) → S11d = **51-12 re-run** (genesis-review: §1–§2 on the full diff; **code level NEEDS_CHANGES
+2026-11-05**) → S11e = **51-18** re-run fixes (genesis-dev; D37) → S11f = 51-12 re-review of 51-18 + every live step →
+S12 = 51-13 (genesis-release, then
 genesis-docs). One at a time: they share the genesis checkout. A `playwright-appian` change found in any session is
 made in that repo in the same session (D19), with its own tests, and recorded in the sub-spec's As built.
 
@@ -149,7 +153,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 
 | Sub-phase | Repo | Content |
 |---|---|---|
-| 51-01 | project-tracker | Findings, decisions D1–D36 (D3a–D3d), defaults F1–F14 |
+| 51-01 | project-tracker | Findings, decisions D1–D37 (D3a–D3d), defaults F1–F14 |
 | 51-02 | project-tracker (agent-system) | Repo list, new `browser-testing` area + gates, agent allow rules, release flow, invariants |
 | 51-03 | genesis (spike code + notes), playwright-appian (D-114, 0.3.0) | **DONE (SHIP 2026-11-02):** sandbox evidence S1/S5/S6 (ADR-083 / Phase 52 input); the D3c loop L1, S4, S11 PASS; S8/S9 via `record start --browser/--state` (0.3.0, unreleased); S10 timings; P10 = global Kiro MCP servers load into workflow turns |
 | 51-04 | genesis | **DONE (SHIP 2026-11-03, genesis `316ac5a`):** m0026 (catalog, executions, results, test users, settings, suite rebuild; DB v26), runner flag `foreign_keys_off`, `kb/testexec_store.py`, `ACT-`/`DS-`/`TE-` ids, library lifecycle, `adr-drafts.md` |
@@ -164,7 +168,8 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 | 51-15 | genesis, genesis-workflows | **DONE (SHIP 2026-11-05, second pass; genesis `d8c1fc8`…`521910b`, genesis-workflows `daf3612`):** Review fixes from 51-12: B1 replay poll loop, B2 reports origin (D26; probe 12/12), B3 + MJ3 run-manager stop handling, MJ1/m6 automation status, MJ2 contract from code (D27), D28 actions Ready in use, D29–D32 UI (L-090 probe: 42 entries clean), m1–m4, m8, n1, n2, the stalled capture (was waiting at its gate) |
 | 51-16 | genesis, genesis-workflows | **DONE (SHIP 2026-11-05, genesis `8dd7b6b`…`4f6f283`, genesis-workflows `9970714`, `f6b9397`):** A recording can also produce a data setup (D34): Record dialog option, m0028 `request_json` (DB v28), `action-capture` 0.2.0 + skill 0.2.0, setup-first replay, dependency rule on apply, version gate at Record |
 | 51-17 | genesis, genesis-workflows | **DONE (SHIP 2026-11-05, genesis `96dceeb`…`2b2cf9d`, genesis-workflows `24145bf`, `69bface`):** Compose with AI: `setup-composer` 0.1.0 (D35, no screen steps enforced in code), compose dialog + route, multi-role setups (D36) in `lib/`, generator, readiness and save checks; `action-capture` 0.2.1, skill 0.3.0; apply checks every used item at the compose's commit |
-| 51-12 | genesis, genesis-workflows, playwright-appian | Independent review + gates + live acceptance on a real QA environment (incl. width probe, L-090). **First pass NEEDS_CHANGES 2026-11-04** (`reviews/51-12-review.md`); re-run after 51-15–51-17 |
+| 51-18 | genesis, genesis-workflows, playwright-appian | Fixes from the 51-12 re-run (D37): R-MJ1 one role reader (the scanner) + parity test, R-m1 paused runs kept on reconcile, R-m2 replay only from untouched code, R-m3 `noUnusedLocals` + per-action `test.step` proofs, R-m4 action restore → Draft, R-m5 Remove script, R-n1, R-n2, R-O1 the `agent-act.test.ts` timeout |
+| 51-12 | genesis, genesis-workflows, playwright-appian | Independent review + gates + live acceptance on a real QA environment (incl. width probe, L-090). **First pass NEEDS_CHANGES 2026-11-04** (`reviews/51-12-review.md`); re-run after 51-15–51-17: **code level NEEDS_CHANGES 2026-11-05** (R-MJ1 + minors → 51-18), live steps not run yet |
 | 51-13 | all four | Release order, deploy, docs write-back (ADR-081..084) |
 
 ## 8. Release plan
