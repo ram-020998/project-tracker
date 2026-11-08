@@ -100,8 +100,8 @@ pause/restart/cancel on the live instances, step 24 on userb (needs an execution
   truncating command lines to `$COLUMNS` (reap found no marker; fixed by reading `/proc/<pid>/cmdline`, `ps -ww`
   elsewhere, and logging a `ps` failure) and a workflow test that assumed Node on PATH. The local `v0.81.0` tag, never
   pushed, was moved from `8e5bacc` to `62537c2` at the user's choice.
-- Dates: the record dates D38 and the end of 51-18 "2026-11-09"; the release, its tags and this write-back are
-  2026-11-08 (tag dates). The umbrella and this doc use 2026-11-08.
+- Dates: the release, its tags and this write-back are 2026-11-08; the spec set's 2026-11-09 dates (D38, 51-18) were
+  corrected to 2026-11-08 in `a302d3c`.
 
 ## Lessons (write-back decisions, approved by the user 2026-11-08)
 
