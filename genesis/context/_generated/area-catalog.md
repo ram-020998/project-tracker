@@ -5,7 +5,7 @@ Detail: `genesis-ctx area <name>`. Always-on areas are part of every pack.
 
 - **api** — FastAPI /api surface · 1 path globs · skills: genesis-backend-dev · 2 gates
 - **appian-integration** — Appian integration: Dev MCP, SAIL CLI, DevOps, write tools · 7 path globs · skills: genesis-backend-dev · 2 gates
-- **browser-testing** — playwright-appian (apwt) + Genesis test execution · 4 path globs · skills: genesis-playwright-appian-dev, genesis-backend-dev · 2 gates
+- **browser-testing** — playwright-appian (apwt) + Genesis test execution · 23 path globs · skills: genesis-playwright-appian-dev, genesis-backend-dev, genesis-web-dev, genesis-workflow-authoring · 8 gates
 - **chat** — Chat, copilot, chat modes, skills-in-chat · 4 path globs · skills: genesis-backend-dev, genesis-web-dev · 5 gates
 - **collaboration-hub** — Collaboration, Hub provider, collab sync · 5 path globs · skills: genesis-backend-dev · 4 gates
 - **config-secrets** — Settings, secrets, environments, MCP/CLI registries, managed-native · 6 path globs · skills: genesis-backend-dev, genesis-web-dev · 4 gates
@@ -22,7 +22,7 @@ Detail: `genesis-ctx area <name>`. Always-on areas are part of every pack.
 - **runs-worker** — Run manager, subprocess worker, HITL gates, events/SSE, checkpoints, scheduler · 7 path globs · skills: genesis-backend-dev · 2 gates
 - **sdk-acp** — kiro-agent-sdk: ACP client/session, tool bridge · 1 path globs · skills: genesis-backend-dev · 2 gates
 - **security** — Localhost guardrail, read-only chat, trust, secrets handling · always-on
-- **stories-workbench** — Stories, boards, design/implementation lanes, story workspace, object wiki · 13 path globs · skills: genesis-backend-dev, genesis-web-dev · 4 gates
+- **stories-workbench** — Stories, boards, design/implementation lanes, story workspace, object wiki · 16 path globs · skills: genesis-backend-dev, genesis-web-dev · 4 gates
 - **web-runs** — Runs list, run detail graph, run inspection (web) · 2 path globs · skills: genesis-web-dev · 2 gates
 - **web-shell** — Web app shell, design system, tokens, theming, system pages · 5 path globs · skills: genesis-web-dev · 2 gates
 - **workflows-library** — genesis-workflows: workflows, skills, registries, CI publish gates · 11 path globs · skills: genesis-workflow-authoring · 4 gates

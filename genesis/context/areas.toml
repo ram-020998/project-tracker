@@ -72,11 +72,10 @@ gates    = ["cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_lib
 
 # ───────────────────────────── browser testing (Phase 51) ─────────────────────────────
 
-# playwright-appian (`apwt`) and, as Phase 51 creates them, the Genesis test-execution paths. 51-02 lands the
-# playwright-appian globs only (an empty glob is a lint error); the sub-spec that creates the first file under
-# genesis/genesis/testexec/, genesis/genesis/integrations/apwt/, genesis/web/src/features/testing/,
-# genesis-workflows/workflows/{test-execution,action-capture,story-verification}/ or
-# genesis-workflows/skills/genesis-test-authoring/ adds that glob here (51-05/51-06/51-07/51-09/51-11).
+# playwright-appian (`apwt`) and the Genesis test-execution paths (Phase 51, ADR-081..084): the testexec engine,
+# its store and migrations' consumers, the apwt client, the Testing API and web pages, the verification lane's
+# finalizer and dialogs, the four testing workflows and the genesis-test-authoring skill (51-13 write-back; 51-02
+# landed the playwright-appian globs). The verification lane's paths are also in stories-workbench.
 # Invariants (never weaken without the user; text in planning/DECISIONS.md): no LLM inside the framework (D-02,
 # enforced by assertNoDroppedActions); Appian element knowledge only in src/core/taxonomy.ts (D-05); generated code is
 # label-only (D-04); one npm package with subpath exports (D-01); trace schema playwright_appian.trace.v1 is
@@ -85,15 +84,33 @@ gates    = ["cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_lib
 [area.browser-testing]
 title    = "playwright-appian (apwt) + Genesis test execution"
 paths    = ["playwright-appian/src/**", "playwright-appian/skills/**", "playwright-appian/tests/**",
-            "playwright-appian/package.json"]
+            "playwright-appian/package.json",
+            # Phase 51 — Genesis side
+            "genesis/genesis/testexec/**", "genesis/genesis/testing/**", "genesis/genesis/integrations/apwt/**",
+            "genesis/genesis/api/testing.py", "genesis/genesis/kb/testexec_store.py",
+            "genesis/genesis/kb/regression_notes.py", "genesis/genesis/chat/story_verification_finalizer.py",
+            "genesis/web/src/features/testing/**", "genesis/web/src/lib/api/testing.ts",
+            "genesis/web/src/types/testing.ts", "genesis/web/src/features/workbench/Verification*.tsx",
+            "genesis/web/src/features/workbench/QueuedVerificationDialog.tsx",
+            "genesis/web/src/features/settings/components/cli/TestingRuntimeCard.tsx", "genesis/scripts/probes/**",
+            "genesis-workflows/workflows/test-execution/**", "genesis-workflows/workflows/action-capture/**",
+            "genesis-workflows/workflows/story-verification/**", "genesis-workflows/workflows/setup-composer/**",
+            "genesis-workflows/skills/genesis-test-authoring/**"]
 keywords = ["playwright", "apwt", "browser test", "test execution", "recorder", "trace", "taxonomy", "e2e",
-            "regression", "action library"]
-skills   = ["genesis-playwright-appian-dev", "genesis-backend-dev"]
+            "regression", "action library", "data setup", "case script", "verification", "reports origin"]
+skills   = ["genesis-playwright-appian-dev", "genesis-backend-dev", "genesis-web-dev", "genesis-workflow-authoring"]
 docs     = ["tracker:agent-system/skills/genesis-playwright-appian-dev/SKILL.md",
             "playwright-appian/planning/BIBLE.md", "playwright-appian/planning/DECISIONS.md",
-            "playwright-appian/planning/TRACKER.md"]
+            "playwright-appian/planning/TRACKER.md", "genesis-workflows/skills/genesis-test-authoring/SKILL.md",
+            "tracker:specs/phase-51-test-execution-engine.md"]
 gates    = ["cd playwright-appian && npm run lint && npm run typecheck && npm test",
-            "cd playwright-appian && npm run build   # a release only (tag vX.Y.Z = package.json version)"]
+            "cd playwright-appian && npm run build   # a release only (tag vX.Y.Z = package.json version)",
+            "cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
+            "cd genesis && .venv/bin/ruff check genesis",
+            "cd genesis/web && npm run lint && npm run typecheck && npm test",
+            "cd genesis/web && npm run build   # then commit web/static/",
+            "cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_library.py",
+            "cd genesis-workflows && ../genesis/.venv/bin/python -m pytest -q workflows --ignore=workflows/_fixtures"]
 
 # ───────────────────────────── genesis backend ─────────────────────────────
 
@@ -193,9 +210,12 @@ paths    = ["genesis/genesis/kb/stories.py", "genesis/genesis/kb/story_stages.py
             # Phase 49 (test traceability, ADR-079) + the lifecycle domain (ADR-050)
             "genesis/genesis/kb/testdesign.py", "genesis/genesis/services/testdesign_stage.py",
             "genesis/genesis/services/testimpact.py", "genesis/genesis/api/testdesign.py",
-            "genesis/genesis/domain/**"]
+            "genesis/genesis/domain/**",
+            # Phase 51 (the Verification lane, ADR-084)
+            "genesis/genesis/chat/story_verification_finalizer.py", "genesis/genesis/testexec/verification*.py",
+            "genesis-workflows/workflows/story-verification/**"]
 keywords = ["story", "board", "lane", "workbench", "object wiki", "design lane", "implementation lane",
-            "test case", "test impact", "traceability"]
+            "test case", "test impact", "traceability", "verification lane"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
 gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
             "cd genesis && .venv/bin/ruff check genesis",

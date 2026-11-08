@@ -904,3 +904,167 @@ genesis-workflows/
                        (details.kb_format_version, else 1 when parser_version ≥ 0.3); full_sync_reason compares formats
                        (no constant → the Phase 45 minor rule); kb_syncs.details.kb_format_version recorded.
 ```
+
+**Phase 51 — Test execution engine: action library, regression suite and story verification (playwright-appian v0.3.0 · genesis v0.81.0 · genesis-workflows v0.25.0; m0026–m0028):**
+```
+genesis/genesis/
+  db/runner.py         Migration.foreign_keys_off (keys off before an explicit BEGIN, checked) + ForeignKeyCheckError:
+                       commit refused on a foreign_key_check row the migration added, compared on (table, rowid, parent);
+                       pre-existing violations logged and tolerated.
+  db/migrations/m0026_test_execution.py  `testexecution` (v26, foreign_keys_off): kb_test_suites rebuild (kind
+                       feature|regression, nullable UNIQUE feature_id, app_uuid NOT NULL FK CASCADE, CHECK, partial UNIQUE
+                       regression per app); kb_test_settings, kb_test_users, kb_test_actions, kb_test_setups
+                       (ever_referenced), kb_test_case_scripts, kb_test_refs, kb_regression_items, kb_test_executions,
+                       kb_test_results (scenario_id/case_id SET NULL + stored scenario_key/case_key), kb_test_captures;
+                       kb_test_scenarios.setup_id / changes_shared_data; kb_sequences test_action/test_setup/test_execution.
+  db/migrations/m0027_regression_notes.py  `regression_notes` (v27): kb_regression_notes (suite FK CASCADE, kind, cause,
+                       cause_key, detail_json, dismissed_at).
+  db/migrations/m0028_capture_request.py  `capture_request` (v28): kb_test_captures.request_json (setup / compose request).
+  kb/testexec_store.py TestSettingsStore (no password parameter), TestLibraryStore (create with the key in the tx, CAS
+                       update, record_replay(inputs=, report=, screenshot=; ANSI stripped), restore_replay,
+                       remove_uncommitted, replace_refs, where_used, delete only when never referenced), TestScriptStore
+                       (upsert/delete; _follow_script = THE automation_status rule: bind → automated, delete →
+                       not-automated, record_run passed → automated over broken, mark_broken), RegressionStore
+                       (get_or_create, items/add_items/remove_item/reorder, selection, notes/get_note/dismiss),
+                       RegressionSelection + regression_selection (the one selection: preview, Run now, job, generator),
+                       ExecutionStore (create queued TE-, set_running(selection=), finish(selection=) with every result
+                       row in one tx, by_status, ran, latest, scenario_history/case_history, prunable keep 20),
+                       CaptureStore (CAS status edges, set_trace_path, set_decisions, bind_run, create(request=));
+                       VALID_CAPTURE_KINDS recording|verification|compose; is_flaky (≥ 3 of the last 10).
+  kb/regression_notes.py  record_losses / note_feature_delete — written under the write lock before the cascade by
+                       FeatureStore.delete_feature, the collab feature tombstone, delete_case and delete_scenario.
+  kb/testdesign.py     allocate_key; regression scenarios may use any non-retired case of the same app; last_result,
+                       referenced_by_regression and changes_shared_data on the one scenario/case DTO builders;
+                       set_scenario_setup (CAS first); delete_case clears its refs.
+  kb/boards.py         card queries join the verification story stage + run; _VERIFICATION_ACTIVE (one subquery in
+                       get_board and get_card) → verification_active queued|running|null; BoardStore.card_lane.
+  kb/story_stages.py   VALID_STAGES + "verification"; run_states_for_feature filtered to design + implementation.
+  domain/              EntityKind.TEST_ACTION/TEST_SETUP; LIBRARY_TRANSITIONS (+ program-only (ready, changed) → draft,
+                       never in allowed()), ACTION_TRANSITIONS ((retired, restore) → draft, actions only),
+                       LIBRARY_/ACTION_PRECONDITIONS + reasons (approve: setups after a passing Replay at the current
+                       hash, actions only when proven in use); build_library_lifecycle(_service). STORY_LANES … CODE_REVIEW,
+                       DEPLOYMENT, VERIFICATION, DONE; edges approve → deployment, deployed → verification, verify → done,
+                       reject → implementation.
+  services/testimpact.py  the impact result gains regression {hop, scenarios} (totals.scenarios stays feature-only).
+  config/environments.py  ENV_TYPES dev|qa|uat|production|other (+ labels); type is the home, is_dev a mirror (an
+                       explicit is_dev false wins); normalize_record; one Dev, at most one QA, no shared QA host;
+                       qa_environment(_label), qa_host_conflicts, host_of.
+  runtime/settings.py  testing_dir (GENESIS_TESTING_DIR) / testing_browsers_dir / testing_apps_dir; reports port.
+  runtime/schedule_store.py  update_option_entry(job, section, key, entry) (sets user_modified; other entries kept).
+  runtime/sync_jobs.py DEFAULT_JOBS + REGRESSION_JOB.   runtime/context.py  ctx.extras['apwt'] = ApwtFactory;
+                       _skill_source("playwright-appian") = the run checkout's package skill only.
+  runtime/preflight.py optional node + chromium items.
+  runs/manager.py      start(prepare=) (called before the record and the spawn; removes its run folder on failure);
+                       _reap_run_processes (finalize, pause, startup sweep); pause stores paused and cancel claims
+                       cancelled per worker BEFORE the kill (the killed worker's events, exit and late final are dropped);
+                       _resumable (resume/respond of a missing or terminal run → RunStateError 409); reconcile_status
+                       never moves a paused run; _worker_state dropped on the terminal announce.
+  runs/store.py        claim_status (CAS terminal write; only the winner announces run.final), note_progress.
+  testexec/            the engine (ADR-081). vendor.py VENDORED_APWT_VERSION 0.3.0 / _SHA256 / _SOURCE_COMMIT d3ed993,
+                       MIN_APWT_VERSION; vendor/playwright-appian-0.3.0.tgz (package data, the published tarball).
+    procs.py           minimal_env, run_bounded (own group, pgid in <run>/.pids, killed on timeout),
+                       record_children_in (ContextVar), start_long_lived(log_path=), record_group/forget, kill_group,
+                       reap (only groups whose processes still name a recorded marker; full command lines from
+                       /proc/<pid>/cmdline on Linux, ps -A -ww elsewhere; a ps failure is logged).
+    runtime.py         detect() (node ≥ 20, npm, git, Chromium CHROMIUM_REVISION 1217 for PLAYWRIGHT_TEST_VERSION 1.59.1,
+                       TYPES_NODE_VERSION), install_chromium() (explicit, serialized).
+    templates/         package.json (exact versions, playwright-appian file:vendor/…), tsconfig.json (noUnusedLocals),
+                       gitignore.txt, README.md, lib/index.ts (defineAction → each call in test.step('<key> <name>'),
+                       defineSetup({role, roles?}), defineCase(key, {role}), loginAs, unique), lib/scan-refs.mjs (the
+                       TypeScript-compiler scanner: defines, imports, refs, roles, dynamic).
+    workspace.py       TestWorkspace (one git repo per app under ~/.genesis/testing/apps/<app>/): create/ensure/install,
+                       update_runtime (+ _update_tsconfig, RuntimeUpdateRefused naming file:line), write/change (files →
+                       checks → tsc → ONE commit → catalog, under path_lock), write_generated, sync_lib, scan_refs,
+                       lib_files, export(commit, dest) (git archive; node_modules linked|installed|missing), history/
+                       revert/status/file_hash, library_drift (actions/ setups/ cases/ lib/ vs the export commit).
+    settings_service.py  TestSettingsService (site, browser, users, passwords under testusers-<sha1[:16]>/<ROLE>_PASSWORD,
+                       Dev-account warning, readiness(app, roles=), secret_values); TestCredentialResolver.
+    generator.py       build_catalog(conn, app, role_reader=, overlay=) → generate(): suites/** + playwright.config.ts +
+                       suites/_support.ts (auth:<role> / setup:<instance> / scn:<instance> projects; private instances
+                       for changes_shared_data; ordered_folders; grep_for anchored tags); Overlay; Roles protocol.
+    roles.py           THE roles reader (D37): case_role_of / setup_roles_of on the scanner's defines, scan_texts (scratch
+                       folder + the template scanner), read_defines (cached by sha256), RoleReader.
+    runner.py          PlaywrightRunner (credentials only in the child env, hard timeout, run(config=)), scrub_dir /
+                       scrub_text (raw, JSON, \u-JSON and XML forms; the HTML report's embedded zip and nested trace zips).
+    replay.py          replay_spec_ts(steps, role, roles=), replay_config_ts(html=), replay_outcome, action_steps,
+                       passed_action_keys.
+    execution_service.py  TestExecutionService: plan/start/start_impact/start_regression(selection=)/cancel(reason=,
+                       queued_only=)/pump (one execution per machine, F7)/launchers (kind → launcher)/detail;
+                       ExecutionCancelled.
+    finalizer.py       TestExecutionFinalizer (live run.final, bound run, CAS-idempotent, startup + on-read reconcile,
+                       automation status, F11 prune, deferred _promote_actions from results.json actions).
+    regression_job.py  REGRESSION_JOB (hourly window, per-app {cadence, days, time, since} in options.apps), is_due,
+                       next_slot.   regression_service.py  RegressionService (references, own scenarios, plan, run_now,
+                       apply_verification_proposal, latest/trend/summary, schedule_view/save_schedule).
+    library_service.py TestLibraryService: create/create_many(cases=)/save (code-declared contract only, D27;
+                       SaveResult.changed)/save_as_new/revert/adopt/transition/delete, _check_code (scanner rules,
+                       _setup_roles_problems), breaking_changes → BreakingContractError, dependent_scenarios/run_dependents,
+                       check_replay/replay (setups only, D28)/prune_replays, promote_proven_actions(passed_actions=),
+                       save_case_script, remove_case_script (CaseScriptInUse names queued/running executions).
+    recording.py       RecordingService (open --login → state-save → record start --detach --state; one per machine;
+                       setup_request; PROOF_WORKFLOW_VERSION 0.2.2 gate at Start and Stop; _drop_debug_trace; reap_stale).
+    compose.py         ComposeService + compose_request (POST …/testing/compose; COMPOSE_WORKFLOW_VERSION 0.1.1,
+                       COMPOSE_SKILL_VERSION 0.3.0; one per app).
+    capture_finalizer.py  CaptureFinalizer (WORKFLOW/KIND guards on every sweep), ComposeFinalizer, composed_from_run.
+    proposals.py       ProposalService (CAS decisions, actions before setups in ONE commit, rewrite_imports,
+                       dependency_problems(library=), _stale_composed over the refs closure at request.commit,
+                       ProposalDependencyError).
+    verification.py    overlay_problems/parse_overlay/overlay_hash/copy_overlay, story_context(role_reader=),
+                       VerificationTools (worker side).   verification_service.py  StoryVerificationService (check
+                       codes no_qa/no_cases/no_scenario/not_installed/not_ready/busy, start, _launch + _withdraw_if_moved
+                       twice, withdraw_queued, view, decide, apply; LEFT_VERIFICATION).
+    jobs.py            TestingJobs (D23: in memory, single flight, a thread per job, children in jobs/.pids, scrubbed,
+                       cancel for library-replay, reap_stale).
+    reports_origin.py  ReportsServer (D26): stdlib read-only static server on the app port + 100 (--reports-port /
+                       GENESIS_REPORTS_PORT), registered report/ roots only, no traversal/symlink escape, GET/HEAD only,
+                       Host checked (421), nosniff, no-cache index.html; started in `genesis serve` after the ADR-026 guard.
+  testing/scan_recording.py  test support: the recorded real-scanner output per text hash (GENESIS_WRITE_SCAN_FIXTURES=1).
+  integrations/apwt/   ApwtClient (the workspace's own apwt; QA host pin before any spawn; --mode full, --allow-host;
+                       credentials only on open --login/login; output scrubbed; daemon pid recorded; record_*/generate;
+                       agent_prefix), errors.py, ApwtFactory (for_run, for_recording, playwright, verification,
+                       run_bounded, library_drift, cleanup_run).
+  chat/story_verification_finalizer.py  StoryVerificationFinalizer (results + triage classes, overlay kept, verify →
+                       Done / reject → Implementation with defects.json, proposals as a verification capture).
+  api/testing.py       register_testing_routes(jobs=) (runtime, setup, users, passwords, workspace jobs, GET
+                       /testing/jobs/{id}), register_execution_routes, register_regression_routes, register_library_routes
+                       (literal /testing/actions and /testing/setups, save-as-new, replay jobs, changes/adopt, case scripts
+                       incl. DELETE …/test-cases/{case_key}/script, recordings, captures, POST …/testing/compose,
+                       _settle_on_read); error helpers refused / stale_write / typecheck_failed / accepted.
+  api/workbench.py     POST …/cards/{story}/verification/start; story verification read/report/decisions/apply;
+                       _withdraw_queued after moves, Design/Implementation start and remove.
+  api/app.py           wiring on app.state (test_jobs, test_library, test_regression, story_verification, finalizers) +
+                       startup reconcile / reap / prune under the run-owner lock.   cli/main.py  starts/stops ReportsServer.
+genesis/web/src/
+  features/testing/    TestingTab (?view=library|regression|executions|setup), LibraryView (?kind=), NewItemDialog,
+                       ComposeDialog (+ NewSetupChoiceDialog), RecordDialog, RecordingBar, CapturesPanel, ProposalsReview,
+                       LibraryItemPage (+ ContractForm read-only contract, LazyCodeEditor → CodeEditor), CaseScriptPage,
+                       AutomationBadge (CaseScriptView + Remove script), RegressionView, ScenarioPicker, PassRateChart
+                       (lazy), ExecutionsView, ExecutionPage (D32), SetupView + setup/*, RegressionBadge; grid.tsx +
+                       grid-logic.ts (the D31 grid pattern); hooks.ts (useJobRunner), logic.ts, problems.ts, paths.ts,
+                       automation.ts; contract.test.ts.
+  lib/api/testing.ts (testingApi) · types/testing.ts · test/fixtures/testing/ (from real responses) · lib/api/client.ts
+                       ApiError.body (the whole error body) · qk.testing.* + qk.workbench.verificationGate.
+  features/workbench/  lanes.ts order (D6), VerificationDialog, QueuedVerificationDialog (QUEUED_CANCEL_SENTENCE),
+                       VerificationSection (report iframe sandbox="allow-popups allow-popups-to-escape-sandbox"),
+                       BoardPage move()/resolveQueued; types/workbench.ts verification_active helpers
+                       (isVerificationQueued/NotStarted, isVerifying, queuedLeavingVerification).
+  features/settings/   EnvironmentsSection Type select (sends type only); components/cli/TestingRuntimeCard.tsx.
+  features/test-design/  case page automation + script, scenario page data setup picker / regression-owned scenarios
+                       (NoFeatureRef), CasesTable Automation column (min-w 980), TestImpactTab Run impacted tests.
+  shared/layout/breadcrumbs.ts  Testing › Executions and Testing › Regression crumbs.
+genesis/scripts/probes/  reports-origin-isolation.mjs (step 24) · testing-widths.mjs (L-090 probe, 3 widths × 2 themes).
+genesis-workflows/
+  workflows/test-execution 0.1.1  program only: prepare_env → run_playwright → parse_results → present
+                       (normalize_report, action_steps → results.json actions).
+  workflows/action-capture 0.2.2  generate → segment (kiro_node, trio, 900 s) → v_segment (proposal + setup rules on the
+                       workspace scanner, tsc via run_bounded) → replay (library_drift first; setup-first when asked;
+                       per-action status from its own step) + attach_healing → present.
+  workflows/story-verification 0.1.0  resolve_inputs → open_sessions → explore → author (D24 overlay) → v_author →
+                       execute → triage/heal/reexecute → decide → propose → cleanup → render_report → present; gates
+                       escalate_blocked / escalate; no pre_mutation.
+  workflows/setup-composer 0.1.1  prepare → compose (library items only, no screen steps) → v_compose → replay as
+                       every role (library_drift first) + attach_healing → escalate → present.
+  skills/genesis-test-authoring 0.3.0  workspace layout, lib/ API, generated-spec contract, recording setups (§5),
+                       multi-role setups, composing (§7); skills-registry.json entry.
+playwright-appian 0.3.0  record start --browser / --state (D-114); its own design record in planning/.
+```

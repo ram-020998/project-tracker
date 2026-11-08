@@ -216,3 +216,50 @@ the Compose with AI dialog or its picker; the reviewer measured them by hand (di
 overflow). Add them to the probe so the next width change is checked automatically. P2 (cosmetic): in the picker,
 `contracting-officer` breaks mid-word, the "Data setup" badge wraps, and the search placeholder is clipped — rebalance from the
 probe's numbers (L-090). Deferred to a v0.81.x patch by the user (2026-11-08, 51-13 As run).
+
+## 25. Scope deferred by the Phase 51 umbrella (§9 Out / Deferred)
+
+Not built in Phase 51, by decision (`specs/phase-51-test-execution-engine.md` §9, `51-01-findings.md` §7):
+- **Automated dev → QA deployment** from the Deployment lane (D7): needs ADR-068/073 amendments, a rollback design and
+  its own gate.
+- **Sharing test code and results** (D17): a GitLab remote per application workspace; Hub sync of the catalog and the
+  results. Prerequisite: machine-unique `ACT-`/`DS-`/`TE-` ids (like `TC-`/`TS-`, 49 D12).
+- **GitLab CI scheduled pipelines** with a result import (D11). The workspace is already CI-portable (D4).
+- **Quarantine** of flaky tests (D14.4; the flaky badge exists).
+- **Desktop or email notifications** of regression results (D14.7; in-app signals only today).
+- **QA test-data cleanup** (D8.6; data accumulates; cleanup can become library actions).
+- **SSO/MFA test users** (`playwright-appian` supports username and password only).
+- **Data-driven datasets** (shared parameters), Xray/TestRail result export, cross-browser projects, visual
+  comparisons, API-based data setups.
+- **Agent runtime isolation** for every workflow agent: Phase 52 (`specs/phase-52-agent-runtime-isolation/`), which
+  closes ADR-083's accepted risks (the shell, the inherited environment, the global Kiro MCP servers). A
+  `--password-stdin` option in `playwright-appian` would close the ~10 s window in which a role's password sits in the
+  `open --login` and replay subprocess environments (ADR-083 risk c).
+
+## 26. Leftovers from the release (51-13 As run, reviews 51-12/51-14/51-17/51-18)
+
+- **`backup/phase-51-2026-11-04` branches** (local and on `origin` in genesis, genesis-workflows and playwright-appian;
+  pushed with `-o ci.skip` during the build) are redundant now that `master`/`main` and the tags hold the code. Delete
+  them when the user agrees (a destructive remote change: ask first).
+- **Existing test workspaces keep the pre-release 0.3.0 tarball** (same version and code, different sha256). "Update
+  testing runtime" compares only the version. Harmless; matters only if a later check compares the workspace copy's sha.
+- **playwright-appian 0.3.0:** the live `npm run e2e` was not run (the user's decision; QA down). Its `planning/` phase
+  record has only the tracker row and the handoff; the pipeline ids are in 51-13's As run.
+- **Fixture provenance:** `tests/fixtures/apwt/apwt-0.3.0-*.json` `_source` says "packed from commit `5d7ae2d`" (true
+  when recorded; the CLI is unchanged).
+- **Ruff outside CI:** `ruff check genesis tests` (genesis) and `ruff check workflows` (genesis-workflows) report
+  pre-existing errors in test files and older workflows; CI does not run those commands.
+- **Local test conditions (51-13 §1.5):** `test_regression_job_handler_starts_due_apps_and_skips_busy_ones` fails
+  between 00:00 and 02:00 IST (time of day); `test_config.py::test_server_readiness_probe` hangs on a machine with Docker
+  installed; playwright-appian tests near vitest's 5 s default fail under load (`agent-idle`, `act`, `observe`; consider
+  a suite-wide `testTimeout` for `tests/agent/browser/**`, review 51-12 O5).
+- **Known limits kept:** a move by a non-route path (a collaboration pull) between the launch's last lane check and
+  `set_running` still starts that verification once (D25, Q26; folding the lane into the `set_running` UPDATE would
+  close it); no index on `json_extract(trigger_json, '$.story_id')` (51-14 n7); a refused queued-card confirm snaps back
+  silently and a background refetch can move the card behind the open dialog (51-14 s5-n1, s5-n2); the compose picker's
+  Role column shows only the main role (51-17 dn-2); `_strip_comments` does not know JavaScript regex literals (51-17
+  dn-3).
+- **Live acceptance (D38):** 51-12 steps 1–27 on QA on v0.81.0, including the step-24 report-isolation probe on userb
+  (needs an execution there, P-O1), the F10 re-measure of the 900 s agent turns on a write flow, and the m5 check that
+  Remove script is refused while a story verification that uses the case runs. Findings ship as v0.81.x patches; the
+  first patch also takes §23 (N1) and §24 (P1, P2).

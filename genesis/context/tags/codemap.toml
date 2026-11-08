@@ -163,3 +163,6 @@ areas = ["features-stages", "stories-workbench", "kb-sync", "runs-worker", "db",
 
 ["Phase 50 — Platform monorepo (genesis v0.80.0 · genesis-workflows v0.24.0; no migration)"]
 areas = ["distribution", "release-ci", "parser", "kb-sync", "workflows-library", "core-engine"]
+
+["Phase 51 — Test execution engine: action library, regression suite and story verification (playwright-appian v0.3.0 · genesis v0.81.0 · genesis-workflows v0.25.0; m0026–m0028)"]
+areas = ["browser-testing", "stories-workbench", "features-stages", "runs-worker", "db", "api", "config-secrets", "workflows-library", "web-shell"]

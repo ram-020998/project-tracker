@@ -38,6 +38,7 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
 - [Backlog — Phase 48 follow-ups (item 1: the shared `Select` drops `aria-label` → 9 unnamed dropdowns)](../specs/backlog/phase-48-follow-ups.md)
 - [Backlog — Phase 49 follow-ups (Test Design deferrals: clause↔story↔test matrix, Hub sync + machine-unique ids, regression suites, tool exports; run-layer defects found in the build)](../specs/backlog/phase-49-follow-ups.md)
 - [Backlog — Phase 50 follow-ups (updater `scope` label, `genesis status` port, ruff pin in genesis-workflows, protect its refs + CI token, guards against batched steps and the CI-variables API)](../specs/backlog/phase-50-follow-ups.md)
+- [Backlog — Phase 51 follow-ups (shell-guard open paths, apwt `--json` gaps, the first v0.81.x patch items §23–§24, deferred scope §25, release leftovers and live acceptance §26)](../specs/backlog/phase-51-follow-ups.md)
 - [Backlog — Skill → Workflow Migration Program (formerly Phase 8)](../specs/backlog/skill-migration-program.md)
 - [Backlog — The Object Wiki as agent grounding/memory](../specs/backlog/wiki-as-agent-memory.md)
 - [Backlog — Story → Object Wiki cross-link ("Objects changed" on the story Implementation tab; ⌘K over wiki objects)](../specs/backlog/wiki-story-cross-link.md)
@@ -66,7 +67,7 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
   secrets); **rotate the shared `GITLAB_PUSH_TOKEN`** (done 2026-11-01, Phase 50 D20: revoked, the new token set only in genesis-workflows) + refresh the expired Artifactory npm token; the
   `lcp` MCP image placeholder (`<lcp-image>`) in `mcp-registry.json`.
 
-**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-11-01 there is NO active build — Phases 1–50 are shipped (Phase 50 platform monorepo: genesis v0.80.0 → genesis-workflows v0.24.0, ADR-080; follow-ups in `specs/backlog/phase-50-follow-ups.md`). No next phase is specced. The Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
+**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-11-08 Phases 1–51 are shipped; Phase 51 (test execution engine: playwright-appian v0.3.0 → genesis v0.81.0 → genesis-workflows v0.25.0, ADR-081..084) still has live acceptance open — 51-12 steps 1–27 on QA, findings as v0.81.x patches (D38); follow-ups in `specs/backlog/phase-51-follow-ups.md`. Phase 52 (agent runtime isolation) is specced separately. The Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
 human's go-ahead — specs are pushed and 16-01/16-02 are shipped + CI-green; continue in the build order per §9's Phase-16
 block. This does not authorize starting any phase *beyond* 16 or any `specs/backlog/` work.)
 
