@@ -208,3 +208,11 @@ From `specs/phase-51-test-execution-engine/reviews/51-15-review.md`, accepted as
 **Context.** When Genesis cannot run `lib/scan-refs.mjs` (for example node is missing), the case-script page tells the
 user to rewrite the role as a plain string literal, which is wrong advice. Show the scanner's real error (and the
 runtime readiness problem) instead. Deferred by D38 to the first v0.81.x patch; a test with the scanner unavailable.
+
+## 24. The compose dialog in the width probe, and its picker layout (51-12 Parts 2–3 P1, P2)
+
+**Context (`reviews/51-12-review.md`, "Re-run 2, continued").** P1: `scripts/probes/testing-widths.mjs` does not open
+the Compose with AI dialog or its picker; the reviewer measured them by hand (dialog 768 × 900, picker 724 px, no
+overflow). Add them to the probe so the next width change is checked automatically. P2 (cosmetic): in the picker,
+`contracting-officer` breaks mid-word, the "Data setup" badge wraps, and the search field's width — rebalance from the
+probe's numbers (L-090). Deferred to a v0.81.x patch by the user (2026-11-08, 51-13 As run).
