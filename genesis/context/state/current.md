@@ -89,8 +89,6 @@ remote `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git`. The old library r
 - **Phase 51 live acceptance is open (D38):** 51-12 steps 1–27 on QA on v0.81.0 when QA is back; findings ship as
   v0.81.x patches. The first patch also takes backlog `phase-51-follow-ups.md` §23 (N1, the case-script hint when the
   scanner cannot run) and §24 (P1 the compose dialog in the width probe, P2 the picker layout).
-- The `backup/phase-51-2026-11-04` branches (local + origin, all three code repos) are redundant; delete on the user's
-  go-ahead (backlog §26).
 - Unconfirmed from Phase 50 (user): the first weekday sync's `details.kb_format_version` = 1 on each instance; moving
   the three old library checkouts to `_archived/`.
 - Agent isolation for every workflow agent is Phase 52 (ADR-083 accepted risks).

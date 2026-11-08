@@ -238,9 +238,8 @@ Not built in Phase 51, by decision (`specs/phase-51-test-execution-engine.md` §
 
 ## 26. Leftovers from the release (51-13 As run, reviews 51-12/51-14/51-17/51-18)
 
-- **`backup/phase-51-2026-11-04` branches** (local and on `origin` in genesis, genesis-workflows and playwright-appian;
-  pushed with `-o ci.skip` during the build) are redundant now that `master`/`main` and the tags hold the code. Delete
-  them when the user agrees (a destructive remote change: ask first).
+- ~~**`backup/phase-51-2026-11-04` branches**~~ **Done 2026-11-08:** deleted locally and on `origin` in genesis,
+  genesis-workflows and playwright-appian by the user, after a check that each was contained in `master`/`main`.
 - **Existing test workspaces keep the pre-release 0.3.0 tarball** (same version and code, different sha256). "Update
   testing runtime" compares only the version. Harmless; matters only if a later check compares the workspace copy's sha.
 - **playwright-appian 0.3.0:** the live `npm run e2e` was not run (the user's decision; QA down). Its `planning/` phase
