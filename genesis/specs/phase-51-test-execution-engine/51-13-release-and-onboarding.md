@@ -123,3 +123,41 @@ process-group reaping (`test_apwt_client` open ×2, `test_testexec_procs` reap, 
 - **For genesis-release.** `v0.81.0` (local) points at `8e5bacc`, which does not have the fix. Ask the user whether to
   move the unpushed tag to `62537c2` or to cut v0.81.1. Then confirm a green genesis pipeline on the tagged commit
   before pushing.
+
+## As built — genesis-workflows test without Node (genesis-dev, 2026-11-02)
+
+There is still no **As run** section, so this note sits beside the reap fix above. genesis-workflows master pipeline
+#7336032, job `workflow-tests`, had 1 failed and 427 passed. Base: `b295394`, the pushed v0.25.0 release commit.
+
+- **Cause.** The failing test was `action-capture` `test_scan_refs_reports_why_it_cannot_run`. Its first assertion
+  expected "no lib/scan-refs.mjs" while node was whatever the host had. The CI image `python:3.13` has no Node, and
+  `scan_refs` (`graph.py:466-470`) correctly checks node first, so it raised "node is not installed". On a machine
+  with Node the test passed.
+- **Fix (test only; `graph.py` and all versions unchanged).** The test now takes PATH from its own folders, never the
+  host's:
+  - PATH = an empty folder → "node is not installed".
+  - PATH = the fake `bin/node` plus that empty folder → "no lib/scan-refs.mjs".
+  - Then `lib/scan-refs.mjs` is added → "no JSON document".
+- **Commits (genesis-workflows, local, not pushed or tagged):** `60dde75` (the fix) and `6a7d432` (review nits).
+- **Other host-tool assumptions.** The grep found none in the workflow tests:
+  - Every `npx` and `node` is a fake bin on a temporary PATH.
+  - story-verification reads roles from the recorded scan.
+  - No test calls git or ps directly.
+  - Genesis helpers the tests reach use git (present in the image) and, on Linux, `/proc` before `ps` (present).
+- **Docker run.** `python:3.13` with no node, npm or npx. Script: `.reap-repro/ci-wf.sh`, outside the repos.
+  - **Steps:** the CI `before_script`'s `ci/check_internal_pins.py`; the four internal pins exactly as
+    `pyproject.toml` lists them (`genesis.git@v0.81.0`, rewritten to the local genesis checkout, where `v0.81.0`
+    peels to `62537c2` as on the remote); this repo editable; then the three CI job commands.
+  - **Difference from CI:** CI's one-pass `pip install -e ".[dev]"` is OOM-killed in this Docker VM. The
+    third-party packages come from the genesis dev venv's exact freeze instead, without PyMuPDF.
+  - **At `6a7d432`:** internal pins PASSED, `validate_library` PASSED (18), `validate_skills` PASSED (4),
+    workflow-tests **428 passed**.
+  - **With the `b295394` test file:** 1 failed, 427 passed, with the pipeline's exact message.
+- **macOS.** `validate_library` PASSED (18), `validate_skills` PASSED (4), workflow pytest 428 passed (at
+  `6a7d432`); `ruff check workflows/action-capture` clean. One run of the action-capture file had 1 failure among 54
+  before I recorded its name. 14 repeats then passed 54/54, so it is unidentified and probably load-related.
+- **Review.** `reviews/51-13-workflows-node-test-review.md`: **SHIP** on `60dde75`, with no blocker, major or minor.
+  Both nits were fixed in `6a7d432`, which was not re-reviewed. The reviewer also ran the suite on macOS with node
+  removed from PATH: 428 passed.
+- **For genesis-release.** Push `6a7d432`. A new genesis-workflows tag is your call: no workflow or version changed,
+  only a test.
