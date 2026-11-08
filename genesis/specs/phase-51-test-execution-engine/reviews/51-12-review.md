@@ -753,3 +753,205 @@ None at code level.
 | R-O1 | 51-13 / playwright-appian | stabilise `agent-act.test.ts` before the release gate |
 
 After R-MJ1 is fixed (and the minors are fixed or moved to `specs/backlog/phase-51-follow-ups.md`), the next step is a delta re-review of that fix, then §3 steps 1–27 live once QA is back.
+
+---
+
+# Re-run 2 — the 51-18 delta, code level (genesis-review, 2026-11-08)
+
+**Ranges reviewed** (every sha resolves and is the repo's HEAD; all three trees clean apart from the user's own
+playwright-appian `.gitignore` line, O3 of the 51-18 review):
+
+| Repo | Range | Commits |
+|---|---|---|
+| genesis | `2b2cf9d..346f885` (51 source files outside `web/static`) | `51e55f9`, `e75a668`, `2d1adb7`, `96354a8` (bundle), `0a5d342`, `346f885` |
+| genesis-workflows | `69bface..6218803` (14 files) | `6218803` |
+| playwright-appian | `5d7ae2d..f00cebb` (2 test files) | `0950798`, `f00cebb` |
+
+**Read:** the 51-12 pack (`genesis-ctx pack 51-12`, 50.2K tokens, OK); the Re-run section above; the 51-18 spec, its As
+built and its review (first pass and delta re-review); the diffs of `runs/manager.py`, `testexec/{roles, generator,
+library_service, finalizer, replay, workspace}.py`, `domain/{transitions, lifecycle}.py`, `integrations/apwt/factory.py`,
+`api/testing.py`, the templates (`lib/index.ts`, `lib/scan-refs.mjs`, `tsconfig.json`), the web diff
+(`AutomationBadge.tsx`, `logic.ts`, `lib/api/testing.ts`, types, fixtures), the workflows' `test-execution/graph.py`
+and the drift and replay code of `setup-composer/graph.py`; the whole of the m5 commit `346f885`.
+
+**Scope, decided by the user on 2026-11-08.** The QA and Dev environments are down. The user runs live acceptance
+(steps 1–27) and asked me for the rework review only. So **Part 2 (installs + restarts), Part 3 (the two no-QA probes)
+and Part 4 (live steps) were NOT done in this session**, and I made no change to the user's machine: no install, no
+restart, no fleet command. Evidence folder: `/tmp/genesis-review/51-12-rerun2/`.
+
+## Each re-run finding against its 51-18 fix
+
+| Finding | Fix at HEAD | Regression test | Verdict |
+|---|---|---|---|
+| R-MJ1 two roles readers | `testexec/roles.py`: one reader over Genesis's template `scan-refs.mjs` in a scratch folder with the workspace's TypeScript, cached by text hash; `case_role_of` / `setup_roles_of` interpret the scanner's `defines`. Every consumer goes through it: `generator.build_catalog(role_reader=)` (`generator.py:178,216,227,264,278`), `execution_service.py:120`, `verification_service.py:101`, `verification.py:254,405,416`, `compose.py:157-167`, `library_service.py:393,1043`, `api/testing.py:756`. The regex readers are gone (`grep setup_extra_roles\|case_script_role\|_CALLBACK_RE genesis/` finds nothing). The scanner lists a non-string literal `role` as dynamic (`scan-refs.mjs:112-113`). | `test_testexec_roles.py`: `async` / `function` / `=>` in the name, block and line comments in `roles`, 8 case-option shapes, scanner failure → not automated with the reason, recording = fresh real scan, cross-repo parity | **Fixed** |
+| R-m1 paused run turns into an old gate | `reconcile_status` returns a `paused` record unchanged (`runs/manager.py:445`) | `test_a_read_in_a_new_process_leaves_a_paused_run_paused` (`test_runs.py:878`, the earlier probe), `test_pause_then_restart_then_resume_continues_from_the_checkpoint` (`:893`, real worker) | **Fixed** |
+| R-m2 replay can prove agent-edited code | `TestWorkspace.library_drift` compares `actions/ setups/ cases/ lib/` of the checkout with the export commit by git blob id, in the workspace repository outside the run folder (`workspace.py:513-538`); `ApwtFactory.library_drift` (`factory.py:85-90`). Both capture workflows check it before **every** replay, so a heal cannot get past it (`setup-composer/graph.py:773-782`, `action-capture/graph.py:703-716` + its replay). The replay writes its own spec and config (`setup-composer/graph.py:787-789`), so a checkout `playwright.config.ts` edit does not run either. | drift end to end in both workflows (`replay["drift"] == [...]`), `library_drift` on a real export | **Fixed** |
+| R-m3 "used" = "imported" | `noUnusedLocals` in the template (`templates/tsconfig.json:7`), brought to old workspaces by Update testing runtime in its own typechecked commit; `defineAction` wraps every call in `test.step('<key> <name>')` (`templates/lib/index.ts:74`); `replay.action_steps` / `passed_action_keys` (`replay.py:185,206`); the finalizer proves only actions whose own step passed in a passed scenario or setup project, and nothing from test-execution < 0.1.1 (`finalizer.py:228-239`); test-execution 0.1.1 reports `actions` per scenario and per setup project | real tsc refuses an unused import; a real Playwright 1.59.1 report of nested action steps; parity of the three workflow copies; called → promoted, imported-not-run / branch not taken / failed step / old workflow → Draft | **Fixed** |
+| R-m4 retired action cannot be restored | `ACTION_TRANSITIONS` adds `(retired, restore) → draft` with no precondition (`transitions.py:256-260`), used only for `TEST_ACTION` (`lifecycle.py:379-394`); setups keep restore → Ready after a passing Replay; toast "Restored to Draft — Run dependents to make it Ready" (`logic.ts` `transitionMessage`) | store test (audited `retired → draft`), setup unchanged, `item.test.tsx`, `logic.test.ts` | **Fixed** |
+| R-m5 a case script cannot be removed | `DELETE /applications/{app}/test-cases/{case_key}/script` (`api/testing.py:769-785`) → `remove_case_script` (`library_service.py:826-860`): one commit, binding and refs deleted, case `not-automated`; 404 without a script; 409 naming every queued or running execution that uses the case, checked at once and again inside the workspace lock (L-091). Web: **Remove script** + `ConfirmDialog` + the refusal in place (`AutomationBadge.tsx` `CaseScriptView`) | route, one commit, second remove 404, running / queued / running-verification refusals, `phase49.test.tsx` with jest-axe, contract fixture `case-script-remove` | **Fixed** (incl. m5 below) |
+| R-m6 ADR-028 amendment | Docs, not code: carried in 51-13 §3 ("Also (51-12 re-run R-m6) … amend ADR-028 … note it in ADR-026") | — | **Carried to 51-13** |
+| R-n1 a paused worker's late events | `on_event` returns at once for any intended stop (`manager.py:220`); `on_exit` likewise (`:271`); per worker, so the resumed worker's events count. Decision (d): a paused worker's late terminal `final` is dropped too. | `test_a_late_node_event_of_a_paused_worker_is_dropped` (`test_runs.py:822`), `test_a_paused_workers_late_terminal_final_is_dropped_and_resume_finishes_the_run` (`:849`) | **Fixed** |
+| R-n2 promotion on the reader thread | `self._defer(promote)` (`finalizer.py:207`), failures still logged | `test_action_promotion_runs_through_the_defer_off_the_reader_thread` | **Fixed** |
+| R-O1 playwright-appian CLI timeouts | `agent-act` and `agent-do` tests have an explicit `30_000` with the measured times in a comment (`agent-act.test.ts:66-83`, `agent-do.test.ts:149-163`); bodies unchanged | 3 consecutive green full runs (below) | **Fixed** for both named tests; see O5 |
+
+## 51-18's delta-review m5 fix (`346f885`, not re-reviewed before)
+
+- **What changed.** `_executions_running` (`library_service.py:798-824`) now reads every queued **and** running
+  execution of the app in one way. It takes the plan's steps (a launched adhoc, impact or regression execution), the
+  `scenario_ids` plus any plan ids, resolved through `kb_test_scenario_steps WHERE case_id=?`, and a verification's
+  `case_keys`. The running branch no longer depends on a plan, which a verification never gets
+  (`verification_service.py:203-207,279-281`: its running selection is the queued one plus `resumed`).
+- **Shape check (L-083).** The selection keys the code reads are the real ones: `scenario_ids` holds ints
+  (`verification_service.py:203`), and `case_keys` holds `TC-` keys (`:206`). The test builds a subset of that shape
+  (`scenario_ids` or `case_keys`, plus `resumed`) and moves the execution to running with the real `set_running`.
+- **Regression proof.** I exported `0a5d342` to `/tmp/g51-m5-old` and copied in the HEAD
+  `tests/test_testexec_execution.py`. Both cases of `test_a_running_story_verification_also_refuses_remove_script`
+  (`[scenario_ids]`, `[case_keys]`) fail there with `DID NOT RAISE CaseScriptInUse` (`:1002`). The queued test still
+  passes there. All three pass at `346f885`.
+- **Lock (L-091).** The check runs once before the lock, without a typecheck (`:855`), and again inside the workspace
+  lock in `before_commit` (`:847`). A verification is queued until `prepare` calls `set_running` and exports its
+  checkout, so the in-lock check sees it either as queued (`scenario_ids`) or as running (the same keys). There is no
+  gap between the two states.
+- **Verdict: fixed.** The 409 text, the docstring and the dialog ("queued or running") now hold for every kind of
+  execution.
+
+## Gates (all run by the reviewer, 13:22–13:55 IST, outside 00:00–02:00)
+
+| Repo | Gate | Result |
+|---|---|---|
+| genesis | `.venv/bin/python -m pytest -q -p no:warnings --deselect tests/test_config.py::test_server_readiness_probe` | **1832 passed, 1 deselected** in 660 s (= 1829 + the earlier O2 flake now passing + the 2 m5 cases). O2 (`test_regression_job_handler_starts_due_apps_and_skips_busy_ones`) passed because the run was outside 00:00–02:00 IST. The deselected test is O1 (Docker is installed, so it attempts a real handshake); nothing under `genesis/config`, `integrations/mcp*` or `tests/test_config.py` changed in the range. A first attempt in the background was killed by the tool's 120 s limit at 27% and is discarded. |
+| genesis | `ruff check genesis` + every changed test file (14 files) | All checks passed |
+| genesis | cross-repo tests locally: `pytest -rs tests/test_testexec_{roles,library,compose,recording}.py` | **132 passed, 0 skipped** (the sibling genesis-workflows checkout was found, so the real-scanner, parity and hash tests ran) |
+| genesis web | `npm run lint` | 0 errors, 20 warnings (the base count) |
+| genesis web | `npm run typecheck` | clean |
+| genesis web | `npx vitest run` | **726 passed, 62 files** |
+| genesis web | stale bundle: `npx vite build --outDir /tmp/genesis-review/51-12-rerun2/static-346f885`, a 30 s wait, then `diff -r` against `web/static` | **IDENTICAL**; then `git status --short --untracked-files=all` empty, in its own call |
+| genesis-workflows | `ci/validate_library.py` | **PASSED (18 workflows)**, incl. the reliability lint and the internal-pin check |
+| genesis-workflows | `ci/validate_skills.py` | **PASSED (4 skills)** |
+| genesis-workflows | `pytest -q workflows --ignore=workflows/_fixtures` | **428 passed** |
+| genesis-workflows | `ruff check` on action-capture, setup-composer, test-execution, story-verification, `ci` | All checks passed |
+| playwright-appian | `npm run lint`, `npm run typecheck` | clean |
+| playwright-appian | `npm test`, each run issued alone (L-089) | Run 1 (load 5.1 at the start, `softwareupdated` at 186% CPU): **2 failed / 1399**. The failures were `tests/agent/browser/act.test.ts` "refs without an address … fill, click and press" (5005 ms) and `tests/agent/browser/observe.test.ts` "the Appian error dialog is in the snapshot" (5004 ms); alone they take 2497 ms and 518 ms (O5). Runs 2, 3 and 4: **1399/1399 each** (three consecutive greens; load 9.9–17.8 from the OS updater). `agent-do.test.ts` file 29.7 s / 30.6 s, `agent-act.test.ts` 24.3 s / 25.9 s, inside their explicit timeouts. |
+
+## `genesis-ctx check` checklists (51-18 delta)
+
+Raw output: `check-genesis.txt` (114 files incl. `web/static`). genesis-workflows (14 files) and playwright-appian
+(3 files incl. the uncommitted `.gitignore`) were printed in-session. Every N/A means the delta does not touch that
+surface; the earlier re-run's answers for the whole Phase 51 diff stand where the delta changes nothing.
+
+### genesis (`check --since 2b2cf9d --repo genesis`)
+
+**ADRs**
+- [OK] ADR-001: no agent orchestrates. The new code is program code (scanner reader, drift check, proofs).
+- [OK] ADR-009: pause stays paused across a new process (R-m1) and wins over a late worker `final` (R-n1, decision d). Both are tested with a real worker.
+- [OK] ADR-010 / ADR-018 / ADR-022: `results.json` `actions` and `replay.actions` are small lists in run-folder documents. No bulk data goes into state.
+- [OK] ADR-011: no agent node added (workflows below).
+- [OK] ADR-012: the workflows carry copies of `action_steps`, pinned by parity tests. Genesis reaches the workspace only through `ctx.extras['apwt']` (`factory.py:85-90`), and the app imports no workflow Python.
+- [N/A] ADR-008 · 019 · 023 · 025 · 026 · 031–035 · 037 · 041–045 · 047 · 049 · 054–060 · 063–065 · 070 · 072–076 · 080: not touched by the delta (no core, bind, chat, credits, KB, Hub, stage, spec or packaging change).
+- [OK] ADR-021 / ADR-068: no `pre_mutation` change. Remove script deletes a workspace file through a commit (history kept), not an Appian object.
+- [OK] ADR-024: the scanner and git calls are blocking. They run in sync FastAPI routes (threadpool; `get_case_script` and `delete_case_script` are `def`), in the deferred finalizer, or in the worker's `asyncio.to_thread` replay (`setup-composer/graph.py:820`).
+- [OK] ADR-027: `Button`, `Trash2` and `ConfirmDialog` come from the existing primitives. Colors use the `text-danger` token, and no raw palette class was added.
+- [OK] ADR-028: the new DELETE is under `/api` through the router. The client adds `/api` centrally (`testingApi.removeCaseScript`).
+- [OK] ADR-030: no migration (DB stays v28). SQL stays in the stores, plus one read-only `SELECT` in the service (the pattern already in that file).
+- [OK] ADR-050: action restore goes through `LifecycleService.transition` with the new table (`lifecycle.py:379-394`), audited. Remove script changes `automation_status` through `TestScriptStore.delete`, the store's existing rule.
+- [OK] ADR-061 / 062: no lane change.
+- [OK] ADR-066: run evidence is unchanged.
+- [OK] ADR-067: healing is bounded as before, and the drift check repeats on every replay, so a heal cannot bypass it.
+- [OK] ADR-069: no skills change.
+- [OK] ADR-071: the Remove script action sits on the canonical case page; no new surface.
+- [OK] ADR-077: one-call retrieval, a pack, never `--trust-all-tools`.
+- [OK] ADR-078 / 079: cases keep Draft → Ready → Retired. Removing a script removes only that case's script binding and refs; the case record stays.
+
+**Lessons**
+- [N/A] L-003 · 010 · 016 · 017 · 018 · 019 · 021 · 031 · 041–043 · 045 · 048 · 050 · 051 · 059 · 060 · 063 · 066 · 071–074 · 082 · 084–087 · 095 · 098 · 100: not touched.
+- [OK] L-004: SQLite stores only.
+- [OK] L-005: no new event kind, and still one `run.final` per terminal (m4 test).
+- [OK] L-008: an unexpected death still fails with its specific error. The stop check runs first, and `test_an_unexpected_worker_death_still_fails_the_run` is in the green full run.
+- [OK] L-009: no sync invoke.
+- [OK] L-011: new contract fixture `case-script-remove`, and re-recorded `capture-*` fixtures with `replay.actions`. `contract.test.ts` passes.
+- [OK] L-020: no new loops.
+- [OK] L-023: `action_steps` and `passed_action_keys` are defensive about types.
+- [OK] L-025 / 027: ruff pin unchanged and green.
+- [OK] L-026: no blocking DB write on an event loop (above).
+- [OK] L-030: the web change is committed with its bundle (`96354a8`), and the out-of-tree build is identical.
+- [OK] L-033 / L-053: recordings need action-capture ≥ 0.2.2 and compose needs setup-composer ≥ 0.1.1, refused at Start and at Stop (`recording.PROOF_WORKFLOW_VERSION`, `compose.COMPOSE_WORKFLOW_VERSION`). An old test-execution proves no action, and that is logged.
+- [OK] L-039: the GET case-script and the catalog read roles through the same reader.
+- [OK] L-056: every commit holds its implementation and tests; the tree is clean.
+- [OK] L-057 / 099: the pin move is required at 51-13 and stated in 51-13 §1.4. The editable dev venv hides it locally (51-18 n6).
+- [OK] L-058: promotion failures are logged loudly inside the deferred job.
+- [OK] L-061: no restart was done by me.
+- [OK] L-062 / 065: unchanged.
+- [OK] L-064 / 075 / 076: no agent turn shape change.
+- [OK] L-068: unchanged.
+- [OK] L-069: no `<Button asChild>` in the delta. The new `Button` is plain.
+- [OK] L-081: the new `noUnusedLocals` default reaches old workspaces only through the user's Update testing runtime, which refuses with `file:line` and keeps the rest of the update (`RuntimeUpdateRefused`).
+- [OK] L-083: real scanner recordings re-checked against a fresh scan, a real Playwright report, and real selection shapes in the m1 and m5 tests.
+- [OK] L-088: my shell guard refused `rm -rf` in `/tmp`, and I worked around it with a fresh folder, not by bypassing the guard.
+- [OK] L-089: the bundle was proven by a rebuild and then an empty status, each in its own call. playwright-appian runs were issued one per call.
+- [N/A] L-090: no table or width change.
+- [OK] L-091: the busy check runs again inside the workspace lock, and the claim/CAS writes are unchanged.
+- [OK] L-092: new tests have unique `test_*` names. `genesis/testing/scan_recording.py` is not named `test_*`, and `test_no_module_or_symbol_named_test_outside_tests` passes.
+- [OK] L-093: m4's test goes through the real `_finalize`, and promotion stays after the stored terminal.
+- [OK] L-094: no registry value added. `ACTION_TRANSITIONS` is a separate table used only for `TEST_ACTION`.
+- [OK] L-096: the new DELETE `…/test-cases/{case_key}/script` has no shadowing pair (testdesign's `DELETE /test-cases/{case_id}` has a different prefix), and `test_no_route_is_shadowed_by_an_earlier_path_parameter_route` passes.
+- [OK] L-097: no startup sweep change.
+
+**Gates:** pytest, ruff, web lint, typecheck, vitest and the bundle are green (above).
+
+### genesis-workflows (`check --since 69bface --repo genesis-workflows`)
+
+- **OK:**
+  - ADR-001, 006 (folder packages; `registry.json` and `workflow.yaml` bumped with `META`), 010, 011 (no agent node added; `validate_library` reliability lint passes), 012 (copies, parity-pinned), 017, 018, 019, 021 (no `pre_mutation`; QA-only, ADR-082 draft), 022, 067 (drift re-checked on every replay inside the heal loop), 068, 077, 078, 080.
+  - L-006, L-009, L-013 (parity lint passes), L-020, L-022, L-023, L-026 (replay in `to_thread`), L-033 (version bumps match Genesis's gates), L-056, L-057 (owed at 51-13, stated), L-089, L-092 (no `tests/__init__.py` added).
+- **N/A:**
+  - ADR-003, 005, 007, 014, 015, 020, 026, 029, 030, 031, 033, 034, 035, 036, 037, 038, 039, 041, 045, 046, 048, 056–059, 061–063, 065, 069, 073–076.
+  - L-017, L-021, L-024, L-025/027 (unchanged pin, ruff green), L-029, L-030, L-042, L-045, L-049, L-051, L-053, L-064, L-075, L-076, L-087, L-088, L-098, L-099, L-100.
+- **Gates:** `validate_library` PASSED (18), `validate_skills` PASSED (4), `pytest workflows` 428, genesis pytest and ruff (above).
+
+### playwright-appian (`check --since 5d7ae2d --repo playwright-appian`)
+
+- [N/A] ADR-011, 019, 026, 046, 063, 065, 074, 080: two test timeouts only.
+- [OK] ADR-077.
+- [N/A] L-017, 025, 027, 030, 045, 051, 057, 087, 088, 092, 098, 099, 100.
+- [OK] L-056: the two commits hold the two test files only. The `.gitignore` line is uncommitted (O3) and must stay out of the 51-13 release commit unless the user says otherwise.
+- [OK] L-089: four runs, one per call.
+- **Gates:** lint and typecheck clean; `npm test` three consecutive greens (runs 2–4) after one loaded run with two timeouts outside the range (O5). `npm run build` is release-only.
+
+## Findings (re-run 2)
+
+### Blockers
+None.
+
+### Majors
+None.
+
+### Minors
+None.
+
+### Nits
+- **N1 (R-MJ1, new path):** `GET …/test-cases/{case_key}/script` drops the scanner's error.
+  - `api/testing.py:756-758` takes `.role` from the reading. When it is `None`, the route shows `UNREADABLE_ROLE_WARNING` ("write the role first … as a plain string literal").
+  - Since R-MJ1, a `None` role can also mean that the scanner could not run (`RoleReading.error`, e.g. "the test workspace is not installed (no node_modules/typescript …)" or "node is not installed"). The page then gives the wrong advice.
+  - The generator path keeps the reason (scenarios are "not automated" with it), so only the case page's hint is affected.
+  - **Fix (optional):** when `reading.error` is set, return that error as the warning instead.
+
+### Observations
+- **O1 / O2** (51-18 review): unchanged. O2 passed in this run (13:30 IST); keep it in the backlog.
+- **O5 (playwright-appian, outside the range):** under external load (`softwareupdated` at 186% CPU), two more in-process tests hit vitest's 5 s default: `tests/agent/browser/act.test.ts` "refs without an address … fill, click and press" (2.5 s alone) and `tests/agent/browser/observe.test.ts` "the Appian error dialog is in the snapshot" (0.5 s alone). Neither file changed in the range. Together with R-O1 and O4, the suite has several tests with less than 2× margin to 5 s under load. For 51-13, run the release gate on an idle machine (51-13 §1.5 already says so). If it recurs, consider a suite-wide `testTimeout` for `tests/agent/browser/**` instead of per-test fixes.
+- **n6 / n7 / R-m6** are carried in 51-13: the pin move (§1.4), the area globs (§3 "Areas"), and the ADR-028 / ADR-026 amendment (§3 "ADRs").
+
+## Not done in this session (user decision)
+
+- **Part 2:** no `genesis install` of test-execution 0.1.1, action-capture 0.2.2 or setup-composer 0.1.1, and no restart. The instances still run the HEAD code from the editable venv (so the Genesis-side 51-18 code is live after a restart), but the installed workflows are the older 0.1.0 / 0.2.1 / 0.1.0. With those, Record and Compose refuse (409) by design until the new versions are installed.
+- **Part 3:** `scripts/probes/reports-origin-isolation.mjs` (step 24) and `scripts/probes/testing-widths.mjs` (step 20, with the compose dialog and picker) were not run.
+- **Part 4:** live steps 1–27 are with the user. That includes the m5 live check: Remove script must be refused while a story verification that uses the case is running.
+
+## Verdict: SHIP (code level)
+
+Every re-run finding (R-MJ1, R-m1–R-m5, R-n1, R-n2, R-O1) is fixed in code, and each fix has a test that would have
+caught the original bug. R-m6 is a docs item carried to 51-13. 51-18's delta-review m5 fix is correct and proven
+against `0a5d342`. Every gate is green in my runs. The only red was one playwright-appian run under OS-updater load,
+in tests outside the range, followed by three consecutive greens. The one new nit (N1) does not block.
+
+**51-12 as a whole is not closed by this verdict:** it SHIPs when the user's live steps 1–27 pass, after the Part 2
+installs and restarts (L-061) and the two Part 3 probes.
