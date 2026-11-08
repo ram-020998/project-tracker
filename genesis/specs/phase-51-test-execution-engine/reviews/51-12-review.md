@@ -955,3 +955,112 @@ in tests outside the range, followed by three consecutive greens. The one new ni
 
 **51-12 as a whole is not closed by this verdict:** it SHIPs when the user's live steps 1–27 pass, after the Part 2
 installs and restarts (L-061) and the two Part 3 probes.
+
+## Re-run 2, continued: Part 2 (setup) and Part 3 (the no-QA probes), 2026-11-08 14:06–14:20 IST
+
+The user asked for Parts 2 and 3, with a question before each change. This supersedes the "Not done in this session"
+list above for Parts 2 and 3. Part 4 (live steps 1–27) is still the user's. Evidence: `/tmp/genesis-review/51-12-rerun2/`
+(`backup/`, `probes/`).
+
+### Part 2 — installs and restarts (each change approved by the user first)
+
+| # | Change | Result |
+|---|---|---|
+| 1 | Back up main | `backup/main-20261108-140635.genesis.db`: SQLite online backup from a read-only source; integrity ok, v28, 428 runs, 0 non-terminal; lockfile copied beside it (`backup.py`) |
+| 2 | Install on main: `gsm exec main -- install --from <genesis-workflows> test-execution action-capture setup-composer` | test-execution **0.1.1**, action-capture **0.2.2**, setup-composer **0.1.1** (ref `local`). Each installed `graph.py` is byte-identical to the checkout at `6218803`. story-verification stays 0.1.0, and the skill is unchanged. |
+| 3 | Back up userb, then the same install on userb (the user chose both instances) | `backup/userb-20261108-140653.genesis.db`: integrity ok, v28, 119 runs, 0 non-terminal. The same three versions are installed, byte-identical. userb's lockfile went from 14 to 17 workflows. userb has no story-verification and no `genesis-test-authoring` skill (not asked for). |
+| 4 | Restart main (`gsm restart main`), after a DB check: no non-terminal run, no queued or running execution, no recording or analysing capture | pid 14358 → **30385**, healthy. The log since the restart has no error or traceback, and the reports listener is on :8860. `/openapi.json` has `delete`/`get`/`put` on `/api/applications/{app_uuid}/test-cases/{case_key}/script` (the 51-18 code is live), and `info.version` is still 0.80.0 (pre-release). `GET /api/workflows/<id>` gives 0.1.1 / 0.2.2 / 0.1.1 / story-verification 0.1.0. |
+| 5 | Restart userb (`gsm restart userb`), after the same check | pid 14393 → **30749**, healthy. No error in the log; the reports listener is on :8861 (`lsof`). The DELETE script route is present. The three workflows answer 0.1.1 / 0.2.2 / 0.1.1; story-verification is 404 (not installed). |
+
+No migration (DB v28 on both). No run was active on either instance at either restart (L-061).
+
+**My own process slips (L-089), with what I checked afterwards. No harm came from either.**
+- **userb.** Its verify read, backup and install went out in one message and ran together. The order still held: the
+  backed-up lockfile has 14 workflows and no test-execution, the live lockfile changed at 14:06:54 (one second after
+  the backup), and the install did not touch `genesis.db` (last written 14:00:07).
+- **main.** The restart and a verification read (with a 5 s wait) also went out together. I repeated the
+  verification on its own afterwards; the results above come from that second read.
+- **userb restart.** Its pre-restart DB check went in the same message as the restart. A separate read-only check a
+  minute earlier, which I had reported to the user, was also empty.
+
+### Part 3 — the probes (read-only)
+
+**Step 24, `scripts/probes/reports-origin-isolation.mjs --base http://127.0.0.1:8760` (main): PASS, 12/12.**
+- The probe loads TE-000012's HTML report (`http://127.0.0.1:8860/executions/test-execution/r-6f190dcfbac4/report/html/index.html`) from the reports origin.
+- `nosniff` is set, and `index.html` is served `no-cache, must-revalidate` (L-068).
+- From the report page:
+  - a same-origin `/api/applications` → 404 (9 bytes);
+  - a cross-origin `fetch` to :8760 is blocked (no CORS);
+  - a `no-cors` fetch is opaque with 0 bytes;
+  - an XHR is blocked.
+- The origin refuses `../../etc/passwd`, `%2e%2e/%2e%2e/`, `/` and `/api/applications` (404 each) and a POST (405).
+- Output: `probes/reports-origin-main.json`.
+
+**Step 24, second instance (userb).** userb has no execution, so the probe has no report to load there. That needs an
+execution on userb, which needs QA, and it stays in the user's live step 24. Read-only HTTP checks of both listeners
+instead:
+
+| Request | :8860 (main) | :8861 (userb) |
+|---|---|---|
+| `GET /` | 404 | 404 |
+| `GET /api/applications` | 404 | 404 |
+| `GET /executions/%2e%2e/%2e%2e/` | 404 | 404 |
+| `POST /` | 405 | 405 |
+| `GET /` with `Host: evil.example` | 421 | 421 |
+| `X-Content-Type-Options` | nosniff | nosniff |
+| main's report path, requested on :8861 | — | 404 (each listener serves only its own instance's reports) |
+
+**Step 20, `scripts/probes/testing-widths.mjs --app _a-0000e5bc…_930416 --feature 4 --execution TE-000012,TE-000010`:
+PASS, all 42 entries clean.**
+- It ran Vite on :5174 from the HEAD source, at 1280/1440/1920 in both themes (`theme-light` / `theme-dark` confirmed on `<html>`).
+- Tailwind resolved, and no page scrolls sideways. No table is wider than its card, no header wraps or is clipped, and no cell spills.
+- Table widths at 1280 / 1440 / 1920:
+  - Library, Executions, Regression and the execution pages' Scenario results: 982 / 1142 / 1350 px.
+  - Setup Test users: 940 / 1100 / 1308.
+  - Execution step tables: 950 / 1110 / 1318.
+  - The Test Design Cases table (m8): 982 / 1142 / 1074. At 1280 its columns are Key 96, Title 202, Type 96, Priority 88, Status 80, Stories 92, Scenarios 100, Review 112, Automation 116, the same as the 51-15 probe.
+- Output: `probes/widths/` (`result.json` + 42 screenshots).
+
+**Step 20, the compose dialog and its picker: PASS on the automatic checks, with minor findings below.**
+- `testing-widths.mjs` predates 51-17 and has no compose page (it has no "compose", "dialog" or "picker" in it; last
+  changed in `f6d86ff`, 51-15). That contradicts the 51-12 spec's "The compose dialog and its picker are in the step-20
+  width probe" (step 27). So I wrote a reviewer driver, `compose-dialog-widths.mjs` (in the evidence folder):
+  - It opens Library → **New data setup** (the choice dialog), then **Compose with AI**, at 1280/1440/1920 in both themes.
+  - It measures each dialog and the picker table the same way the probe measures tables, takes screenshots, and closes with Escape.
+  - It aborts every non-GET `/api` request: **0 were attempted**.
+- **Choice dialog:** 448 × 322 at every width, inside the viewport.
+- **Compose dialog:** 768 × 900 at every width. That is `max-w-3xl` and `max-h-[90vh]`; it scrolls vertically, never sideways, and stays inside the viewport.
+- **Picker table:** 724 px, all 5 library items. Columns: Pick 40, Key 100, Kind 96, Name 167, Role 104, Contract 217. No overflow, no header wrapping or clipped, no spilling cell.
+- The driver's "filter-lines 3" value is a flaw in my metric: it counts distinct element tops in an `items-center` row. The screenshots show one line.
+- **What the numbers do not catch, from the screenshots** (`probes/compose-widths/compose-dialog-*.png`):
+  - In the 104 px Role column, `[overflow-wrap:anywhere]` breaks `contracting-officer` into "contracting / -officer" on every row.
+  - The "Data setup" badge wraps to two lines in the 96 px Kind column; on the Library page it stays on one line.
+  - The search placeholder is clipped ("Search key, name, area" cut off at `w-52`).
+  - The Contract column is the right place for long text: ACT-000001's row is 133 px tall.
+  - The dialog is the same 768 px at every viewport, so all six layouts are identical.
+
+### Findings from Parts 2 and 3
+
+- **Blockers / majors:** none.
+- **Minor P1 (51-17 / 51-15, probe coverage): the step-20 width probe does not cover the compose dialog, although the
+  51-12 spec says it does.** L-090 asks for column widths from a real-browser probe. The picker's widths (100 / 96 / 104 /
+  30%) were never probed before this reviewer driver. **Fix:** add the choice dialog and the compose dialog to
+  `scripts/probes/testing-widths.mjs` (open from Library, measure inside `[role=dialog]`, abort non-GET `/api`), so 51-13
+  and later changes re-run it. My driver can be the starting point.
+- **Minor P2 (51-17, compose picker layout, cosmetic):**
+  - `contracting-officer` breaks mid-word in the Role column.
+  - "Data setup" wraps to two lines in the Kind column.
+  - The search placeholder is clipped.
+  - **Fix:** give Role the room it needs for the longest real role key without breaking inside a word (e.g. drop `[overflow-wrap:anywhere]` on that cell, or widen Role to ≈ 152 px and take it from Contract's 30%). Let Kind fit "Data setup" on one line (≈ 104 px). Widen the search input or shorten the placeholder. Then re-probe. None of this hides data or blocks an action.
+- **Observation P-O1:** userb's report isolation can be probed only after an execution on userb (needs QA). It is part of the user's step 24.
+
+### Verdict after Parts 2 and 3: SHIP (code level), unchanged
+
+Parts 2 and 3 found no blocker or major. The instances are ready for Part 4:
+- both run HEAD (`346f885`) on DB v28;
+- both have test-execution 0.1.1, action-capture 0.2.2 and setup-composer 0.1.1;
+- main also has story-verification 0.1.0 and the skill 0.3.0;
+- the reports listeners are up on :8860 and :8861.
+
+P1 and P2 are minors for the developer, to fix before 51-13 tags or to move to the Phase 51 follow-ups backlog. They do
+not block. 51-12 as a whole SHIPs when the user's live steps 1–27 pass. Stopped before Part 4.
