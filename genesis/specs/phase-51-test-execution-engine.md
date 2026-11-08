@@ -144,9 +144,10 @@ D3c loop — program-owned sessions + agent `apwt` through the shell — cannot 
 the cross-cutting tests) → S10 = 51-11 → S10b = **51-14** (genesis-dev; D25, added 2026-11-03) → S11 = 51-12
 (genesis-review; **NEEDS_CHANGES 2026-11-04**) → S11a = **51-15** review fixes → S11b = **51-16** → S11c = **51-17**
 (genesis-dev each; D33) → S11d = **51-12 re-run** (genesis-review: §1–§2 on the full diff; **code level NEEDS_CHANGES
-2026-11-05**) → S11e = **51-18** re-run fixes (genesis-dev; D37) → S11f = 51-12 re-review of 51-18 + every live step →
-S12 = 51-13 (genesis-release, then
-genesis-docs). One at a time: they share the genesis checkout. A `playwright-appian` change found in any session is
+2026-11-05**) → S11e = **51-18** re-run fixes (genesis-dev; D37) → S11f = 51-12 re-review of 51-18 (**code-level SHIP**) + parts 2–3
+(installs, restarts, no-QA probes) → S12 = 51-13 (genesis-release, then genesis-docs; **D38: before live acceptance**)
+→ S13 = 51-12 live steps 1–27 on v0.81.0 when QA is back; findings → v0.81.x patches (genesis-dev, then
+genesis-release). One at a time: they share the genesis checkout. A `playwright-appian` change found in any session is
 made in that repo in the same session (D19), with its own tests, and recorded in the sub-spec's As built.
 
 ## 7. Sub-phase ledger

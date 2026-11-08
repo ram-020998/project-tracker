@@ -1,8 +1,10 @@
 # 51-13 — Release and onboarding
 
 > **Status:** SPEC-DRAFTED 2026-11-02. Repos: playwright-appian, genesis, genesis-workflows, project-tracker. Parent:
-> `specs/phase-51-test-execution-engine.md`. After 51-12 = SHIP. **genesis-release** asks before every tag and push;
-> then **genesis-docs** does the write-back.
+> `specs/phase-51-test-execution-engine.md`. After 51-12 **code-level** SHIP (Re-run 2) **and** 51-12 parts 2–3 green
+> (installs, restarts, the step-24 isolation and step-20 width probes) — **D38**: the release precedes live acceptance;
+> 51-12 live steps 1–27 run on the released v0.81.0 and any finding ships as a v0.81.x patch. **genesis-release** asks
+> before every tag and push; then **genesis-docs** does the write-back.
 
 ## 1. Release order
 
@@ -55,8 +57,10 @@ As run and let genesis-docs correct it. The `userb` instance keeps reading `envi
   `web/src/features/testing/**`, the four workflows and the skill `genesis-test-authoring`
   to their areas so `check` routes them.
 - `context/state/current.md` (versions incl. `playwright-appian`, DB v28, test counts, "what works": Testing tab,
-  environment types, Verification lane, lane order), code map, `progress/phase-51-test-execution-engine.md`,
-  `changelog.md`, README row 51 → SHIPPED, tracker §6, `bible/08` §9 pointer to the new
+  environment types, Verification lane, lane order; **and, under Known open items, that Phase 51 live acceptance —
+  51-12 steps 1–27 on QA — is still open (D38)**), code map, `progress/phase-51-test-execution-engine.md`,
+  `changelog.md` (the v0.81.0 entry says live acceptance is open), README row 51 → **SHIPPED (live acceptance open)**
+  until 51-12 passes, then SHIPPED, tracker §6, `bible/08` §9 pointer to the new
   `specs/backlog/phase-51-follow-ups.md` (Deferred list from the umbrella §9 + anything found in the build), lessons via
   `genesis-ctx add lesson`. `genesis-ctx index && lint` green.
 

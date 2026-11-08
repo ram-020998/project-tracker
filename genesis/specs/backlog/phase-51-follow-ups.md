@@ -202,3 +202,9 @@ From `specs/phase-51-test-execution-engine/reviews/51-15-review.md`, accepted as
   (`POST /api/runs/{id}/resume` on a done run).
 - **rn-3** No test renders the scenario page inside the layout and checks the breadcrumb trail (the page test and the
   crumb test cover the halves; the 51-15 live check covered the whole).
+
+## 23. The case-script page shows a role-literal hint when the scanner cannot run (51-12 Re-run 2 nit N1)
+
+**Context.** When Genesis cannot run `lib/scan-refs.mjs` (for example node is missing), the case-script page tells the
+user to rewrite the role as a plain string literal, which is wrong advice. Show the scanner's real error (and the
+runtime readiness problem) instead. Deferred by D38 to the first v0.81.x patch; a test with the scanner unavailable.
