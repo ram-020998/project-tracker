@@ -52,8 +52,20 @@ Keep packs under budget by naming tight `areas`/`adrs`, not whole catalogs.
 Ask ONE question at a time. Record each answer immediately in findings §Decisions (D1, D2 …) with the reason.
 Never batch questions. Research externally (web) when a library/API/standard is involved; cite it.
 
+## Keeping the spec set current (during the build)
+- **Fold each As built into the later sub-specs** before they are built: read every new As built's decisions and "for
+  NN-xx" notes and edit the downstream sub-specs. In Phase 51 this caught real design gaps (the D24 verification
+  overlay, the D25 queued-verification state) before anyone built on the old text.
+- **When a decision changes, re-check the acceptance steps that test it** in the review & acceptance sub-spec (D25's
+  amendment had to change 51-12 step 13; an old step tests behaviour that no longer exists).
+- **A manifest cannot name a draft ADR** (lint refuses an unknown id): until the release adds it, list the drafts file
+  in `docs` (e.g. `tracker:specs/phase-NN-<slug>/adr-drafts.md`) and the ADRs it amends in `adrs`.
+- Release before live acceptance only by an explicit decision, and then the release notes, README row and state say
+  that acceptance is open (L-111).
+
 ## Status vocabulary (umbrella Status line)
-`SPEC-DRAFTED` → `BUILT` (per sub-spec) → `SHIPPED`. Sub-spec status uses the same words in its own banner.
+`SPEC-DRAFTED` → `BUILT` (per sub-spec) → `SHIPPED`. Sub-spec status uses the same words in its own banner. A phase
+released before its live acceptance reads `SHIPPED (live acceptance open)` until the acceptance passes.
 
 ## Finish
 `{{GENESIS_HOME}}/bin/genesis-ctx lint --specs-only` green (unknown area/ADR/lesson/upstream or a missing manifest fails it).

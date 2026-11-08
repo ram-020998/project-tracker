@@ -244,11 +244,11 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 From Phase 47 on: ≤ 5 lines per phase; detail lives in `progress/`.
 
-- **2026-11-08 — Phase 51 (Test execution engine): 🚢 SHIPPED, live acceptance open — playwright-appian v0.3.0 → genesis v0.81.0 → genesis-workflows v0.25.0 (m0026–m0028, DB v28; ADR-081..084).**
+- **2026-11-08 — Phase 51 (Test execution engine): 🚢 SHIPPED, live acceptance open — playwright-appian v0.3.0 → genesis v0.81.0 → genesis-workflows v0.25.0 (m0026–m0028, DB v28; ADR-081..085).**
   Testing tab (library, Record / Compose, case scripts, executions, regression schedule), QA environment type,
   Verification lane; pytest 1832, vitest 726, workflows 428, apwt 1399. 51-12 code-level SHIP after 51-15/51-18; release
   CI first red on Linux (`ps` truncation, a Node assumption), fixed. 51-12 live steps 1–27 on QA still open (D38).
-  Details: `progress/phase-51-test-execution-engine.md`.
+  Lessons L-101–L-112; L0 cut (no area tags in the digests). Details: `progress/phase-51-test-execution-engine.md`.
 
 - **2026-11-01 — Phase 50 (Platform monorepo): ✅ SHIPPED genesis v0.80.0 → genesis-workflows v0.24.0 (no migration; ADR-080).**
   genesis-core, kiro-agent-sdk and the parser moved under `genesis/packages/` with history; one install script, one

@@ -1,7 +1,7 @@
 # Phase 51 — Test execution engine: action library, regression suite and story verification
 
 > **Status:** 🚢 SHIPPED (live acceptance open) 2026-11-08 — playwright-appian **v0.3.0** (`d3ed993`) → genesis
-> **v0.81.0** (`62537c2`) → genesis-workflows **v0.25.0** (`6a7d432`); m0026–m0028 (DB v28); ADR-081..084. **51-12 live
+> **v0.81.0** (`62537c2`) → genesis-workflows **v0.25.0** (`6a7d432`); m0026–m0028 (DB v28); ADR-081..085. **51-12 live
 > steps 1–27 on QA are still open (D38)**; findings ship as v0.81.x patches, and the status becomes SHIPPED when they
 > pass. As built: `progress/phase-51-test-execution-engine.md`. (Spec-drafted 2026-11-02 by the genesis-spec agent.)
 > Sub-specs: `phase-51-test-execution-engine/51-01..51-18`. Findings (code facts, research, every decision):
@@ -11,7 +11,7 @@
 > ADRs: **ADR-081** (test automation architecture), **ADR-082** (the QA environment and test data writes),
 > **ADR-083** (Phase 51 browser agents drive `apwt` through Kiro's shell on program-owned QA sessions; isolation
 > deferred to Phase 52 — accepted risk), **ADR-084** (lane order +
-> Verification lane automation).
+> Verification lane automation), **ADR-085** (the reports origin, D26).
 > Part 2 of the testing framework (part 1 = Phase 49 Test Design).
 
 ## 1. Why this phase exists
@@ -174,7 +174,7 @@ made in that repo in the same session (D19), with its own tests, and recorded in
 | 51-17 | genesis, genesis-workflows | **DONE (SHIP 2026-11-05, genesis `96dceeb`…`2b2cf9d`, genesis-workflows `24145bf`, `69bface`):** Compose with AI: `setup-composer` 0.1.0 (D35, no screen steps enforced in code), compose dialog + route, multi-role setups (D36) in `lib/`, generator, readiness and save checks; `action-capture` 0.2.1, skill 0.3.0; apply checks every used item at the compose's commit |
 | 51-18 | genesis, genesis-workflows, playwright-appian | **DONE (SHIP 2026-11-08, first pass + delta; genesis `51e55f9`…`346f885`, genesis-workflows `6218803`, playwright-appian `0950798`, `f00cebb`):** Fixes from the 51-12 re-run (D37): R-MJ1 one role reader (the scanner) + parity test, R-m1 paused runs kept on reconcile, R-m2 replay only from untouched code, R-m3 `noUnusedLocals` + per-action `test.step` proofs, R-m4 action restore → Draft, R-m5 Remove script, R-n1, R-n2, R-O1 the `agent-act.test.ts` timeout; workflow version gates (`action-capture` ≥ 0.2.2, `setup-composer` ≥ 0.1.1) |
 | 51-12 | genesis, genesis-workflows, playwright-appian | Independent review + gates + live acceptance on a real QA environment (incl. width probe, L-090). **First pass NEEDS_CHANGES 2026-11-04** (`reviews/51-12-review.md`); re-run after 51-15–51-17: **code level NEEDS_CHANGES 2026-11-05** (R-MJ1 + minors → 51-18); **Re-run 2: code level SHIP** (51-18 rework); Parts 2–3 (installs, no-QA probes) PASS 2026-11-08; **live steps 1–27 open (D38)** |
-| 51-13 | all four | **§1–§2 DONE 2026-11-08:** released playwright-appian v0.3.0 (`d3ed993`), genesis v0.81.0 (`62537c2`; first master pipeline red on Linux `ps` truncation, fixed), genesis-workflows v0.25.0 (`6a7d432`; first master pipeline red on a Node assumption in a test, fixed); both instances on v0.81.0 / DB v28. **§3 docs write-back in progress 2026-11-08** (areas, code map, progress, backlog done; ADR-081..084, lessons and the state wait on the L0 cut) |
+| 51-13 | all four | **§1–§2 DONE 2026-11-08:** released playwright-appian v0.3.0 (`d3ed993`), genesis v0.81.0 (`62537c2`; first master pipeline red on Linux `ps` truncation, fixed), genesis-workflows v0.25.0 (`6a7d432`; first master pipeline red on a Node assumption in a test, fixed); both instances on v0.81.0 / DB v28. **§3 docs write-back DONE 2026-11-08** (ADR-081..085, areas, code map, state, progress, lessons L-101–L-112, L0 cut A + B4) |
 
 ## 8. Release plan
 

@@ -45,13 +45,17 @@ in sequence: bump → `npm run build` → `git add`/`commit` → fresh `npm run 
 --untracked-files=all` empty → tag; `gsm stop|provision|restart|start` one per call. Batch only read-only commands, and
 only with other reads: a verifying read (`git status`, `git rev-list`, `ls` of a backup, a run or health check) runs in
 its **own** call after the step it proves, never in the same batch as that step (L-089; the 49-09 As run batched tag +
-`rev-list`, mkdir + backup, provision + run check, restart + status).
+`rev-list`, mkdir + backup, provision + run check, restart + status). The calls of one message run in parallel, so
+"own call" means **its own message**; check a bundle commit with `git show --stat <sha> -- web/static`.
 
 ## Tag / push protocol (irreversible — ALWAYS ask)
 Ask the operator before EACH `git tag` and EACH `git push`. Never force-push or reset --hard. After pushing, verify CI:
 `glab ci list` and `glab ci trace <id>`; record the pipeline ids. genesis "CI green" = the four package jobs
 (`genesis`, `genesis-core`, `kiro-agent-sdk`, `genesis-appian-parser`) plus `frontend` / `clean-install` when their
-`changes` rules match (a new tag runs all six).
+`changes` rules match (a new tag runs all six). `glab ci get` can show a pipeline as running for minutes after its
+jobs ended (51-13, #7335323): read the job traces (`glab ci trace <job> -b <ref>`) before calling a pipeline stuck. Work
+that never ran in CI before the release commit meets Linux CI for the first time at the release (L-112): expect it, and
+check the release commit's first pipeline before tagging.
 
 ## GitLab API limits
 glab's token has read scope only: archiving a project, settings and variables are the operator's, in the GitLab UI

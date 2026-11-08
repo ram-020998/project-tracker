@@ -4,7 +4,8 @@
 > **v0.81.0** (`62537c2`; the app and the three packages at 0.81.0, `CORE_MAJOR` 1 and `KB_FORMAT_VERSION` 1 unchanged)
 > → genesis-workflows **v0.25.0** (`6a7d432`; `test-execution` 0.1.1, `action-capture` 0.2.2, `setup-composer` 0.1.1,
 > `story-verification` 0.1.0, skill `genesis-test-authoring` 0.3.0; all internal pins on `genesis.git@v0.81.0`) ·
-> m0026–m0028 (DB 25 → 28; memory.db v1) · **ADR-081..084** Accepted.
+> m0026–m0028 (DB 25 → 28; memory.db v1) · **ADR-081..085** Accepted (ADR-085 = the reports origin, split out of the
+> ADR-081 draft by the user).
 > **Live acceptance is still open (D38):** 51-12 steps 1–27 run on QA on v0.81.0 when QA is back; findings ship as
 > v0.81.x patches. Spec: `specs/phase-51-test-execution-engine.md` + `51-01..51-18` (each with its As built; 51-13 has
 > the As run). Reviews: `specs/phase-51-test-execution-engine/reviews/`. Follow-ups: `specs/backlog/phase-51-follow-ups.md`.
@@ -89,8 +90,11 @@ pause/restart/cancel on the live instances, step 24 on userb (needs an execution
   D33–D36 recording-as-setup, the composer and multi-role setups, all inside Phase 51; D37 every re-run finding fixed;
   **D38 released before live acceptance.**
 - No ADR deviation. ADR-021's `pre_mutation` rule for QA test data is amended by ADR-082 (D22); the reports origin is
-  an amendment of ADR-028 and a note in ADR-026's network surface, carried by ADR-081 (51-12 re-run R-m6); the per-app
-  cadence inside `regression-run`'s options is an ADR-047 note in ADR-081 (51-06 §8).
+  its own ADR-085, amending ADR-028 and noting it in ADR-026's network surface (51-12 re-run R-m6); the per-app cadence
+  inside `regression-run`'s options is an ADR-047 amendment in ADR-081 (51-06 §8). The one-line rules of ADR-021,
+  ADR-028, ADR-029 and ADR-068 now name these exceptions. The ADR drafts were corrected against D20–D38 (multi-role
+  setups, actions proven by use, contracts in code, the verification overlay, the click approvals, the replay drift
+  check).
 - Release (51-13 As run): Phase 51's 43 genesis and 9 genesis-workflows build commits first met CI with the release
   commits (macOS-only local runs; the `backup/phase-51-*` pushes used `-o ci.skip`). Linux CI then exposed procps `ps`
   truncating command lines to `$COLUMNS` (reap found no marker; fixed by reading `/proc/<pid>/cmdline`, `ps -ww`
@@ -99,9 +103,42 @@ pause/restart/cancel on the live instances, step 24 on userb (needs an execution
 - Dates: the record dates D38 and the end of 51-18 "2026-11-09"; the release, its tags and this write-back are
   2026-11-08 (tag dates). The umbrella and this doc use 2026-11-08.
 
-## Lessons (write-back decisions)
+## Lessons (write-back decisions, approved by the user 2026-11-08)
 
-_Proposed to the user 2026-11-08; filled in when approved._
+| Candidate (source) | Decision |
+|---|---|
+| `npx <bin>` in a non-TTY shell auto-installs (51-02) | **Added L-101** |
+| SQLite table rebuild needs the runner's help (51-04 m1′) | **Added L-102** |
+| A derived index with no FK must not outlive its source (51-04 M1) | **Added L-103** |
+| A detached child is not in your group (51-05 M1) + procps `ps` honours `$COLUMNS`; a tool failure must log before it becomes an empty list (51-13 reap fix) | **Added L-104** (merged) |
+| The HTML reporter keeps what the JSON drops; scrub every escaped form (51-06 B1, R1) | **Added L-105** |
+| A gate's prompt is a promise (51-09 M2) | **Added L-106** |
+| A job must finish when storing its outcome fails (51-10 m1) + cancel covers the child started after it (51-10 m4) + a guard added late inherits the error handling (51-16 dm-1) | **Added L-107** (merged) |
+| An intended stop recorded per worker, not per run (51-15 B3/MJ3; R-m1, R-n1) | **Added L-108** |
+| Two readers of one contract must be the same reader (51-16; evidence 51-12 re-run R-MJ1) + a second reader breaks on inputs the first handles (51-18) + one home for a fact in code, shown not re-entered (D27, MJ2) | **Added L-109** (merged; your (c) + (f) part 1) |
+| Actions proven by use, not standalone replay (D28) + "used" means "ran" (51-18 R-m3) + a proof checking only direct dependencies (51-17 M-1) + replay only from untouched files (R-m2) | **Added L-110** (merged; your (f) part 2) |
+| Live acceptance finds what code review does not (B1, B2; D38) | **Added L-111** (your (d)) |
+| Local work meets CI at the tag; tests must not assume a tool the CI image lacks (51-13 As run, CI #7335323, #7336032) + `glab ci get` shows a stale running status (51-13) | **Added L-112** (your (e)); the glab note also → `genesis-release` skill |
+| A compatibility mirror becoming the home: an older client's explicit flag must win (51-05 M2) | **Extended L-081** (old consumers) |
+| A generic tombstone delete is a feature-delete path (51-08) + "moved out" has more paths than the route (51-14) + grep a confirm's caller first (51-14 §5) + a derived state is two states (51-11 R1) + a selection's shape differs by status (51-18) + a new link is a new caller (51-15 MJ-1) | **Extended L-094** (lead broadened) |
+| L-089 recurrences in every role + build output lands after the command returns; check `git show --stat <sha> -- web/static` (51-14 review n4) + calls of one message run in parallel (51-18) | **Extended L-089** (lead reworded); the guard is backlog `phase-51-follow-ups.md` §27 (a narrow spike, the user's decision) |
+| Prove "the agent can't see X" from outside with a positive control (51-03 S4) + a model refuses an authorized bypass self-test; prove at the OS layer (51-03) | **Extended L-088** |
+| The sandbox is not applied on the `acp` path (51-03 S1) + V3 rejects `--trust-tools` (51-03) + global MCP servers load into workflow turns; check the spawned processes (51-03 P10) | **Extended L-044** |
+| A compensation undoes only its own writes inside the lock (51-07 R-M1) + a status filter the service ignores (51-10 m3) + a guard once at the start of a slow launch (51-14) | **Extended L-091** |
+| A strict `tsc` catches what a stubbed typecheck hides (51-07) + tests read the tool's recorded output, never an imitation (51-18) | **Extended L-083** |
+| A route-table shadowing check (51-10) + a FastAPI body model imported inside the function is a query param (51-06) | **Extended L-096** |
+| The client keeps only `detail` (51-11) + a fixture drifts in its values (51-15) | **Extended L-011** |
+| A width probe that checks only overflow passes bad wrapping; check the probe covers the screen (51-15; 51-12 Parts 2–3 P1/P2) | **Extended L-090** |
+| A finalizer sibling needs a kind guard on every sweep (51-17) | **Extended L-061** |
+| pytest collects any `test*` function (51-05) | **Extended L-092** (lead: `test*`) |
+| Global MCP servers load into workflow turns (51-03 P10, as a fact) | **Dropped** as a lesson: home is ADR-083 accepted risk (d); the verification method is in L-044 |
+| `newContext()` over CDP is cookie-less (51-03 S8) | **Dropped**: home is playwright-appian D-114 |
+| The local sandbox cannot restrict loopback (51-03) | **Dropped**: home is ADR-083 residual 1 (Phase 52 input) |
+| An allow-listed child env drops test switches; use a marker file (51-06) | **Dropped**: a narrow test technique |
+| Generated specs start on `about:blank` (51-07) | **Dropped**: home is the `genesis-test-authoring` skill and the templates |
+| A spec rule unreachable because of an older refusal (51-08 decision 1) | **Dropped**: a one-off; `bible/07` §8 step 1 covers reading the code first |
+| Renaming a report folder breaks kept links (51-09 M1) | **Dropped**: fixed and tested (`carry_attachments`), narrow |
+| Re-check acceptance steps when a decision changes; fold As builts into later sub-specs; a manifest cannot name a draft ADR (your (g)) | **Routed** to the `genesis-spec-authoring` skill |
 
 ## Agent-system notes
 
@@ -109,8 +146,20 @@ _Proposed to the user 2026-11-08; filled in when approved._
    `shasum`, build + status, add + commit, push + `ci list`, batched `sleep`s that did not wait), 51-14 (two commits
    staged before the bundle reached the disk), 51-15 (build + status, add/commit + status), 51-18 (build + bundle
    commit; three full test runs at once), the reviewers of 51-12 Part 2 (verify + backup + install, restart + verify),
-   51-14 and 51-18, and the spec sessions. Every outcome was re-verified alone and was correct. A structural guard is
-   proposed (backlog `phase-50-follow-ups.md` §5).
+   51-14 and 51-18, the spec sessions, and this write-back (a rule-check grep batched with the edits it checked, and
+   `add lesson` calls sent in batches of two to four: the ids came out in order and each rule kept its own body,
+   verified alone). Every outcome was re-verified alone and was correct. The narrow guard spike is backlog
+   `phase-51-follow-ups.md` §27 (the user's decision, not built in this write-back).
 2. `browser-testing` now routes the Genesis test-execution paths (23 globs, 8 gates); the verification lane's paths are
    also in `stories-workbench`.
 3. The genesis `README.md` DB line was fixed in the release commit (m0001–m0028, DB v28).
+4. **L0 cut (Option A + B4, the user's choice):** the generated ADR and lesson digests no longer carry `[areas]`
+   (`genesis_ctx/index.py`; `[untagged]` kept; `test_commands.py` updated; agent-system tests 389 passed); the stale
+   `bible/02` release paragraph moved verbatim to `archive/bible-02-pre-51.md`. L0 went from ~23,863 to ~21,047 before
+   the new ADRs, lessons and state, and ends at the figure in the write-back commit.
+5. Skills changed: `genesis-spec-authoring` (keeping a spec set current; the "SHIPPED (live acceptance open)" status)
+   and `genesis-release` (`glab ci trace` before calling a pipeline stuck; first CI at the release; "own message").
+   Installed with `agent-system/update.sh`.
+6. `genesis-ctx verify-lossless --baseline d89f763` reports 21 missing baseline units, all in lines older phases
+   extended (bible/03, 05, 06, 08, tracker, decision-log ADR-056 heading, coding-standards); the B4 paragraph is not
+   among them (it is in the archive).

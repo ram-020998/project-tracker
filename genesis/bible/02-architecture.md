@@ -43,9 +43,8 @@ durable `run_events` log is the source of truth for a run's timeline/conversatio
 `interrupt()`; (2) ad-hoc pause/resume anywhere; (3) mid-run state injection + fork (seed a new thread
 from a past checkpoint, original untouched).
 
-**Release/versioning (ADR-019):** git+ssh tag pins along `genesis → genesis-core → kiro-agent-sdk`;
-`CORE_MAJOR` (currently 1, distinct from pip version) is the hard compat gate the loader enforces
-(refuse-to-load on mismatch; additive-only within a major).
+**Release/versioning:** one repo, one tag, one shared version (ADR-080); `CORE_MAJOR` = 1 is the loader's compat gate
+(ADR-019). *(Pre-Phase-51 wording archived in `archive/bible-02-pre-51.md`.)*
 
 ---
 

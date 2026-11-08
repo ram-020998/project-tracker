@@ -17,7 +17,8 @@ def _short(ids) -> str:
 
 def adr_digest(c: Corpus) -> str:
     out = [GEN_NOTE, "# ADR digest — one line per ADR",
-           "", "Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Untagged = not yet routed (47-05).", ""]
+           "", "Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-ctx area <name>`. "
+           "Untagged = not yet routed (47-05).", ""]
     for i in c.adr_ids:
         t = c.adr_tags.get(i)
         if not t:
@@ -33,20 +34,20 @@ def adr_digest(c: Corpus) -> str:
         status = t.get("status", "")
         flag = f" {{{status}}}" if status and status not in ("accepted",) else ""
         rel = f" ({'; '.join(rels)})" if rels else ""
-        out.append(f"- {i} [{','.join(t.get('areas', []) or [])}]{flag}{rel} — {c.adr_rule(i) or c.adr_title(i)}")
+        # Phase 51 L0 cut (Option A): the area tags live in context/tags/*.toml and `genesis-ctx area`, not here.
+        out.append(f"- {i}{flag}{rel} — {c.adr_rule(i) or c.adr_title(i)}")
     return "\n".join(out) + "\n"
 
 
 def lesson_digest(c: Corpus) -> str:
     out = [GEN_NOTE, "# Lesson digest — one line per hard-won lesson (bible/06 §7)",
-           "", "Full text: `genesis-ctx lesson <ID>`.", ""]
+           "", "Full text: `genesis-ctx lesson <ID>`. Areas: `genesis-ctx area <name>`.", ""]
     for n, l in enumerate(c.lessons, 1):
         if not l.marker:
             out.append(f"- (unmarked #{n}) [untagged] — {l.lead or md.collapse(l.text)[:160]}")
             continue
-        t = c.lesson_tags.get(l.marker)
-        tag = f"[{','.join(t.get('areas', []) or [])}]" if t else "[untagged]"
-        out.append(f"- {l.marker} {tag} — {c.lesson_rule(l.marker)}")
+        tag = "" if c.lesson_tags.get(l.marker) else " [untagged]"
+        out.append(f"- {l.marker}{tag} — {c.lesson_rule(l.marker)}")
     return "\n".join(out) + "\n"
 
 

@@ -248,9 +248,10 @@ def test_index_is_deterministic(env):
     after = {p.name: p.read_text() for p in (env.tracker / "context/_generated").iterdir()}
     assert before == after and set(after) == {"adr-digest.md", "lesson-digest.md", "area-catalog.md"}
     digest = after["adr-digest.md"]
-    assert "- ADR-031 [chat,security] (amended by 033) — Chat never orchestrates" in digest
+    assert "- ADR-031 (amended by 033) — Chat never orchestrates" in digest
+    assert "[chat,security]" not in digest  # Phase 51 L0 cut: areas are not in the digest
     assert "- ADR-002 [untagged] — " in digest
-    assert "- L-001 [chat,core-engine] — ACP MCP env MUST be a list of `{name,value}`" in after["lesson-digest.md"]
+    assert "- L-001 — ACP MCP env MUST be a list of `{name,value}`" in after["lesson-digest.md"]
 
 
 def test_index_fills_empty_fp_but_only_reviewed_refreshes(env):

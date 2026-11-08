@@ -63,6 +63,10 @@ pushes only `master` and the `v0.24.0` tag.
 
 ## 5. Stop agents from batching dependent steps (L-089 kept recurring)
 
+> **Narrowed and carried into `phase-51-follow-ups.md` §27** (the user's decision, 2026-11-08): serialize only step
+> calls (git add/commit/push/tag, builds) and refuse git status/diff/show while one runs or a vite build is alive; plain
+> parallel reads stay allowed. Kept here for the context.
+
 **Context.** L-089 forbids sending dependent steps (edit → run → commit, stop → check, push → check) in one parallel
 tool batch. In Phase 50 it recurred in almost every session despite being in the agents' rules: the 50-03 subtree
 merges, the 50-04 and spec-agent check+commit batches, the 50-08 push+check, and about a dozen times in the 50-09

@@ -85,7 +85,7 @@ reviewed_fp = "d0dcbced8ea8ff12"
 areas = ["web-runs", "web-shell"]
 phase = ""
 rule = "Mirror the event/gate/topology/steps contract shapes in `web/src/types` + the golden fixtures; a contract drift must fail a test (stubs must not hide the contract)."
-reviewed_fp = "a584b4ae710eb532"
+reviewed_fp = "9e465485a6ec5c0c"
 
 [L-012]
 areas = ["config-secrets", "web-shell"]
@@ -280,10 +280,10 @@ rule = ""
 reviewed_fp = "49df54bebb2057e9"
 
 [L-044]
-areas = ["chat", "sdk-acp"]
+areas = ["chat", "sdk-acp", "security", "browser-testing"]
 phase = "21"
 rule = ""
-reviewed_fp = "079ef7a063130b52"
+reviewed_fp = "fdef359e936df586"
 
 [L-045]
 areas = ["chat", "security"]
@@ -382,10 +382,10 @@ rule = ""
 reviewed_fp = "d038b6cb2c1c4121"
 
 [L-061]
-areas = ["features-stages", "runs-worker", "chat"]
+areas = ["features-stages", "runs-worker", "chat", "browser-testing"]
 phase = "29"
 rule = ""
-reviewed_fp = "01cf234f502235cd"
+reviewed_fp = "571e661e6fd84857"
 
 [L-062]
 areas = ["features-stages", "runs-worker"]
@@ -502,10 +502,10 @@ rule = ""
 reviewed_fp = "05a1b5d7db9fd156"
 
 [L-081]
-areas = ["kb-sync", "config-secrets", "runs-worker"]
+areas = ["kb-sync", "config-secrets", "runs-worker", "api", "browser-testing"]
 phase = "45"
 rule = ""
-reviewed_fp = "7841932ff8151a6f"
+reviewed_fp = "4ffa186fd7301263"
 
 [L-082]
 areas = ["collaboration-hub", "kb-sync", "features-stages"]
@@ -517,7 +517,7 @@ reviewed_fp = "c9c3692b0516bf60"
 areas = ["features-stages", "stories-workbench"]
 phase = "46"
 rule = ""
-reviewed_fp = "8836a124d950bbe5"
+reviewed_fp = "7dab3b20cc32a0d7"
 
 [L-084]
 areas = ["collaboration-hub", "appian-integration", "features-stages"]
@@ -544,34 +544,34 @@ rule = ""
 reviewed_fp = "6d681ecfb9a75d7b"
 
 [L-088]
-areas = ["security", "release-ci"]
+areas = ["security", "release-ci", "browser-testing"]
 phase = "47"
 rule = ""
-reviewed_fp = "15017f4c4ff5a63d"
+reviewed_fp = "fa34cf026503fa3b"
 
 [L-089]
 areas = ["release-ci", "web-shell"]
 phase = "48"
 rule = ""
-reviewed_fp = "4cb9f57dba72f3a3"
+reviewed_fp = "6db85ea175ccf44e"
 
 [L-090]
-areas = ["web-shell", "web-runs", "documents", "stories-workbench", "features-stages"]
+areas = ["web-shell", "web-runs", "documents", "stories-workbench", "features-stages", "browser-testing"]
 phase = "48"
 rule = ""
-reviewed_fp = "0d28799cca0f2192"
+reviewed_fp = "6c0f361218e9c49c"
 
 [L-091]
-areas = ["db", "kb-sync", "stories-workbench"]
+areas = ["db", "kb-sync", "stories-workbench", "browser-testing", "runs-worker"]
 phase = "49"
 rule = ""
-reviewed_fp = "8da255f23e4d8874"
+reviewed_fp = "6ee43161bdde2930"
 
 [L-092]
 areas = ["release-ci", "workflows-library", "db"]
 phase = "49"
 rule = ""
-reviewed_fp = "8c2a0e91443805ef"
+reviewed_fp = "d3d659bec6a2cd04"
 
 [L-093]
 areas = ["runs-worker", "features-stages", "stories-workbench", "chat"]
@@ -580,10 +580,10 @@ rule = ""
 reviewed_fp = "d717824b00e1f558"
 
 [L-094]
-areas = ["features-stages", "collaboration-hub"]
+areas = ["features-stages", "collaboration-hub", "stories-workbench", "web-shell", "runs-worker", "browser-testing"]
 phase = "49"
 rule = ""
-reviewed_fp = "ab092c20e8417481"
+reviewed_fp = "9c4e94b1dd0d3d73"
 
 [L-095]
 areas = ["stories-workbench", "kb-sync", "features-stages"]
@@ -592,10 +592,10 @@ rule = ""
 reviewed_fp = "0d97f4e7359a51ed"
 
 [L-096]
-areas = ["api", "features-stages"]
+areas = ["api", "features-stages", "browser-testing"]
 phase = "49"
 rule = ""
-reviewed_fp = "26c920907f1f656a"
+reviewed_fp = "e2198362db0d4580"
 
 [L-097]
 areas = ["runs-worker"]
@@ -620,3 +620,75 @@ areas = ["security", "release-ci"]
 phase = "50"
 rule = ""
 reviewed_fp = "8d965bbb4bff709a"
+
+[L-101]
+areas = ["security", "browser-testing", "release-ci"]
+phase = "51"
+rule = ""
+reviewed_fp = "6293a17cba21295e"
+
+[L-102]
+areas = ["db"]
+phase = "51"
+rule = ""
+reviewed_fp = "a64824983aa7674b"
+
+[L-103]
+areas = ["db", "browser-testing"]
+phase = "51"
+rule = ""
+reviewed_fp = "5c1b086033853b1b"
+
+[L-104]
+areas = ["runs-worker", "browser-testing", "release-ci"]
+phase = "51"
+rule = ""
+reviewed_fp = "33b8116e01e4fb4f"
+
+[L-105]
+areas = ["browser-testing", "security"]
+phase = "51"
+rule = ""
+reviewed_fp = "af3a7a99a75a90ea"
+
+[L-106]
+areas = ["core-engine", "workflows-library", "runs-worker"]
+phase = "51"
+rule = ""
+reviewed_fp = "08e49b30c24df562"
+
+[L-107]
+areas = ["runs-worker", "api", "browser-testing"]
+phase = "51"
+rule = ""
+reviewed_fp = "6896582725778806"
+
+[L-108]
+areas = ["runs-worker"]
+phase = "51"
+rule = ""
+reviewed_fp = "36a5a309c00d7a66"
+
+[L-109]
+areas = ["browser-testing", "workflows-library", "api"]
+phase = "51"
+rule = ""
+reviewed_fp = "c416c15fe9fd0346"
+
+[L-110]
+areas = ["browser-testing", "workflows-library"]
+phase = "51"
+rule = ""
+reviewed_fp = "0368bb75aeb5c3cd"
+
+[L-111]
+areas = ["release-ci"]
+phase = "51"
+rule = ""
+reviewed_fp = "c0f141491aca7192"
+
+[L-112]
+areas = ["release-ci"]
+phase = "51"
+rule = ""
+reviewed_fp = "4ae426fb37cb176c"

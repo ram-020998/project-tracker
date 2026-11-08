@@ -263,3 +263,46 @@ Not built in Phase 51, by decision (`specs/phase-51-test-execution-engine.md` §
   (needs an execution there, P-O1), the F10 re-measure of the 900 s agent turns on a write flow, and the m5 check that
   Remove script is refused while a story verification that uses the case runs. Findings ship as v0.81.x patches; the
   first patch also takes §23 (N1) and §24 (P1, P2).
+
+## 27. Spike: a narrow shell-serialization guard for L-089 (supersedes `phase-50-follow-ups.md` §5's open question)
+
+**Context.** L-089 recurred in every role in Phase 51 (the 51-13 As run, the As builts of 51-14, 51-15 and 51-18,
+reviews 51-12 Part 2, 51-14 and 51-18, the spec sessions and the Phase 51 write-back). The tool runs the calls of one
+message in parallel, so a verifying read sent with the step it proves reads the state before that step, and rules in
+prompts and skills have not stopped it. A `PreToolUse` hook sees one command at a time, not the batch. Decided by the
+user (2026-11-08): spike a **narrow** guard, not a serialization of every shell call.
+
+**Rule to build (if the spike holds).** Owner: genesis-docs (agent system), in `agent-system/hooks/`.
+- **Serialized ("step") calls:** `git add`, `git commit`, `git push`, `git tag` (any form the shell-guard lexer already
+  resolves: absolute paths, `env`, `-C`, wrappers), and builds (`npm run build`, `vite build`, `npx vite build`). A step
+  call claims an atomic per-session lock (`O_EXCL` create) in `PreToolUse`; a second shell call of the same session that
+  arrives while the lock is held is refused (exit 2) with "an earlier step is still running; send this in a later
+  message (L-089)".
+- **Proving reads refused while a step runs:** `git status`, `git diff`, `git show` are refused while a step lock is held
+  **or** while a `vite build` process is still alive (`pgrep -f "vite build"`), which also covers a build whose output
+  is still being written after the command returned (51-14).
+- **Everything else stays parallel:** plain reads (`git log`, `grep`, `ls`, `genesis-ctx` reads, file reads through the
+  `read` tool) are never serialized.
+- **Release:** `PostToolUse` on `shell` removes the step lock. Fallback when that cannot be relied on: the lock carries
+  the claim time and a step's own expected maximum (the shell tool's timeout); a stale lock is ignored and replaced, and a
+  `genesis-ctx` maintenance command clears it.
+
+**Spike first (probe the installed CLI, L-044, L-087):**
+1. Does Kiro CLI V3 fire `PostToolUse` for `shell` with a matcher, also after a refused or failed call, and what does
+   its payload carry (a session id, a tool-use id, the exit code)? Is a `PreToolUse` payload's session id stable across
+   the calls of one session and distinct between two concurrent sessions?
+2. In a parallel batch, does a `PreToolUse` refusal of one call leave its siblings running (no batch-wide cancel)? In
+   what order do the hooks of one batch fire, and does an `O_EXCL` claim decide the winner deterministically?
+3. Does the shell tool return before a backgrounded child (a build) exits? Measure with a build in a batch.
+
+**Tests (L-088), `agent-system/tests/test_shell_guard.py` or a new `test_shell_serial.py`:**
+- **Bypass corpus (must be refused):** `git commit` + `git status` in one batch (two hook invocations against one
+  session lock); `npm run build` + `git status`; `git add web/static` + `git show --stat HEAD`; `git tag` +
+  `git show`; `/usr/bin/git status`, `env git status`, `git -C <repo> diff` while a step lock is held; `git status`
+  while a fake `vite build` process is alive; a step call while another step call holds the lock.
+- **Positive corpus (must pass):** sequential calls in later messages (the lock released); parallel plain reads
+  (`git log`, `grep -rn`, `ls`, `genesis-ctx lint` with `genesis-ctx status`); a proving read with no step in flight;
+  two concurrent sessions each running one step; a stale lock past its maximum; `git status` while an unrelated
+  non-build node process runs.
+
+Then `agent-system/update.sh`, and shorten the batching prose in the skills to one line that points at the guard.

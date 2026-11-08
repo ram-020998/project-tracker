@@ -284,9 +284,9 @@ status = "accepted"
 areas = ["runs-worker", "core-engine", "workflows-library", "appian-integration", "config-secrets", "documents"]
 paths = []
 amends = []
-amended_by = ["ADR-068"]
+amended_by = ["ADR-068", "ADR-082"]
 superseded_by = ""
-rule = "`META.auto_approve=true` by default; pause only at approval|escalation|pre_mutation gates; `pre_mutation` REQUIRED before any write/deploy/data MCP node (ADR-068: the Implementation confirm replaces per-object gates)."
+rule = "`META.auto_approve=true` by default; pause only at approval|escalation|pre_mutation gates; `pre_mutation` REQUIRED before any write/deploy/data MCP node, unless a confirm is the approval (ADR-068, ADR-082)."
 reviewed_fp = "361c9be622e7da80"
 b04 = "include"
 
@@ -344,7 +344,7 @@ status = "accepted"
 areas = ["web-shell", "web-runs", "security", "distribution", "api"]
 paths = []
 amends = []
-amended_by = ["ADR-063"]
+amended_by = ["ADR-063", "ADR-085"]
 superseded_by = ""
 rule = "Web UI = React+TS for a local single-user app; `genesis serve`/`up` refuse a non-loopback bind unless explicitly opted in (`--i-understand-no-auth`) — Genesis ships no auth."
 reviewed_fp = "2e06badfd7c764a7"
@@ -368,9 +368,9 @@ status = "accepted"
 areas = ["api", "web-shell", "web-runs", "runs-worker", "config-secrets"]
 paths = []
 amends = []
-amended_by = []
+amended_by = ["ADR-085"]
 superseded_by = ""
-rule = "ALL backend endpoints live under `/api` (+ SPA history fallback); the web client prepends `/api` centrally — never hard-code it in components."
+rule = "ALL backend endpoints live under `/api` (+ SPA history fallback; only static Playwright reports sit on their own loopback origin, ADR-085); the client prepends `/api` centrally — never in components."
 reviewed_fp = "bdfe26648d7d321e"
 b04 = "skip"
 
@@ -380,9 +380,9 @@ status = "accepted"
 areas = ["config-secrets", "workflows-library", "chat"]
 paths = []
 amends = ["ADR-005", "ADR-020"]
-amended_by = []
+amended_by = ["ADR-083"]
 superseded_by = ""
-rule = "Two-tier MCP/CLI registry: curated read-only (MR-governed) + custom user-writable; effective tool trust = `node.tools ∩ server.allowlist` (a hard cap)."
+rule = "Two-tier MCP/CLI registry: curated read-only (MR-governed) + custom user-writable; tool trust = `node.tools ∩ server.allowlist`, a cap only for a node with a tool list (ADR-083: without one it trusts every tool)."
 reviewed_fp = "81784f999df25207"
 b04 = "skip"
 
@@ -596,7 +596,7 @@ status = "accepted"
 areas = ["kb-sync", "runs-worker", "api", "config-secrets"]
 paths = []
 amends = []
-amended_by = ["ADR-074"]
+amended_by = ["ADR-074", "ADR-081"]
 superseded_by = ""
 rule = "Scheduled maintenance syncs are fixed and backend-defined; the app sync is re-runnable as a full-package refresh."
 reviewed_fp = "36d765365525f1fe"
@@ -764,7 +764,7 @@ status = "accepted"
 areas = ["stories-workbench", "features-stages", "kb-sync", "web-shell"]
 paths = []
 amends = ["ADR-049"]
-amended_by = ["ADR-062"]
+amended_by = ["ADR-062", "ADR-084"]
 superseded_by = ""
 rule = "The Workbench is a curated set of per-application Kanban boards over finalized stories, with eight fixed lanes; board membership is explicit (v0.69.0 amendment)."
 reviewed_fp = "18e3ca424965cf88"
@@ -848,9 +848,9 @@ status = "accepted"
 areas = ["stories-workbench", "appian-integration", "core-engine", "config-secrets", "workflows-library"]
 paths = []
 amends = ["ADR-021", "ADR-062"]
-amended_by = []
+amended_by = ["ADR-082"]
 superseded_by = ""
-rule = "Implementation is the only env-mutating lane: the Design Review→Implementation confirm is the single blanket approval (rollback doc first); NEVER delete an object — deprecate via description; no delete* tool allowlisted."
+rule = "Implementation is the only lane that mutates design objects; its confirm is the single blanket approval (rollback doc first); NEVER delete an object, no delete* tool (ADR-082: test users write QA app data)."
 reviewed_fp = "9380507a5bc2aa0d"
 b04 = "include"
 
@@ -967,7 +967,7 @@ status = "accepted"
 areas = ["features-stages", "stories-workbench", "workflows-library"]
 paths = []
 amends = ["ADR-056"]
-amended_by = []
+amended_by = ["ADR-081"]
 superseded_by = ""
 rule = "A fifth feature stage, Test Design, starts after stories are finalized; Finalize once into ordered TS- scenarios that reference reusable TC- cases; Draft → Ready → Retired, retire not delete."
 reviewed_fp = "209898e516fbd672"
@@ -993,3 +993,58 @@ amended_by = []
 superseded_by = ""
 rule = "The platform is one repo: the app at the root, genesis-core, kiro-agent-sdk and the parser under packages/; no internal package lists another as a dependency; one install command; one shared version = the tag."
 reviewed_fp = "3a6025192e8361a1"
+
+[ADR-081]
+title = "Test automation architecture: an action library, case scripts and program-run executions (Phase 51)"
+status = "accepted"
+areas = ["browser-testing", "stories-workbench", "features-stages", "db"]
+paths = []
+amends = ["ADR-078", "ADR-047"]
+amended_by = []
+superseded_by = ""
+rule = "Test code lives as files in a per-app git workspace and genesis.db holds only the catalog; scripts reference actions and cases, never copy them; executions are program-only and run committed code."
+reviewed_fp = "012b35823f2d7128"
+
+[ADR-082]
+title = "The QA environment and test data writes (Phase 51)"
+status = "accepted"
+areas = ["config-secrets", "browser-testing", "appian-integration", "security"]
+paths = []
+amends = ["ADR-068", "ADR-021"]
+amended_by = []
+superseded_by = ""
+rule = "All test execution and agent browser sessions run only on the single QA environment, as the app's test users, changing application data through the UI only — never design objects, deployments or MCP writes."
+reviewed_fp = "9c1b83564ae9784c"
+
+[ADR-083]
+title = "Phase 51 browser agents and the isolation boundary (an accepted risk until Phase 52)"
+status = "accepted"
+areas = ["browser-testing", "security", "sdk-acp", "core-engine", "workflows-library"]
+paths = []
+amends = ["ADR-029"]
+amended_by = []
+superseded_by = ""
+rule = "Phase 51 browser agents use Kiro's shell with the workspace's own apwt on program-opened, QA-pinned sessions; credentials never reach the agent; the missing isolation is an accepted risk until Phase 52."
+reviewed_fp = "1c53ff61eb6d38b6"
+
+[ADR-084]
+title = "Lane order and Verification lane automation (Phase 51)"
+status = "accepted"
+areas = ["stories-workbench", "features-stages", "browser-testing", "workflows-library"]
+paths = []
+amends = ["ADR-061"]
+amended_by = []
+superseded_by = ""
+rule = "Deployment precedes Verification; dragging a story into Verification (after confirming QA has its changes) launches story-verification; pass → Done, product defect → Implementation, blocked → a gate."
+reviewed_fp = "b537eeeac83202f1"
+
+[ADR-085]
+title = "Playwright reports are served from their own loopback origin (Phase 51)"
+status = "accepted"
+areas = ["browser-testing", "api", "security", "web-shell"]
+paths = []
+amends = ["ADR-028", "ADR-026"]
+amended_by = []
+superseded_by = ""
+rule = "Serve Playwright reports only from a second loopback origin (app port + 100): static report files, no /api, GET/HEAD only, Host-checked, no traversal — never from the app's own origin."
+reviewed_fp = "c979fa012d71c531"

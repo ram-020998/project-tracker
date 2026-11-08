@@ -1,80 +1,98 @@
-Active phase: Phase 51 (test execution engine) in build — 51-02 done 2026-11-02; next 51-03 (spike, gate)
+Active phase: none in build — Phase 51 (test execution engine) SHIPPED 2026-11-08 with live acceptance open (51-12 steps 1–27 on QA, D38)
 
 <!-- context/state/current.md — the current-state snapshot (47-05 §4). OVERWRITTEN every phase by genesis-docs:
      current values only, no history, no CI ids. History lives in progress/ and archive/. Keep ≤ 4K tokens. -->
 
 # Genesis — current state
 
-## Shipped versions (Phase 50 release, 2026-11-01)
+## Shipped versions (Phase 51 release, 2026-11-08)
 
 | Repo | Tag | Branch |
 |---|---|---|
-| `genesis` | v0.80.0 — the app + `packages/genesis-core` (`CORE_MAJOR=1`), `packages/kiro-agent-sdk`, `packages/genesis-appian-parser` (`KB_FORMAT_VERSION=1`), all 0.80.0 | master |
-| `genesis-workflows` | v0.24.0 — pins all four on `genesis.git@v0.80.0` (`#subdirectory=packages/<name>` for the libraries) | master |
+| `playwright-appian` | v0.3.0 — `apwt`, own semver, GitLab npm registry (project 13864); vendored into genesis (`testexec/vendor/`) | main |
+| `genesis` | v0.81.0 — the app + `packages/genesis-core` (`CORE_MAJOR=1`), `packages/kiro-agent-sdk`, `packages/genesis-appian-parser` (`KB_FORMAT_VERSION=1`), all 0.81.0 | master |
+| `genesis-workflows` | v0.25.0 — pins all four on `genesis.git@v0.81.0` (`#subdirectory=packages/<name>` for the libraries) | master |
 
 Shared version, one install script, no internal dependency entries: ADR-080. Repos at `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/`,
-remote `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git`. The old library repos carry a "moved" README (their tags
-still serve genesis ≤ v0.79.0).
+remote `git@gitlab.appian-stratus.com:ramaswamy.u/<repo>.git`. The old library repos carry a "moved" README.
 
 ## Databases
 
-- `~/.genesis/genesis.db` (SQLite, WAL): migrations m0001–m0025, `current_version` = **25**.
+- `~/.genesis/genesis.db` (SQLite, WAL): migrations m0001–m0028, `current_version` = **28**.
 - `~/.genesis/memory.db` (separate, Phase 26): migration set `mm0001` (version 1).
 
 ## Test counts at the last release
 
-- genesis app: pytest **1418**; web: vitest **467** (50 files)
-- packages: genesis-core **96** · kiro-agent-sdk **79** · genesis-appian-parser **53** (+ 1 skipped: two real exports not provided)
-- genesis-workflows: `validate_library` **14** (gates 1–9) + `validate_skills` 3 + pytest **317**
+- genesis app: pytest **1832** locally (1 deselected: the readiness probe that hangs with Docker installed); CI **1778**
+  passed + 61 skipped; web: vitest **726** (62 files)
+- packages: genesis-core **96** · kiro-agent-sdk **79** · genesis-appian-parser **53** (+ 1 skipped)
+- genesis-workflows: `validate_library` **18** (gates 1–9) + `validate_skills` 4 + pytest **428**
+- playwright-appian: `npm test` **1399** · agent-system: **389**
 
 ## What works today
 
-- **Agent system (Phase 47):** five role agents `genesis-spec/dev/review/release/docs` (Kiro CLI V3, JSON profiles,
-  `claude-opus-5.5`) installed from `project-tracker/genesis/agent-system/` (`install.sh` / `update.sh` /
-  `uninstall.sh`); launch with `kiro-cli --v3 chat --agent genesis-<role>` from `~/repo-gitlab/ramaswamy.u`; context via
-  `genesis-ctx` (`status` shows genesis, genesis-workflows, playwright-appian, project-tracker; an area glob matching nothing is a lint
-  error); never `--trust-all-tools`.
-- **Platform monorepo (Phase 50):** one clone of `genesis`; `scripts/install.sh` and the dev setup
-  (`scripts/install-packages.sh --editable --dev`) install all four packages offline from the checkout; the CLI exits 1
-  naming a missing library; the updater runs the target tag's install script. Installs ≤ v0.79.0 must be reinstalled,
-  not updated through the banner.
-- `genesis serve` → FastAPI backend + SPA at `http://127.0.0.1:8760`; API under `/api`, Swagger at `/docs`, SPA history
-  fallback; the running version is `/openapi.json` `info.version`.
+- **Agent system:** five role agents `genesis-spec/dev/review/release/docs` (L0-core §6; `agent-system/OPERATOR_GUIDE.md`).
+  `genesis-ctx status` shows genesis, genesis-workflows, playwright-appian and project-tracker; the digests carry no
+  area tags (`genesis-ctx area <name>` lists an area's rules).
+- **Platform monorepo:** one clone of `genesis`; `scripts/install.sh` and the dev setup
+  (`scripts/install-packages.sh --editable --dev`) install all four packages offline from the checkout.
+- `genesis serve` → FastAPI backend + SPA at `http://127.0.0.1:8760`; API under `/api`, Swagger at `/docs`; the running
+  version is `/openapi.json` `info.version`. Playwright reports are served from a second loopback origin (app port
+  + 100, e.g. :8860): static report files only, no `/api` (ADR-085).
 - Primary nav: Applications · Chat · Runs · Documents (Applications is the landing); Overview + Catalog live in Settings.
-- Runs list + Run Detail (graph, inspector, turn-grouped conversation, all 3 HITL modes, per-node and run-total credits).
-  Stage and story finalizers complete on the live `run.final` (status stored first); a run orphaned by a server restart
-  is failed at startup ("worker lost across a server restart") by the process holding `~/.genesis/run/runs.lock`.
+- Runs list + Run Detail (graph, inspector, conversation, all 3 HITL modes, credits). Pause keeps a run paused, also
+  across a restart; cancel ends it cancelled with one `run.final`. A run orphaned by a server restart is failed at
+  startup by the process holding `~/.genesis/run/runs.lock`.
 - Chat: read-only assistant with persisted sessions, copilot run control (human-confirmed), skills, per-message credits.
 - Applications: the code-free Appian KB (business map, overview, Object Wiki, syncs, releases, business artifacts,
-  features, Test Impact). Tabs are URL-addressable
-  (`?tab=business-map|overview|object-wiki|features|syncs|releases|business-artifacts|test-impact`). KB syncs are
-  incremental; a full sync is forced only by a lower recorded `kb_format_version`.
-- **Object Wiki tab (Phase 48):** searchable, filterable, sortable table of the app's documented objects → one page per
-  object (`/applications/:appUuid/wiki/:objectUuid`) with newest-first history, the change reason on every entry, story
-  links, and (Phase 49) a Tests section with "Check test impact".
-- Feature workspace: Spec, UX Design, Technical Design, Feature Breakdown and **Test Design** stages; finalized
-  stories; Workbench boards. Feature roll-up: Completed / Draft (nothing started) / In progress.
-- **Test Design (Phase 49, ADR-078/079; local only, not synced to the Hub):** the stage unlocks after stories are
-  finalized; `test-design-analysis` drafts a suite → completion chat → **Finalize tests** into `TC-`/`TS-` records
-  (Given/When/Then, type, priority, Draft → Ready → Retired); top-up "Generate tests" proposals; CSV export. Feature →
-  **Tests** tab (summary, scenarios, cases table, coverage donut), case and scenario pages, story Tests section. Cases
-  link to stories (Needs review on change) and objects (resolved via implementation, KB syncs and on read). Application
-  → **Test Impact**: from picked objects, a story or a KB sync → affected suites → scenarios → cases, direct and
-  indirect (1–5 hops, default 2).
-- Spec change requests + story↔spec traceability (Phase 46): clause ids, coverage, CR → impact analysis → apply / discard.
-- Collaboration (opt-in, off by default): Genesis Hub sync of KB, identity/teams, the SDLC entities and the Object Wiki.
+  features, Test Impact, **Testing**). Tabs are URL-addressable (`?tab=…|test-impact|testing`). KB syncs are
+  incremental; a full sync is forced only by a lower recorded `kb_format_version`. Object Wiki: searchable object table
+  → one history page per object with story links and a Tests section.
+- Feature workspace: Spec, UX Design, Technical Design, Feature Breakdown and Test Design stages; finalized stories.
+  Test Design (local only): `TC-`/`TS-` records, Tests tab, case and scenario pages, CSV export, Test Impact.
+- **Environment types (ADR-082):** Settings → Environments has a Type (Dev, QA, UAT, Production, Other): exactly one
+  Dev (KB sync, Implementation, core MCP credentials) and at most one QA, on its own host. All test execution and agent
+  browser sessions run on QA only, as the application's test users.
+- **Testing tab (ADR-081)** — Library · Regression · Executions · Setup (`?view=`):
+  - **Setup:** QA site path, test users by role (passwords in the SecretProvider only), the regression schedule
+    (off / daily / weekly; off by default), runtime (Node ≥ 20 and Chromium are per machine; Install Chromium, Create
+    workspace and Update testing runtime run as background jobs). Code lives in a per-app git workspace under
+    `~/.genesis/testing/apps/<app>/`; the catalog is in `genesis.db`.
+  - **Library:** `ACT-` actions and `DS-` data setups as code (contract declared in the code, CodeMirror editor,
+    typecheck + one commit per save, history, revert, adopt outside edits, Draft → Ready → Retired). A setup becomes
+    Ready by a passing Replay, an action by passing in use (Run dependents). Setups may span several roles.
+  - **Record workflow:** a signed-in Chromium on QA as one role → `action-capture` → reviewed proposals, optionally also
+    a data setup. **Compose with AI:** pick library items and describe the end state → `setup-composer` writes, checks
+    and replays one setup, or names the missing step.
+  - **Case scripts** for `TC-` cases (Edit, Remove script); scenario specs generated from the Phase 49 tables.
+  - **Executions:** program-only `TE-` runs of committed code (ad-hoc, impact, regression, verification), one at a
+    time per machine; results per scenario and step, flaky badge, execution page with View run and Open report.
+  - **Regression:** per-app suite of feature-scenario references and own cross-feature scenarios; plan preview, Run
+    now, change notes, pass-rate trend; the `regression-run` job runs due apps one at a time.
+  - **Run impacted tests** from Test Impact.
+- **Workbench (ADR-084):** lanes To Do → Design → Design Review → Implementation → Code Review → Deployment →
+  Verification → Done. Dragging Deployment → Verification (after confirming QA has the changes) runs
+  `story-verification`: pass → Done, product defect → Implementation with a defect report, blocked → a gate; report and
+  proposals on the story page. A queued card reads Queued; dragging it out asks, then cancels the queued run.
+- Spec change requests + story↔spec traceability; collaboration (opt-in, off by default) via the Genesis Hub.
 - Data plane: durable SQLite (checkpoints, runs/events, chat sessions persist across restart; retention available).
-- Credits: real metered Kiro credits per agent turn and chat message, with honest `metered`/`partial`/`unavailable` provenance.
-- Integrations: curated (MR-governed) + custom MCP/CLI tiers with per-node injection; managed-native Dev/DevOps MCP + `gws`.
-- Fleet: `genesis-fleet` runs main (:8760) + userb (:8761) for two-user collaboration checks, both on v0.80.0 / DB v25
-  with genesis-workflows v0.24.0 installed, from the editable dev venv; `gsm` is at
-  `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/genesis-fleet/bin/gsm` (not on the agents' PATH). No managed install exists.
-- Dev: `npm run dev` in `genesis/web` → `http://localhost:5173/` (Vite proxies `/api` → :8760); design-system gallery at `/dev`.
+- Credits: real metered Kiro credits per agent turn and chat message, with honest provenance.
+- Integrations: curated + custom MCP/CLI tiers with per-node injection; managed-native Dev/DevOps MCP + `gws`.
+- Fleet: `genesis-fleet` runs main (:8760, reports :8860) + userb (:8761, reports :8861), both on v0.81.0 / DB v28
+  from the editable dev venv, each with test-execution 0.1.1, action-capture 0.2.2, setup-composer 0.1.1,
+  story-verification 0.1.0 and the skill genesis-test-authoring 0.3.0; `gsm` is at
+  `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/genesis-fleet/bin/gsm` (not on the agents' PATH). No managed install.
+- Dev: `npm run dev` in `genesis/web` → `http://localhost:5173/` (Vite proxies `/api` → :8760); gallery at `/dev`.
 
 ## Known open items
 
-- **User, after the Phase 50 release:** check the first weekday scheduled sync (Monday 2026-11-02) — newest `kb_syncs`
-  row incremental with `details.kb_format_version` = 1 on each instance; archive GitLab projects 14328 / 14306 / 14520
-  in the UI; move the three old checkouts to `_archived/`.
-- genesis `README.md` still says "m0001–m0024 (DB v24)" (code repo; fix with the next genesis change).
-- Phase 51 specs: `specs/phase-51-test-execution-engine.md` (51-01..51-13). Backlog: `specs/backlog/phase-50-follow-ups.md` §1–§6; the rest in `bible/08` §9.
+- **Phase 51 live acceptance is open (D38):** 51-12 steps 1–27 on QA on v0.81.0 when QA is back; findings ship as
+  v0.81.x patches. The first patch also takes backlog `phase-51-follow-ups.md` §23 (N1, the case-script hint when the
+  scanner cannot run) and §24 (P1 the compose dialog in the width probe, P2 the picker layout).
+- The `backup/phase-51-2026-11-04` branches (local + origin, all three code repos) are redundant; delete on the user's
+  go-ahead (backlog §26).
+- Unconfirmed from Phase 50 (user): the first weekday sync's `details.kb_format_version` = 1 on each instance; moving
+  the three old library checkouts to `_archived/`.
+- Agent isolation for every workflow agent is Phase 52 (ADR-083 accepted risks).
+- Backlog: `specs/backlog/phase-51-follow-ups.md` §1–§27 (§27 = the L-089 guard spike), `phase-50-follow-ups.md`
+  §1–§6; the rest in `bible/08` §9.
