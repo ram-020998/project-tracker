@@ -1,6 +1,6 @@
 # 51-18 — Fixes from the 51-12 re-run
 
-> **Status:** SPEC-DRAFTED 2026-11-05. Repos: **genesis** (backend + web), **genesis-workflows** (`action-capture`,
+> **Status:** **DONE 2026-11-09** (SHIP, first pass + delta; see As built). SPEC-DRAFTED 2026-11-05. Repos: **genesis** (backend + web), **genesis-workflows** (`action-capture`,
 > `setup-composer`: shared checks only), **playwright-appian** (one test). Parent:
 > `specs/phase-51-test-execution-engine.md`. Decision: 51-01 **D37**. Evidence for every item (file:line, repro, the
 > reviewer's fix): `reviews/51-12-review.md` → **Re-run** section — read it first. Built after 51-17; then the

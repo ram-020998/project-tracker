@@ -17,11 +17,18 @@
    `npm run build` + commit `web/static/` as separate steps (L-089); verify the release commit contains every changed
    file, including the vendored tarball as package data (L-056, L-048); tag; push on go-ahead; CI green (genesis,
    frontend, clean-install).
-4. **genesis-workflows v0.25.0**: `test-execution`, `story-verification`, `setup-composer` (each v0.1.0) and `action-capture` (v0.2.1; 0.2.0 from 51-16, 0.2.1 from 51-17) + `registry.json`
+4. **genesis-workflows v0.25.0**: `story-verification` (v0.1.0), `test-execution` (v0.1.1), `setup-composer` (v0.1.1) and `action-capture` (v0.2.2) — the 51-18 versions, released together with genesis v0.81.0 (Record needs `action-capture` ≥ 0.2.2 and Compose `setup-composer` ≥ 0.1.1) + `registry.json`
    entries + skill `genesis-test-authoring` in `skills-registry.json`; pins on `genesis.git@v0.81.0` (+
    `#subdirectory=packages/<name>`, gate 9, L-057); CI green. The pin move is **required**, not only tidy: since 51-07
    the genesis-workflows tests import Phase 51 genesis modules (`testexec`, `integrations/apwt`), so a pin on v0.80.0
-   reds CI.
+   reds CI. Since 51-18 it is also a **behaviour** dependency: with the old pin the story-verification tests fail
+   (no scanner-recording helper, no checkout check) and the two capture workflows refuse every replay.
+5. **Release gate conditions (51-18 As built):** run the playwright-appian and genesis gates on a machine that is not
+   heavily loaded (one agent-idle timing test failed once at load average ~25). Two known local test issues are not
+   regressions: `test_regression_job_handler_starts_due_apps_and_skips_busy_ones` fails between 00:00 and 02:00 IST
+   (a time-of-day flake, pre-existing; run the gate outside that window or fix the test first), and
+   `test_config.py::test_server_readiness_probe` hangs on a machine with Docker installed (pre-existing). Keep the
+   user's uncommitted playwright-appian `.gitignore` line out of the release commit unless the user says otherwise.
 
 ## 2. Deploy
 
@@ -43,7 +50,7 @@ As run and let genesis-docs correct it. The `userb` instance keeps reading `envi
   amend ADR-028 with its scope and rules (static report files only, no `/api`, its own loopback port) and note it in
   ADR-026's network surface; an ADR-047 note for the
   per-app cadence inside `regression-run`'s options (51-06 §8).
-- **Areas:** extend `browser-testing` (51-02) with every new path; map `genesis/genesis/testexec/**`,
+- **Areas:** extend `browser-testing` (51-02) with every new path; map `genesis/genesis/testexec/**`, `genesis/genesis/testing/**`,
   `api/testing.py`, `integrations/apwt/**`, `chat/story_verification_finalizer.py`,
   `web/src/features/testing/**`, the four workflows and the skill `genesis-test-authoring`
   to their areas so `check` routes them.
