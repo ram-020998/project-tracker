@@ -74,3 +74,52 @@ docs     = ["tracker:specs/phase-51-test-execution-engine.md", "tracker:agent-sy
 code     = ["genesis/pyproject.toml", "genesis/genesis/testexec/vendor/**", "genesis-workflows/registry.json", "genesis-workflows/skills-registry.json", "playwright-appian/package.json"]
 upstream = ["51-12"]
 ```
+
+## As built — Linux reap fix before the push (genesis-dev, 2026-11-08)
+
+There is no **As run** yet. This fix comes first: genesis CI pipeline #7335323 failed the genesis job with 10 tests, all
+process-group reaping (`test_apwt_client` open ×2, `test_testexec_procs` reap, `test_testexec_recording` refresh/reap,
+`test_testing_api` cancel / startup reap / replay cancel, `test_runs` run-end reap ×3). The base is the release commit
+`8e5bacc`. Its local tag `v0.81.0` was not touched.
+
+- **Cause.** `procs._group_commands` ran `ps -A -o pgid=,command=`. procps-ng (4.0.4 in `python:3.13`) cuts each line
+  to `$COLUMNS` even when the output is piped, and the CI runner sets `COLUMNS`. The workspace and run markers at the
+  end of long command lines were therefore cut off, so `reap()` found no process of ours, signalled nothing and dropped
+  the record. A `ps` error was swallowed into `[]`. macOS BSD `ps` does not truncate (8,460-character lines with
+  `COLUMNS=80`), which is why the gates were green locally.
+- **Fix.** On Linux, full command lines are read from `/proc/<pid>/cmdline`, with the group taken from
+  `/proc/<pid>/stat` after the last `)`. Elsewhere, and when procfs is empty or unreadable, the fallback is
+  `ps -A -ww -o pgid=,command=`. A `ps` that cannot run, or that exits non-zero, now logs a warning. `reap()` itself
+  is unchanged, so a group is still signalled only while one of its processes names a recorded marker.
+- **Commits (genesis, local, not pushed or tagged):** `2e92fca` (the fix and its regression tests) and `62537c2`
+  (review m1/m2/n3/n5).
+- **Tests.** In `tests/test_testexec_procs.py`, five new tests (6 with parametrization):
+  - a marker past column 80 under `COLUMNS=80`;
+  - the `ps` fallback reads full lines (`-ww`);
+  - a `ps` failure is logged with the exact text (2 cases);
+  - a fake procfs (comm with spaces and parens, empty cmdline, garbage stat, vanished entry);
+  - an empty or missing procfs falls back to `ps`.
+- **Test runs:**
+  - **Docker `python:3.13`, `COLUMNS=80`, base `procs.py`:** 11 failed, 5 passed (the 10 CI failures plus the
+    regression test).
+  - **Same container, `62537c2`:** 21 passed. The tests were the 10 CI failures plus the whole procs file. `2e92fca`
+    also passed without `COLUMNS`.
+  - **How the container was set up:** a venv built from the dev venv's exact `pip freeze`, without PyMuPDF (it OOMs
+    the container). The full suite was not run in Linux.
+  - **macOS:** `ruff check genesis` + the test file are clean. Full `pytest` at `2e92fca`: **1836 passed,
+    1 deselected** (`test_config.py::test_server_readiness_probe`, the known hang). At `62537c2`: the procs file
+    (12) and the 21 reap tests with `COLUMNS=80` passed.
+- **Review.** `reviews/51-13-reap-fix-review.md`: **SHIP** on `2e92fca`, with no blocker or major finding.
+  - Fixed in `62537c2`: m1 (procfs parser test), m2 (empty procfs returns `None`), n3 (exact log text) and n5
+    (docstring).
+  - Left as is: n4 (a broken `ps` warns once per record per reap; this happens only off Linux and only on failure).
+  - `62537c2` was not re-reviewed.
+- **Decisions.** No ADR deviation.
+- **Lesson candidate.** procps `ps` honours `$COLUMNS` even when piped. Any check that matches text at the end of a
+  command line must read `/proc/<pid>/cmdline` or pass `-ww`. A tool failure that turns into an empty list must log
+  first, because an empty list reads as "nothing to do".
+- **Code-map changes.** `genesis/testexec/procs.py` gains `_PROC_ROOT`, `_cmdlines_from_proc(pgid, root=None)` and
+  `_cmdlines_from_ps(pgid)`. `_group_commands` keeps its signature.
+- **For genesis-release.** `v0.81.0` (local) points at `8e5bacc`, which does not have the fix. Ask the user whether to
+  move the unpushed tag to `62537c2` or to cut v0.81.1. Then confirm a green genesis pipeline on the tagged commit
+  before pushing.
