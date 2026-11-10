@@ -348,8 +348,8 @@ variants, 5.4 MB, scrubbed); `packages/kiro-agent-sdk/tests/fixtures/v3/` (28 `.
 ### Review / commits
 
 - genesis (local, base `62537c2`, not pushed): `c7c05b2` (harness + W1), `a885ca3` (W2–W5), `a13798d` (W6–W19 +
-  fixtures + loader test), `0ab0e61` (review fixes).
-- Review: `reviews/53-02-review.md` — first pass NEEDS_CHANGES (M1, m1–m6, n1–n8), fixed in genesis `0ab0e61`
+  fixtures + loader test), `a54b1f4` (review fixes).
+- Review: `reviews/53-02-review.md` — first pass NEEDS_CHANGES (M1, m1–m6, n1–n8), fixed in genesis `a54b1f4`
   (see Decisions); re-review below.
 
 ### Decisions / deviations
