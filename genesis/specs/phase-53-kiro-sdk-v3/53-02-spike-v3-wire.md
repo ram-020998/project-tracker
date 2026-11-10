@@ -18,9 +18,9 @@ sub-specs before 53-03 starts.
 
 | # | Question | Pass criterion |
 |---|---|---|
-| W1 **(gate)** | Workspace skills under a private `KIRO_HOME`: a skill in `<cwd>/.kiro/skills/<id>/SKILL.md` is listed (context breakdown) and usable; nothing from `~/.kiro/skills` appears (D6, D7, D8; 51-03 S11 retest) | managed skill visible, personal skill absent |
+| W1 **(gate)** | Workspace skills under a private `KIRO_HOME`: a skill in `<cwd>/.kiro/skills/<id>/SKILL.md` is listed (context breakdown) and usable; nothing from `~/.kiro/skills` appears (D6, D7, D8; 51-03 S11 retest). Use Phase 51's real pair: `playwright-appian` copied from a workspace export's `checkout/node_modules/playwright-appian/skills/` and the managed `genesis-test-authoring`, each with a canary line (53-01 §9.3 item 5) | both managed/provisioned skills visible, personal skill absent |
 | W2 **(gate)** | MCP servers from `session/new.mcpServers` with real `env` values (list form, L-001), including a Genesis managed server (`genesis-kb`) and the blackboard server | both start, `env` reaches the server, tools run |
-| W3 **(gate)** | The shell over v3 with `execute_bash` in `tools`: permission request shape (`_meta.kiro.toolId`, `consent`), tool frames (`kind`, title, `rawInput`), auto-approve works | frames recorded; a command runs |
+| W3 **(gate)** | The shell over v3 with `execute_bash` in `tools`: permission request shape (`_meta.kiro.toolId`, `consent`), tool frames (`kind`, title, `rawInput`), auto-approve works. Workload: Phase 51's recipe `cd <ws> && PLAYWRIGHT_APPIAN_HOME=<run>/.apwt npx --no-install apwt …` (53-01 §9.3 item 1) under the caller's environment (`PATH` with Node) — against a signed-in QA session if QA is available, otherwise `npx --no-install apwt --version` plus one command on a local page; and one large output saved through `@blackboard/save_tool_output` | frames recorded; the commands run; `npx` resolves the workspace's own `apwt` |
 | W4 **(gate)** | `session/set_mode` confirmation: the `config_option_update` (or other frame) that proves our agent is active; what happens when the agent fails the engine's schema (deliberately bad field) | a reliable "active" signal and a reliable "dropped" signal |
 | W5 **(gate)** | Credits on a turn that does not end cleanly: `session/cancel` mid-turn, a turn hitting the client timeout, a turn whose MCP server fails | `turn_completion` present or absent per case recorded; nothing invents a number (ADR-032) |
 | W6 | `session/load` of a chat session after the kiro-cli process exits (same `KIRO_HOME`): history restored, the custom agent re-sent and active, a new turn sees prior context | works, or the exact failure |
@@ -31,9 +31,9 @@ sub-specs before 53-03 starts.
 | W11 | Images in `session/prompt` (`promptCapabilities.image`), and whether v3 needs only the `prompt` key (today the SDK sends `content` and `prompt`) | image turn works; key decided |
 | W12 | `--auth-method client`: the engine's access-token request (`_kiro/auth/getAccessToken` or as observed), its params, the answer shape; with no answer, the failure (F9; 52-01 D8) | request/answer recorded with a token from the user's login, **token value never written to evidence** |
 | W13 | HTTP MCP servers in `session/new` (`mcpCapabilities.http: true`): a local Streamable HTTP server reached (52-01 D7 input) | works or the failure |
-| W14 | Timings for F7: time between frames in a long silent model step, the longest normal MCP tool call in a real workflow node, and the cancel grace (time from `session/cancel` to the prompt answer) | numbers → 53-04's timeout values |
+| W14 | Timings for F7: time between frames in a long silent model step, the longest normal MCP tool call in a real workflow node, the longest normal shell command in the W3 workload, and the cancel grace (time from `session/cancel` to the prompt answer). Reference: a 51-03 v2 explore turn made 26 tool calls in 194 s (8.44 credits); Phase 51 turns run up to 900 s (a live heal took 482 s) | numbers → 53-04's timeout values, none of which would end a normal 900 s Phase 51 turn early |
 | W15 | The built-in tool ids on 2.37.1: registered id vs permission `toolId` for each built-in D9 and F2 name (`execute_bash`/`run_command`, `read_file`, `list_directory`, `fs_write`, `str_replace`, `fs_append`, `grep_search`, `file_search`, `web_fetch`, `remote_web_search`, `delete_file`); the meta tools (`tool_load`, `tool_call`, `disclose_context`) | the table for 53-05's fixture |
-| W16 | Process tree: which processes kiro-cli starts (engine child, MCP servers) and their process groups; whether killing kiro-cli's own group reaches them (F12) | tree recorded; a kill that leaves nothing behind |
+| W16 | Process tree: which processes kiro-cli starts (engine child, MCP servers) and their process groups; whether killing kiro-cli's own group reaches them (F12). Also: a program-started `apwt` session daemon and its Chromium (own groups, recorded in `<run>/.pids`, 53-01 §9.3 item 4) survive that kill and are still reaped by `testexec/procs.py` | tree recorded; a kill that leaves nothing of kiro-cli's behind and leaves the program's apwt processes to their own reaper |
 | W17 | `_kiro/mcp/status` states for a server that fails to start, needs auth, or is slow; how long `connecting` lasts (F3) | states + timings |
 | W18 | Elicitation: the request an MCP tool's elicitation produces on v3 (`elicitation/create` or `_kiro/mcp/elicitation`) and the decline answer (F8) | request + decline recorded |
 
@@ -72,8 +72,8 @@ spent; anything that changes 53-04..53-07 (flag it for the spec agent)._
 
 ```toml
 areas    = ["sdk-acp", "chat", "core-engine"]
-adrs     = ["ADR-002", "ADR-004", "ADR-020", "ADR-029", "ADR-031", "ADR-032", "ADR-034", "ADR-045", "ADR-069"]
-lessons  = ["L-001", "L-011", "L-016", "L-021", "L-024", "L-041", "L-044", "L-046", "L-064", "L-087", "L-100"]
+adrs     = ["ADR-002", "ADR-004", "ADR-020", "ADR-029", "ADR-031", "ADR-032", "ADR-034", "ADR-045", "ADR-069", "ADR-083"]
+lessons  = ["L-001", "L-011", "L-016", "L-021", "L-024", "L-041", "L-044", "L-046", "L-064", "L-087", "L-100", "L-101", "L-104", "L-112"]
 docs     = ["tracker:specs/phase-53-kiro-sdk-v3/53-01-findings.md", "tracker:specs/phase-51-test-execution-engine/51-03-spike-sandboxed-shell.md", "tracker:specs/phase-52-agent-runtime-isolation/52-01-findings.md"]
 code     = ["genesis/scripts/spikes/53-02/**", "genesis/packages/kiro-agent-sdk/tests/fixtures/v3/**", "genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py"]
 upstream = []

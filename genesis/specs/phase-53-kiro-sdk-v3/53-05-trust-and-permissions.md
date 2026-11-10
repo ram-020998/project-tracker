@@ -82,7 +82,9 @@ missing or raises. Not used by Genesis in this phase (Phase 52 wires it, 52-01 D
 
 ## 8. Tests
 
-Projection golden tests (policy → entry) for every 53-06/53-07 caller shape; refusal of globs and meta capabilities;
+Projection golden tests (policy → entry) for every 53-06/53-07 caller shape, including the Phase 51 node shape (no `mcp`,
+no `tools`, blackboard on: D9's built-ins + `@blackboard` only) and a `blackboard=False` node with `mcp=[]` (built-ins
+only, no MCP); refusal of globs and meta capabilities;
 reserved-id rename; ladder table tests (identity missing, outside policy, each mode, timeout, unknown option); fixture
 replays `mcp-allow`, `mcp-ask-approve`, `mcp-ask-reject`, `shell-auto-approve`, `fs-write-client`, `elicitation`,
 `access-token`; a `tool_load` of an unlisted tool is not approved (53-01 P5/C1–C2 shape).
@@ -95,7 +97,7 @@ _To be filled by genesis-dev._
 
 ```toml
 areas    = ["sdk-acp", "security", "chat"]
-adrs     = ["ADR-029", "ADR-031", "ADR-033", "ADR-034", "ADR-004", "ADR-020", "ADR-068"]
+adrs     = ["ADR-029", "ADR-031", "ADR-033", "ADR-034", "ADR-004", "ADR-020", "ADR-068", "ADR-083"]
 lessons  = ["L-017", "L-041", "L-045", "L-088", "L-011"]
 docs     = ["tracker:specs/phase-53-kiro-sdk-v3/53-01-findings.md", "tracker:specs/phase-53-kiro-sdk-v3/53-02-spike-v3-wire.md"]
 code     = ["genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/**", "genesis/packages/kiro-agent-sdk/tests/**"]

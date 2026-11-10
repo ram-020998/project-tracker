@@ -6,9 +6,11 @@
 > Repos: **genesis** (`packages/kiro-agent-sdk` rebuilt, `packages/genesis-core` `kiro_node`, chat backend, preflight,
 > skills, web, one migration), **genesis-workflows** (the `appian` skill published), **project-tracker** (areas, ADRs).
 > Proposed ADR: **ADR-086** (number fixed at write-back) — Genesis drives Kiro only through the v3 engine with a
-> Genesis-owned `KIRO_HOME` and a projected custom agent; managed skills only. Amends ADR-031, ADR-032, ADR-034,
-> ADR-045, ADR-069.
-> **Starts after Phase 51 is released (D11).** Phase 52 (agent runtime isolation) builds on this phase.
+> Genesis-owned `KIRO_HOME` and a projected custom agent; managed skills only. Amends ADR-029, ADR-031, ADR-032,
+> ADR-034, ADR-045, ADR-069, ADR-083.
+> **Phase 51 shipped 2026-11-08 (genesis v0.81.0, genesis-workflows v0.25.0), so D11 is met; its live acceptance is
+> still open (Phase 51 D38).** Specs re-checked against that code: `53-01-findings.md` §9. Phase 52 (agent runtime
+> isolation) builds on this phase.
 
 ## 1. Why this phase exists
 
@@ -51,17 +53,19 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D10 | Chat steering: Send steers while a turn runs; an unread steer is sent as the next message; Stop keeps the session. |
 | D11 | Phase 51 completes and ships first; Phase 53 starts after. |
 
-Defaults F1–F15 (confirmed): `53-01-findings.md` §8.
+Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn) proposed on the Phase 51 re-check:
+§9.5.
 
 ## 4. Current state (code-grounded — full detail in `53-01-findings.md` §2–§3)
 
 | Area | Today | File(s) |
 |---|---|---|
 | SDK | v2 launch with trust flags; one flat timeout; `_kiro.dev/*` extensions; unknown requests → `{}`; no cancel/load/close; 79 unit tests, no wire tests | `packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py`, `__init__.py`, `messages.py` |
-| Workflow nodes | `--trust-tools` / `--trust-all-tools`, SDK default `auto_approve`; tool name from `_meta.kiro.toolName` | `packages/genesis-core/genesis_core/nodes/agent.py:137-391`, `agents/provider.py`, `agents/kiro.py` |
+| Workflow nodes | `--trust-tools` / `--trust-all-tools`, SDK default `auto_approve`; tool name from `_meta.kiro.toolName` | `packages/genesis-core/genesis_core/nodes/agent.py:137-406`, `agents/provider.py`, `agents/kiro.py` |
 | Chat | `--trust-tools` + `auto_deny`/`ask`; Stop kills kiro-cli; preamble replay; `/clear` `/compact` as prompts; catalog from `session/new.models` + `_kiro.dev/commands/available` | `genesis/genesis/chat/manager.py`, `chat/mcp.py`, `chat/mode_profile.py`, `api/chat.py` |
 | Skills | managed workspace + user's `~/.kiro/skills` (chat, and the workflow fallback) | `genesis/genesis/skills/store.py:55-63`, `runtime/context.py:76-97` |
-| Readiness | Kiro sign-in only; no version or engine check | `genesis/genesis/runtime/preflight.py`, `runtime/kiro_auth.py` |
+| Readiness | Kiro sign-in only (plus Phase 51's optional Node and Chromium items); no kiro-cli version or engine check | `genesis/genesis/runtime/preflight.py`, `runtime/kiro_auth.py` |
+| Phase 51 callers | 3 agent workflows driving `npx --no-install apwt` through the shell (no tool list, 600–900 s turns, inherited env); `playwright-appian` skill from the run checkout; ADR-083's accepted risks | `53-01-findings.md` §9.2–§9.3 |
 | Web | model picker, `/` palette, context meter, Clear/Compact, Stop, credit badge, permission card | `genesis/web/src/features/chat/**`, `features/run-detail/**`, `features/catalog/skills/**` |
 
 ## 5. Design overview
@@ -115,7 +119,7 @@ last caller (53-07); until then the old client stays importable so every interme
 |---|---|---|
 | 53-01 | project-tracker | Findings, decisions D1–D12, defaults F1–F15, probe evidence |
 | 53-02 | genesis (spike harness + fixtures) | The v3 unknowns (shell, env values, workspace skills under a private home, `session/load` after restart, images, Clear, `tool_load` setting, steering method, model fallback shape, credit-less turns, auth client, HTTP MCP, timings, tool ids vs 2.37.1); recorded frames into `packages/kiro-agent-sdk/tests/fixtures/v3/` |
-| 53-03 | genesis, project-tracker | ADR-086 draft (`adr-drafts.md`); migration: `chat_sessions.kiro_session_id` (next free number after Phase 51) |
+| 53-03 | genesis, project-tracker | ADR-086 draft (`adr-drafts.md`); migration `m0029`: `chat_sessions.kiro_session_id` (DB v28 → v29) |
 | 53-04 | genesis (`packages/kiro-agent-sdk`) | New modules (launch, transport, session, updates, errors, timeouts), process tree, fake engine + fixture replay tests, import-boundary test |
 | 53-05 | genesis (`packages/kiro-agent-sdk`) | `TrustPolicy`, agent projection, tool-id fixture + verified versions, permission ladder, refusal notice, elicitation decline, access-token responder |
 | 53-06 | genesis (`packages/genesis-core`, `genesis/runtime`), genesis-workflows | `kiro_node` on v3 (per-run home, D9 trust, v3 tool shapes, credits), managed-only `_skill_source`, the `appian` skill in the library |
@@ -123,12 +127,13 @@ last caller (53-07); until then the old client stays importable so every interme
 | 53-08 | genesis | Preflight v3 + minimum version + verified-version warning; Settings health; skills: `personal_dir`/`shadows_personal` removed, Update wired |
 | 53-09 | genesis | Contract table (steer endpoint, `usage.model` / `fallback_from`, `session.notice`, preflight items), fixtures, tests |
 | 53-10 | genesis (`web/`) | Composer steering, Stop, "answered by <model>", MCP notice, Skills Update button, warning removed, preflight message |
-| 53-11 | all | Review + gates + live acceptance on v3 (every workflow agent node, every chat mode) |
+| 53-11 | all | Review + gates + live acceptance on v3 (all 15 agent-node workflows, 53-01 §9.2, and all eight chat modes) |
 | 53-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-086, lessons, areas, state, progress) |
 
 ## 8. Release plan
 
-One release at the end (D5), after Phase 51's: **genesis** next minor after Phase 51's (expected v0.82.0; the
+One release at the end (D5), after Phase 51's: **genesis** next minor after Phase 51's (expected v0.82.0, after any
+v0.81.x patches; the
 migration from 53-03; SDK, genesis-core and parser at the same shared version, ADR-080), then **genesis-workflows** next
 minor (the `appian` skill; pins on the new genesis tag, L-057). Users: Genesis sessions stop loading global Kiro MCP
 servers and personal skills; the release notes say how to add a server as a Genesis custom MCP server and how to install
@@ -156,6 +161,9 @@ F1–F15 in `53-01-findings.md` §8 (confirmed 2026-11-03).
 | The engine drops our custom agent (schema) and runs its default agent | Activation check fails the session closed (53-05) |
 | On-demand MCP loading (`tool_load`) costs extra steps | Spike measures; F10 turns it off if so |
 | Kiro removes v2 before the release | No effect on this phase (v3 only); Genesis ≤ the previous release stops working; users update |
+| Phase 51's open live acceptance ships v0.81.x patches that change its workflows while Phase 53 builds | Each sub-spec rebases on current master before it starts; 53-06 and 53-11 re-diff genesis-workflows (53-01 §9.3 item 8) |
+| Phase 51 shell turns break on v3 (env, timeouts, process kill) | 53-02 W3/W14/W16 use the real `apwt` workload; 53-04 keeps the inherited env and the program's process reaping; 53-11 A1/A6 |
+| QA is unavailable at 53-11, so the three Phase 51 workflows cannot run live | Run everything else; release only with the user's go-ahead, and say plainly that A1 is open for those three (L-111) |
 
 ## 12. ADR summaries
 
@@ -166,14 +174,16 @@ F1–F15 in `53-01-findings.md` §8 (confirmed 2026-11-03).
   the managed workspace. Amends **ADR-031** (fail-closed by agent projection, not `--trust-tools`), **ADR-032** (credits
   from `session_info_update` `turn_completion`), **ADR-034** (sanctioned `KIRO_HOME`; personal skills no longer in
   chat), **ADR-045** (the v3 methods: config options, `available_commands_update`, `_kiro/session/compact`,
-  `session/cancel`), **ADR-069** (no global-skills fallback). Draft in 53-03.
+  `session/cancel`), **ADR-069** (no global-skills fallback; the Phase 51 checkout source for `playwright-appian`
+  stays), **ADR-083** (accepted risk d closes; risks a–c stay until Phase 52) and **ADR-029** (a node with no tool
+  list gets D9's built-ins and its own servers, not every tool). Draft in 53-03.
 
 ## Context manifest
 
 ```toml
-areas    = ["sdk-acp", "chat", "core-engine", "runs-worker", "config-secrets", "api", "web-runs", "workflows-library", "db"]
-adrs     = ["ADR-002", "ADR-004", "ADR-020", "ADR-029", "ADR-031", "ADR-032", "ADR-033", "ADR-034", "ADR-045", "ADR-051", "ADR-069", "ADR-080"]
-lessons  = ["L-001", "L-011", "L-016", "L-017", "L-024", "L-041", "L-044", "L-046", "L-057"]
+areas    = ["sdk-acp", "chat", "core-engine", "runs-worker", "config-secrets", "api", "web-runs", "workflows-library", "db", "browser-testing"]
+adrs     = ["ADR-002", "ADR-004", "ADR-020", "ADR-029", "ADR-031", "ADR-032", "ADR-033", "ADR-034", "ADR-045", "ADR-051", "ADR-069", "ADR-080", "ADR-083"]
+lessons  = ["L-001", "L-011", "L-016", "L-017", "L-024", "L-041", "L-044", "L-046", "L-057", "L-108", "L-111"]
 docs     = ["tracker:specs/phase-53-kiro-sdk-v3/53-01-findings.md", "tracker:specs/phase-52-agent-runtime-isolation/52-01-findings.md"]
 code     = ["genesis/packages/kiro-agent-sdk/**", "genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/genesis/chat/manager.py"]
 upstream = []

@@ -18,6 +18,9 @@ code stops knowing about `~/.kiro/skills`.
   <x> has not been verified with this Genesis release; it should work — report problems." (warn, F5).
 - Chat and runs refuse to start while the required item fails: chat returns the classified error on the first turn
   (`kiro_too_old` / `engine_missing`); a run fails at its first agent node with the same error (53-04 `errors.py`).
+- Same `_item` shape and "optional = warning" convention as Phase 51's Node 20+ and Playwright Chromium items
+  (`preflight.py:67-78`); the new items go before the `kiro` sign-in item without reordering the others (the web
+  fixtures pin the order).
 - `check_kiro()` runs `kiro-cli --version` and `kiro-cli acp --help` once and caches by binary path + mtime (no network).
 
 ## 3. Settings health
@@ -27,16 +30,17 @@ code stops knowing about `~/.kiro/skills`.
 
 ## 4. Skills cleanup (D7, D8)
 
-- `skills/store.py:55-63`: remove `personal_dir` and the shadowing computation; `skills/model.py:72-74`, `:86`: remove
-  `shadows_personal` (the API field is dropped; 53-09 records it).
-- `api/skills.py`: keep `POST /skills/update` (`:99`) as is; it already reinstalls the latest library ref and closes live
+- `skills/store.py:55-63`: remove `personal_dir` (`:56-63`) and the shadowing computation (`:111`);
+  `skills/model.py:72-74`, `:86`: remove `shadows_personal` (the API field is dropped; 53-09 records it).
+- `api/skills.py`: keep `POST /skills/update` (`:100`) as is; it already reinstalls the latest library ref and closes live
   chat clients (`_reload`).
 - Docstrings that say chat also sees `~/.kiro/skills` (`skills/__init__.py`, Phase 14 notes) are corrected.
 
 ## 5. Tests
 
 Preflight with fake `kiro-cli` scripts (missing, too old, no v3, ok, newer unverified); `GET /system/kiro` shape;
-skills list without `shadows_personal`; `POST /skills/update` happy path and "not in the library" (404).
+skills list without `shadows_personal` (`tests/test_skills_store.py:158-161` asserts it today and is rewritten);
+`POST /skills/update` happy path and "not in the library" (404).
 
 ## As built
 
@@ -49,6 +53,6 @@ areas    = ["config-secrets", "chat", "api", "distribution"]
 adrs     = ["ADR-034", "ADR-046", "ADR-069", "ADR-026"]
 lessons  = ["L-044", "L-098", "L-012"]
 docs     = ["tracker:specs/phase-53-kiro-sdk-v3/53-01-findings.md"]
-code     = ["genesis/genesis/runtime/preflight.py", "genesis/genesis/runtime/kiro_auth.py", "genesis/genesis/api/system.py", "genesis/genesis/api/skills.py", "genesis/genesis/skills/**"]
+code     = ["genesis/genesis/runtime/preflight.py", "genesis/genesis/runtime/kiro_auth.py", "genesis/genesis/api/system.py", "genesis/genesis/api/skills.py", "genesis/genesis/skills/**", "genesis/tests/test_skills_store.py"]
 upstream = ["53-05"]
 ```

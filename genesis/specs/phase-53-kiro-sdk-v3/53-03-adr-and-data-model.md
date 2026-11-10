@@ -13,7 +13,7 @@ resume a Kiro session (F4).
 
 **ADR-086 (proposed; number fixed at write-back, after Phase 51's ADR-081..085) — Genesis drives Kiro only through the
 v3 engine, with a Genesis-owned Kiro home, projected trust and managed skills.** Areas: `sdk-acp`, `chat`,
-`core-engine`, `config-secrets`, `security`. Amends ADR-031, ADR-032, ADR-034, ADR-045, ADR-069.
+`core-engine`, `config-secrets`, `security`. Amends ADR-029, ADR-031, ADR-032, ADR-034, ADR-045, ADR-069, ADR-083.
 
 The draft states, each with its reason and evidence (53-01 §3 probe ids, §7 decision ids):
 
@@ -35,6 +35,12 @@ The draft states, each with its reason and evidence (53-01 §3 probe ids, §7 de
    `session/cancel` (keeps the session), steering; `_kiro.dev/commands/execute` and `session/set_model` are not used
    (P11, P12, P13; D10).
 6. Skills come only from Genesis's managed workspace, for chat and workflows; no fallback to `~/.kiro/skills` (D7, D8).
+   The one other source is Phase 51's `playwright-appian` skill, read from the run's own workspace export (51-07 §7,
+   53-01 §9.3 item 5).
+7. **ADR-083 and ADR-029 (53-01 §9.3 item 7).** ADR-083's accepted risk (d) closes: no workflow turn loads the user's
+   global Kiro MCP servers. ADR-029/083's "a node with no tool list trusts every tool" becomes "D9's built-ins plus the
+   node's own servers within their allowlists", enforced by the projected tool list. ADR-083's risks (a)–(c) stay
+   open until Phase 52, and the agent shell still inherits the worker's environment.
 
 ## 3. Data model
 
@@ -59,7 +65,7 @@ _To be filled by genesis-dev._
 
 ```toml
 areas    = ["db", "chat", "sdk-acp"]
-adrs     = ["ADR-030", "ADR-031", "ADR-032", "ADR-034", "ADR-045", "ADR-069", "ADR-029", "ADR-004", "ADR-020"]
+adrs     = ["ADR-030", "ADR-031", "ADR-032", "ADR-034", "ADR-045", "ADR-069", "ADR-029", "ADR-004", "ADR-020", "ADR-083"]
 lessons  = ["L-004", "L-024", "L-091"]
 docs     = ["tracker:specs/phase-53-kiro-sdk-v3/53-01-findings.md", "tracker:specs/phase-51-test-execution-engine/adr-drafts.md"]
 code     = ["genesis/genesis/db/migrations/**", "genesis/genesis/db/__init__.py", "genesis/genesis/chat/store.py"]
