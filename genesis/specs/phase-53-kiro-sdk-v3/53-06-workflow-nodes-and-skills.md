@@ -66,7 +66,9 @@ blackboard behaviour as today; workflow skills come only from the managed worksp
   managed skill it is "update or reinstall it in Settings → Catalog → Skills". The node fails at the start, before
   any credits are spent; it never runs without a declared skill.
 - **`playwright-appian` 0.3.1 (D14 parts 1–2; repo `playwright-appian`, branch `main`, own semver; skill
-  `genesis-playwright-appian-dev`):** `skills/playwright-appian/SKILL.md:3` → `description: >-` block. In
+  `genesis-playwright-appian-dev`):** `skills/playwright-appian/SKILL.md:3` → `description: >-` block. In the same edit, fix `SKILL.md:16`: it currently
+  says "if the versions differ, use npx apwt", a bare `npx` that L-101 forbids. Tell the agent to stop and report a
+  version mismatch instead (53-02 review n4). In
   `tests/skills/skill.test.ts:54-57`, replace the text-prefix assertion with a strict YAML parse of the front matter
   (name = `playwright-appian`, a non-empty `description`). Use `js-yaml`, the parser whose error v3 logged, as a
   devDependency. Bump to 0.3.1 with that repo's changelog and planning notes. Commit locally. Publishing the package

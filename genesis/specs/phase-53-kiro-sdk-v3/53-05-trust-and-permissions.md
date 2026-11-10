@@ -36,15 +36,27 @@ reference):
   `web_fetch` → `web_fetch`) + each MCP entry as `@server/tool` or `@server`. `delete_file` is never projected (D9).
 - `permissions.rules`: one `{capability: "mcp", match: [...], effect: "allow"}` for the MCP entries in `auto_approve`
   (`@srv` → `srv/*`, `@srv/tool` → `srv/tool`; a glob or empty server name is refused, never widened); one `allow` per
-  built-in capability in `auto_approve` (`shell`, `fs_read`, `fs_write`, `web_fetch`, `web_search`); never the meta
+  built-in capability in `auto_approve` (`shell`, `fs_read`, `fs_write`, `web_fetch`, `web_search`); capabilities come
+  only from this fixed list, because the engine accepts a misspelt capability silently and the rule then never matches
+  (53-02 W15); never the meta
   capabilities `all`, `builtin`, `filesystem`; nothing else, so every other request reaches the client as `ask`.
+  Listing a capability never adds a tool: `delete_file` asks under `fs_write`, but it is absent from `tools`, so the
+  model cannot call it. **`fs_read` path scope: open (53-01 §10.3 Q12).** 53-02 W15 showed
+  `{capability: "fs_read", match: ["./**"], effect: "allow"}` auto-approves reads inside the cwd and makes absolute
+  outside paths ask. `../`, a symlink pointing out, `~`, and `grep_search`/`file_search` are untested (review m5).
 - `includeMcpJson: false`, `includePowers: false` (explicit; D6 already hides the user's files).
 - Limits: ≤ 64 patterns per rule (split), ≤ 50 agents (one per session here).
 
 ## 4. Tool-id fixture (`tool_ids.json`, package data) (D3 #11, F5)
 
+Built from 53-02's `tests/fixtures/v3/tool-ids.json` (kiro-cli 2.37.1, KAS 0.66.70; the W15 table in 53-02's As built):
+per built-in its registered id, permission `toolId`, `consent.capability`, `kind` and `toolCallId` prefix. For
+example, the shell is listed as `execute_bash` but asks as `run_command`; `remote_web_search` asks as itself with kind
+`other` and capability `web_search`. Also the meta tools, the rule capabilities and effects, and the reserved mode ids.
+Shape:
 `{kiro_cli_verified: ["2.37.1", …], builtins: {genesis_name: {registered: [...], permission_tool_id: [...],
-capability}}, meta_tools: ["tool_load", "tool_call", "disclose_context"], reserved_mode_ids: [...]}` from 53-02 W15.
+capability}}, meta_tools: ["tool_load", "tool_call", "disclose_context"], reserved_mode_ids: [...]}`. MCP tools ask as
+`mcp_<server>_<tool>`; identity still comes from `mcpTool.identity`.
 `tool_ids.verified(version) -> bool`; `kiro_agent_sdk.check_kiro()` (used by preflight, 53-08) returns
 `{installed, version, engine_v3, minimum_ok, verified}`. A start on an unverified newer version logs one warning per
 version per process.
@@ -65,7 +77,7 @@ For each `session/request_permission`, answered exactly once:
    name; `raw_input` from the correlated `tool_call` by `toolCallId`), fail closed on timeout / error / unknown option
    (as today, `client.py:460-485`).
 4. **Refusal notice** (D3 #8, F11): on a Genesis deny, before answering, send a fixed, cause-specific message into the
-   turn (the 53-02 W7 steering method), e.g. read-only chat "This chat is read-only; <tool> is not available here.",
+   turn with `_session/steer` (53-02 W7; text only, delivered after the running tool call ends), e.g. read-only chat "This chat is read-only; <tool> is not available here.",
    outside policy "<tool> is not available to this step." Text is static per cause, never built from tool arguments.
    Prefer the clean `reject_once` option (the turn continues) over `cancelled` (ends the turn), as KiroCrew records.
 - `fs/write_text_file` keeps its own gate (`allow_fs_write`, `fs_write_root`; L-041): two independent checks. 53-02 P9
@@ -73,14 +85,20 @@ For each `session/request_permission`, answered exactly once:
 
 ## 6. Elicitation (D3 #7, F8)
 
-The W18 request is declined in every session (`action: "decline"` or the shape W18 records) with a notice on the turn
+The engine's request is `_kiro/mcp/elicitation {sessionId, toolCallId, elicitation: {mode: "form", message,
+requestedSchema}}` (53-02 W18; not `elicitation/create`). It is answered `{action: "decline"}` in every session (the
+engine passes it to the server unchanged) with a notice on the turn
 ("<server> asked for input; Genesis does not support MCP input requests yet."). A chat form is backlog.
 
 ## 7. Access-token requests (D3 #14, F9)
 
-With `auth_method="client"`, the engine's token request (W12) calls `on_access_token() -> {accessToken, expiresAt}`;
-the SDK answers, never logs or stores the token, and fails the request (classified `not_signed_in`) when the callback is
-missing or raises. Not used by Genesis in this phase (Phase 52 wires it, 52-01 D8). Tested with the W12 fixture.
+With `auth_method="client"`, the engine sends `_kiro/auth/getAccessToken {}` right after start (53-02 W12). The SDK
+calls `on_access_token()` and answers `{accessToken, expiresAt (ISO 8601), profileArn, authMethod, provider}`.
+`profileArn` is required for an IdC/enterprise login: without it every model call fails (`ModelRegistryUnavailableError`).
+The engine asks again when the token is within 180 s of expiry. The SDK never logs or stores the token or the ARN, and
+it fails the request (classified `not_signed_in`) when the callback is missing or raises. With no answer at all,
+`session/new` still succeeds and the first prompt fails "not signed in". Not used by Genesis in this phase (Phase 52
+wires it, 52-01 D8). Tested with the `access-token` fixture.
 
 ## 8. Tests
 

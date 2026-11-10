@@ -396,9 +396,35 @@ Results live in 53-02's As built. This section records what they change and what
 ### 10.3 Open, asked one at a time
 
 - **Q10: How the `playwright-appian` skill is fixed.** Answered: D14 (option A, fix upstream).
-- **Q11: How Stop prevents a cancelled prompt being carried out by the next turn.** Asked after 53-02 W19 measures the
-  options. 53-07's Stop waits for this answer.
-- **F16** (§9.5): awaiting the user.
+- **Q11: How Stop keeps a stopped prompt from being carried out by the next turn.** 53-02 W19 measured the options (see
+  §10.4). 53-07's Stop waits for the answer.
+- **Q12: Should `fs_read` be limited to the working folder?** 53-02 W15 showed it can be (`match: ["./**"]`). This
+  decides 53-05 §3 for chat's spec-style modes and for workflow nodes, whose shell is unscoped either way.
+- **F16** (§9.5): the text-only part is now forced (the steering method takes text only, 53-02 W7). The layout (Send
+  and Stop both shown during a turn) still awaits the user.
+
+### 10.4 53-02 complete (2026-11-10, review SHIP)
+
+W6–W19 results, the timings, the tool-id table and the 28 fixtures are in 53-02's As built. This re-spec carried them
+into the sub-specs:
+- **53-04:** activation now fails closed on `_kiro/customAgent/not_found` (the engine moves the session to `vibe`) and
+  never prompts that session again. Credits are summed over every engine turn of a prompt, and replayed credits are
+  skipped. Timeouts are 600 s silent, 300 s tool stall and a 5 s cancel grace, with MCP readiness at 65 s. Also: the
+  steer, load, compact, model-validation, `prompt`-only, HTTP-MCP, elicitation and access-token shapes; the kill
+  checks both process groups; redaction works on joined chunk text.
+- **53-05:** the tool table comes from the fixture; capabilities come only from a fixed list; the elicitation method
+  and the access-token answer (with `profileArn`) are spelled out.
+- **53-06:** the bare `npx` line in the skill is fixed too.
+- **53-07:** steering and resume are spelled out.
+- **53-08:** the minimum kiro-cli is 2.37.1.
+- **53-09:** the steer API returns `queued`.
+
+Still unmeasured, owed to the build:
+- the model-fallback frame (W10; handled defensively in 53-04);
+- a kill while a shell tool runs (W16, review m3; 53-04 test);
+- path-scope edge cases (W15, review m5; 53-05, if Q12 says scope);
+- whether a revert survives a later `session/load` (W19, review m2);
+- the loader test in the `python:3.13` image (Docker was down; L-112).
 
 ## Context manifest
 

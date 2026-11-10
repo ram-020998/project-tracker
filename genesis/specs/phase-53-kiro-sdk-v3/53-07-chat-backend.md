@@ -30,7 +30,8 @@ v2 path and it is deleted from the SDK (D5).
 - **MCP readiness** (F3): a failed server → a `session.notice` event `{kind: "mcp_failed", servers: [...],
   detail}` on the first turn's stream; the turn proceeds.
 - **Resume** (F4): if the chat record has `kiro_session_id` (53-03) and the client is new (idle reap, restart, after a
-  model change), call `load(kiro_session_id)`; on success no preamble is sent; on failure (logged with the classified
+  model change), call `load(kiro_session_id)`. The engine's replay of old turns is not shown again and its replayed
+  credits are not stored again (53-02 W6). on success no preamble is sent; on failure (logged with the classified
   error) fall back to `session/new` + today's preamble (`_build_preamble`, `:382-395`). Store the new id after every
   `session/new`.
 - **Model** (unchanged behaviour, 21-05): the session's model is applied at start with `set_config_option("model", …)`
@@ -49,16 +50,22 @@ change.
 - **Slash commands typed by the user:** the palette lists the engine's commands; a typed `/…` is sent as a prompt only if
   the engine listed it (v3 handles its listed commands in `session/prompt`; 53-02 W8 confirms which); `/clear` and
   `/compact` are mapped to §5. An unlisted `/x` is sent as plain text, as v3 would.
-- **Steering** (D10): `steer(session_id, text)`: when a turn is running, store the text as a user message with
-  `meta_json.kind = "steer"`, call the SDK `steer`, and emit `user.steer {seq, text, status: "delivered" | "queued"}` on
-  the live stream; at turn end, every steer the engine did not consume (53-02 W7 signal) is reported on `agent.result` as
-  `unread_steers: [seq]`, and the web sends them as the next message (53-10). No steer while no turn runs (→ 409 at the
-  API, use the normal send).
+- **Steering** (D10; SDK `steer`, 53-04, from 53-02 W7): `steer(session_id, text)`: when a turn is running, store the
+  text as a user message with `meta_json.kind = "steer"`, call the SDK `steer` (text only), and emit
+  `user.steer {seq, text, status: "queued"}`, then `status: "delivered"` on the engine's `steering_injected`. A steer
+  sent while a tool runs is delivered only after that tool ends. If a steer arrives as the turn ends, the engine runs
+  a second turn inside the same prompt. That is still one Genesis turn: one `agent.result`, with the summed credits
+  (53-04 `usage.py`). At turn end, every steer the engine did not consume (`steering_cleared` without
+  `steering_injected`; never seen in 53-02, still handled) is reported on `agent.result` as `unread_steers: [seq]`,
+  and the web sends them as the next message (53-10). No steer while no turn runs (→ 409 at the API, use the normal
+  send).
 - **Stop** (D10): `cancel()` becomes `session/cancel` (wait the grace, then mark the turn `cancelled`); the client stays
   alive; pending permission futures resolve as today (`cancel`, `:359-376`; the future loop `:360-364`); only `delete_session`, idle reap and mode/model
-  changes close the client (`session/close`). **Open (53-01 §10 Q11):** a prompt cancelled before the model answered
-  can be carried out by the next turn (53-02 W5). How Stop prevents that is decided after 53-02 W19; do not build Stop
-  until then.
+  changes close the client (`session/close`). **Open (53-01 §10.3 Q11):** without help, a prompt stopped before the
+  model answers is carried out by the next turn (53-02 W19: 3/3 times, and again after `session/load`). Two measured
+  remedies: the fixed line at the start of the next prompt (0/3 carried out) and `_kiro/checkpoint/revertMultiple` on
+  the stopped prompt's `userMessageId` (removes it from the engine's history). The choice is the user's; do not build
+  Stop until it is made.
 - **Refusals and elicitation:** the SDK's notices (53-05) arrive as agent text; nothing to do here.
 - **Usage:** `agent.result` adds `model`, `fallback_from` when present (F6); `chat_messages.usage` stores them (no schema
   change).

@@ -13,7 +13,8 @@ code stops knowing about `~/.kiro/skills`.
 
 - New required item `kiro-cli` (before `kiro` sign-in): from `kiro_agent_sdk.check_kiro()` (53-05 §4). States:
   missing ("Install kiro-cli: <official install link>"), too old ("kiro-cli <x> is older than <min>; run `kiro-cli
-  update`"), no v3 engine (same remedy), ok. The minimum is the version 53-02 verifies (expected 2.37.1).
+  update`"), no v3 engine (same remedy), ok. The minimum is the version 53-02 verified: **2.37.1** (`tool-ids.json`
+  `kiro_cli_verified`).
 - An **optional** item `kiro-cli-verified`: ok when the installed version is in the verified list; otherwise "kiro-cli
   <x> has not been verified with this Genesis release; it should work — report problems." (warn, F5).
 - Chat and runs refuse to start while the required item fails: chat returns the classified error on the first turn
