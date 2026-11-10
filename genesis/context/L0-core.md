@@ -32,6 +32,7 @@ the Chat `/` palette (or auto-activated by description).
 - project-tracker (specs, progress, bible, context, archive): `/Users/ramaswamy.u/repo/project-tracker/genesis/`.
 - Dev venv for all Python: `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/genesis/.venv` (editable, from `scripts/install-packages.sh --editable --dev`).
 - Context tool: `genesis-ctx` (`project-tracker/genesis/agent-system/tools/genesis-ctx`).
+- KiroCrew (github.com/kirodotdev/KiroCrew): a reference implementation, cloned at `/Users/ramaswamy.u/repo/KiroCrew`. Read-only: never edit it, never a dependency.
 
 ## 3. Retrieval protocol
 
@@ -62,6 +63,7 @@ the Chat `/` palette (or auto-activated by description).
 - Ask before destructive/irreversible actions (force push, history rewrite, deleting data, anything "prod").
 - Never commit secrets; reference secrets by key name only; don't push beyond the normal Genesis release flow.
 - Honest pushback; keep changes scoped; if stuck twice on the same error, find the root cause and change approach.
+- For any technical question (design, a Kiro/ACP behaviour, an approach), consult KiroCrew as a reference: compare its options with the alternatives, validate them against our ADRs, lessons and real behaviour (spike or probe when it matters), and pick the best for Genesis. Never copy it blindly; ADRs win over KiroCrew. Cite the KiroCrew file you used.
 
 ## 6. The agent system (who does what — ADR-077)
 
