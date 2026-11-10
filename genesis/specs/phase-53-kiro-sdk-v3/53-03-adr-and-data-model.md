@@ -11,7 +11,7 @@ resume a Kiro session (F4).
 
 ## 2. ADR draft (`specs/phase-53-kiro-sdk-v3/adr-drafts.md`)
 
-**ADR-085 (proposed; number fixed at write-back, after Phase 51's ADR-081..084) — Genesis drives Kiro only through the
+**ADR-086 (proposed; number fixed at write-back, after Phase 51's ADR-081..085) — Genesis drives Kiro only through the
 v3 engine, with a Genesis-owned Kiro home, projected trust and managed skills.** Areas: `sdk-acp`, `chat`,
 `core-engine`, `config-secrets`, `security`. Amends ADR-031, ADR-032, ADR-034, ADR-045, ADR-069.
 
@@ -38,7 +38,7 @@ The draft states, each with its reason and evidence (53-01 §3 probe ids, §7 de
 
 ## 3. Data model
 
-- **Migration** (next free number after Phase 51's last, expected `m0028`; DB +1): `ALTER TABLE chat_sessions ADD COLUMN
+- **Migration** (next free number after Phase 51's last `m0028_capture_request`, so `m0029`; DB v28 → v29): `ALTER TABLE chat_sessions ADD COLUMN
   kiro_session_id TEXT` (nullable). The id of the v3 session a chat last used, so the chat can `session/load` it after an
   idle reap or restart (F4). Forward-only, idempotent per the runner's rules (`genesis/genesis/db/`).
 - **Store** (`genesis/genesis/chat/store.py`): `ChatSessionRecord.kiro_session_id`; `set_kiro_session(id, value)`;

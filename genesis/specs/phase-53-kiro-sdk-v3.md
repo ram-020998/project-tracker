@@ -5,7 +5,7 @@
 > decision): `53-01-findings.md`. Probe scripts and raw frames: `phase-53-kiro-sdk-v3/evidence/`.
 > Repos: **genesis** (`packages/kiro-agent-sdk` rebuilt, `packages/genesis-core` `kiro_node`, chat backend, preflight,
 > skills, web, one migration), **genesis-workflows** (the `appian` skill published), **project-tracker** (areas, ADRs).
-> Proposed ADR: **ADR-085** (number fixed at write-back) — Genesis drives Kiro only through the v3 engine with a
+> Proposed ADR: **ADR-086** (number fixed at write-back) — Genesis drives Kiro only through the v3 engine with a
 > Genesis-owned `KIRO_HOME` and a projected custom agent; managed skills only. Amends ADR-031, ADR-032, ADR-034,
 > ADR-045, ADR-069.
 > **Starts after Phase 51 is released (D11).** Phase 52 (agent runtime isolation) builds on this phase.
@@ -60,7 +60,7 @@ Defaults F1–F15 (confirmed): `53-01-findings.md` §8.
 | SDK | v2 launch with trust flags; one flat timeout; `_kiro.dev/*` extensions; unknown requests → `{}`; no cancel/load/close; 79 unit tests, no wire tests | `packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py`, `__init__.py`, `messages.py` |
 | Workflow nodes | `--trust-tools` / `--trust-all-tools`, SDK default `auto_approve`; tool name from `_meta.kiro.toolName` | `packages/genesis-core/genesis_core/nodes/agent.py:137-391`, `agents/provider.py`, `agents/kiro.py` |
 | Chat | `--trust-tools` + `auto_deny`/`ask`; Stop kills kiro-cli; preamble replay; `/clear` `/compact` as prompts; catalog from `session/new.models` + `_kiro.dev/commands/available` | `genesis/genesis/chat/manager.py`, `chat/mcp.py`, `chat/mode_profile.py`, `api/chat.py` |
-| Skills | managed workspace + user's `~/.kiro/skills` (chat, and the workflow fallback) | `genesis/genesis/skills/store.py:55-63`, `runtime/context.py:73-89` |
+| Skills | managed workspace + user's `~/.kiro/skills` (chat, and the workflow fallback) | `genesis/genesis/skills/store.py:55-63`, `runtime/context.py:76-97` |
 | Readiness | Kiro sign-in only; no version or engine check | `genesis/genesis/runtime/preflight.py`, `runtime/kiro_auth.py` |
 | Web | model picker, `/` palette, context meter, Clear/Compact, Stop, credit badge, permission card | `genesis/web/src/features/chat/**`, `features/run-detail/**`, `features/catalog/skills/**` |
 
@@ -115,7 +115,7 @@ last caller (53-07); until then the old client stays importable so every interme
 |---|---|---|
 | 53-01 | project-tracker | Findings, decisions D1–D12, defaults F1–F15, probe evidence |
 | 53-02 | genesis (spike harness + fixtures) | The v3 unknowns (shell, env values, workspace skills under a private home, `session/load` after restart, images, Clear, `tool_load` setting, steering method, model fallback shape, credit-less turns, auth client, HTTP MCP, timings, tool ids vs 2.37.1); recorded frames into `packages/kiro-agent-sdk/tests/fixtures/v3/` |
-| 53-03 | genesis, project-tracker | ADR-085 draft (`adr-drafts.md`); migration: `chat_sessions.kiro_session_id` (next free number after Phase 51) |
+| 53-03 | genesis, project-tracker | ADR-086 draft (`adr-drafts.md`); migration: `chat_sessions.kiro_session_id` (next free number after Phase 51) |
 | 53-04 | genesis (`packages/kiro-agent-sdk`) | New modules (launch, transport, session, updates, errors, timeouts), process tree, fake engine + fixture replay tests, import-boundary test |
 | 53-05 | genesis (`packages/kiro-agent-sdk`) | `TrustPolicy`, agent projection, tool-id fixture + verified versions, permission ladder, refusal notice, elicitation decline, access-token responder |
 | 53-06 | genesis (`packages/genesis-core`, `genesis/runtime`), genesis-workflows | `kiro_node` on v3 (per-run home, D9 trust, v3 tool shapes, credits), managed-only `_skill_source`, the `appian` skill in the library |
@@ -124,7 +124,7 @@ last caller (53-07); until then the old client stays importable so every interme
 | 53-09 | genesis | Contract table (steer endpoint, `usage.model` / `fallback_from`, `session.notice`, preflight items), fixtures, tests |
 | 53-10 | genesis (`web/`) | Composer steering, Stop, "answered by <model>", MCP notice, Skills Update button, warning removed, preflight message |
 | 53-11 | all | Review + gates + live acceptance on v3 (every workflow agent node, every chat mode) |
-| 53-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-085, lessons, areas, state, progress) |
+| 53-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-086, lessons, areas, state, progress) |
 
 ## 8. Release plan
 
@@ -159,7 +159,7 @@ F1–F15 in `53-01-findings.md` §8 (confirmed 2026-11-03).
 
 ## 12. ADR summaries
 
-- **ADR-085 (proposed) — Kiro v3 engine, Genesis-owned Kiro home, projected trust, managed skills.** Genesis starts
+- **ADR-086 (proposed) — Kiro v3 engine, Genesis-owned Kiro home, projected trust, managed skills.** Genesis starts
   Kiro only as `kiro-cli acp --agent-engine v3` with a Genesis-owned `KIRO_HOME` (per run; one for chat) and never
   reads the user's `~/.kiro` for agents, MCP servers, skills or steering; tool trust is a projected custom agent
   (explicit tool list + permission rules, activated and verified) plus a Genesis allowlist check; skills come only from

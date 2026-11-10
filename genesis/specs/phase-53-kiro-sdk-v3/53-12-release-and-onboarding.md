@@ -6,7 +6,7 @@
 
 ## 1. Release order (after Phase 51's release, D11)
 
-1. **genesis** next minor after Phase 51's (expected **v0.82.0**; 53-03's migration, DB +1): version in
+1. **genesis** next minor after Phase 51's (Phase 51 shipped v0.81.0; expected **v0.82.0** unless v0.81.x patches only move the patch number; 53-03's migration `m0029`, DB v28 → v29): version in
    `pyproject.toml` files of the app and the three packages (one shared version, ADR-080), `create_app`,
    `web/src/version.ts`; `npm run build` + commit `web/static/` as separate steps (L-089); verify the release commit has
    every changed file, including `tool_ids.json` and the v3 fixtures as package/test data (L-056, L-048); tag; push on
@@ -29,7 +29,7 @@ the DB version; `GET /api/system/kiro` shows a verified kiro-cli. User checklist
 
 ## 3. Docs write-back (genesis-docs)
 
-- **ADR-085** from `adr-drafts.md` (53-03 §2) via `genesis-ctx add adr --amends ADR-031,ADR-032,ADR-034,ADR-045,ADR-069`
+- **ADR-086** from `adr-drafts.md` (53-03 §2) via `genesis-ctx add adr --amends ADR-031,ADR-032,ADR-034,ADR-045,ADR-069`
   with areas `sdk-acp, chat, core-engine, config-secrets, security`.
 - **Lessons** (candidates from As built sections; at least): v3 rejects the v2 trust flags over ACP; v3 MCP calls nest
   arguments under `rawInput.arguments` and arrive through `tool_load`; a custom agent's `tools` absent = no tools;

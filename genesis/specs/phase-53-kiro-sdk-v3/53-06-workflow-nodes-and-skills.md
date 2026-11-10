@@ -38,8 +38,11 @@ blackboard behaviour as today; workflow skills come only from the managed worksp
 
 ## 3. Managed-only skills (D8)
 
-- `genesis/genesis/runtime/context.py:73-89` `_skill_source`: search **only** `settings.skills_dir`; remove the
-  `~/.kiro/skills` entry.
+- `genesis/genesis/runtime/context.py:76-97` `_skill_source`: search **only** `settings.skills_dir`; remove the
+  `~/.kiro/skills` entry (`:93`). **Keep** Phase 51's `playwright-appian` branch (`:87-92`, 51-07 §7): that skill's
+  one home is the run's workspace export (`<run>/checkout/node_modules/playwright-appian/skills/`), a Genesis-owned
+  source, so it stays consistent with D8. A test pins both: managed skills resolve, `playwright-appian` resolves from the
+  checkout, and a skill present only in `~/.kiro/skills` does not resolve.
 - `core/nodes/agent.py:99-107` error text: "skill '<id>' (declared by node '<node>') is not installed — install it in
   Settings → Catalog → Skills." (no `~/.kiro/skills` wording).
 - **`appian` skill** (genesis-workflows): add `skills/appian/` (SKILL.md + references) from the user's
