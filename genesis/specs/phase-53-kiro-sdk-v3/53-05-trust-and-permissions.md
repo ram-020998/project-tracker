@@ -41,9 +41,9 @@ reference):
   (53-02 W15); never the meta
   capabilities `all`, `builtin`, `filesystem`; nothing else, so every other request reaches the client as `ask`.
   Listing a capability never adds a tool: `delete_file` asks under `fs_write`, but it is absent from `tools`, so the
-  model cannot call it. **`fs_read` path scope: open (53-01 §10.3 Q12).** 53-02 W15 showed
-  `{capability: "fs_read", match: ["./**"], effect: "allow"}` auto-approves reads inside the cwd and makes absolute
-  outside paths ask. `../`, a symlink pointing out, `~`, and `grep_search`/`file_search` are untested (review m5).
+  model cannot call it. **`fs_read` path scope: none in this phase (D16).** The built-in allow rules use
+  `match: ["**"]`, so reads reach any path the user can, as today. Confinement is Phase 52's; 53-02 W15's path-rule
+  findings are its input.
 - `includeMcpJson: false`, `includePowers: false` (explicit; D6 already hides the user's files).
 - Limits: ≤ 64 patterns per rule (split), ≤ 50 agents (one per session here).
 

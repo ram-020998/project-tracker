@@ -56,6 +56,7 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D13 | After W1's gate failure, W2–W5 ran before the re-spec (all PASS). |
 | D14 | The `playwright-appian` skill's invalid front matter is fixed upstream (0.3.1, re-vendored byte for byte); Genesis refuses to provision a skill with invalid front matter. |
 | D15 | Stop keeps the session; the next prompt starts with a fixed "previous request was cancelled" note (KiroCrew's approach), read from the stored transcript; no revert. |
+| D16 | No path scope on agents' file reads in this phase; confinement stays with Phase 52 (53-02 W15 path-rule findings are its input). |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn) proposed on the Phase 51 re-check:
 §9.5.
@@ -150,7 +151,9 @@ a skill from Settings → Catalog → Skills. kiro-cli must be at least the veri
 form in chat (F8); live model switching mid-session (models stay "applied at next start", 21-05); multi-user anything
 (ADR-026). **Deferred to the backlog** (`specs/backlog/phase-53-follow-ups.md`, created at write-back): the non-SDK
 KiroCrew ideas from the 2026-11-03 research (secret-value redaction at write, a tool-call audit log, MCP quarantine,
-`genesis doctor`, SSE reconnect, learning from runs, skill usage and evals, CI ratchets).
+`genesis doctor`, SSE reconnect, learning from runs, skill usage and evals, CI ratchets), and, for Phase 52, the 53-02
+W15 path-rule finding (`fs_read` `match: ["./**"]` confines absolute-path reads; `../`, symlinks, `~` and the search
+tools untested; D16).
 
 ## 10. Defaults
 
