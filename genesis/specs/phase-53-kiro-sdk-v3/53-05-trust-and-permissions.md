@@ -102,7 +102,8 @@ wires it, 52-01 D8). Tested with the `access-token` fixture.
 
 ## 8. Tests
 
-Projection golden tests (policy → entry) for every 53-06/53-07 caller shape, including the Phase 51 node shape (no `mcp`,
+Turn off the fake engine's `customAgents` skip (53-04 §1 item 5) so every replay checks the projected agent against the
+recorded frames. Projection golden tests (policy → entry) for every 53-06/53-07 caller shape, including the Phase 51 node shape (no `mcp`,
 no `tools`, blackboard on: D9's built-ins + `@blackboard` only) and a `blackboard=False` node with `mcp=[]` (built-ins
 only, no MCP); refusal of globs and meta capabilities;
 reserved-id rename; ladder table tests (identity missing, outside policy, each mode, timeout, unknown option); fixture

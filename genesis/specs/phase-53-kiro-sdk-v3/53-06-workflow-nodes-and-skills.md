@@ -40,6 +40,11 @@ blackboard behaviour as today; workflow skills come only from the managed worksp
 - **AgentProvider** (ADR-051): `KiroAcpProvider` and `_load_real` unchanged in shape; `options_cls()` returns the new
   `KiroAgentOptions`; the test hooks `set_collect_impl` / `set_agent_provider` keep working (genesis-workflows tests use
   them).
+- **Public names switch here** (53-04 §1 sequencing): `kiro_agent_sdk.KiroAgentOptions` / `KiroACPClient` / `query` /
+  `collect*` point at the v3 client (`_v3client.py`). Chat, still on v2 until 53-07, imports `LegacyKiroACPClient` /
+  `LegacyKiroAgentOptions` (`chat/manager.py`, one import line); `test_public_surface.py` pin updated.
+  `test_core_units.py:211-226` (asserts `trust_tools` / `trust_all_tools`) is rewritten to the `TrustPolicy` shape.
+  53-05 must be BUILT first.
 
 ## 3. Managed-only skills (D8)
 
@@ -103,6 +108,6 @@ areas    = ["core-engine", "workflows-library", "sdk-acp", "runs-worker"]
 adrs     = ["ADR-011", "ADR-012", "ADR-019", "ADR-021", "ADR-022", "ADR-029", "ADR-032", "ADR-051", "ADR-066", "ADR-067", "ADR-069", "ADR-010", "ADR-018", "ADR-083"]
 lessons  = ["L-002", "L-005", "L-016", "L-020", "L-021", "L-023", "L-024", "L-026", "L-042", "L-064", "L-092", "L-101", "L-112"]
 docs     = ["tracker:specs/phase-53-kiro-sdk-v3/53-01-findings.md", "tracker:specs/phase-52-agent-runtime-isolation/52-01-findings.md"]
-code     = ["genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/packages/genesis-core/genesis_core/agents/**", "genesis/packages/genesis-core/tests/**", "genesis/genesis/runtime/context.py", "genesis/genesis/skills/model.py", "genesis/tests/test_workflow_skill_provisioning.py", "genesis-workflows/skills/**", "genesis-workflows/workflows/story-implementation/**", "playwright-appian/skills/**", "playwright-appian/tests/skills/**"]
+code     = ["genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/packages/genesis-core/genesis_core/agents/**", "genesis/packages/genesis-core/tests/**", "genesis/genesis/runtime/context.py", "genesis/genesis/chat/manager.py", "genesis/genesis/skills/model.py", "genesis/tests/test_workflow_skill_provisioning.py", "genesis-workflows/skills/**", "genesis-workflows/workflows/story-implementation/**", "playwright-appian/skills/**", "playwright-appian/tests/skills/**"]
 upstream = ["53-04", "53-05"]
 ```

@@ -10,6 +10,28 @@ Replace `client.py`'s v2 transport with small v3 modules behind the public names
 build on a tested core. The old `KiroACPClient` code path is kept importable (unused by new code) until 53-07 moves the
 last caller, then deleted (umbrella §6, D5).
 
+**Sequencing (agreed with genesis-dev before the build, 2026-11-10).** §1 and the F1 option changes in §2 conflict:
+genesis-core (`nodes/agent.py`, `tests/test_core_units.py:211-226`) and chat (`chat/manager.py:132-138`) use the top-level
+`KiroAgentOptions` with `trust_tools` / `trust_all_tools` / `on_session_status` until 53-06 / 53-07 move them. So:
+
+1. **53-04:** the top-level names `KiroAgentOptions`, `KiroACPClient`, `query`, `collect*` keep pointing at today's
+   `client.py`, unchanged byte for byte. New public names are added: `KiroError`, the error codes, `AgentNotActive`,
+   `SessionStatus`. The v3 client and options live in the private `_v3client.py` (plus the §2 modules); only SDK tests
+   import it. `test_public_surface.py` pins the names that exist **in this sub-spec**; each later sub-spec changes the
+   pin on purpose (53-05 adds `TrustPolicy`; 53-06 and 53-07 as below).
+2. **53-06:** the public names point at the v3 client when `kiro_node` moves. The v2 client stays reachable for chat only
+   as `LegacyKiroACPClient` / `LegacyKiroAgentOptions`, and chat's import switches to them (a one-line change in
+   `chat/manager.py`).
+3. **53-07:** chat moves to v3, then the old `client.py` and the `Legacy*` aliases are deleted and `_v3client.py` becomes
+   `client.py`.
+4. **Trust in 53-04:** `trust` is an untyped placeholder until 53-05. The agent sent in `session/new` is
+   `{id, prompt, tools: []}`, which fails closed. Permission requests use a port of v2's `permission_mode` logic as a
+   stopgap, so the ask/reject/auto-approve fixtures replay end to end; 53-05 replaces it with the identity check and the
+   backstop. Nothing outside SDK tests reaches this path until 53-06, after 53-05.
+5. **Fake engine:** while the agent body is a placeholder, the fake engine may skip comparing
+   `_meta.kiro.customAgents` in `session/new` / `session/load`. The skip must be one named switch, listed in the As
+   built, and 53-05 turns it off so the projection is checked against the recorded frames.
+
 ## 2. Modules (`packages/kiro-agent-sdk/src/kiro_agent_sdk/`)
 
 | Module | Owns |

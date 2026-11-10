@@ -87,6 +87,10 @@ change.
 
 ## 6. v2 removal (D5)
 
+Chat switches from `LegacyKiroACPClient` / `LegacyKiroAgentOptions` (53-06) to the public v3 names. Then delete the old
+`client.py` and the `Legacy*` aliases, rename `_v3client.py` to `client.py` (53-04 §1 sequencing), and update the
+`test_public_surface.py` pin to the final F1 set.
+
 Delete from the SDK: the v2 launch flags, `_kiro.dev/metadata` folding, `_kiro.dev/commands/*`, `_kiro.dev/{compaction,
 clear}/status`, `execute_command`, `set_model`, the removed options; their tests are replaced by the fixture tests. Grep
 the monorepo and genesis-workflows for any remaining use (`trust_tools`, `trust_all_tools`, `agent_engine`,
