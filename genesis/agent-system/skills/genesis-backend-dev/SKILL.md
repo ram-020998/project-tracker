@@ -39,5 +39,5 @@ Every new behaviour gets a test; every bug fix gets a test that FAILS before the
 next to the code's existing suite; match the project's fixtures and style. Do not add a new test framework.
 
 ## Loop
-Pack → restate task + applicable ADRs/lessons → smallest correct change → gates green → regression test →
-scoped local commit. If stuck twice on the same error, find the root cause and change approach.
+Pack → restate task + applicable ADRs/lessons → smallest complete change (coding-standards §5) → gates green →
+regression test → scoped local commit. If stuck twice on the same error, find the root cause and change approach.

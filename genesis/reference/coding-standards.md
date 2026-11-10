@@ -100,7 +100,14 @@ disable a lint to make a commit pass.
 ## 5. Cross-cutting
 
 - **Comments explain *why*, not *what*.** Match the existing dense-docstring style that cites the ADR/spec.
-- **Small, scoped changes.** Don't refactor unrelated code in a fix. Match the surrounding style.
+- **Smallest complete change.** First list every place it must reach: the callers of any function whose signature,
+  return or behaviour changes (grep them), tests, fixtures, config, exports (L-094). Then take the first option that
+  fully works: (1) skip what nobody asked for and name it in one line; (2) reuse what the codebase has, the way the
+  surrounding code uses it; (3) the standard library or platform; (4) an installed dependency, never a new one for a
+  few lines; (5) only then the minimum new code. No abstraction, option or "for later" code with one user; deletion
+  beats addition; fix a bug once in the shared code, not in one caller. Never cut validation at trust boundaries,
+  error handling that prevents data loss, security or accessibility. Don't refactor unrelated code; match the
+  surrounding style.
 - **Security:** no secrets in code, state, logs, or commits; reference by key name. Flag any
   network-exposed surface without auth (there is none today — keep it that way unless asked; ADR-026).
 - **Commits:** `git -c user.name=Genesis -c user.email=genesis@local commit -m "…"`. Conventional-ish
@@ -112,7 +119,7 @@ disable a lint to make a commit pass.
 ---
 
 ## 6. Definition of Done (every item)
-1. Behavior implemented in the smallest correct scope; matches existing patterns.
+1. Behavior implemented as the smallest complete change (§5); matches existing patterns.
 2. Tests added/updated (incl. a regression test for bugs); **all** affected suites green
    (backend `pytest`+`ruff`; web `lint`+`typecheck`+`vitest`).
 3. Web changes: `npm run build` run and `web/static/` committed.

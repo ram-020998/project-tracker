@@ -9,7 +9,9 @@ Full rules: `{{GENESIS_HOME}}/bin/genesis-ctx adr ADR-027` and `{{GENESIS_HOME}}
 plus `{{GENESIS_HOME}}/bin/genesis-ctx area web-shell`. Conventions live in `{{TRACKER}}/bible/05-dev-loop-and-release.md` (web section).
 
 ## Rules
-- Reuse existing primitives (shadcn/Radix, the Overcut components); don't re-implement a button/dialog/card.
+- Reuse existing primitives (shadcn/Radix, the Overcut components); don't re-implement a button/dialog/card. Before
+  writing a component, take the reuse order in `{{TRACKER}}/reference/coding-standards.md` §5 (a house component,
+  then a native platform feature, then new code).
 - Use **design tokens**, never raw palette hex (`#4f46e5` etc.). Colors come from the token layer; support **both
   themes** (light + dark).
 - Accessibility is a gate: components pass **jest-axe**; label controls; keyboard reachable; honour roles/aria.

@@ -186,6 +186,9 @@ run all gates, and write the review report with a SHIP / NEEDS_CHANGES verdict.
 - If **NEEDS_CHANGES**: start a `genesis-dev` session with
   `Fix the findings in specs/phase-NN-<slug>/reviews/NN-review.md (items B1, M2, …).` Then re-run the review prompt
   with `Re-review only the fixes.`
+- Each finding gives a concrete case (this input gives this wrong result) and the smallest fix; the reviewer also reads
+  the callers of changed functions outside the diff. The report ends with **Not checked**: read it before you accept a
+  SHIP. Dev and review share one change rule, the "smallest complete change" in `reference/coding-standards.md` §5.
 
 ### Step 4 — Live acceptance (`genesis-review`, same or new session)
 
