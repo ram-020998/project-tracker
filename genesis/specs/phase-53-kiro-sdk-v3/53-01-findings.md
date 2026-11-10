@@ -232,6 +232,7 @@ private `KIRO_HOME`; `session/load` after a process restart; images; Clear; turn
 | D11 | **Ordering: Phase 51 is completed and released first; Phase 53 starts after it (Q8, option C).** Phase 53 builds on the master that carries Phase 51, so its callers include Phase 51's new agent workflows (`story-verification` for the Verification lane, `action-capture` for recording, `setup-composer`; `test-execution` is program-only; list corrected after Phase 51 shipped, see §9); D5's live acceptance covers them on v3. Phase 52 builds on Phase 53 (D1). Consequence: the D4 risk (CLI 3.0 switching `kiro-cli acp` to v3 before Phase 53 ships) lasts through the rest of Phase 51 as well; Phase 51's acceptance runs on v2. | User (2026-11-03): "We will complete 51 first and then start 53." No branch juggling and no half-built work on a shared tag. Rejected A (pause 51, release 53 first) and B (parallel, 53 on a branch). |
 | D12 | **D4 stands after D11 (Q9, option B).** No v2 pin, neither as a hotfix nor in Phase 51's release; the risk that CLI 3.0 switches `kiro-cli acp` to v3 before Phase 53 ships is accepted for the whole of Phase 51 too. If it happens, the recovery is to start Phase 53's v3 work at once (or pin kiro-cli's engine by hand with `acp.agentEngine`). | User (2026-11-03): "lets go with B, keep D4 as it is: no pin, and accept the risk until Phase 53 ships" (after first asking for a pin prompt, then withdrawing it). Rejected A (add the pin to Phase 51's release). |
 | D13 | **After W1's gate FAIL, W2–W5 ran before the re-spec (2026-11-10).** W1's failure is a defect in one shipped skill file, not in the v3 skill mechanism, and W2–W5 do not use skill files, so the whole gate was measured first and the re-spec covers it in one pass. W6–W18 (and the new W19) wait for this re-spec. Result: W2–W5 PASS (53-02 As built). | User approved the assistant's recommendation (2026-11-10); the dev agent ran them for 2.29 more credits (2.75 of 20 in total). Rejected: re-spec first, then run W2–W5, which risks a second re-spec round. |
+| D14 | **The `playwright-appian` skill is fixed upstream (Q10, option A).** (1) `playwright-appian` (own repo, own semver): `skills/playwright-appian/SKILL.md:3` `description` becomes a `>-` block (as `genesis-test-authoring` writes it); its skill test parses the front matter with a strict YAML parser instead of matching a text prefix (`tests/skills/skill.test.ts:54-57`); release **0.3.1** to the GitLab npm registry (project 13864). (2) genesis re-vendors the **published** 0.3.1 tarball byte for byte (`genesis/testexec/vendor/`, `VENDORED_APWT_VERSION`, `testexec/vendor.py`), and an app workspace picks it up through "Update testing runtime". (3) Genesis checks a skill's front matter before provisioning it: `_skill_source` (`genesis/runtime/context.py`) runs `parse_skill_md` + `validate` (`genesis/skills/model.py:90-157`, PyYAML `safe_load`) on every source, managed or checkout. An invalid file fails the node with a message naming the skill, the YAML error and the remedy ("Update testing runtime" for `playwright-appian`, Settings → Catalog → Skills for a managed skill). Today such a skill is lost silently on v3 (53-02 W1). | User chose A (2026-11-10). The fix lands where the file lives, and the agent keeps reading the skill of the exact `apwt` version it drives (51-07 §7). Rejected B (Genesis rewrites the front matter while provisioning): it edits another package's file and hides the defect. |
 
 ## 8. Defaults — ✅ confirmed by the user 2026-11-03 ("i accept")
 
@@ -366,8 +367,12 @@ Results live in 53-02's As built. This section records what they change and what
   unquoted `description:` value that contains `: ` (since `0ada4c1`). v3 parses front matter strictly, drops the whole
   skill, and logs it only to `kiro.log` (`skill.frontmatter.invalid`). The vendored `genesis/testexec/vendor/
   playwright-appian-0.3.0.tgz` carries the same file. A strict `yaml.safe_load` of every skill's front matter: the four
-  genesis-workflows library skills pass; `playwright-appian` fails. No check in genesis-workflows, playwright-appian or
-  Genesis parses front matter today. The v3 skill mechanism itself passed: workspace skills load from the cwd under a
+  genesis-workflows library skills pass; `playwright-appian` fails. The library skills and Genesis's managed store are
+  already parsed strictly (`genesis-workflows/ci/validate_skills.py:41-66`; `genesis/skills/model.py:90-157` on
+  create, get and list, where list skips a bad skill silently). The gap is `playwright-appian`'s own skill: its test
+  matches a text prefix only (`tests/skills/skill.test.ts:54-57`), and Genesis copies it from the checkout without
+  parsing it (`runtime/context.py:87-92`). (Corrected on Q10: an earlier draft of this paragraph said nothing parses
+  front matter.) The v3 skill mechanism itself passed: workspace skills load from the cwd under a
   private `KIRO_HOME`, and personal skills never appear (D6–D8 stand).
 - **A canary in the reply does not prove a skill loaded.** The model found and read the dropped file by browsing.
   Check the engine's skill list (`_kiro/progressive_context/items_changed`).
@@ -390,9 +395,7 @@ Results live in 53-02's As built. This section records what they change and what
 
 ### 10.3 Open, asked one at a time
 
-- **Q10: How the `playwright-appian` skill is fixed.** The choice is a one-line fix upstream plus a patch release and a
-  re-vendor, or Genesis repairing front matter when it provisions a skill. Strict front-matter checks in CI and at
-  provisioning come with either option.
+- **Q10: How the `playwright-appian` skill is fixed.** Answered: D14 (option A, fix upstream).
 - **Q11: How Stop prevents a cancelled prompt being carried out by the next turn.** Asked after 53-02 W19 measures the
   options. 53-07's Stop waits for this answer.
 - **F16** (§9.5): awaiting the user.

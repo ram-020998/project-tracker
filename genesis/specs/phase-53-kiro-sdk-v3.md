@@ -4,7 +4,8 @@
 > Sub-specs: `phase-53-kiro-sdk-v3/53-01..53-12`. Findings (code facts, the live v3 probe, KiroCrew research, every
 > decision): `53-01-findings.md`. Probe scripts and raw frames: `phase-53-kiro-sdk-v3/evidence/`.
 > Repos: **genesis** (`packages/kiro-agent-sdk` rebuilt, `packages/genesis-core` `kiro_node`, chat backend, preflight,
-> skills, web, one migration), **genesis-workflows** (the `appian` skill published), **project-tracker** (areas, ADRs).
+> skills, web, one migration), **genesis-workflows** (the `appian` skill published), **playwright-appian** (0.3.1: the
+> skill's front matter, D14), **project-tracker** (areas, ADRs).
 > Proposed ADR: **ADR-086** (number fixed at write-back) — Genesis drives Kiro only through the v3 engine with a
 > Genesis-owned `KIRO_HOME` and a projected custom agent; managed skills only. Amends ADR-029, ADR-031, ADR-032,
 > ADR-034, ADR-045, ADR-069, ADR-083.
@@ -52,6 +53,8 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D9 | Workflow nodes: today's built-ins, auto-approved; MCP limited to `node.tools ∩ allowlist` by the tool list; no `delete_file`. |
 | D10 | Chat steering: Send steers while a turn runs; an unread steer is sent as the next message; Stop keeps the session. |
 | D11 | Phase 51 completes and ships first; Phase 53 starts after. |
+| D13 | After W1's gate failure, W2–W5 ran before the re-spec (all PASS). |
+| D14 | The `playwright-appian` skill's invalid front matter is fixed upstream (0.3.1, re-vendored byte for byte); Genesis refuses to provision a skill with invalid front matter. |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn) proposed on the Phase 51 re-check:
 §9.5.
@@ -122,7 +125,7 @@ last caller (53-07); until then the old client stays importable so every interme
 | 53-03 | genesis, project-tracker | ADR-086 draft (`adr-drafts.md`); migration `m0029`: `chat_sessions.kiro_session_id` (DB v28 → v29) |
 | 53-04 | genesis (`packages/kiro-agent-sdk`) | New modules (launch, transport, session, updates, errors, timeouts), process tree, fake engine + fixture replay tests, import-boundary test |
 | 53-05 | genesis (`packages/kiro-agent-sdk`) | `TrustPolicy`, agent projection, tool-id fixture + verified versions, permission ladder, refusal notice, elicitation decline, access-token responder |
-| 53-06 | genesis (`packages/genesis-core`, `genesis/runtime`), genesis-workflows | `kiro_node` on v3 (per-run home, D9 trust, v3 tool shapes, credits), managed-only `_skill_source`, the `appian` skill in the library |
+| 53-06 | genesis (`packages/genesis-core`, `genesis/runtime`), genesis-workflows, playwright-appian | `kiro_node` on v3 (per-run home, D9 trust, v3 tool shapes, credits), managed-only `_skill_source` with a front-matter check, the `appian` skill in the library, `playwright-appian` 0.3.1 skill fix (D14) |
 | 53-07 | genesis (`genesis/chat`, `genesis/api/chat.py`) | Chat on v3: chat home, per-mode agents (F2), catalog from `configOptions` + `available_commands_update`, Compact/Clear, Stop = `session/cancel`, steering, `session/load` resume, record deletion, MCP notice, model fallback; v2 client removed |
 | 53-08 | genesis | Preflight v3 + minimum version + verified-version warning; Settings health; skills: `personal_dir`/`shadows_personal` removed, Update wired |
 | 53-09 | genesis | Contract table (steer endpoint, `usage.model` / `fallback_from`, `session.notice`, preflight items), fixtures, tests |
@@ -132,7 +135,8 @@ last caller (53-07); until then the old client stays importable so every interme
 
 ## 8. Release plan
 
-One release at the end (D5), after Phase 51's: **genesis** next minor after Phase 51's (expected v0.82.0, after any
+One release at the end (D5), after Phase 51's: first **playwright-appian 0.3.1** (D14), published and re-vendored byte for
+byte into genesis; then **genesis** next minor after Phase 51's (expected v0.82.0, after any
 v0.81.x patches; the
 migration from 53-03; SDK, genesis-core and parser at the same shared version, ADR-080), then **genesis-workflows** next
 minor (the `appian` skill; pins on the new genesis tag, L-057). Users: Genesis sessions stop loading global Kiro MCP

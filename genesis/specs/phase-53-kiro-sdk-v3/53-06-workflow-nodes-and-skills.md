@@ -1,7 +1,8 @@
 # 53-06 — Workflow nodes on v3, and managed-only skills
 
-> **Status:** SPEC-DRAFTED 2026-11-03. Repos: **genesis** (`packages/genesis-core`, `genesis/runtime/context.py`),
-> **genesis-workflows** (the `appian` skill). Parent: `specs/phase-53-kiro-sdk-v3.md`. Decisions: 53-01 D5, D6, D8, D9;
+> **Status:** SPEC-DRAFTED 2026-11-03; re-specced 2026-11-10 (D14). Repos: **genesis** (`packages/genesis-core`,
+> `genesis/runtime/context.py`), **genesis-workflows** (the `appian` skill), **playwright-appian** (the skill's front
+> matter, 0.3.1). Parent: `specs/phase-53-kiro-sdk-v3.md`. Decisions: 53-01 D5, D6, D8, D9, D14;
 > F1, F3, F6, F7, F10.
 
 ## 1. Goal
@@ -53,9 +54,26 @@ blackboard behaviour as today; workflow skills come only from the managed worksp
   `~/.kiro/skills/appian/` **with the user's confirmation of the content to publish** (it is their skill); register it
   in `genesis-workflows/skills-registry.json`; the library's skill CI gates (`validate_skills`) green. `story-implementation`
   (`workflows/story-implementation/graph.py:120-121`) is unchanged and now installs `appian` from the library.
-- Workflows that declare skills: a run fails fast with the message above when the skill is not installed (as today,
+- **Workflows that declare skills:** a run fails fast with the message above when the skill is not installed (as today,
   better text). Consider (backlog, not this phase): auto-installing a workflow's declared library skills at
   `genesis install`.
+- **Front matter is checked before a skill is provisioned (D14 part 3).** `_skill_source` runs
+  `genesis.skills.model.parse_skill_md` + `validate(expected_id=<id>)` on the resolved `SKILL.md`. This applies to
+  every source: the managed workspace and the `playwright-appian` checkout branch. The check lives in genesis because
+  genesis-core has no YAML dependency. On failure it raises an error that `_provision_skills` (`agent.py:78-113`)
+  passes on as the node's failure: "skill '<id>' (declared by node '<node>') has invalid front matter: <YAML error>.
+  <remedy>". The remedy for `playwright-appian` is "Update testing runtime on the application's Testing → Setup"; for a
+  managed skill it is "update or reinstall it in Settings → Catalog → Skills". The node fails at the start, before
+  any credits are spent; it never runs without a declared skill.
+- **`playwright-appian` 0.3.1 (D14 parts 1–2; repo `playwright-appian`, branch `main`, own semver; skill
+  `genesis-playwright-appian-dev`):** `skills/playwright-appian/SKILL.md:3` → `description: >-` block. In
+  `tests/skills/skill.test.ts:54-57`, replace the text-prefix assertion with a strict YAML parse of the front matter
+  (name = `playwright-appian`, a non-empty `description`). Use `js-yaml`, the parser whose error v3 logged, as a
+  devDependency. Bump to 0.3.1 with that repo's changelog and planning notes. Commit locally. Publishing the package
+  and re-vendoring it into genesis are 53-12 steps, because the vendored tarball must be the published one byte for
+  byte (`genesis/testexec/vendor.py:7-16`). Until then, test with a locally packed 0.3.1 (`npm pack`).
+- **53-02 W1 re-run:** with the locally packed 0.3.1 in a workspace export, W1's PASS line (both skills in the engine's
+  skill list, `_kiro/progressive_context/items_changed`; the personal skill absent) is recorded in 53-02's As built.
 
 ## 4. Tests
 
@@ -63,7 +81,9 @@ genesis-core: `kiro_node` builds the expected `TrustPolicy` and `kiro_home` for 
 blackboard on/off); an `mcp_failed` turn emits `agent.result` with the error and no credits; v3-shaped messages through
 `_emit_message` and the tool-output store (fixtures from 53-02: MCP `arguments` nesting, `save_tool_output`); provider
 hooks. genesis: `_skill_source` ignores `~/.kiro/skills` (tmp home with a same-named skill), still resolves
-`playwright-appian` from the run checkout and `genesis-test-authoring` from the managed workspace;
+`playwright-appian` from the run checkout and `genesis-test-authoring` from the managed workspace, and refuses a
+`SKILL.md` with invalid front matter from either source. The refusal test uses the 0.3.0 file's real line 3 (L-083:
+real value shapes) and checks that the node fails before any turn with the remedy text;
 `tests/test_workflow_skill_provisioning.py` (asserts the fallback today, `:4`, `:41`) rewritten to the managed-only rule.
 genesis-workflows: `story-implementation` tests with the skill resolvable from the library fixture; the Phase 51
 workflows' tests (`story-verification`, `action-capture`, `setup-composer`) still green through the provider hooks;
@@ -81,6 +101,6 @@ areas    = ["core-engine", "workflows-library", "sdk-acp", "runs-worker"]
 adrs     = ["ADR-011", "ADR-012", "ADR-019", "ADR-021", "ADR-022", "ADR-029", "ADR-032", "ADR-051", "ADR-066", "ADR-067", "ADR-069", "ADR-010", "ADR-018", "ADR-083"]
 lessons  = ["L-002", "L-005", "L-016", "L-020", "L-021", "L-023", "L-024", "L-026", "L-042", "L-064", "L-092", "L-101", "L-112"]
 docs     = ["tracker:specs/phase-53-kiro-sdk-v3/53-01-findings.md", "tracker:specs/phase-52-agent-runtime-isolation/52-01-findings.md"]
-code     = ["genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/packages/genesis-core/genesis_core/agents/**", "genesis/packages/genesis-core/tests/**", "genesis/genesis/runtime/context.py", "genesis/tests/test_workflow_skill_provisioning.py", "genesis-workflows/skills/**", "genesis-workflows/workflows/story-implementation/**"]
+code     = ["genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/packages/genesis-core/genesis_core/agents/**", "genesis/packages/genesis-core/tests/**", "genesis/genesis/runtime/context.py", "genesis/genesis/skills/model.py", "genesis/tests/test_workflow_skill_provisioning.py", "genesis-workflows/skills/**", "genesis-workflows/workflows/story-implementation/**", "playwright-appian/skills/**", "playwright-appian/tests/skills/**"]
 upstream = ["53-04", "53-05"]
 ```
