@@ -29,7 +29,7 @@ means every tool of that server, and only servers the caller sent are reachable.
 reference):
 
 - `id`: `agent_id`, renamed if it collides with an engine built-in mode id (`vibe`, `spec`, `quick-spec`, `bug-fix`,
-  `plan`, `autonomous`, and the list 53-02 records); `prompt`: inline text (never a `file://`); `description`.
+  `plan`, `autonomous`, `semantic_reviewer` on 2.37.1, 53-02 W4; the fixture's `reserved_mode_ids` is the source); `prompt`: inline text (never a `file://`); `description`.
 - `tools`: **always explicit** (absent = no tools): each built-in name expanded through the tool-id fixture (§4) to its
   v3 registered ids (`fs_read` → `read_file`, `list_directory`; `fs_write` → `fs_write`, `str_replace`, `fs_append`;
   `shell` → `execute_bash`; `grep` → `grep_search`; `glob` → `file_search`; `web_search` → `remote_web_search`;
@@ -53,9 +53,11 @@ version per process.
 
 For each `session/request_permission`, answered exactly once:
 
-1. **Identity** from the engine's `_meta.kiro`: `toolId` (built-ins, mapped back to the Genesis name by the fixture),
-   `mcpTool.identity {serverName, toolName}` (MCP). Never from `toolCall.title` (the model can influence it). No readable
-   identity → **deny**.
+1. **Identity** from the engine's `_meta.kiro`: `toolId` (built-ins, mapped back to the Genesis name by the fixture's
+   **permission** id, which can differ from the listed id: the shell is listed as `execute_bash` but asks as
+   `run_command`, with `consent.capability: "shell"`, 53-02 W3), `mcpTool.identity {serverName, toolName}` (MCP). Never
+   from `toolCall.title` (the model can influence it). No readable identity → **deny**. The request itself carries no
+   `kind`; `raw_input` and `kind` come from the `tool_call` with the same `toolCallId`, which arrives 15–55 ms earlier.
 2. **Backstop:** the identity must be in the policy's `builtins` or `mcp_tools`; else **deny** (the engine should not have
    asked; this catches a projection bug or an engine change).
 3. **Answer by mode:** in `auto_approve` → the `allow_once` option; `auto_deny` → the `reject_once` option; `ask` → the

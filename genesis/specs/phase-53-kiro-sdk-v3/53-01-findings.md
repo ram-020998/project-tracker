@@ -231,6 +231,7 @@ private `KIRO_HOME`; `session/load` after a process restart; images; Clear; turn
 | D10 | **Chat steering: Send steers while a turn runs (Q7, option A).** The composer stays enabled during a turn; Send adds the message to the running turn (v3 steering; the exact method is confirmed by the spike). It shows in the transcript as the user's message marked "sent during the turn" and is stored like any user message. If the turn ends before the agent reads it, Genesis sends it as a normal next message, so nothing is lost. Stop ends the turn with `session/cancel` and keeps the session (no process kill, no cold start). Applies to every chat mode (read-only rules are unchanged: a steered message is a user message, ADR-031). | User chose A (2026-11-03). The natural chat behaviour; KiroCrew enables steering for v3 (`agent_sdk/backends_turns.py:94`) and queues a steer the turn did not read (`harness-parity.md` H6). Rejected B (a separate Steer button) and C (SDK only, no UI). |
 | D11 | **Ordering: Phase 51 is completed and released first; Phase 53 starts after it (Q8, option C).** Phase 53 builds on the master that carries Phase 51, so its callers include Phase 51's new agent workflows (`story-verification` for the Verification lane, `action-capture` for recording, `setup-composer`; `test-execution` is program-only; list corrected after Phase 51 shipped, see §9); D5's live acceptance covers them on v3. Phase 52 builds on Phase 53 (D1). Consequence: the D4 risk (CLI 3.0 switching `kiro-cli acp` to v3 before Phase 53 ships) lasts through the rest of Phase 51 as well; Phase 51's acceptance runs on v2. | User (2026-11-03): "We will complete 51 first and then start 53." No branch juggling and no half-built work on a shared tag. Rejected A (pause 51, release 53 first) and B (parallel, 53 on a branch). |
 | D12 | **D4 stands after D11 (Q9, option B).** No v2 pin, neither as a hotfix nor in Phase 51's release; the risk that CLI 3.0 switches `kiro-cli acp` to v3 before Phase 53 ships is accepted for the whole of Phase 51 too. If it happens, the recovery is to start Phase 53's v3 work at once (or pin kiro-cli's engine by hand with `acp.agentEngine`). | User (2026-11-03): "lets go with B, keep D4 as it is: no pin, and accept the risk until Phase 53 ships" (after first asking for a pin prompt, then withdrawing it). Rejected A (add the pin to Phase 51's release). |
+| D13 | **After W1's gate FAIL, W2–W5 ran before the re-spec (2026-11-10).** W1's failure is a defect in one shipped skill file, not in the v3 skill mechanism, and W2–W5 do not use skill files, so the whole gate was measured first and the re-spec covers it in one pass. W6–W18 (and the new W19) wait for this re-spec. Result: W2–W5 PASS (53-02 As built). | User approved the assistant's recommendation (2026-11-10); the dev agent ran them for 2.29 more credits (2.75 of 20 in total). Rejected: re-spec first, then run W2–W5, which risks a second re-spec round. |
 
 ## 8. Defaults — ✅ confirmed by the user 2026-11-03 ("i accept")
 
@@ -354,6 +355,47 @@ secrets, not from `~/.kiro` (D6).
 | # | Default | Why |
 |---|---|---|
 | F16 | **Composer during a turn.** While a turn runs, the textarea stays enabled and Send and Stop are both shown. Send steers (D10) and Enter does the same. The model select and attach stay disabled, so a steer is text only. | D10 needs the textarea and Send enabled (§9.4). The model applies at the next start (21-05), not mid-turn. An image in a steer depends on the unconfirmed W7 method, so text only is the safe default. |
+
+## 10. Spike gate re-spec (53-02 W1–W5, 2026-11-10)
+
+Results live in 53-02's As built. This section records what they change and what is still open.
+
+### 10.1 Facts (verified by the spec agent)
+
+- **W1 FAIL is a skill-file defect, not a v3 one.** `playwright-appian/skills/playwright-appian/SKILL.md:3` has an
+  unquoted `description:` value that contains `: ` (since `0ada4c1`). v3 parses front matter strictly, drops the whole
+  skill, and logs it only to `kiro.log` (`skill.frontmatter.invalid`). The vendored `genesis/testexec/vendor/
+  playwright-appian-0.3.0.tgz` carries the same file. A strict `yaml.safe_load` of every skill's front matter: the four
+  genesis-workflows library skills pass; `playwright-appian` fails. No check in genesis-workflows, playwright-appian or
+  Genesis parses front matter today. The v3 skill mechanism itself passed: workspace skills load from the cwd under a
+  private `KIRO_HOME`, and personal skills never appear (D6–D8 stand).
+- **A canary in the reply does not prove a skill loaded.** The model found and read the dropped file by browsing.
+  Check the engine's skill list (`_kiro/progressive_context/items_changed`).
+- **An agent's read tools are not confined.** In W1 the agent listed `~/.kiro` and `~/.kiro/skills` unprompted. The
+  engine loads nothing from there, but `read_file`/`list_directory` reach any path the user can (ADR-083 risk a). This
+  applies to workflow nodes (D9) and to chat's spec-style modes (F2). 53-03's ADR draft now says so; 53-02 W15 checks
+  for path-scoped `fs_read` rules.
+- **W2–W5 consequences applied to the sub-specs:**
+  - 53-04: the activation check (the `set_mode` answer proves nothing); the cancel grace (0.01–0.03 s); a mid-turn
+    MCP death is classified from the tool failure text; an update for an unknown tool-call id is accepted.
+  - 53-05: the shell's permission id `run_command` ≠ the listed id `execute_bash`; `kind` and `raw_input` come from
+    the correlated `tool_call`; `semantic_reviewer` is reserved.
+  - 53-02: W15 gains path scoping; W19 is added.
+
+### 10.2 Defaults set in this re-spec (the user may object)
+
+| # | Default | Why |
+|---|---|---|
+| F17 | **Credits on an aborted turn.** Per turn, `provenance` is `metered` when the engine's `turn_completion` carried a credit entry (a cancel after a finished tool round: 0.05) and `unavailable` when it did not (a cancel during a model call, a killed process). `partial` stays an aggregate value only (some turns reported, some not), as `genesis/runs/eventlog.py:188-207` already defines it. The cancellation shows in the turn's status. | ADR-032 requires real numbers and honest provenance. An engine-sent number is real metered data even for an aborted turn. Using `partial` per turn would change the meaning the run totals already give it. |
+
+### 10.3 Open, asked one at a time
+
+- **Q10: How the `playwright-appian` skill is fixed.** The choice is a one-line fix upstream plus a patch release and a
+  re-vendor, or Genesis repairing front matter when it provisions a skill. Strict front-matter checks in CI and at
+  provisioning come with either option.
+- **Q11: How Stop prevents a cancelled prompt being carried out by the next turn.** Asked after 53-02 W19 measures the
+  options. 53-07's Stop waits for this answer.
+- **F16** (§9.5): awaiting the user.
 
 ## Context manifest
 

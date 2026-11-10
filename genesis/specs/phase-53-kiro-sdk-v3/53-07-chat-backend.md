@@ -56,7 +56,9 @@ change.
   API, use the normal send).
 - **Stop** (D10): `cancel()` becomes `session/cancel` (wait the grace, then mark the turn `cancelled`); the client stays
   alive; pending permission futures resolve as today (`cancel`, `:359-376`; the future loop `:360-364`); only `delete_session`, idle reap and mode/model
-  changes close the client (`session/close`).
+  changes close the client (`session/close`). **Open (53-01 §10 Q11):** a prompt cancelled before the model answered
+  can be carried out by the next turn (53-02 W5). How Stop prevents that is decided after 53-02 W19; do not build Stop
+  until then.
 - **Refusals and elicitation:** the SDK's notices (53-05) arrive as agent text; nothing to do here.
 - **Usage:** `agent.result` adds `model`, `fallback_from` when present (F6); `chat_messages.usage` stores them (no schema
   change).

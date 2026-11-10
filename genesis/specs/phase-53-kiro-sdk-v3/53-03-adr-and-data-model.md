@@ -22,7 +22,10 @@ The draft states, each with its reason and evidence (53-01 §3 probe ids, §7 de
    `~/.genesis/kiro-home/chat/` for chat and the catalog probe. Genesis never reads the user's `~/.kiro` for agents, MCP
    servers, skills or steering (D6). The user's login is unaffected (P16). (Reconciles ADR-034's and L-024's "never set
    `KIRO_HOME`": that warning was about relocating the user's agents, sessions and login inside the user's own home;
-   Genesis's homes are separate folders and the login does not live in `KIRO_HOME`.)
+   Genesis's homes are separate folders and the login does not live in `KIRO_HOME`.) What this does **not** promise:
+   the engine loads nothing from `~/.kiro`, but an agent's built-in read tools can still read any path the user can,
+   including `~/.kiro` (53-02 W1: the agent listed it unprompted; ADR-083 risk a). That closes in Phase 52, or earlier
+   for `fs_read` if 53-02 W15 finds path-scoped rules.)
 3. Tool trust is a **projected custom agent** sent in `session/new` (`_meta.kiro.customAgents`): an explicit tool list in
    v3 ids, permission rules that auto-approve only what Genesis trusts, and activation by `session/set_mode` that is
    **verified** (fail closed if the agent is not the active mode or not `origin: client`). Behind it, the SDK checks
