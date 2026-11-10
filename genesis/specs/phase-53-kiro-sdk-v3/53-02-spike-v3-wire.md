@@ -63,10 +63,96 @@ must produce from it): `initialize`, `session-new-custom-agent`, `set-mode-activ
 None for product code. The spike leaves the fixtures plus a small loader test that parses each fixture file (so a
 malformed fixture fails CI at once).
 
-## As built
+## As built (2026-11-10, genesis-dev) — STOPPED AT THE GATE: W1 FAILS
 
-_To be filled by genesis-dev: per question the evidence path, PASS/FAIL, the numbers; the fixture list; the credits
-spent; anything that changes 53-04..53-07 (flag it for the spec agent)._
+**kiro-cli 2.37.1** (`kiro-cli --version`, recorded as the first line of every evidence file). genesis base
+`62537c2` (master; `git fetch` was refused by the remote (access rights), so the rebase was onto the last-known
+`origin/master` = local `master`). Harness and evidence: `genesis/scripts/spikes/53-02/` (`acp.py` = the 2026-11-03
+`Probe` moved and adapted; `probe_mcp.py` moved and extended; `scrub.py`; `gate.py`; `README.md`). Every run used a
+private `KIRO_HOME` at `~/Genesis/runs/spike-53-02/<id>-<time>/_kiro`.
+
+**Task restated.** Answer W1–W18 against the installed kiro-cli over raw JSON-RPC, gate items W1–W5 first, record
+each as `evidence/<id>.jsonl` + `<id>.json`, turn the frames the SDK depends on into fixtures under
+`packages/kiro-agent-sdk/tests/fixtures/v3/` with one loader test, no product code. Rules applied: ADR-002/004/020
+(per-session MCP over ACP, no global Kiro mutation), ADR-029/083 (the trust cap, the accepted shell risk), ADR-032
+(nothing invents a credit number), ADR-034/069 (skills are files in `<cwd>/.kiro/skills`), L-001 (env as a list),
+L-024, L-044/L-087 (probe the installed CLI), L-100 (no secret in evidence), L-101 (`npx --no-install`), L-104,
+L-112 (fixture tests without Node or kiro-cli).
+
+### Gate results so far
+
+| # | Result | Evidence (`genesis/scripts/spikes/53-02/evidence/`) |
+|---|---|---|
+| **W1 (gate)** | **FAIL.** Under a private `KIRO_HOME`, v3 discovers workspace skills from `<cwd>/.kiro/skills/` and lists them in the `_kiro/progressive_context/items_changed` notification (`items[{name, type:"skill", description}]`) — the managed `genesis-test-authoring` was listed, loaded with the engine's skill tool (`title: "Load skill: genesis-test-authoring"`, `rawInput {name}`) and its canary came back. **`playwright-appian` (copied from a Phase 51 export, `checkout/node_modules/playwright-appian/skills/`, package 0.3.0) was NOT listed:** kiro.log `skill.frontmatter.invalid … Failed to parse front matter: bad indentation of a mapping entry (3:112)`. Line 3 is its unquoted `description:`, which contains `(package playwright-appian): open a session` — a `: ` inside a plain YAML scalar, which v3's strict parser rejects. The model found the file only by browsing (`list_directory` of `<run>/.kiro/skills`) and read it with `read_file`, so its canary came back too, but the skill was never offered. The personal skill (1 id under `~/.kiro/skills`, directory names only) was absent from the skill list and from every frame. 0.46 credits, 20.3 s. | `w1.json`, `w1.jsonl` |
+| W1b (diagnosis, no prompt) | **Root cause confirmed, 0 credits.** Two sessions in one process: the package's `SKILL.md` as shipped → listed `[genesis-test-authoring]` only, log `skill.frontmatter.invalid`; the same file with only the `description` value quoted → listed `[genesis-test-authoring, playwright-appian]`, no log warning. The bad line is in the `playwright-appian` source (`skills/playwright-appian/SKILL.md:3`, since commit `0ada4c1`, P4-12), so every 0.3.0 export carries it. | `w1b.json`, `w1b.jsonl` |
+| W2–W5 (gate) | **Not run** — stopped after the W1 FAIL, as the spike's rules require. | — |
+| W6–W18 | Not started. | — |
+
+**Other W1 observations (not the failure).**
+- When the skill was missing, the model listed the user's `~/.kiro` and `~/.kiro/skills` with `list_directory`
+  on its own: v3's built-in read tools are not confined to the cwd (ADR-083 accepted risk a; Phase 52). The two
+  outputs are blanked in `w1.jsonl` (`acp.drop_user_kiro`, applied to every later save).
+- The context breakdown (`session_info_update` `breakdown.contextFiles.items`) lists a skill only once it is
+  loaded (`progressivelyLoaded: true`), by path (`.kiro/skills/<id>/SKILL.md`); the list of *available* skills is
+  `_kiro/progressive_context/items_changed`.
+- A second `session/new` in a warm process took 0.04 s (the first 2.85 s).
+- With a private `KIRO_HOME` the engine still sends `_kiro/steering/documents_changed` with three built-in
+  steering documents (`architecture-selection`, `quick-spec`, `bug-fix`, `scope: global`, `uri: builtin:…`): these
+  ship inside kiro-cli, not from `~/.kiro`.
+
+### For the spec agent (re-spec input)
+
+- **The `playwright-appian` skill does not load on v3 as shipped.** Phase 51's browser agents (`story-verification`,
+  `action-capture`, `setup-composer`) declare it (53-01 §9.3 item 5), so on v3 they would run without it unless the
+  model happens to browse for the file. The fix is one line in `playwright-appian` (quote the `description` value, or
+  use a `>-` block as `genesis-test-authoring` does), a patch release and a re-vendor into genesis
+  (`testexec/vendor/`) — or a Genesis-side normalisation when it provisions the skill. Affected sub-specs: 53-06 §3
+  (the `playwright-appian` branch), 53-08 (readiness/skills, if a frontmatter check is wanted), 53-11 (acceptance).
+  Worth a check in the same pass: every library skill's frontmatter under a strict YAML parser.
+- The skill mechanism itself (D6, D7, D8) holds: workspace skills load from the cwd under a private `KIRO_HOME`;
+  personal skills do not appear.
+
+### Credits
+
+0.46 metered (W1's one turn; W1b sent no prompt). Budget 20.
+
+### Changed
+
+genesis (spike only, commit `c7c05b2`): `scripts/spikes/53-02/{README.md,
+.gitignore, acp.py, scrub.py, probe_mcp.py, gate.py, evidence/w1.json, w1.jsonl, w1b.json, w1b.jsonl}`. No product
+code, no fixtures yet.
+
+### Tests
+
+`ruff check scripts/spikes/53-02/` clean. Evidence scan: no `/Users/` path, UUID, `sess_` id, `toolu_` id, login
+name or e-mail address left in `evidence/`.
+
+### Review / commits
+
+genesis `c7c05b2` (local, base `62537c2`; not pushed). project-tracker: this As built. The review by genesis-review and
+the fixtures follow when the spike resumes.
+
+### Decisions / deviations
+
+- No ADR deviation.
+- Stopped at the first gate FAIL as instructed; W1b is a zero-credit diagnosis of that failure, not a workaround.
+
+### Lesson candidates
+
+- **A skill file can be valid for one Kiro engine and invisible to another.** v3 parses `SKILL.md` front matter with
+  a strict YAML parser and drops a file with an unquoted `: ` in `description`, logging only to `kiro.log`; the
+  model then never sees the skill. Check the skill list (`_kiro/progressive_context/items_changed`), not a canary in
+  the reply: the model can still find and read the file by browsing.
+
+### Resume note
+
+- **Done:** harness, W1 (FAIL) and W1b (root cause).
+- **Next, once the spec agent has re-specced the W1 consequence** (or the user says to go on): run `gate.py w2`…`w5`
+  (W3 needs the QA site; it was reachable on 2026-11-10, HTTP 200 on `/suite/`), then W6–W18, then the fixtures and
+  the loader test, the review, the commits and the rest of this As built. For W1, a re-run with a fixed
+  `playwright-appian` skill shows the PASS line.
+- **Open:** whether the v2 engine ever offered this skill (51-03 S11's agent read both files because the prompt
+  pointed it there); not measured.
 
 ## Context manifest
 
