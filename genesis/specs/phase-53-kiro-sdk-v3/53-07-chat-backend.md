@@ -61,11 +61,14 @@ change.
   send).
 - **Stop** (D10): `cancel()` becomes `session/cancel` (wait the grace, then mark the turn `cancelled`); the client stays
   alive; pending permission futures resolve as today (`cancel`, `:359-376`; the future loop `:360-364`); only `delete_session`, idle reap and mode/model
-  changes close the client (`session/close`). **Open (53-01 §10.3 Q11):** without help, a prompt stopped before the
-  model answers is carried out by the next turn (53-02 W19: 3/3 times, and again after `session/load`). Two measured
-  remedies: the fixed line at the start of the next prompt (0/3 carried out) and `_kiro/checkpoint/revertMultiple` on
-  the stopped prompt's `userMessageId` (removes it from the engine's history). The choice is the user's; do not build
-  Stop until it is made.
+  changes close the client (`session/close`). **After a Stop (D15):** the turn is stored as cancelled and the stopped
+  user message keeps its row. When the next prompt is sent and the latest turn before it in the stored transcript ended
+  cancelled, `stream_turn` puts the fixed note `STOPPED_TURN_NOTE` (a module constant: "[The previous request was
+  cancelled by the user. Answer only the request below; use the cancelled request only if this request refers to it.]")
+  before the user's text in the prompt sent to Kiro. The stored user message is the user's text only. The note is sent
+  once per Stop, read from the transcript, so it also applies after an app restart and after `session/load`, which
+  replays the stopped prompt (53-02 W19 d). The note never contains the stopped request's text or any model or tool
+  output. No `_kiro/checkpoint/revertMultiple`.
 - **Refusals and elicitation:** the SDK's notices (53-05) arrive as agent text; nothing to do here.
 - **Usage:** `agent.result` adds `model`, `fallback_from` when present (F6); `chat_messages.usage` stores them (no schema
   change).
@@ -96,7 +99,9 @@ historical (a header comment; it is outside the F13 gate, 53-01 §9.4).
 `tests/test_chat_manager.py`, `test_chat_api.py`, `test_copilot_*`, `test_chat_store.py`, `test_chat_mode_profile.py`
 moved onto the fake engine
 (53-04): every mode's `TrustPolicy` (all eight `PROFILES` entries); catalog shapes from v3 fixtures; steer delivered/queued/unread; Stop keeps the
-client and the next turn needs no preamble; resume by load and the fallback; Clear gives a new Kiro session; Compact;
+client and the next turn needs no preamble; after a Stop the next prompt sent to the fake engine starts with
+`STOPPED_TURN_NOTE` exactly once (also after a restart with `load`), the stored user message does not contain it, and a
+prompt after a normal turn has no note; resume by load and the fallback; Clear gives a new Kiro session; Compact;
 delete removes the record; `session.notice` on an MCP failure; usage with `model`/`fallback_from`. Web fixtures in
 `web/src/test/fixtures/` regenerated from real responses (L-011, L-083).
 

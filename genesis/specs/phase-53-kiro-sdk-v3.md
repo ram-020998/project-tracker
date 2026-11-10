@@ -55,6 +55,7 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D11 | Phase 51 completes and ships first; Phase 53 starts after. |
 | D13 | After W1's gate failure, W2–W5 ran before the re-spec (all PASS). |
 | D14 | The `playwright-appian` skill's invalid front matter is fixed upstream (0.3.1, re-vendored byte for byte); Genesis refuses to provision a skill with invalid front matter. |
+| D15 | Stop keeps the session; the next prompt starts with a fixed "previous request was cancelled" note (KiroCrew's approach), read from the stored transcript; no revert. |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn) proposed on the Phase 51 re-check:
 §9.5.
