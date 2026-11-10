@@ -353,11 +353,11 @@ secrets, not from `~/.kiro` (D6).
   `~/.kiro/skills` fallback, 53-06), `genesis/tests/test_skills_store.py:158-161` and `web/src/types/skill.ts:15-16`
   (`shadows_personal`, 53-08/53-10), `tests/test_chat_mode_profile.py` (53-07).
 
-### 9.5 Proposed default from this re-check (awaiting the user)
+### 9.5 Default from this re-check — ✅ confirmed by the user 2026-11-10 (option A)
 
 | # | Default | Why |
 |---|---|---|
-| F16 | **Composer during a turn.** While a turn runs, the textarea stays enabled and Send and Stop are both shown. Send steers (D10) and Enter does the same. The model select and attach stay disabled, so a steer is text only. | D10 needs the textarea and Send enabled (§9.4). The model applies at the next start (21-05), not mid-turn. An image in a steer depends on the unconfirmed W7 method, so text only is the safe default. |
+| F16 | **Composer during a turn.** While a turn runs, the textarea stays enabled and Send and Stop are both shown. Send steers (D10) and Enter does the same. The model select and attach stay disabled, so a steer is text only. | D10 needs the textarea and Send enabled (§9.4). The model applies at the next start (21-05), not mid-turn. The steering method takes text only (53-02 W7), so a steer cannot carry an image. User confirmed A (2026-11-10). Rejected B (Stop only during a turn, Enter steers): no visible way to steer. A separate Steer/Queue split was not offered (D10 rejected a separate Steer button). |
 
 ## 10. Spike gate re-spec (53-02 W1–W5, 2026-11-10)
 
@@ -401,8 +401,9 @@ Results live in 53-02's As built. This section records what they change and what
 - **Q11: How Stop keeps a stopped prompt from being carried out by the next turn.** Answered: D15 (option B, a fixed
   note on the next prompt).
 - **Q12: Should `fs_read` be limited to the working folder?** Answered: D16 (option C, not in this phase; Phase 52).
-- **F16** (§9.5): the text-only part is now forced (the steering method takes text only, 53-02 W7). The layout (Send
-  and Stop both shown during a turn) still awaits the user.
+- **F16** (§9.5): confirmed (option A, Send and Stop both shown during a turn; text-only steer).
+
+All questions are answered; nothing in the spec set is open.
 
 ### 10.4 53-02 complete (2026-11-10, review SHIP)
 
