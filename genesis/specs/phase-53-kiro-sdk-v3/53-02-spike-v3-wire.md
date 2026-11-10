@@ -64,7 +64,7 @@ must produce from it): `initialize`, `session-new-custom-agent`, `set-mode-activ
 None for product code. The spike leaves the fixtures plus a small loader test that parses each fixture file (so a
 malformed fixture fails CI at once).
 
-## As built (2026-11-10, genesis-dev) — GATE: W1 FAIL (re-specced, D14), W2–W5 PASS; W6–W19 recorded; fixtures in
+## As built (2026-11-10, genesis-dev) — GATE: W1 FAIL (re-specced, D14), W2–W5 PASS; W6–W19 recorded; fixtures in; review SHIP
 
 **kiro-cli 2.37.1** (`kiro-cli --version`, recorded as the first line of every evidence file). genesis base
 `62537c2` (master; `git fetch` was refused by the remote (access rights), so the rebase was onto the last-known
@@ -123,7 +123,7 @@ is new). The W1 PASS re-run happens in 53-06 with the fixed skill (D14).
 | W9 | **No client off switch.** `initialize` `clientCapabilities._meta.kiro.settings` is read for `memory` only (KAS 2.37 `acp-server.js`); the engine's `toolSearch` / `toolSearchNeverDefer` settings exist, but `_kiro/configuration/set` refuses them from the client at the `session` and `client-connection` layers (`ConfigurationSetRefusedError`, `reason: notGranted`). **Numbers** (4-tool node, 3 tools used): first turn 1 batched `tool_load` + 3 calls, 10.0 s, 0.134 credits; second turn in the same session 0 loads, 5.0 s, 0.078 credits. The cost is one load step per session, so F10 keeps the default. | `w9.*`, `w9state.*` |
 | W10 | `configOptions.model`: `currentValue` + options (`auto`, `claude-opus-5.5`, `claude-sonnet-5.5`, …). `session/set_config_option {configId: "model", value}` → `{configOptions}` + a `config_option_update`. An **unknown id is accepted** (`currentValue` = the bad id); the next prompt fails `-32000 "The model '…' is not available"` with a `display_error` kind and `turn_end stopReason: error`. **No fallback frame was produced**; the bundle has fallback triggers for refusal and availability (`MODEL_FALLBACK_REFUSAL/AVAILABILITY`) and a `modelFallback` constant, not forced here. F6 shape still unmeasured. | `w10.*` |
 | W11 | `promptCapabilities {image: true, embeddedContext: true}`. Image + text with key **`prompt` only: works** ("Red."); **`content` only: `-32602`** (prompt required); both keys: works. **Decision: send `prompt` only.** | `w11.*` |
-| W12 | `kiro-cli acp --agent-engine v3 --auth-method client`: the engine sends **`_kiro/auth/getAccessToken {}`** (no params) right after start. **No answer** (`-32601`): 8 retries in 0.1 s, `session/new` still succeeds, the prompt fails `-32000 ModelRegistryUnauthenticatedError` ("not signed in"). **Answer `{accessToken, expiresAt}` only** (`w12-answer_no_arn.*`, re-run credit-free after review m1): one request, `session/new` succeeds, the prompt fails `-32000 ModelRegistryUnavailableError` ("could not load the available models"; no `profileArn` → region falls back to `us-east-1`). **Answer `{accessToken, expiresAt (ISO), profileArn, authMethod: "IdC", provider: "Enterprise"}`** with the user's own login token (read in process from kiro-cli's store, never printed; the ARN scrubbed too): one request, turn `end_turn`, 0.03 credits. The engine refreshes when the token is within 180 s of expiry. | `w12-no_answer.*`, `w12-answer_no_arn.*`, `w12-answer.*` |
+| W12 | `kiro-cli acp --agent-engine v3 --auth-method client`: the engine sends **`_kiro/auth/getAccessToken {}`** (no params) right after start. **No answer** (`-32601`): 8 retries in 0.1 s, `session/new` still succeeds, the prompt fails `-32000 ModelRegistryUnauthenticatedError` ("not signed in"). **Answer `{accessToken, expiresAt}` only** (`w12-answer_no_arn.*`, re-run credit-free after review m1): one request, `session/new` succeeds, the prompt fails `-32000 ModelRegistryUnavailableError` ("could not load the available models"; per the bundle, without `profileArn` the region falls back to `us-east-1`). **Answer `{accessToken, expiresAt (ISO), profileArn, authMethod: "IdC", provider: "Enterprise"}`** with the user's own login token (read in process from kiro-cli's store, never printed; the ARN scrubbed too): one request, turn `end_turn`, 0.03 credits. The engine refreshes when the token is within 180 s of expiry. | `w12-no_answer.*`, `w12-answer_no_arn.*`, `w12-answer.*` |
 | W13 | **Works.** `mcpServers: [{type: "http", name, url, headers: []}]`: the engine POSTed `server/discover` (our `-32601`), then `initialize`, `notifications/initialized`, a GET for SSE (our 405), `tools/list`, `tools/call`; status `connecting` → `connected` in 0.06 s (labelled `authType: "oauth"` even without auth); the tool ran. | `w13.*` |
 | W14 | See "Timings" below. | `w14.*` |
 | W15 | Table below (`tool-ids.json`). **Path-scoped `fs_read`: yes.** The client rejected every ask: (A) `{capability: "fs_read", match: ["**"], effect: "allow"}` also allows absolute paths outside the cwd (no ask); (B) adding `{…, match: ["/tmp/53-02-outside/**", "/private/tmp/53-02-outside/**"], effect: "deny"}` refuses those reads without asking; (C) **`match: ["./**"]` allows the cwd only** — the outside read and listing asked (`consent.resource` = the realpath, `/private/tmp/…`) and failed on the client's reject. An unknown `capability` (`"zzz"`) does not drop the agent (a typo makes the rule silently never match). | `w15.*`, `w15path.*` |
@@ -348,9 +348,13 @@ variants, 5.4 MB, scrubbed); `packages/kiro-agent-sdk/tests/fixtures/v3/` (28 `.
 ### Review / commits
 
 - genesis (local, base `62537c2`, not pushed): `c7c05b2` (harness + W1), `a885ca3` (W2–W5), `a13798d` (W6–W19 +
-  fixtures + loader test), `a54b1f4` (review fixes).
+  fixtures + loader test), `a54b1f4` (review fixes), `5f633df` (re-review nit n9).
 - Review: `reviews/53-02-review.md` — first pass NEEDS_CHANGES (M1, m1–m6, n1–n8), fixed in genesis `a54b1f4`
-  (see Decisions); re-review below.
+  (see Decisions); **re-review: SHIP** (same file; nits n9 fixed in `5f633df`, n11 marked "bundle", n10 left:
+  the QA host is a literal in `make_fixtures.py`).
+- **For the spec agent before 53-04 starts:** `53-04-sdk-core.md` §`session.py` activation does not yet mention
+  `_kiro/customAgent/not_found` or the fallback to `vibe` (W4, review M1); the "Changes for 53-04" bullet above has
+  the correction.
 
 ### Decisions / deviations
 
