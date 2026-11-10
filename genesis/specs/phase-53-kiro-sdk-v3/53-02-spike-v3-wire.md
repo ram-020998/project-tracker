@@ -348,9 +348,9 @@ variants, 5.4 MB, scrubbed); `packages/kiro-agent-sdk/tests/fixtures/v3/` (28 `.
 ### Review / commits
 
 - genesis (local, base `62537c2`, not pushed): `c7c05b2` (harness + W1), `a885ca3` (W2–W5), `a13798d` (W6–W19 +
-  fixtures + loader test), `a54b1f4` (review fixes), `5f633df` (re-review nit n9).
+  fixtures + loader test), `a54b1f4` (review fixes), `e824d3d` (re-review nit n9).
 - Review: `reviews/53-02-review.md` — first pass NEEDS_CHANGES (M1, m1–m6, n1–n8), fixed in genesis `a54b1f4`
-  (see Decisions); **re-review: SHIP** (same file; nits n9 fixed in `5f633df`, n11 marked "bundle", n10 left:
+  (see Decisions); **re-review: SHIP** (same file; nits n9 fixed in `e824d3d`, n11 marked "bundle", n10 left:
   the QA host is a literal in `make_fixtures.py`).
 - **For the spec agent before 53-04 starts:** `53-04-sdk-core.md` §`session.py` activation does not yet mention
   `_kiro/customAgent/not_found` or the fallback to `vibe` (W4, review M1); the "Changes for 53-04" bullet above has
