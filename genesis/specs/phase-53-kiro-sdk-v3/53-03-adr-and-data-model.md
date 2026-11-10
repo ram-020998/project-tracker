@@ -62,7 +62,91 @@ Migration up on a v(current) DB copy and on an empty DB; store round-trip of `ki
 
 ## As built
 
-_To be filled by genesis-dev._
+_2026-11-10, genesis-dev._ Base: genesis `e824d3d` (= `62537c2` + the five 53-02 commits, local `master`, clean; no
+rebase needed). project-tracker `fb51bd1` (spec set final through `3f46621`).
+
+**Task restated.** Write the ADR-086 draft (§2 items 1–7, each with its reason and 53-01/53-02 evidence, reflecting D6
+with D16's "what this does not promise", D14, D15, the W4 activation rule and F17), and add the one column chat needs to
+resume a v3 session: m0029 `chat_sessions.kiro_session_id`, with the store field and setter, unused until 53-07.
+Rules applied: ADR-030 (SQLite, DB-agnostic repository signatures), ADR-031/032/034/045/069/029/083 (the ADRs the draft
+amends), ADR-004/020 (per-session MCP, no global Kiro mutation); L-004 (DDL only in a migration), L-024 (reconciled in
+item 2), L-091 (`set_kiro_session` is a single UPDATE, no read-validate-write), L-092 (no `test_*` name in the
+migration module), L-102 (an `ADD COLUMN`, not a rebuild, so no `foreign_keys_off`).
+
+### Commits
+
+- genesis `143e9d2` — feat(db,chat,53-03): m0029 + store + tests + README DB line.
+- project-tracker — `adr-drafts.md`, this As built and `reviews/53-03-review.md` (one commit, after the review).
+
+### Changed
+
+- `genesis/db/migrations/m0029_chat_kiro_session.py` (new): `ALTER TABLE chat_sessions ADD COLUMN kiro_session_id
+  TEXT`, guarded by `PRAGMA table_info` (re-run is a no-op), `Migration(version=29, name="chat_kiro_session")`.
+- `genesis/db/migrations/__init__.py`: m0029 appended to `MIGRATIONS`.
+- `genesis/chat/store.py`: `ChatSessionRecord.kiro_session_id: str | None = None` (before `message_count`; every
+  construction is by keyword), read tolerant of the column's absence like `model`; `ChatStore.set_kiro_session(
+  session_id, kiro_session_id | None)`. `get`/`list` already `SELECT s.*`, so they carry it. `api/chat.py:54` builds
+  the session dict field by field, so the column does not reach the web (53-09 decides).
+- `README.md`: "migrations m0001–m0029 (DB v29)". The status line still names v0.81.0 (the release, not the DB).
+- `specs/phase-53-kiro-sdk-v3/adr-drafts.md` (new): ADR-086, header table for `genesis-ctx add adr` + body.
+
+### Tests
+
+- New, `tests/test_chat_store.py`: m0029 on a fresh DB → v29, column `TEXT` / nullable / no default, `_up` re-run
+  no-op, no `test_*` names (L-092); a populated v28 DB (`MIGRATIONS[:28]`: a copilot chat with a model, a spec chat,
+  messages with usage and meta) → `migrate == [29]`, every session and message row identical apart from the new NULL
+  column, `foreign_key_check` empty, the old row reads `kiro_session_id is None`; `set_kiro_session` round trip in
+  `get` and `list`, replace, clear with `None`, `updated_at` unchanged, an unknown chat is a no-op; a pre-m0029 DB read
+  through the store returns `None`.
+- Version pins 28 → 29 in `test_db.py` (applied lists, row count, a row-29 name check, `current_version`, `pending`),
+  `test_board_store`, `test_chat_store`, `test_collab_migration`, `test_document_store`, `test_feature_store`,
+  `test_kb_store`, `test_object_wiki`, `test_stage_store`; the m0028 tests in `test_testexec_recording.py` now pin
+  `MIGRATIONS[:28]` (the precedent m0027's tests set).
+- **Real-data copy** (one-off, not in the suite): a `sqlite3` backup-API copy of `~/.genesis/genesis.db` (opened
+  `mode=ro`) in a temp folder: v28, 32 sessions / 123 messages → applied `[29]`, v29, counts unchanged, 0 non-null
+  `kiro_session_id`, 0 foreign-key violations, `integrity_check` ok, `ChatStore.list` 32, second `migrate` `[]`; temp
+  folder removed. The live DB was not migrated (the fleet migrates at its next update, after a backup).
+- Gates: `pytest -q` **1843 passed** (4 of them new here); `ruff check genesis` clean; the touched test files are
+  clean apart from the pre-existing `tests/test_db.py:16` F401 (unused `tempfile`, present at `e824d3d`). `ruff check
+  genesis tests` reports 26 findings, all in code this change did not touch; CI runs `ruff check genesis`.
+
+### Review
+
+- Round 1 (`reviews/53-03-review.md`): **NEEDS_CHANGES**, from the ADR draft only; the code was found ready as
+  committed. Fixed in `adr-drafts.md`: M1 `--amends` as seven space-separated ids after one flag (`nargs="+"`; a
+  repeated flag would keep only ADR-083), the "repeat the flag" hint removed; m1 filing note: `--status accepted`,
+  `--body-file` from `- **Context.**` on (the tool writes the Status line); m2 item 5: W19 b tested a shorter line, the
+  D15 wording is first tested in 53-11 A3, and the note is adapted from KiroCrew's flag but carries no stopped-turn text
+  (checked: `KiroCrew/src/kiro_crew/context_assembly/replay.py:565-573`); m3 the rule; n1 KiroCrew cite `:856-930`
+  (checked: `_verify_spawn_agent_active` `:875`, `activation_refusal` `:903`); n2 ADR-031 items 1–2, item 3 unchanged;
+  n3 "MCP read tools"; n4, n5 in this As built.
+- Round 2 (same report): **SHIP**. Its optional nit r2-n1 (the `prev_turn_cancelled` cite pointed at `replay.py`) is
+  fixed: `session_parts/record.py:151`, consumed at `dashboard/chat_turn/prompt_assembly.py:712` (checked).
+
+### Decisions / deviations
+
+- **`set_kiro_session` does not touch `updated_at`** (unlike `set_model`): the Chat page orders by it, and a new Kiro
+  session (start, resume, Clear) is not user activity. No ADR deviation.
+- **ADR draft `--rule`** (214 chars) says "nothing loaded from ~/.kiro; reads unscoped", so the digest line alone
+  carries D6's limit; the body's "what this does not promise" gives the detail (D16, ADR-083 a). Review m3.
+- **For 53-07 (review n4):** `ChatStore.create` inserts five named columns and does not write `kiro_session_id`; a
+  record passed to `create` with the field set loses it. Store the id only with `set_kiro_session` after `session/new`.
+- **For genesis-docs (review m2):** 53-01 D15 says "the same instruction stopped it 0/3", but W19 b ran a shorter line,
+  not the D15 wording, and KiroCrew's `cancelled_turn_preamble` re-sends the stopped turn's text, which Genesis's note
+  does not. The ADR draft says so; D15's wording in the findings should match at write-back.
+- **Item 6 includes D8's "a declared skill that is not installed fails the run at the start"** and §10.1's "check the
+  engine's skill list, not a canary", both from the spec set, so 53-06/53-08 cite one rule.
+- No ADR deviation.
+
+### Lesson candidates
+
+- None new. (Reconfirmed: a column added for a later sub-spec needs every `current_version == N` pin bumped and the
+  previous migration's tests pinned to `MIGRATIONS[:N]`; 13 files here.)
+
+### Code-map changes
+
+- `genesis/genesis/db/`: m0029 `chat_kiro_session` (`chat_sessions.kiro_session_id`), DB v29.
+- `genesis/genesis/chat/store.py`: `ChatSessionRecord.kiro_session_id`, `ChatStore.set_kiro_session`.
 
 ## Context manifest
 
