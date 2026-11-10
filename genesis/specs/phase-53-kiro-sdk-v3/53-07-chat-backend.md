@@ -31,9 +31,11 @@ v2 path and it is deleted from the SDK (D5).
   detail}` on the first turn's stream; the turn proceeds.
 - **Resume** (F4): if the chat record has `kiro_session_id` (53-03) and the client is new (idle reap, restart, after a
   model change), call `load(kiro_session_id)`. The engine's replay of old turns is not shown again and its replayed
-  credits are not stored again (53-02 W6). on success no preamble is sent; on failure (logged with the classified
-  error) fall back to `session/new` + today's preamble (`_build_preamble`, `:382-395`). Store the new id after every
-  `session/new`.
+  credits are not stored again (53-02 W6). On success no preamble is sent; on failure (logged with the classified
+  error) fall back to `session/new` + today's preamble (`_build_preamble`, `:382-395`). After every `session/new`,
+  store the new id with `ChatStore.set_kiro_session` (53-03; `ChatStore.create` does not write it, and the setter
+  leaves `updated_at` alone so a new Kiro session does not reorder the chat list). The chat API does not return the id
+  (`api/chat.py:54` lists its fields).
 - **Model** (unchanged behaviour, 21-05): the session's model is applied at start with `set_config_option("model", …)`
   instead of `--model`.
 

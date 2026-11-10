@@ -39,7 +39,7 @@ the DB version; `GET /api/system/kiro` shows a verified kiro-cli. User checklist
 
 ## 3. Docs write-back (genesis-docs)
 
-- **ADR-086** from `adr-drafts.md` (53-03 §2) via `genesis-ctx add adr --amends ADR-029,ADR-031,ADR-032,ADR-034,ADR-045,ADR-069,ADR-083`
+- **ADR-086** from `adr-drafts.md` (53-03 §2) via `genesis-ctx add adr --amends ADR-029 ADR-031 ADR-032 ADR-034 ADR-045 ADR-069 ADR-083` (one flag, the seven ids space-separated; repeating the flag keeps only the last; the filing note in `adr-drafts.md` holds the full command, with `--status accepted`)
   with areas `sdk-acp, chat, core-engine, config-secrets, security`.
 - **Lessons** (candidates from As built sections; at least): v3 rejects the v2 trust flags over ACP; v3 MCP calls nest
   arguments under `rawInput.arguments` and arrive through `tool_load`; a custom agent's `tools` absent = no tools;
