@@ -88,7 +88,7 @@ L-112 (fixture tests without Node or kiro-cli).
 | W1b (diagnosis, no prompt) | **Root cause confirmed, 0 credits.** Two sessions in one process: the package's `SKILL.md` as shipped → listed `[genesis-test-authoring]` only, log `skill.frontmatter.invalid`; the same file with only the `description` value quoted → listed `[genesis-test-authoring, playwright-appian]`, no log warning. The bad line is in the `playwright-appian` source (`skills/playwright-appian/SKILL.md:3`, since commit `0ada4c1`, P4-12), so every 0.3.0 export carries it. | `w1b.json`, `w1b.jsonl` |
 | **W2 (gate)** | **PASS.** `session/new.mcpServers` with the probe server, `genesis-kb` (launched as the worker does, `python -m genesis.mcp.kb_server --db …`, `genesis/runs/worker.py:89`) and the blackboard server (`genesis_core.mcp.blackboard_server --root <run>`), `env` in list form (L-001). `_kiro/mcp/status` went `connecting` → `connected` for all three within 1.0 s of the `session/new` answer (probe 3.79 s, genesis-kb 3.81 s, blackboard 4.58 s after launch; `session/new` 2.98 s, `set_mode` 0.09 s). A canary env var reached both the probe server and `genesis-kb` (checked with `ps -E` on the spawned processes, boolean only), and the probe's `env` tool returned it. `@probe/env`, `@genesis-kb/list_applications` and `@blackboard/list_tool_outputs` all completed with no permission request (each had an allow rule). 0.16 credits, 13.8 s. | `w2.json`, `w2.jsonl` |
 | **W3 (gate)** | **PASS.** A program step opened and signed in a QA session as `contracting-officer` through Genesis's own `ApwtFactory.for_run(...).open_session(..., role=…)` (9.8 s, `signedIn: true`, chromium; password only in that subprocess's environment and registered with the scrubber, no `<SECRET_n>` placeholder appears anywhere, so it never reached a frame). The agent (tools `execute_bash`, `read_file`, two blackboard tools) ran Phase 51's recipe exactly: `cd <ws> && PLAYWRIGHT_APPIAN_HOME=<run>/.apwt npx --no-install apwt --version` → `0.3.0` (0.57 s), then `… apwt -s w3-officer snapshot --full --json` (0.83 s), then saved that output with `@blackboard/save_tool_output` as `w3/snapshot.txt` (**42 023 bytes**, by reference; the reply quoted nothing). **`npx` resolves the workspace's own `apwt`:** from the checkout `npx --no-install` gives `<RUN>/checkout/node_modules/.bin/apwt` 0.3.0, while the `apwt` on this machine's `PATH` is a global nvm install, version **0.2.0** (L-101: the recipe is what keeps the agent off it). **Frames:** `tool_call` first (`toolCallId: "run_command_toolu_…"`, `kind: "execute"`, `title` = the model's own description, `rawInput {command, description, run_in_background}`), then 15–55 ms later `session/request_permission` with the same `toolCallId`, no `kind`, `title` = the command, `_meta.kiro {toolId: "run_command", command, consent {capability: "shell", resource: <command>, askType: "implicit", triggeringResource: "cd <RUN>/checkout", workspaceRoot}, consentRound: 1}`, options `accept/always-accept/reject/always-reject`; the client's `allow_once` answer ran it; result `rawOutput {output, exitCode, message}` + `content[]`. 0.42 credits, 27.4 s. Run 1 (`w3-run1.*`, 0.29 credits) failed only the size check: plain `apwt snapshot` prints a 333-byte pointer and writes the page to a file. | `w3.json`, `w3.jsonl`, `w3-run1.*` |
-| **W4 (gate)** | **PASS.** **Active:** after `session/set_mode` (answer `{}`), a `session/update` `config_option_update` whose `mode` option has `currentValue` = our id arrives within ~30 ms; a codeword from our agent's prompt came back (0.03 credits). Client agents are listed in `session/new.result.modes.availableModes` with `_meta.kiro.resource.source.origin: "client"`. **Dropped:** a schema-invalid agent (`permissions.rules[0].effect: "sometimes"`; `tools` as a string) is **silently dropped**: absent from `availableModes` and from the `mode` option list, no notification (no `_kiro/customAgent/config_error`), and `session/set_mode` to its id still answers **`{}`** with no `config_option_update` — the mode stays where it was. The reason is only in `KIRO_HOME/logs/<t>/kiro.log`: `[ClientCustomAgents] client.agent.drop.invalid {index, error}` (`index` = position in `customAgents`; `error` = zod issues, e.g. `invalid_enum_value` at `permissions.rules.0.effect`, options `allow, deny, ask, evaluate`; `invalid_union` at `tools`). An unknown extra key (`notAField: true`) is accepted and the agent becomes active. Bundled modes on 2.37.1: `vibe, spec, quick-spec, bug-fix, plan, autonomous, semantic_reviewer`. | `w4.json`, `w4.jsonl` |
+| **W4 (gate)** | **PASS.** **Active:** after `session/set_mode` (answer `{}`), a `session/update` `config_option_update` whose `mode` option has `currentValue` = our id arrives within ~30 ms; a codeword from our agent's prompt came back (0.03 credits). Client agents are listed in `session/new.result.modes.availableModes` with `_meta.kiro.resource.source.origin: "client"`. **Dropped:** a schema-invalid agent (`permissions.rules[0].effect: "sometimes"`; `tools` as a string) is dropped at `session/new` without a notification: absent from `availableModes` and from the `mode` option list (no `_kiro/customAgent/config_error`). `session/set_mode` to its id still answers **`{}`**, but first the engine sends **`_kiro/customAgent/not_found {sessionId, requestedAgent, fallbackAgent: "vibe"}`** and a `config_option_update` that **moves the session from our active agent to the bundled `vibe` agent** (corrected after review M1: the first summary stopped its mode timeline too early; `w4.json` `not_found_notifications`, `mode_timeline_all`). The schema error itself is only in `KIRO_HOME/logs/<t>/kiro.log`: `[ClientCustomAgents] client.agent.drop.invalid {index, error}` (`index` = position in `customAgents`; `error` = zod issues, e.g. `invalid_enum_value` at `permissions.rules.0.effect`, options `allow, deny, ask, evaluate`; `invalid_union` at `tools`). An unknown extra key (`notAField: true`) is accepted and the agent becomes active. Bundled modes on 2.37.1: `vibe, spec, quick-spec, bug-fix, plan, autonomous, semantic_reviewer`. | `w4.json`, `w4.jsonl` |
 | **W5 (gate)** | **PASS (recorded; nothing invents a number).** One session per case (`w5.*`), plus `w5a.*` and run 1 (`w5-run1.*`, credits recomputed: an empty summary is None, not 0). | `w5.json`, `w5.jsonl`, `w5a.*`, `w5-run1.*` |
 
 **W5 per case** (`turn_completion` = `session_info_update` kind `turn_completion`; its `promptTurnSummaries` carries
@@ -118,12 +118,12 @@ is new). The W1 PASS re-run happens in 53-06 with the fixed skill (D14).
 | # | Result | Evidence |
 |---|---|---|
 | W6 | **Works.** After kiro-cli exited (no `session/close`), a new process with the same `KIRO_HOME` answered `session/load {sessionId, cwd, mcpServers, _meta.kiro.customAgents}` in 2.1 s; the answer's `_meta.agentMode` was our agent and the history came back before the load answer as `user_message_chunk` + `agent_message_chunk` (each with `_meta.kiro.replayId`) **and the old turn's `turn_completion` again, with its credit entry and `_meta.kiro.replay: true`**; `set_mode` then confirmed active; the next turn recalled the codeword. 0.05 credits. | `w6.*` |
-| W7 | **`_session/steer {sessionId, message: string}`** → `{queued: true, messageId: "steer-<uuid>"}` (KAS 2.37 also has `_session/steer/clear` → `{cleared, messageIds}`; neither is in `extensionMethods`). Consumption on the wire: `session_info_update` kinds `steering_queued {messageId, content}` → `steering_injected {messageId, content}` (the model then saw it, and echoed a `[STEERING steer-…: …]` note) → `steering_cleared {messageIds}` after `turn_end`. A steer sent mid-stream was injected 0.12 s later in the same turn. **A steer queued as the turn ends (`w7b`) starts a second engine turn inside the same `session/prompt`:** two `turn_start`/`turn_completion` pairs (0.029 + 0.032 credits) before the one prompt answer. No steer stayed unread in any test. **Images: no** — `message` must be a non-empty string; a content list is refused (`-32603 "_session/steer: missing or empty message"`), so F16's text-only steer is the only option. | `w7.*`, `w7b.*` |
+| W7 | **`_session/steer {sessionId, message: string}`** → `{queued: true, messageId: "steer-<uuid>"}` (KAS 2.37 also has `_session/steer/clear` → `{cleared, messageIds}`; neither is in `extensionMethods`). Consumption on the wire: `session_info_update` kinds `steering_queued {messageId, content}` → `steering_injected {messageId, content}` (the model then saw it, and echoed a `[STEERING steer-…: …]` note) → `steering_cleared {messageIds}` after `turn_end`. A steer sent while the model streamed was injected 0.12 s later; one sent while an MCP tool ran (an 8 s `sleep`) was injected only after the tool finished (queued 12.03 s → injected 20.06 s), so delivery can lag by the running tool's duration (review m4). **A steer queued as the turn ends (`w7b`) starts a second engine turn inside the same `session/prompt`:** two `turn_start`/`turn_completion` pairs (0.029 + 0.032 credits) before the one prompt answer. No steer stayed unread in any test. **Images: no** — `message` must be a non-empty string; a content list is refused (`-32603 "_session/steer: missing or empty message"`), so F16's text-only steer is the only option. | `w7.*`, `w7b.*` |
 | W8 | **Compact:** `_kiro/session/compact {sessionId}` → `{success: true}` in 14.7 s, one `session_info_update` kind **`summarization_completed`** (`_meta.kiro.summarization {status, summary}`); the next turn still knew the earlier context. **Clear:** no v3 clear method (`_kiro/session/clear`, `session/clear`, `_session/clear` → `-32603` "no persistence classification"); `session/close` (`{}`) + `session/new` took 0.03 s in a warm process, the new session knew nothing (F15 holds). | `w8.*` |
 | W9 | **No client off switch.** `initialize` `clientCapabilities._meta.kiro.settings` is read for `memory` only (KAS 2.37 `acp-server.js`); the engine's `toolSearch` / `toolSearchNeverDefer` settings exist, but `_kiro/configuration/set` refuses them from the client at the `session` and `client-connection` layers (`ConfigurationSetRefusedError`, `reason: notGranted`). **Numbers** (4-tool node, 3 tools used): first turn 1 batched `tool_load` + 3 calls, 10.0 s, 0.134 credits; second turn in the same session 0 loads, 5.0 s, 0.078 credits. The cost is one load step per session, so F10 keeps the default. | `w9.*`, `w9state.*` |
 | W10 | `configOptions.model`: `currentValue` + options (`auto`, `claude-opus-5.5`, `claude-sonnet-5.5`, …). `session/set_config_option {configId: "model", value}` → `{configOptions}` + a `config_option_update`. An **unknown id is accepted** (`currentValue` = the bad id); the next prompt fails `-32000 "The model '…' is not available"` with a `display_error` kind and `turn_end stopReason: error`. **No fallback frame was produced**; the bundle has fallback triggers for refusal and availability (`MODEL_FALLBACK_REFUSAL/AVAILABILITY`) and a `modelFallback` constant, not forced here. F6 shape still unmeasured. | `w10.*` |
 | W11 | `promptCapabilities {image: true, embeddedContext: true}`. Image + text with key **`prompt` only: works** ("Red."); **`content` only: `-32602`** (prompt required); both keys: works. **Decision: send `prompt` only.** | `w11.*` |
-| W12 | `kiro-cli acp --agent-engine v3 --auth-method client`: the engine sends **`_kiro/auth/getAccessToken {}`** (no params) right after start. **No answer** (`-32601`): 8 retries in 0.1 s, `session/new` still succeeds, the prompt fails `-32000 ModelRegistryUnauthenticatedError` ("not signed in"). **Answer `{accessToken, expiresAt}` only**: one request, then `ModelRegistryUnavailableError` (no `profileArn` → region falls back to `us-east-1`). **Answer `{accessToken, expiresAt (ISO), profileArn, authMethod: "IdC", provider: "Enterprise"}`** with the user's own login token (read in process from kiro-cli's store, never printed; the ARN scrubbed too): one request, turn `end_turn`, 0.03 credits. The engine refreshes when the token is within 180 s of expiry. | `w12-no_answer.*`, `w12-answer.*` |
+| W12 | `kiro-cli acp --agent-engine v3 --auth-method client`: the engine sends **`_kiro/auth/getAccessToken {}`** (no params) right after start. **No answer** (`-32601`): 8 retries in 0.1 s, `session/new` still succeeds, the prompt fails `-32000 ModelRegistryUnauthenticatedError` ("not signed in"). **Answer `{accessToken, expiresAt}` only** (`w12-answer_no_arn.*`, re-run credit-free after review m1): one request, `session/new` succeeds, the prompt fails `-32000 ModelRegistryUnavailableError` ("could not load the available models"; no `profileArn` → region falls back to `us-east-1`). **Answer `{accessToken, expiresAt (ISO), profileArn, authMethod: "IdC", provider: "Enterprise"}`** with the user's own login token (read in process from kiro-cli's store, never printed; the ARN scrubbed too): one request, turn `end_turn`, 0.03 credits. The engine refreshes when the token is within 180 s of expiry. | `w12-no_answer.*`, `w12-answer_no_arn.*`, `w12-answer.*` |
 | W13 | **Works.** `mcpServers: [{type: "http", name, url, headers: []}]`: the engine POSTed `server/discover` (our `-32601`), then `initialize`, `notifications/initialized`, a GET for SSE (our 405), `tools/list`, `tools/call`; status `connecting` → `connected` in 0.06 s (labelled `authType: "oauth"` even without auth); the tool ran. | `w13.*` |
 | W14 | See "Timings" below. | `w14.*` |
 | W15 | Table below (`tool-ids.json`). **Path-scoped `fs_read`: yes.** The client rejected every ask: (A) `{capability: "fs_read", match: ["**"], effect: "allow"}` also allows absolute paths outside the cwd (no ask); (B) adding `{…, match: ["/tmp/53-02-outside/**", "/private/tmp/53-02-outside/**"], effect: "deny"}` refuses those reads without asking; (C) **`match: ["./**"]` allows the cwd only** — the outside read and listing asked (`consent.resource` = the realpath, `/private/tmp/…`) and failed on the client's reject. An unknown `capability` (`"zzz"`) does not drop the agent (a typo makes the rule silently never match). | `w15.*`, `w15path.*` |
@@ -224,10 +224,13 @@ raw `sess_`/`toolu_` id, JWT-like token or AWS ARN; answers follow their request
 From W2–W5:
 
 - **53-04 `session.py` activation (W4) — contradicts "fail closed: `AgentNotActive`" if that relies on a
-  `set_mode` error:** `session/set_mode` answers `{}` even for an agent the engine dropped. The reliable signals are
-  (1) our id in `session/new.result.modes.availableModes` (origin `client`) — check it *before* `set_mode`, and
-  (2) the `config_option_update` with `mode.currentValue` = our id within a short wait (seen ≤ 30 ms). The reason
-  for a drop is only in `KIRO_HOME/logs/<t>/kiro.log` (`client.agent.drop.invalid {index, error}`); the SDK can read
+  `set_mode` error:** `session/set_mode` answers `{}` even for an agent the engine dropped. The signals are
+  (1) our id in `session/new.result.modes.availableModes` (origin `client`) — check it *before* `set_mode`;
+  (2) active: the `config_option_update` with `mode.currentValue` = our id (seen ≤ 30 ms); (3) dropped:
+  `_kiro/customAgent/not_found {requestedAgent, fallbackAgent}` plus a `config_option_update` to the fallback
+  (`vibe`, the engine's default agent with all built-ins). A failed `set_mode` therefore **moves a running session
+  to `vibe`**: the SDK must fail closed (`AgentNotActive`) and never prompt that session again (review M1). The
+  reason for a drop is only in `KIRO_HOME/logs/<t>/kiro.log` (`client.agent.drop.invalid {index, error}`); the SDK can read
   it from the session's own `KIRO_HOME` for the error text. Unknown extra keys do not drop an agent. Permission rule
   `effect` values are `allow | deny | ask | evaluate`.
 - **53-05 built-in mode ids (W4):** add `semantic_reviewer` to the collision list (`vibe, spec, quick-spec, bug-fix,
@@ -266,15 +269,17 @@ From W6–W19:
   Phase 51 turn early; the cancel grace can be 5 s. The engine's own MCP connect limit is 60 s, so `startup_timeout`
   for MCP readiness (F3) should be ≥ 60 s or the SDK reports `connecting` servers as slow, not failed.
 - **53-04 `steer` (W7):** method `_session/steer {sessionId, message}` (string only), answer `{queued, messageId}`;
-  "delivered" = a later `steering_injected` with that `messageId`; "queued, unread" = `steering_cleared` without a
-  prior `steering_injected` (never observed). Not advertised in `extensionMethods`, so the SDK cannot gate it on
+  "delivered" = a later `steering_injected` with that `messageId` (0.1 s while the model streams, but only after a
+  running tool call ends — 8 s in W7); "queued, unread" = `steering_cleared` without a prior `steering_injected`
+  (never observed). Not advertised in `extensionMethods`, so the SDK cannot gate it on
   that list.
 - **53-07 / F16 (W7):** the steering method does **not** accept image content — F16's text-only steer is forced, not
   just safe.
 - **53-07 Stop (W19, Q11):** without help, a prompt stopped before the answer is carried out by the next turn 3/3,
   and again after `session/load`. Two working remedies measured: the fixed line at the start of the next prompt
   (0/3), and `_kiro/checkpoint/revertMultiple {sessionId, messageId}` on the stopped prompt's `userMessageId`
-  (removes it from history, also for a later `session/load`; not advertised; refused while a turn runs).
+  (removes it from history; not advertised; refused while a turn runs). Whether a revert also holds across a
+  later `session/load` was not measured (review m2).
 - **53-04 `load` (W6):** `session/load` needs `customAgents` re-sent; the answer's `_meta.agentMode` names the
   restored agent, and the replay arrives as `user_message_chunk` / `agent_message_chunk` with `_meta.kiro.replayId`
   **before** the load answer, including the old `turn_completion` with `_meta.kiro.replay: true` — the SDK must not
@@ -294,12 +299,17 @@ From W6–W19:
 - **53-04 HTTP MCP (W13, 52-01 D7):** works with `{type: "http", name, url, headers: []}`; the engine first POSTs
   `server/discover`.
 - **53-05 tool ids (W15):** the table above is the fixture. `remote_web_search` shows as title `web_search`, kind
-  `other`, capability `web_search`; `delete_file` asks under `fs_write`; reads ask too. **Path scoping works:**
-  `{capability: "fs_read", match: ["./**"], effect: "allow"}` confines auto-approved reads to the cwd (an outside path
-  asks with its realpath), and `deny` rules refuse without asking. A misspelt capability is accepted silently, so
+  `other`, capability `web_search`; `delete_file` asks under `fs_write`; reads ask too. **Path scoping works as
+  far as tested:** `{capability: "fs_read", match: ["./**"], effect: "allow"}` auto-approved the cwd read and made
+  absolute outside paths ask (with their realpath), and `deny` rules refuse without asking. Only `read_file` and
+  `list_directory` on absolute paths were tested: `../` traversal, a symlink inside the cwd pointing out, `~`, and
+  `grep_search` / `file_search` were not, so 53-05 must cover them before treating this as a boundary (ADR-083 risk
+  a; review m5). A misspelt capability is accepted silently, so
   53-05 should project capabilities only from a fixed list.
-- **53-04 `close()` / F12 (W16):** TERM to kiro-cli's group ends the engine and its MCP servers too (0.54 s), and
-  even SIGKILL leaves nothing; the engine runs in its own group, so the SDK should still record both pgids and
+- **53-04 `close()` / F12 (W16):** on an **idle** session (MCP servers connected, no turn or shell tool running),
+  TERM to kiro-cli's group ends the engine and its MCP servers too (0.54 s), and even SIGKILL leaves nothing; a kill
+  during a running shell tool (for example an agent's `apwt` command) was not measured — 53-04 should test it before
+  relying on "nothing left" (review m3); the engine runs in its own group, so the SDK should still record both pgids and
   check after the kill. The program's `apwt` groups are untouched and stay with `procs.reap` (53-01 §9.3 item 4
   holds).
 - **53-04 MCP readiness / F3 (W17):** states seen: `connecting`, `connected` (with `tools`), `failed`
@@ -312,10 +322,10 @@ From W6–W19:
 ### Credits
 
 **7.72 metered** of the 20 budget (sum of every `turn_completion` credit entry in the evidence, counting the W7/W8
-shared frames once, skipping W6's replayed entry (`replay: true`, 0.03), plus W4's replaced first run 0.03; items
-rounded): W1 0.46 · W2 0.16 · W3 0.71 (both runs) · W4 0.06 · W5 1.34
+shared frames once, skipping W6's replayed entry (`replay: true`, 0.03), plus W4's replaced first run 0.03, whose evidence was not kept;
+items rounded): W1 0.46 · W2 0.16 · W3 0.71 (both runs) · W4 0.06 · W5 1.35
 (both runs + W5a) · W6 0.05 · W7 0.34 (W7 + W7b) · W8 0.06 · W9 0.21 · W10 0.00 · W11 0.04 · W12 0.03 · W13 0.09 ·
-**W14 2.46** (the 1 500-word file) · W15 0.89 (incl. path tests) · W18 0.11 · W19 0.56 · fixture capture 0.13 · W16,
+**W14 2.46** (the 1 500-word file) · W15 0.88 (incl. path tests) · W18 0.11 · W19 0.56 · fixture capture 0.13 · W16,
 W17, W1b, W9state 0. Not metered (no credit entry sent, ADR-032): six aborted or killed turns.
 
 ### Changed
@@ -327,7 +337,7 @@ variants, 5.4 MB, scrubbed); `packages/kiro-agent-sdk/tests/fixtures/v3/` (28 `.
 
 ### Tests
 
-- `packages/kiro-agent-sdk`: `pytest -q` **110 passed** (79 before + 31 new in `test_v3_fixtures.py`); `ruff check .`
+- `packages/kiro-agent-sdk`: `pytest -q` **111 passed** (79 before + 32 new in `test_v3_fixtures.py`); `ruff check .`
   clean.
 - `ruff check scripts/spikes/53-02/` clean.
 - The loader test runs with an empty `PATH` (asserts no `kiro-cli`/`node`). A run in the `python:3.13` image was not
@@ -338,8 +348,9 @@ variants, 5.4 MB, scrubbed); `packages/kiro-agent-sdk/tests/fixtures/v3/` (28 `.
 ### Review / commits
 
 - genesis (local, base `62537c2`, not pushed): `c7c05b2` (harness + W1), `a885ca3` (W2–W5), `a13798d` (W6–W19 +
-  fixtures + loader test).
-- Review: below.
+  fixtures + loader test), `0ab0e61` (review fixes).
+- Review: `reviews/53-02-review.md` — first pass NEEDS_CHANGES (M1, m1–m6, n1–n8), fixed in genesis `0ab0e61`
+  (see Decisions); re-review below.
 
 ### Decisions / deviations
 
@@ -354,12 +365,25 @@ variants, 5.4 MB, scrubbed); `packages/kiro-agent-sdk/tests/fixtures/v3/` (28 `.
   (`~/Library/Application Support/kiro-cli/kas/2.37.0-…/node_modules/@kiro/agent/dist/server/acp-server.js`) to find
   what to probe; every behaviour reported above was then measured on the wire (L-044), except where marked "bundle".
 - Fixture list deviations: see Fixtures.
+- Review (`reviews/53-02-review.md`, NEEDS_CHANGES → fixed): M1 corrected (W4, the 53-04 bullet, the
+  `set-mode-dropped` fixture now has `notification`, `fallback_mode`, `mode_before`, `mode_after`); m1 evidenced
+  (`w12-answer_no_arn.*`, no model call); m2–m5 qualified above; **m6 open, recorded:** the scrubber works per frame,
+  so a value split across streamed chunks escapes it — the loader test now also scans the joined chunk text of each
+  stream for `LEAKS` (passes); the model's echo of a steer `messageId` stays raw across chunks in `steer`,
+  `steer-at-turn-end` and `w7/w7b/w8.jsonl` (harmless, but its correlation to `steer-<UUID_n>` is lost; re-scrub
+  before replay tests depend on it). Nits: n1 (rounding) and n2 (README) fixed; n3 the QA host is `<QA_HOST>` in the
+  fixtures (evidence keeps it); n8 W16 no longer reads credentials; n4 forwarded below; n5–n7 left (optional test
+  tightening, `tool-ids.json` ids come from the prompt order, v2 `Running:` shell titles classed builtin — the
+  maxima are unaffected).
+- For 53-06 (review n4): playwright-appian 0.3.0's `SKILL.md` tells the agent "if the versions differ, use npx apwt"
+  — a bare `npx`, contrary to L-101; fix it in the same D14 edit.
 
 ### Lesson candidates
 
 - **A skill file can be valid for one Kiro engine and invisible to another** (W1; see above).
-- **v3 accepts and drops silently** (W4, W10, W15): an invalid custom agent, a `set_mode` to a missing id, an
-  unknown model id and an unknown rule capability all answer success; confirm by the positive signal.
+- **v3 accepts and drops without an error** (W4, W10, W15): an invalid custom agent is dropped at `session/new`
+  silently, a `set_mode` to it answers `{}` (and falls back to `vibe`), an unknown model id and an unknown rule
+  capability are accepted; confirm by the positive signal, never by the absence of an error.
 - **Probe one case per session** (W5 run 1).
 - **One prompt is not one engine turn** (W7b): a steer at the end starts a second turn inside the same
   `session/prompt`, with its own `turn_completion` — sum credits over the prompt, not the last turn.
