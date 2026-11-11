@@ -62,9 +62,15 @@ blackboard behaviour as today; workflow skills come only from the managed worksp
   workspace from Settings → Catalog → Skills. Register it
   in `genesis-workflows/skills-registry.json`; the library's skill CI gates (`validate_skills`) green. `story-implementation`
   (`workflows/story-implementation/graph.py:120-121`) is unchanged and now installs `appian` from the library.
-  **Open (53-01 §10.3 Q13):** the skill's `registry/components-registry.json` sits outside the folders the skill store
-  accepts (`scripts/`, `references/`, `assets/`; `genesis/skills/store.py:151-171`), so a library install would be
-  refused with a 400.
+  **Skill folders (D17):** in `genesis/skills/store.py`, drop the `scripts/`/`references/`/`assets/` restriction on
+  bundled files (`:151-171`). A file may sit at any relative path inside the skill. Keep the refusals for absolute
+  paths, `..` segments and dot-file or dot-folder segments, and keep the size and count caps (`:28-29`). Update the
+  module docstrings (`store.py:4-5`, `model.py:7`), which name only the three folders. Copy `appian` with
+  `registry/components-registry.json` unchanged; change only `references/documentation-lookup-strategy.md:191` from
+  `skills/appian/registry/…` to the skill-root-relative `registry/components-registry.json`. Tests: a bundled file
+  under `registry/` installs; `../x`, `/abs`, `.hidden/x` and an over-cap file are still refused; `appian` installs
+  from the library fixture through `SkillInstaller.install_selection` (`genesis/dist/skill_install.py:50-59`) and
+  `_skill_source` resolves it.
 - **Workflows that declare skills:** a run fails fast with the message above when the skill is not installed (as today,
   better text). Consider (backlog, not this phase): auto-installing a workflow's declared library skills at
   `genesis install`.
@@ -114,6 +120,6 @@ areas    = ["core-engine", "workflows-library", "sdk-acp", "runs-worker"]
 adrs     = ["ADR-011", "ADR-012", "ADR-019", "ADR-021", "ADR-022", "ADR-029", "ADR-032", "ADR-051", "ADR-066", "ADR-067", "ADR-069", "ADR-010", "ADR-018", "ADR-083"]
 lessons  = ["L-002", "L-005", "L-016", "L-020", "L-021", "L-023", "L-024", "L-026", "L-042", "L-064", "L-092", "L-101", "L-112"]
 docs     = ["tracker:specs/phase-53-kiro-sdk-v3/53-01-findings.md", "tracker:specs/phase-52-agent-runtime-isolation/52-01-findings.md"]
-code     = ["genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/packages/genesis-core/genesis_core/agents/**", "genesis/packages/genesis-core/tests/**", "genesis/genesis/runtime/context.py", "genesis/genesis/chat/manager.py", "genesis/genesis/skills/model.py", "genesis/tests/test_workflow_skill_provisioning.py", "genesis-workflows/skills/**", "genesis-workflows/workflows/story-implementation/**", "playwright-appian/skills/**", "playwright-appian/tests/skills/**"]
+code     = ["genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/packages/genesis-core/genesis_core/agents/**", "genesis/packages/genesis-core/tests/**", "genesis/genesis/runtime/context.py", "genesis/genesis/chat/manager.py", "genesis/genesis/skills/model.py", "genesis/genesis/skills/store.py", "genesis/genesis/dist/skill_install.py", "genesis/tests/test_workflow_skill_provisioning.py", "genesis-workflows/skills/**", "genesis-workflows/workflows/story-implementation/**", "playwright-appian/skills/**", "playwright-appian/tests/skills/**"]
 upstream = ["53-04", "53-05"]
 ```

@@ -57,6 +57,7 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D14 | The `playwright-appian` skill's invalid front matter is fixed upstream (0.3.1, re-vendored byte for byte); Genesis refuses to provision a skill with invalid front matter. |
 | D15 | Stop keeps the session; the next prompt starts with a fixed "previous request was cancelled" note (KiroCrew's approach), read from the stored transcript; no revert. |
 | D16 | No path scope on agents' file reads in this phase; confinement stays with Phase 52 (53-02 W15 path-rule findings are its input). |
+| D17 | Genesis's skill store accepts bundled files in any subfolder, as the Agent Skills standard does (traversal, dot-file and size caps kept); `appian` is published with its `registry/` folder. |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn: Send and Stop both shown, text-only
 steer; confirmed 2026-11-10): §9.5. F17 (per-turn credit provenance on aborted turns): §10.2.
