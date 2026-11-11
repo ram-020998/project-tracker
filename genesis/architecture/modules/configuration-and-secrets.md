@@ -53,56 +53,66 @@ time, from registries Genesis owns (ADR-020, ADR-029).
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph routes["genesis/api"]
-        cr["config_routes.py"]
-        nm["native_mcp.py"]
-        nc["native_cli.py"]
-        chatapi["chat.py<br/>/config/copilot"]
-    end
-    subgraph cfg["genesis/config"]
-        svc["service.py<br/>ConfigService"]
-        sec["secrets.py<br/>PlaintextProvider"]
-        env["environments.py<br/>EnvironmentRegistry"]
-        fld["fields.py<br/>cards, missing secrets"]
-        hl["health.py"]
-        cop["copilot.py<br/>CopilotConfig"]
-        ret["retention.py<br/>RetentionService"]
-    end
-    subgraph native["managed-native installs"]
-        mi["mcp/native/<br/>NativeMcpInstaller"]
-        ci["cli_tools/native/<br/>NativeCliInstaller"]
-    end
-    subgraph core["genesis_core"]
-        mreg["mcp/registry.py"]
-        cstore["mcp/custom_store.py<br/>clis/custom_store.py"]
-        intro["mcp/introspect.py"]
-        creg["clis/registry.py"]
-        atomic["util/atomic_json.py"]
-    end
-    set["runtime/settings.py<br/>Settings"]
-    files[("state folder<br/>JSON files")]
-
-    cr --> svc
-    nm --> svc
-    nc --> svc
+flowchart TB
+    chatapi["<b>api/chat.py</b><br/>config/copilot route"]:::comp
+    cop["<b>CopilotConfig</b><br/>copilot.py"]:::comp
+    routes["<b>API routes</b><br/>config, native_mcp<br/>native_cli"]:::comp
+    svc["<b>ConfigService</b><br/>service.py"]:::core
+    fld["<b>fields.py</b><br/>cards, missing secrets"]:::comp
+    hl["<b>health.py</b><br/>health checks"]:::comp
+    env["<b>EnvironmentRegistry</b><br/>environments.py"]:::comp
+    sec["<b>PlaintextProvider</b><br/>secrets.py"]:::comp
+    mi["<b>NativeMcpInstaller</b><br/>mcp/native/"]:::comp
+    ci["<b>NativeCliInstaller</b><br/>cli_tools/native/"]:::comp
+    files[("<b>State folder</b><br/>JSON files")]:::data
     chatapi --> cop
-    cr --> ret
-    svc --> sec & env & fld & hl & mi & ci
-    svc --> mreg & creg & cstore & intro
+    routes --> svc
+    svc --> fld & hl & env & sec & mi & ci
     env --> sec
-    mreg -. "resolves ${VAR}" .-> sec
-    mreg -. "resolve_var" .-> env
-    sec & env & cop & cstore --> atomic --> files
-    mi & ci --> files
-    svc --> set
+    cop & sec & env & mi & ci --> files
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-The routes call `ConfigService`, which owns the secret store, the environment registry, the two native installers
-and the custom stores. `ConfigService` builds merged registries from `genesis-core` and gives them the secret store,
-the environment registry and the installers as helpers. Every JSON file is written through the same atomic-write
-helper in `genesis-core`. The copilot config and the retention service are reached by their own routes and do not
-go through `ConfigService`.
+The routes call `ConfigService`, which owns the secret store, the environment registry, the card and health helpers and
+the two native installers. The copilot config is reached by its own route and does not go through `ConfigService`. The retention service is
+also reached by its own routes and is not drawn here. The secret store, the environment registry and the copilot config write their JSON files
+through an atomic-write helper (next diagram). The installers write under the state folder.
+
+```mermaid
+flowchart LR
+    svc["<b>ConfigService</b><br/>builds merged registries"]:::core
+    set["<b>Settings</b><br/>runtime/settings.py"]:::comp
+    mreg["<b>McpRegistry</b><br/>mcp/registry.py"]:::comp
+    creg["<b>CliRegistry</b><br/>clis/registry.py"]:::comp
+    cstore["<b>Custom stores</b><br/>custom_store.py"]:::comp
+    intro["<b>introspect.py</b><br/>list MCP tools"]:::comp
+    sec["<b>PlaintextProvider</b><br/>secret store"]:::comp
+    env["<b>EnvironmentRegistry</b><br/>environments"]:::comp
+    atomic["<b>atomic_json.py</b><br/>atomic writes"]:::comp
+    files[("<b>State folder</b><br/>JSON files")]:::data
+    svc --> set & mreg & creg & cstore & intro
+    mreg -. "resolves VAR" .-> sec
+    mreg -. "resolve_var" .-> env
+    cstore --> atomic --> files
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
+```
+
+`ConfigService` builds merged registries from `genesis-core` (`McpRegistry`, `CliRegistry` and the custom stores) and
+reads `Settings`. It hands the registries the secret store and the environment registry to resolve variables. The
+custom stores write through the atomic-write helper in `genesis-core`, as do the secret store and the environment
+registry.
 
 | File | Main classes and functions |
 |---|---|
@@ -189,25 +199,26 @@ starts. The env list is a list of `{name, value}` objects, never a dict, because
 
 ```mermaid
 sequenceDiagram
-    participant N as Agent node or chat
+    autonumber
+    participant N as Node or chat
     participant R as McpRegistry
-    participant S as PlaintextProvider
-    participant E as EnvironmentRegistry
-    participant I as NativeMcpInstaller
-    N->>R: acp_servers(["appian-dev"])
-    R->>I: launch_spec_for("appian-dev")
-    I-->>R: command and args from the active venv
-    loop each ${VAR} in env
-        R->>S: resolve(VAR, "appian-dev")
+    participant I as Installer
+    participant S as Secrets
+    participant E as Environments
+    N->>R: acp_servers for appian-dev
+    R->>I: launch spec for appian-dev
+    I-->>R: command and args
+    loop each VAR in env
+        R->>S: resolve VAR for the server
         alt value found
             S-->>R: value
         else not found
-            R->>E: resolve_var(VAR)
+            R->>E: resolve_var VAR
             E-->>R: value or None
             Note over R: if still None, os.environ is tried
         end
     end
-    R-->>N: [{name, command, args, env:[{name,value}]}]
+    R-->>N: server entries with env list
 ```
 
 The diagram shows the order for one managed server. The installer supplies only the command line (L-029). Secrets
@@ -226,23 +237,31 @@ is_dev}}}`. The allowed fields are fixed (`_ALLOWED`). A validator rejects any f
 **Types and the two single-select rules (ADR-082).**
 
 ```mermaid
-stateDiagram-v2
-    [*] --> other: new, no type given
-    other --> dev: type=dev or Dev switch on
-    other --> qa: type=qa
-    dev --> other: another environment becomes dev
-    dev --> other: Dev switch off
-    qa --> other: type changed
-    other --> uat: type=uat
-    other --> production: type=production
-    uat --> other
-    production --> other
+flowchart LR
+    start(( )):::startpt
+    other("<b>Other</b><br/>the default"):::waiting
+    dev("<b>Dev</b><br/>at most one"):::core
+    qa("<b>QA</b><br/>at most one"):::core
+    uat("<b>UAT</b>"):::comp
+    prod("<b>Production</b>"):::comp
+
+    start -- "new" --> other
+    other <-- "set dev / demoted" --> dev
+    other <-- "set qa / edit" --> qa
+    other <-- "set uat / edit" --> uat
+    other <-- "set production / edit" --> prod
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef startpt fill:#212121,stroke:#212121
 ```
 
 The diagram shows how one environment record moves between types. Tagging another environment `dev` demotes the
 current Dev environment to `other`, so there is never more than one. `qa` is refused if another environment is QA.
-Moves among `other`, `uat` and `production` are plain edits and are drawn only once for brevity.
-
+An arrow back to `other` without a label is a plain edit of the type.
+Each arrow goes both ways: the first label sets the type, the second moves the record back to `other` (a plain edit of
+the type, or for Dev a demotion).
 Rules enforced in `EnvironmentRegistry.upsert` and `set_dev_environment`, under the file lock:
 
 1. **One Dev.** Tagging `dev` demotes the previous Dev environment to `other`.
@@ -343,36 +362,37 @@ Genesis installs them as given and never edits them. Updates are a manual drop-i
 
 ```mermaid
 sequenceDiagram
-    participant U as Operator (UI or CLI)
+    autonumber
+    actor U as Operator
     participant C as ConfigService
-    participant M as NativeMcpInstaller
-    participant L as lockfile.json
+    participant M as Installer
+    participant L as Lockfile
     participant UV as uv
-    U->>C: install appian-dev bundle.tar.gz
-    C->>M: install("appian-dev", path)
-    M->>M: sha256 of the bundle
-    M->>L: find_by_sha
+    U->>C: install appian-dev bundle
+    C->>M: install with the bundle path
+    M->>M: hash the bundle
+    M->>L: find by hash
     alt same bytes already installed
         L-->>M: entry
-        M->>L: set_active(version)
+        M->>L: set active version
         M-->>C: version
     else new bundle
         M->>M: check uv on PATH
-        M->>M: extract to temp dir (data filter)
-        M->>M: read version from pyproject.toml
-        M->>M: move to versions/VERSION/
-        M->>UV: uv sync in that folder
+        M->>M: extract to a temp folder
+        M->>M: read version from pyproject
+        M->>M: move to versions folder
+        M->>UV: uv sync
         M->>M: verify entry point exists
         M->>L: record entry, set active
         M-->>C: version
     end
-    C->>C: also extract and install SAIL from the same bundle
-    C-->>U: mcp status and sail status
+    C->>C: also install SAIL from the bundle
+    C-->>U: MCP status and SAIL status
 ```
 
 The diagram shows one install. The same bytes install twice as a no-op that re-points the active version. A new
-bundle is unpacked into a temporary folder, moved to `versions/<version>/`, built with `uv sync`, and checked
-before the lockfile is updated.
+bundle is unpacked into a temporary folder, moved to `versions/VERSION/`, built with `uv sync`, and checked before the
+lockfile is updated.
 
 Steps in `NativeMcpInstaller.install(server_id, bundle_path)`:
 

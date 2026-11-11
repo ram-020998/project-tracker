@@ -10,55 +10,39 @@ in [`modules/`](#62-the-modules).
 
 ```mermaid
 flowchart TB
-    subgraph ui["Presentation"]
-        web["web/ — React SPA"]
-    end
-    subgraph edge["Edge"]
-        api["genesis/api — FastAPI routes under /api"]
-        cli["genesis/cli — the genesis command"]
-    end
-    subgraph app["Application services (app process)"]
-        runs["genesis/runs — run control"]
-        chat["genesis/chat + genesis/skills"]
-        svc["genesis/services + genesis/domain — lifecycle, stages, change requests, test impact"]
-        testexec["genesis/testexec — test execution"]
-        collab["genesis/collab — Hub sharing"]
-        rt["genesis/runtime — settings, context, scheduler, launcher, updater"]
-    end
-    subgraph data["Data and integrations"]
-        kb["genesis/kb — KB, features, stories, tests (stores)"]
-        mem["genesis/memory — memory.db"]
-        db["genesis/db — connections + migrations"]
-        cfg["genesis/config — secrets, environments, registries"]
-        dist["genesis/dist — library install + loader"]
-        integ["genesis/integrations + genesis/mcp + genesis/cli_tools"]
-    end
-    subgraph libs["Libraries (packages/)"]
-        core["genesis-core"]
-        sdk["kiro-agent-sdk"]
-        parser["genesis-appian-parser"]
-    end
-    subgraph lib["Workflow library (separate repo)"]
-        wf["genesis-workflows — workflows, skills, registries"]
+    web["<b>Presentation</b><br/>web/<br/>React single-page app"]:::core
+    edge["<b>Edge</b><br/>genesis/api · genesis/cli"]:::core
+    svc["<b>Application services</b><br/>runs · chat · skills<br/>services · domain<br/>testexec · collab · runtime"]:::comp
+    data["<b>Data and integrations</b><br/>kb · memory · db · config<br/>dist · integrations · mcp"]:::comp
+    wf["<b>genesis-workflows</b><br/>separate repo"]:::ext
+
+    subgraph libs["Libraries in packages/"]
+        direction LR
+        parser["<b>genesis-appian-parser</b><br/>export parser"]:::proc
+        core["<b>genesis-core</b><br/>nodes, state"]:::proc
+        sdk["<b>kiro-agent-sdk</b><br/>ACP client"]:::proc
+        parser ~~~ core
+        core -. "lazy import" .-> sdk
     end
 
-    web --> api
-    api --> runs & chat & svc & testexec & collab & kb
-    cli --> rt & dist & db
-    runs --> db & dist
-    chat --> sdk & kb & mem
-    svc --> kb
-    testexec --> runs & kb & integ
-    kb --> db
-    wf -. "loaded only inside the run worker" .-> core
-    core -. "lazy import" .-> sdk
-    runs -. "worker imports graph.py" .-> wf
+    web -- "HTTP /api" --> edge
+    edge --> svc
+    svc --> data
+    data --> libs
+    wf -. "graph.py, in the worker" .-> libs
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    style libs fill:#f4f8fd,stroke:#5d82a8
 ```
 
-Read the diagram top to bottom. The browser talks only to the API. API routes call application services. Services
-use the stores in `genesis/kb` and `genesis/memory`, which use `genesis/db`. The three libraries under `packages/`
-sit at the bottom: they know nothing about the app. The workflow library is a separate repo; its code is loaded
-only inside a run worker.
+Read the diagram top to bottom. Each box is one layer, and each layer uses only the layers below it. The browser
+talks only to the edge layer: the API under `/api`, with the `genesis` command as a second way in. The edge calls
+the application services, the services use the data and integration modules, and those use the three libraries
+in `packages/`. Inside the libraries, genesis-core imports kiro-agent-sdk lazily. The workflow library (grey) is a
+separate repo; its `graph.py` files are loaded only inside a run worker and are built on the libraries.
 
 ## 6.2 The modules
 

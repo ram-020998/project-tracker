@@ -58,33 +58,79 @@ Four chat-side finalizers live in `genesis/chat/` but belong to other modules (s
 
 ```mermaid
 flowchart LR
-    web["web Chat page"] --> routes["api/chat.py<br/>api/skills.py<br/>api/run_routes.py"]
-    routes --> mgr["ChatManager<br/>ChatSession"]
-    mgr --> prof["mode_profile.py<br/>PROFILES"]
-    mgr --> mcpb["mcp.py<br/>build_chat_mcp"]
-    mgr --> stores["store.py<br/>6 repositories"]
-    mgr --> ev["events.py"]
-    mgr --> sdk["kiro_agent_sdk<br/>KiroACPClient"]
-    mgr --> cop["config/copilot.py<br/>CopilotConfig"]
-    sdk --> kiro["kiro-cli acp"]
-    kiro --> kb["genesis-kb"]
-    kiro --> mem["genesis-memory"]
-    kiro --> intro["genesis<br/>introspection"]
-    kiro --> ctl["genesis-control<br/>copilot only"]
-    kiro --> dev["appian-dev<br/>if configured"]
-    ctl -- "HTTP /api + token" --> routes
-    sup["supervisor.py<br/>ChatRunSupervisor"] --> mgr
-    rm["RunManager"] -- "events" --> sup
-    skills["skills/<br/>SkillService, SkillStore"] --> disk[("~/.genesis/.kiro/skills")]
-    routes --> skills
-    inst["dist/skill_install.py<br/>skill_catalog.py"] --> skills
-    kiro -. "finds skills in cwd" .-> disk
+    web(["<b>Chat page</b><br/>web app"]):::person
+    routes["<b>api/chat.py</b><br/>HTTP routes"]:::comp
+    mgr["<b>ChatManager</b><br/>sessions and clients"]:::core
+    prof["<b>mode_profile.py</b><br/>PROFILES"]:::comp
+    mcpb["<b>mcp.py</b><br/>build_chat_mcp"]:::comp
+    stores["<b>store.py</b><br/>6 repositories"]:::comp
+    ev["<b>events.py</b><br/>SDK to agent events"]:::comp
+    cop["<b>CopilotConfig</b><br/>copilot.json"]:::comp
+    sdk["<b>KiroACPClient</b><br/>kiro_agent_sdk"]:::comp
+    kiro["<b>kiro-cli acp</b><br/>agent process"]:::proc
+    web --> routes --> mgr
+    mgr --> prof & mcpb & stores
+    mgr --> ev & cop
+    mgr --> sdk --> kiro
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-The routes call `ChatManager`. The manager reads the mode profile and asks `build_chat_mcp` for the MCP list and
-trust set. It then starts an SDK client, and the SDK starts `kiro-cli`. Kiro starts the MCP servers. The control
-server calls back into the app's own `/api`, with the session token. The supervisor listens to run events and
-writes into the chat. Skills are plain files that the routes and the installer write and Kiro reads.
+The Chat page calls the routes, and the routes call `ChatManager`. The manager reads the mode profile and asks `build_chat_mcp` for the MCP list and the trust set. It reads and writes chat rows through the stores, maps SDK messages with `events.py`, and checks `CopilotConfig` for the kill-switch. It then starts an SDK client, and the SDK starts `kiro-cli`.
+
+```mermaid
+flowchart LR
+    kiro["<b>kiro-cli acp</b><br/>agent process"]:::proc
+    kb["<b>genesis-kb</b><br/>KB and documents"]:::proc
+    mem["<b>genesis-memory</b><br/>memory tools"]:::proc
+    intro["<b>genesis</b><br/>run introspection"]:::proc
+    ctl["<b>genesis-control</b><br/>copilot only"]:::proc
+    dev["<b>appian-dev</b><br/>if configured"]:::proc
+    routes["<b>api routes</b><br/>/api"]:::comp
+    mgr["<b>ChatManager</b><br/>sessions"]:::core
+    sup["<b>ChatRunSupervisor</b><br/>supervisor.py"]:::comp
+    rm["<b>RunManager</b><br/>run control"]:::ext
+    kiro --> kb & mem & intro & dev
+    kiro --> ctl
+    ctl -- "HTTP and token" --> routes
+    rm -- "run events" --> sup
+    sup -- "notes" --> mgr
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
+```
+
+Kiro starts the MCP servers for the session. `genesis-control` runs only in copilot mode, and it calls back into the app's own `/api` with the control token. `ChatRunSupervisor` listens to run events from `RunManager` and writes notes into the chat through `ChatManager`.
+
+```mermaid
+flowchart LR
+    routes["<b>api/skills.py</b><br/>skill routes"]:::comp
+    svc["<b>SkillService</b><br/>SkillStore"]:::core
+    inst["<b>SkillInstaller</b><br/>dist/skill_install.py"]:::comp
+    disk[("<b>~/.genesis/.kiro/skills</b>")]:::data
+    kiro["<b>kiro-cli acp</b><br/>agent process"]:::proc
+    routes --> svc --> disk
+    inst --> svc
+    kiro -. "finds skills in cwd" .-> disk
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
+```
+
+Skills are plain files. The routes and the installer write them through `SkillService` into the managed skills folder. Kiro reads them from its working folder.
 
 | File | Main classes and functions |
 |---|---|
@@ -176,34 +222,45 @@ export or the Finalize step reads that block.
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant B as Browser
-    participant R as api/chat.py
+    participant R as Chat route
     participant S as ChatSession
     participant C as KiroACPClient
-    participant DB as chat tables
-    B->>R: POST /chat/sessions/{id}/messages
-    R->>R: validate text, length, busy
-    R->>S: stream_turn(text, images)
+    participant DB as Chat tables
+    rect rgb(240, 246, 255)
+    Note over B,R: Send the message
+    B->>R: POST message
+    R->>R: validate text and busy state
+    R->>S: stream_turn
+    end
+    rect rgb(240, 246, 255)
+    Note over S,DB: Prepare the turn
     S->>S: take the session lock
-    S->>S: _ensure_started (5.1)
+    S->>S: start the client if needed
     S->>DB: append user message
-    S->>S: build prompt (steering, preamble, notes)
-    S->>C: prompt(prompt, images)
+    S->>S: build the prompt
+    end
+    rect rgb(240, 246, 255)
+    Note over S,B: Stream the answer
+    S->>C: prompt
     loop each streamed message
-        C-->>S: AgentMessageChunk, ToolCall, ...
+        C-->>S: chunk or tool call
         S-->>R: canonical event
         R-->>B: SSE event
     end
-    C-->>S: ResultMessage (usage)
-    S->>DB: append assistant message (answer, events, usage)
-    S->>S: post-turn hook
+    end
+    rect rgb(240, 246, 255)
+    Note over S,DB: Finish
+    C-->>S: result with usage
+    S->>DB: append assistant message
+    S->>S: run post-turn hook
     S-->>R: agent.result
-    R-->>B: SSE agent.result, stream ends
+    R-->>B: SSE agent.result and end
+    end
 ```
 
-The browser posts a message. The route checks the text and the busy state, then streams server-sent events
-from the session. The session writes the user message first and the assistant message last, so a cancelled or
-failed turn still keeps its partial answer.
+The browser posts a message. The route checks the text and the busy state, then streams server-sent events from the session. The session writes the user message first and the assistant message last, so a cancelled or failed turn still keeps its partial answer.
 
 Steps in `ChatSession.stream_turn`:
 
@@ -257,32 +314,41 @@ Kiro asks for permission before each call.
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant A as Kiro agent
+    participant CS as genesis-control
     participant S as ChatSession
     participant B as Browser
-    participant API as /api
-    participant CS as genesis-control
+    participant API as App API
     participant RM as RunManager
-    A->>CS: tools/call start_run
-    Note over A,S: tool is untrusted
-    A->>S: session/request_permission
-    S->>S: _on_permission: store row, audit proposal
+    rect rgb(240, 246, 255)
+    Note over A,B: Ask for permission
+    A->>CS: call start_run
+    A->>S: request permission
+    S->>S: store row and audit proposal
     S-->>B: SSE permission.request
-    B->>API: POST /chat/sessions/id/permissions/tool_call_id
-    API->>S: resolve_permission(option or null)
-    S->>S: set the Future, audit outcome
+    end
+    rect rgb(240, 246, 255)
+    Note over B,A: The user answers
+    B->>API: POST permission answer
+    API->>S: resolve_permission
+    S->>S: set the Future and audit
     S-->>B: SSE permission.resolved
-    S-->>A: chosen option (or deny)
-    A->>CS: call proceeds if allowed
-    CS->>API: POST /api/runs with X-Genesis-Control-Token
-    API->>API: _enforce_copilot_start
-    API->>RM: start(...)
-    API->>API: link_run(run, session)
+    S-->>A: chosen option or deny
+    end
+    opt allowed
+        rect rgb(240, 246, 255)
+        Note over A,RM: Start the run
+        A->>CS: call proceeds
+        CS->>API: POST runs with control token
+        API->>API: enforce copilot limits
+        API->>RM: start run
+        API->>API: link run to session
+        end
+    end
 ```
 
-The agent calls a mutating tool. Kiro asks Genesis for permission. The session shows a confirm card in the open
-SSE stream and waits. The user answers through the permission route. Only then does the control server call
-`/api`, carrying the token. The app checks the safety limits, starts the run and links it to the session.
+The agent calls a mutating tool. Kiro asks Genesis for permission. The session shows a confirm card in the open SSE stream and waits. The user answers through the permission route. Only then does the control server call `/api`, carrying the token. The app checks the safety limits, starts the run and links it to the session.
 
 Steps:
 

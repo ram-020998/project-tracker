@@ -62,50 +62,73 @@ no run changes a design object (ADR-082).
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph api["API"]
-        rt["testing.py<br/>testdesign.py<br/>workbench.py"]
-    end
-    subgraph design["Design half"]
-        td["kb/testdesign.py<br/>TestDesignStore"]
-        ti["services/testimpact.py<br/>TestImpactService"]
-        tds["services/testdesign_stage.py"]
-    end
-    subgraph exec["genesis/testexec"]
-        set["settings_service"]
-        ws["workspace + runtime<br/>+ vendor"]
-        lib["library_service<br/>proposals"]
-        rec["recording + compose<br/>capture_finalizer"]
-        gen["generator + replay<br/>+ roles"]
-        ex["execution_service<br/>+ finalizer"]
-        reg["regression_service<br/>+ regression_job"]
-        ver["verification_service<br/>+ verification"]
-        run["runner + procs<br/>+ jobs"]
-        ro["reports_origin"]
-    end
-    ap["integrations/apwt<br/>ApwtFactory + ApwtClient"]
-    st["kb/testexec_store.py"]
-    rm["RunManager"]
-    wf["workflows<br/>test-execution, action-capture,<br/>setup-composer, story-verification"]
-    rt --> design & exec
-    tds --> td & ti
+flowchart TB
+    rt["<b>API routes</b><br/>testing, testdesign<br/>workbench"]:::comp
+    tds["<b>testdesign_stage.py</b><br/>Test Design stage"]:::comp
+    ex["<b>genesis/testexec</b><br/>execution half"]:::core
+    ti["<b>TestImpactService</b><br/>testimpact.py"]:::comp
+    td[("<b>TestDesignStore</b><br/>kb/testdesign.py")]:::data
+
+    rt --> tds & ex
+    rt --> ti
+    rt --> td
+    tds --> ti
+    tds --> td
     ti --> td
-    lib --> ws & st
-    gen --> st
-    ex --> gen & ws & st & rm
-    reg --> ex
-    ver --> ex & lib
-    rec --> ap & rm
-    wf -. "ctx.extras apwt" .-> ap
-    ap --> run
-    ex --> ro
-    rm -. "run.final" .-> ex & rec & ver
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
-The API routes call the design stores and the execution services. The execution service builds a catalog from the
-database and the workspace, regenerates the scenario specs, exports a commit into a run folder and starts a
-`test-execution` run. The workflow reaches Playwright through `ApwtFactory`. When the run ends, `RunManager`
-announces `run.final` and the finalizers turn the run's files into database rows.
+The API routes call the design half and the execution half. The design half is the Test Design stage service, the
+impact service and `TestDesignStore`. The stage service uses the store and the impact service, and the impact
+service reads the store. The execution half is `genesis/testexec`, shown in the next diagram.
+
+```mermaid
+flowchart TB
+    ver["<b>verification_service</b><br/>story verification"]:::comp
+    reg["<b>regression_service</b><br/>regression suites"]:::comp
+    lib["<b>library_service</b><br/>proposals"]:::comp
+    rec["<b>recording, compose</b><br/>signed-in sessions"]:::comp
+
+    ex["<b>execution_service</b><br/>TE- executions"]:::core
+
+    cat["<b>Catalog and files</b><br/>testexec_store, workspace<br/>generator, reports_origin"]:::comp
+    rm["<b>RunManager</b><br/>starts runs"]:::core
+
+    wf["<b>Workflows</b><br/>test-execution<br/>action-capture<br/>setup-composer<br/>story-verification"]:::proc
+    fin["<b>Finalizers</b><br/>execution, capture<br/>verification"]:::comp
+
+    ap["<b>apwt integration</b><br/>ApwtFactory, ApwtClient"]:::comp
+    run["<b>runner, procs, jobs</b><br/>child processes"]:::comp
+
+    ver --> lib
+    ver --> ex
+    reg --> ex
+    lib --> cat
+    ex -- "catalog, specs, export" --> cat
+    ex -- "start run" --> rm
+    rec -- "start run" --> rm
+    rec --> ap
+    rm -- "runs" --> wf
+    rm -. "run.final" .-> fin
+    fin -- "rows" --> cat
+    wf -. "ctx.extras" .-> ap
+    ap --> run
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+```
+
+The execution service builds a catalog from the database and the workspace, regenerates the scenario specs, exports a
+commit into a run folder and starts a `test-execution` run through `RunManager`. The "Catalog and files" box stands
+for four modules: `testexec_store.py`, `workspace`, the spec generator and `reports_origin`. The workflows reach
+Playwright through `ApwtFactory` in `ctx.extras`; recording and compose also open their signed-in sessions through
+it. When a run ends, `RunManager` announces `run.final` and the finalizers turn the run's files into database rows.
+The regression and verification services build on the execution service. The settings service is left out of the
+picture.
 
 ### Files
 
@@ -168,18 +191,29 @@ Cases and scenarios use one lifecycle in `domain/transitions.py` (`TEST_TRANSITI
 
 ```mermaid
 stateDiagram-v2
-    [*] --> draft: manual add
-    [*] --> ready: Finalize
-    draft --> ready: approve
-    draft --> retired: retire
-    ready --> retired: retire
-    retired --> ready: restore
+    direction TB
+    state "Draft" as draft
+    state "Ready" as ready
+    state "Retired" as retired
+    [*] --> draft : manual add
+    [*] --> ready : Finalize
+    draft --> ready : approve
+    ready --> retired : retire
+    draft --> retired : retire
+    retired --> ready : restore
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    class draft waiting
+    class retired gone
+    class ready terminal
+    classDef gone fill:#eeeeee,stroke:#757575,color:#424242
 ```
 
-The diagram shows the three statuses. A manual add starts as `draft`; Finalize creates `ready` records. A case
+The diagram shows the three statuses. A manual add starts as `draft`. Finalize creates `ready` records. A case
 cannot retire while a live scenario uses it. A scenario cannot become `ready` with no steps and cannot be restored
 while it uses a retired case. A hard delete is allowed only for an unreferenced `draft` (`delete_case`,
-`delete_scenario`); anything else raises `ConflictError` and the person retires it instead. A delete that removes
+`delete_scenario`). Anything else raises `ConflictError` and the person retires it instead. A delete that removes
 regression references writes a change note (`kb_regression_notes`).
 
 **Needs review.** `story_fingerprint` hashes the normalised story title and acceptance criteria. The case DTO
@@ -266,29 +300,37 @@ files (ADR-081).
 
 ```mermaid
 sequenceDiagram
-    participant UI as Browser
-    participant API as api/testing.py
-    participant Lib as TestLibraryService
-    participant WS as TestWorkspace
-    participant Cat as TestLibraryStore
-    participant LC as LifecycleService
-    UI->>API: PUT /testing/actions/{key} (code)
-    API->>Lib: save(kind, id, code)
-    Lib->>WS: change({path: code}) under the path lock
-    WS->>WS: write file, then before_commit
-    Note over WS: scan-refs reads the code, checks the<br/>contract and imports, compares contract<br/>with the old one
+    autonumber
+    actor U as Person
+    participant API as Routes
+    participant Lib as Library
+    participant WS as Workspace
+    participant Cat as Catalog
+    participant LC as Lifecycle
+    U->>API: PUT /testing/actions/KEY with code
+    API->>Lib: save kind, id, code
+    rect rgb(240, 246, 255)
+    Note over Lib,WS: Under the path lock
+    Lib->>WS: change one file
+    WS->>WS: write file, run before_commit
+    Note over WS: scan-refs checks the contract and imports
     WS->>WS: tsc --noEmit
     WS->>WS: git commit
-    WS->>Lib: after_commit(commit)
+    WS->>Lib: after_commit with commit id
+    end
+    rect rgb(240, 246, 255)
+    Note over Lib,LC: Update the catalog
     Lib->>Cat: update hash, contract, refs
     opt item was Ready and code changed
-        Lib->>LC: transition changed (ready to draft)
+        Lib->>LC: transition changed, ready to draft
+    end
     end
     Lib-->>API: SaveResult
-    API-->>UI: item, commit, warnings, demoted
+    API-->>U: item, commit, warnings, demoted
 ```
 
-The diagram shows one save as a single operation under the workspace lock. The steps:
+The diagram shows one save as a single operation under the workspace lock. The `before_commit` step scans the code,
+checks the contract and imports, and compares the contract with the old one. The steps:
 
 1. `before_commit` reads the file with `lib/scan-refs.mjs` (the workspace's TypeScript compiler API) through
    `_check_code`. The file must make exactly one `defineAction`, `defineSetup` or `defineCase` call, with the
@@ -341,29 +383,41 @@ Restore differs by kind: a retired setup returns to `ready` only after a passing
 
 ```mermaid
 sequenceDiagram
-    participant UI as Browser
-    participant Rec as RecordingService
+    autonumber
+    actor U as Person
+    participant Rec as Recording
     participant Apwt as ApwtClient
-    participant RM as RunManager
-    participant Wf as action-capture run
-    participant Fin as CaptureFinalizer
-    UI->>Rec: POST /testing/recordings (role, intent)
-    Rec->>Rec: readiness, skill and workflow installed
-    Rec->>Apwt: open session --login (password in this subprocess only)
+    participant RM as Runs
+    participant Wf as Capture run
+    participant Fin as Finalizer
+    rect rgb(240, 246, 255)
+    Note over U,Apwt: Sign in and start recording
+    U->>Rec: POST /testing/recordings
+    Rec->>Rec: check readiness, skill, workflow
+    Rec->>Apwt: open session with login
     Rec->>Apwt: state-save, close
-    Rec->>Apwt: record start --detach --state file
-    Rec->>Rec: delete saved login, record recorder pid
-    UI->>Rec: Stop (or the window closes: refresh)
+    Rec->>Apwt: record start, detached
+    Rec->>Rec: delete saved login, keep pid
+    end
+    rect rgb(240, 246, 255)
+    Note over U,Apwt: Stop recording
+    U->>Rec: Stop, or close the window
     Rec->>Apwt: record stop
-    Rec->>RM: start action-capture (trace, library snapshot)
-    RM->>Wf: generate, segment, replay on QA, heal
+    end
+    rect rgb(240, 246, 255)
+    Note over Rec,Fin: Capture
+    Rec->>RM: start action-capture
+    RM->>Wf: generate, segment, replay, heal
     Wf-->>RM: run.final
     RM-->>Fin: run.final
-    Fin->>Fin: capture analysing to ready (proposals)
-    UI->>Rec: review, accept or reject
+    Fin->>Fin: capture analysing to ready
+    end
+    U->>Rec: review, accept or reject
 ```
 
-The diagram shows that the recorder never holds the password. The steps:
+The diagram shows that the recorder never holds the password. The password is only in the environment of the login
+subprocess, and the saved login is deleted before the recorder runs. After the stop, the capture workflow produces
+proposals for review. The steps:
 
 1. `start` checks readiness for the role, that the `genesis-test-authoring` skill is installed, and that the
    `action-capture` workflow is installed at version 0.2.2 or newer, because an older one can prove code its replay never ran. A request for a
@@ -413,31 +467,43 @@ closure against the compose's export commit (L-110). A recording's raw trace is 
 
 ```mermaid
 sequenceDiagram
-    participant UI as Browser
-    participant ES as TestExecutionService
-    participant Gen as generator
-    participant WS as TestWorkspace
-    participant RM as RunManager
-    participant Wk as worker (test-execution)
-    participant R as PlaywrightRunner
-    UI->>ES: POST /testing/executions (scenario ids)
-    ES->>Gen: build_catalog from DB + committed HEAD
-    ES->>ES: plan, readiness for the plan's roles
-    ES->>ES: create TE- row (queued), pump
-    ES->>Gen: generate suites + playwright.config.ts
-    ES->>WS: write_generated, one commit
-    ES->>RM: start(test-execution, prepare)
-    RM->>ES: prepare(run_id, run_dir)
-    ES->>WS: export commit into run/checkout
-    ES->>ES: row to running with commit, versions, report_dir
+    autonumber
+    actor U as Person
+    participant ES as Service
+    participant Gen as Generator
+    participant WS as Workspace
+    participant RM as Runs
+    participant Wk as Worker
+    participant R as Runner
+    rect rgb(240, 246, 255)
+    Note over U,ES: Plan and queue
+    U->>ES: POST /testing/executions
+    ES->>Gen: build_catalog
+    ES->>ES: plan, check readiness
+    ES->>ES: queue TE row, pump
+    end
+    rect rgb(240, 246, 255)
+    Note over ES,RM: Prepare the run
+    ES->>Gen: generate suites
+    ES->>WS: write specs, commit
+    ES->>RM: start test-execution
+    RM->>ES: prepare run folder
+    ES->>WS: export commit
+    ES->>ES: row to running
+    end
+    rect rgb(240, 246, 255)
+    Note over RM,R: Run the tests
     RM->>Wk: spawn worker
-    Wk->>R: ctx.extras apwt playwright(...)
-    R->>R: npx --no-install playwright test
+    Wk->>R: ctx.extras apwt playwright
+    R->>R: run playwright test
     R->>R: scrub report folder
-    Wk-->>RM: results.json, result.json, run.final
+    Wk-->>RM: results.json, run.final
+    end
 ```
 
-The diagram shows the order from click to results files. The steps:
+The diagram shows the order from click to results files. The person asks for scenarios. The execution service builds
+the catalog, plans the run, queues it and prepares the checkout. The worker runs Playwright and writes the results.
+The steps:
 
 1. **Catalog** (`build_catalog`). It reads the application's non-retired scenarios from the database. A scenario is
    **automated** only if it has steps, its data setup (if any) is committed and not retired, every step's case has a
@@ -479,15 +545,22 @@ selection; the library's *Run dependents* runs the scenarios that use an item.
 
 ```mermaid
 stateDiagram-v2
+    direction TB
     [*] --> queued
-    queued --> running: pump launches
-    queued --> cancelled: cancel
-    queued --> error: cannot launch
+    queued --> running : pump launches
+    queued --> cancelled : cancel
+    queued --> error : cannot launch
     running --> passed
     running --> failed
     running --> blocked
     running --> cancelled
     running --> error
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    class passed terminal
+    class blocked waiting
+    class failed,cancelled,error bad
 ```
 
 The diagram shows an execution's status. The five end states are `passed`, `failed`, `blocked`, `cancelled` and

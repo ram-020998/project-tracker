@@ -58,44 +58,39 @@ everything is derived from data other modules already store.
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph kiro["Kiro and the SDK"]
-        meta["_kiro.dev/metadata"]
-        sdk["kiro-agent-sdk<br/>_accumulate_meta<br/>_finalize_usage"]
-    end
-    subgraph worker["Run worker process"]
-        agent["genesis-core<br/>kiro_node"]
-        red["state.py<br/>_telemetry_merge"]
-        wlog["logging.py<br/>configure_logging + bind"]
-        prompts["blackboard<br/>_prompts/*.txt"]
-    end
-    subgraph app["App process"]
-        mgr["RunManager<br/>_log to run_events"]
-        elog["eventlog.py<br/>aggregate_credits<br/>credits_provenance"]
-        steps["steps.py<br/>fold_steps<br/>fold_iterations"]
-        metrics["api/metrics.py"]
-        home["api/home.py"]
-        chat["chat manager + store<br/>chat_messages.usage"]
-        mw["api/app.py<br/>request_id middleware"]
-        alog["logging.py<br/>formatters"]
-    end
-    meta --> sdk --> agent
-    agent --> red
-    agent --> prompts
-    agent -->|"agent.prompt, agent.result"| mgr --> elog
-    elog --> metrics & home
-    mgr --> steps
+flowchart TB
+    meta["<b>Kiro</b><br/>_kiro.dev/metadata"]:::ext
+    sdk["<b>kiro-agent-sdk</b><br/>folds usage"]:::comp
+    agent["<b>kiro_node</b><br/>genesis-core, in worker"]:::proc
+    red["<b>state.py</b><br/>_telemetry_merge"]:::proc
+    mgr["<b>RunManager</b><br/>logs to run_events"]:::core
+    elog["<b>eventlog.py</b><br/>credit aggregates"]:::comp
+    steps["<b>steps.py</b><br/>fold_steps, fold_iterations"]:::comp
+    metrics["<b>api/metrics.py</b>"]:::comp
+    home["<b>api/home.py</b>"]:::comp
+    chat["<b>Chat store</b><br/>chat_messages.usage"]:::comp
+    meta --> sdk
+    sdk --> agent
     sdk --> chat
-    mw --> alog
-    wlog -. "stderr" .-> mgr
+    agent --> red
+    agent -- "agent.result" --> mgr
+    mgr --> elog
+    mgr --> steps
+    elog --> metrics & home
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-The left side shows where a credit number starts: Kiro sends metering, the SDK folds it into `usage`, and the
-agent node in the worker puts it on the `agent.result` event. The app's `RunManager` stores that event in
-`run_events`. The aggregates, the folds, the metrics route and the home route all read from that table. Chat takes
-the same `usage` dict straight from the SDK and stores it on the assistant message. The logging pieces are
-separate: both the app and the worker call `configure_logging`, and the app adds a middleware that binds the
-`request_id`.
+The diagram shows where a credit number starts and who reads it. Kiro sends metering, the SDK folds it into `usage`,
+and the agent node in the worker (light blue) puts it on the `agent.result` event. The node state also sums credits
+through a reducer. The app's `RunManager` stores that event in `run_events`. The aggregates, the folds, the metrics
+route and the home route all read from that table. Chat takes the same `usage` dict straight from the SDK and stores
+it on the assistant message.
 
 | File | Main classes and functions |
 |---|---|
@@ -123,20 +118,30 @@ separate: both the app and the worker call `configure_logging`, and the app adds
 
 ```mermaid
 sequenceDiagram
-    participant K as Kiro (kiro-cli acp)
-    participant S as kiro-agent-sdk
-    participant N as kiro_node (worker)
-    participant M as RunManager (app)
+    autonumber
+    participant K as Kiro
+    participant S as SDK
+    participant N as kiro_node
+    participant M as RunManager
     participant D as run_events
     participant A as API and web
-    K->>S: _kiro.dev/metadata (contextUsagePercentage)
-    K->>S: _kiro.dev/metadata (meteringUsage, turnDurationMs)
-    S->>S: _accumulate_meta, then _finalize_usage
-    S-->>N: turn.usage {credits, context_pct, turn_duration_ms, provenance}
-    N->>N: telemetry per node and _run (reducer sums credits)
-    N-->>M: ctx.emit agent.result (credits, provenance, attempt, iteration)
-    M->>D: INSERT run_events kind agent.result, payload verbatim
-    A->>D: aggregate_credits, credits_provenance, fold_steps (read)
+    rect rgb(240, 246, 255)
+        Note over K,S: Metering from Kiro
+        K->>S: metadata with contextUsagePercentage
+        K->>S: metadata with meteringUsage
+        S->>S: accumulate, then finalize usage
+    end
+    rect rgb(240, 246, 255)
+        Note over S,D: Record the turn
+        S-->>N: turn.usage with provenance
+        N->>N: telemetry per node, reducer sums credits
+        N-->>M: emit agent.result
+        M->>D: insert agent.result as is
+    end
+    rect rgb(240, 246, 255)
+        Note over D,A: Read
+        A->>D: aggregate_credits, fold_steps
+    end
 ```
 
 The diagram shows one agent turn. Kiro sends the metadata notification at least once. The SDK folds the
@@ -306,15 +311,29 @@ For a run with more than 5000 events, the node list, tool list, end time and `ev
 ### 5.8 Logging
 
 ```mermaid
-flowchart LR
-    rec["log call<br/>logger.info(...)"] --> flt["ContextFilter<br/>copies bound ids"]
-    flt --> fmt{"GENESIS_LOG_JSON?"}
-    fmt -->|"yes"| js["JsonFormatter<br/>one JSON object per line"]
-    fmt -->|"no"| cs["ConsoleFormatter<br/>text plus ids in brackets"]
-    js --> err["stderr"]
+flowchart TB
+    rec["<b>Log call</b><br/>logger.info"]:::comp
+    flt["<b>ContextFilter</b><br/>copies bound ids"]:::comp
+    fmt{"<b>GENESIS_LOG_JSON?</b>"}:::note
+    js["<b>JsonFormatter</b><br/>one JSON object a line"]:::comp
+    cs["<b>ConsoleFormatter</b><br/>text, ids in brackets"]:::comp
+    err["<b>stderr</b>"]:::core
+    file[("<b>genesis.log</b><br/>~/.genesis/run")]:::data
+    pipe["<b>Supervisor pipe</b><br/>last 2000 chars on exit"]:::proc
+    rec --> flt --> fmt
+    fmt -- "yes" --> js
+    fmt -- "no" --> cs
+    js --> err
     cs --> err
-    err -->|"genesis up"| file["~/.genesis/run/genesis.log"]
-    err -->|"worker"| pipe["supervisor stderr pipe<br/>last 2000 chars on exit"]
+    err -- "app: genesis up" --> file
+    err -- "worker" --> pipe
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
 The diagram shows one log line. A single stderr handler decorates it with the bound ids and formats it as JSON or

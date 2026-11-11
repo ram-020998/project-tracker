@@ -65,55 +65,65 @@ The module has four parts:
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph api["API and scheduler (app process)"]
-        routes["api/applications.py<br/>/api/applications routes"]
-        svc["services/application_sync.py<br/>ApplicationSyncService"]
-        jobs["runtime/sync_jobs.py<br/>application-sync job"]
-    end
-    subgraph kbpkg["genesis/kb"]
-        store["store.py<br/>KbStore"]
-        mix["mixins:<br/>object reads, graph reads,<br/>relationship reads, evidence"]
-        blob["blob.py<br/>serialize and deserialize"]
-        devmcp["dev_mcp.py<br/>DevMcpSession, version gate"]
-        pkgs["dev_packages.py<br/>DevMcpPackages"]
-        otypes["object_types.py"]
-    end
-    mcpsrv["mcp/kb_server.py<br/>genesis-kb, read-only"]
-    subgraph wf["genesis-workflows (run worker)"]
-        sync["sync-application"]
-        bmap["generate-business-map"]
-    end
-    runs["RunManager"]
-    parser["genesis-appian-parser"]
-    appian["Appian: Deployment REST<br/>and Dev MCP"]
-    db[("genesis.db")]
-
-    routes --> svc
+flowchart TB
+    jobs["<b>sync_jobs.py</b><br/>application-sync job"]:::comp
+    routes["<b>api/applications.py</b><br/>HTTP routes"]:::comp
+    svc["<b>ApplicationSyncService</b><br/>starts syncs"]:::core
+    runs["<b>RunManager</b><br/>run control"]:::comp
+    sync["<b>sync-application</b><br/>workflow in a worker"]:::proc
+    bmap["<b>generate-business-map</b><br/>workflow in a worker"]:::proc
+    store["<b>KbStore</b><br/>kb/store.py"]:::core
+    db[("<b>genesis.db</b>")]:::data
     jobs --> svc
+    routes --> svc
     svc --> runs
-    runs -. "starts" .-> sync
-    runs -. "starts" .-> bmap
-    routes --> store
-    store --- mix
+    runs -. "starts" .-> sync & bmap
+    sync -- "kb_store" --> store
+    bmap -- "kb_store" --> store
+    routes -- "reads" --> store
     store --> db
-    sync -->|"ctx.extras kb_store"| store
-    bmap -->|"ctx.extras kb_store"| store
-    sync --> parser
-    sync --> appian
-    sync -->|"ctx.extras devmcp_packages"| pkgs
-    pkgs --> devmcp
-    devmcp --> appian
-    mcpsrv --> store
-    mcpsrv --> devmcp
-    store --- blob
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-The routes and the scheduler job both start syncs through `ApplicationSyncService`, which asks `RunManager` to
-start the `sync-application` workflow. The workflow runs in a worker. It exports from Appian, parses with the
-parser library, and writes into `KbStore` through `ctx.extras["kb_store"]`. Incremental syncs also use
-`DevMcpPackages` through `ctx.extras["devmcp_packages"]`. The routes read the KB directly from `KbStore`. The
-`genesis-kb` server opens the same database read-only and reuses `KbStore`'s read methods.
+The routes and the scheduler job both start syncs through `ApplicationSyncService`, which asks `RunManager` to start the `sync-application` workflow. The workflow and the business-map workflow run in workers. They write into `KbStore` through `ctx.extras["kb_store"]`. The routes read the KB directly from `KbStore`, and `KbStore` keeps everything in `genesis.db`.
+
+```mermaid
+flowchart TB
+    sync["<b>sync-application</b><br/>workflow in a worker"]:::proc
+    mcpsrv["<b>genesis-kb</b><br/>MCP server, read-only"]:::proc
+
+    parser["<b>genesis-appian-parser</b><br/>parses the export"]:::ext
+    pkgs["<b>DevMcpPackages</b><br/>dev_packages.py"]:::comp
+    store["<b>KbStore</b><br/>kb/store.py"]:::core
+
+    devmcp["<b>DevMcpSession</b><br/>dev_mcp.py, version gate"]:::comp
+    mix["<b>Read mixins</b><br/>objects, graph, evidence"]:::comp
+    blob["<b>blob.py</b><br/>serialize, deserialize"]:::comp
+
+    appian["<b>Appian</b><br/>Deployment REST, Dev MCP"]:::ext
+
+    sync -- "parse" --> parser
+    sync -- "export" --> appian
+    sync -- "devmcp_packages" --> pkgs
+    pkgs --> devmcp
+    mcpsrv -- "live code" --> devmcp
+    mcpsrv -- "read" --> store
+    devmcp --> appian
+    store --> mix & blob
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+```
+
+The workflow exports from Appian and parses the export with the parser library. Incremental syncs also use `DevMcpPackages` through `ctx.extras["devmcp_packages"]`, which talks to Appian through `DevMcpSession`. The `genesis-kb` server opens the same database read-only and reuses the read methods that `KbStore` gets from its mixins; it fetches live SAIL code through `DevMcpSession` (ADR-037).
 
 | File | Main classes and functions |
 |---|---|
@@ -174,26 +184,48 @@ the installed workflow declares an `options` property.
 ### 5.3 The sync-application workflow, step by step
 
 ```mermaid
-flowchart TD
-    A["resolve_inputs"] --> B["plan_sync"]
-    B -->|"full"| X["export_package"]
-    B -->|"incremental"| D["build_delta_package"]
-    B -->|"empty"| E["record_empty_sync"]
-    D -->|"nothing added"| X
-    D -->|"validate"| V["v_export"]
+flowchart TB
+    S(( )):::startpt
+    A["<b>resolve_inputs</b>"]:::comp
+    B["<b>plan_sync</b>"]:::comp
+    D["<b>build_delta_package</b>"]:::comp
+    X["<b>export_package</b>"]:::comp
+    E["<b>record_empty_sync</b>"]:::comp
+    V["<b>v_export</b><br/>validator"]:::proc
+    P["<b>parse_package</b>"]:::comp
+    VP["<b>v_parse</b><br/>validator"]:::proc
+    W["<b>write_kb</b>"]:::comp
+    VK["<b>v_kb</b><br/>validator"]:::proc
+    H["<b>publish_hub</b>"]:::comp
+    PR["<b>present</b>"]:::comp
+    ERR["<b>surface_error</b>"]:::bad
+    F(( )):::endpt
+    F2(( )):::endpt
+
+    S --> A --> B
+    B -- "incremental" --> D
+    B -- "full" --> X
+    B -- "empty" --> E
+    D -- "no full sync yet" --> X
+    D -- "validate" --> V
     X --> V
-    V -->|"pass"| P["parse_package"]
-    V -->|"retry"| X
-    V -->|"retry_delta"| D
-    V -->|"fail"| ERR["surface_error"]
-    P --> VP["v_parse"]
-    VP -->|"pass"| W["write_kb"]
-    VP -->|"fail"| ERR
-    W --> VK["v_kb"]
-    VK -->|"pass"| H["publish_hub"]
-    VK -->|"fail"| ERR
+    V -- "retry_delta" --> D
+    V -- "retry" --> X
+    V -- "pass" --> P --> VP
+    VP -- "pass" --> W --> VK
+    VK -- "pass" --> H
     E --> H
-    H --> PR["present"]
+    H --> PR --> F
+    V -- "fail" --> ERR
+    VP -- "fail" --> ERR
+    VK -- "fail" --> ERR
+    ERR --> F2
+
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    classDef startpt fill:#212121,stroke:#212121
+    classDef endpt fill:#ffffff,stroke:#212121,stroke-width:3px
 ```
 
 The graph has no agent step and no gate. LangGraph owns the control flow (ADR-001). The only write to Appian is
@@ -258,31 +290,45 @@ the temporary delta package (ADR-073). The nodes:
 
 ```mermaid
 sequenceDiagram
-    participant U as Scheduler or user
-    participant S as ApplicationSyncService
-    participant R as RunManager and worker
+    autonumber
+    participant U as Starter
+    participant S as SyncService
+    participant R as Run worker
     participant K as KbStore
-    participant D as Dev MCP (DevMcpPackages)
-    participant A as Appian Deployment REST
+    participant D as Dev MCP
+    participant A as Appian REST
     participant P as Parser
-    U->>S: start_sync(app, mode auto)
-    S->>S: is_sync_running? resolve_mode
+    rect rgb(240, 246, 255)
+    Note over U,R: Start
+    U->>S: start_sync, mode auto
+    S->>S: check running, resolve mode
     S->>R: start sync-application
-    R->>K: last_successful_sync(kinds)
-    R->>D: sweep leftovers, listObjects since covered_until
+    end
+    rect rgb(240, 246, 255)
+    Note over R,D: Find changed objects
+    R->>K: last_successful_sync
+    R->>D: sweep leftovers, list changes
     D-->>R: changed objects
-    R->>D: createPackage, addPackageObjects
-    R->>A: export package, poll, download zip
-    R->>D: deletePackage (finally)
+    end
+    rect rgb(240, 246, 255)
+    Note over R,A: Export a temporary package
+    R->>D: create package, add objects
+    R->>A: export, poll, download zip
+    R->>D: delete package
+    end
+    rect rgb(240, 246, 255)
+    Note over R,K: Parse and merge
     R->>K: known_context
-    R->>P: parse(zip, known_objects, known_edges)
-    R->>K: begin_sync, apply(incremental), finish_sync(details)
-    R->>K: export_snapshot, then publish to Hub if enabled
+    R->>P: parse zip with known context
+    R->>K: begin_sync, apply, finish_sync
+    R->>K: export_snapshot
+    end
+    opt collaboration on
+        Note over R,K: Publish the snapshot to the Hub
+    end
 ```
 
-The scheduler or a user asks the service to start a sync. The worker finds the last own sync, lists the objects
-changed since then, builds and exports a temporary package, deletes it, parses it against the KB's known context,
-and merges only the package objects. A snapshot goes to the Hub afterwards if collaboration is on.
+The scheduler or a user asks the service to start a sync. The worker finds the last own sync, lists the objects changed since then, builds and exports a temporary package, deletes it, parses it against the KB's known context, and merges only the package objects. A snapshot goes to the Hub afterwards if collaboration is on.
 
 ### 5.5 The export calls
 

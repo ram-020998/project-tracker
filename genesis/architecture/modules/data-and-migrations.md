@@ -50,36 +50,34 @@ app process, the worker processes and the async checkpointer share one file safe
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph db["genesis/db"]
-        database["database.py<br/>Database"]
-        runner["runner.py<br/>migrate, pending,<br/>current_version"]
-        migs["migrations/<br/>m0001 ... m0028<br/>MIGRATIONS"]
-    end
-    subgraph callers["Callers that migrate"]
-        rm["RunManager.__init__"]
-        cm["ChatManager.__init__"]
-        cli["genesis db upgrade / status"]
-        pf["runtime/preflight.py"]
-    end
-    stores["Stores<br/>RunStore, EventLog, KbStore,<br/>ChatStore, ..."]
-    ckpt["runtime/checkpoint.py<br/>AsyncSqliteSaver"]
-    file[("genesis.db<br/>WAL file")]
-    mem["memory/db.py<br/>memory.db"]
+flowchart TB
+    callers["<b>At startup</b><br/>RunManager, genesis db"]:::ext
+    stores["<b>Stores</b><br/>RunStore, KbStore, ..."]:::ext
+    ckpt["<b>checkpoint.py</b><br/>AsyncSqliteSaver"]:::ext
+
+    runner["<b>runner.py</b><br/>migrate, pending"]:::core
+    migs["<b>migrations/</b><br/>m0001 to m0028"]:::comp
+    database["<b>database.py</b><br/>Database"]:::core
+
+    db[("<b>genesis.db</b><br/>SQLite, WAL")]:::data
+
+    callers -- "migrate" --> runner
     migs --> runner
-    rm & cm & cli --> runner
-    pf --> runner
     runner --> database
-    stores --> database
-    database --> file
-    ckpt --> file
-    mem --> database
-    mem --> runner
+    stores -- "connect, tx" --> database
+    database --> db
+    ckpt -- "own connection" --> db
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
-The diagram shows two paths into one file. Stores and the migration runner go through `Database`. The LangGraph
-checkpointer opens its own `aiosqlite` connection and does not use `Database`. The memory module reuses
-`Database` and `migrate` but points them at a different file.
+The diagram shows two paths into `genesis.db`. At startup the run manager (and the `genesis db` command) call
+the migration runner, which applies the migration files through `Database`. Stores also go through `Database`. The
+LangGraph checkpointer opens its own `aiosqlite` connection and does not use `Database`. Not drawn: the memory module
+reuses `Database` and `migrate` but points them at `memory.db`.
 
 | File | Main classes and functions |
 |---|---|
@@ -151,22 +149,29 @@ closes its connection afterwards.
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant C as Caller
-    participant R as runner.migrate
+    participant R as migrate
     participant D as Database
     participant S as schema_migrations
-    C->>R: migrate(db, MIGRATIONS)
-    R->>R: _validate_contiguous (1, 2, 3 ... no gaps)
-    R->>D: connect()
-    R->>S: CREATE TABLE IF NOT EXISTS, read applied versions
+    C->>R: migrate with MIGRATIONS
+    R->>R: check versions are contiguous
+    rect rgb(240, 246, 255)
+    Note over R,S: Read applied versions
+    R->>D: connect
+    R->>S: create table, read versions
     R->>D: close
-    loop each migration not yet applied, in order
-        R->>D: connect() (new connection)
-        R->>R: m.up(conn) or the foreign-keys-off path
-        R->>S: INSERT version, name, applied_at
-        R->>D: commit, close
     end
-    R-->>C: list of versions applied
+    rect rgb(240, 246, 255)
+    Note over R,S: One connection per migration
+    loop each pending migration, in order
+        R->>D: connect, new connection
+        R->>R: run up, or foreign-keys-off path
+        R->>S: insert version, name, time
+        R->>D: commit and close
+    end
+    end
+    R-->>C: versions applied
 ```
 
 The diagram shows that each migration gets its own connection, and that the bookkeeping row is written on the

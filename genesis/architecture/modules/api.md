@@ -51,27 +51,38 @@ module document describes each route file.
 
 ```mermaid
 flowchart TB
-    cli["genesis serve<br/>cli/main.py"] --> guard["bind_guard_error<br/>runtime/launcher.py"]
-    cli --> rep["ReportsServer<br/>testexec/reports_origin.py"]
-    cli --> create["create_app<br/>api/app.py"]
-    create --> svc["services, stores,<br/>observers, finalizers"]
-    create --> reg["register_*_routes<br/>one per route file"]
-    reg --> apirouter["APIRouter<br/>included at /api"]
-    create --> mw["correlation-id<br/>middleware"]
-    create --> hooks["startup and<br/>shutdown hooks"]
-    create --> spa["/assets mount, /,<br/>history fallback"]
-    apirouter --> app["FastAPI app"]
-    mw --> app
-    spa --> app
+    serve["<b>genesis serve</b><br/>cli/main.py"]:::person
+    guard["<b>Bind guard</b><br/>runtime/launcher.py"]:::comp
+    reports["<b>ReportsServer</b><br/>second port"]:::comp
+    create["<b>create_app</b><br/>api/app.py"]:::core
+
+    services["<b>Services</b><br/>stores, finalizers"]:::comp
+    register["<b>register_*_routes</b><br/>one per route file"]:::comp
+    shared["<b>_shared.py</b><br/>request models"]:::comp
+    hooks["<b>Middleware, hooks</b><br/>request id, startup"]:::comp
+    spa["<b>SPA routes</b><br/>/assets, fallback"]:::comp
+
+    app["<b>FastAPI app</b><br/>/api router + SPA"]:::core
+
+    serve -- "1 check host" --> guard
+    serve -- "2 start" --> reports
+    serve -- "3 build, run" --> create
+    create -- "builds" --> services
+    create --> hooks & spa
+    shared --> register
+    services -- "passed to" --> register
+    register --> app
     hooks --> app
-    shared["_shared.py<br/>request models, formatters"] --> reg
-    web["web/ SPA"] --> app
-    mcp["control MCP server"] --> app
+    spa --> app
+
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
 ```
 
 The CLI checks the bind, starts the reports origin, then calls `create_app`. `create_app` builds the services, hands
-them to the route modules, and ends with one FastAPI app that carries the `/api` router, the middleware, the lifecycle
-hooks and the SPA routes. The SPA and the control MCP server are the two callers.
+them to the route modules, and ends with one FastAPI app that carries the `/api` router, the middleware and
+lifecycle hooks, and the SPA routes. The diagram leaves out the app's two callers: the SPA and the control MCP server.
 
 | File | What it contains |
 |---|---|
@@ -93,30 +104,40 @@ hooks and the SPA routes. The SPA and the control MCP server are the two callers
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant C as cli/main.py serve
-    participant G as launcher.bind_guard_error
+    autonumber
+    actor U as User
+    participant C as serve command
+    participant G as Bind guard
     participant R as ReportsServer
     participant A as create_app
     participant V as uvicorn
-    U->>C: genesis serve [--host --port --reports-port]
+    rect rgb(240, 246, 255)
+    Note over U,V: Checks before start
+    U->>C: genesis serve with host and ports
     C->>G: check host
     G-->>C: error text or None
     alt non-loopback and no opt-in
         C-->>U: message on stderr, exit 2
     end
-    C->>C: set GENESIS_API_BASE (if unset)
-    C->>R: start on host, reports port
+    end
+    rect rgb(240, 246, 255)
+    Note over C,R: Reports origin
+    C->>C: set GENESIS_API_BASE if unset
+    C->>R: start on host and reports port
     R-->>C: running, or OSError
     alt reports port busy
         C-->>U: hint on stderr, exit 2
     end
     C->>C: set GENESIS_REPORTS_URL
-    C->>A: create_app()
+    end
+    rect rgb(240, 246, 255)
+    Note over C,V: App
+    C->>A: create_app
     A-->>C: FastAPI app
-    C->>V: run(app, host, port)
+    C->>V: run app on host and port
     V-->>U: serving
-    Note over C,R: finally: reports.stop()
+    end
+    C->>R: stop in finally
 ```
 
 The bind guard runs first, so a refused host opens neither port. The reports origin starts before the app, and
@@ -295,25 +316,32 @@ confirm. The API side of that rule is the control token.
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant Ch as ChatManager
-    participant K as Kiro (copilot session)
-    participant M as control MCP server
+    participant K as Kiro copilot
+    participant M as Control MCP
     participant P as POST /api/runs
     participant RM as RunManager
-    Ch->>Ch: copilot session opens: mint token, register_token(token, session_id)
-    Ch->>M: start with GENESIS_API_BASE url and token
-    K->>M: start_run (user confirms in chat)
-    M->>P: POST /api/runs + X-Genesis-Control-Token
-    P->>Ch: session_for_token(token)
+    rect rgb(240, 246, 255)
+    Note over Ch,M: Session opens
+    Ch->>Ch: mint token, register it
+    Ch->>M: start with API url and token
+    end
+    rect rgb(240, 246, 255)
+    Note over K,P: Start request
+    K->>M: start_run after user confirms
+    M->>P: POST with control token header
+    P->>Ch: session_for_token
     Ch-->>P: session id
-    P->>P: _enforce_copilot_start(session, workflow)
-    alt kill-switch, deny list, concurrency or rate limit
+    P->>P: enforce copilot limits
+    alt kill-switch, deny list, or limit
         P-->>M: 403 or 429
     else allowed
-        P->>RM: start(workflow, inputs, ...)
+        P->>RM: start workflow
         RM-->>P: run_id
-        P->>Ch: link_run(run_id, session)
-        P-->>M: {"run_id": ...}
+        P->>Ch: link_run
+        P-->>M: run_id
+    end
     end
 ```
 

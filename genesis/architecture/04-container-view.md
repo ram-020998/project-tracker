@@ -15,54 +15,62 @@ harming the app.
 
 ```mermaid
 flowchart TB
-    browser(["Browser<br/>React SPA"])
+    browser(["<b>Browser</b><br/>React SPA"]):::ext
+    app["<b>App process</b><br/>genesis serve, FastAPI /api<br/>RunManager, ChatManager"]:::core
+    reports["<b>Reports origin</b><br/>second port, static files"]:::comp
+    worker["<b>Run worker</b><br/>runs the workflow graph"]:::proc
+    kiroW["<b>kiro-cli acp</b><br/>one per agent step"]:::proc
+    mcpW["<b>Step MCP servers</b><br/>blackboard, appian-dev, ..."]:::proc
+    kiroC["<b>kiro-cli acp</b><br/>one per chat session"]:::proc
+    mcpC["<b>Chat MCP servers</b><br/>read-only set"]:::proc
+    apwt["<b>apwt and Chromium</b><br/>test runs only"]:::proc
 
-    subgraph app["Genesis app process — genesis serve (uvicorn)"]
-        api["FastAPI /api<br/>+ SPA files"]
-        rm["RunManager"]
-        chatm["ChatManager"]
-        fin["Finalizers and observers<br/>(run → domain records)"]
-        sched["Scheduler + collab auto-pull"]
-        reports["Reports origin<br/>(second listener, port + 100)"]
-    end
-
-    subgraph worker["Run worker — python -m genesis.runs.worker (one per run operation)"]
-        graph["Workflow graph.py<br/>+ genesis-core nodes"]
-    end
-
-    kiroW["kiro-cli acp<br/>(one per agent step)"]
-    kiroC["kiro-cli acp<br/>(one per live chat session)"]
-    mcpW["MCP servers for the step<br/>blackboard, appian-dev, genesis-kb, …"]
-    mcpC["Chat MCP servers<br/>genesis-kb, genesis-memory,<br/>genesis, appian-dev, genesis-control"]
-    browserTest["apwt / Playwright / Chromium<br/>(test runs only)"]
-
-    db[("genesis.db<br/>SQLite WAL")]
-    memdb[("memory.db<br/>SQLite")]
-    art[["Artifacts root<br/>~/Genesis/runs/&lt;workflow&gt;/&lt;run&gt;/"]]
-    state[["State folder ~/.genesis/<br/>library, lockfile, secrets,<br/>stage artifacts, testing workspaces"]]
-
-    browser -- "HTTP /api + SSE" --> api
+    browser -- "HTTP /api and SSE" --> app
     browser -- "report pages" --> reports
-    api --> rm & chatm
-    rm -- "spawn, JSON job on stdin;<br/>JSONL events on stdout" --> worker
-    graph -- "ACP stdio" --> kiroW
-    kiroW -- "MCP stdio" --> mcpW
-    chatm -- "ACP stdio" --> kiroC
+    app -- "job in, events out" --> worker
+    app -- "ACP stdio" --> kiroC
     kiroC -- "MCP stdio" --> mcpC
-    graph -- "program steps" --> browserTest
-    rm & fin & chatm --> db
-    graph -- "checkpoints" --> db
-    graph --> art
-    mcpC --> db & memdb
-    reports --> art
-    rm & fin --> state
+    worker -- "ACP stdio" --> kiroW
+    kiroW -- "MCP stdio" --> mcpW
+    worker -- "program steps" --> apwt
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-The browser talks only to the app process. The app's RunManager starts a worker for each run operation. The
-worker loads the workflow's `graph.py`, runs it, and writes LangGraph checkpoints into `genesis.db` and bulk
-files into the run's artifacts folder. Each agent step in the graph starts its own `kiro-cli acp`, which starts
-that step's MCP servers. Chat is different: it keeps one `kiro-cli` per live chat session inside the app process,
-with a fixed read-only set of MCP servers. Test workflows also start browser processes from program steps.
+The browser talks only to the app process, and to the reports origin for test report pages. The app process starts a run worker for each run operation, handing it a JSON job and reading its events back as JSON lines. The worker loads the workflow graph. For each agent step it starts a Kiro CLI, and Kiro starts that step's MCP servers. Chat is different: the app keeps one Kiro CLI per live chat session, with a fixed read-only set of MCP servers. Test workflows also start browser processes from program steps.
+
+```mermaid
+flowchart TB
+    app["<b>App process</b><br/>RunManager, ChatManager,<br/>finalizers"]:::core
+    mcp["<b>Chat MCP servers</b><br/>kb, memory, introspection"]:::proc
+    worker["<b>Run worker</b><br/>graph and nodes"]:::proc
+    reports["<b>Reports origin</b><br/>static files"]:::comp
+
+    state[("<b>~/.genesis</b><br/>library, secrets,<br/>workspaces")]:::data
+    db[("<b>genesis.db</b><br/>runs, events, KB,<br/>checkpoints")]:::data
+    mem[("<b>memory.db</b><br/>memories, vectors")]:::data
+    art[("<b>~/Genesis/runs</b><br/>one folder per run")]:::data
+
+    app -- "settings" --> state
+    app -- "records" --> db
+    mcp -- "reads" --> db
+    mcp -- "reads" --> mem
+    worker -- "checkpoints" --> db
+    worker -- "files" --> art
+    reports -- "serves" --> art
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+```
+
+The processes are on top and the data stores below. The app process keeps settings, the installed library and secrets in `~/.genesis`, and writes run records, the event log and domain records to `genesis.db`. The run worker writes LangGraph checkpoints to `genesis.db` and bulk files to the run's folder under `~/Genesis/runs`. The chat MCP servers only read `genesis.db` and `memory.db`. The reports origin serves files from the run folders. Bulk content never goes into a database; it stays in files.
 
 ## 4.2 The containers
 

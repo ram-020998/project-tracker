@@ -10,46 +10,43 @@ mechanics are in [distribution.md](modules/distribution.md).
 ## 9.1 One machine
 
 ```mermaid
-flowchart TB
-    subgraph mac["Engineer's computer (macOS or Linux)"]
-        subgraph clone["Clone of the genesis repo"]
-            venv[".venv (Python 3.13)<br/>genesis, genesis-core,<br/>kiro-agent-sdk, genesis-appian-parser"]
-            static["web/static (built SPA)"]
-        end
-        app["genesis serve<br/>127.0.0.1:8760 (app + /api)<br/>127.0.0.1:8860 (reports)"]
-        kiro["kiro-cli (user install)"]
-        node["Node.js 20+ (user install, for testing)"]
-        subgraph state["~/.genesis (state)"]
-            db[("genesis.db, memory.db")]
-            lib["library/, installed.lock.json"]
-            sec["secrets.json (0600), environments.json"]
-            mcp["mcp-servers/ (Dev, DevOps MCP)<br/>cli-tools/ (gws, sail)"]
-            test["testing/ (Chromium, app workspaces)"]
-            run["run/ (pid, log, runs.lock)"]
-        end
-        art["~/Genesis/runs (run folders)"]
-        browser["Browser"]
-    end
-    gitlab["Internal GitLab"]
-    appian["Appian Dev and QA"]
-    kirocloud["Kiro service"]
-    hub["Genesis Hub (optional)"]
-    google["Google Workspace"]
+flowchart LR
+    browser(["<b>Browser</b><br/>same machine"]):::person
+    clone["<b>genesis clone</b><br/>.venv, web/static"]:::comp
+    serve["<b>genesis serve</b><br/>app and /api :8760<br/>reports :8860"]:::core
 
-    browser --> app
-    venv --> app
-    static --> app
-    app --> state & art
-    app --> kiro --> kirocloud
-    app --> appian & hub & google
-    clone -. "git fetch tags" .-> gitlab
-    lib -. "install from" .-> gitlab
+    state[("<b>~/.genesis</b><br/>databases, library,<br/>secrets, tools")]:::data
+    runs[("<b>~/Genesis/runs</b><br/>run folders")]:::data
+    kiro["<b>kiro-cli</b><br/>user install"]:::proc
+    node["<b>Node.js and Chromium</b><br/>browser tests"]:::proc
+
+    kirocloud["<b>Kiro service</b>"]:::ext
+    appian["<b>Appian Dev and QA</b>"]:::ext
+    gitlab["<b>Internal GitLab</b><br/>library, release tags"]:::ext
+    google["<b>Google Workspace</b>"]:::ext
+    hub["<b>Genesis Hub</b><br/>optional"]:::ext
+
+    browser -- "HTTP" --> serve
+    clone -- "runs from" --> serve
+    serve --> state
+    serve --> runs
+    serve -- "ACP stdio" --> kiro
+    serve -- "test runs" --> node
+    kiro -- "HTTPS" --> kirocloud
+    serve -- "MCP, REST" --> appian
+    serve -- "REST, git" --> gitlab
+    serve -- "gws CLI" --> google
+    serve -. "opt-in" .-> hub
+
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
-The clone holds the code and one virtual environment with all four packages. `genesis serve` runs from that
-environment and listens on two loopback ports. Everything it keeps lives in `~/.genesis/` and
-`~/Genesis/runs/`. Kiro CLI and Node.js are installed by the user. Outgoing connections go to the Kiro service
-(through kiro-cli), Appian, GitLab, Google and, when enabled, the Hub.
+Everything except the grey boxes runs on the engineer's computer. `genesis serve` runs from the clone's virtual environment and listens on two loopback ports: 8760 for the app and 8860 for reports. It keeps its data in `~/.genesis` and `~/Genesis/runs`. Kiro CLI, Node.js and Chromium are local programs: the user installs Kiro CLI and Node.js, and Genesis installs Chromium. The grey boxes are outside the computer. Genesis reaches Appian, GitLab and Google directly, and the Kiro service only through kiro-cli. The dotted line is the optional Genesis Hub, used only when collaboration is on.
 
 ## 9.2 What is installed where
 

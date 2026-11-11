@@ -61,47 +61,57 @@ design, and the `gws` login flow.
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph api["genesis/api"]
-        docapi["documents.py<br/>routes under /api"]
-        nativecli["native_cli.py<br/>gws login routes"]
-    end
-    subgraph kb["genesis/kb"]
-        store["documents.py<br/>DocumentStore"]
-        engine["doc_sync.py<br/>DocumentSyncEngine"]
-        parsing["doc_parsing.py<br/>parse to Markdown"]
-        pdf["pdf_render.py<br/>PDF to PNG"]
-    end
-    subgraph integ["genesis/integrations"]
-        prov["documents/<br/>DocumentProvider,<br/>GoogleDriveProvider"]
-        gws["gws/<br/>GwsClient, GwsLogin"]
-    end
-    wf["sync-documents<br/>workflow (worker)"]
-    kbmcp["mcp/kb_server.py<br/>document tools"]
-    db[("genesis.db")]
-    disk[("kb-documents/<br/>folders")]
-    bin["gws binary"]
-
-    docapi --> engine
+flowchart TB
+    kbmcp["<b>genesis-kb</b><br/>document tools, read-only"]:::proc
+    docapi["<b>api/documents.py</b><br/>routes under /api"]:::comp
+    wf["<b>sync-documents</b><br/>workflow in a worker"]:::proc
+    engine["<b>DocumentSyncEngine</b><br/>doc_sync.py"]:::core
+    store["<b>DocumentStore</b><br/>kb/documents.py"]:::core
+    parsing["<b>doc_parsing.py</b><br/>parse to Markdown"]:::comp
+    db[("<b>genesis.db</b>")]:::data
+    disk[("<b>kb-documents</b><br/>one folder per document")]:::data
+    kbmcp -- "query" ----> store
     docapi --> store
-    wf -->|"ctx.extras"| engine
+    docapi --> engine
+    wf -- "ctx.extras" --> engine
     engine --> store
     engine --> parsing
-    engine --> prov
-    prov --> gws
-    gws --> bin
-    nativecli --> gws
-    parsing -->|"store_parsed"| store
+    parsing -- "store_parsed" --> store
     parsing --> disk
     store --> db
-    kbmcp -->|"read only"| store
-    wfux["ux-design-analysis<br/>workflow"] -->|"ctx.extras"| pdf
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-The API and the sync workflow both go through `DocumentSyncEngine`. The engine owns the sync steps and delegates
-Drive access to a provider, which uses `GwsClient`. Parsing and the on-disk write sit in `doc_parsing.py`; the
-store owns every SQL statement. The `genesis-kb` MCP server and the feature API read the store but never write it.
-`pdf_render.py` is separate: it does not touch documents, and the `ux-design-analysis` workflow calls it.
+The API and the sync workflow both go through `DocumentSyncEngine`. The engine owns the sync steps. Parsing and the on-disk write sit in `doc_parsing.py`, and the store owns every SQL statement. The `genesis-kb` MCP server and the feature API (not drawn) read the store but never write it.
+
+```mermaid
+flowchart LR
+    engine["<b>DocumentSyncEngine</b><br/>doc_sync.py"]:::core
+    prov["<b>GoogleDriveProvider</b><br/>DocumentProvider"]:::comp
+    gws["<b>GwsClient</b><br/>integrations/gws"]:::comp
+    bin["<b>gws binary</b><br/>managed install"]:::proc
+    login["<b>native_cli.py</b><br/>gws login routes"]:::comp
+    wfux["<b>ux-design-analysis</b><br/>workflow"]:::proc
+    pdf["<b>pdf_render.py</b><br/>PDF to PNG"]:::comp
+    engine --> prov --> gws --> bin
+    login --> gws
+    wfux -- "ctx.extras" --> pdf
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
+```
+
+The engine delegates Drive access to a provider, which uses `GwsClient` to run the `gws` binary. The login routes also use `GwsClient`. `pdf_render.py` is separate: it does not touch documents, and the `ux-design-analysis` workflow calls it.
 
 | File | Main classes and functions |
 |---|---|
@@ -155,39 +165,47 @@ A sync is a deterministic workflow with no agent and no credits (ADR-001). The A
 
 ```mermaid
 sequenceDiagram
-    participant S as Starter<br/>(API or scheduler)
-    participant W as sync-documents<br/>worker
-    participant E as DocumentSyncEngine
-    participant P as GoogleDriveProvider
+    autonumber
+    participant S as Starter
+    participant W as Sync worker
+    participant E as SyncEngine
+    participant P as Drive provider
     participant G as gws binary
-    participant D as DocumentStore<br/>+ disk
-
-    S->>W: start(scope, ids)
-    W->>E: resolve_targets(scope)
-    E->>D: gdrive_documents()
-    D-->>E: rows with stored fingerprints
+    participant D as Store and disk
+    rect rgb(240, 246, 255)
+    Note over S,D: Resolve targets
+    S->>W: start with scope and ids
+    W->>E: resolve_targets
+    E->>D: gdrive_documents
+    D-->>E: rows with fingerprints
+    end
+    rect rgb(240, 246, 255)
+    Note over W,G: Fetch each target
     loop each target
-        W->>E: fetch(target, dest)
-        E->>P: resolve(ref)
+        W->>E: fetch target
+        E->>P: resolve ref
         P->>G: drive files get
-        G-->>P: name, mimeType, fingerprint
+        G-->>P: name, type, fingerprint
         alt fingerprint equal
             E-->>W: action unchanged
         else changed or new
-            E->>P: fetch(ref, meta, dest)
+            E->>P: fetch ref
             P->>G: export or download
             G-->>P: file in dest
-            E-->>W: action fetched, path
+            E-->>W: action fetched
         end
     end
-    W->>E: parse(path) per fetched file
-    W->>E: write(...) in a thread
-    E->>D: store_parsed + set_fingerprint
-    W->>W: v_write, then present report.json
+    end
+    rect rgb(240, 246, 255)
+    Note over W,D: Parse and write
+    W->>E: parse each fetched file
+    W->>E: write in a thread
+    E->>D: store_parsed, set_fingerprint
+    W->>W: v_write, then present
+    end
 ```
 
-The diagram shows one run. Targets are resolved first, then each target is fetched or skipped, then the fetched
-files are parsed and written, and a validator checks the result.
+The diagram shows one run. Targets are resolved first, then each target is fetched or skipped, then the fetched files are parsed and written, and a validator checks the result.
 
 The graph is `resolve_targets → fetch_or_export → parse → write_documents → v_write → present`, with
 `surface_error` on a failed validation. Step by step:
@@ -255,22 +273,28 @@ If a later version has no tables but an earlier one had, `tables.json` stays on 
 ### 5.6 Document status
 
 ```mermaid
-stateDiagram-v2
-    [*] --> pending: upsert_document (new row)
-    pending --> parsed: set_content
-    pending --> error: set_error
-    pending --> source_missing: mark_source_missing
-    parsed --> parsed: later sync, new content
-    parsed --> error: later parse or fetch fails
-    parsed --> source_missing: Drive returns not found
-    error --> parsed: later sync succeeds
-    source_missing --> parsed: later sync succeeds
-    parsed --> [*]: remove (explicit delete)
+flowchart TB
+    start(( )):::startpt
+    pending("<b>Pending</b><br/>new row"):::waiting
+    write{{"<b>Each sync writes</b><br/>one result"}}:::step
+    parsed("<b>Parsed</b>"):::terminal
+    error("<b>Error</b><br/>message stored"):::bad
+    missing("<b>Source missing</b><br/>old content kept"):::bad
+
+    start --> pending --> write
+    write -- "set_error" --> error
+    write -- "set_content" --> parsed
+    write -- "mark_source_missing" --> missing
+
+    classDef step fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    classDef startpt fill:#212121,stroke:#212121
 ```
 
-A new row starts as `pending`. A successful write sets `parsed`. A failure sets `error` with a message cut to 2000
-characters. A missing Drive file sets `source_missing`; the old content stays on disk and stays readable. Any later
-successful write moves the row back to `parsed`. Only an explicit delete removes the row.
+A new row starts as `pending`. Each sync then writes one result, whatever the current status, so a row can move
+between the three result states on any later sync. A successful write sets `parsed`. A failure sets `error` with a message cut to 2000 characters. A missing Drive file sets `source_missing`; the old content stays on disk and stays readable. Any later successful write moves the row back to `parsed`. Only an explicit delete removes the row.
 
 ### 5.7 Linking, untracking and deleting
 

@@ -65,46 +65,36 @@ Four more ideas shape the module:
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph app["App process"]
-        api["api/memory.py<br/>curation routes"]
-        sys["api/system.py<br/>GET /system/memory"]
-        jobs["runtime/memory_jobs.py<br/>two scheduler jobs"]
-        ctx["runtime/context.py<br/>ctx.extras"]
-    end
-    subgraph mem["genesis/memory"]
-        store["store.py<br/>MemoryStore, GraphStore"]
-        retr["retrieval.py<br/>HybridRetriever"]
-        vec["vector.py<br/>VectorIndex"]
-        emb["embedder.py"]
-        cr["chat_read.py<br/>ChatReadAccessor"]
-        mdb["db.py + migrations/"]
-    end
-    subgraph worker["Run worker"]
-        wf["memory-consolidation<br/>memory-maintenance"]
-    end
-    subgraph mcp["Kiro-launched subprocess"]
-        srv["mcp/memory_server.py<br/>genesis-memory"]
-    end
-    memdb[("memory.db")]
-    gdb[("genesis.db<br/>chat tables")]
+flowchart TB
+    api["<b>api/memory.py</b><br/>human curation"]:::comp
+    jobs["<b>memory_jobs.py</b><br/>scheduler jobs"]:::comp
+    srv["<b>genesis-memory</b><br/>MCP server for chat"]:::proc
+    wf["<b>Run worker</b><br/>consolidation, maintenance"]:::proc
 
-    jobs -->|"RunManager.start"| wf
-    ctx --> store & cr & emb
-    wf --> store & cr & emb & vec
-    api --> store
-    sys --> store
-    srv --> retr --> store & vec & emb
-    store --> memdb
-    vec --> memdb
-    mdb --> memdb
-    cr -->|"read only"| gdb
+    lib["<b>genesis/memory</b><br/>MemoryStore<br/>GraphStore<br/>HybridRetriever<br/>VectorIndex<br/>Embedder<br/>ChatReadAccessor"]:::core
+
+    memdb[("<b>memory.db</b>")]:::data
+    gdb[("<b>genesis.db</b><br/>chat tables")]:::data
+
+    jobs -- "start run" --> wf
+    api -- "edit, pin, delete" --> lib
+    wf -- "write memories" --> lib
+    srv -- "search" --> lib
+    lib -- "store" --> memdb
+    lib -- "read chat" --> gdb
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
-The diagram shows three places where memory code runs. The app process serves the curation API and fires the two
-scheduler jobs. The run worker runs the two workflows, which reach the stores through `ctx.extras`. A subprocess
-that Kiro starts for each chat session runs the MCP server, which builds its own retriever and embedder. All of
-them write to or read from `memory.db`. The only access to `genesis.db` is the read-only chat reader.
+The library `genesis/memory` (dark blue) holds the stores, the retriever, the vector index, the embedder and the
+read-only chat reader. It has three callers. The curation routes in `api/memory.py` edit, pin and delete memories.
+The two scheduler jobs in `memory_jobs.py` start the consolidation and maintenance workflows; these run in a run
+worker (light blue) and reach the library through `ctx.extras`. The `genesis-memory` MCP server runs in a subprocess
+that Kiro starts for each chat session (light blue) and searches with its own retriever and embedder. The library
+writes `memory.db`. Its only access to `genesis.db` is the read-only chat reader.
 
 | File | Main classes and functions |
 |---|---|
@@ -151,16 +141,28 @@ A memory is never edited in place. The store closes it and adds a new row.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Current: add_memory
-    Current --> Superseded: update_memory<br/>(new row added, valid_to set)
-    Current --> Invalidated: invalidate_memory<br/>(contradiction or merge)
-    Current --> Archived: archive_memory, forget_before, discard
-    Archived --> Current: unarchive_memory
-    Superseded --> [*]
-    Invalidated --> [*]
-    Current --> Deleted: delete_memory (hard purge)
-    Archived --> Deleted: delete_memory (hard purge)
-    Deleted --> [*]
+    direction LR
+    state "Current" as cur
+    state "Superseded" as sup
+    state "Invalidated" as inv
+    state "Archived" as arc
+    state "Deleted" as del
+    [*] --> cur : add_memory
+    cur --> sup : update_memory
+    cur --> inv : invalidate_memory
+    cur --> arc : archive, forget, discard
+    arc --> cur : unarchive_memory
+    cur --> del : delete_memory
+    arc --> del : delete_memory
+    sup --> [*]
+    inv --> [*]
+    del --> [*]
+    class cur terminal
+    class arc waiting
+    class del bad
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
 ```
 
 A `Current` memory has `valid_to` empty and `archived = 0`. `update_memory(old_id, **fields)` inserts a new
@@ -198,29 +200,38 @@ Consolidation turns new chat sessions into memories. The scheduler and the workf
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant S as Scheduler
     participant J as memory_jobs
     participant RM as RunManager
-    participant W as memory-consolidation
-    participant C as ChatReadAccessor
+    participant W as Workflow
+    participant C as ChatRead
     participant K as Kiro
-    participant M as MemoryStore
-
-    S->>J: fire memory-consolidation (02:00)
-    J->>M: consolidation_cursor()
-    J->>C: sessions_since(cursor, limit=1)
+    participant M as Store
+    rect rgb(240, 246, 255)
+        Note over S,M: Check for work
+        S->>J: fire job at 02:00
+        J->>M: consolidation_cursor
+        J->>C: sessions_since cursor
+    end
     alt nothing new
-        J-->>S: skipped, no new chat sessions
+        J-->>S: skipped, nothing new
     else new sessions
-        J->>RM: start workflow, inputs owner
-        RM->>W: run in a worker
-        W->>C: sessions_since, messages
-        W->>K: extract turn, then validator
-        W->>M: search_memories for neighbours
-        W->>K: reconcile turn, then validator
-        W->>M: apply operations, embed pending
-        W->>M: advance_cursor
-        J-->>S: ok, run id
+        rect rgb(240, 246, 255)
+            Note over J,W: Start the run
+            J->>RM: start workflow
+            RM->>W: run in a worker
+        end
+        rect rgb(240, 246, 255)
+            Note over W,M: Extract and reconcile
+            W->>C: read sessions
+            W->>K: extract turn
+            W->>M: search neighbours
+            W->>K: reconcile turn
+            W->>M: apply operations
+            W->>M: advance_cursor
+        end
+        J-->>S: ok and run id
     end
 ```
 

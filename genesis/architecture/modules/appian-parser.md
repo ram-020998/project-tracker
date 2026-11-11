@@ -60,36 +60,33 @@ nothing about the database, the app or the workflow engine.
 
 ```mermaid
 flowchart TB
-    subgraph api["api.py"]
-        parse["parse()"]
-        roots["delta_roots()"]
-    end
-    reader["package_reader.py<br/>PackageReader"]
-    detector["type_detector.py<br/>TypeDetector"]
-    registry["parser_registry.py<br/>ParserRegistry"]
-    parsers["parsers/<br/>one parser per object type"]
-    hashsvc["diff_hash.py<br/>DiffHashService"]
-    deps["dependencies/<br/>DependencyAnalyzer, cross_app"]
-    res["resolution/<br/>ReferenceResolver + 4 resolvers"]
-    bundles["output/<br/>BundleCoordinator + builders"]
-    dom["domain/<br/>constants, models, field_walker"]
-    result["result.py<br/>KbParseResult and friends"]
+    parse["<b>api.py parse</b><br/>drives the pipeline"]:::core
 
-    parse --> reader --> detector --> registry --> parsers
-    parsers --> hashsvc
-    parse --> deps
-    parse --> res
-    parse --> bundles
-    deps --> dom
-    res --> dom
-    bundles --> dom
-    parse --> result
+    reader["<b>PackageReader</b><br/>unzips the package"]:::comp
+    detector["<b>TypeDetector</b><br/>names each type"]:::comp
+    registry["<b>ParserRegistry</b><br/>picks the parser"]:::comp
+    parsers["<b>parsers/</b><br/>one per object type"]:::comp
+    hashsvc["<b>DiffHashService</b><br/>change hash"]:::comp
+
+    deps["<b>dependencies/</b><br/>DependencyAnalyzer"]:::comp
+    res["<b>resolution/</b><br/>ReferenceResolver"]:::comp
+    bundles["<b>output/</b><br/>BundleCoordinator"]:::comp
+    result[("<b>result.py</b><br/>KbParseResult")]:::data
+
+    parse -- "1 each file" --> reader --> detector --> registry --> parsers --> hashsvc
+    parse -- "2 whole package" --> deps --> res --> bundles
+    parse -- "3 fill" ----> result
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
 The diagram shows the pipeline that `parse()` drives. The reader unpacks the zip, the detector names each file's
 type, the registry hands the file to the right parser, and the diff hash is computed from the parser's output. Then
 `parse()` runs dependency analysis, reference resolution and bundle building, and fills the result classes. The
-`domain/` folder holds shared constants and helpers used by the last three steps.
+`domain/` folder (constants, models, field walker) holds shared helpers used by the last three steps; it is left
+out of the diagram.
 
 | File | Main classes and functions |
 |---|---|
@@ -398,27 +395,27 @@ base to 41 objects. The parser makes its result self-describing, and the store c
 
 ```mermaid
 sequenceDiagram
-    participant WF as sync-application<br/>(run worker)
-    participant KS as KbStore<br/>(genesis/kb/store.py)
-    participant P as genesis_appian_parser
+    autonumber
+    participant WF as sync-application
+    participant KS as KbStore
+    participant P as Parser
     participant DB as genesis.db
-
-    WF->>P: read KB_FORMAT_VERSION, __version__
-    WF->>WF: full_sync_reason(...) picks full or incremental
+    WF->>P: read KB_FORMAT_VERSION and version
+    WF->>WF: choose full or incremental
     alt full sync
-        WF->>P: parse(zip_path)
+        WF->>P: parse zip
     else incremental sync
-        WF->>KS: known_context(app_uuid)
-        KS->>DB: read current kb_objects, kb_dependencies
-        KS-->>WF: KnownObject list, KnownEdge list
-        WF->>P: delta_roots(known_objects)
-        Note over WF: export delta package<br/>(changed objects + roots)
-        WF->>P: parse(zip_path, known_objects, known_edges)
+        WF->>KS: known_context for app
+        KS->>DB: read kb_objects, kb_dependencies
+        KS-->>WF: known objects and edges
+        WF->>P: delta_roots
+        Note over WF: export delta package
+        WF->>P: parse zip with known context
     end
     P-->>WF: KbParseResult
-    WF->>WF: write result.json, validate (v_parse)
-    WF->>KS: apply(sync_id, result, mode)
-    KS->>DB: write kb_* rows
+    WF->>WF: write result.json, validate
+    WF->>KS: apply result with mode
+    KS->>DB: write kb rows
 ```
 
 The sequence shows one sync. The workflow decides full or incremental from the recorded format version. For an

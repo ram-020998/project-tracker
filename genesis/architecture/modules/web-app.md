@@ -63,50 +63,34 @@ The build is also part of the module. The production bundle is built with Vite a
 
 ```mermaid
 flowchart TB
-    browser["Browser"]
-    subgraph spa["web/src"]
-        main["main.tsx<br/>Providers + RouterProvider"]
-        subgraph app["app/"]
-            router["router.tsx<br/>createBrowserRouter"]
-            root["RootLayout + error-boundary"]
-            prov["providers.tsx"]
-        end
-        subgraph shared["shared/"]
-            layout["layout/<br/>AppShell, Sidebar, TopBar,<br/>CommandPalette, nav, breadcrumbs,<br/>Page, SplitPane"]
-            ui["ui/<br/>Button, Dialog, Tabs, Badge,<br/>format, icons, ..."]
-            fb["feedback/states.tsx"]
-        end
-        subgraph features["features/ (17 folders)"]
-            rd["run-detail/"]
-            runs["runs/"]
-            others["applications, features, workbench,<br/>chat, catalog, settings, testing, ..."]
-        end
-        subgraph lib["lib/"]
-            api["api/client.ts + resource modules"]
-            query["query/ client.ts, keys.ts"]
-        end
-        stores["stores/<br/>theme, run-view, prefs"]
-        types["types/ + test/fixtures"]
-        styles["styles/ tokens.css, index.css"]
-    end
-    backend["FastAPI /api"]
-    browser --> main --> prov
-    main --> router --> root --> layout
-    root --> features
-    features --> shared
-    features --> api
-    features --> query
-    features --> stores
-    features --> types
-    shared --> stores
-    api -->|"fetch /api/..."| backend
-    rd -->|"EventSource /api/runs/id/events/stream"| backend
-    styles -.-> ui
+    browser(["<b>Browser</b>"]):::person
+    main["<b>main.tsx</b><br/>providers, router"]:::core
+    app["<b>app/</b><br/>router, RootLayout"]:::comp
+    features["<b>features/</b><br/>one folder per page"]:::core
+
+    shared["<b>shared/</b><br/>layout, UI kit"]:::comp
+    stores["<b>stores/</b><br/>theme, view prefs"]:::comp
+    types["<b>types/</b><br/>API contracts"]:::comp
+    query["<b>lib/query</b><br/>cache, query keys"]:::comp
+    api["<b>lib/api</b><br/>the one API client"]:::comp
+
+    backend["<b>FastAPI</b><br/>/api"]:::ext
+
+    browser --> main --> app --> features
+    features --> shared & stores & types & query & api
+    api -- "fetch /api" --> backend
+    features -. "SSE stream" .-> backend
+
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
 ```
 
-The diagram shows the layers. `main.tsx` wraps the router in the providers. The router renders `RootLayout`,
-which puts every page inside `AppShell`. Feature folders use the shared kit, the API modules and the query
-registry. Only `lib/api` and two stream hooks reach the backend.
+The diagram shows the layers. `main.tsx` wraps the router in the providers. The router in `app/` renders
+`RootLayout`, which puts every page inside `AppShell` from `shared/`. Feature folders use the shared kit, the stores,
+the contract types, the query registry and the API client. Only `lib/api` (fetch) and two stream hooks (SSE, dotted
+line) reach the backend.
 
 ### 4.1 Files by area
 
@@ -354,24 +338,31 @@ retries). The choice is kept in the `useRunView` store (`viewMode`) for the brow
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant P as RunDetailPage
     participant H as useRunStream
     participant ES as EventSource
     participant API as FastAPI
     participant Q as Query cache
+    rect rgb(240, 246, 255)
+    Note over P,API: Open the stream
     P->>H: run is active
-    H->>ES: open /api/runs/{id}/events/stream?after=0
-    ES->>API: GET (text/event-stream)
-    API-->>ES: replay of durable log, then live events
+    H->>ES: open events stream after 0
+    ES->>API: GET text/event-stream
+    API-->>ES: replay durable log, then live events
+    end
+    rect rgb(240, 246, 255)
+    Note over ES,P: Each named event
     loop each named SSE event
-        ES-->>H: node.completed / gate.* / error
+        ES-->>H: node.completed, gate, or error
         H->>Q: invalidate steps, run, transitions
         Q->>API: refetch
         API-->>Q: fresh data
         Q-->>P: re-render graph and bar
     end
+    end
     ES-->>H: run.final
-    H->>Q: invalidate, then close the stream
+    H->>Q: invalidate, then close stream
 ```
 
 The diagram shows that the stream is only a nudge. The page never stores the events. It reacts to a few event
@@ -480,11 +471,23 @@ Material-inspired look. It did not adopt `@mui/material`.
 
 ```mermaid
 flowchart LR
-    src["web/src"] -->|"npm run build<br/>tsc --noEmit + vite build"| static["web/static/<br/>committed"]
-    static -->|"pyproject force-include"| pkg["genesis/web_static<br/>in the wheel"]
-    static -->|"editable tree"| serve
-    pkg --> serve["FastAPI<br/>/assets mount + SPA fallback"]
-    ci["CI frontend job"] -->|"rebuild and git diff"| static
+    src["<b>web/src</b><br/>TypeScript source"]:::comp
+    static[("<b>web/static/</b><br/>committed bundle")]:::data
+    pkg["<b>genesis/web_static</b><br/>folder in the wheel"]:::comp
+    serve["<b>FastAPI</b><br/>/assets mount, SPA fallback"]:::core
+    ci["<b>CI frontend job</b><br/>rebuild and git diff"]:::proc
+    src -- "npm run build" --> static
+    static -- "force-include" --> pkg
+    static -- "editable tree" --> serve
+    pkg -- "installed wheel" --> serve
+    ci -. "compares" .-> static
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
 The diagram shows one built folder feeding both the installed package and the dev tree. CI rebuilds the folder

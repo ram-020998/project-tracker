@@ -95,50 +95,59 @@ nothing enforces them (ADR-063).
 
 ```mermaid
 flowchart LR
-    subgraph web["Web"]
-        wui["features/collab<br/>hooks, auto-pull driver"]
-    end
-    subgraph api["genesis/api"]
-        rc["collab.py<br/>config, identity, teams"]
-        rs["collab_sync.py<br/>publish, pull, adopt, activity"]
-        ra["applications.py<br/>KB pull and publish"]
-    end
-    subgraph collab["genesis/collab"]
-        svc["service.py<br/>CollaborationService"]
-        cfg["config.py<br/>CollabConfigStore"]
-        ident["identity.py<br/>IdentityStore"]
-        merge["story_merge.py"]
-        prov["provider.py<br/>SyncProvider, DTOs"]
-        loc["providers/local.py"]
-        app["providers/appian.py"]
-        init["__init__.py<br/>build_sync_provider"]
-    end
-    subgraph rt["genesis/runtime"]
-        auto["collab_autopull.py<br/>CollabAutoPuller"]
-        ctx["context.py<br/>kb_publish, object_wiki_publish"]
-    end
-    fin["finalizers, spec_change,<br/>features answers"]
-    db[("genesis.db")]
-    hub[("Hub: Appian app<br/>or shared folder")]
-    wui --> rc & rs & ra
-    rc & rs & ra --> svc
+    web(["<b>Web</b><br/>collab hooks"]):::ext
+    routes["<b>API routes</b><br/>collab, sync, applications"]:::comp
+    fin["<b>Finalizers</b><br/>spec change, answers"]:::comp
+    hooks["<b>runtime/context.py</b><br/>KB and wiki publish"]:::comp
+    auto["<b>CollabAutoPuller</b><br/>background pull loop"]:::comp
+    svc["<b>CollaborationService</b><br/>service.py"]:::core
+    prov["<b>SyncProvider</b><br/>Protocol and DTOs"]:::comp
+    merge["<b>story_merge.py</b><br/>merges stories"]:::comp
+    cfg["<b>CollabConfigStore</b><br/>collab.json"]:::comp
+    ident["<b>IdentityStore</b><br/>who is the user"]:::comp
+    db[("<b>genesis.db</b>")]:::data
+    web --> routes
+    routes --> svc
     fin --> svc
-    ctx --> svc
+    hooks --> svc
     auto --> svc
-    svc --> prov
-    svc --> merge
-    svc --> cfg
+    svc --> prov & merge & cfg & ident
     svc --> db
     ident --> db
-    init --> loc & app
-    prov -.implemented by.-> loc & app
-    loc --> hub
-    app --> hub
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-The routes, the finalizers, the workflow hooks and the auto-pull loop all call one `CollaborationService`. The
-service reads and writes `genesis.db` and talks to the Hub only through the `SyncProvider` Protocol. The composition
-function `build_sync_provider` chooses the implementation at boot.
+```mermaid
+flowchart TB
+    init["<b>build_sync_provider</b><br/>chooses at boot"]:::comp
+
+    prov["<b>SyncProvider</b><br/>Protocol"]:::core
+
+    loc["<b>LocalHubProvider</b><br/>providers/local.py"]:::comp
+    app["<b>AppianHubProvider</b><br/>providers/appian.py"]:::comp
+
+    hub[("<b>Hub</b><br/>Appian app or folder")]:::data
+
+    init -- "returns one" --> prov
+    prov -. "implemented by" .-> loc & app
+    loc -- "files" --> hub
+    app -- "Web API" --> hub
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+```
+
+The first diagram shows who calls `CollaborationService`: the API routes (which the web uses), the finalizers, the
+workflow hooks in `runtime/context.py` and the auto-pull loop. The service reads and writes `genesis.db` and talks to
+the Hub only through the `SyncProvider` Protocol. The second diagram shows how `build_sync_provider` chooses the
+implementation at boot: the local shared folder or the Appian Hub app.
 
 | File | Main classes and functions |
 |---|---|
@@ -176,15 +185,21 @@ only when there is no dev environment.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Dormant
-    Dormant: Dormant<br/>no provider built
-    Armed: Armed<br/>provider built, switch off
-    Active: Active<br/>provider built, switch on
-    Dormant --> Armed: env master on and valid provider config, then restart
-    Armed --> Active: PUT /api/collab/config ui_enabled true<br/>(409 unless the Hub answers /meta)
-    Active --> Armed: PUT /api/collab/config ui_enabled false
-    Armed --> Dormant: env master off, then restart
-    Active --> Dormant: env master off, then restart
+    direction LR
+    state "Dormant<br/>no provider built" as dormant
+    state "Armed<br/>provider built, switch off" as armed
+    state "Active<br/>provider built, switch on" as active
+    [*] --> dormant
+    dormant --> armed : env master on, restart
+    armed --> active : switch on, Hub answers
+    active --> armed : switch off
+    armed --> dormant : env master off, restart
+    active --> dormant : env master off, restart
+    class active terminal
+    class armed waiting
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
 ```
 
 In `Dormant` and `Armed` every service entry point either returns an empty result or raises "collaboration is
@@ -246,21 +261,33 @@ The higher-level publishers wrap this:
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant C as Caller
-    participant S as CollaborationService
-    participant P as SyncProvider
+    participant S as Service
+    participant P as Provider
     participant D as genesis.db
-    C->>S: pull(kind)
-    S->>D: read cursor for kind
-    S->>P: changes_since(cursor)
-    P-->>S: changes, next_cursor
-    loop each change of this kind
-        S->>P: get_record(kind, sync_uuid)
-        P-->>S: Record
-        S->>S: version <= known version? then skip
-        S->>D: upsert mirror (or delete on tombstone)
-        S->>P: get blob, only for artifact kinds
-        S->>D: write pulled.html, set html_path
+    rect rgb(240, 246, 255)
+        Note over C,D: Read the changes
+        C->>S: pull kind
+        S->>D: read cursor for kind
+        S->>P: changes_since cursor
+        P-->>S: changes and next cursor
+    end
+    rect rgb(240, 246, 255)
+        Note over S,D: Apply each change
+        loop each change of this kind
+            S->>P: get_record
+            P-->>S: Record
+            alt version not newer than known
+                S->>S: skip the change
+            else newer
+                S->>D: upsert mirror, or delete on tombstone
+                opt artifact kinds only
+                    S->>P: get blob
+                    S->>D: write pulled.html, set html_path
+                end
+            end
+        end
     end
     S->>D: advance cursor only if nothing was skipped
 ```
@@ -332,21 +359,25 @@ Browsers throttle background tabs, so the backend runs its own loop. It is descr
 
 ```mermaid
 sequenceDiagram
-    participant L as CollabAutoPuller
-    participant S as CollaborationService
-    participant P as SyncProvider
+    autonumber
+    participant L as AutoPuller
+    participant S as Service
+    participant P as Provider
     participant K as KbStore
-    loop every 10 s
-        L->>S: is_enabled()
-        L->>S: autopull_tick(kb_store, is_syncing) in a thread
-        S->>P: changes_since(autopull cursor)
-        alt no changes, nothing pending, KB poll not due
-            S-->>L: None (no work)
-        else something to do
-            S->>S: save new autopull cursor
-            S->>S: pull_all(), pull_boards()
-            S->>P: list_blob_versions(kb, app) for due apps
-            S->>K: hydrate_from_blob (skipped while that app is syncing)
+    loop every 10 seconds
+        L->>S: is_enabled
+        rect rgb(240, 246, 255)
+            Note over L,S: Tick in a thread
+            L->>S: autopull_tick
+            S->>P: changes_since autopull cursor
+            alt nothing to do
+                S-->>L: None, no work
+            else something to do
+                S->>S: save new autopull cursor
+                S->>S: pull_all and pull_boards
+                S->>P: list_blob_versions for due apps
+                S->>K: hydrate_from_blob, not while syncing
+            end
         end
     end
 ```

@@ -58,41 +58,41 @@ clicks, then (for some jobs) wait for it to end. The runs are described in [runs
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph app["genesis/api/app.py"]
-        wire["create_app wiring<br/>startup and shutdown hooks"]
-    end
-    subgraph rt["genesis/runtime"]
-        sched["scheduler.py<br/>Scheduler, due_slot,<br/>schedule_times, validate_schedule"]
-        store["schedule_store.py<br/>ScheduleStore, ScheduledJob"]
-        sync["sync_jobs.py<br/>DEFAULT_JOBS,<br/>register_sync_jobs"]
-        mem["memory_jobs.py<br/>DEFAULT_MEMORY_JOBS,<br/>register_memory_jobs"]
-    end
-    subgraph te["genesis/testexec"]
-        reg["regression_job.py<br/>REGRESSION_JOB,<br/>register_regression_job"]
-        jobs["jobs.py<br/>TestingJobs"]
-    end
-    routes["genesis/api/schedules.py<br/>/system/schedules,<br/>/system/sync-settings"]
-    db[("genesis.db<br/>scheduled_jobs")]
-    rm["RunManager"]
-    asvc["ApplicationSyncService"]
-    exec["TestExecutionService"]
+flowchart TB
+    routes["<b>api/schedules.py</b><br/>schedule routes"]:::comp
+    sched["<b>Scheduler</b><br/>scheduler.py, the loop"]:::core
+    store["<b>ScheduleStore</b><br/>schedule_store.py"]:::comp
+    db[("<b>genesis.db</b><br/>scheduled_jobs")]:::data
 
-    wire --> sched & sync & mem & reg & jobs & routes
-    sched --> store --> db
-    sync --> asvc --> rm
-    sync --> rm
-    mem --> rm
-    reg --> exec
+    reg["<b>regression_job.py</b><br/>regression job"]:::comp
+    mem["<b>memory_jobs.py</b><br/>memory jobs"]:::comp
+    sync["<b>sync_jobs.py</b><br/>application sync"]:::comp
+
+    asvc["<b>ApplicationSync</b><br/>Service"]:::comp
+    rm["<b>RunManager</b>"]:::comp
+    exec["<b>TestExecution</b><br/>Service"]:::comp
+
+    routes -- "run now" --> sched
+    routes -- "edit rows" --> store
+    sched -- "rows, status" --> store
+    store --> db
+    sched --> reg & mem & sync
     reg -. "reads options" .-> store
-    routes --> store
-    routes --> sched
+    reg --> exec
+    mem ---> rm
+    sync --> asvc --> rm
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
 The scheduler owns the loop and knows nothing about specific jobs. It reads and writes `scheduled_jobs` through
 `ScheduleStore`. Three modules (`sync_jobs`, `memory_jobs`, `regression_job`) each define their default rows and
-register handlers on the scheduler. `app.py` creates all of it. `schedules.py` exposes the table and the application
-sync settings over HTTP. `TestingJobs` stands apart: it is created in `app.py` and handed to the testing routes.
+register handlers on the scheduler, and the scheduler calls the handler when a row is due. `app.py` creates and
+wires all of it (not drawn). `schedules.py` exposes the table and the application sync settings over HTTP, and its
+run-now route goes through the scheduler. `TestingJobs` stands apart from the scheduler and is not shown: it is created in `app.py`
+and handed to the testing routes.
 
 | File | Main classes and functions |
 |---|---|
@@ -180,19 +180,25 @@ A row with no `last_fired_slot` (a new row) fires the latest passed slot of the 
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Idle
-    Idle --> Idle: tick, not due or disabled or no handler
-    Idle --> Running: tick, slot due, mark_fired(slot, running)
-    Running --> Idle: handler returns, mark_fired(slot, status, detail)
-    Running --> Idle: handler raises, mark_fired(slot, error, text)
-    Running --> Running: tick, key in running set, skipped
-    Idle --> Running: run_now, mark_fired(None, running, manual run)
-    Running --> Cancelled: scheduler.stop cancels the task
-    Cancelled --> [*]
+    direction LR
+    state "Idle" as idle
+    state "Running" as run
+    state "Cancelled" as canc
+    [*] --> idle
+    idle --> run : slot due or run_now
+    run --> idle : handler ends, status saved
+    run --> canc : scheduler.stop
+    canc --> [*]
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    class run waiting
+    class canc bad
 ```
 
-The diagram shows one job's life in the scheduler. A due tick marks the slot and starts the task. While the task
-runs, later ticks skip the job. When the handler ends, the final status is written. A shutdown cancels the task;
+The diagram shows one job's life in the scheduler. A due tick (or a run-now request) marks the slot and starts the
+task. Ticks that find nothing due change nothing, and while the task runs, later ticks skip the job. When the
+handler ends, by returning or by raising, the final status or the error is written. A shutdown cancels the task;
 the cancelled path clears the in-memory flag and does not write a final status (section 8).
 
 ### 5.4 Run now
@@ -281,25 +287,32 @@ is `full_every_days` old or more than `max_changed` objects or `max_changed_pct`
 
 ```mermaid
 sequenceDiagram
-    participant T as Scheduler tick
+    autonumber
+    participant T as Tick
     participant S as ScheduleStore
-    participant H as application_sync handler
-    participant A as ApplicationSyncService
+    participant H as Sync handler
+    participant A as SyncService
     participant R as RunManager
-    T->>S: mark_fired(slot, running)
-    T->>H: create task, call handler
-    H->>S: get application-sync options
-    H->>H: skip checks (collab, dev env, workflow, incremental)
-    loop each tracked application, one at a time
-        H->>A: is_sync_running
-        H->>A: start_sync(mode None, options)
-        A->>R: start sync-application run
-        loop every 5 s, up to 1200 s
-            H->>R: reconcile_status, get
+    rect rgb(240, 246, 255)
+        Note over T,H: Start the handler
+        T->>S: mark_fired slot, running
+        T->>H: create task, call handler
+        H->>S: get application-sync options
+        H->>H: skip checks
+    end
+    rect rgb(240, 246, 255)
+        Note over H,R: Sync each application in turn
+        loop each tracked application
+            H->>A: is_sync_running
+            H->>A: start_sync with options
+            A->>R: start sync-application run
+            loop every 5 s, up to 1200 s
+                H->>R: reconcile_status and get
+            end
         end
     end
     H-->>T: status and detail text
-    T->>S: mark_fired(slot, status, detail)
+    T->>S: mark_fired slot, status, detail
 ```
 
 The sequence shows that the scheduler only starts the handler. The handler talks to the sync service, which starts

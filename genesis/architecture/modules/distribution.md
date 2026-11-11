@@ -63,60 +63,71 @@ executable, and nothing in this module depends on it.
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph shell["scripts/"]
-        ins["install.sh<br/>bootstrap"]
-        ip["install-packages.sh<br/>the one install command"]
-        ctl["genesisctl.sh<br/>thin wrapper"]
-    end
-    subgraph cli["genesis/cli/"]
-        main["main.py<br/>argparse + package check"]
-        cins["install.py<br/>install, list"]
-    end
-    subgraph rt["genesis/runtime/"]
-        launcher["launcher.py<br/>up, down, status, logs, bind guard"]
-        updater["updater.py<br/>check, apply"]
-    end
-    subgraph dist["genesis/dist/"]
-        gl["gitlab.py<br/>GitLabClient"]
-        loc["local.py<br/>LocalSource"]
-        cat["catalog.py<br/>Catalog"]
-        inst["install.py<br/>Installer"]
-        lock["lockfile.py<br/>Lockfile"]
-        load["loader.py<br/>Loader + compat gate"]
-        sc["skill_catalog.py"]
-        si["skill_install.py"]
-    end
-    subgraph api["genesis/api/"]
-        croutes["catalog_routes.py"]
-        sroutes["system.py<br/>update routes"]
-        skroutes["skills.py<br/>install routes"]
-    end
-    lib[("~/.genesis/library/<br/>installed.lock.json")]
-    gitlab[("genesis-workflows<br/>GitLab or local dir")]
+flowchart TB
+    ins["<b>install.sh</b><br/>bootstrap"]:::person
+    ctl["<b>genesisctl.sh</b><br/>thin wrapper"]:::person
+    sroutes["<b>api/system.py</b><br/>update routes"]:::comp
 
-    ins --> ip
+    main["<b>cli/main.py</b><br/>argparse, package check"]:::core
+    cins["<b>cli/install.py</b><br/>install, list"]:::comp
+    dist["<b>genesis/dist/</b><br/>installer and loader"]:::comp
+
+    updater["<b>runtime/updater.py</b><br/>check, apply"]:::core
+    launcher["<b>runtime/launcher.py</b><br/>up, down, status, logs"]:::core
+    ip["<b>install-packages.sh</b><br/>the one install command"]:::comp
+
     ctl --> main
-    main --> cins & launcher & updater
-    cins --> inst & load
-    inst --> cat & lock
-    inst --> gl & loc
+    main --> cins --> dist
+    main ---> launcher
+    main --> updater
+    sroutes --> updater
+    updater -- "restart" --> launcher
+    updater -- "reinstall" --> ip
+    ins ---> ip
+
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+```
+
+`install.sh` bootstraps a clone by calling `install-packages.sh`, and `genesisctl.sh` is a thin wrapper around the
+`genesis` command. The command (`main.py`) dispatches to the install helpers, the
+launcher and the updater. The update route calls the updater, which reruns `install-packages.sh` of the new tag and
+then uses the launcher to restart.
+
+```mermaid
+flowchart LR
+    skroutes["<b>skills.py</b><br/>skill install routes"]:::comp
+    si["<b>skill_install.py</b><br/>skill installer"]:::comp
+    sc["<b>skill_catalog.py</b><br/>skill catalog"]:::comp
+    lock["<b>Lockfile</b><br/>lockfile.py"]:::comp
+    croutes["<b>catalog_routes.py</b><br/>catalog routes"]:::comp
+    inst["<b>Installer</b><br/>install.py"]:::core
+    load["<b>Loader</b><br/>compat gate"]:::core
+    cat["<b>Catalog</b><br/>resolves ids"]:::comp
+    gl["<b>GitLabClient</b><br/>gitlab.py"]:::comp
+    loc["<b>LocalSource</b><br/>local.py"]:::comp
+    lib[("<b>~/.genesis/library/</b><br/>installed.lock.json")]:::data
+    gitlab["<b>genesis-workflows</b><br/>GitLab or local dir"]:::ext
+    skroutes --> si
     si --> sc & lock
+    croutes --> inst & load
+    inst --> lock & cat & gl & loc
     gl & loc -.-> gitlab
     inst --> lib
     load --> lib
-    croutes --> inst & load
-    skroutes --> si
-    sroutes --> updater
-    updater --> ip
-    updater --> launcher
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-The install scripts call `install-packages.sh`. The `genesis` command (`main.py`) dispatches to the install
-helpers, the launcher and the updater. The installer reads a source (GitLab or a local directory), uses the
-catalog to resolve ids, writes files under the library folder, and records them in the lockfile. The loader reads
-the same folder and lockfile. The API routes use the installer, the skill installer and the updater. The updater
-reruns `install-packages.sh` of the new tag and then uses the launcher's commands to restart.
+The API routes use the installer, the loader and the skill installer. The installer reads a source (GitLab or a local
+directory), uses the catalog to resolve ids, writes files under the library folder, and records them in the lockfile.
+The loader reads the same folder.
 
 | File | Main classes and functions |
 |---|---|
@@ -184,38 +195,44 @@ This is the full path of a workflow from the library repo to a running graph.
 
 ```mermaid
 sequenceDiagram
-    participant U as User (CLI or Catalog page)
-    participant R as Route or CLI
-    participant S as Source (GitLab or local dir)
+    autonumber
+    actor U as User
+    participant R as Route
+    participant S as Source
     participant I as Installer
-    participant D as ~/.genesis/library
-    participant L as installed.lock.json
-    participant M as RunManager (app)
-    participant W as Run worker
-    U->>R: install workflow id
-    R->>S: latest_tag() unless a ref is given
-    I->>S: read registry.json and bundles.json at the ref
-    I->>I: resolve ids and bundles to a de-duplicated id list
-    I->>S: get registry.json, mcp-registry.json, cli-registry.json, bundles.json
-    I->>D: write the four shared files
-    loop each selected workflow
-        I->>S: list_tree(workflow path), get_raw_file each blob
-        I->>D: write workflows/id/... files
+    participant D as Library
+    participant M as RunManager
+    participant W as Worker
+    rect rgb(240, 246, 255)
+        Note over U,D: Install
+        U->>R: install workflow
+        R->>I: install selection
+        I->>S: pick the ref
+        I->>S: read the catalog
+        I->>I: resolve ids and bundles
+        I->>S: get shared files
+        I->>D: write the shared files
+        loop each selected workflow
+            I->>S: list and get files
+            I->>D: write workflow files
+        end
+        I->>D: save lockfile entry
     end
-    I->>L: save workflows[id], libraryRef, genesis_core pin
-    U->>M: start run
-    M->>L: check_compat (lockfile only)
-    M->>D: meta_of reads workflow.yaml
-    M->>W: spawn worker
-    W->>L: check_compat again
-    W->>D: import graph.py by file path
-    W->>W: build(ctx) and run
+    rect rgb(240, 246, 255)
+        Note over U,W: Run
+        U->>M: start run
+        M->>D: check compat, read meta
+        M->>W: spawn worker
+        W->>D: check compat again
+        W->>D: import graph.py
+        W->>W: build and run
+    end
 ```
 
-The user picks a workflow in the Catalog page or runs `genesis install`. The installer reads the registry at the
-ref, resolves the selection, copies the four shared files and the workflow's folder into the library folder, and
-writes the lockfile. When a run starts, the app checks the gate and reads `workflow.yaml`. The worker checks the
-gate again and imports `graph.py`.
+The user picks a workflow in the Catalog page or runs `genesis install`. The installer reads the registry at the ref,
+resolves the selection, copies the four shared files and the workflow's folder into the library folder, and writes the
+lockfile. When a run starts, the app checks the gate and reads `workflow.yaml`. The worker checks the gate again and
+imports `graph.py`. The library box stands for the library folder and its lockfile.
 
 Step by step:
 
@@ -393,27 +410,47 @@ reports origin binds the same host, so the same refusal covers it.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Check
-    Check --> NotManaged: no dist.json or no repo
-    Check --> UpToDate: latest tag is not newer
-    Check --> Available: newer vX.Y.Z tag
-    Available --> Blocked: on a named branch that is not the tracked one
-    Available --> Fetch: apply
-    Fetch --> Checkout
-    Checkout --> Failed: checkout error
-    Checkout --> Install
-    Install --> Failed: install script error
-    Install --> Migrate
-    Migrate --> Failed: db upgrade error
-    Migrate --> Library
-    Library --> Library: refresh error is a warning only
-    Library --> Stamp
-    Stamp --> Restart
-    Restart --> [*]
-    NotManaged --> [*]
-    UpToDate --> [*]
-    Blocked --> [*]
-    Failed --> [*]
+    direction TB
+    state "Check" as check
+    state "Not managed" as notmanaged
+    state "Up to date" as uptodate
+    state "Available" as available
+    state "Blocked" as blocked
+    state "Fetch" as fetch
+    state "Checkout" as checkout
+    state "Install" as install
+    state "Migrate" as migrate
+    state "Library refresh" as library
+    state "Stamp version" as stamp
+    state "Restart" as restart
+    state "Failed" as failed
+    [*] --> check
+    check --> notmanaged : no dist.json or repo
+    check --> uptodate : tag not newer
+    check --> available : newer tag
+    available --> blocked : other named branch
+    available --> fetch : apply
+    fetch --> checkout
+    checkout --> install
+    install --> migrate
+    migrate --> library
+    library --> stamp : error is a warning
+    stamp --> restart
+    checkout --> failed : checkout error
+    install --> failed : install error
+    migrate --> failed : db upgrade error
+    restart --> [*]
+    notmanaged --> [*]
+    uptodate --> [*]
+    blocked --> [*]
+    failed --> [*]
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    class restart terminal
+    class available waiting
+    class notmanaged,blocked waiting
+    class failed bad
 ```
 
 The check never changes anything. The apply steps run in order; each failure before the restart stops the update

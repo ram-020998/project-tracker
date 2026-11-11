@@ -63,50 +63,67 @@ records.
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph api["genesis/api"]
-        fapi["features.py<br/>feature, stage, story routes"]
-        crapi["change_requests.py<br/>CR routes"]
-    end
-    subgraph svc["genesis/services"]
-        sart["stage_artifacts.py<br/>working vs consumer HTML"]
-        sclause["spec_clauses.py<br/>SpecClauseService"]
-        schange["spec_change.py<br/>SpecChangeService"]
-        tdstage["testdesign_stage.py<br/>Test Design stage"]
-    end
-    subgraph chat["genesis/chat"]
-        fin["stage_finalizer.py<br/>StageFinalizer + bindings"]
-        prof["mode_profile.py<br/>feature_spec post-turn hook"]
-    end
-    subgraph dom["genesis/domain"]
-        life["lifecycle.py<br/>LifecycleService"]
-        trans["transitions.py<br/>tables + guards"]
-    end
-    subgraph kb["genesis/kb"]
-        feat["features.py<br/>FeatureStore"]
-        stg["stages.py<br/>StageStore"]
-        cl["spec_clauses.py<br/>clause model"]
-        pure["spec_diff, spec_impact,<br/>cr_plan, cr_document,<br/>cr_apply, backlog_doc,<br/>story_trace"]
-        crs["spec_changes.py<br/>SpecChangeStore"]
-        aud["lifecycle_audit.py"]
-    end
-    fapi --> life & stg & feat & sclause & schange & sart
+flowchart TB
+    fapi["<b>api/features.py</b><br/>feature, stage, story"]:::comp
+    crapi["<b>api/change_requests.py</b><br/>CR routes"]:::comp
+
+    prof["<b>mode_profile.py</b><br/>post-turn hook"]:::comp
+    schange["<b>SpecChangeService</b><br/>change requests"]:::core
+    pure["<b>Pure helpers</b><br/>diff, impact, plan"]:::comp
+
+    shared["<b>Shared services</b><br/>LifecycleService<br/>stage_artifacts.py<br/>SpecClauseService"]:::core
+
+    stores[("<b>kb/ stores</b><br/>features, stages<br/>spec_changes, clauses")]:::data
+
     crapi --> schange
-    schange --> life & crs & sclause & pure & sart
-    sclause --> cl
-    tdstage --> life & stg
-    fin --> life & stg
-    prof --> sclause
-    life --> trans
-    life -. emit .-> aud
-    life --> stg
+    fapi --> schange
+    schange --> pure
+    schange --> stores
+    schange --> shared
+    fapi --> shared
+    fapi --> stores
+    prof -- "clause repair" --> shared
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
-The API layer calls the services and the stores. `LifecycleService` is the only code that moves a stage
-between states. It reads and writes through `StageStore` and sends every successful move to
-`LifecycleAuditStore`. `SpecChangeService` uses the pure helper modules in `genesis/kb/` for the diff, the
-impact input, the plan check and the document. The `StageFinalizer` is attached to the run manager and turns a
-finished analysis run into a stage artifact.
+The two route files call `SpecChangeService`; `api/features.py` also calls the shared services and the stores
+directly. The shared services are `LifecycleService`, the HTML helpers in `stage_artifacts.py` and
+`SpecClauseService`, which works on the clause model. The `feature_spec` post-turn hook in `mode_profile.py` also
+calls `SpecClauseService`. The stores are `FeatureStore`, `StageStore`, `SpecChangeStore` and the clause model in
+`kb/spec_clauses.py`. `SpecChangeService` uses the pure helper modules in `genesis/kb/` for the diff, the impact
+input, the plan check and the document: `spec_diff`, `spec_impact`, `cr_plan`, `cr_document`, `cr_apply`,
+`backlog_doc` and `story_trace`.
+
+```mermaid
+flowchart TB
+    fapi["<b>api/features.py</b><br/>stage routes"]:::comp
+    schange["<b>SpecChangeService</b><br/>change requests"]:::comp
+    tdstage["<b>testdesign_stage.py</b><br/>Test Design stage"]:::comp
+    fin["<b>StageFinalizer</b><br/>run to artifact"]:::comp
+
+    life["<b>LifecycleService</b><br/>the only code that<br/>moves a stage"]:::core
+
+    trans["<b>transitions.py</b><br/>tables and guards"]:::comp
+    stg["<b>StageStore</b><br/>stage rows"]:::comp
+    aud["<b>LifecycleAuditStore</b><br/>one row per move"]:::comp
+
+    fapi & schange & tdstage & fin -- "transition" --> life
+    life -- "rules" --> trans
+    life -- "read, write" --> stg
+    life -. "audit" .-> aud
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+```
+
+`LifecycleService` is the only code that moves a stage between states. The stage routes, `SpecChangeService`, the
+Test Design stage service and the `StageFinalizer` all call it. It reads the rules from `transitions.py` and reads
+and writes through `StageStore` (the Test Design service and the finalizer also read `StageStore` directly). It
+sends every successful move to `LifecycleAuditStore`. The `StageFinalizer` is
+attached to the run manager and turns a finished analysis run into a stage artifact.
 
 | File | Main classes and functions |
 |---|---|
@@ -181,21 +198,33 @@ Every stage shares one table. The Spec stage and the four other stages move thro
 
 ```mermaid
 stateDiagram-v2
+    direction TB
+    state "Draft" as draft
+    state "In progress" as inprog
+    state "In review" as inrev
+    state "Under change" as uc
+    state "Completed" as completed
     [*] --> draft : row created
-    draft --> InProgress : start
-    InProgress --> InReview : submit (needs HTML)
-    InReview --> completed : approve
-    InReview --> InProgress : request-changes
-    completed --> InProgress : reopen (blocked when locked)
-    completed --> UnderChange : initiate-change (spec, CR service only)
-    UnderChange --> completed : apply-change
-    UnderChange --> completed : discard-change
+    draft --> inprog : start
+    inprog --> inrev : submit, needs HTML
+    inrev --> completed : approve
+    inrev --> inprog : request-changes
+    completed --> inprog : reopen, if not locked
+    completed --> uc : initiate-change
+    uc --> completed : apply-change
+    uc --> completed : discard-change
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    class completed terminal
+    class inrev,uc waiting
 ```
 
-`InProgress` is the state `in-progress`, `InReview` is `in-review` and `UnderChange` is `under-change`. The
+`In progress` is the state `in-progress`, `In review` is `in-review` and `Under change` is `under-change`. The
 diagram shows the stage table. A new stage row starts as `draft`. Forward moves go `start`, `submit`,
 `approve`. A reviewer can send a stage back with `request-changes`. A completed stage goes back to
-`in-progress` with `reopen`, except when the guard blocks it. The three change-request actions are listed in
+`in-progress` with `reopen`, except when the guard blocks it. Only a spec can use `initiate-change`. The three
+change-request actions are listed in
 `CHANGE_REQUEST_ACTIONS` and only `SpecChangeService` may use them. The guard needs `via_change_request`, which
 the generic action routes never set.
 
@@ -326,30 +355,44 @@ UX Design, Technical Design, Feature Breakdown and Test Design all follow the sa
 
 ```mermaid
 sequenceDiagram
-    participant U as Person (web)
-    participant A as api/features.py
+    autonumber
+    actor U as Person
+    participant A as API
+    participant R as Runs
+    participant W as Worker
+    participant F as Finalizer
     participant S as StageStore
-    participant R as RunManager
-    participant W as Worker (workflow)
-    participant F as StageFinalizer
-    participant C as ChatManager
-    participant L as LifecycleService
-    U->>A: start / upload / rerun
-    A->>A: check prerequisites, snapshot input HTML
-    A->>R: start(workflow_id, inputs incl. stage_id)
-    A->>S: set_source(run_id), set_upstream_versions
-    A->>S: set_status in-progress
+    participant C as Chat
+    rect rgb(240, 246, 255)
+    Note over U,A: Start the run
+    U->>A: start, upload, re-run
+    A->>A: check, snapshot inputs
+    A->>R: start workflow
+    A->>S: record run and spec version
+    A->>S: set status in-progress
+    end
+    rect rgb(240, 246, 255)
+    Note over R,W: Run the analysis
     R->>W: run the graph
-    W-->>R: artifact file in the run folder
-    R->>R: store status done, then emit run.final
-    R-->>F: run.final (observer)
-    F->>S: row bound to this run? no chat yet?
-    F->>C: create session in the stage's chat mode, seed turn
-    F->>F: copy artifact into the session sandbox
-    F->>S: set_chat_session, set_html
-    F->>L: start (if draft), submit
-    L->>S: status in-review (audited)
+    W-->>R: artifact file
+    R->>R: store done, emit run.final
+    end
+    rect rgb(240, 246, 255)
+    Note over F,C: Finalize the stage
+    R-->>F: run.final observer
+    F->>S: check row bound, no chat yet
+    F->>C: create session, seed turn
+    F->>F: copy artifact into sandbox
+    F->>S: set chat and HTML
+    F->>S: start, submit via lifecycle
+    S-->>F: in-review, audited
+    end
 ```
+
+The diagram shows one analysis stage from start to review. The person starts the stage and the API checks the
+prerequisites and starts the run. The worker writes the artifact. `RunManager` stores the status and then announces
+`run.final`. The `StageFinalizer` creates the completion chat, copies the artifact and moves the stage to `in-review`
+through the lifecycle service.
 
 The start routes snapshot the inputs to files in `<stage_id>/` and pass paths to the run:
 
@@ -480,14 +523,21 @@ All of Initiate, Discard, Analyze and Apply run under an in-process lock for the
 
 ```mermaid
 stateDiagram-v2
-    [*] --> completed : spec completed and locked
-    completed --> UnderChange : Initiate (CR-nn open)
-    UnderChange --> UnderChange : edit in chat, Analyze, plan
-    UnderChange --> completed : Apply (CR applied)
-    UnderChange --> completed : Discard (CR discarded)
+    direction TB
+    state "Completed and locked" as comp
+    state "Under change" as uc
+    [*] --> comp : spec completed
+    comp --> uc : Initiate, CR open
+    uc --> uc : edit, analyze, plan
+    uc --> comp : Apply, CR applied
+    uc --> comp : Discard, CR discarded
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    class uc waiting
 ```
 
-The diagram shows the spec stage. While the spec is `UnderChange` (state `under-change`), the change request
+The diagram shows the spec stage. While the spec is `Under change` (state `under-change`), the change request
 row is `open`. It ends as `applied` or `discarded`.
 
 **Initiate** (`POST /features/{id}/change-requests`):

@@ -21,31 +21,44 @@ modules. Each scenario is a short sequence with links to the module document tha
 
 ```mermaid
 sequenceDiagram
+    autonumber
     actor U as Engineer
     participant W as Web app
-    participant A as API + RunManager
+    participant A as RunManager
     participant K as Worker 1
     participant C as kiro-cli
     participant K2 as Worker 2
-    U->>W: Launch (inputs)
+    rect rgb(240, 246, 255)
+    Note over U,A: Start
+    U->>W: Launch with inputs
     W->>A: POST /api/runs
-    A->>A: validate inputs, create run, log run.started
-    A->>K: spawn worker (op run)
-    K->>C: agent step: session/new, session/prompt
-    C-->>K: streamed updates, output file, credits
-    K-->>A: events (agent.*), node.completed
+    A->>A: validate, create run, log run.started
+    A->>K: spawn worker, op run
+    end
+    rect rgb(240, 246, 255)
+    Note over K,C: Agent step with a retry
+    K->>C: session/new, session/prompt
+    C-->>K: updates, output file, credits
+    K-->>A: agent events, node.completed
     K->>K: validator fails, retry.scheduled
-    K->>C: agent step again, with the failure message
+    K->>C: prompt again with the failure
     K->>K: validator passes
-    K->>K: pre_mutation gate: interrupt()
-    K-->>A: final (awaiting_input:gate)
+    end
+    rect rgb(240, 246, 255)
+    Note over K,A: Gate
+    K->>K: pre_mutation gate, interrupt
+    K-->>A: final, awaiting_input:gate
     A-->>W: SSE gate.awaiting
+    end
+    rect rgb(240, 246, 255)
+    Note over U,K2: Resume and end
     U->>W: Approve
-    W->>A: POST /api/runs/{id}/respond
-    A->>K2: spawn worker (op resume, decision)
-    K2-->>A: final (done)
+    W->>A: POST /api/runs/ID/respond
+    A->>K2: spawn worker, op resume
+    K2-->>A: final, done
     A->>A: store done, then log run.final
     A-->>W: SSE run.final, stream closes
+    end
 ```
 
 The engineer launches a workflow. The app records the run and starts a worker. The worker runs the graph; an
@@ -73,25 +86,35 @@ the worker exits. When the engineer approves, a new worker resumes from the chec
 
 ```mermaid
 sequenceDiagram
+    autonumber
     actor U as Engineer
     participant W as Web app
     participant S as ChatSession
-    participant C as kiro-cli (chat)
-    participant M as genesis-control MCP
-    participant A as /api/runs
-    U->>W: "Run the business map for app X"
-    W->>S: POST /api/chat/sessions/{id}/messages
-    S->>C: prompt (read tools trusted)
-    C->>M: start_run (untrusted)
+    participant C as kiro-cli
+    participant M as Control MCP
+    participant A as Runs API
+    rect rgb(240, 246, 255)
+    Note over U,C: Ask
+    U->>W: Run the business map for app X
+    W->>S: POST chat message
+    S->>C: prompt, read tools trusted
+    C->>M: start_run, not trusted
     C->>S: session/request_permission
-    S-->>W: SSE permission.request (confirm card)
+    end
+    rect rgb(240, 246, 255)
+    Note over U,S: Confirm
+    S-->>W: SSE permission.request
     U->>W: Allow
-    W->>S: POST .../permissions/{tool_call_id}
+    W->>S: POST permission answer
     S-->>C: chosen option
-    M->>A: POST /api/runs + X-Genesis-Control-Token
-    A->>A: copilot limits, start, link run to session
+    end
+    rect rgb(240, 246, 255)
+    Note over M,A: Start the run
+    M->>A: POST /api/runs with control token
+    A->>A: copilot limits, start, link to session
     C-->>S: answer streamed
     S-->>W: SSE agent.message, agent.result
+    end
 ```
 
 The engineer asks in chat. The agent decides to start a run and calls the control server's `start_run` tool.
@@ -110,27 +133,38 @@ Detail: [chat-and-skills.md](modules/chat-and-skills.md#55-copilot-confirm-cards
 
 ```mermaid
 sequenceDiagram
-    participant T as Scheduler tick
-    participant J as application-sync job
-    participant S as ApplicationSyncService
-    participant R as Worker (sync-application)
-    participant D as Dev MCP
-    participant X as Appian Deployment API
+    autonumber
+    participant T as Scheduler
+    participant S as SyncService
+    participant W as Sync worker
+    participant A as Appian Dev
     participant P as Parser
     participant K as KbStore
     participant H as Genesis Hub
-    T->>J: slot due
-    J->>S: start_sync(app, mode auto)
-    S->>R: start run
-    R->>K: last own sync, covered_until
-    R->>D: list objects changed since covered_until
-    R->>D: create genesis-delta-* package, add objects
-    R->>X: export package, download zip
-    R->>D: delete package
-    R->>K: known_context
-    R->>P: parse(zip, known objects and edges)
-    R->>K: apply (incremental), finish sync
-    R->>H: publish KB snapshot (if collaboration is on)
+
+    rect rgb(240, 246, 255)
+        Note over T,W: Start
+        T->>S: slot due, mode auto
+        S->>W: start sync-application run
+    end
+    rect rgb(240, 246, 255)
+        Note over W,A: Export what changed
+        W->>K: read covered_until
+        W->>A: list objects changed since then
+        W->>A: create genesis-delta package
+        W->>A: export package, download zip
+        W->>A: delete package
+    end
+    rect rgb(240, 246, 255)
+        Note over W,K: Parse and merge
+        W->>K: read known context
+        W->>P: parse zip with known objects
+        P-->>W: partial parse result
+        W->>K: apply incremental, finish sync
+    end
+    opt collaboration is on
+        W->>H: publish KB snapshot
+    end
 ```
 
 The scheduler fires the application-sync job. The job asks the sync service to start the `sync-application`
@@ -150,24 +184,31 @@ Detail: [knowledge-base.md](modules/knowledge-base.md#54-an-incremental-sync-end
 
 ```mermaid
 sequenceDiagram
+    autonumber
     actor U as Engineer
-    participant A as api/features.py
+    participant A as Features API
     participant R as RunManager
-    participant K as Worker (technical-design-analysis)
+    participant K as Worker
     participant F as StageFinalizer
     participant C as ChatManager
-    participant L as LifecycleService
+    participant L as Lifecycle
+    rect rgb(240, 246, 255)
+    Note over U,K: Start the stage
     U->>A: Start Technical Design
-    A->>A: prerequisites present? snapshot Spec + UX HTML
-    A->>R: start(workflow, paths, stage_id)
-    A->>A: bind run to stage, status in-progress
-    R->>K: run (plan, analyze, draft, verify, heal)
+    A->>A: check prerequisites, snapshot Spec and UX
+    A->>R: start workflow with paths and stage id
+    A->>A: bind run to stage, set in-progress
+    R->>K: plan, analyze, draft, verify, heal
     K-->>R: technical-design.html, run.final done
+    end
+    rect rgb(240, 246, 255)
+    Note over R,L: Finalize
     R-->>F: run.final
-    F->>F: stage bound to this run? no chat yet?
-    F->>C: create technical_design chat, seed turn
-    F->>F: copy HTML into the chat sandbox
-    F->>L: submit (in-progress to in-review)
+    F->>F: stage bound to this run, no chat yet
+    F->>C: create chat, seed turn
+    F->>F: copy HTML into chat sandbox
+    F->>L: submit, in-progress to in-review
+    end
 ```
 
 The engineer starts the stage. The route checks the stage's prerequisites, writes the input documents to files
@@ -181,20 +222,42 @@ Detail: [features-and-stages.md](modules/features-and-stages.md#57-how-an-analys
 ## 7.5 A story moves through the Workbench
 
 ```mermaid
-flowchart LR
-    todo["To Do"] -- "drag + confirm:<br/>story-design-analysis" --> design["Design"]
-    design -- "finalizer" --> dr["Design Review"]
-    dr -- "drag + confirm:<br/>story-implementation<br/>(writes to Dev)" --> impl["Implementation"]
-    impl -- "finalizer" --> cr["Code Review"]
-    impl -- "finalizer: send back" --> dr
-    cr -- "drag" --> dep["Deployment"]
-    dep -- "drag + confirm:<br/>story-verification on QA" --> ver["Verification"]
-    ver -- "finalizer: pass" --> done["Done"]
-    ver -- "finalizer: product defect" --> impl
+stateDiagram-v2
+    direction TB
+    state "To Do" as todo
+    state "Design" as design
+    state "Design Review" as dr
+    state "Implementation" as impl
+    state "Code Review" as cr
+    state "Deployment" as dep
+    state "Verification" as ver
+    state "Done" as done
+    [*] --> todo
+    todo --> design : confirm, design run
+    design --> dr : run done
+    dr --> impl : confirm, implement run
+    impl --> cr : run done
+    impl --> dr : send back
+    cr --> dep : drag
+    dep --> ver : confirm, verification run
+    ver --> done : pass
+    ver --> impl : product defect
+    done --> [*]
+    classDef auto fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef review fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    class design,impl,ver auto
+    class dr,cr review
+    classDef plain fill:#f5f5f5,stroke:#616161,color:#212121
+    class todo,dep plain
+    class done terminal
 ```
 
-A story card moves left to right. Three drags open a confirm that starts a workflow. The finalizers move the
-card when the run ends. The agent never moves a card.
+A story card starts in To Do and moves down the lanes to Done. The three dark blue lanes (Design, Implementation,
+Verification) each run a workflow: dragging a card into one opens a confirm, and the confirm starts the run. When
+the run ends, its finalizer moves the card ("run done"): Design goes to Design Review, Implementation goes to Code
+Review or back to Design Review, and Verification goes to Done on a pass or back to Implementation on a product
+defect. The yellow lanes are human reviews, and the Deployment drag is plain. The agent never moves a card.
 
 1. **Design.** The confirm starts `story-design-analysis` with the story and snapshots of the feature's Spec, UX
    Design and Technical Design. The finalizer opens a design-review chat and moves the card to Design Review.
@@ -213,26 +276,36 @@ Detail: [stories-and-workbench.md](modules/stories-and-workbench.md#51-the-lanes
 
 ```mermaid
 sequenceDiagram
+    autonumber
     actor U as Engineer
-    participant E as TestExecutionService
-    participant G as Generator + workspace
+    participant E as ExecutionService
+    participant G as Generator
     participant R as RunManager
-    participant K as Worker (test-execution)
-    participant P as Playwright on QA
-    participant F as TestExecutionFinalizer
+    participant K as Worker
+    participant P as Playwright
+    participant F as Finalizer
+    rect rgb(240, 246, 255)
+    Note over U,G: Queue
     U->>E: Run scenarios
-    E->>E: catalog from DB + committed HEAD, readiness
-    E->>E: TE- row queued, pump (one at a time)
+    E->>E: read catalog and HEAD, check readiness
+    E->>E: queue TE row, pump one at a time
     E->>G: generate specs, commit
-    E->>R: start(test-execution, prepare)
-    R->>E: prepare: export commit into run/checkout
+    end
+    rect rgb(240, 246, 255)
+    Note over E,P: Execute on QA
+    E->>R: start test-execution, prepare
+    R->>E: prepare, export commit to checkout
     R->>K: spawn
     K->>P: npx --no-install playwright test
-    P-->>K: report (scrubbed of passwords)
+    P-->>K: report, passwords scrubbed
     K-->>R: results.json, run.final
+    end
+    rect rgb(240, 246, 255)
+    Note over R,E: Record
     R-->>F: run.final
-    F->>F: result rows + status in one transaction
+    F->>F: result rows and status, one transaction
     F->>E: pump the next queued execution
+    end
 ```
 
 The engineer runs scenarios. The service checks that the scenarios are automated and QA is ready, queues the

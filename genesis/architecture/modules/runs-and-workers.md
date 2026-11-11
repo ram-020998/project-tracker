@@ -40,41 +40,64 @@ code in `genesis/runs/manager.py` exists to keep that promise when processes die
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph appproc["App process"]
-        routes["api/run_routes.py"]
-        mgr["RunManager<br/>(manager.py)"]
-        store["RunStore<br/>(store.py)"]
-        log["EventLog<br/>(eventlog.py)"]
-        bus["EventBus per run<br/>(events.py)"]
-        sup["Supervisor<br/>(supervisor.py)"]
-        folds["steps.py folds"]
-        obs["Observers / finalizers"]
-    end
-    subgraph wproc["Worker process"]
-        wk["worker.py"]
-        loader["dist/loader.py"]
-        ctxb["runtime/context.py"]
-        cp["runtime/checkpoint.py"]
-        graph["workflow graph.py"]
-    end
-    db[("genesis.db")]
+flowchart TB
+    routes["<b>run_routes.py</b><br/>HTTP endpoints"]:::ext
+    mgr["<b>RunManager</b><br/>manager.py"]:::core
+
+    store["<b>RunStore</b><br/>run records"]:::comp
+    log["<b>EventLog</b><br/>durable events"]:::comp
+    bus["<b>EventBus</b><br/>live, one per run"]:::comp
+    folds["<b>steps.py</b><br/>pure folds"]:::comp
+    sup["<b>Supervisor</b><br/>spawns workers"]:::comp
+
+    db[("<b>genesis.db</b>")]:::data
+    obs["<b>Observers</b><br/>finalizers"]:::ext
+    worker["<b>Worker process</b><br/>worker.py"]:::proc
 
     routes --> mgr
-    mgr --> store & log & bus & sup & folds
-    log --> obs
-    sup -- "spawn + stdin job" --> wk
-    wk -- "stdout JSONL" --> sup
-    wk --> loader --> graph
-    wk --> ctxb
-    wk --> cp --> db
-    store & log --> db
+    mgr --> store & log & bus & folds & sup
+    store --> db
+    log --> db
+    log -- "every event" --> obs
+    sup <-- "stdin job, stdout events" --> worker
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
-The routes call the `RunManager`, which owns the store, the event log, the per-run buses and the supervisor. The
-supervisor starts a worker per operation and reads its output on a thread. The worker loads the workflow through
-the loader, builds its context, and checkpoints into the same database the store and the log use. Every logged
-event also goes to the observers.
+The routes call the `RunManager`, which owns the store, the event log, the per-run buses, the step folds and the
+supervisor. The store and the log write to `genesis.db`. The supervisor starts a worker per operation, sends it the
+job on stdin and reads its JSON lines from stdout on a thread. Every logged event also goes to the observers.
+
+```mermaid
+flowchart LR
+    sup["<b>Supervisor</b><br/>app process"]:::ext
+    wk["<b>worker.py</b><br/>reads the job"]:::proc
+    loader["<b>dist/loader.py</b><br/>loads the workflow"]:::comp
+    wfgraph["<b>Workflow graph.py</b><br/>the LangGraph graph"]:::comp
+    ctxb["<b>runtime/context.py</b><br/>builds PlatformContext"]:::comp
+    cp["<b>runtime/checkpoint.py</b><br/>AsyncSqliteSaver"]:::comp
+    db[("<b>genesis.db</b>")]:::data
+    sup -- "spawn + stdin job" --> wk
+    wk -- "stdout JSONL" --> sup
+    wk --> loader --> wfgraph
+    wk --> ctxb
+    wk --> cp
+    cp -- "checkpoints" --> db
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
+```
+
+The worker reads the job, loads the workflow through the loader and builds its context. It checkpoints into the
+same database that the store and the log use. Its output goes back to the supervisor as JSON lines.
 
 | File | Main parts |
 |---|---|
@@ -96,25 +119,46 @@ event also goes to the observers.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> pending: start() creates the record
-    pending --> running: worker spawned
-    running --> awaiting_gate: graph hit a gate (interrupt)
-    running --> paused: pause() killed the worker
-    awaiting_gate --> running: respond(decision)
-    paused --> running: resume()
-    running --> done: graph finished
-    running --> failed: error, worker died, or orphaned at restart
-    awaiting_gate --> cancelled: cancel()
-    paused --> cancelled: cancel()
-    running --> cancelled: cancel()
-    pending --> failed
+    direction LR
+    state "Pending" as pending
+    state "Running" as running
+    state "Awaiting gate" as gate
+    state "Paused" as paused
+    state "Done" as done
+    state "Failed" as failed
+    state "Cancelled" as cancelled
+
+    [*] --> pending : start()
+    pending --> running : worker spawned
+    pending --> failed : start fails
+    running --> gate : gate reached
+    gate --> running : respond()
+    running --> paused : pause()
+    paused --> running : resume()
+    running --> done : graph finished
+    running --> failed : error or worker lost
+    running --> cancelled : cancel()
+    gate --> cancelled : cancel()
+    paused --> cancelled : cancel()
     done --> [*]
     failed --> [*]
     cancelled --> [*]
+
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    classDef active fill:#1168bd,stroke:#0b4884,color:#ffffff
+    class running active
+    class done terminal
+    class gate,paused waiting
+    class failed,cancelled bad
 ```
 
-`awaiting_gate` is the stored status `awaiting_input:gate`; `paused` is `awaiting_input:paused`. A fork creates a
-new run that starts in `paused` (section 5.6).
+A run starts as Pending and is Running once its worker starts. From Running it can stop at a gate or be paused
+(yellow); answering the gate or resuming takes it back to Running. It ends in exactly one of three terminal
+statuses: Done (green), Failed or Cancelled (red). Cancel works from Running, Awaiting gate and Paused. The stored
+values are `pending`, `running`, `awaiting_input:gate`, `awaiting_input:paused`, `done`, `failed` and `cancelled`.
+A fork creates a new run that starts in Paused (section 5.6).
 
 ### 5.2 Starting a run
 

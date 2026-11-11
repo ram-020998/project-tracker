@@ -42,24 +42,32 @@ this file". The answers to those questions are how Genesis enforces read-only ch
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    caller["Caller<br/>(kiro_node or ChatSession)"]
-    subgraph sdk["kiro_agent_sdk"]
-        api["__init__.py<br/>query, collect_streaming,<br/>collect, collect_json"]
-        client["client.py<br/>KiroACPClient,<br/>KiroAgentOptions"]
-        msgs["messages.py<br/>typed messages"]
-    end
-    kiro["kiro-cli acp<br/>(child process)"]
-    caller --> api --> client
-    caller -. "chat holds a client directly" .-> client
-    client -- "stdin: requests, answers" --> kiro
-    kiro -- "stdout: responses, notifications, requests" --> client
-    client --> msgs
+flowchart TB
+    node["<b>kiro_node</b><br/>workflow agent step"]:::ext
+    chat["<b>ChatSession</b><br/>one client per session"]:::ext
+
+    api["<b>__init__.py</b><br/>query, collect_streaming"]:::comp
+    client["<b>client.py</b><br/>KiroACPClient, options"]:::core
+    msgs["<b>messages.py</b><br/>typed messages"]:::comp
+
+    kiro["<b>kiro-cli acp</b><br/>child process"]:::proc
+
+    node -- "one call" --> api
+    api -- "create, prompt, close" --> client
+    chat -. "uses directly" .-> client
+    client <-- "JSON-RPC over stdio" --> kiro
+    client -- "parses into" --> msgs
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
 ```
 
 A workflow agent node calls the one-call helpers in `__init__.py`, which create a client, run one prompt and
-close it. Chat holds a client for the life of a session and calls it directly. The client is the only part that
-talks to the `kiro-cli` process; it turns what Kiro sends into the typed messages in `messages.py`.
+close it. Chat holds a client for the life of a session and calls it directly (dotted line). The client is the
+only part that talks to the `kiro-cli` process; it sends requests and answers, reads responses and updates, and
+turns them into the typed messages in `messages.py`.
 
 | File | Contents |
 |---|---|
@@ -95,28 +103,37 @@ Steps 5 and 6 each time out after `startup_timeout` (default 30 s; workflow node
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant C as KiroACPClient
-    participant K as kiro-cli acp
-    C->>K: spawn (args, cwd, env)
-    C->>K: initialize {protocolVersion, clientCapabilities}
-    K-->>C: {agentInfo, agentCapabilities}
-    C->>K: session/new {cwd, mcpServers}
-    K-->>C: {sessionId, models, modes}
-    K--)C: _kiro.dev/commands/available
-    C->>K: session/prompt {sessionId, content}
-    K--)C: session/update (chunks, tool calls)
-    K->>C: session/request_permission
-    C-->>K: {outcome: selected optionId}
-    K->>C: fs/write_text_file {path, content}
-    C-->>K: {} or error
-    K--)C: _kiro.dev/metadata {meteringUsage}
-    K-->>C: {stopReason}
+    participant K as kiro-cli
+    rect rgb(240, 246, 255)
+    Note over C,K: Start the session
+    C->>K: spawn with args, cwd, env
+    C->>K: initialize
+    K-->>C: agent info and capabilities
+    C->>K: session/new with MCP servers
+    K-->>C: session id, models, modes
+    K-->>C: commands/available
+    end
+    rect rgb(240, 246, 255)
+    Note over C,K: One turn
+    C->>K: session/prompt
+    K-->>C: session/update stream
+    opt Kiro asks the client
+        K->>C: session/request_permission
+        C-->>K: selected option
+        K->>C: fs/write_text_file
+        C-->>K: empty result or error
+    end
+    K-->>C: metadata with credits
+    K-->>C: stop reason
+    end
 ```
 
-The client starts the process, initialises the protocol and opens a session with the MCP servers. During the
-prompt, Kiro streams updates and also asks the client questions (permission, file writes), which the client must
-answer. A metering notification carries the credits. The prompt request's answer, with the stop reason, ends the
-turn.
+The first phase starts the process, initialises the protocol and opens a session with the MCP servers. In the
+second phase the client sends the prompt and Kiro streams updates. Kiro may also ask the client questions
+(permission, file writes), which the client must answer. A metering notification carries the credits. The prompt
+request's answer, with the stop reason, ends the turn.
 
 ### 5.2 A turn
 

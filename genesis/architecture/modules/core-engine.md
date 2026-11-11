@@ -42,42 +42,37 @@ core nodes, and the platform runs it.
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph core["genesis_core"]
-        types["types.py<br/>Node, PlatformContext,<br/>ValidationResult, CORE_MAJOR"]
-        state["state.py<br/>PlatformState + reducers"]
-        ws["workspace.py<br/>RunWorkspace, Doc"]
-        subgraph nodes["nodes/"]
-            program["program.py"]
-            agent["agent.py — kiro_node"]
-            cli["cli.py"]
-            validator["validator.py"]
-            gate["gate.py — hitl_gate"]
-            sub["subgraph.py"]
-            rel["reliability.py — attach_reliability"]
-            relstep["reliable.py — reliable_agent_step"]
-            heal["healing.py — attach_healing"]
-            tstore["tool_store.py"]
-        end
-        agents["agents/<br/>AgentProvider, KiroAcpProvider"]
-        mcp["mcp/<br/>McpRegistry, blackboard_server,<br/>introspect, custom_store"]
-        clis["clis/<br/>CliRegistry, custom_store"]
-        vals["validators.py"]
-        contracts["contracts.py<br/>VerificationReport, HealDecision"]
-        util["util/atomic_json.py"]
-    end
-    sdk["kiro_agent_sdk"]
-    agent --> agents --> sdk
-    agent --> tstore
-    agent --> mcp
-    relstep --> agent & validator & rel
-    heal --> rel & validator & program & contracts
+flowchart TB
+    relstep["<b>reliable.py</b><br/>trio in one call"]:::comp
+    heal["<b>healing.py</b><br/>attach_healing"]:::comp
+    rel["<b>reliability.py</b><br/>attach_reliability"]:::comp
+
+    agent["<b>agent.py</b><br/>kiro_node"]:::core
+    validator["<b>validator.py</b><br/>validator_node"]:::comp
+    program["<b>program.py</b><br/>program_node"]:::comp
+    contracts["<b>contracts.py</b><br/>heal contracts"]:::comp
+
+    provider["<b>agents/</b><br/>AgentProvider"]:::comp
+    registry["<b>mcp/</b><br/>McpRegistry"]:::comp
+    store["<b>tool_store.py</b><br/>tool outputs"]:::comp
+    sdk["<b>kiro_agent_sdk</b><br/>ACP client"]:::ext
+
+    relstep --> agent & rel
+    heal --> rel & program & contracts
+    rel --> validator
+    agent --> provider & registry & store
+    provider -. "lazy import" .-> sdk
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
 ```
 
-The diagram shows the package's parts and the few dependencies between them. The agent node is the only part
-that reaches outside the package: it calls the agent provider, which calls the SDK, and it uses the MCP registry
-and the tool-output store. The one-call trio helper and the healing tier are built only from the other node
-factories, so they add no new mechanism.
+The diagram shows the package's files and how they depend on each other. The two wiring helpers at the top build
+graphs only from the node factories: `reliable.py` combines an agent node with `attach_reliability`, and `healing.py`
+adds the heal loop from the trio, program nodes and its contracts. `agent.py` (`kiro_node`) is the only part that
+reaches outside the package. It uses the agent provider, the MCP registry and the tool-output store, and the
+provider imports the SDK only when a turn runs.
 
 | File | What it contains |
 |---|---|
@@ -189,29 +184,39 @@ the validator that follows finds the output missing or wrong and the trio retrie
 
 ```mermaid
 sequenceDiagram
-    participant G as LangGraph (worker)
+    autonumber
+    participant G as LangGraph
     participant N as kiro_node
     participant P as AgentProvider
-    participant K as kiro-cli acp
+    participant K as kiro-cli
     participant M as MCP servers
-    participant B as Blackboard files
-    G->>N: _run(state, config)
-    N->>B: copy skills, create output file, write prompt file
-    N->>N: resolve MCP entries + trust
-    N->>P: collect_streaming(prompt, options, on_message)
-    P->>K: start, initialize, session/new (mcpServers), session/prompt
-    K->>M: start servers, call tools
-    K-->>P: session/update stream, metadata (credits)
-    P-->>N: messages (on_message) → events + tool-output store
-    K->>B: agent writes the output file
-    P-->>N: TurnResult (stop reason, error, usage)
-    N-->>G: {cursor, artifacts, _last_turn, telemetry}
+    participant B as Blackboard
+    rect rgb(240, 246, 255)
+    Note over N,B: Prepare
+    G->>N: run node with state
+    N->>B: copy skills, write prompt
+    N->>N: resolve MCP and trust
+    end
+    rect rgb(240, 246, 255)
+    Note over N,M: Turn
+    N->>P: collect_streaming
+    P->>K: start and open session
+    P->>K: session/prompt
+    K->>M: start servers and call tools
+    K-->>P: updates and credits
+    P-->>N: messages become events
+    N->>B: save tool outputs
+    K->>B: write the output file
+    K-->>P: stop reason, usage
+    P-->>N: TurnResult
+    end
+    N-->>G: cursor, artifacts, telemetry
 ```
 
 The node prepares the files first, then hands one turn to the provider. The provider starts Kiro, which starts
 the step's MCP servers. While the turn runs, every streamed message becomes an event and every tool result is
-saved to the tool-output store. Kiro writes the output file itself. The node returns only pointers and
-telemetry to LangGraph.
+saved to the tool-output store on the blackboard. Kiro writes the output file itself. The node returns only
+pointers and telemetry to LangGraph.
 
 ### 5.3 How tool trust is computed
 
@@ -247,11 +252,25 @@ retries remain, emits `retry.scheduled`. It always emits `validator.result`. The
 
 ```mermaid
 flowchart LR
-    A["agent node"] --> V["validator (wrapped)"]
-    V -- "ok" --> NXT["nxt (next step)"]
-    V -- "not ok and retries ≤ retry_max" --> A
-    V -- "not ok and retries > retry_max" --> GATE["escalation gate (or END)"]
+    agent["<b>Agent node</b><br/>one Kiro turn"]:::comp
+    val["<b>Validator</b><br/>program check"]:::comp
+    nxt["<b>Next step</b>"]:::proc
+    gate["<b>Escalation gate</b><br/>or END"]:::proc
+    agent --> val
+    val -- "ok" --> nxt
+    val -- "failed, retries left" --> agent
+    val -- "retries used up" --> gate
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
+
+The diagram shows the router after the validator. A passed check goes to the next step. A failed check goes back
+to the agent while retries remain, and to the escalation gate (or END) once they are used up.
 
 With `retry_max = 2` the agent runs at most three times: the first try and two retries. On a retry the agent's
 `prompt_fn` should read `state["_validation"][<validator>]["message"]` and include it, so the agent knows what to
@@ -284,15 +303,35 @@ happen after each answer, given the run's state (L-106).
 
 ```mermaid
 flowchart TB
-    ASM["assemble (workflow's own program node)"] --> VER["verify (agent + trio)"]
-    VER --> VR{"verify_route"}
-    VR -- "report ok" --> NXT["nxt"]
-    VR -- "not ok" --> HEAL["heal (agent + trio)"]
-    HEAL --> HR{"heal_route"}
-    HR -- "mode patch and heals left" --> RE["reassemble (program)"] --> VER
-    HR -- "restarts left" --> RT["restart_target: the workflow runs again<br/>with guidance, pass + 1"]
-    HR -- "budget used up" --> G["escalation gate"]
+    asm["<b>assemble</b><br/>workflow program node"]:::proc
+    ver["<b>verify</b><br/>agent with trio"]:::comp
+    vr{"verify_route"}:::note
+    heal["<b>heal</b><br/>agent with trio"]:::comp
+    hr{"heal_route"}:::note
+    re["<b>reassemble</b><br/>program node"]:::proc
+    rt["<b>restart_target</b><br/>run again with guidance"]:::proc
+    nxt["<b>Next step</b>"]:::proc
+    gate["<b>Escalation gate</b>"]:::proc
+    asm --> ver --> vr
+    vr -- "report ok" --> nxt
+    vr -- "not ok" --> heal --> hr
+    hr -- "patch, heals left" --> re
+    re --> ver
+    hr -- "restart, restarts left" --> rt
+    hr -- "budget used up" --> gate
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
+
+The diagram shows the loop. The workflow assembles the artifact, then the verify agent checks it. A good report
+moves on to the next step. A bad report goes to the heal agent, which either patches the items (the program node
+reassembles and verify runs again) or restarts the workflow with guidance. When the budget is used up, the
+escalation gate asks a person.
 
 - **verify** is an agent that writes a `VerificationReport` (`verify.json`): `ok`, `summary` and a list of
   item-keyed fixes, each with `target_id`, `issue`, `reason`, `evidence`, `suggested_change` and a severity of

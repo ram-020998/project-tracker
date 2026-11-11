@@ -9,36 +9,34 @@ Nothing inside the box is shown here; [04-container-view.md](04-container-view.m
 
 ```mermaid
 flowchart LR
-    user(["Solutions engineer<br/>(browser on the same machine)"])
-
-    subgraph local["The engineer's computer"]
-        genesis["<b>Genesis</b><br/>local web app<br/>http://127.0.0.1:8760"]
-        kiro["Kiro CLI<br/>(kiro-cli acp)"]
-    end
-
-    kirocloud["Kiro service<br/>(models, sign-in, metering)"]
-    dev["Appian development environment<br/>(Dev MCP, DevOps MCP, SAIL)"]
-    qa["Appian QA environment<br/>(the site under test)"]
-    hub["Genesis Hub<br/>(Appian app in the dev environment)"]
-    gitlab["Internal GitLab<br/>(genesis-workflows library,<br/>genesis release tags)"]
-    google["Google Workspace<br/>(Drive documents)"]
+    user(["<b>Solutions engineer</b><br/>uses a local browser"]):::person
+    genesis["<b>Genesis</b><br/>local web app<br/>127.0.0.1:8760"]:::core
+    kiro["<b>Kiro CLI</b><br/>local process<br/>kiro-cli acp"]:::proc
+    kirocloud["<b>Kiro service</b><br/>models, sign-in, metering"]:::ext
+    dev["<b>Appian Dev</b><br/>Dev MCP, DevOps MCP, SAIL"]:::ext
+    qa["<b>Appian QA</b><br/>site under test"]:::ext
+    hub["<b>Genesis Hub</b><br/>Appian app in Dev"]:::ext
+    gitlab["<b>Internal GitLab</b><br/>library and release tags"]:::ext
+    google["<b>Google Workspace</b><br/>Drive documents"]:::ext
 
     user -- "uses the UI" --> genesis
-    genesis -- "ACP over stdio:<br/>one session per agent step or chat" --> kiro
-    kiro -- "HTTPS (Kiro's own auth)" --> kirocloud
-    genesis -- "MCP tools via Kiro and program code:<br/>read objects, export, sync, write in Implementation" --> dev
-    genesis -- "Chromium driven by apwt/Playwright,<br/>signed in as test users" --> qa
-    genesis -. "opt-in: Web API (publish / pull)" .-> hub
-    genesis -- "REST API with a GitLab token:<br/>catalog + install" --> gitlab
-    genesis -- "git fetch of tags:<br/>self-update" --> gitlab
-    genesis -- "gws CLI (OAuth)" --> google
+    genesis -- "ACP over stdio" --> kiro
+    kiro -- "HTTPS" --> kirocloud
+    genesis -- "MCP and SAIL" --> dev
+    genesis -- "browser tests" --> qa
+    genesis -. "opt-in publish, pull" .-> hub
+    genesis -- "REST and git fetch" --> gitlab
+    genesis -- "gws CLI" --> google
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-The engineer uses Genesis from a browser on the same computer. Genesis starts Kiro CLI processes on that computer
-and gives each one a narrow task. Kiro CLI calls the Kiro service for the language model. Genesis reaches the
-Appian development environment for knowledge-base syncs and implementation, the QA environment for browser
-tests, GitLab for workflows and its own updates, Google Workspace for documents and, when collaboration is
-switched on, the Genesis Hub. The dotted line marks the one optional connection.
+The engineer uses Genesis from a browser on the same computer. Genesis starts Kiro CLI as a local process, one session per agent step or chat, and Kiro CLI calls the Kiro service for the language model. Genesis reaches the Appian Dev environment for knowledge-base syncs and implementation, the QA environment for browser tests, GitLab for workflows and its own updates, and Google Workspace for documents. The dotted line marks the one optional connection, to the Genesis Hub. Dark blue is the person, blue is Genesis, light blue is a local process and grey is a system outside the computer or outside Genesis.
 
 ## 3.2 People
 

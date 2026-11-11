@@ -49,47 +49,73 @@ board asks for a confirm, and the confirm starts a workflow. When the workflow e
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    web["web/.../workbench<br/>board, story page"]
-    subgraph api["genesis/api"]
-        wb["workbench.py<br/>register_workbench_routes"]
-        wiki_api["object_wiki.py"]
-        feat["features.py<br/>story CRUD, finalize"]
+flowchart TB
+    web(["<b>Web app</b><br/>board, story page"]):::ext
+
+    feat["<b>features.py</b><br/>story CRUD, finalize"]:::comp
+    wb["<b>workbench.py</b><br/>board and lane routes"]:::comp
+
+    vs["<b>Story verification</b><br/>testexec service"]:::core
+    rm["<b>RunManager</b><br/>starts runs"]:::core
+
+    stores[("<b>Story stores</b><br/>StoryStore<br/>BoardStore<br/>StoryStageStore")]:::data
+    subgraph wg [" "]
+        wikiapi["<b>object_wiki.py</b><br/>history routes"]:::comp
+        wiki[("<b>ObjectWikiStore</b><br/>kb/object_wiki.py")]:::data
+        wikiapi --> wiki
     end
-    subgraph kb["genesis/kb"]
-        stories["stories.py<br/>StoryStore"]
-        boards["boards.py<br/>BoardStore"]
-        sstages["story_stages.py<br/>StoryStageStore"]
-        wiki["object_wiki.py<br/>ObjectWikiStore"]
-        trace["story_trace.py<br/>pure helpers"]
-    end
-    subgraph fin["app-process finalizers"]
-        fd["story_design_finalizer"]
-        fi["story_implementation_finalizer"]
-        fv["story_verification_finalizer"]
-    end
-    vs["testexec/verification_service.py<br/>StoryVerificationService"]
-    rm["RunManager"]
-    life["domain LifecycleService<br/>story lane edges"]
-    wf["workflows:<br/>story-design-analysis<br/>story-implementation<br/>story-verification"]
-    web --> wb & wiki_api & feat
-    wb --> boards & sstages & stories & trace & vs
+
+    web --> wikiapi
+    web --> feat
+    web --> wb
+    wb --> vs
     wb --> rm
-    feat --> stories & trace
-    wiki_api --> wiki
-    rm --> wf
-    rm -. "run.final" .-> fd & fi & fv
-    fd & fi & fv --> sstages & life
-    life --> stories
-    vs --> rm & sstages & boards
-    wf -. "ctx.extras object_wiki" .-> wiki
+    vs --> rm
+    feat --> stores
+    wb --> stores
+    vs --> stores
+
+    style wg fill:#ffffff,stroke:#9e9e9e,stroke-dasharray:4 3
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
 The web app calls the routes in `workbench.py`, `object_wiki.py` and the story routes of `features.py`. The Workbench
-routes read and write through the stores in `genesis/kb`. They start runs through `RunManager`, and the verification
-start goes through `StoryVerificationService`. When a run ends, `RunManager` announces `run.final` and the three
-finalizers react: they update the story stage and move the lane through the story `LifecycleService`. The
-implementation workflow writes the Object Wiki directly, through a store that the platform puts in `ctx.extras`.
+and story routes read and write through the story stores in `genesis/kb` (`StoryStore`, `BoardStore`,
+`StoryStageStore`); the story routes also use the pure helpers in `story_trace.py` (not drawn). The Workbench routes
+start runs through `RunManager`, and the verification start goes through `StoryVerificationService`. The Object Wiki
+routes (dashed box) use only their own store.
+
+```mermaid
+flowchart TB
+    rm["<b>RunManager</b><br/>runs, announces run.final"]:::core
+    wf["<b>Story workflows</b><br/>design, implementation<br/>verification"]:::proc
+
+    fins["<b>Story finalizers</b><br/>design, implementation<br/>verification"]:::comp
+
+    life["<b>LifecycleService</b><br/>story lane edges"]:::core
+    sstages[("<b>StoryStageStore</b><br/>stage rows")]:::data
+    stories[("<b>StoryStore</b><br/>story status")]:::data
+    wiki[("<b>ObjectWikiStore</b><br/>change ledger")]:::data
+
+    rm -. "run.final" .-> fins
+    rm -- "runs" --> wf
+    fins -- "write result" --> sstages
+    fins -- "move lane" --> life
+    life --> stories
+    wf -. "implementation only" .-> wiki
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+```
+
+When a run ends, `RunManager` announces `run.final` and the three finalizers react. They update the story stage and
+move the lane through the story `LifecycleService`. The implementation workflow writes the Object Wiki directly,
+through a store that the platform puts in `ctx.extras`.
 
 | File | Main classes and functions |
 |---|---|
@@ -115,27 +141,40 @@ implementation workflow writes the Object Wiki directly, through a store that th
 
 ```mermaid
 stateDiagram-v2
-    direction LR
-    [*] --> ToDo: Import onto board
-    ToDo --> Design: drag + confirm<br/>starts story-design-analysis
-    Design --> DesignReview: finalizer, action submit
-    DesignReview --> Design: drag + confirm<br/>re-runs the design
-    DesignReview --> Implementation: drag + confirm<br/>starts story-implementation
-    Implementation --> CodeReview: finalizer, action submit-review
-    Implementation --> DesignReview: finalizer, action send-back
-    CodeReview --> Deployment: drag, no workflow
-    CodeReview --> Implementation: drag + confirm<br/>re-runs the implementation
-    Deployment --> Verification: drag + confirm<br/>starts story-verification
-    Verification --> Done: finalizer, action verify
-    Verification --> Implementation: finalizer, action reject
-    Done --> [*]
+    direction TB
+    state "To Do" as todo
+    state "Design" as design
+    state "Design Review" as dreview
+    state "Implementation" as impl
+    state "Code Review" as creview
+    state "Deployment" as deploy
+    state "Verification" as verif
+    state "Done" as done
+    [*] --> todo : import onto board
+    todo --> design : drag, confirm, design run
+    design --> dreview : finalizer, submit
+    dreview --> design : drag, confirm, re-run
+    dreview --> impl : drag, confirm, impl run
+    impl --> creview : finalizer, submit-review
+    impl --> dreview : finalizer, send-back
+    creview --> deploy : drag only
+    creview --> impl : drag, confirm, re-run
+    deploy --> verif : drag, confirm, verify run
+    verif --> done : finalizer, verify
+    verif --> impl : finalizer, reject
+    done --> [*]
+    classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef waiting fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    class done terminal
 ```
 
-Lane names in the diagram are the display names (`ToDo` is `to-do`, `DesignReview` is `design-review`, and so on).
-Each arrow labelled "drag + confirm" is a person's drag followed by a confirm dialog whose Yes button calls a start
-route. Each arrow labelled "finalizer" is made by program code after a run ends, through the audited story
-`LifecycleService` (action names are those in `STORY_STAGE_TRANSITIONS`). An arrow labelled "drag, no workflow" is a
-plain move. Any lane can also be reached by a plain drag, because the board does not enforce the transition table
+The diagram uses the display names of the lanes (`to-do`, `design-review` and so on). Each arrow labelled "drag,
+confirm" is a person's drag followed by a confirm dialog whose Yes button calls a start route. The label ends with
+the run it starts: `story-design-analysis`, `story-implementation` or `story-verification`. Each arrow labelled
+"finalizer" is made by program code after a run ends, through the audited story `LifecycleService` (the second word
+is the action name from `STORY_STAGE_TRANSITIONS`). An arrow labelled "drag only" is a plain move with no workflow.
+Any lane can also be reached by a plain drag, because the board does not enforce the transition table
 (section 5.2).
 
 The web asks for a confirm when a card enters Design or Implementation from another lane, and when a card goes from
@@ -172,25 +211,35 @@ The web does not refresh the board from the 10-second poll while a move is being
 
 ```mermaid
 sequenceDiagram
+    autonumber
     actor U as Person
-    participant W as Board (web)
-    participant API as workbench.py
-    participant RM as RunManager
-    participant WK as Worker<br/>story-design-analysis
-    participant FD as StoryDesignFinalizer
-    participant CH as ChatManager
-    U->>W: drag card into Design, confirm
-    W->>API: POST .../design/start
-    API->>API: checks, write 3 HTML snapshots
+    participant W as Board
+    participant API as Routes
+    participant RM as Runs
+    participant WK as Worker
+    participant FD as Finalizer
+    participant CH as Chat
+    rect rgb(240, 246, 255)
+    Note over U,RM: Start the design
+    U->>W: drag to Design, confirm
+    W->>API: POST design/start
+    API->>API: checks, 3 HTML snapshots
     API->>API: move card to design
-    API->>RM: start story-design-analysis
-    API->>API: bind run to story stage, status in-progress
+    API->>RM: start design run
+    API->>API: bind run, in-progress
+    end
+    rect rgb(240, 246, 255)
+    Note over RM,WK: Run the analysis
     RM->>WK: spawn worker
-    WK-->>RM: design.html, result.json, run.final done
-    RM->>FD: run.final (status already stored)
-    FD->>CH: create story_design chat, seed turn
-    FD->>FD: copy design.html to chat sandbox, set stage in-review
-    FD->>FD: transition submit: design to design-review
+    WK-->>RM: design.html, run.final
+    end
+    rect rgb(240, 246, 255)
+    Note over RM,CH: Finalize
+    RM->>FD: run.final, status stored
+    FD->>CH: create chat, seed turn
+    FD->>FD: copy design.html to sandbox
+    FD->>FD: in-review, move to Design Review
+    end
     U->>W: review, annotate, chat
 ```
 

@@ -55,37 +55,42 @@ Installing the library onto a machine is described in [distribution.md](distribu
 ## 4. Structure
 
 ```mermaid
-flowchart LR
-    subgraph repo["genesis-workflows (repo)"]
-        reg["registry.json<br/>bundles.json"]
-        mcpr["mcp-registry.json<br/>cli-registry.json"]
-        skr["skills-registry.json<br/>skills/"]
-        wfs["workflows/ID/<br/>workflow.yaml + graph.py"]
-        steer["steering/ schemas/"]
-        ci["ci/ + .gitlab-ci.yml"]
-    end
-    subgraph plat["genesis (platform)"]
-        lint["genesis/lint"]
-        cli["genesis/cli<br/>create_workflow, test_workflow"]
-        har["genesis/testing/harness.py"]
-        dist["genesis/dist<br/>Catalog, Installer, Loader"]
-        worker["run worker"]
-    end
-    core["genesis-core"]
-    ci -- "imports" --> lint
-    cli --> lint
-    har --> core
-    wfs -. "built from" .-> core
+flowchart TB
+    dist["<b>genesis/dist</b><br/>Catalog, Installer<br/>Loader"]:::comp
+    worker["<b>Run worker</b><br/>imports graph.py"]:::proc
+    cli["<b>genesis/cli</b><br/>create, test workflow"]:::comp
+
+    reg[("<b>registry.json</b><br/>bundles.json")]:::data
+    skr[("<b>skills-registry.json</b><br/>skills/")]:::data
+    wfs["<b>workflows/ID/</b><br/>workflow.yaml<br/>graph.py"]:::core
+    ci["<b>ci/</b><br/>publish gates"]:::core
+    mcpr[("<b>mcp-registry.json</b><br/>cli-registry.json")]:::data
+
+    gcore["<b>genesis-core</b><br/>node factories"]:::ext
+    har["<b>testing/harness.py</b><br/>headless graph run"]:::comp
+    lint["<b>genesis/lint</b><br/>contract, reliability"]:::comp
+
     dist -- "reads" --> reg
-    dist -- "copies" --> wfs
     dist -- "reads" --> skr
-    worker -- "imports graph.py" --> wfs
-    mcpr -. "curated tier" .-> core
+    dist -- "copies" --> wfs
+    worker -- "imports" --> wfs
+    cli --> lint
+    har -- "builds" --> gcore
+    ci -- "imports" --> lint
+    wfs -. "built from" .-> gcore
+    mcpr -. "curated tier" .-> gcore
+
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
 ```
 
-The repo on the left holds only data and workflow source. The platform on the right reads it in three ways. CI imports
-the lints to check the repo. `genesis/dist` reads the catalog files and copies a workflow folder onto the user's
-machine. The run worker imports one `graph.py`, which builds its graph from `genesis-core` factories.
+The library repo holds data files and workflow source (the two dark boxes are `ci/` and the workflow folders). The
+platform reads it in three ways. CI imports the lints to check the repo. `genesis/dist` reads the catalog files and
+copies a workflow folder onto the user's machine. The run worker imports one `graph.py`, which builds its graph from
+`genesis-core` factories.
 
 ### 4.1 The library repo
 
@@ -234,24 +239,32 @@ Notes on the table:
 
 ```mermaid
 sequenceDiagram
-    participant A as Author
-    participant S as genesis create-workflow
-    participant T as genesis test-workflow
-    participant CI as Library CI
+    autonumber
+    actor A as Author
+    participant S as create-workflow
+    participant T as test-workflow
     participant L as Library repo
-    A->>S: workflow id, name, roles
-    S-->>A: package with the trio wired
-    A->>A: edit graph.py, workflow.yaml, tests
-    A->>T: path to the package
-    T-->>A: contract, reliability, tests result
-    A->>L: merge request, add registry.json entry
-    L->>CI: library-validate, skills-validate, workflow-tests
-    CI-->>L: all gates pass
-    A->>L: release tag
+    participant CI as Library CI
+    rect rgb(240, 246, 255)
+        Note over A,T: Scaffold and check locally
+        A->>S: workflow id, name, roles
+        S-->>A: package with the trio wired
+        A->>A: edit graph.py, workflow.yaml, tests
+        A->>T: path to the package
+        T-->>A: contract, reliability, tests
+    end
+    rect rgb(240, 246, 255)
+        Note over A,CI: Publish
+        A->>L: merge request with registry entry
+        L->>CI: run the three jobs
+        CI-->>L: all gates pass
+        A->>L: release tag
+    end
 ```
 
-The author scaffolds a package, edits it, checks it locally and opens a merge request. CI runs the same checks plus the
-library-wide ones. After a tag, users can install the new version.
+The author scaffolds a package with `create-workflow`, edits it and checks it locally with `test-workflow`. The author
+then opens a merge request that adds the `registry.json` entry. CI runs the library-validate, skills-validate and
+workflow-tests jobs. After a tag, users can install the new version.
 
 1. `genesis create-workflow <id> --name "..." [--dest workflows] [--roles a,b] [--summary ...] [--mcp x,y]` calls
    `create_workflow(...)`. It writes `graph.py`, `workflow.yaml`, `nodes.py`, `tests/test_workflow.py` and an empty
@@ -324,21 +337,28 @@ mechanics of the trio are in [core-engine.md](core-engine.md#54-how-validators-a
 ### 5.5 The publish gates
 
 ```mermaid
-flowchart TB
-    start["merge request or tag"] --> setup["setup: check_internal_pins.py (stdlib only)<br/>then git URL rewrite, pip install -e .[dev]"]
-    setup --> lv["library-validate<br/>ci/validate_library.py"]
-    setup --> sv["skills-validate<br/>ci/validate_skills.py"]
-    setup --> wt["workflow-tests<br/>pytest workflows"]
-    lv --> done["tag allowed when all green"]
-    sv --> done
-    wt --> done
+flowchart LR
+    start(["<b>Merge request or tag</b>"]):::ext
+    setup["<b>Setup</b><br/>pins check, pip install"]:::comp
+    lv["<b>library-validate</b><br/>ci/validate_library.py"]:::proc
+    sv["<b>skills-validate</b><br/>ci/validate_skills.py"]:::proc
+    wt["<b>workflow-tests</b><br/>pytest workflows"]:::proc
+    done["<b>Tag allowed</b><br/>when all green"]:::core
+    start --> setup
+    setup --> lv & sv & wt
+    lv & sv & wt --> done
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef core fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef comp fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef proc fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef ext fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef data fill:#f5f5f5,stroke:#616161,color:#212121
+    classDef note fill:#fff8e1,stroke:#f9a825,color:#5d4037
 ```
 
-`.gitlab-ci.yml` has two stages (`validate`, `test`) and three jobs. Each job first runs `python -I ci/check_internal_pins.py`
-before any download or build and before the CI token is used (50-08 H2). It then rewrites `ssh://git@gitlab...` URLs to
-HTTPS with the `GITLAB_PUSH_TOKEN` CI variable and runs `pip install -e ".[dev]"`. `library-validate` and
-`skills-validate` are in the `validate` stage and `workflow-tests` is in the `test` stage. CI runs no `ruff` check
-(the `pyproject.toml` comment says so).
+A merge request or tag starts the pipeline. Setup runs `check_internal_pins.py` (stdlib only), then the git URL rewrite
+and `pip install -e .[dev]`. Three jobs follow: `library-validate`, `skills-validate` and `workflow-tests`. The tag is
+allowed when all three are green.
 
 `ci/validate_library.py` prints one line per failure with a bracketed prefix and exits 1 when any gate fails. It
 walks every folder under `workflows/` that does not start with `_` and has a `graph.py`.
@@ -372,25 +392,33 @@ Warnings do not fail the build. A graph node in `workflow.yaml` without a `descr
 
 ```mermaid
 sequenceDiagram
-    participant U as User
+    autonumber
+    actor U as User
     participant API as Catalog routes
     participant I as Installer
-    participant D as Disk (library, lockfile)
+    participant D as Disk
     participant M as RunManager
     participant W as Worker
-    U->>API: POST /api/library/install {id}
-    API->>I: install_selection(ids, ref)
-    I->>D: write shared registry files
-    I->>D: copy workflows/ID/ tree
-    I->>D: write lockfile (version, ref, files, core major)
-    U->>M: start workflow (route or app feature)
-    M->>D: read workflow.yaml (Loader.meta_of)
-    M->>W: spawn worker
-    W->>D: check_compat, import graph.py
-    W->>W: build(ctx), run graph
+    rect rgb(240, 246, 255)
+        Note over U,D: Install
+        U->>API: install workflow id
+        API->>I: install selection
+        I->>D: write shared registry files
+        I->>D: copy the workflow tree
+        I->>D: write lockfile
+    end
+    rect rgb(240, 246, 255)
+        Note over U,W: Run
+        U->>M: start workflow
+        M->>D: read workflow.yaml
+        M->>W: spawn worker
+        W->>D: check compat, import graph.py
+        W->>W: build and run graph
+    end
 ```
 
-Installing copies files. Running reads them again at the start of each run.
+Installing copies files. Running reads them again at the start of each run. The disk box stands for the library folder
+and the lockfile, which records version, ref, files and core major.
 
 1. The user picks a workflow (Catalog page, or `genesis install`). `Installer.resolve` reads the latest library tag
    (or the given ref) and the catalog at that ref.
