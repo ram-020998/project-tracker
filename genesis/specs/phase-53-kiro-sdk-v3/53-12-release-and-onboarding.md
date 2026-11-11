@@ -15,7 +15,11 @@
    `pyproject.toml` files of the app and the three packages (one shared version, ADR-080), `create_app`,
    `web/src/version.ts`; `npm run build` + commit `web/static/` as separate steps (L-089); verify the release commit has
    every changed file, including `tool_ids.json` and the v3 fixtures as package/test data (L-056, L-048); tag; push on
-   the user's go-ahead; CI green (packages, genesis, frontend, clean-install).
+   the user's go-ahead; CI green (packages, genesis, frontend, clean-install). **Before the release commit (L-112):**
+   run the SDK suite once in the `python:3.13` image or on a CI branch run (not yet run: 53-04 As built; the Linux
+   `/proc` reader is otherwise covered only by a fake-procfs test). `test_regression_job_handler_starts_due_apps_and_skips_busy_ones`
+   reads the real date and can fail on some days (phase-51 backlog, 51-13 §1.5); a red result there is that known
+   issue, not a Phase 53 regression, and needs the user's call before tagging.
 2. **genesis-workflows** next minor (expected **v0.26.0**; Phase 51 shipped v0.25.0): the `appian` skill (53-06) + its `skills-registry.json` entry; pins on the new genesis tag
    (`#subdirectory=packages/<name>`, gate 9, L-057); CI green.
 3. Never read CI variables through the API (L-100).
