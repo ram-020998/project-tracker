@@ -55,10 +55,16 @@ blackboard behaviour as today; workflow skills come only from the managed worksp
   checkout, and a skill present only in `~/.kiro/skills` does not resolve.
 - `core/nodes/agent.py:106-110` error text: "skill '<id>' (declared by node '<node>') is not installed — install it in
   Settings → Catalog → Skills." (no `~/.kiro/skills` wording).
-- **`appian` skill** (genesis-workflows): add `skills/appian/` (SKILL.md + references) from the user's
-  `~/.kiro/skills/appian/` **with the user's confirmation of the content to publish** (it is their skill); register it
+- **`appian` skill** (genesis-workflows): **copy** (never move or edit) the user's `~/.kiro/skills/appian/` into
+  `skills/appian/` (`SKILL.md`, `references/**`, and the component registry; content confirmed by the user
+  2026-11-10). The user's personal copy is untouched (ADR-020). From then on the library copy is Genesis's one home
+  for the skill: changes go through an MR to genesis-workflows (ADR-005/029), and Genesis installs it into the managed
+  workspace from Settings → Catalog → Skills. Register it
   in `genesis-workflows/skills-registry.json`; the library's skill CI gates (`validate_skills`) green. `story-implementation`
   (`workflows/story-implementation/graph.py:120-121`) is unchanged and now installs `appian` from the library.
+  **Open (53-01 §10.3 Q13):** the skill's `registry/components-registry.json` sits outside the folders the skill store
+  accepts (`scripts/`, `references/`, `assets/`; `genesis/skills/store.py:151-171`), so a library install would be
+  refused with a 400.
 - **Workflows that declare skills:** a run fails fast with the message above when the skill is not installed (as today,
   better text). Consider (backlog, not this phase): auto-installing a workflow's declared library skills at
   `genesis install`.

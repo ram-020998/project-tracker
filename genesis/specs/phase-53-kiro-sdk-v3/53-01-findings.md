@@ -405,6 +405,10 @@ Results live in 53-02's As built. This section records what they change and what
 
 All questions are answered; nothing in the spec set is open.
 
+- **Q13 (raised 2026-11-10, before 53-06): the `appian` skill's `registry/` folder.** The skill's content is
+  confirmed. Its `registry/components-registry.json` (cited from `SKILL.md:163` and seven reference files) is outside
+  the folders Genesis's skill store accepts, so installing it from the library would fail. Awaiting the user.
+
 ### 10.4 53-02 complete (2026-11-10, review SHIP)
 
 W6–W19 results, the timings, the tool-id table and the 28 fixtures are in 53-02's As built. This re-spec carried them
