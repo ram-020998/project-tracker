@@ -24,6 +24,12 @@ The small set of visible changes the v3 move brings; everything else in chat and
 Stack rules: existing tokens and primitives only (ADR-027/055); never `<Button asChild>` (L-069); no new heavy
 dependency (L-015); `/api` prefix only through the central client (ADR-028).
 
+**Also from 53-07** (its As built, "Changes for 53-08..53-12", 53-10 item; the field names are in the 53-09 table):
+strip `[STEERING steer-<id>: …]` markers in the live stream view, including an unclosed trailing fragment; hide or
+label the engine's "Tool Load" step (an `agent.tool_update` with no `agent.tool_call`); the "Stopped" label reads
+`agent.result.code == "cancelled"` live and `meta.turn_status == "cancelled"` after reload; re-send `unread_steers`
+in order; on a 409 from `/steer`, send the text as a normal message.
+
 ## 3. Tests
 
 Vitest + jest-axe (L-014): composer sends a steer while streaming, with Send and Stop both visible and the model select
