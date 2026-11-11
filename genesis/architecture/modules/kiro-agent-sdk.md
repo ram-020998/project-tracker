@@ -57,6 +57,10 @@ flowchart LR
     client --> msgs
 ```
 
+A workflow agent node calls the one-call helpers in `__init__.py`, which create a client, run one prompt and
+close it. Chat holds a client for the life of a session and calls it directly. The client is the only part that
+talks to the `kiro-cli` process; it turns what Kiro sends into the typed messages in `messages.py`.
+
 | File | Contents |
 |---|---|
 | `__init__.py` | `query()` (start, stream one prompt, close), `collect_streaming()` (the same plus an observer callback, returning a `TurnResult`), `collect()`, `collect_json()`, `extract_json()`, `load_mcp_servers()` (read an `mcp.json` into ACP form), `load_dotenv()` |
@@ -108,6 +112,11 @@ sequenceDiagram
     K--)C: _kiro.dev/metadata {meteringUsage}
     K-->>C: {stopReason}
 ```
+
+The client starts the process, initialises the protocol and opens a session with the MCP servers. During the
+prompt, Kiro streams updates and also asks the client questions (permission, file writes), which the client must
+answer. A metering notification carries the credits. The prompt request's answer, with the stop reason, ends the
+turn.
 
 ### 5.2 A turn
 

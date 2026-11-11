@@ -39,22 +39,42 @@ Two more sources shaped the layout:
 | 4 | [04-container-view.md](04-container-view.md) | C4 level 2: every process and data store at run time, and how they connect |
 | 5 | [05-solution-strategy.md](05-solution-strategy.md) | The dozen key ideas the architecture is built on, and why |
 | 6 | [06-building-blocks.md](06-building-blocks.md) | The module map: every module, its job, its code path and its document |
+| 7 | [07-runtime-view.md](07-runtime-view.md) | The main scenarios end to end: a run, a copilot chat, a KB sync, a stage, a story, a test execution, a restart, an update |
+| 8 | [08-crosscutting-concepts.md](08-crosscutting-concepts.md) | The rules every module follows: reliability, state, durability, events, human control, security, ids, versions, errors, testing |
+| 9 | [09-deployment-view.md](09-deployment-view.md) | What is installed where, ports, the developer checkout and the test fleet |
+| 10 | [10-architecture-decisions.md](10-architecture-decisions.md) | Every decision record in plain words, grouped by topic, and where code and record differ |
+| 11 | [11-quality-and-risks.md](11-quality-and-risks.md) | Quality scenarios, known risks and technical debt |
 | — | [glossary.md](glossary.md) | Every Genesis term in one place |
 
 ### Module documents (C4 level 3)
 
 Each module document uses the same sections, so you always know where to look: purpose, at a glance, concepts,
 structure, how it works, interfaces, data, failure handling, configuration, extending it, design decisions, known
-pitfalls, tests and a code map.
+pitfalls, tests and a code map. They are long, because they are complete. Read the purpose and the "How it works"
+section first; use the rest as reference.
 
-| Module | Document |
-|---|---|
-| genesis-core: the workflow engine library | [modules/core-engine.md](modules/core-engine.md) |
-| Runs and workers: run control, subprocess workers, events, gates | [modules/runs-and-workers.md](modules/runs-and-workers.md) |
-| kiro-agent-sdk: the ACP client for Kiro | [modules/kiro-agent-sdk.md](modules/kiro-agent-sdk.md) |
-
-The other modules are listed in [06-building-blocks.md](06-building-blocks.md); their documents are being
-written in batches.
+| Layer | Module | Document |
+|---|---|---|
+| Libraries | genesis-core: the workflow engine library | [modules/core-engine.md](modules/core-engine.md) |
+| | kiro-agent-sdk: the ACP client for Kiro | [modules/kiro-agent-sdk.md](modules/kiro-agent-sdk.md) |
+| | genesis-appian-parser: Appian exports to code-free structure | [modules/appian-parser.md](modules/appian-parser.md) |
+| Platform core | Runs and workers: run control, subprocess workers, events, gates | [modules/runs-and-workers.md](modules/runs-and-workers.md) |
+| | API: app assembly, `/api`, startup, SPA serving | [modules/api.md](modules/api.md) |
+| | Data and migrations: `genesis.db`, every table | [modules/data-and-migrations.md](modules/data-and-migrations.md) |
+| | Configuration and secrets: settings, secrets, environments, registries, managed installs | [modules/configuration-and-secrets.md](modules/configuration-and-secrets.md) |
+| | Scheduler and jobs | [modules/scheduler-and-jobs.md](modules/scheduler-and-jobs.md) |
+| | Observability and credits | [modules/observability-and-credits.md](modules/observability-and-credits.md) |
+| | Distribution: install, library, loader, launcher, update | [modules/distribution.md](modules/distribution.md) |
+| Product features | Chat and skills | [modules/chat-and-skills.md](modules/chat-and-skills.md) |
+| | Knowledge base and sync | [modules/knowledge-base.md](modules/knowledge-base.md) |
+| | Documents | [modules/documents.md](modules/documents.md) |
+| | Features and stages | [modules/features-and-stages.md](modules/features-and-stages.md) |
+| | Stories and Workbench | [modules/stories-and-workbench.md](modules/stories-and-workbench.md) |
+| | Test design and execution | [modules/testing.md](modules/testing.md) |
+| | Collaboration Hub | [modules/collaboration-hub.md](modules/collaboration-hub.md) |
+| | Memory | [modules/memory.md](modules/memory.md) |
+| Front end | Web app | [modules/web-app.md](modules/web-app.md) |
+| Library | Workflow library and authoring (`genesis-workflows`) | [modules/workflow-library.md](modules/workflow-library.md) |
 
 ## Conventions
 

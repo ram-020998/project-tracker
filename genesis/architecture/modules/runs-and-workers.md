@@ -71,6 +71,11 @@ flowchart LR
     store & log --> db
 ```
 
+The routes call the `RunManager`, which owns the store, the event log, the per-run buses and the supervisor. The
+supervisor starts a worker per operation and reads its output on a thread. The worker loads the workflow through
+the loader, builds its context, and checkpoints into the same database the store and the log use. Every logged
+event also goes to the observers.
+
 | File | Main parts |
 |---|---|
 | `runs/manager.py` | `RunManager`: `start`, `pause`, `resume`, `cancel`, `respond`, `get_state`, `patch_state`, `fork`, `pending_gate`, `reconcile_status`, `fail_orphaned_runs`, `list`, `steps`, `transitions`, `node_iterations`, `log_events`, `cbus`, `add_event_observer`; the private `_spawn`, `_log`, `_finalize`, `_announce_final`, `_claim_status` |
@@ -178,8 +183,9 @@ keeps the terminal event; a later reconcile adopts it.
    one.
 2. Calls `Loader.load_build(workflow_id)`: checks the core major again, imports
    `~/.genesis/library/workflows/<id>/graph.py` by file path, checks `META.id`, returns `build` and `META`.
-3. Builds the MCP and CLI registries from the installed library's registries. The launch provider resolves
-   managed servers from their local installs, and resolves `genesis-kb` to `python -m genesis.mcp.kb_server`.
+3. Builds the MCP and CLI registries from the installed library's **curated** registry files only (the user's
+   custom tier is not merged here). The MCP launch provider resolves managed servers from their local installs,
+   and resolves `genesis-kb` to `python -m genesis.mcp.kb_server`. The CLI registry gets no launch provider.
 4. Opens the checkpointer on `genesis.db` and builds the `PlatformContext`. `ctx.emit` prints a `custom` line.
 5. Calls `build(ctx)` and sets the config: `thread_id = run_id`, the context under `genesis_ctx`, and
    `recursion_limit` from `META.execution.recursion_limit` (default 150).

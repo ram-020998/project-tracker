@@ -74,6 +74,11 @@ flowchart LR
     heal --> rel & validator & program & contracts
 ```
 
+The diagram shows the package's parts and the few dependencies between them. The agent node is the only part
+that reaches outside the package: it calls the agent provider, which calls the SDK, and it uses the MCP registry
+and the tool-output store. The one-call trio helper and the healing tier are built only from the other node
+factories, so they add no new mechanism.
+
 | File | What it contains |
 |---|---|
 | `types.py` | `CORE_MAJOR`, `CompatError`, `check_compat`, `Node`, `ValidationResult`, `PlatformContext`, `CTX_KEY = "genesis_ctx"`, `ctx_from_config(config)` |
@@ -203,6 +208,11 @@ sequenceDiagram
     N-->>G: {cursor, artifacts, _last_turn, telemetry}
 ```
 
+The node prepares the files first, then hands one turn to the provider. The provider starts Kiro, which starts
+the step's MCP servers. While the turn runs, every streamed message becomes an event and every tool result is
+saved to the tool-output store. Kiro writes the output file itself. The node returns only pointers and
+telemetry to LangGraph.
+
 ### 5.3 How tool trust is computed
 
 Trust is the set of tools Kiro may call without asking. `_compute_effective_trust(node_tools, mcp_names,
@@ -301,8 +311,10 @@ credits without limit.
 
 ### 5.7 How MCP servers are resolved
 
-`McpRegistry` holds server specs merged from two tiers: the curated `mcp-registry.json` of the installed library,
-and the user's custom tier (custom wins on a name clash, ADR-029). `acp_servers(names)` builds, for each name:
+`McpRegistry` holds server specs. It can merge two tiers: the curated `mcp-registry.json` of the installed library,
+and the user's custom tier (custom wins on a name clash, ADR-029). Which tiers a caller gets depends on how it
+builds the registry: in v0.81.0 the run worker (`genesis/runs/worker.py`, `_load_registries`) loads only the curated
+file, while the app's `ConfigService` uses the merged view. `acp_servers(names)` builds, for each name:
 
 - `command` and `args`: from the spec, or, for a **managed** entry (`"managed": "<id>"`), from the platform's
   launch provider, which points at the locally installed bundle (ADR-038). An entry that is not installed fails
@@ -314,9 +326,11 @@ and the user's custom tier (custom wins on a name clash, ADR-029). `acp_servers(
 If any variable stays unresolved, it raises `McpResolutionError` listing all of them. `allowlist(name)` returns a
 server's `tool_allowlist` or `None`.
 
-`CliRegistry` works the same way for external commands: a managed entry resolves to its installed binary; any
-other entry is found on `PATH`. `cli_node` raises on a non-zero exit, which fails the run unless the graph
-handles it.
+`CliRegistry` works the same way for external commands: a managed entry resolves to its installed binary through a
+launch provider; any other entry is found on `PATH`. The run worker builds its `CliRegistry` from the curated
+`cli-registry.json` without a launch provider, so a managed CLI cannot be resolved through `ctx.clis` inside a run
+in v0.81.0; workflows that need `gws` or `sail` reach them through `ctx.extras` services instead. `cli_node` raises
+on a non-zero exit, which fails the run unless the graph handles it.
 
 ## 6. Interfaces
 
