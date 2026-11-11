@@ -71,7 +71,11 @@ For each `session/request_permission`, answered exactly once:
    from `toolCall.title` (the model can influence it). No readable identity → **deny**. The request itself carries no
    `kind`; `raw_input` and `kind` come from the `tool_call` with the same `toolCallId`, which arrives 15–55 ms earlier.
 2. **Backstop:** the identity must be in the policy's `builtins` or `mcp_tools`; else **deny** (the engine should not have
-   asked; this catches a projection bug or an engine change).
+   asked; this catches a projection bug or an engine change). **One exception, skill loads (D18):** a request whose
+   `_meta.kiro.toolId` is `disclose_context` **and** whose `consent.capability` is `skill` is approved in every mode,
+   never by its title. Under D6–D8 the engine can offer only skills Genesis provisioned. No skill rule is projected
+   and `TrustPolicy` has no skills field. Bypass corpus: a `Load skill:` title with another `toolId`, `capability:
+   skill` with another `toolId`, and `disclose_context` with another capability are all denied.
 3. **Answer by mode:** in `auto_approve` → the `allow_once` option; `auto_deny` → the `reject_once` option; `ask` → the
    caller's `on_permission(PermissionRequest)` (shape unchanged, F1; `tool_name` = `@server/tool` or the Genesis built-in
    name; `raw_input` from the correlated `tool_call` by `toolCallId`), fail closed on timeout / error / unknown option
@@ -102,8 +106,15 @@ wires it, 52-01 D8). Tested with the `access-token` fixture.
 
 ## 8. Tests
 
-Turn off the fake engine's `customAgents` skip (53-04 §1 item 5) so every replay checks the projected agent against the
-recorded frames. Projection golden tests (policy → entry) for every 53-06/53-07 caller shape, including the Phase 51 node shape (no `mcp`,
+Turn off the fake engine's `customAgents` skip (53-04 §1 item 5) so every replay checks the projected agent. The
+recorded agents are bare spike agents, so the check is structural, not byte for byte (D19): every received agent
+passes the W4 schema rules (`tools` a list of strings; rule `effect` in `allow|deny|ask|evaluate`) and the Genesis
+rules (explicit `tools`, no `delete_file`, capabilities only from the fixed list, no globs, `includeMcpJson` and
+`includePowers` false). Where a fixture recorded an agent, `id` and `prompt` match, every recorded tool and rule is
+present, and extra keys come only from `description`, `permissions`, `includeMcpJson`, `includePowers`. **Live
+schema probe (D19, no prompt, 0 credits):** send the projection of every 53-06/53-07 caller shape to the installed
+kiro-cli and record that each activates (`availableModes` entry + `config_option_update`); record the frames as a
+fixture. Projection golden tests (policy → entry) for every 53-06/53-07 caller shape, including the Phase 51 node shape (no `mcp`,
 no `tools`, blackboard on: D9's built-ins + `@blackboard` only) and a `blackboard=False` node with `mcp=[]` (built-ins
 only, no MCP); refusal of globs and meta capabilities;
 reserved-id rename; ladder table tests (identity missing, outside policy, each mode, timeout, unknown option); fixture

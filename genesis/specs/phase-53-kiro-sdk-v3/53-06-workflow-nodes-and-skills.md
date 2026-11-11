@@ -29,7 +29,7 @@ blackboard behaviour as today; workflow skills come only from the managed worksp
   `ResultMessage.error` classified `mcp_failed` (no credits spent); the reliability trio retries/escalates as today
   (ADR-011).
 - **Events** (shapes unchanged, ADR-066, L-005): `_emit_message` (`agent.py:169-192`) reads `name` (now `@server/tool`
-  → the tool name, or the built-in Genesis name), `raw_input` (now the MCP `arguments`, 53-04), `output`; `save_tool_output`
+  → the tool name, or the built-in's registered id such as `execute_bash` or `read_file`, D19), `raw_input` (now the MCP `arguments`, 53-04), `output`; `save_tool_output`
   detection (`agent.py:321-337`) keeps `raw_input["document"]` because 53-04 unwraps `arguments`; `agent.result` keeps
   `credits, context_pct, turn_duration_ms, provenance` and adds `model`, `fallback_from` when present (F6); telemetry
   keys unchanged.
