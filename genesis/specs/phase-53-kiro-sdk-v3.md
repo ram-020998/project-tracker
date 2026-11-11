@@ -58,6 +58,7 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D15 | Stop keeps the session; the next prompt starts with a fixed "previous request was cancelled" note (KiroCrew's approach), read from the stored transcript; no revert. |
 | D16 | No path scope on agents' file reads in this phase; confinement stays with Phase 52 (53-02 W15 path-rule findings are its input). |
 | D17 | Genesis's skill store accepts bundled files in any subfolder, as the Agent Skills standard does (traversal, dot-file and size caps kept); `appian` is published with its `registry/` folder. |
+| D20 | The fleet runs the build-in-progress; the four affected workflows are not run on it until 53-12, and Phase 51's live acceptance is postponed until after the Phase 53 release. |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn: Send and Stop both shown, text-only
 steer; confirmed 2026-11-10): §9.5. F17 (per-turn credit provenance on aborted turns): §10.2.
@@ -170,7 +171,8 @@ F1–F15 in `53-01-findings.md` §8 (confirmed 2026-11-03).
 | The engine drops our custom agent (schema) and runs its default agent | Activation check fails the session closed (53-05) |
 | On-demand MCP loading (`tool_load`) costs extra steps | Spike measures; F10 turns it off if so |
 | Kiro removes v2 before the release | No effect on this phase (v3 only); Genesis ≤ the previous release stops working; users update |
-| Phase 51's open live acceptance ships v0.81.x patches that change its workflows while Phase 53 builds | Each sub-spec rebases on current master before it starts; 53-06 and 53-11 re-diff genesis-workflows (53-01 §9.3 item 8) |
+| Phase 51's open live acceptance ships v0.81.x patches that change its workflows while Phase 53 builds | Each sub-spec rebases on current master before it starts; 53-06 and 53-11 re-diff genesis-workflows (53-01 §9.3 item 8). Since D20, Phase 51's live acceptance waits for the Phase 53 release, so no such patches are expected |
+| The fleet runs unreleased Phase 53 code (D20) | Accepted: the four affected workflows are not run on the fleet until 53-12; a chat problem after a fleet restart is fixed in the dev checkout |
 | Phase 51 shell turns break on v3 (env, timeouts, process kill) | 53-02 W3/W14/W16 use the real `apwt` workload; 53-04 keeps the inherited env and the program's process reaping; 53-11 A1/A6 |
 | QA is unavailable at 53-11, so the three Phase 51 workflows cannot run live | Run everything else; release only with the user's go-ahead, and say plainly that A1 is open for those three (L-111) |
 

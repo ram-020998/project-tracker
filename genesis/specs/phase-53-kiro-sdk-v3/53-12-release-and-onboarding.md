@@ -52,7 +52,8 @@ the DB version; `GET /api/system/kiro` shows a verified kiro-cli. User checklist
 - **Areas:** map `genesis/genesis/runtime/preflight.py`, `runtime/kiro_auth.py`, `runtime/context.py` (no area today)
   and `genesis/packages/kiro-agent-sdk/tests/fixtures/**` to `sdk-acp`/`config-secrets` so `check` routes them.
 - `context/state/current.md` (versions, DB version, test counts, "what works": v3 engine, Genesis Kiro homes, steering,
-  resume, managed skills only), code map, `progress/phase-53-kiro-sdk-v3.md`, `changelog.md`, README row 53 →
+  resume, managed skills only; **known open items: Phase 51's live acceptance, postponed by D20, now runs on v3 with
+  playwright-appian 0.3.1**; the Phase 51 umbrella and README row 51 get the same note), code map, `progress/phase-53-kiro-sdk-v3.md`, `changelog.md`, README row 53 →
   SHIPPED, tracker §6, and `specs/backlog/phase-53-follow-ups.md` (umbrella §9 Deferred list + build findings).
   `genesis-ctx index && lint` green.
 
