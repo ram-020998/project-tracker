@@ -113,6 +113,15 @@ next turn did not.
 **W6–W19** were run after the re-spec (project-tracker `4ae2915`, `2866d81`; W15 gained path-scoped `fs_read`, W19
 is new). The W1 PASS re-run happens in 53-06 with the fixed skill (D14).
 
+**W1 re-run (53-06, 2026-11-11): PASS.** kiro-cli 2.37.1, run's own `KIRO_HOME`, playwright-appian **0.3.1 packed
+locally** (`npm pack` of playwright-appian `38f87fd`, extracted as an install lays it out into
+`<run>/checkout/node_modules/playwright-appian/`; not the published tarball, which is 53-12's) plus the managed
+`genesis-test-authoring`. `_kiro/progressive_context/items_changed` listed **both** skills
+(`[genesis-test-authoring, playwright-appian]`); the personal skill (`appian`, the 1 id under `~/.kiro/skills`) was in no
+frame; kiro.log had no `skill.frontmatter.invalid`; both skills were loaded by the engine's skill tool (`Load skill: …`)
+and both canaries came back. 0.20 credits, 9.4 s. Harness `scripts/spikes/53-06/w1_rerun.py` (reuses this spike's
+`acp.py` and `gate.py` helpers); evidence `evidence/w1-rerun-031.{json,jsonl}` (genesis `0c0a4aa`).
+
 ### W6–W19 results
 
 | # | Result | Evidence |
