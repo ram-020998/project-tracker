@@ -22,7 +22,7 @@ One home per fact. Move a finished phase's knowledge into those homes, keep the 
 | Process / working-agreement change | `bible/07` | — | — |
 | Procedure change (release/review/…) | the matching skill in `agent-system/skills/` + `update.sh` | — | — |
 | CI pipeline ids / commit hashes | the release sub-spec's As-run + the progress doc | — | L0, state, digests |
-| How a module is built and why, for human readers | its `architecture/modules/<module>.md`; the numbered `architecture/0N-*.md` when a container, outside system, constraint or key idea changed | the module row in `architecture/06-building-blocks.md` | release-varying numbers (test counts, DB version) beyond the **Describes** header; pasted ADR or lesson text (explain it and cite the id) |
+| How a module is built and why, for human readers | its `{{REPOS}}/genesis/docs/architecture/modules/<module>.md`; the numbered `docs/architecture/0N-*.md` when a container, outside system, constraint or key idea changed | the module row in `docs/architecture/06-building-blocks.md` | release-varying numbers (test counts, DB version) beyond the **Describes** header; pasted ADR or lesson text (explain it and cite the id); a copy in project-tracker |
 
 ## Write-back, in order (no bulk reading)
 Run every `{{GENESIS_HOME}}/bin/genesis-ctx …` command **unpiped** — no `| grep`, `| head`, `> file` or other pipe — and
@@ -41,14 +41,17 @@ one per tool call: they write the same files and each assigns the next id; a ver
 5. **State:** overwrite `context/state/current.md` (versions, DB version, test counts, what works, active phase).
 6. **History:** write `progress/phase-NN-<slug>.md` (from the As-builts, cited); one `changelog.md` line
    (`2026-10-25 — Phase 48 <title> — genesis v0.78.0 … — ADR-078`); a ≤ 5-line `tracker.md` §6 entry; the README row.
-7. **Architecture docs** (`{{TRACKER}}/architecture/`, the source copy; never edit another copy): map the release's
-   changed paths to modules with the code column of `architecture/06-building-blocks.md`. For each changed module,
+7. **Architecture docs** (`{{REPOS}}/genesis/docs/architecture/`, the only copy): map the release's
+   changed paths to modules with the code column of `docs/architecture/06-building-blocks.md`. For each changed module,
    update its `modules/<module>.md` from the As-builts and the code (read the code at the new tag); add a document
    and a `06` row for a new module. Update a numbered overview document only when what it describes changed. Set the
    **Describes** header to the new tag and **Last reviewed** to today on every document you reviewed, changed or not.
-   List modules whose document is still "planned" in the progress doc.
+   List modules whose document is still "planned" in the progress doc. Commit in the genesis repo with
+   `git -C {{REPOS}}/genesis add docs/architecture`, then (its own call)
+   `git -C {{REPOS}}/genesis commit -m "docs(architecture): <tag> review" -- docs/architecture`: the pathspec keeps
+   anyone else's staged work out. Never push genesis; it ships with the next release.
 8. **Skills:** if a procedure changed, edit the skill in `agent-system/skills/` and tell the operator to run `update.sh`.
-9. **Verify:** `{{GENESIS_HOME}}/bin/genesis-ctx index && {{GENESIS_HOME}}/bin/genesis-ctx lint` green; print the L0 budget. Commit project-tracker locally; ask before pushing.
+9. **Verify:** `{{GENESIS_HOME}}/bin/genesis-ctx index && {{GENESIS_HOME}}/bin/genesis-ctx lint` green; print the L0 budget. Commit project-tracker locally; ask before pushing. The architecture docs commit (step 7) stays local in genesis.
 
 ## `{{GENESIS_HOME}}/bin/genesis-ctx add` formats (verified 2026-10-20, 47-08 §5)
 - `{{GENESIS_HOME}}/bin/genesis-ctx add adr --id ADR-0NN --title "…" --phase NN --areas a,b --rule "…" [--status accepted|proposed] [--amends ADR-0MM …] [--body-file F]`

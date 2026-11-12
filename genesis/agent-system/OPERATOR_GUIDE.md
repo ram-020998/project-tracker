@@ -17,7 +17,7 @@ prompt, and in what order. You never paste the bible again.
 | `genesis-dev` | to build **one** sub-spec | the sub-spec id | code + tests + local commits + the sub-spec's **As built** | the code repos (local commits only) + the sub-spec |
 | `genesis-review` | after all build sub-specs (whole phase), or any time you want a second opinion | phase/sub-spec ids + base tags | a review report (SHIP / NEEDS_CHANGES) + live-acceptance evidence | review reports only |
 | `genesis-release` | the review says SHIP and you want to ship | the release sub-spec id | version bumps, tags, pushes (each asked), CI ids, **As run** | version files, commits; tag/push only after you say yes |
-| `genesis-docs` | after release (or at any phase end) | the phase id | ADRs, lessons, code map, state, progress doc, changelog, README row, architecture docs | `project-tracker/genesis/**` only |
+| `genesis-docs` | after release (or at any phase end) | the phase id | ADRs, lessons, code map, state, progress doc, changelog, README row, architecture docs | `project-tracker/genesis/**` and the genesis repo's `docs/architecture/` only |
 
 Every agent starts with the same small core (L0: architecture, work loop, a one-line rule for **every** ADR and lesson,
 the area catalog, current state) and the live repo status. Each one pulls the rest itself with `genesis-ctx`.
@@ -233,9 +233,10 @@ Phase NN is released. Do the documentation write-back for Phase NN.
 
 It gathers the As-built / As-run sections, review reports and git logs; marks ADRs Accepted; adds lessons, code-map
 entries and tags; overwrites the current state; writes the progress doc, the changelog line, the ≤ 5-line tracker entry
-and the README row; updates the architecture documents (`project-tracker/genesis/architecture/`) of every module the
+and the README row; updates the architecture documents (the genesis repo's `docs/architecture/`) of every module the
 release changed and moves their "Describes" header to the new tag; runs `genesis-ctx index` + `lint`; commits
-project-tracker and asks before pushing.
+project-tracker and asks before pushing; commits the architecture docs in genesis locally (they ship with the next
+release push).
 
 **Check:** `genesis-ctx status --brief` in a terminal now shows "Active phase: none — Phase NN complete".
 
@@ -306,7 +307,7 @@ today; the spec agent writes the hand-off prompt (as in 46-09).
 | Live acceptance | review | `Run the live acceptance in NN-<id> §<n>; back up DBs; stop at HITL gates.` |
 | Release | release | `Release Phase NN per NN-<release id>. Review is SHIP.` |
 | Write-back | docs | `Phase NN is released. Do the documentation write-back.` |
-| Architecture docs | docs | `Write the architecture documents for <modules> (architecture/06-building-blocks.md), from the code at <tag>.` |
+| Architecture docs | docs | `Write the architecture documents for <modules> (genesis docs/architecture/06-building-blocks.md), from the code at <tag>.` |
 | Bug | dev | `Bug: … Areas: … Failing test first.` |
 | History question | docs | `Why/when did we …? Use genesis-ctx, cite sources.` |
 | Context check | any | `/context show` |

@@ -367,3 +367,30 @@ def test_m3_bare_npx_apwt_blocked_for_release_too():
     rc, err = guard("npx apwt -v", "--allow-push-tag", *WR, cwd="/work/playwright-appian")
     assert rc == 2 and "npx --no-install apwt" in err
     assert guard("npx --no-install apwt -v", "--allow-push-tag", *WR, cwd="/work/playwright-appian")[0] == 0
+
+
+# genesis-docs: the genesis repo's docs/architecture/ is a write root, the rest of the repo is not (L-088 corpora).
+DOCS_WR = ["--write-root", "/tracker", "--write-root", "/repos/genesis/docs/architecture", "--write-root", "/tmp"]
+
+
+@pytest.mark.parametrize("cmd", [
+    "cp /tmp/a.md /repos/genesis/genesis/api/app.py",                     # code tree
+    "cp /tmp/a.md /repos/genesis/docs/INSTALL.md",                        # a sibling doc, not the folder
+    "cp /tmp/a.md /repos/genesis/docs/architecture-old/x.md",             # prefix lookalike
+    "cp /tmp/a.md /repos/genesis/docs/architecture/../../pyproject.toml",  # traversal out of the root
+    "echo x > /repos/genesis-workflows/registry.json",                    # another repo
+    "cd /repos/genesis/docs/architecture && cp a.md ../../web/x.md",      # relative escape
+])
+def test_docs_architecture_root_blocks_the_rest_of_genesis(cmd):
+    rc, err = guard(cmd, *DOCS_WR)
+    assert rc == 2, err
+
+
+@pytest.mark.parametrize("cmd", [
+    "cp -R /tmp/arch/modules /repos/genesis/docs/architecture/modules",
+    "cd /repos/genesis/docs/architecture && sed -i '' 's/v0.81.0/v0.82.0/' README.md",
+    "echo x > /tracker/progress/p.md",
+])
+def test_docs_architecture_root_allows_the_folder(cmd):
+    rc, err = guard(cmd, *DOCS_WR)
+    assert rc == 0, err

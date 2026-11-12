@@ -1,6 +1,6 @@
 # Backlog: findings from the architecture documentation pass (2026-11-11)
 
-> **Status:** UNVERIFIED. Found by reading the v0.81.0 code while writing `architecture/` (one writer per module).
+> **Status:** UNVERIFIED. Found by reading the v0.81.0 code while writing the architecture docs (now the genesis repo's `docs/architecture/`; one writer per module).
 > Nothing here was reproduced or tested. Each item needs a failing test or a repro before it is treated as a bug.
 > The architecture documents describe the code as it is and do not state these as facts.
 

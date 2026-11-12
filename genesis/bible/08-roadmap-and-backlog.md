@@ -22,7 +22,7 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
 
 **Backlog specs** (`specs/backlog/`):
 
-- [Backlog — Architecture-docs findings (41 unverified possible defects and ADR/code mismatches found while writing `architecture/`, 2026-11-11)](../specs/backlog/architecture-docs-findings.md)
+- [Backlog — Architecture-docs findings (41 unverified possible defects and ADR/code mismatches found while writing the genesis repo's `docs/architecture/`, 2026-11-11)](../specs/backlog/architecture-docs-findings.md)
 - [Backlog — Dev MCP browser-based SSO authentication](../specs/backlog/devmcp-browser-sso-auth.md)
 - [Backlog — ERD generation improvements (Lucid ids, layout/grouping, token)](../specs/backlog/erd-generation-improvements.md)
 - [Backlog — Implementation packages (one deployment package per story)](../specs/backlog/implementation-packages.md)

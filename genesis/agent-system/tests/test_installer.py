@@ -419,6 +419,41 @@ def test_genesis_docs_allows_read_only_git_on_code_repos(tmp_path, monkeypatch):
     assert not any("push" in m or "tag" in m for m in allow)
 
 
+def test_genesis_docs_writes_only_the_genesis_architecture_docs(tmp_path, monkeypatch):
+    # The architecture docs live in the genesis repo (docs/architecture/); genesis-docs may write and commit
+    # that folder only. Code trees, the other repos and .git stay denied, and the shell guard gets the folder
+    # as a write root (so `cp`/redirects elsewhere in genesis are still refused).
+    home = tmp_path / "home"
+    (home / ".kiro" / "agents").mkdir(parents=True)
+    monkeypatch.setenv("HOME", str(home))
+    tracker = tmp_path / "tracker"
+    src = tracker / "agent-system"
+    for sub in ("agents", "skills", "hooks"):
+        shutil.copytree(REAL_SOURCE / sub, src / sub, ignore=shutil.ignore_patterns("__pycache__", ".DS_Store"))
+    repos = tmp_path / "repos"
+    cfg = gi.Config(source=src, tracker=tracker, repos=repos, home=home / ".kiro" / "genesis",
+                    agents_dir=home / ".kiro" / "agents", model="")
+    desired = gi.build_desired(cfg)
+    docs = next(json.loads(i.data) for p, i in desired.items() if p.name == "genesis-docs.json")
+    rules = docs["permissions"]["rules"]
+    w_allow = [m for r in rules if r["capability"] == "fs_write" and r["effect"] == "allow" for m in r["match"]]
+    w_deny = [m for r in rules if r["capability"] == "fs_write" and r["effect"] == "deny" for m in r["match"]]
+    arch = f"{repos}/genesis/docs/architecture"
+    assert f"{arch}/**" in w_allow
+    assert not any(m.startswith(str(repos)) and m != f"{arch}/**" for m in w_allow)
+    assert f"{repos}/**" not in w_deny                       # a blanket deny would win over the folder allow
+    for denied in ("genesis/genesis", "genesis/web", "genesis/packages", "genesis-workflows", "playwright-appian"):
+        assert f"{repos}/{denied}/**" in w_deny
+    assert f"{repos}/**/.git/**" in w_deny
+    sh_allow = [m for r in rules if r["capability"] == "shell" and r["effect"] == "allow" for m in r["match"]]
+    assert f"git -C {repos}/genesis commit -m * -- docs/architecture" in sh_allow
+    assert not any(m.startswith(f"git -C {repos}/genesis commit") and not m.endswith("-- docs/architecture")
+                   for m in sh_allow)
+    guard = next(h["action"]["command"] for h in docs["hooks"] if h["name"] == "shell-guard")
+    assert f"--write-root {arch}" in guard
+    assert f"--write-root {repos} " not in guard and f"--write-root {repos}/genesis " not in guard
+
+
 # ── 47-09 m9: the documented retrieval form matches every profile's allow rules ───────────────────────────────
 SHELL_META = set("|;&$`()<>\n")
 
