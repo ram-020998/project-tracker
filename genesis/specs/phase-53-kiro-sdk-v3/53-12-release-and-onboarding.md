@@ -34,7 +34,8 @@ application that has a testing workspace (it brings `playwright-appian` 0.3.1; u
 fail at the start with the front-matter message, D14); verify `/openapi.json` `info.version` and
 the DB version; `GET /api/system/kiro` shows a verified kiro-cli. User checklist in the release notes:
 
-- kiro-cli at least the verified minimum (`kiro-cli update`).
+- kiro-cli at least the verified minimum (`kiro-cli update`). Verified on 2.37.1 only; on 3.x Genesis warns and runs
+  (D22, `specs/backlog/kiro-cli-3x-reverify.md`).
 - Global Kiro MCP servers (`~/.kiro/settings/mcp.json`) and personal skills (`~/.kiro/skills`) no longer appear in
   Genesis: add a server as a custom MCP server in Settings (the custom MCP tier, ADR-029); install skills from Settings → Catalog →
   Skills.

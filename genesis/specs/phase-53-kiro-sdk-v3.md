@@ -60,6 +60,7 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D17 | Genesis's skill store accepts bundled files in any subfolder, as the Agent Skills standard does (traversal, dot-file and size caps kept); `appian` is published with its `registry/` folder. |
 | D20 | The fleet runs the build-in-progress; the four affected workflows are not run on it until 53-12, and Phase 51's live acceptance is postponed until after the Phase 53 release. |
 | D21 | The chat `/` palette offers only `/clear` and `/compact`; engine agent commands are not offered or sent (their trust was never measured). |
+| D22 | Phase 53 ships verified on kiro-cli 2.37.1; re-verification on 3.x is `specs/backlog/kiro-cli-3x-reverify.md` (53-13 before 53-11 if 3.x arrives in time, else a patch release). |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn: Send and Stop both shown, text-only
 steer; confirmed 2026-11-10): §9.5. F17 (per-turn credit provenance on aborted turns): §10.2.
@@ -168,7 +169,7 @@ F1–F15 in `53-01-findings.md` §8 (confirmed 2026-11-03).
 | Risk | Mitigation |
 |---|---|
 | CLI 3.0 switches `kiro-cli acp` to v3 before this phase ships (D4/D12) | Accepted; start Phase 53 at once if it happens, or pin `acp.agentEngine` by hand |
-| v3 wire behaviour differs from the probe on a later kiro-cli | Recorded fixtures + verified-version list + warning (F5, F14); the spike re-measures |
+| v3 wire behaviour differs from the probe on a later kiro-cli | Recorded fixtures + verified-version list + warning (F5, F14); the spike re-measures. kiro-cli 3.x shipped 2026-11-03 but is not yet available to the user: `specs/backlog/kiro-cli-3x-reverify.md` (D22) |
 | A workflow relies on something only v2 did (global MCP server, personal skill, `toolName`) | D5 live acceptance of every agent node; D8 publishes `appian`; release notes |
 | The engine drops our custom agent (schema) and runs its default agent | Activation check fails the session closed (53-05) |
 | On-demand MCP loading (`tool_load`) costs extra steps | Spike measures; F10 turns it off if so |
