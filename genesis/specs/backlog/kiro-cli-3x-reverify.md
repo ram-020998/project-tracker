@@ -42,7 +42,7 @@ What the 3.x notes say that touches Phase 53:
 
 ## 3. When
 
-- If 3.x becomes available **before Phase 53's 53-11 acceptance**: run this as sub-spec 53-13 before 53-11, and
+- If 3.x becomes available **before Phase 53's 53-11 acceptance**: run this as sub-spec 53-14 before 53-11, and
   release with both versions verified.
 - If it becomes available **after the Phase 53 release**: run it as its own small phase and ship a patch release
   (genesis `v0.82.x`).

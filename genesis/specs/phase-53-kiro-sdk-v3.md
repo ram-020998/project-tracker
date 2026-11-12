@@ -60,7 +60,8 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D17 | Genesis's skill store accepts bundled files in any subfolder, as the Agent Skills standard does (traversal, dot-file and size caps kept); `appian` is published with its `registry/` folder. |
 | D20 | The fleet runs the build-in-progress; the four affected workflows are not run on it until 53-12, and Phase 51's live acceptance is postponed until after the Phase 53 release. |
 | D21 | The chat `/` palette offers only `/clear` and `/compact`; engine agent commands are not offered or sent (their trust was never measured). |
-| D22 | Phase 53 ships verified on kiro-cli 2.37.1; re-verification on 3.x is `specs/backlog/kiro-cli-3x-reverify.md` (53-13 before 53-11 if 3.x arrives in time, else a patch release). |
+| D22 | Phase 53 ships verified on kiro-cli 2.37.1; re-verification on 3.x is `specs/backlog/kiro-cli-3x-reverify.md` (53-14 before 53-11 if 3.x arrives in time, else a patch release). |
+| D23 | Spec-style chat modes reach the managed skills through the custom agent's `resources` (`skill://` globs), probed first; fallback: copy into the sandbox. Sub-spec 53-13. |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn: Send and Stop both shown, text-only
 steer; confirmed 2026-11-10): §9.5. F17 (per-turn credit provenance on aborted turns): §10.2.
@@ -117,7 +118,7 @@ steer; confirmed 2026-11-10): §9.5. F17 (per-turn credit provenance on aborted 
 
 S1 = 53-02 spike (genesis-dev; **gate**: a "FAIL" on any must-pass item stops the phase for a re-spec of the sub-specs
 it affects before anything else is built) → S2 = 53-03 → S3 = 53-04 → S4 = 53-05 → S5 = 53-06 (genesis +
-genesis-workflows) → S6 = 53-07 → S7 = 53-08 → S8 = 53-09 (each backend sub-spec adds its routes; 53-09 owns the
+genesis-workflows) → S6 = 53-07 → S7 = 53-08 → S7b = 53-13 (spec-mode skills, D23) → S8 = 53-09 (each backend sub-spec adds its routes; 53-09 owns the
 contract table and fixtures) → S9 = 53-10 → S10 = 53-11 (genesis-review) → S11 = 53-12 (genesis-release, then
 genesis-docs). One at a time: they share the genesis checkout. The v2 path is deleted in the sub-spec that replaces its
 last caller (53-07); until then the old client stays importable so every intermediate commit keeps the gates green.
@@ -134,6 +135,7 @@ last caller (53-07); until then the old client stays importable so every interme
 | 53-06 | genesis (`packages/genesis-core`, `genesis/runtime`), genesis-workflows, playwright-appian | `kiro_node` on v3 (per-run home, D9 trust, v3 tool shapes, credits), managed-only `_skill_source` with a front-matter check, the `appian` skill in the library, `playwright-appian` 0.3.1 skill fix (D14) |
 | 53-07 | genesis (`genesis/chat`, `genesis/api/chat.py`) | Chat on v3: chat home, per-mode agents (F2), catalog from `configOptions` + `available_commands_update`, Compact/Clear, Stop = `session/cancel`, steering, `session/load` resume, record deletion, MCP notice, model fallback; v2 client removed |
 | 53-08 | genesis | Preflight v3 + minimum version + verified-version warning; Settings health; skills: `personal_dir`/`shadows_personal` removed, Update wired |
+| 53-13 | genesis (`packages/kiro-agent-sdk`, `genesis/chat`) | Spec-style chat modes reach managed skills through the agent's `resources` (`KiroAgentOptions.skill_dirs`), probe first, copy fallback (D23) |
 | 53-09 | genesis | Contract table (steer endpoint, `usage.model` / `fallback_from`, `session.notice`, preflight items), fixtures, tests |
 | 53-10 | genesis (`web/`) | Composer steering, Stop, "answered by <model>", MCP notice, Skills Update button, warning removed, preflight message |
 | 53-11 | all | Review + gates + live acceptance on v3 (all 15 agent-node workflows, 53-01 §9.2, and all eight chat modes) |
