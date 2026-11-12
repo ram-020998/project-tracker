@@ -156,7 +156,8 @@ form in chat (F8); live model switching mid-session (models stay "applied at nex
 KiroCrew ideas from the 2026-11-03 research (secret-value redaction at write, a tool-call audit log, MCP quarantine,
 `genesis doctor`, SSE reconnect, learning from runs, skill usage and evals, CI ratchets), and, for Phase 52, the 53-02
 W15 path-rule finding (`fs_read` `match: ["./**"]` confines absolute-path reads; `../`, symlinks, `~` and the search
-tools untested; D16).
+tools untested; D16), and two 53-08 review nits: a broken SDK install shows the "Install kiro-cli" hint (n1), and a
+run's `error` event carries the message and remedy but no `code` (n2).
 
 ## 10. Defaults
 

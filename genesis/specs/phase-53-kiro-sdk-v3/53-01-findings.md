@@ -408,10 +408,33 @@ Results live in 53-02's As built. This section records what they change and what
 - **Q12: Should `fs_read` be limited to the working folder?** Answered: D16 (option C, not in this phase; Phase 52).
 - **F16** (§9.5): confirmed (option A, Send and Stop both shown during a turn; text-only steer).
 
-All questions are answered; nothing in the spec set is open.
+All questions up to Q16 are answered; Q17 and Q18 (§10.5) are open.
 
 - **Q13 (raised 2026-11-10, before 53-06): the `appian` skill's `registry/` folder.** Answered: D17 (option B, the
   store accepts any subfolder, as the Agent Skills standard does).
+
+### 10.5 After 53-08 (2026-11-11): kiro-cli 3.x and skills in spec-style chat modes
+
+- **kiro-cli 3.x is out and Phase 53 is verified only on 2.37.1.** Kiro CLI 3.0.0 shipped on 2026-11-03, the day
+  this spec set was written; 3.1.0 followed on 11-05, 3.2.0 on 11-10 and 3.2.1 on 11-11
+  ([changelog](https://kiro.dev/changelog/cli/)). This machine still runs 2.37.1. What the changelog and the
+  [upgrade guide](https://kiro.dev/docs/cli/v3/) say that bears on Phase 53:
+  - ACP: "new clients start on V3; existing clients stay on V2 unless already supported". Genesis passes
+    `--agent-engine v3` explicitly, so it is unaffected. The released Genesis v0.81.0 keeps working on 3.x, which
+    makes the D4 risk smaller than feared.
+  - "'Vibe' concept removed … 'Default' mode is the standard name". The engine's fallback agent, which 53-04 names
+    when activation fails (W4), and the reserved mode ids (53-05) may have changed name.
+  - 3.1.0 and 3.2.x fix "permissions", "session reload", "Skills" and "/model fallback" issues. Those areas are
+    measured by our fixtures (W4, W6, W10, W15).
+  - Workspace trust (2.33.0) applies to interactive sessions; it never appeared over ACP on 2.37.1.
+  - Preflight's v3 check reads `kiro-cli acp --help`, whose text may change (53-08 As built).
+  A user who updates kiro-cli gets the "unverified version" warning (F5), but the frames behind the fixtures may
+  differ. Q17 asks how to verify 3.x.
+- **Spec-style chat modes may see no skills.** They run with cwd = the skill-output sandbox
+  (`chat/manager.py:264`), and the engine discovers workspace skills from `<cwd>/.kiro/skills`. Managed skills live in
+  `state_dir/.kiro/skills`, so these six modes find none. Under v2 they still saw the user's personal skills through
+  the global folder; D7 removes that path. 53-08's As built flags this as unverified. Q18, asked after Q17, decides
+  whether these modes need managed skills.
 
 ### 10.4 53-02 complete (2026-11-10, review SHIP)
 
