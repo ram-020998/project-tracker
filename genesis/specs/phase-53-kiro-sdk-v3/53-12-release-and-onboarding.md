@@ -50,6 +50,13 @@ the DB version; `GET /api/system/kiro` shows a verified kiro-cli. User checklist
   arguments under `rawInput.arguments` and arrive through `tool_load`; a custom agent's `tools` absent = no tools;
   verify `set_mode` activation; credits moved to `turn_completion`. Update **L-024** (sanctioned Genesis `KIRO_HOME`),
   **L-044 / L-046** (v3 methods), **L-016** (capture source) as amendments, not rewrites.
+- **Architecture docs** (`genesis/docs/architecture/`, added in `7d7cd2d`, describing v0.81.0): update to the
+  Phase 53 build at least `modules/kiro-agent-sdk.md` (rewritten for v3), `modules/chat-and-skills.md` (`:421-427`
+  skills reach and D23 `resources`, Stop/steer/resume, the palette D21), `modules/core-engine.md` (`kiro_node` trust,
+  `_node_mcp_trust`, `KIRO_HOME`), `modules/configuration-and-secrets.md` (preflight kiro-cli items),
+  `modules/testing.md` (playwright-appian 0.3.1), `10-architecture-decisions.md` (ADR-086) and `glossary.md`. Grep
+  the folder for `trust_tools`, `--trust`, `~/.kiro/skills`, `shadows_personal`, `_kiro.dev/` and `agent_engine`
+  until nothing stale is left.
 - **Areas:** map `genesis/genesis/runtime/preflight.py`, `runtime/kiro_auth.py`, `runtime/context.py` (no area today)
   and `genesis/packages/kiro-agent-sdk/tests/fixtures/**` to `sdk-acp`/`config-secrets` so `check` routes them.
 - `context/state/current.md` (versions, DB version, test counts, "what works": v3 engine, Genesis Kiro homes, steering,
