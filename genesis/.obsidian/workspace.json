@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "de3d3829ff401638",
+        "id": "c836a1433bc5ddc8",
         "type": "tabs",
         "children": [
           {
-            "id": "e87cd4d23e7f0440",
+            "id": "43d8e74cd5afe3bc",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "tracker.md",
+                "file": "architecture/modules/features-and-stages.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "tracker"
+              "title": "features-and-stages"
             }
           }
         ]
@@ -188,35 +188,35 @@
       "bases:Create new base": false
     }
   },
-  "active": "e87cd4d23e7f0440",
+  "active": "43d8e74cd5afe3bc",
   "lastOpenFiles": [
-    "design/ui-screen-catalog.md",
+    "architecture/modules/memory.md",
+    "specs/phase-53-kiro-sdk-v3/reviews/53-07-review.md",
+    "specs/phase-53-kiro-sdk-v3/reviews/53-06-review.md",
+    "architecture/modules/knowledge-base.md",
+    "architecture/modules/kiro-agent-sdk.md",
+    "architecture/modules/features-and-stages.md",
+    "architecture/modules/configuration-and-secrets.md",
+    "architecture/modules/collaboration-hub.md",
+    "architecture/modules/chat-and-skills.md",
+    "architecture/modules/appian-parser.md",
+    "architecture/modules/api.md",
+    "architecture/README.md",
+    "architecture/11-quality-and-risks.md",
+    "architecture/10-architecture-decisions.md",
+    "architecture/09-deployment-view.md",
+    "architecture/08-crosscutting-concepts.md",
+    "architecture/07-runtime-view.md",
+    "architecture/06-building-blocks.md",
+    "architecture/05-solution-strategy.md",
+    "architecture/04-container-view.md",
+    "architecture/03-system-context.md",
+    "architecture/02-constraints.md",
+    "architecture/01-introduction-and-goals.md",
+    "architecture/modules/orkflow-library.md",
+    "architecture/modules/workflow-library.md",
+    "architecture/modules/core-engine.md",
     "design",
-    "specs/phase-26-agentic-memory-layer/26-08-memory-management-ui-and-graph.md",
-    "specs/phase-26-agentic-memory-layer/26-07-release-and-acceptance.md",
-    "specs/phase-25-architectural-foundation-hardening.md",
-    "specs/00-architecture-overview.md",
-    "specs/phase-26-agentic-memory-layer/26-06-scheduler-integration-and-config.md",
-    "specs/phase-26-agentic-memory-layer/26-05-genesis-memory-mcp-and-retrieval.md",
-    "specs/phase-26-agentic-memory-layer/26-04-memory-maintenance-dreaming.md",
-    "specs/phase-26-agentic-memory-layer/26-03-consolidation-workflow.md",
-    "specs/phase-26-agentic-memory-layer/26-02-embedding-and-vector-index.md",
-    "specs/phase-26-agentic-memory-layer/26-01-memory-model-and-store.md",
-    "specs/phase-26-agentic-memory-layer.md",
-    "specs/phase-25-architectural-foundation-hardening/25-10-reliable-agent-step-helper.md",
-    "specs/phase-26-agentic-memory-layer",
-    "progress/2026-08-19-branding-logo-and-loading.md",
-    "progress/2026-08-19-spreadsheet-viewer.md",
-    "progress/2026-08-19-live-fixes-apikey-scope-and-gws-cwd.md",
-    "progress/phase-25-architectural-foundation-hardening.md",
-    "specs/phase-25-architectural-foundation-hardening/25-12-ai-cost-and-performance-pass.md",
-    "specs/backlog/phase-25-12-ai-cost-and-performance-pass.md",
-    "progress/phase-25-partial-release.md",
-    "specs/phase-01-core-platform-foundation.md",
-    "specs/phase-25-architectural-foundation-hardening/25-13-observability-metrics-and-lifecycle-audit.md",
-    "specs/phase-25-architectural-foundation-hardening/25-09-document-provider-interface.md",
-    "specs/phase-25-architectural-foundation-hardening/25-08-concurrency-and-optimistic-locking.md",
-    "specs/phase-25-architectural-foundation-hardening/25-07-chat-mode-profile.md",
-    "specs/phase-25-architectural-foundation-hardening/25-06-god-module-decomposition-and-service-layer.md"
+    "specs/phase-26-agentic-memory-layer"
   ]
 }
