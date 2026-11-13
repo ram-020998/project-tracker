@@ -133,7 +133,12 @@
      stopped the carry-over 0/3; the D15 wording itself is first tested in 53-11 A3; c: revert exists but is
      unadvertised; d: load replays the stopped prompt). *Risk:* the note relies on the model obeying it; 53-11 A3 tests
      the exact wording live, and revert stays a possible later fallback.
-  6. **Skills come only from Genesis.** Chat sees only the managed workspace `~/.genesis/.kiro/skills/` (its cwd); a
+  6. **Skills come only from Genesis.** Chat sees only the managed workspace `~/.genesis/.kiro/skills/`, read in place
+     with no copies: read-only chat and copilot reach it through their cwd (`state_dir`, workspace skills); the six
+     spec-style modes, whose cwd is the per-session skill-output sandbox (L-041), reach it through the projected
+     agent's `resources`, `["skill://<state_dir>/.kiro/skills/*/SKILL.md"]` (SDK `KiroAgentOptions.skill_dirs`: an
+     absolute, existing directory; a relative path, `~`, a glob or `..` is refused). No session gets both, so no skill
+     is listed twice (53-13). A
      workflow node's declared skills (`kiro_node(skills=[…])`, ADR-069) are provisioned into `<run>/.kiro/skills/` from
      that managed workspace. There is no fallback to `~/.kiro/skills` and Genesis does not copy personal skills in (D7,
      D8). The `appian` skill is published to the genesis-workflows library so it installs from Settings → Catalog →
@@ -150,7 +155,13 @@
      for chat and workflows; a workflow no longer depends on one user's personal folder, and v3 drops a skill with bad
      front matter silently (log only). *Evidence:* W1 (managed `genesis-test-authoring` listed and loaded under a private
      home; `playwright-appian` 0.3.0 dropped, `skill.frontmatter.invalid … (3:112)`; the model found the file only by
-     browsing); W1b (quoting the value lists it, 0 credits); 51-03 S11 (provisioned skills work in a run).
+     browsing); W1b (quoting the value lists it, 0 credits); 51-03 S11 (provisioned skills work in a run); 53-13 R1–R4
+     (kiro-cli 2.37.1, 0.10 credits, fixture `agent-resources-skills`: a spec-style agent with `resources` and an
+     empty sandbox cwd activated, the engine listed exactly the managed folder's three skills with scope `global`, a
+     prompt loaded `gam` through `disclose_context` with its canary back and no browsing, a skill added later was
+     listed after `session/load` and `session/new` in a new process; the same agent without `resources` listed none;
+     an empty folder still activates; with the production nesting, cwd `<state>/skill-output/<id>`, each skill is listed
+     once with `resources` and not at all without it, so the engine does not walk up from the cwd).
   7. **ADR-083 and ADR-029 (53-01 §9.3 item 7).** ADR-083's accepted risk (d) closes: no Genesis session, workflow turn
      or chat, loads the user's global Kiro MCP servers (item 2; P15 against P16). ADR-029/083's "a node with no tool list
      trusts every tool" becomes "D9's built-ins plus the node's own servers within their allowlists", enforced by the
