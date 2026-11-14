@@ -173,6 +173,29 @@ wrote needs its own lock.
 drops `_listed_command` and `_command_type`. `genesis/api/skills.py` adds a library lock, and the install and update
 routes now run the installer in a thread.
 
+### Round 2 fixes (genesis-dev, 2026-11-14; review round 2 NEEDS_CHANGES)
+
+**Commit:** `61ec063` (genesis, local, signed; no web change, so no `web/static` commit).
+
+- **B1:** a message of only `/` crashed `_engine_text`, because the split of the empty rest unpacked nothing. The
+  user message was already stored by then. Now the split result is checked first, and the message goes as `User: /`.
+  Test: `"/"` was added to `test_no_raw_slash_prompt_reaches_the_engine`, and every input must now end in
+  `agent.result`. On `dd27c46` it failed with `ValueError: not enough values to unpack (expected at least 1, got 0)`
+  at `manager.py:433`.
+- **m1 (the flagged steer path):** `ChatSession.steer` now sends `_no_slash(text)`, the same D25 rule a prompt
+  without pieces gets. A managed skill id becomes `Use the <id> skill. …`, and any other leading `/` is prefixed
+  `User: `. The stored steer is what was typed. Test: `test_a_steer_never_reaches_the_engine_starting_with_a_slash`.
+  On `dd27c46` the engine was sent `['/gam x', '/general-task-execution do it', 'plain']`.
+- **n1:** `POST /skills` (author, `replace`) takes `library_lock`. Test:
+  `test_authoring_a_skill_waits_for_a_running_library_update`. On `dd27c46` the author finished 0.42 s before the
+  update it should have waited for.
+- **n2** is not taken. The reviewer left it to the spec agent: the web could send `/<id> <text>` and leave the rewrite
+  to the backend, so the string has one home. §4 words the pick as sending `Use the <id> skill.`, so this stays as
+  built until the spec agent rules.
+
+**Gates:** genesis `pytest` **1945 passed**, with the same signing override for the testexec tests. The chat, skills
+and contract subset has 101 tests, all passing. `ruff check genesis` and the changed test files are clean.
+
 ## Context manifest
 
 ```toml
