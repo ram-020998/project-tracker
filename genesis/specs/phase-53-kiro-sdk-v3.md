@@ -64,6 +64,7 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D23 | Spec-style chat modes reach the managed skills through the custom agent's `resources` (`skill://` globs), probed first; fallback: copy into the sandbox. Sub-spec 53-13. |
 | D24 | Phase 51's three browser workflows are live-accepted after the release, with Phase 51's postponed acceptance (narrows D5's safety net for them; said plainly at release). |
 | D25 | Chat invokes a skill with a plain `Use the <id> skill.` prompt; engine skill and agent commands are never offered or sent raw (53-11 M1). |
+| D26 | The release does not wait for Appian Dev: 4 of 15 agent-node workflows are live-accepted before it; the rest after (53-11 §5), said plainly at release. |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn: Send and Stop both shown, text-only
 steer; confirmed 2026-11-10): §9.5. F17 (per-turn credit provenance on aborted turns): §10.2.

@@ -72,6 +72,17 @@ login and apps)
 
 Then genesis-review re-reviews the delta (round 2).
 
+## 5. Live rows before and after the release (D24, D26)
+
+| When | Rows |
+|---|---|
+| **Before 53-12**, on a separate `genesis serve` (no Appian needed) | A1 for `hello-appian`, `generate-business-map`, `memory-consolidation`, `memory-maintenance`; A3; A3b; A4's chat part; A5; A6; A7 |
+| **After the release, when Dev is up** | A1 for the other eight workflows (`story-implementation` only with the user's go-ahead, ADR-068); A2's remaining modes; A8; A9(a) |
+| **After the release, with Phase 51's acceptance** (D24) | `story-verification`, `action-capture`, `setup-composer`; the cancelled-run `apwt` reap check |
+
+The 53-11 verdict covers the review, the gates and the before-release rows. The later rows are recorded in this As
+built when they run.
+
 ## As built
 
 _To be filled by genesis-review (report path, verdict) and genesis-dev (fixes)._
