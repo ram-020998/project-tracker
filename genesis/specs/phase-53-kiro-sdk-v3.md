@@ -63,6 +63,7 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D22 | Phase 53 ships verified on kiro-cli 2.37.1; re-verification on 3.x is `specs/backlog/kiro-cli-3x-reverify.md` (53-14 before 53-11 if 3.x arrives in time, else a patch release). |
 | D23 | Spec-style chat modes reach the managed skills through the custom agent's `resources` (`skill://` globs), probed first; fallback: copy into the sandbox. Sub-spec 53-13. |
 | D24 | Phase 51's three browser workflows are live-accepted after the release, with Phase 51's postponed acceptance (narrows D5's safety net for them; said plainly at release). |
+| D25 | Chat invokes a skill with a plain `Use the <id> skill.` prompt; engine skill and agent commands are never offered or sent raw (53-11 M1). |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn: Send and Stop both shown, text-only
 steer; confirmed 2026-11-10): §9.5. F17 (per-turn credit provenance on aborted turns): §10.2.
@@ -166,7 +167,8 @@ sign-in and preflight code runs the wrong way (n1), `/system/kiro` probes kiro-c
 `memory_jobs` calls the sign-in check on the scheduler loop (n3, L-026); the testexec tests should switch off git
 commit signing themselves (they fail under a global signing config); and from 53-07, `reap_idle` has no caller; from 53-10's review: after a full page reload an unread steer reads "sent
 during the turn" (no stored unread marker), and the MCP notice card lasts only for the page session (the notice is not
-stored).
+stored); from 53-11's review: nothing prunes the engine logs in the chat Kiro home (`~/.genesis/kiro-home/chat/logs/`,
+about 67 KB per chat process start).
 
 ## 10. Defaults
 

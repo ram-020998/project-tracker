@@ -39,13 +39,38 @@ login and apps)
 | A1 | **Every genesis-workflows agent node runs on v3** (D5, narrowed by D24): run each of the 15 agent-node workflows in 53-01 §9.2 once (or a fixture input that reaches each agent node) **except Phase 51's `story-verification`, `action-capture` and `setup-composer`**, which run after the release (D24). This includes the Implementation lane's `story-implementation` against Dev, with `appian` installed from the library. Prerequisites: the `jira`, `jarvis` and `appian-atlas` servers configured in Genesis, since `~/.kiro` no longer supplies them (D6). Before the run, re-diff genesis-workflows against the version the specs were checked at (v0.25.0) for Phase 51 v0.81.x patches | each run completes or reaches its designed gate; every agent turn has `provenance: metered` credits; run detail shows the conversation; no Phase 51 turn ends on a silent or tool-stall limit |
 | A2 | Each of the eight chat modes: read-only, copilot (start + supervise a run; confirm card), `feature_spec`, `ux_design`, `technical_design`, `feature_breakdown`, `story_design`, `test_design` | answers; read-only refuses a mutating tool with the notice; copilot's mutation waits for confirm; each spec-style mode writes only inside its sandbox |
 | A3 | Chat surface: model picker list + model at start; `/` palette; Compact; Clear; Stop then a fast next turn (no cold start); **Stop before the answer (D15):** in 3 tries, stop a request with a visible side effect (a tool call) about 1 s after sending, then send an unrelated message; repeat once with a `genesis serve` restart between the Stop and the next message; steering (delivered, and one unread re-sent after the turn); restart `genesis serve` and continue a chat (resume by load) | all behave as specified in 53-07 / 53-10; the stopped request is never carried out (any carry-over is a finding that reopens D15) |
-| A3b | Chat paths 53-07 could not run live (its As built, 53-11 item): a mode change that resumes under a different agent; a steer during a tool call, an unread steer, and a steer arriving as the turn ends (one Genesis turn, summed credits); the browser's Stop through a real `genesis serve` (53-10 order: `/cancel` first, the stream kept open up to 10 s; the stopped turn's credits stored and the Stopped label shown live; leftover steers return to the composer); a skill installed meanwhile found after a `session/load`; the first model-fallback frame if one occurs; `/system/kiro` on a machine where kiro-cli is only in `~/.local/bin` (`installed: true` beside its version, 53-09); **one Feature Spec turn through `genesis serve` that names a managed skill** (D23, 53-13: the skill loads through `disclose_context` in a sandboxed spec-mode session, and read-only chat lists it once) | each behaves as 53-07 specifies; a fallback frame, if seen, is recorded as a fixture |
+| A3b | Chat paths 53-07 could not run live (its As built, 53-11 item): a mode change that resumes under a different agent; a steer during a tool call, an unread steer, and a steer arriving as the turn ends (one Genesis turn, summed credits); the browser's Stop through a real `genesis serve` (53-10 order: `/cancel` first, the stream kept open up to 10 s; the stopped turn's credits stored and the Stopped label shown live; leftover steers return to the composer); a skill installed meanwhile found after a `session/load`; the first model-fallback frame if one occurs; `/system/kiro` on a machine where kiro-cli is only in `~/.local/bin` (`installed: true` beside its version, 53-09); a steer queued just after the turn's answer; resuming a chat after a mode change that also moves its working folder (sandbox ↔ `state_dir`); **one Feature Spec turn through `genesis serve` that names a managed skill** (D23, 53-13: the skill loads through `disclose_context` in a sandboxed spec-mode session, and read-only chat lists it once) | each behaves as 53-07 specifies; a fallback frame, if seen, is recorded as a fixture |
 | A4 | Isolation: with a server in `~/.kiro/settings/mcp.json` and a skill only in `~/.kiro/skills`, neither appears in chat or a workflow turn; `story-implementation` gets `appian` from the library | as stated |
 | A5 | Failure paths: an MCP server that fails to start (chat notice; node fails before the prompt, no credits); kiro-cli below the minimum (preflight + refusal message); an unverified newer kiro-cli (warning only) | as stated |
 | A6 | Process hygiene: after A1–A3, no stray `kiro-cli`, `kiro-cli-chat` or MCP server processes (`ps`). (The reap of a cancelled `story-verification` run's `apwt` daemons and Chromium runs after the release with the Phase 51 workflows, D24; 53-02 W16 measured it.) | none |
 | A7 | Web: real-browser check of the steered bubble, the "answered by" text, the MCP notice card and the Skills Update action at 1280 / 1440 / 1920 px, light and dark (L-090) | no overflow or clipping |
 | A9 | Open from 53-05's As built, checked on A1–A3's runs: (a) a node with no tool list calls a tool under its whole-server `@blackboard` entry (`save_tool_output` in a Phase 51 node); (b) whether the built-in `match: ["**"]` rules auto-approve, or every built-in call asks and the ladder approves (count the `session/request_permission` frames per turn); (c) a read-only chat refusal while another permission request is pending, and whether a notice at turn end starts a second metered engine turn (credits stay summed per prompt) | (a) works; (b) recorded either way, a finding only if the extra round trips slow turns visibly; (c) the refusal reaches the turn and nothing hangs |
 | A8 | Credits sanity: A1's per-node credits in the same range as the same workflow's last v2 runs (± the `tool_load` effect measured in 53-02 W9) | no unexplained jump |
+
+## 4. Fix pass after round 1 (review `reviews/53-11-review.md`, NEEDS_CHANGES; genesis-dev, one pass)
+
+1. **M1 (D25): skills are not engine commands in chat.**
+   - The engine command list is filtered to `/clear` and `/compact` only (`engine_commands`; D21). Skill-type and
+     agent-type engine commands are never offered and never sent raw.
+   - The palette's skill rows keep coming from Genesis's skill store (`Composer.tsx:123`), so each skill shows once.
+     Picking one sends the prompt `Use the <id> skill.` through the normal prompt path, with any text the user typed
+     after it.
+   - A typed `/<id> …` where `<id>` is an installed managed skill is rewritten the same way before it is sent. No
+     prompt that starts with `/` reaches the engine except `/clear` and `/compact`, which map to the 53-07 §5 methods.
+   - The D15 note still applies on every one of these paths after a Stop.
+   - Tests: the recorded 53-13 frame no longer yields skill commands; the palette lists each skill once; a pick and a
+     typed `/gam x` send `Use the gam skill. x`; after a Stop that prompt starts with the note; no raw `/`-prompt
+     reaches the fake engine.
+2. **m1: Skills Update does not kill a running turn or block the server.**
+   - The library fetch of `POST /skills/install` and `/skills/update` runs off the event loop (`asyncio.to_thread`,
+     L-026).
+   - The reload closes only idle chat clients now. A client with a turn in progress is marked and closed when that
+     turn ends, so it re-discovers skills on its next turn.
+   - Tests: an Update during a streaming turn lets the turn finish with its credits; another session's stream keeps
+     flowing while the fetch runs (a slow fake fetch).
+3. **n1:** fix the four v2-era comments.
+
+Then genesis-review re-reviews the delta (round 2).
 
 ## As built
 
