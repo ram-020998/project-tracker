@@ -1,0 +1,231 @@
+{
+ "session": "c-03fc09aeaecb",
+ "t1": {
+  "status": 200,
+  "answer": "OK",
+  "tools": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.008091144278606965,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 19
+ },
+ "kiro_session_before_clear": {
+  "id": "c-03fc09aeaecb",
+  "title": "53-11 A3 misc",
+  "created_at": "2026-11-14T18:14:45.747493+00:00",
+  "updated_at": "2026-11-14T18:14:56.303918+00:00",
+  "message_count": 2,
+  "mode": "read_only",
+  "model": "claude-haiku-5.5"
+ },
+ "compact": {
+  "ok": true,
+  "error": null
+ },
+ "t2_after_compact": {
+  "status": 200,
+  "answer": "314",
+  "tools": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.0026210228855721393,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 29
+ },
+ "clear": {
+  "ok": true,
+  "error": null
+ },
+ "kiro_session_after_clear": {
+  "id": "c-03fc09aeaecb",
+  "title": "53-11 A3 misc",
+  "created_at": "2026-11-14T18:14:45.747493+00:00",
+  "updated_at": "2026-11-14T18:15:09.722762+00:00",
+  "message_count": 4,
+  "mode": "read_only",
+  "model": "claude-haiku-5.5"
+ },
+ "t3_after_clear": {
+  "status": 200,
+  "answer": "NONE",
+  "tools": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.0018488437810945276,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 14
+ },
+ "typed_clear": {
+  "status": 200,
+  "answer": "Conversation context cleared.",
+  "tools": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": null,
+   "provenance": "unavailable",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 2
+ },
+ "typed_unknown_slash": {
+  "status": 200,
+  "answer": "I don't have a usage command, and I can't see token or model usage for this chat. The closest thing I can report is Genesis run activity from `platform_stats`:\n\n- **Recent runs:** 100\n- **Active:** 0\n- **Done:** 73\n- **Failed:** 25\n- **Cancelled:** 2\n\nIf you meant token or cost usage for the Claude model, check the usage or billing page in your model provider's console. For the failed runs, I can list them with `list_failures` and look into any run ID you give me.",
+  "tools": [
+   {
+    "t": 7.03,
+    "name": "@genesis/platform_stats",
+    "title": "@genesis/platform_stats",
+    "input": null
+   }
+  ],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.006113603980099505,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 1,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 68
+ },
+ "stored": [
+  {
+   "seq": 319,
+   "role": "user",
+   "content": "Remember the number 314. Reply OK.",
+   "meta": null,
+   "credits": null,
+   "model": null,
+   "provenance": null
+  },
+  {
+   "seq": 320,
+   "role": "assistant",
+   "content": "OK",
+   "meta": null,
+   "credits": 0.008091144278606965,
+   "model": null,
+   "provenance": "metered"
+  },
+  {
+   "seq": 321,
+   "role": "user",
+   "content": "What number did I ask you to remember? Reply with the number only.",
+   "meta": null,
+   "credits": null,
+   "model": null,
+   "provenance": null
+  },
+  {
+   "seq": 322,
+   "role": "assistant",
+   "content": "314",
+   "meta": null,
+   "credits": 0.0026210228855721393,
+   "model": null,
+   "provenance": "metered"
+  },
+  {
+   "seq": 323,
+   "role": "user",
+   "content": "Did I ask you to remember a number earlier in this conversation? If so which; if you have no record, reply NONE.",
+   "meta": null,
+   "credits": null,
+   "model": null,
+   "provenance": null
+  },
+  {
+   "seq": 324,
+   "role": "assistant",
+   "content": "NONE",
+   "meta": null,
+   "credits": 0.0018488437810945276,
+   "model": null,
+   "provenance": "metered"
+  },
+  {
+   "seq": 325,
+   "role": "user",
+   "content": "/clear",
+   "meta": null,
+   "credits": null,
+   "model": null,
+   "provenance": null
+  },
+  {
+   "seq": 326,
+   "role": "assistant",
+   "content": "Conversation context cleared.",
+   "meta": {
+    "command": "/clear",
+    "ok": true
+   },
+   "credits": null,
+   "model": null,
+   "provenance": null
+  },
+  {
+   "seq": 327,
+   "role": "user",
+   "content": "/usage please",
+   "meta": null,
+   "credits": null,
+   "model": null,
+   "provenance": null
+  },
+  {
+   "seq": 328,
+   "role": "assistant",
+   "content": "I don't have a usage command, and I can't see token or model usage for this chat. The closest thing I can report is Genesis run activity from `platform_stats`:\n",
+   "meta": null,
+   "credits": 0.006113603980099505,
+   "model": null,
+   "provenance": "metered"
+  }
+ ]
+}

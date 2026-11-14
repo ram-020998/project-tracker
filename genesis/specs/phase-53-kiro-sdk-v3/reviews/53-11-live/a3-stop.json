@@ -1,0 +1,300 @@
+[
+ {
+  "warm": {
+   "status": 200,
+   "answer": "Hello, nice meeting!",
+   "tools": [],
+   "result": {
+    "ok": true,
+    "stop_reason": "end_turn",
+    "credits": 0.06731657930348259,
+    "provenance": "metered",
+    "error": null,
+    "code": null,
+    "tool_calls": 0,
+    "unread_steers": null,
+    "model": null,
+    "fallback_from": null
+   },
+   "other_events": [],
+   "fired": [],
+   "events_n": 4
+  }
+ },
+ {
+  "try": 1,
+  "file_after_stop": false,
+  "file_after_next": false,
+  "stopped": {
+   "status": 200,
+   "answer": "",
+   "tools": [],
+   "result": {
+    "ok": false,
+    "stop_reason": "cancelled",
+    "credits": null,
+    "provenance": "unavailable",
+    "error": "The turn was cancelled.",
+    "code": "cancelled",
+    "tool_calls": 0,
+    "unread_steers": null,
+    "model": null,
+    "fallback_from": null
+   },
+   "other_events": [],
+   "fired": [
+    {
+     "t": 1.05,
+     "action": "cancel",
+     "result": 200
+    }
+   ],
+   "events_n": 2
+  },
+  "next": {
+   "status": 200,
+   "answer": "42",
+   "tools": [],
+   "result": {
+    "ok": true,
+    "stop_reason": "end_turn",
+    "credits": 0.027140160580431182,
+    "provenance": "metered",
+    "error": null,
+    "code": null,
+    "tool_calls": 0,
+    "unread_steers": null,
+    "model": null,
+    "fallback_from": null
+   },
+   "other_events": [],
+   "fired": [],
+   "events_n": 2
+  }
+ },
+ {
+  "try": 2,
+  "file_after_stop": false,
+  "file_after_next": false,
+  "stopped": {
+   "status": 200,
+   "answer": "",
+   "tools": [],
+   "result": {
+    "ok": false,
+    "stop_reason": "cancelled",
+    "credits": null,
+    "provenance": "unavailable",
+    "error": "The turn was cancelled.",
+    "code": "cancelled",
+    "tool_calls": 0,
+    "unread_steers": null,
+    "model": null,
+    "fallback_from": null
+   },
+   "other_events": [],
+   "fired": [
+    {
+     "t": 1.04,
+     "action": "cancel",
+     "result": 200
+    }
+   ],
+   "events_n": 2
+  },
+  "next": {
+   "status": 200,
+   "answer": "42",
+   "tools": [],
+   "result": {
+    "ok": true,
+    "stop_reason": "end_turn",
+    "credits": 0.027836512155887234,
+    "provenance": "metered",
+    "error": null,
+    "code": null,
+    "tool_calls": 0,
+    "unread_steers": null,
+    "model": null,
+    "fallback_from": null
+   },
+   "other_events": [],
+   "fired": [],
+   "events_n": 2
+  }
+ },
+ {
+  "try": 3,
+  "file_after_stop": false,
+  "file_after_next": false,
+  "stopped": {
+   "status": 200,
+   "answer": "",
+   "tools": [],
+   "result": {
+    "ok": false,
+    "stop_reason": "cancelled",
+    "credits": null,
+    "provenance": "unavailable",
+    "error": "The turn was cancelled.",
+    "code": "cancelled",
+    "tool_calls": 0,
+    "unread_steers": null,
+    "model": null,
+    "fallback_from": null
+   },
+   "other_events": [],
+   "fired": [
+    {
+     "t": 1.03,
+     "action": "cancel",
+     "result": 200
+    }
+   ],
+   "events_n": 1
+  },
+  "next": {
+   "status": 200,
+   "answer": "42",
+   "tools": [],
+   "result": {
+    "ok": true,
+    "stop_reason": "end_turn",
+    "credits": 0.04192095016583749,
+    "provenance": "metered",
+    "error": null,
+    "code": null,
+    "tool_calls": 0,
+    "unread_steers": null,
+    "model": null,
+    "fallback_from": null
+   },
+   "other_events": [],
+   "fired": [],
+   "events_n": 15
+  }
+ },
+ {
+  "session": "c-8c2cc7c31918",
+  "stored": [
+   {
+    "seq": 280,
+    "role": "user",
+    "content": "Say hello in three words.",
+    "meta": null,
+    "credits": null,
+    "provenance": null
+   },
+   {
+    "seq": 281,
+    "role": "assistant",
+    "content": "Hello, nice meeting!",
+    "meta": null,
+    "credits": 0.06731657930348259,
+    "provenance": "metered"
+   },
+   {
+    "seq": 282,
+    "role": "user",
+    "content": "Create a file named carry-1.txt in your working directory containing exactly CARRY-1. Then reply with the single word WROTE.",
+    "meta": null,
+    "credits": null,
+    "provenance": null
+   },
+   {
+    "seq": 283,
+    "role": "assistant",
+    "content": "",
+    "meta": {
+     "turn_status": "cancelled"
+    },
+    "credits": null,
+    "provenance": "unavailable"
+   },
+   {
+    "seq": 284,
+    "role": "user",
+    "content": "Unrelated question: what is 7 times 6? Reply with only the number.",
+    "meta": null,
+    "credits": null,
+    "provenance": null
+   },
+   {
+    "seq": 285,
+    "role": "assistant",
+    "content": "42",
+    "meta": null,
+    "credits": 0.027140160580431182,
+    "provenance": "metered"
+   },
+   {
+    "seq": 286,
+    "role": "user",
+    "content": "Create a file named carry-2.txt in your working directory containing exactly CARRY-2. Then reply with the single word WROTE.",
+    "meta": null,
+    "credits": null,
+    "provenance": null
+   },
+   {
+    "seq": 287,
+    "role": "assistant",
+    "content": "",
+    "meta": {
+     "turn_status": "cancelled"
+    },
+    "credits": null,
+    "provenance": "unavailable"
+   },
+   {
+    "seq": 288,
+    "role": "user",
+    "content": "Unrelated question: what is 7 times 6? Reply with only the number.",
+    "meta": null,
+    "credits": null,
+    "provenance": null
+   },
+   {
+    "seq": 289,
+    "role": "assistant",
+    "content": "42",
+    "meta": null,
+    "credits": 0.027836512155887234,
+    "provenance": "metered"
+   },
+   {
+    "seq": 290,
+    "role": "user",
+    "content": "Create a file named carry-3.txt in your working directory containing exactly CARRY-3. Then reply with the single word WROTE.",
+    "meta": null,
+    "credits": null,
+    "provenance": null
+   },
+   {
+    "seq": 291,
+    "role": "assistant",
+    "content": "",
+    "meta": {
+     "turn_status": "cancelled"
+    },
+    "credits": null,
+    "provenance": "unavailable"
+   },
+   {
+    "seq": 292,
+    "role": "user",
+    "content": "Unrelated question: what is 7 times 6? Reply with only the number.",
+    "meta": null,
+    "credits": null,
+    "provenance": null
+   },
+   {
+    "seq": 293,
+    "role": "assistant",
+    "content": "42",
+    "meta": null,
+    "credits": 0.04192095016583749,
+    "provenance": "metered"
+   }
+  ]
+ }
+]

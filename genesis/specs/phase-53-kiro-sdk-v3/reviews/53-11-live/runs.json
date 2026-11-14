@@ -1,0 +1,73 @@
+{
+ "res": [
+  {
+   "run": "r-d19a1e33212d",
+   "node": "make_result",
+   "dialog_has_conversation_section": false,
+   "dialog_has_prompt": true,
+   "dialog_has_answer": true,
+   "dialog_tool_ids": [],
+   "dialog_chars": 616
+  },
+  {
+   "run": "r-d19a1e33212d",
+   "node": "make_result",
+   "answer_probe": "DONE",
+   "answer_on_page": true,
+   "has_credits_text": true,
+   "body_chars": 1314
+  },
+  {
+   "run": "r-c4a4b6de1e02",
+   "node": "synthesize_capabilities",
+   "dialog_has_conversation_section": false,
+   "dialog_has_prompt": true,
+   "dialog_has_answer": true,
+   "dialog_tool_ids": [],
+   "dialog_chars": 62333
+  },
+  {
+   "run": "r-c4a4b6de1e02",
+   "node": "synthesize_capabilities",
+   "answer_probe": "I wrote the business model to `/tmp/gene",
+   "answer_on_page": true,
+   "has_credits_text": true,
+   "body_chars": 63467
+  },
+  {
+   "run": "r-78442ab0531c",
+   "node": "extract",
+   "dialog_has_conversation_section": true,
+   "dialog_has_prompt": true,
+   "dialog_has_answer": true,
+   "dialog_tool_ids": [],
+   "dialog_chars": 13542
+  },
+  {
+   "run": "r-78442ab0531c",
+   "node": "extract",
+   "answer_probe": "I wrote the memories JSON to `/tmp/genes",
+   "answer_on_page": true,
+   "has_credits_text": true,
+   "body_chars": 14528
+  },
+  {
+   "run": "r-9880c13825c9",
+   "node": "reflect",
+   "dialog_has_conversation_section": false,
+   "dialog_has_prompt": true,
+   "dialog_has_answer": false,
+   "dialog_tool_ids": [],
+   "dialog_chars": 2211
+  },
+  {
+   "run": "r-9880c13825c9",
+   "node": "reflect",
+   "answer_probe": "I wrote `reflections.json` with an empty",
+   "answer_on_page": false,
+   "has_credits_text": true,
+   "body_chars": 3198
+  }
+ ],
+ "errors": []
+}

@@ -1,0 +1,4 @@
+## serve PATH: PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
+## /system/kiro
+{"installed":true,"authenticated":true,"email":"<redacted>","start_url":"https://stratus.awsapps.com/start","version":"2.37.1","minimum":"2.37.1","verified":true,"engine_v3":true}
+## chat turn {"session": "c-db47a7da9156", "answer": "OK", "result": {"ok": true, "stop_reason": "end_turn", "credits": 0.01414149658374793, "provenance": "metered", "error": null, "code": null, "tool_calls": 0, "unread_steers": null, "model": null, "fallback_from": null}}

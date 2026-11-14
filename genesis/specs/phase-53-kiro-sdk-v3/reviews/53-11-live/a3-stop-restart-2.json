@@ -1,0 +1,60 @@
+{
+ "phase": "next",
+ "file_after_next": false,
+ "next": {
+  "status": 200,
+  "answer": "Paris",
+  "tools": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.03962326376451078,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 2
+ },
+ "stored_tail": [
+  {
+   "seq": 294,
+   "role": "user",
+   "content": "Create a file named carry-restart.txt in your working directory containing exactly CARRY-RESTART. Then reply with the single word WROTE.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 295,
+   "role": "assistant",
+   "content": "",
+   "meta": {
+    "turn_status": "cancelled"
+   },
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  {
+   "seq": 296,
+   "role": "user",
+   "content": "Unrelated question: what is the capital of France? Reply with one word.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 297,
+   "role": "assistant",
+   "content": "Paris",
+   "meta": null,
+   "credits": 0.03962326376451078,
+   "provenance": "metered"
+  }
+ ]
+}

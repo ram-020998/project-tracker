@@ -1,0 +1,66 @@
+run_id r-c4a4b6de1e02
+elapsed_s 135.4
+{
+ "run_id": "r-c4a4b6de1e02",
+ "workflow": "generate-business-map",
+ "status": "done",
+ "cursor": "present",
+ "kinds": {
+  "run.started": 1,
+  "node.completed": 11,
+  "custom": 8,
+  "agent.prompt": 2,
+  "agent.tool_call": 4,
+  "agent.tool_update": 9,
+  "agent.thought": 328,
+  "agent.message": 76,
+  "agent.result": 2,
+  "validator.result": 2,
+  "run.final": 1
+ },
+ "agent_turns": [
+  {
+   "node": "synthesize_capabilities",
+   "credits": 1.5439075339137645,
+   "provenance": "metered",
+   "stop_reason": "end_turn",
+   "error": null
+  },
+  {
+   "node": "synthesize_value_streams",
+   "credits": 2.0958480973466007,
+   "provenance": "metered",
+   "stop_reason": "end_turn",
+   "error": null
+  }
+ ],
+ "tool_calls": [
+  {
+   "node": "synthesize_capabilities",
+   "tool": "fs_write",
+   "tool_id": null,
+   "title": "Write File"
+  },
+  {
+   "node": "synthesize_capabilities",
+   "tool": "str_replace",
+   "tool_id": null,
+   "title": "Replace in File"
+  },
+  {
+   "node": "synthesize_capabilities",
+   "tool": "execute_bash",
+   "tool_id": null,
+   "title": "Run Command"
+  },
+  {
+   "node": "synthesize_value_streams",
+   "tool": "fs_write",
+   "tool_id": null,
+   "title": "Write File"
+  }
+ ],
+ "run_credits": 3.639755631260365,
+ "credits_provenance": "metered",
+ "event_count": 444
+}

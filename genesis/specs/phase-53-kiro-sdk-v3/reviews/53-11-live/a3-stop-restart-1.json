@@ -1,0 +1,30 @@
+{
+ "phase": "stop",
+ "file_after_stop": false,
+ "stopped": {
+  "status": 200,
+  "answer": "",
+  "tools": [],
+  "result": {
+   "ok": false,
+   "stop_reason": "cancelled",
+   "credits": null,
+   "provenance": "unavailable",
+   "error": "The turn was cancelled.",
+   "code": "cancelled",
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [
+   {
+    "t": 1.05,
+    "action": "cancel",
+    "result": 200
+   }
+  ],
+  "events_n": 1
+ }
+}

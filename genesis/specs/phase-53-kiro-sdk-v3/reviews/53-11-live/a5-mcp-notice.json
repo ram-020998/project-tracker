@@ -1,0 +1,57 @@
+{
+ "session": "c-a878cd65fd53",
+ "t1": {
+  "other_events": [
+   {
+    "type": "session.notice",
+    "kind": "mcp_failed",
+    "servers": [
+     "appian-dev"
+    ],
+    "detail": "appian-dev: Connection closed",
+    "_t": 3.61
+   }
+  ],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.050485227927031515,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "answer": "OK"
+ },
+ "t1_notice_raw": [
+  {
+   "type": "session.notice",
+   "kind": "mcp_failed",
+   "servers": [
+    "appian-dev"
+   ],
+   "detail": "appian-dev: Connection closed",
+   "seq": 1,
+   "_t": 3.61
+  }
+ ],
+ "t2": {
+  "other_events": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.01808646645107794,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "answer": "AGAIN"
+ }
+}

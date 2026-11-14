@@ -1,0 +1,56 @@
+{
+ "label": "serve 5 up (no ~/.local/bin on PATH), before stop",
+ "serve_pid": 16345,
+ "under_serve": [
+  {
+   "pid": 16754,
+   "ppid": 16345,
+   "pgid": 16754,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 16762,
+   "ppid": 16754,
+   "pgid": 16754,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 16763,
+   "ppid": 16762,
+   "pgid": 16763,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 16820,
+   "ppid": 16763,
+   "pgid": 16763,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 16821,
+   "ppid": 16763,
+   "pgid": 16763,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 16822,
+   "ppid": 16763,
+   "pgid": 16763,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  }
+ ],
+ "not_under_serve_but_test_or_orphan": [
+  {
+   "pid": 16343,
+   "ppid": 1,
+   "pgid": 16340,
+   "cmd": "/opt/homebrew/bin/bash -c ls /opt/homebrew/bin/kiro-cli /usr/bin/kiro-cli 2>&1 | head -2; chmod +x /tmp/genesis-53-11/serve-nolocalbin.sh && /tmp/genesis-53-11/\u2026"
+  },
+  {
+   "pid": 61824,
+   "ppid": 1,
+   "pgid": 61824,
+   "cmd": "/Applications/Kiro CLI.app/Contents/MacOS/kiro_cli_desktop --is-startup --no-dashboard"
+  }
+ ]
+}

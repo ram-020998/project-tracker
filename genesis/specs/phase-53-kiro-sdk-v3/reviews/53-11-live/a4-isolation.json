@@ -1,0 +1,84 @@
+{
+ "canaries": [
+  "mcp#0",
+  "mcp#1",
+  "skill#2"
+ ],
+ "read_only": {
+  "session": "c-9ff93daf451b",
+  "answer": "genesis-kb, genesis-memory, genesis\n\nappian, appian-object-generation, canary-5311, gam, genesis-test-authoring, sail-mockup-generation",
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.02718263845771144,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "tools": [],
+  "canary_hits_in_answer": [
+   {
+    "canary": "mcp#0",
+    "hits": 0
+   },
+   {
+    "canary": "mcp#1",
+    "hits": 0
+   },
+   {
+    "canary": "skill#2",
+    "hits": 2
+   }
+  ]
+ },
+ "feature_spec": {
+  "session": "c-1aa8a738243a",
+  "answer": "genesis-kb, genesis-memory, genesis\n\nappian, appian-object-generation, canary-5311, gam, genesis-test-authoring, sail-mockup-generation",
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.07476889053067992,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "tools": [],
+  "canary_hits_in_answer": [
+   {
+    "canary": "mcp#0",
+    "hits": 0
+   },
+   {
+    "canary": "mcp#1",
+    "hits": 0
+   },
+   {
+    "canary": "skill#2",
+    "hits": 2
+   }
+  ]
+ },
+ "kiro_home_files_scanned": 63,
+ "canary_hits_in_genesis_kiro_home": [
+  {
+   "canary": "mcp#0",
+   "hits": 0
+  },
+  {
+   "canary": "mcp#1",
+   "hits": 0
+  },
+  {
+   "canary": "skill#2",
+   "hits": 50
+  }
+ ]
+}

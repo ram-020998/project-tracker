@@ -1,0 +1,54 @@
+run_id r-9880c13825c9
+elapsed_s 25.1
+{
+ "run_id": "r-9880c13825c9",
+ "workflow": "memory-maintenance",
+ "status": "done",
+ "cursor": "present",
+ "kinds": {
+  "run.started": 1,
+  "node.completed": 10,
+  "custom": 6,
+  "agent.prompt": 2,
+  "agent.thought": 15,
+  "agent.tool_call": 2,
+  "agent.tool_update": 4,
+  "agent.message": 30,
+  "agent.result": 2,
+  "validator.result": 2,
+  "run.final": 1
+ },
+ "agent_turns": [
+  {
+   "node": "reflect",
+   "credits": 0.1349224545273632,
+   "provenance": "metered",
+   "stop_reason": "end_turn",
+   "error": null
+  },
+  {
+   "node": "curate",
+   "credits": 0.08715158240464345,
+   "provenance": "metered",
+   "stop_reason": "end_turn",
+   "error": null
+  }
+ ],
+ "tool_calls": [
+  {
+   "node": "reflect",
+   "tool": "fs_write",
+   "tool_id": null,
+   "title": "Write File"
+  },
+  {
+   "node": "curate",
+   "tool": "fs_write",
+   "tool_id": null,
+   "title": "Write File"
+  }
+ ],
+ "run_credits": 0.22207403693200667,
+ "credits_provenance": "metered",
+ "event_count": 75
+}

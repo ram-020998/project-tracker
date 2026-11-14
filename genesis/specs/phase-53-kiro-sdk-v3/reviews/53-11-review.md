@@ -661,3 +661,159 @@ None new. Round 2's n2 stays open for the spec agent.
 B1, m1 and n1 are fixed as proposed. Each has a regression test, and each test fails on dd27c46 (re-run by the
 reviewer). The affected suites and ruff are green. The §5 live acceptance rows are still open and are not covered by
 this verdict (L-111).
+
+---
+
+# Live rows (before release) — 53-11 §5 "before 53-12", genesis 61ec063, kiro-cli 2.37.1 (genesis-review, 2026-11-14/15)
+
+**Setup.** A separate `genesis serve` from the dev checkout (genesis `61ec063`, the round 3 SHIP commit), with
+`GENESIS_STATE_DIR=/tmp/genesis-53-11/state`, `GENESIS_ARTIFACTS_DIR=/tmp/genesis-53-11/artifacts`, port **8770**
+(reports origin **8870**), as the operator chose. The fleet (:8760, :8761) was not restarted or changed (D20).
+- `genesis.db` is a `.backup` snapshot of the fleet main's DB (read-only on the source; DB version 29), so
+  `generate-business-map` has a real KB (AS GSS Full Application, 3 348 `kb_objects` rows). `secrets.json`,
+  `environments.json` and `collab.json` were not copied. All six scheduled jobs were turned off in the copy only, so no
+  nightly memory or sync job could fire on it.
+- Workflows: `genesis install --from <genesis-workflows checkout>` for the four A1 workflows (ref `local`).
+- Skills: `appian`, `gam`, `appian-object-generation`, `sail-mockup-generation` and `genesis-test-authoring` were
+  installed with `SkillInstaller(LocalSource(<genesis-workflows checkout>))`. The checkout is at `b097719`, which adds
+  `appian` and is not pushed. GitLab's latest library tag (v0.25.0) has no `appian`, and this instance has no GitLab
+  token. A `canary-5311` skill was authored through `POST /api/skills` during A3b.
+- `kiro-cli --version` → 2.37.1, installed only in `~/.local/bin`.
+- Evidence (JSON, logs, screenshots, the driver scripts): `reviews/53-11-live/` in project-tracker. The full set is in
+  `/tmp/genesis-53-11/evidence/`. A scan of the evidence for the account email, the A5 dummy password, `~/.kiro`
+  paths and the `~/.kiro` MCP server names found nothing. `/system/kiro` output is stored with the email redacted.
+
+## Rows
+
+| Row | Result | Evidence | Credits (metered) |
+|---|---|---|---|
+| A1 `hello-appian` | **PASS** | `a1-hello-appian.json`; run `r-d19a1e33212d` done in 20 s; 1 agent turn (`make_result`) `provenance: metered`; tool ids `list_directory`, `execute_bash`, `fs_write` (registered ids, `tool_ids.json` `builtins`); turn explorer shows prompt + conversation (`screens/run-r-d19a1e33212d-make_result.png`) | 0.3065 |
+| A1 `generate-business-map` | **PASS** | `a1-generate-business-map.json`; run `r-c4a4b6de1e02` done in 135 s, `review: false`; 2 agent turns (`synthesize_capabilities` 1.5439, `synthesize_value_streams` 2.0958), both metered; tools `execute_bash`, `fs_write`, `str_replace`; 328 thoughts, 76 messages; conversation in the turn explorer | 3.6398 |
+| A1 `memory-consolidation` | **PASS** | `a1-memory-consolidation.json`; run `r-78442ab0531c` (`since` = this test's start, so only these chats) done in 35 s; `extract` 0.4742 + `reconcile` 0.1165, metered; tool `fs_write` | 0.5907 |
+| A1 `memory-maintenance` | **PASS** | `a1-memory-maintenance.json`; run `r-9880c13825c9` done in 25 s; `reflect` 0.1349 + `curate` 0.0872, metered; tool `fs_write` | 0.2221 |
+| A3 Stop before the answer × 3 (D15) | **PASS** | `a3-stop.json`, session `c-8c2cc7c31918` (feature_spec, so the request has a file-write side effect). Each try: "Create carry-N.txt … reply WROTE", `/cancel` at 1.03–1.05 s → `stop_reason: cancelled`, stored `turn_status: cancelled`, `provenance: unavailable`. W5 says a cancel during a model call carries no credit entry, so `unavailable` is correct. Then "what is 7 × 6": answer `42`, 0 tool calls, `carry-N.txt` absent after the stop and after the next turn. The next turn took 3.4 / 3.5 / 4.7 s against 5.0 s for the cold first turn (the client was kept). The Kiro session's `messages.jsonl` holds the D15 note on each of the 4 next prompts | 0.2038 (session) |
+| A3 Stop across a `serve` restart | **PASS** | `a3-stop-restart-{1,2}.json`. Stop at 1.05 s; SIGTERM serve (its kiro-cli pid 80324 exited with it); start serve; "capital of France" → `Paris`, 0 tools, no `carry-restart.txt`. Resume was by `session/load`: one Kiro session `sess_ca71e323…` for the whole chat, and no load-failure warning in `serve-2.log`. The note came from the stored transcript | (in the line above) |
+| A3 model picker / model at start / Compact / Clear | **PASS** | `a3-misc.json`. `/chat/models` lists 9+ models with a current one. A session created with `claude-haiku-5.5` runs on it: all 3 of its Kiro session records name `claude-haiku-5.5` (the others name `claude-sonnet-5.5`). Compact → `{ok: true}`, and the number 314 is still recalled. The Clear button → `{ok: true}`, then "NONE" (a new Kiro session), transcript kept. Typed `/clear` → "Conversation context cleared."; typed `/usage please` goes as user text (D25) | 0.0187 |
+| A3 `/` palette (D25) | **PASS** | `browser-palette-log.json`, `screens/palette-1440.png`. Rows: `/clear`, `/compact` and the six skills, each once. A pick sends `{"text":"Use the gam skill."}`; `/gam in five words` keeps one row and the pick sends `Use the gam skill. in five words`. The engine loaded the skill (`Load skill: gam`, 0.1028) | (in A3b browser) |
+| A3b steer during a tool | **PASS** | `a3b-steer.json`, session `c-5dd4dbd0c118`. `@genesis-kb/list_applications` at 2.53 s; steer queued 2.55 s, `delivered` 2.66 s; the answer ends `KIWI`; one `agent.result` (0.1237, metered). The live stream carried `[STEERING steer-…: Applied …]`; the stored answer has it stripped | 0.2585 (session) |
+| A3b late steer (as the answer streams) | **PASS** | same file. Steer at the first answer chunk (3.40 s), delivered 3.41 s. The engine ran a second turn inside the prompt, and the answer joins the two parts with a blank line (F18). One Genesis turn, one result (0.0848, metered) | (in the line above) |
+| A3b steer after the answer | **PASS** | `POST /steer` after `agent.result` → 409 "no turn is running in this chat; send the message normally" | 0 |
+| A3b unread steer + leftovers after Stop | **PASS** | API: steer at 1.53 s, Stop at 1.87 s → `unread_steers: [307]` on the cancelled result. Browser (`browser-chat-log.json`, `screens/stop-live-1440.png`): a steer typed during the turn, then Stop; afterwards the composer holds "Make it about rivers only." and the bubble reads "sent after the turn". The first, faulty browser run also showed a refused steer re-sent as the next message | (in steer) |
+| A3b browser Stop through serve (53-10 order) | **PASS** | `browser-chat-log.json`: `POST /cancel` at 18.055 s, answered at 18.077 s; the stream was not aborted, and the turn ended in the UI at 18.082 s on its own `agent.result`. "Stopped" shows live (count 1) and after a reload (count 1). The stopped turn's credits are stored: seq 339, **0.0501 metered** (a finished tool round before the cancel, as W5 recorded) | 0.5308 (both browser sessions) |
+| A3b mode change that moves the working folder | **PASS** | `a3b-mode-skill.json`, session `c-973e84a8cf3c`. read_only: cwd `/tmp/genesis-53-11/state`. Switch to `feature_spec`: the code word PEAR is recalled, and `list_directory` shows cwd `…/skill-output/c-973e84a8cf3c`. Back to read_only: PEAR recalled. One Kiro session id throughout (`sess_141ba859…`, the record stays in the `state_dir` cwd group), no load-failure warning, so each change resumed under the other agent by `session/load` | 0.3904 (session) |
+| A3b Feature Spec turn naming a managed skill (D23) | **PASS** | same session, in `feature_spec`. Typed `/gam In one sentence …` (D25 rewrite) → tool `Load skill: gam` (the `disclose_context` load) → "GAM stands for Government Acquisition Management", 0.0791 metered. Read-only chat lists each skill once (the palette row above, and A4's answers) | (in the line above) |
+| A3b skill installed meanwhile, found after `session/load` | **PASS** | same session. `POST /api/skills` (canary-5311) closed the idle client; the next turn (sandbox mode) → `Load skill: canary-5311` → `PLUM-5311` | (in the line above) |
+| A3b `/system/kiro` with kiro-cli only in `~/.local/bin` | **PASS** | `a3b-localbin.txt`: serve run with `PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin` → `installed: true, version: "2.37.1", verified: true, engine_v3: true`. A chat turn launched `/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3` and answered OK | 0.0141 |
+| A3b first model-fallback frame | **not seen** | no `fallback_from` in about 60 chat turns and 8 workflow turns, so no fixture was recorded. "answered by" was checked on the 53-10 mock (A7) | — |
+| A4 chat part: `~/.kiro` MCP server and skill | **PASS** | MCP: the two servers in `~/.kiro/settings/mcp.json` (of the three names the operator gave, `power-jarvis-jarvis` is not in the file now). Read-only and feature_spec sessions list `genesis-kb, genesis-memory, genesis` and nothing else. 0 hits for either name in the answers or in the 63 files of Genesis's chat Kiro home; the live process tree under serve holds only `genesis.mcp.{kb,memory,introspection}_server` (`a6-ps-1.json`). Skill: the one skill in `~/.kiro/skills` is a byte-identical copy of a library skill installed on this instance, so it cannot tell the two folders apart. I removed it from this instance only (`DELETE /api/skills/<id>`) and asked both modes again: 0 whole-word hits, 5 skills listed. It stayed in `~/.kiro/skills`, so chat does not read that folder. Reinstalled afterwards. Names are withheld in the evidence (`a4-isolation.json`, `a4-skill.json`). `~/.kiro` was only read, never written | 0.2263 |
+| A5 MCP server that fails to start | **PASS** | `a5-mcp-notice.json`. The test state got a fake managed `appian-dev` install whose `python` exits 1, plus a dummy dev environment ("A5 fake dev", `https://a5-fake-dev.invalid`, dummy credentials that are not secrets). The first turn streams `session.notice {kind: mcp_failed, servers: [appian-dev], detail: "appian-dev: Connection closed"}` at 3.6 s, then answers OK; the second turn has no notice. The card renders (`screens/a7-notice-*.png`). See nit n1 | 0.0686 |
+| A5 kiro-cli below the minimum | **PASS** | `a5-kiro-old.txt`, `a5-kiro-old-run.json`. A fake `kiro-cli` first on serve's PATH answers `--version` with 2.36.0 and passes every other call to the real one. `/system/kiro` → `version 2.36.0, verified false`; preflight `kiro-cli` **missing** "kiro-cli 2.36.0 is older than 2.37.1; run `kiro-cli update`.", `ready: false`. A chat turn → `error` `code: kiro_too_old` in 0.02 s, no credits. A `hello-appian` run fails at `make_result` with the same message: one `agent.prompt` event, no `agent.result`, no credits. See nit n2 | 0 |
+| A5 an unverified newer kiro-cli | **PASS** | `a5-kiro-new.txt`. Fake 2.38.0: preflight `kiro-cli` ok, `kiro-cli-verified` **missing** (optional) "kiro-cli 2.38.0 has not been verified with this Genesis release; it should work — report problems.", `ready: true`. A chat turn answers OK (0.0141 metered); the log has one `WARNING kiro_agent_sdk.tool_ids … 2.38.0 is not a version the tool-id table was measured on` | 0.0141 |
+| A6 process hygiene | **PASS** | `a6-ps-{1..4}.json` (`ps -A -ww`, L-104). With serve up after A1–A4: 54 processes under serve, which are 9 live idle chat clients × (kiro-cli, kiro-cli-chat, engine `node`, 3 Genesis MCP servers). None belong to a run (the 4 runs had ended) and none are orphans. After each SIGTERM of serve (2, 3-old, 4-new, 5): 0 processes under serve, none with the test state dir in their command line, none re-parented to PID 1. The remaining kiro-cli processes on the machine belong to the fleet main (parent 21722) and to the operator's own Kiro CLI | 0 |
+| A7 real browser 1280/1440/1920 × light/dark | **PASS** | Live on :8770 (`a7-result.json`, `browser_a7.mjs`): steer label (3), steered bubble, MCP notice card and the 5 Skills Update buttons. All 24 element × size × theme checks are inside the viewport and their parent, with no own horizontal overflow and no page horizontal scroll. Screenshots `screens/a7-*.png`, read at 1280 light (steer), 1280 dark (notice) and 1920 dark (skills). "answered by" needs a real fallback, so it was covered by the 53-10 mock probe on the same tree (`scripts/probes/chat-steer-widths.mjs`): 12/12 entries "OK", "all clean" (`a7-probe.log`, `a7-probe-result.json`) | 0.0846 (6 notice chats) |
+
+**Credits.** A1 4.7591 · A3 0.2225 · A3b 1.1938 · A4 0.2263 · A5 0.0827 · A6 0 · A7 0.0846. **Total 6.569**:
+chat 1.8103 (sum of stored `usage.credits` over this test's 20 sessions) and runs 4.7591 (`/runs/{id}/provenance`).
+Every non-zero figure is `metered`. The 7 assistant messages without a metered figure are the 6 cancelled turns
+(`unavailable`; a cancel during a model call has no credit entry, W5) and the typed `/clear` command turn. The
+too-old kiro-cli turn (code `kiro_too_old`) is counted among the 20 sessions at 0 credits.
+
+## The python:3.13 image check (L-112, 53-12 precondition)
+
+Colima was started for it (operator's go-ahead). The run used a fresh `git clone` of genesis at `61ec063`, with `.git`
+and 0 changed files, streamed in as a tar so pytest runs on the container's disk. It ran the `.gitlab-ci.yml` job
+scripts (`scripts/install-packages.sh --editable --dev`, then ruff + pytest per package) in `python:3.13`. The image
+has no node and no kiro-cli.
+
+| Suite | aarch64 (colima native) on 61ec063 | Same failing tests on the phase base 62537c2 (v0.81.0) |
+|---|---|---|
+| genesis `ruff check genesis` | All checks passed | — |
+| genesis `pytest -q` | **1881 passed, 61 skipped, 3 failed** (6 min 9 s) | the same 3 fail |
+| genesis-core ruff / pytest | clean / **109 passed** | — |
+| kiro-agent-sdk ruff / pytest | clean / **302 passed** | — |
+| genesis-appian-parser ruff / pytest | clean / **1 failed** (`test_parse_returns_populated_result`: 179 bundles, expected 174) | fails the same way |
+
+The 3 genesis failures: `test_sail_cli.py::test_extract_sail_binary_for_host`,
+`::test_install_appian_dev_bundle_installs_both` and
+`test_testexec_execution.py::test_regression_job_handler_starts_due_apps_and_skips_busy_ones`. Phase 53 changes no file
+these tests or their code read (`git diff --stat 62537c2 61ec063` over the parser, `testexec` and the sail CLI is
+empty), and all 4 fail identically on the base. **None is a Phase 53 regression.** The Phase 53 suites (SDK, core, chat)
+pass in the image without node or kiro-cli.
+- The regression-job test is clock-dependent. It also fails on macOS in the dev venv when run at 00:31 IST (m1 below).
+- The two sail tests pass on macOS. The parser test passes on macOS but fails on aarch64 Linux at the base too.
+  I tried a linux/amd64 run of these four tests (the CI runner's arch, emulated by colima). It **did not complete**:
+  the emulated container hung with one idle `qemu-x86_64 bash` at 0 % CPU after printing its first line, and I stopped
+  it after 16 minutes (`image-amd64-check.txt`). CI on v0.81.0 was green on its x86_64 runner (1778 passed, 61
+  skipped, the parser job green), so there these tests passed or were skipped. They read as aarch64-host failures,
+  but only the real CI run at 53-12 confirms that.
+- A first attempt was invalid: macOS tar added `._*` AppleDouble files, which gave 67 ruff E902 errors. It was
+  re-run with `COPYFILE_DISABLE=1 --no-mac-metadata` (0 AppleDouble files). That attempt is kept as
+  `image-check-run1-appledouble.txt`.
+
+## Findings (live rows)
+
+### Blockers
+None.
+
+### Majors
+None.
+
+### Minors
+- **m1 (pre-existing, Phase 51; not a Phase 53 regression): `test_regression_job_handler_starts_due_apps_and_skips_busy_ones`
+  fails whenever the real time is before 02:00 IST.** The test's scheduler clock is
+  `datetime.now(IST).replace(hour=3, minute=0)` (`tests/test_testexec_execution.py:684`), and the app's slot is
+  "02:00". `is_due` (`genesis/testexec/regression_job.py:92-100`, `:127`) compares that slot with the newest
+  execution's `created_at`, which the store writes with the real time. Between 00:00 and 02:00 IST the real
+  `created_at` is earlier than today's faked 02:00 slot, so the finished run does not cover the slot and the third
+  tick starts a second run: `assert 2 == 1` at `:696`.
+  - Seen at 00:32 IST in the image (19:02 UTC) and at 00:31 IST on macOS, on both `61ec063` and `62537c2`. The
+    1945-pass run on 14 Nov was in the daytime.
+  - Risk for 53-12: a release commit or tag whose CI runs between 18:30 and 20:30 UTC reds the `genesis` CI job
+    (L-112).
+  - Smallest fix: keep the faked clock and the stored time on one clock. Either use the real clock with a slot that
+    is always in the past today (`"time": "00:00"`), or freeze the store's creation time to the same instant as the
+    clock. The test must not mix a faked clock with the real one (coding standards §4 "inject `now`"). The
+    regression check: the same test run with the clock and the stored time in the 00:00–02:00 IST window.
+  - Owner: genesis-dev, as a Phase 51 follow-up. It needs no Phase 53 change. Or 53-12 avoids that window and says
+    so.
+
+### Nits
+- **n1: the MCP notice names the server twice.** The text reads "appian-dev did not start: appian-dev: Connection
+  closed. Its tools are not available in this chat." (`screens/a7-notice-1280-dark.png`). The web prefixes the server
+  list (`ChatThread.tsx:55`) to a backend `detail` that already starts with `<server>: `. Smallest fix: build `detail`
+  without the server prefix when it covers one server, or show only the reason after the name in the web. Pin the
+  text in the existing notice test.
+- **n2: the too-old message repeats the version.** "kiro-cli 2.36.0 is too old; Genesis needs 2.37.1 or newer.
+  Update kiro-cli and try again. (kiro-cli 2.36.0)". The SDK's `check_version` (`launch.py:96-99`) passes the
+  `--version` text as `detail`, and the error string appends it. Smallest fix: leave `detail` out of the user-facing
+  message, or drop the parenthesis when it only restates the version.
+
+## Not checked (live rows)
+
+- **The live view's stripping of the `[STEERING steer-…]` marker.** The backend stripped it from the stored answer
+  (checked). My screenshots of the steered session were taken after a reload. The live-stream strip is pinned by
+  53-10's `steering.ts` tests and the mock probe, not by a live screenshot.
+- **A model-fallback frame**: none occurred, so no fixture was recorded.
+- **A5's workflow-node half** ("node fails before the prompt, no credits") for a failing MCP server. The operator
+  scoped A5 to the chat notice. The too-old kiro-cli run did fail before any engine turn, with no credits.
+- **Rows after the release** (§5): A1 for the other eight workflows (`story-implementation` only with the operator's
+  go-ahead, ADR-068), A2's remaining modes, A8, A9(a), and the Phase 51 workflows with the `apwt` reap (D24).
+- **The clean-install CI job** (it runs only on a push).
+
+## Cleanup and state left behind
+
+- The 53-11 serve is stopped. `/tmp/genesis-53-11/` (state copy, artifacts, evidence, fakes) is left in place for
+  re-checks. Its `secrets.json` holds only the A5 dummy credentials. The file of `~/.kiro` canary names was deleted.
+- The amd64 pull had moved the local docker tag `python:3.13` to linux/amd64. It was pulled back with
+  `--platform linux/arm64` (`docker image inspect` → `arm64`). Colima was stopped afterwards (`colima status` →
+  "colima is not running").
+- Nothing in any code repo changed. The 53-10 probe ran Vite from `genesis/web` (its cache only), and
+  `git status --short` in genesis is empty.
+
+## Verdict for the before-release rows: **PASS**
+
+All the §5 "before 53-12" rows pass (A1 × 4, A3, A3b, A4 chat part, A5, A6, A7), and no stopped request was ever
+carried out, so D15 stays closed. The python:3.13 image check has run. Every Phase 53 suite passes in it, and the
+four failures there are not Phase 53's (identical on v0.81.0). One of them, m1, can red the release CI between 18:30
+and 20:30 UTC. Together with the round 3 code verdict, **53-11 is SHIP**. 53-12 can start. It should fix m1 first or
+tag outside that window, and its notes must say which §5 rows stay open until after the release (D26, L-111).

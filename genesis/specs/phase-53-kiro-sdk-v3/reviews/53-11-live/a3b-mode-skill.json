@@ -1,0 +1,239 @@
+{
+ "session": "c-973e84a8cf3c",
+ "t1_read_only": {
+  "status": 200,
+  "answer": "Code word PEAR noted (I can't write to memory, so I'll only keep it for this conversation). My working directory is /tmp/genesis-53-11/state.",
+  "tools": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.026117417810945277,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 12
+ },
+ "mode_to_spec": {
+  "ok": true,
+  "mode": "feature_spec"
+ },
+ "t2_feature_spec": {
+  "status": 200,
+  "answer": "The code word was PEAR. My working directory is /tmp/genesis-53-11/state/skill-output/c-973e84a8cf3c, so my last answer (/tmp/genesis-53-11/state) was wrong. The directory is currently empty.",
+  "tools": [
+   {
+    "t": 9.38,
+    "name": "list_directory",
+    "title": "List Directory",
+    "input": null
+   }
+  ],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.11349776615257047,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 1,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 39
+ },
+ "t3_spec_skill": {
+  "status": 200,
+  "answer": "According to the skill, GAM stands for Government Acquisition Management.",
+  "tools": [
+   {
+    "t": 1.14,
+    "name": "Load skill: gam",
+    "title": "Load skill: gam",
+    "input": null
+   }
+  ],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.07912989165837479,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 1,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 17
+ },
+ "author_canary": {
+  "status": 200,
+  "body": {
+   "id": "canary-5311",
+   "name": "canary-5311",
+   "description": "A 53-11 live-acceptance canary skill. Use it when the user asks for the 53-11 canary word.",
+   "source": "local",
+   "has_scripts": false,
+   "has_references": false,
+   "has_assets": false,
+   "bytes": 271
+  }
+ },
+ "t4_new_skill": {
+  "status": 200,
+  "answer": "PLUM-5311",
+  "tools": [
+   {
+    "t": 8.01,
+    "name": "Load skill: canary-5311",
+    "title": "Load skill: canary-5311",
+    "input": null
+   }
+  ],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.10925092507462686,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 1,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 5
+ },
+ "mode_to_ro": {
+  "ok": true,
+  "mode": "read_only"
+ },
+ "t5_read_only": {
+  "status": 200,
+  "answer": "PEAR",
+  "tools": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.062434533432835816,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 2
+ },
+ "commands": {
+  "commands": [
+   {
+    "name": "/clear",
+    "description": "Clear the conversation context (the transcript stays)"
+   },
+   {
+    "name": "/compact",
+    "description": "Compact the conversation context"
+   }
+  ]
+ },
+ "stored": [
+  {
+   "seq": 309,
+   "role": "user",
+   "content": "Remember the code word PEAR. Also tell me the absolute path of your current working directory. Reply in one line.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 310,
+   "role": "assistant",
+   "content": "Code word PEAR noted (I can't write to memory, so I'll only keep it for this conversation). My working directory is /tmp/genesis-53-11/state.",
+   "meta": null,
+   "credits": 0.026117417810945277,
+   "provenance": "metered"
+  },
+  {
+   "seq": 311,
+   "role": "user",
+   "content": "What was the code word? Also tell me the absolute path of your current working directory (use a file tool to check it). Reply in one line.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 312,
+   "role": "assistant",
+   "content": "The code word was PEAR. My working directory is /tmp/genesis-53-11/state/skill-output/c-973e84a8cf3c, so my last answer (/tmp/genesis-53-11/state) was wrong. The directory is currently empty.",
+   "meta": null,
+   "credits": 0.11349776615257047,
+   "provenance": "metered"
+  },
+  {
+   "seq": 313,
+   "role": "user",
+   "content": "/gam In one sentence, what does GAM stand for according to the skill?",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 314,
+   "role": "assistant",
+   "content": "According to the skill, GAM stands for Government Acquisition Management.",
+   "meta": null,
+   "credits": 0.07912989165837479,
+   "provenance": "metered"
+  },
+  {
+   "seq": 315,
+   "role": "user",
+   "content": "Use the canary-5311 skill.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 316,
+   "role": "assistant",
+   "content": "PLUM-5311",
+   "meta": null,
+   "credits": 0.10925092507462686,
+   "provenance": "metered"
+  },
+  {
+   "seq": 317,
+   "role": "user",
+   "content": "What was the code word from the start of this chat? Reply in one word.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 318,
+   "role": "assistant",
+   "content": "PEAR",
+   "meta": null,
+   "credits": 0.062434533432835816,
+   "provenance": "metered"
+  }
+ ]
+}

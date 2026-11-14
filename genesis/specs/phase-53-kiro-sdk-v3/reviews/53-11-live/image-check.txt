@@ -1,0 +1,76 @@
+== AppleDouble files: 0
+== HEAD 61ec063  status: 0 changed
+== python Python 3.13.18  node: none  kiro-cli: none
+== install exit 0
+
+[notice] A new release of pip is available: 26.2.2 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+== genesis ruff
+All checks passed!
+exit 0
+== genesis pytest
+tests/test_memory_api.py: 9 warnings
+tests/test_memory_jobs.py: 1 warning
+tests/test_metrics_api.py: 5 warnings
+tests/test_native_cli_api.py: 4 warnings
+tests/test_object_wiki_api.py: 12 warnings
+tests/test_phase53_api_contract.py: 11 warnings
+tests/test_skills_api.py: 17 warnings
+tests/test_spec_clauses_api.py: 6 warnings
+tests/test_spec_links.py: 9 warnings
+tests/test_story_trace.py: 12 warnings
+tests/test_sync_jobs.py: 4 warnings
+tests/test_test_design_api.py: 35 warnings
+tests/test_test_design_stage.py: 36 warnings
+tests/test_testexec_settings.py: 3 warnings
+tests/test_testing_api.py: 13 warnings
+tests/test_workbench_api.py: 7 warnings
+  /src/genesis/api/app.py:381: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_sail_cli.py::test_extract_sail_binary_for_host - assert (No...
+FAILED tests/test_sail_cli.py::test_install_appian_dev_bundle_installs_both
+FAILED tests/test_testexec_execution.py::test_regression_job_handler_starts_due_apps_and_skips_busy_ones
+3 failed, 1881 passed, 61 skipped, 4900 warnings in 369.04s (0:06:09)
+exit 1
+== genesis-core ruff
+All checks passed!
+exit 0
+== genesis-core pytest
+........................................................................ [ 66%]
+.....................................                                    [100%]
+109 passed in 3.41s
+exit 0
+== sdk ruff
+All checks passed!
+exit 0
+== sdk pytest
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 23%]
+........................................................................ [ 47%]
+........................................................................ [ 71%]
+........................................................................ [ 95%]
+..............                                                           [100%]
+302 passed in 5.70s
+exit 0
+== parser ruff
+All checks passed!
+exit 0
+== parser pytest
+>       assert len(result.bundles) == EXPECTED["bundles"]
+E       AssertionError: assert 179 == 174
+E        +  where 179 = len([KbBundle(bundle_id='AIA_Home_Site', bundle_type='site', name='AIA Home Site', object_count=227, root_uuid='15ad6b1a-7...String'), KbBundleMember(uuid='45679773-ddea-4e84-b30a-217c2872a261', name='SHRD Administrators', type='Group')]), ...])
+E        +    where [KbBundle(bundle_id='AIA_Home_Site', bundle_type='site', name='AIA Home Site', object_count=227, root_uuid='15ad6b1a-7...String'), KbBundleMember(uuid='45679773-ddea-4e84-b30a-217c2872a261', name='SHRD Administrators', type='Group')]), ...] = KbParseResult(application=KbApplicationInfo(name='DocCenter', app_uuid='81997754-651d-4840-9385-128c04dc7fa5', version...: ['AIA_FOLDER_CLEANUP_DOCS']}]}, 'total_files_in_zip': 2649, 'total_xml_files': 2626, 'parse_duration_seconds': 2.22}).bundles
+
+tests/test_parse.py:52: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_parse.py::test_parse_returns_populated_result - AssertionEr...
+exit 1

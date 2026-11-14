@@ -1,0 +1,650 @@
+{
+ "chat-turn@1280/light": {
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "page_hscroll": false,
+  "composer": {
+   "textarea": {
+    "l": 516,
+    "r": 1268,
+    "t": 903,
+    "b": 961,
+    "w": 752,
+    "h": 58
+   },
+   "padding_right": 144,
+   "buttons": {
+    "l": 1130,
+    "r": 1260,
+    "t": 928,
+    "b": 960,
+    "w": 130,
+    "h": 32
+   },
+   "enabled": true,
+   "send": true,
+   "stop": true,
+   "send_disabled": false,
+   "attach_disabled": true,
+   "model_disabled": true,
+   "buttons_inside": true,
+   "text_clear_of_buttons": true
+  },
+  "steer_bubble": {
+   "bubble": {
+    "l": 957,
+    "r": 1264,
+    "t": 194,
+    "b": 230,
+    "w": 307,
+    "h": 36
+   },
+   "label": {
+    "text": "sent during the turn",
+    "l": 1148,
+    "r": 1264,
+    "t": 234,
+    "b": 251,
+    "w": 116,
+    "h": 17
+   },
+   "column": {
+    "l": 520,
+    "r": 1264,
+    "t": 142,
+    "b": 470,
+    "w": 744,
+    "h": 328
+   },
+   "inside_column": true,
+   "label_right_aligned": true,
+   "overflow": false
+  },
+  "mcp_card": {
+   "box": {
+    "l": 520,
+    "r": 1264,
+    "t": 267,
+    "b": 353,
+    "w": 744,
+    "h": 86
+   },
+   "overflow": false,
+   "text": "genesis-kb, genesis-memory and genesis did not start: genesis-kb: still not conn",
+   "inside_column": true
+  }
+ },
+ "skills@1280/light": {
+  "theme_class": "theme-light",
+  "page_hscroll": false,
+  "card": {
+   "l": 605,
+   "r": 923,
+   "t": 280,
+   "b": 510,
+   "w": 317,
+   "h": 230
+  },
+  "footer": {
+   "l": 626,
+   "r": 902,
+   "t": 449,
+   "b": 489,
+   "w": 275,
+   "h": 40
+  },
+  "update": {
+   "l": 763,
+   "r": 858,
+   "t": 455,
+   "b": 487,
+   "w": 95,
+   "h": 32,
+   "text": "Update",
+   "wraps": false
+  },
+  "footer_spill": false,
+  "footer_one_row": true,
+  "authored_has_update": false
+ },
+ "chat-turn@1440/light": {
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "page_hscroll": false,
+  "composer": {
+   "textarea": {
+    "l": 516,
+    "r": 1428,
+    "t": 903,
+    "b": 961,
+    "w": 912,
+    "h": 58
+   },
+   "padding_right": 144,
+   "buttons": {
+    "l": 1290,
+    "r": 1420,
+    "t": 928,
+    "b": 960,
+    "w": 130,
+    "h": 32
+   },
+   "enabled": true,
+   "send": true,
+   "stop": true,
+   "send_disabled": false,
+   "attach_disabled": true,
+   "model_disabled": true,
+   "buttons_inside": true,
+   "text_clear_of_buttons": true
+  },
+  "steer_bubble": {
+   "bubble": {
+    "l": 1049,
+    "r": 1356,
+    "t": 194,
+    "b": 230,
+    "w": 307,
+    "h": 36
+   },
+   "label": {
+    "text": "sent during the turn",
+    "l": 1240,
+    "r": 1356,
+    "t": 234,
+    "b": 251,
+    "w": 116,
+    "h": 17
+   },
+   "column": {
+    "l": 588,
+    "r": 1356,
+    "t": 142,
+    "b": 470,
+    "w": 768,
+    "h": 328
+   },
+   "inside_column": true,
+   "label_right_aligned": true,
+   "overflow": false
+  },
+  "mcp_card": {
+   "box": {
+    "l": 588,
+    "r": 1356,
+    "t": 267,
+    "b": 353,
+    "w": 768,
+    "h": 86
+   },
+   "overflow": false,
+   "text": "genesis-kb, genesis-memory and genesis did not start: genesis-kb: still not conn",
+   "inside_column": true
+  }
+ },
+ "skills@1440/light": {
+  "theme_class": "theme-light",
+  "page_hscroll": false,
+  "card": {
+   "l": 659,
+   "r": 1029,
+   "t": 280,
+   "b": 510,
+   "w": 371,
+   "h": 230
+  },
+  "footer": {
+   "l": 680,
+   "r": 1008,
+   "t": 449,
+   "b": 489,
+   "w": 329,
+   "h": 40
+  },
+  "update": {
+   "l": 870,
+   "r": 964,
+   "t": 455,
+   "b": 487,
+   "w": 95,
+   "h": 32,
+   "text": "Update",
+   "wraps": false
+  },
+  "footer_spill": false,
+  "footer_one_row": true,
+  "authored_has_update": false
+ },
+ "chat-turn@1920/light": {
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "page_hscroll": false,
+  "composer": {
+   "textarea": {
+    "l": 516,
+    "r": 1908,
+    "t": 903,
+    "b": 961,
+    "w": 1392,
+    "h": 58
+   },
+   "padding_right": 144,
+   "buttons": {
+    "l": 1770,
+    "r": 1900,
+    "t": 928,
+    "b": 960,
+    "w": 130,
+    "h": 32
+   },
+   "enabled": true,
+   "send": true,
+   "stop": true,
+   "send_disabled": false,
+   "attach_disabled": true,
+   "model_disabled": true,
+   "buttons_inside": true,
+   "text_clear_of_buttons": true
+  },
+  "steer_bubble": {
+   "bubble": {
+    "l": 1289,
+    "r": 1596,
+    "t": 194,
+    "b": 230,
+    "w": 307,
+    "h": 36
+   },
+   "label": {
+    "text": "sent during the turn",
+    "l": 1480,
+    "r": 1596,
+    "t": 234,
+    "b": 251,
+    "w": 116,
+    "h": 17
+   },
+   "column": {
+    "l": 828,
+    "r": 1596,
+    "t": 142,
+    "b": 470,
+    "w": 768,
+    "h": 328
+   },
+   "inside_column": true,
+   "label_right_aligned": true,
+   "overflow": false
+  },
+  "mcp_card": {
+   "box": {
+    "l": 828,
+    "r": 1596,
+    "t": 267,
+    "b": 353,
+    "w": 768,
+    "h": 86
+   },
+   "overflow": false,
+   "text": "genesis-kb, genesis-memory and genesis did not start: genesis-kb: still not conn",
+   "inside_column": true
+  }
+ },
+ "skills@1920/light": {
+  "theme_class": "theme-light",
+  "page_hscroll": false,
+  "card": {
+   "l": 864,
+   "r": 1304,
+   "t": 280,
+   "b": 510,
+   "w": 440,
+   "h": 230
+  },
+  "footer": {
+   "l": 885,
+   "r": 1283,
+   "t": 449,
+   "b": 489,
+   "w": 398,
+   "h": 40
+  },
+  "update": {
+   "l": 1144,
+   "r": 1239,
+   "t": 455,
+   "b": 487,
+   "w": 95,
+   "h": 32,
+   "text": "Update",
+   "wraps": false
+  },
+  "footer_spill": false,
+  "footer_one_row": true,
+  "authored_has_update": false
+ },
+ "chat-turn@1280/dark": {
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "page_hscroll": false,
+  "composer": {
+   "textarea": {
+    "l": 516,
+    "r": 1268,
+    "t": 903,
+    "b": 961,
+    "w": 752,
+    "h": 58
+   },
+   "padding_right": 144,
+   "buttons": {
+    "l": 1130,
+    "r": 1260,
+    "t": 928,
+    "b": 960,
+    "w": 130,
+    "h": 32
+   },
+   "enabled": true,
+   "send": true,
+   "stop": true,
+   "send_disabled": false,
+   "attach_disabled": true,
+   "model_disabled": true,
+   "buttons_inside": true,
+   "text_clear_of_buttons": true
+  },
+  "steer_bubble": {
+   "bubble": {
+    "l": 957,
+    "r": 1264,
+    "t": 194,
+    "b": 230,
+    "w": 307,
+    "h": 36
+   },
+   "label": {
+    "text": "sent during the turn",
+    "l": 1148,
+    "r": 1264,
+    "t": 234,
+    "b": 251,
+    "w": 116,
+    "h": 17
+   },
+   "column": {
+    "l": 520,
+    "r": 1264,
+    "t": 142,
+    "b": 470,
+    "w": 744,
+    "h": 328
+   },
+   "inside_column": true,
+   "label_right_aligned": true,
+   "overflow": false
+  },
+  "mcp_card": {
+   "box": {
+    "l": 520,
+    "r": 1264,
+    "t": 267,
+    "b": 353,
+    "w": 744,
+    "h": 86
+   },
+   "overflow": false,
+   "text": "genesis-kb, genesis-memory and genesis did not start: genesis-kb: still not conn",
+   "inside_column": true
+  }
+ },
+ "skills@1280/dark": {
+  "theme_class": "theme-dark",
+  "page_hscroll": false,
+  "card": {
+   "l": 605,
+   "r": 923,
+   "t": 280,
+   "b": 510,
+   "w": 317,
+   "h": 230
+  },
+  "footer": {
+   "l": 626,
+   "r": 902,
+   "t": 449,
+   "b": 489,
+   "w": 275,
+   "h": 40
+  },
+  "update": {
+   "l": 763,
+   "r": 858,
+   "t": 455,
+   "b": 487,
+   "w": 95,
+   "h": 32,
+   "text": "Update",
+   "wraps": false
+  },
+  "footer_spill": false,
+  "footer_one_row": true,
+  "authored_has_update": false
+ },
+ "chat-turn@1440/dark": {
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "page_hscroll": false,
+  "composer": {
+   "textarea": {
+    "l": 516,
+    "r": 1428,
+    "t": 903,
+    "b": 961,
+    "w": 912,
+    "h": 58
+   },
+   "padding_right": 144,
+   "buttons": {
+    "l": 1290,
+    "r": 1420,
+    "t": 928,
+    "b": 960,
+    "w": 130,
+    "h": 32
+   },
+   "enabled": true,
+   "send": true,
+   "stop": true,
+   "send_disabled": false,
+   "attach_disabled": true,
+   "model_disabled": true,
+   "buttons_inside": true,
+   "text_clear_of_buttons": true
+  },
+  "steer_bubble": {
+   "bubble": {
+    "l": 1049,
+    "r": 1356,
+    "t": 194,
+    "b": 230,
+    "w": 307,
+    "h": 36
+   },
+   "label": {
+    "text": "sent during the turn",
+    "l": 1240,
+    "r": 1356,
+    "t": 234,
+    "b": 251,
+    "w": 116,
+    "h": 17
+   },
+   "column": {
+    "l": 588,
+    "r": 1356,
+    "t": 142,
+    "b": 470,
+    "w": 768,
+    "h": 328
+   },
+   "inside_column": true,
+   "label_right_aligned": true,
+   "overflow": false
+  },
+  "mcp_card": {
+   "box": {
+    "l": 588,
+    "r": 1356,
+    "t": 267,
+    "b": 353,
+    "w": 768,
+    "h": 86
+   },
+   "overflow": false,
+   "text": "genesis-kb, genesis-memory and genesis did not start: genesis-kb: still not conn",
+   "inside_column": true
+  }
+ },
+ "skills@1440/dark": {
+  "theme_class": "theme-dark",
+  "page_hscroll": false,
+  "card": {
+   "l": 659,
+   "r": 1029,
+   "t": 280,
+   "b": 510,
+   "w": 371,
+   "h": 230
+  },
+  "footer": {
+   "l": 680,
+   "r": 1008,
+   "t": 449,
+   "b": 489,
+   "w": 329,
+   "h": 40
+  },
+  "update": {
+   "l": 870,
+   "r": 964,
+   "t": 455,
+   "b": 487,
+   "w": 95,
+   "h": 32,
+   "text": "Update",
+   "wraps": false
+  },
+  "footer_spill": false,
+  "footer_one_row": true,
+  "authored_has_update": false
+ },
+ "chat-turn@1920/dark": {
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "page_hscroll": false,
+  "composer": {
+   "textarea": {
+    "l": 516,
+    "r": 1908,
+    "t": 903,
+    "b": 961,
+    "w": 1392,
+    "h": 58
+   },
+   "padding_right": 144,
+   "buttons": {
+    "l": 1770,
+    "r": 1900,
+    "t": 928,
+    "b": 960,
+    "w": 130,
+    "h": 32
+   },
+   "enabled": true,
+   "send": true,
+   "stop": true,
+   "send_disabled": false,
+   "attach_disabled": true,
+   "model_disabled": true,
+   "buttons_inside": true,
+   "text_clear_of_buttons": true
+  },
+  "steer_bubble": {
+   "bubble": {
+    "l": 1289,
+    "r": 1596,
+    "t": 194,
+    "b": 230,
+    "w": 307,
+    "h": 36
+   },
+   "label": {
+    "text": "sent during the turn",
+    "l": 1480,
+    "r": 1596,
+    "t": 234,
+    "b": 251,
+    "w": 116,
+    "h": 17
+   },
+   "column": {
+    "l": 828,
+    "r": 1596,
+    "t": 142,
+    "b": 470,
+    "w": 768,
+    "h": 328
+   },
+   "inside_column": true,
+   "label_right_aligned": true,
+   "overflow": false
+  },
+  "mcp_card": {
+   "box": {
+    "l": 828,
+    "r": 1596,
+    "t": 267,
+    "b": 353,
+    "w": 768,
+    "h": 86
+   },
+   "overflow": false,
+   "text": "genesis-kb, genesis-memory and genesis did not start: genesis-kb: still not conn",
+   "inside_column": true
+  }
+ },
+ "skills@1920/dark": {
+  "theme_class": "theme-dark",
+  "page_hscroll": false,
+  "card": {
+   "l": 864,
+   "r": 1304,
+   "t": 280,
+   "b": 510,
+   "w": 440,
+   "h": 230
+  },
+  "footer": {
+   "l": 885,
+   "r": 1283,
+   "t": 449,
+   "b": 489,
+   "w": 398,
+   "h": 40
+  },
+  "update": {
+   "l": 1144,
+   "r": 1239,
+   "t": 455,
+   "b": 487,
+   "w": 95,
+   "h": 32,
+   "text": "Update",
+   "wraps": false
+  },
+  "footer_spill": false,
+  "footer_one_row": true,
+  "authored_has_update": false
+ }
+}

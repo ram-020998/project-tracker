@@ -1,0 +1,51 @@
+== HEAD 62537c2  arch aarch64
+== install exit 0
+        job = store.get(rj.JOB_KEY)
+        assert job.enabled and job.options == {}                    # every application off by default (F13)
+        store.update_settings(rj.JOB_KEY, enabled=True, schedule=job.schedule,
+                              options={"apps": {APP: {"cadence": "daily", "time": "02:00"},
+                                                "untracked": {"cadence": "daily", "time": "02:00"},
+                                                "off-app": {"cadence": "off"}}})
+        store.ensure_defaults([rj.REGRESSION_JOB])                  # a later boot keeps the user's per-app settings
+        assert APP in store.get(rj.JOB_KEY).options["apps"]
+        reg = RegressionStore(env.db).get_or_create(APP)
+        RegressionStore(env.db).add_item(reg["id"], env.cat.flow)
+    
+        class Sched:
+            def register(self, key, fn):
+                self.fn = fn
+    
+        sched = Sched()
+        rj.register_regression_job(sched, service=env.svc, schedule_store=store, kb_store=KbStore(env.db),
+                                   clock=lambda tz: datetime.now(IST).replace(hour=3, minute=0))
+        import asyncio
+        status, detail = asyncio.run(sched.fn())
+        assert status == "ok" and "1 started" in detail, detail
+        first = env.store.list(APP, kind="regression")
+        assert len(first) == 1 and first[0]["trigger"]["source"] == "schedule"
+        status, detail = asyncio.run(sched.fn())                    # running → skipped, never a second one
+        assert "0 started" in detail and len(env.store.list(APP, kind="regression")) == 1
+        _end_run(env, env.store.get(first[0]["id"]), "done", _results_for(env.store.get(first[0]["id"])))
+        asyncio.run(sched.fn())                                     # the slot is already covered
+>       assert len(env.store.list(APP, kind="regression")) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([{'id': 2, 'app_uuid': 'app-exec', 'key': 'TE-000002', 'kind': 'regression', ...}, {'id': 1, 'app_uuid': 'app-exec', 'key': 'TE-000001', 'kind': 'regression', ...}])
+E        +    where [{'id': 2, 'app_uuid': 'app-exec', 'key': 'TE-000002', 'kind': 'regression', ...}, {'id': 1, 'app_uuid': 'app-exec', 'key': 'TE-000001', 'kind': 'regression', ...}] = list('app-exec', kind='regression')
+E        +      where list = <genesis.kb.testexec_store.ExecutionStore object at 0xee4e7e2abc50>.list
+E        +        where <genesis.kb.testexec_store.ExecutionStore object at 0xee4e7e2abc50> = namespace(settings=Settings(state_dir=PosixPath('/tmp/pytest-of-root/pytest-0/test_regression_job_handler_st0/state'),...xecutionFinalizer object at 0xee4e7e3567b0>, store=<genesis.kb.testexec_store.ExecutionStore object at 0xee4e7e2abc50>).store
+
+tests/test_testexec_execution.py:696: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_sail_cli.py::test_extract_sail_binary_for_host - assert (No...
+FAILED tests/test_sail_cli.py::test_install_appian_dev_bundle_installs_both
+FAILED tests/test_testexec_execution.py::test_regression_job_handler_starts_due_apps_and_skips_busy_ones
+3 failed in 0.97s
+exit 1
+E        +  where 179 = len([KbBundle(bundle_id='AIA_Home_Site', bundle_type='site', name='AIA Home Site', object_count=227, root_uuid='15ad6b1a-7...uuid='_a-0000efcb-c4fe-8000-a2d3-011c48011c48_1092276', name='AIA_MTR_DEPLOYMENT_FILE_UPDATE', type='Constant')]), ...])
+E        +    where [KbBundle(bundle_id='AIA_Home_Site', bundle_type='site', name='AIA Home Site', object_count=227, root_uuid='15ad6b1a-7...uuid='_a-0000efcb-c4fe-8000-a2d3-011c48011c48_1092276', name='AIA_MTR_DEPLOYMENT_FILE_UPDATE', type='Constant')]), ...] = KbParseResult(application=KbApplicationInfo(name='DocCenter', app_uuid='81997754-651d-4840-9385-128c04dc7fa5', version...: ['AIA_FOLDER_CLEANUP_DOCS']}]}, 'total_files_in_zip': 2649, 'total_xml_files': 2626, 'parse_duration_seconds': 2.54}).bundles
+
+tests/test_parse.py:52: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_parse.py::test_parse_returns_populated_result - AssertionEr...
+exit 1
+done

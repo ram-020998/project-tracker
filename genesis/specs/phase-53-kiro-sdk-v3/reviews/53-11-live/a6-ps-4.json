@@ -1,0 +1,13 @@
+{
+ "label": "after the final serve stop",
+ "serve_pid": null,
+ "under_serve": [],
+ "not_under_serve_but_test_or_orphan": [
+  {
+   "pid": 61824,
+   "ppid": 1,
+   "pgid": 61824,
+   "cmd": "/Applications/Kiro CLI.app/Contents/MacOS/kiro_cli_desktop --is-startup --no-dashboard"
+  }
+ ]
+}

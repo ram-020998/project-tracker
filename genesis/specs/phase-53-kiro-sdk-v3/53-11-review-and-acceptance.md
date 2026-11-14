@@ -201,6 +201,34 @@ and the reviewer re-ran the three new tests against the `dd27c46` source, where 
 `reviews/53-11-review.md`. n2 stays open for the spec agent. This verdict does not cover the §5 live rows, which
 genesis-review runs next on a separate `genesis serve` (L-111).
 
+### §5 live rows before the release (genesis-review, 2026-11-14/15)
+
+Run on a separate `genesis serve` from the dev checkout at genesis `61ec063`, with kiro-cli 2.37.1. State
+`/tmp/genesis-53-11/state` (a `.backup` copy of the fleet main's DB, with its schedules off), port 8770 (reports
+8870). The fleet was not touched (D20). Report: `reviews/53-11-review.md` § "Live rows (before release)". Evidence and
+driver scripts: `reviews/53-11-live/`.
+
+| Row | Result | Metered credits |
+|---|---|---|
+| A1 `hello-appian`, `generate-business-map`, `memory-consolidation`, `memory-maintenance` | PASS: all done; 7 agent turns, all `metered`; built-in tool ids are registered ids; the turn explorer shows each conversation | 4.7591 |
+| A3 (Stop × 3 + once across a serve restart, D15; models, model at start, Compact, Clear, palette) | PASS: no carry-over in 4 tries plus a fifth after a finished tool round; resume by `session/load` | 0.2225 |
+| A3b (steer during a tool, late, after the answer, unread; browser Stop; mode change moving the cwd; Feature Spec skill turn; skill found after load; `~/.local/bin`) | PASS; no model-fallback frame occurred | 1.1938 |
+| A4 chat part (`~/.kiro` MCP servers and skill) | PASS: neither reaches chat; the `~/.kiro` skill is a copy of a library skill, so it was checked by removing that skill from the instance | 0.2263 |
+| A5 (failing MCP server notice; kiro-cli 2.36.0 fake; 2.38.0 fake) | PASS: notice once; refusal `kiro_too_old` with no credits; newer → warning only | 0.0827 |
+| A6 (`ps -ww` after the runs and after each serve stop) | PASS: no stray kiro-cli, kiro-cli-chat, engine or MCP process | 0 |
+| A7 (1280/1440/1920 × light/dark) | PASS: 24 live checks plus 12/12 on the 53-10 mock probe ("answered by") | 0.0846 |
+
+Total **6.569** credits (chat 1.8103, runs 4.7591).
+- **python:3.13 image (L-112): run.** SDK 302, core 109 and genesis 1881 passed; ruff is clean everywhere. 3 genesis
+  tests and 1 parser test fail, identically on `62537c2`, so they are not Phase 53's. One of them is clock-dependent
+  (finding m1: it fails 00:00–02:00 IST, which is 18:30–20:30 UTC). The other three look aarch64-only; an emulated
+  amd64 re-run hung and did not complete.
+- **Findings for genesis-dev:** m1 (pre-existing Phase 51 test; fix it before 53-12 or tag outside that window), n1
+  (the MCP notice names the server twice), n2 (the too-old message repeats the version).
+- **Verdict:** before-release rows PASS. **53-11 SHIP**; 53-12 is next.
+- **Open until after the release (D26):** A1 for the other 8 workflows, A2's remaining modes, A8, A9(a), the Phase 51
+  workflows and the `apwt` reap.
+
 ## Context manifest
 
 ```toml

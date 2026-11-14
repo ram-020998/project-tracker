@@ -1,0 +1,23 @@
+{
+ "delete_status": 200,
+ "instance_skills_after_delete": "5 skills (names withheld: removing one id would name the ~/.kiro skill)",
+ "skill2_in_instance": false,
+ "read_only": {
+  "session": "c-ab237e15bb93",
+  "answer_whole_word_hits_skill2": 0,
+  "credits": 0.054148015223880595,
+  "provenance": "metered",
+  "answer_skill_count": 5
+ },
+ "feature_spec": {
+  "session": "c-9871084ba7cd",
+  "answer_whole_word_hits_skill2": 0,
+  "credits": 0.07024516281923715,
+  "provenance": "metered",
+  "answer_skill_count": 5
+ },
+ "commands": [
+  "/clear",
+  "/compact"
+ ]
+}

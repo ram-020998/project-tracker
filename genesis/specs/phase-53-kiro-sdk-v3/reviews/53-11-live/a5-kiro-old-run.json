@@ -1,0 +1,20 @@
+run_id r-12601e6c2372
+elapsed_s 5.0
+{
+ "run_id": "r-12601e6c2372",
+ "workflow": "hello-appian",
+ "status": "failed",
+ "cursor": "",
+ "kinds": {
+  "run.started": 1,
+  "custom": 1,
+  "agent.prompt": 1,
+  "error": 1,
+  "run.final": 1
+ },
+ "agent_turns": [],
+ "tool_calls": [],
+ "run_credits": null,
+ "credits_provenance": "unavailable",
+ "event_count": 5
+}

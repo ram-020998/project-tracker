@@ -1,0 +1,54 @@
+run_id r-78442ab0531c
+elapsed_s 35.1
+{
+ "run_id": "r-78442ab0531c",
+ "workflow": "memory-consolidation",
+ "status": "done",
+ "cursor": "present",
+ "kinds": {
+  "run.started": 1,
+  "node.completed": 10,
+  "custom": 6,
+  "agent.prompt": 2,
+  "agent.thought": 28,
+  "agent.tool_call": 2,
+  "agent.tool_update": 4,
+  "agent.message": 67,
+  "agent.result": 2,
+  "validator.result": 2,
+  "run.final": 1
+ },
+ "agent_turns": [
+  {
+   "node": "extract",
+   "credits": 0.4741707632504146,
+   "provenance": "metered",
+   "stop_reason": "end_turn",
+   "error": null
+  },
+  {
+   "node": "reconcile",
+   "credits": 0.11648285008291873,
+   "provenance": "metered",
+   "stop_reason": "end_turn",
+   "error": null
+  }
+ ],
+ "tool_calls": [
+  {
+   "node": "extract",
+   "tool": "fs_write",
+   "tool_id": null,
+   "title": "Write File"
+  },
+  {
+   "node": "reconcile",
+   "tool": "fs_write",
+   "tool_id": null,
+   "title": "Write File"
+  }
+ ],
+ "run_credits": 0.5906536133333333,
+ "credits_provenance": "metered",
+ "event_count": 125
+}

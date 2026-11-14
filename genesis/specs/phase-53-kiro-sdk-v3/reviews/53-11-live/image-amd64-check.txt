@@ -1,0 +1,36 @@
+Unable to find image 'python:3.13' locally
+3.13: Pulling from library/python
+a6dd1c05fbba: Pulling fs layer
+e8a88afca2bd: Pulling fs layer
+411d2dc8717d: Pulling fs layer
+696c1fe91c64: Pulling fs layer
+b52517489ae9: Pulling fs layer
+d2d2cf188367: Pulling fs layer
+9314519f47a6: Pulling fs layer
+b52517489ae9: Waiting
+d2d2cf188367: Waiting
+9314519f47a6: Waiting
+696c1fe91c64: Waiting
+e8a88afca2bd: Verifying Checksum
+e8a88afca2bd: Download complete
+411d2dc8717d: Verifying Checksum
+411d2dc8717d: Download complete
+b52517489ae9: Verifying Checksum
+b52517489ae9: Download complete
+a6dd1c05fbba: Download complete
+a6dd1c05fbba: Pull complete
+9314519f47a6: Verifying Checksum
+9314519f47a6: Download complete
+e8a88afca2bd: Pull complete
+411d2dc8717d: Pull complete
+d2d2cf188367: Verifying Checksum
+d2d2cf188367: Download complete
+696c1fe91c64: Verifying Checksum
+696c1fe91c64: Download complete
+696c1fe91c64: Pull complete
+b52517489ae9: Pull complete
+d2d2cf188367: Pull complete
+9314519f47a6: Pull complete
+Digest: sha256:ecbe213fb818d557fd19db4078244339e2e2e52874f9c81052d3094ea114d797
+Status: Downloaded newer image for python:3.13
+== HEAD 61ec063  arch x86_64  TZ-date Sat Nov 14 19:02:45 UTC 2026

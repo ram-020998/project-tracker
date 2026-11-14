@@ -1,0 +1,818 @@
+[
+ {
+  "tag": "1280-light",
+  "element": "steer label",
+  "count": 3,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1147.765625,
+    "right": 1264,
+    "width": 116.234375,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1147.765625,
+    "right": 1264,
+    "width": 116.234375,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1147.765625,
+    "right": 1264,
+    "width": 116.234375,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1280-light",
+  "element": "steered bubble",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 965.140625,
+    "right": 1264,
+    "width": 298.859375,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Also end your reply with the word KIWI.",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1280-light",
+  "element": "MCP notice card",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 520,
+    "right": 1264,
+    "width": 744,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "appian-dev did not start: appian-dev: Connection closed. Its",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1280-light",
+  "element": "Skills Update button",
+  "count": 5,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 429.765625,
+    "right": 524.328125,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 763.09375,
+    "right": 857.65625,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 429.765625,
+    "right": 524.328125,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 763.09375,
+    "right": 857.65625,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1096.4375,
+    "right": 1191,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1440-light",
+  "element": "steer label",
+  "count": 3,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1239.765625,
+    "right": 1356,
+    "width": 116.234375,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1239.765625,
+    "right": 1356,
+    "width": 116.234375,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1239.765625,
+    "right": 1356,
+    "width": 116.234375,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1440-light",
+  "element": "steered bubble",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1057.140625,
+    "right": 1356,
+    "width": 298.859375,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Also end your reply with the word KIWI.",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1440-light",
+  "element": "MCP notice card",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 588,
+    "right": 1356,
+    "width": 768,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "appian-dev did not start: appian-dev: Connection closed. Its",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1440-light",
+  "element": "Skills Update button",
+  "count": 5,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 483.09375,
+    "right": 577.65625,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 869.765625,
+    "right": 964.328125,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 483.09375,
+    "right": 577.65625,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 869.765625,
+    "right": 964.328125,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1256.421875,
+    "right": 1350.984375,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1920-light",
+  "element": "steer label",
+  "count": 3,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1479.765625,
+    "right": 1596,
+    "width": 116.234375,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1479.765625,
+    "right": 1596,
+    "width": 116.234375,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1479.765625,
+    "right": 1596,
+    "width": 116.234375,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1920-light",
+  "element": "steered bubble",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1297.140625,
+    "right": 1596,
+    "width": 298.859375,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Also end your reply with the word KIWI.",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1920-light",
+  "element": "MCP notice card",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 828,
+    "right": 1596,
+    "width": 768,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "appian-dev did not start: appian-dev: Connection closed. Its",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1920-light",
+  "element": "Skills Update button",
+  "count": 5,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 688.4375,
+    "right": 783,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1144.4375,
+    "right": 1239,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 688.4375,
+    "right": 783,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1144.4375,
+    "right": 1239,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1600.4375,
+    "right": 1695,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1280-dark",
+  "element": "steer label",
+  "count": 3,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1147.765625,
+    "right": 1264,
+    "width": 116.234375,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1147.765625,
+    "right": 1264,
+    "width": 116.234375,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1147.765625,
+    "right": 1264,
+    "width": 116.234375,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1280-dark",
+  "element": "steered bubble",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 965.140625,
+    "right": 1264,
+    "width": 298.859375,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Also end your reply with the word KIWI.",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1280-dark",
+  "element": "MCP notice card",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 520,
+    "right": 1264,
+    "width": 744,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "appian-dev did not start: appian-dev: Connection closed. Its",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1280-dark",
+  "element": "Skills Update button",
+  "count": 5,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 429.765625,
+    "right": 524.328125,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 763.09375,
+    "right": 857.65625,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 429.765625,
+    "right": 524.328125,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 763.09375,
+    "right": 857.65625,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1096.4375,
+    "right": 1191,
+    "width": 94.5625,
+    "vw": 1280,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1440-dark",
+  "element": "steer label",
+  "count": 3,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1239.765625,
+    "right": 1356,
+    "width": 116.234375,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1239.765625,
+    "right": 1356,
+    "width": 116.234375,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1239.765625,
+    "right": 1356,
+    "width": 116.234375,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1440-dark",
+  "element": "steered bubble",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1057.140625,
+    "right": 1356,
+    "width": 298.859375,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Also end your reply with the word KIWI.",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1440-dark",
+  "element": "MCP notice card",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 588,
+    "right": 1356,
+    "width": 768,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "appian-dev did not start: appian-dev: Connection closed. Its",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1440-dark",
+  "element": "Skills Update button",
+  "count": 5,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 483.09375,
+    "right": 577.65625,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 869.765625,
+    "right": 964.328125,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 483.09375,
+    "right": 577.65625,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 869.765625,
+    "right": 964.328125,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1256.421875,
+    "right": 1350.984375,
+    "width": 94.5625,
+    "vw": 1440,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1920-dark",
+  "element": "steer label",
+  "count": 3,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1479.765625,
+    "right": 1596,
+    "width": 116.234375,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1479.765625,
+    "right": 1596,
+    "width": 116.234375,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   },
+   {
+    "left": 1479.765625,
+    "right": 1596,
+    "width": 116.234375,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "sent during the turn",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1920-dark",
+  "element": "steered bubble",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 1297.140625,
+    "right": 1596,
+    "width": 298.859375,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Also end your reply with the word KIWI.",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1920-dark",
+  "element": "MCP notice card",
+  "count": 1,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 828,
+    "right": 1596,
+    "width": 768,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "appian-dev did not start: appian-dev: Connection closed. Its",
+    "ok": true
+   }
+  ]
+ },
+ {
+  "tag": "1920-dark",
+  "element": "Skills Update button",
+  "count": 5,
+  "pageHScroll": 0,
+  "ok": true,
+  "items": [
+   {
+    "left": 688.4375,
+    "right": 783,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1144.4375,
+    "right": 1239,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 688.4375,
+    "right": 783,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1144.4375,
+    "right": 1239,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   },
+   {
+    "left": 1600.4375,
+    "right": 1695,
+    "width": 94.5625,
+    "vw": 1920,
+    "ownOverflowX": 0,
+    "outsideParent": false,
+    "text": "Update",
+    "ok": true
+   }
+  ]
+ }
+]

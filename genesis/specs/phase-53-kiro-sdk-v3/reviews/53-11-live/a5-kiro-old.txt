@@ -1,0 +1,56 @@
+## /system/kiro
+{"installed":true,"authenticated":true,"email":"<redacted>","start_url":"https://stratus.awsapps.com/start","version":"2.36.0","minimum":"2.37.1","verified":false,"engine_v3":true}
+## /system/preflight (kiro items)
+[
+ {
+  "id": "kiro-cli",
+  "label": "kiro-cli 2.37.1+ with the v3 engine",
+  "status": "missing",
+  "required": true,
+  "hint": "kiro-cli 2.36.0 is older than 2.37.1; run `kiro-cli update`.",
+  "fix_link": "/settings/general"
+ },
+ {
+  "id": "kiro-cli-verified",
+  "label": "kiro-cli version verified with this release",
+  "status": "missing",
+  "required": false,
+  "hint": "Fix the kiro-cli item first.",
+  "fix_link": "/settings/general"
+ },
+ {
+  "id": "kiro",
+  "label": "Kiro sign-in",
+  "status": "ok",
+  "required": true,
+  "hint": "",
+  "fix_link": "/settings/general"
+ }
+]
+ready False
+## chat turn
+{
+ "session": "c-664562663972",
+ "events": [
+  {
+   "type": "error",
+   "seq": 1,
+   "detail": "kiro-cli 2.36.0 is too old; Genesis needs 2.37.1 or newer. Update kiro-cli and try again. (kiro-cli 2.36.0)",
+   "code": "kiro_too_old",
+   "_t": 0.02
+  },
+  {
+   "type": "agent.result",
+   "seq": 2,
+   "ok": false,
+   "stop_reason": "error",
+   "error": "kiro-cli 2.36.0 is too old; Genesis needs 2.37.1 or newer. Update kiro-cli and try again. (kiro-cli 2.36.0)",
+   "tool_calls": 0,
+   "credits": null,
+   "context_pct": null,
+   "provenance": "unavailable",
+   "code": "kiro_too_old",
+   "_t": 0.02
+  }
+ ]
+}

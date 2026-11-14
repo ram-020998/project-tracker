@@ -1,0 +1,59 @@
+run_id r-d19a1e33212d
+elapsed_s 20.1
+{
+ "run_id": "r-d19a1e33212d",
+ "workflow": "hello-appian",
+ "status": "done",
+ "cursor": "finish",
+ "kinds": {
+  "run.started": 1,
+  "custom": 7,
+  "agent.prompt": 1,
+  "agent.thought": 30,
+  "agent.tool_call": 4,
+  "agent.tool_update": 10,
+  "agent.message": 1,
+  "agent.result": 1,
+  "node.completed": 3,
+  "validator.result": 1,
+  "run.final": 1
+ },
+ "agent_turns": [
+  {
+   "node": "make_result",
+   "credits": 0.3065348883913765,
+   "provenance": "metered",
+   "stop_reason": "end_turn",
+   "error": null
+  }
+ ],
+ "tool_calls": [
+  {
+   "node": "make_result",
+   "tool": "list_directory",
+   "tool_id": null,
+   "title": "List Directory"
+  },
+  {
+   "node": "make_result",
+   "tool": "execute_bash",
+   "tool_id": null,
+   "title": "Run Command"
+  },
+  {
+   "node": "make_result",
+   "tool": "execute_bash",
+   "tool_id": null,
+   "title": "Run Command"
+  },
+  {
+   "node": "make_result",
+   "tool": "fs_write",
+   "tool_id": null,
+   "title": "Write File"
+  }
+ ],
+ "run_credits": 0.3065348883913765,
+ "credits_provenance": "metered",
+ "event_count": 60
+}

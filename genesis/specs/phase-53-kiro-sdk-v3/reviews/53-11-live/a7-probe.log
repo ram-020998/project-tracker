@@ -1,0 +1,14 @@
+OK    chat-turn@1280/light
+OK    skills@1280/light
+OK    chat-turn@1440/light
+OK    skills@1440/light
+OK    chat-turn@1920/light
+OK    skills@1920/light
+OK    chat-turn@1280/dark
+OK    skills@1280/dark
+OK    chat-turn@1440/dark
+OK    skills@1440/dark
+OK    chat-turn@1920/dark
+OK    skills@1920/dark
+all clean — /tmp/genesis-53-11/evidence/a7-probe
+exit 0

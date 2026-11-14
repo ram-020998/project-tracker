@@ -1,0 +1,278 @@
+{
+ "session": "c-5dd4dbd0c118",
+ "warm": {
+  "status": 200,
+  "answer": "READY",
+  "tools": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.0500784120066335,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [],
+  "fired": [],
+  "events_n": 2
+ },
+ "during_tool": {
+  "status": 200,
+  "answer": "The knowledge base has one application, \"AS GSS Full Application\". It has 2,782 objects.\n\n[STEERING steer-04cb20ca-83c8-4865-91f7-b63764dcd4b2: Applied. I ended the reply with the word KIWI as requested.]\n\nKIWI",
+  "tools": [
+   {
+    "t": 2.53,
+    "name": "@genesis-kb/list_applications",
+    "title": "@genesis-kb/list_applications",
+    "input": null
+   }
+  ],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.12365842752902156,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 1,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [
+   {
+    "type": "user.steer",
+    "message_seq": 301,
+    "text": "Also end your reply with the word KIWI.",
+    "status": "queued",
+    "_t": 2.55
+   },
+   {
+    "type": "user.steer",
+    "message_seq": 301,
+    "text": "Also end your reply with the word KIWI.",
+    "status": "delivered",
+    "_t": 2.66
+   }
+  ],
+  "fired": [
+   {
+    "t": 2.55,
+    "action": "steer:Also end your reply with the w",
+    "result": {
+     "status": 200,
+     "body": {
+      "ok": true,
+      "message_seq": 301,
+      "status": "queued"
+     }
+    }
+   }
+  ],
+  "events_n": 49
+ },
+ "late": {
+  "status": 200,
+  "answer": "The sea covers about 71 percent of Earth's surface and holds most of the planet's water.\n\nMOUNTAIN ranges such as the Himalayas form where tectonic plates collide and push the crust upward over millions of years.\n\n[STEERING steer-c038b22e-da35-4db5-b19b-03a7826aab01: Applied. I added one sentence about mountains that starts with \"MOUNTAIN\".]",
+  "tools": [],
+  "result": {
+   "ok": true,
+   "stop_reason": "end_turn",
+   "credits": 0.08480327275290217,
+   "provenance": "metered",
+   "error": null,
+   "code": null,
+   "tool_calls": 0,
+   "unread_steers": null,
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [
+   {
+    "type": "user.steer",
+    "message_seq": 304,
+    "text": "Now also write one sentence about mountains, starting with MOUNTAIN:",
+    "status": "queued",
+    "_t": 3.4
+   },
+   {
+    "type": "user.steer",
+    "message_seq": 304,
+    "text": "Now also write one sentence about mountains, starting with MOUNTAIN:",
+    "status": "delivered",
+    "_t": 3.41
+   }
+  ],
+  "fired": [
+   {
+    "t": 3.4,
+    "action": "steer:Now also write one sentence ab",
+    "result": {
+     "status": 200,
+     "body": {
+      "ok": true,
+      "message_seq": 304,
+      "status": "queued"
+     }
+    }
+   }
+  ],
+  "events_n": 59
+ },
+ "after_answer": {
+  "status": 409,
+  "body": {
+   "detail": "no turn is running in this chat; send the message normally"
+  }
+ },
+ "unread": {
+  "status": 200,
+  "answer": "",
+  "tools": [],
+  "result": {
+   "ok": false,
+   "stop_reason": "cancelled",
+   "credits": null,
+   "provenance": "unavailable",
+   "error": "The turn was cancelled.",
+   "code": "cancelled",
+   "tool_calls": 0,
+   "unread_steers": [
+    307
+   ],
+   "model": null,
+   "fallback_from": null
+  },
+  "other_events": [
+   {
+    "type": "user.steer",
+    "message_seq": 307,
+    "text": "Make it about green tea only.",
+    "status": "queued",
+    "_t": 1.53
+   }
+  ],
+  "fired": [
+   {
+    "t": 1.53,
+    "action": "steer:Make it about green tea only.",
+    "result": {
+     "status": 200,
+     "body": {
+      "ok": true,
+      "message_seq": 307,
+      "status": "queued"
+     }
+    }
+   },
+   {
+    "t": 1.87,
+    "action": "cancel",
+    "result": 200
+   }
+  ],
+  "events_n": 2
+ },
+ "stored": [
+  {
+   "seq": 298,
+   "role": "user",
+   "content": "Reply with the single word READY.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 299,
+   "role": "assistant",
+   "content": "READY",
+   "meta": null,
+   "credits": 0.0500784120066335,
+   "provenance": "metered"
+  },
+  {
+   "seq": 300,
+   "role": "user",
+   "content": "Using the genesis-kb tools, find the applications in the knowledge base and tell me how many objects the first one has. Keep the answer to two sentences.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 301,
+   "role": "user",
+   "content": "Also end your reply with the word KIWI.",
+   "meta": {
+    "kind": "steer"
+   },
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 302,
+   "role": "assistant",
+   "content": "The knowledge base has one application, \"AS GSS Full Application\". It has 2,782 objects.\n\nKIWI",
+   "meta": null,
+   "credits": 0.12365842752902156,
+   "provenance": "metered"
+  },
+  {
+   "seq": 303,
+   "role": "user",
+   "content": "Write one sentence about the sea.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 304,
+   "role": "user",
+   "content": "Now also write one sentence about mountains, starting with MOUNTAIN:",
+   "meta": {
+    "kind": "steer"
+   },
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 305,
+   "role": "assistant",
+   "content": "The sea covers about 71 percent of Earth's surface and holds most of the planet's water.\n\nMOUNTAIN ranges such as the Himalayas form where tectonic plates colli",
+   "meta": null,
+   "credits": 0.08480327275290217,
+   "provenance": "metered"
+  },
+  {
+   "seq": 306,
+   "role": "user",
+   "content": "Write a 400-word essay about the history of tea.",
+   "meta": null,
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 307,
+   "role": "user",
+   "content": "Make it about green tea only.",
+   "meta": {
+    "kind": "steer"
+   },
+   "credits": null,
+   "provenance": null
+  },
+  {
+   "seq": 308,
+   "role": "assistant",
+   "content": "",
+   "meta": {
+    "turn_status": "cancelled"
+   },
+   "credits": null,
+   "provenance": "unavailable"
+  }
+ ]
+}

@@ -1,0 +1,62 @@
+## /system/kiro
+{"installed":true,"authenticated":true,"email":"<redacted>","start_url":"https://stratus.awsapps.com/start","version":"2.38.0","minimum":"2.37.1","verified":false,"engine_v3":true}
+## /system/preflight (kiro items)
+[
+ {
+  "id": "kiro-cli",
+  "label": "kiro-cli 2.37.1+ with the v3 engine",
+  "status": "ok",
+  "required": true,
+  "hint": "",
+  "fix_link": "/settings/general"
+ },
+ {
+  "id": "kiro-cli-verified",
+  "label": "kiro-cli version verified with this release",
+  "status": "missing",
+  "required": false,
+  "hint": "kiro-cli 2.38.0 has not been verified with this Genesis release; it should work \u2014 report problems.",
+  "fix_link": "/settings/general"
+ },
+ {
+  "id": "kiro",
+  "label": "Kiro sign-in",
+  "status": "ok",
+  "required": true,
+  "hint": "",
+  "fix_link": "/settings/general"
+ }
+]
+ready True
+## chat turn
+{
+ "session": "c-7b24e05311d7",
+ "status": 200,
+ "answer": "OK",
+ "tools": [],
+ "result": {
+  "ok": true,
+  "stop_reason": "end_turn",
+  "credits": 0.01414149658374793,
+  "provenance": "metered",
+  "error": null,
+  "code": null,
+  "tool_calls": 0,
+  "unread_steers": null,
+  "model": null,
+  "fallback_from": null
+ },
+ "other_events": [
+  {
+   "type": "session.notice",
+   "kind": "mcp_failed",
+   "servers": [
+    "appian-dev"
+   ],
+   "detail": "appian-dev: Connection closed",
+   "_t": 3.34
+  }
+ ],
+ "fired": [],
+ "events_n": 3
+}

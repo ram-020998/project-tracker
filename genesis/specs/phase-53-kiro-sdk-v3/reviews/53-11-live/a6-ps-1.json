@@ -1,0 +1,338 @@
+{
+ "label": "after A1-A4, serve 2 up, idle chat clients live",
+ "serve_pid": 86282,
+ "under_serve": [
+  {
+   "pid": 8073,
+   "ppid": 86282,
+   "pgid": 8073,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 8081,
+   "ppid": 8073,
+   "pgid": 8073,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 8082,
+   "ppid": 8081,
+   "pgid": 8082,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 8101,
+   "ppid": 8082,
+   "pgid": 8082,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 8102,
+   "ppid": 8082,
+   "pgid": 8082,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 8103,
+   "ppid": 8082,
+   "pgid": 8082,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  },
+  {
+   "pid": 8110,
+   "ppid": 86282,
+   "pgid": 8110,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 8118,
+   "ppid": 8110,
+   "pgid": 8110,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 8119,
+   "ppid": 8118,
+   "pgid": 8119,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 8143,
+   "ppid": 8119,
+   "pgid": 8119,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 8144,
+   "ppid": 8119,
+   "pgid": 8119,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 8145,
+   "ppid": 8119,
+   "pgid": 8119,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  },
+  {
+   "pid": 11636,
+   "ppid": 86282,
+   "pgid": 11636,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 11644,
+   "ppid": 11636,
+   "pgid": 11636,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 11645,
+   "ppid": 11644,
+   "pgid": 11645,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 11668,
+   "ppid": 11645,
+   "pgid": 11645,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 11669,
+   "ppid": 11645,
+   "pgid": 11645,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 11670,
+   "ppid": 11645,
+   "pgid": 11645,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  },
+  {
+   "pid": 12131,
+   "ppid": 86282,
+   "pgid": 12131,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 12147,
+   "ppid": 12131,
+   "pgid": 12131,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 12150,
+   "ppid": 12147,
+   "pgid": 12150,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 12276,
+   "ppid": 12150,
+   "pgid": 12150,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 12277,
+   "ppid": 12150,
+   "pgid": 12150,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 12278,
+   "ppid": 12150,
+   "pgid": 12150,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  },
+  {
+   "pid": 12319,
+   "ppid": 86282,
+   "pgid": 12319,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 12332,
+   "ppid": 12319,
+   "pgid": 12319,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 12334,
+   "ppid": 12332,
+   "pgid": 12334,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 12378,
+   "ppid": 12334,
+   "pgid": 12334,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 12379,
+   "ppid": 12334,
+   "pgid": 12334,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 12380,
+   "ppid": 12334,
+   "pgid": 12334,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  },
+  {
+   "pid": 13129,
+   "ppid": 86282,
+   "pgid": 13129,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 13139,
+   "ppid": 13129,
+   "pgid": 13129,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 13141,
+   "ppid": 13139,
+   "pgid": 13141,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 13171,
+   "ppid": 13141,
+   "pgid": 13141,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 13172,
+   "ppid": 13141,
+   "pgid": 13141,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 13173,
+   "ppid": 13141,
+   "pgid": 13141,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  },
+  {
+   "pid": 13532,
+   "ppid": 86282,
+   "pgid": 13532,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 13541,
+   "ppid": 13532,
+   "pgid": 13532,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 13543,
+   "ppid": 13541,
+   "pgid": 13543,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 13606,
+   "ppid": 13543,
+   "pgid": 13543,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 13607,
+   "ppid": 13543,
+   "pgid": 13543,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 13608,
+   "ppid": 13543,
+   "pgid": 13543,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  },
+  {
+   "pid": 13877,
+   "ppid": 86282,
+   "pgid": 13877,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 13887,
+   "ppid": 13877,
+   "pgid": 13877,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 13888,
+   "ppid": 13887,
+   "pgid": 13888,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 13911,
+   "ppid": 13888,
+   "pgid": 13888,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 13912,
+   "ppid": 13888,
+   "pgid": 13888,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 13913,
+   "ppid": 13888,
+   "pgid": 13888,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  },
+  {
+   "pid": 13959,
+   "ppid": 86282,
+   "pgid": 13959,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli acp --agent-engine v3"
+  },
+  {
+   "pid": 13968,
+   "ppid": 13959,
+   "pgid": 13959,
+   "cmd": "/Users/ramaswamy.u/.local/bin/kiro-cli-chat acp --agent-engine v3"
+  },
+  {
+   "pid": 13970,
+   "ppid": 13968,
+   "pgid": 13970,
+   "cmd": "/Users/ramaswamy.u/Library/Application Support/kiro-cli/node --experimental-wasm-modules /Users/ramaswamy.u/Library/Application Support/kiro-cli/kas/2.37.1-1d71\u2026"
+  },
+  {
+   "pid": 13996,
+   "ppid": 13970,
+   "pgid": 13970,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.kb_server --db /tm\u2026"
+  },
+  {
+   "pid": 13997,
+   "ppid": 13970,
+   "pgid": 13970,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.memory_server --db\u2026"
+  },
+  {
+   "pid": 13998,
+   "ppid": 13970,
+   "pgid": 13970,
+   "cmd": "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m genesis.mcp.introspection_serv\u2026"
+  }
+ ],
+ "not_under_serve_but_test_or_orphan": [
+  {
+   "pid": 61824,
+   "ppid": 1,
+   "pgid": 61824,
+   "cmd": "/Applications/Kiro CLI.app/Contents/MacOS/kiro_cli_desktop --is-startup --no-dashboard"
+  }
+ ]
+}

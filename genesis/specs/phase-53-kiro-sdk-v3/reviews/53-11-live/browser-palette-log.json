@@ -1,0 +1,49 @@
+[
+ {
+  "t": 0.798,
+  "k": "palette_rows",
+  "typed": "/",
+  "rows": [
+   "/clearClear the conversation context (the transcript stays)",
+   "/compactCompact the conversation context",
+   "appianappian",
+   "appian-object-generationappian-object-generation",
+   "canary-5311canary-5311",
+   "gamgam",
+   "genesis-test-authoringgenesis-test-authoring",
+   "sail-mockup-generationsail-mockup-generation"
+  ]
+ },
+ {
+  "t": 0.798,
+  "k": "pick",
+  "id": "gam",
+  "index": 5
+ },
+ {
+  "t": 0.827,
+  "k": "request",
+  "url": "/api/chat/sessions/c-dcf66669edd9/messages",
+  "body": "{\"text\":\"Use the gam skill.\",\"images\":null}"
+ },
+ {
+  "t": 9.215,
+  "k": "palette_rows",
+  "typed": "/gam in five words",
+  "rows": [
+   "gamgam"
+  ]
+ },
+ {
+  "t": 9.215,
+  "k": "pick",
+  "id": "gam",
+  "index": 0
+ },
+ {
+  "t": 9.24,
+  "k": "request",
+  "url": "/api/chat/sessions/c-dcf66669edd9/messages",
+  "body": "{\"text\":\"Use the gam skill. in five words\",\"images\":null}"
+ }
+]
