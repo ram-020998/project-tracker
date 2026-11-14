@@ -62,6 +62,7 @@ session loads the user's global Kiro MCP servers, contrary to ADR-004 (51-03 P10
 | D21 | The chat `/` palette offers only `/clear` and `/compact`; engine agent commands are not offered or sent (their trust was never measured). |
 | D22 | Phase 53 ships verified on kiro-cli 2.37.1; re-verification on 3.x is `specs/backlog/kiro-cli-3x-reverify.md` (53-14 before 53-11 if 3.x arrives in time, else a patch release). |
 | D23 | Spec-style chat modes reach the managed skills through the custom agent's `resources` (`skill://` globs), probed first; fallback: copy into the sandbox. Sub-spec 53-13. |
+| D24 | Phase 51's three browser workflows are live-accepted after the release, with Phase 51's postponed acceptance (narrows D5's safety net for them; said plainly at release). |
 
 Defaults F1–F15 (confirmed): `53-01-findings.md` §8. F16 (composer during a turn: Send and Stop both shown, text-only
 steer; confirmed 2026-11-10): §9.5. F17 (per-turn credit provenance on aborted turns): §10.2.

@@ -23,8 +23,12 @@
 2. **genesis-workflows** next minor (expected **v0.26.0**; Phase 51 shipped v0.25.0): the `appian` skill (53-06) + its `skills-registry.json` entry; pins on the new genesis tag
    (`#subdirectory=packages/<name>`, gate 9, L-057); CI green.
 3. Never read CI variables through the API (L-100).
-4. If any 53-11 live check could not run (for example A1's Phase 51 workflows while QA is down), the release notes,
-   README row and state say so plainly (L-111).
+4. If any 53-11 live check could not run, the release notes, README row and state say so plainly (L-111). **By D24,
+   the three Phase 51 browser workflows are not live-accepted before the release.**
+5. **After the release (D24, with Phase 51's postponed live acceptance, D20):** publish playwright-appian 0.3.1 and
+   re-vendor it (step 0 above, if not already done), run Update testing runtime, then run `story-verification`,
+   `action-capture` and `setup-composer` on QA on v3 (with both skills in the engine's skill list, not a canary), the
+   cancelled-run `apwt` reap check, and Phase 51's 51-12 steps 1–27. Findings ship as patch releases.
 
 ## 2. Deploy
 
