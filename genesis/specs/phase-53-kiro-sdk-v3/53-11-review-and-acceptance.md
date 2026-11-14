@@ -196,6 +196,11 @@ routes now run the installer in a thread.
 **Gates:** genesis `pytest` **1945 passed**, with the same signing override for the testexec tests. The chat, skills
 and contract subset has 101 tests, all passing. `ruff check genesis` and the changed test files are clean.
 
+**Review:** round 2 (on `dd27c46`) NEEDS_CHANGES (B1, m1, n1 above). Round 3 (on `61ec063`) **SHIP**: no findings,
+and the reviewer re-ran the three new tests against the `dd27c46` source, where all three fail. Both rounds are in
+`reviews/53-11-review.md`. n2 stays open for the spec agent. This verdict does not cover the §5 live rows, which
+genesis-review runs next on a separate `genesis serve` (L-111).
+
 ## Context manifest
 
 ```toml

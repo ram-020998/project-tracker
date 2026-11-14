@@ -335,3 +335,329 @@ when Dev is back. If the release goes first, its notes must say which rows are o
 Fix M1 with its regression tests; m1 is recommended in the same pass. Then re-run the chat suite and the web suite,
 and run the live rows that need no Appian (A3, A3b, A4 chat part, A5, A6, A7) before 53-12. A1, A2, A8 and A9(a) stay
 open until the Appian environments return, and the release must say so (L-111).
+
+---
+
+# Round 2 — the §4 fix pass, base genesis b9ba5d9 → dd27c46 (genesis-review, 2026-11-14)
+
+What this change does: the engine's command list is cut to `/clear` and `/compact`, and every other message reaches
+the engine as plain text. A typed `/<installed skill id> …` and a palette pick are both sent as
+`Use the <id> skill. …`, and any other leading `/` is sent as `User: /…`. Skills install and update now fetch the
+library in a thread under one lock (delete takes the lock too). A skills reload closes idle chat clients at once and a
+busy one when its turn ends. The four v2-era comments now name their v3 sources.
+
+Scope: code-level review of the delta only. The §5 live rows were not run and no fleet instance was touched (D20).
+Commits checked: `483170e` (source + tests) and `dd27c46` (`web/static` only); HEAD = `dd27c46`, tree clean.
+
+## §4 items
+
+**1. M1 (D25): OK in design, but one input crashes (B1).**
+- `engine_commands` keeps only the names in `_OFFERED_ENGINE_COMMANDS` = {clear, compact}
+  (`genesis/chat/manager.py:139`, `:142-152`). v3 lists neither, so the result is `[]`, and `catalog_commands`
+  (`:161`) adds Genesis's own two. On the recorded 53-13 frame: `['/clear', '/compact']`
+  (`test_the_recorded_53_13_frame_yields_no_skill_commands`; `engine_commands(raw) == []`). `_listed_command`,
+  `_command_type` and the raw branch are gone (`git grep` finds no reference in `*.py`).
+- One prompt path is left: `client.prompt(prompt, images=images)` (`manager.py:500`; `git grep "\.prompt("` over
+  `genesis/chat genesis/api genesis/services` finds only this one). `/clear` and `/compact` leave before it, through
+  `_command_turn` (`:455-458`) and `run_slash_command` (`:907`).
+- No prompt starts with `/`. With pieces, the prompt ends in `User: {body}` (`:484-485`); without them, a body that
+  starts with `/` gets `User: ` (`:486-487`). `test_no_raw_slash_prompt_reaches_the_engine` covers 9 inputs: a managed
+  skill, a padded skill, an engine skill, an agent, the session agent, `/usage`, an unknown word, `/clear` and
+  `/compact`.
+- A typed `/gam x` becomes `Use the gam skill. x` (`_engine_text` `:428-436` → `skill_prompt` `:155-158`). The check is
+  `SkillStore.exists`, which returns False on an invalid id (`genesis/skills/store.py:129-133`), so a crafted id
+  cannot traverse paths. Test: `test_a_typed_skill_command_is_sent_as_use_the_skill`.
+- The palette's skill rows come only from the skill store (`web/src/features/chat/Composer.tsx:124-131`). An exact
+  `/<id> <text>` keeps its row (`:104-106`, `:128`). A pick calls `onPickSkill(id, rest)` (`:141`), and
+  `ChatThread.tsx:345` sends `Use the ${id} skill.` plus the text. Web tests: "picking a skill sends 'Use the <id>
+  skill.'", "picking a skill with text after its id …", and "lists each skill once …". The last one reads the
+  backend-recorded `fixtures/chat/commands-skills-listed.json`, which `test_commands_when_the_engine_lists_the_managed_skills`
+  writes (L-011).
+- D15: `STOPPED_TURN_NOTE` is now added on every non-command turn (`:476-477`, with no `is_command` guard). Test:
+  `test_after_a_stop_a_skill_prompt_starts_with_the_note[/gam x]` and `[Use the gam skill. x]`, once per Stop.
+- **Gap (B1):** a message that is only `/` raises `ValueError` in `_engine_text` (`:433`) after the user message is
+  stored. Details below.
+
+**2. m1: OK.**
+- `POST /skills/install` and `/skills/update` call `await asyncio.to_thread(...)` inside `async with library_lock`
+  (`genesis/api/skills.py:93-94`, `:112-113`). `DELETE /skills/{id}` holds the same lock for `service.remove` and
+  the lockfile write (`:187-197`). `_reload()` runs after the lock is released in all three, so a reload never waits
+  on a fetch. The lock is created once per `register_skills_routes` call (`:61`). On 3.10+ an `asyncio.Lock` binds
+  its loop lazily, so creating it at app build is safe.
+- `reload_all_skill_clients` and `reload_skills` both go through `_reload_live` (`manager.py:944-970`):
+  - A session whose `_lock` is held is marked `_close_after_turn` and stays in `_live`, so `is_busy`, `cancel` and
+    `steer` still find it.
+  - An idle session is popped (only if it is still the same object) and closed.
+  - `aclose_all` (shutdown, `:1125`) is unchanged and still closes everything.
+- `_turn_scope` (`:438-448`) is entered after the lock (`async with self._lock, self._turn_scope()`, `:453`; `:907`
+  for Clear and Compact). It therefore exits before the lock is released, and a second reload during the close still
+  sees the session as busy. The close runs inside a shielded `anyio.CancelScope`, the same pattern as the 53-07 M1
+  stream `finally` (`:526-528`), so sse-starlette's task-group cancel cannot interrupt it. After `aclose()`,
+  `_client` is None, so the next turn's `_ensure_started` runs `session/load` and re-lists the skills
+  (`test_a_reload_during_a_turn_…` asserts `calls[0] == ("load", …)`).
+- Cancellation, probed by the reviewer (`/tmp/r2probe/test_r2_scope.py`, not in the repo): a turn marked by a
+  reload, whose consuming task is then cancelled with `task.cancel()`, still ends with the client closed, the flag
+  cleared and the lock released (`closed: True flag: False locked: False`). The async generator's `finally` runs in
+  the cancelled task, because the cancel arrives at `await q.get()` inside the generator. A generator abandoned
+  without `aclose` falls back to the loop's asyncgen finalizer, as before this pass.
+- Tests: `test_a_reload_during_a_turn_lets_it_finish_with_its_credits_then_closes_the_client` (the busy turn keeps
+  `ok`, its credits and `provenance: metered`, and the client is closed after the turn), and
+  `test_an_update_with_a_slow_library_fetch_keeps_another_chat_streaming` (a 0.6 s blocking fetch with ≥ 5 chunks
+  arriving during it).
+
+**3. n1: OK.** `messages.py:47-55` (`SystemInit`: `configOptions`, `available_commands_update`; prompts and tools
+are empty on v3), `messages.py:127-134` (`ResultMessage`: `session_info_update` `turn_completion`),
+`genesis_core/nodes/agent.py:439-442` (credits from `turn_completion`), `web/src/types/chat.ts:24-25`
+(`SlashCommand`: `GET /chat/commands`, only `/clear` and `/compact`). These are all four places round 1 named.
+
+## Decisions in the As built
+
+1. **The pick string is built in both web and backend.** Accepted. §4 says the pick sends `Use the <id> skill.`, and
+   each copy is pinned by a test (`skills-chat.test.tsx`, `test_a_typed_skill_command_is_sent_as_use_the_skill`), and
+   `skill_prompt`'s docstring names the web copy. A one-home alternative is listed under nit n2.
+2. **The stored message is the typed text.** Accepted. This matches how the D15 note and the preamble are kept out of
+   storage. Note that in the web, typing `/gam x` and pressing Enter goes through the palette pick, so the stored
+   text there is `Use the gam skill. x`. Only an API or no-row send stores `/gam x` (n2).
+3. **An unknown `/x` is sent as `User: /x`.** Accepted. It fails closed and uses the same form as a prompt with
+   pieces (`test_chat_api.py::test_an_unlisted_slash_text_is_sent_as_text`).
+4. **The lock covers delete.** Accepted. This is right: removing the blocking call removed an accidental
+   serialization. `POST /skills` (author, `replace=true`) is still outside the lock (nit n1).
+5. **reload_skills, Clear and Compact follow the same rule.** Accepted (`:907`, `:944-954`).
+6. **`FakeV3Client.commands_fixture`.** Accepted. It points the fake at the 53-13 recording, which is the fix for why
+   M1 hid (L-011). `reset()` restores the default (`tests/chat_fakes.py:104`).
+
+**Flagged open item: a steer starting with `/`.** `ChatSession.steer` sends the text unchanged
+(`manager.py:686`). The API is reachable, but the web never steers a `/` text (`Composer.tsx:89` `commandWaits`), and
+how the engine treats such a steer was never measured. D25's rule is "no raw `/` prompt except the two mapped
+commands", and a steer is a user message sent to the engine mid-turn. Apply the same rule there (finding m1 below).
+Not blocking on its own.
+
+## Checklist (from `genesis-ctx check --since b9ba5d9 --repo genesis`)
+
+Rules that apply to this delta:
+- [OK] ADR-031 — chat stays fail-closed. No engine command is offered or sent (`manager.py:139-152`, `:486-487`).
+  The open steer path is m1.
+- [OK] ADR-034 — skills are chat-invoked by a prompt naming them and filesystem-provisioned. A reload re-discovers
+  them via `session/load` (`test_a_reload_during_a_turn_…`).
+- [OK] ADR-045 — the palette mirrors the CLI surface Genesis supports: `/clear` and `/compact` as methods (D21).
+- [OK] ADR-032 / L-016 — a reload no longer kills a turn's metered usage (the test asserts credits and
+  `provenance: metered`).
+- [OK] ADR-028 / L-010 — no new endpoint and no `/api` literal in components (the web change is `Composer.tsx` and
+  `ChatThread.tsx` only).
+- [OK] ADR-027 / ADR-055 — no new UI primitives or colours (the diff adds a regex and a row field).
+- [OK] ADR-026 / ADR-033 — no new surface or tool.
+- [OK] L-011 — the contract fixture `commands-skills-listed.json` is recorded by the backend test and read by the web
+  test, and the fake now serves the 53-13 shape.
+- [OK] L-026 — the library fetch runs off the loop (`skills.py:94`, `:113`), proven by the slow-fetch test.
+- [OK] L-046 — `/clear` and `/compact` map to methods; no `_kiro.dev/commands/execute`.
+- [OK] L-069 — no `<Button asChild>` added.
+- [OK] L-083 — the fixtures use real shapes (the recorded 53-13 frame; the backend-recorded commands answer).
+- [OK] L-089 — `dd27c46` holds only `web/static`, and the reviewer's out-of-tree build is identical to it (gates).
+- [OK] L-092 — no new `tests/__init__.py` or `test*` non-test symbol. `_ticking_turn` and `_dies_when_closed` are
+  private helpers.
+- [OK] L-107 — the close-after-turn runs in a `finally` on every exit path, including cancellation (the reviewer's
+  probe).
+- [OK] L-109 — one reader of the command list (`catalog_commands`). The pick string has two homes, pinned by tests
+  (decision 1, n2).
+- [VIOLATION→B1] coding-standards §5 — validation at a trust boundary: a message of `/` crashes the turn (B1).
+
+Rules this delta does not touch: **N/A** with the reason.
+- Core-engine and workflow rules (ADR-001/002/004/009/010/011/012/017/018/019/021/022/023/024/025/030/039/054/062/
+  066/067/068/069/083; L-002/005/006/009/020/021/022/023/059/064/065/075/076/106): the only change in
+  `genesis_core/nodes/agent.py` is a comment (`git diff` shows lines 439-442 only).
+- SDK rules (ADR-020/029; L-001/017): the only change in `messages.py` is two docstrings.
+- Domain areas this delta does not touch (ADR-035/037/041/042/043/047/050/053/059/060/061/063/065/071/073/074/075/
+  076/081/082/084/085; L-003/004/007/018/019/031/039/041/042/044/045/047/048/058/061/068/073/081/086/093/096/104/105).
+- Release-time rules (ADR-046/077/080; L-025/027/030/051/056/057/087/088/098/099/100/101/111/112): nothing is tagged
+  or pushed here. L-111 is carried by 53-11 §5 and by D26.
+- ADR-005 (registry tiers) and L-024 (skills load from the filesystem: unchanged mechanism).
+
+### Gates (run by the reviewer on `dd27c46`)
+- [OK] Chat, skills and contract suites: 13 files (`test_chat_api`, `_manager`, `_mode_profile`, `_store`,
+  `_v3_engine`, `test_copilot_e2e`, `_mode`, `_safety`, `test_phase53_api_contract`, `test_skill_install`,
+  `test_skills_api`, `test_skills_store`, `test_workflow_skill_provisioning`): **196 passed**. The full 1943-test run
+  was not repeated; the author's claim stands for the rest.
+- [OK] `ruff check genesis`, the 5 changed test files, `genesis_core`, and the SDK `src` + `tests`: all passed.
+- [OK] SDK `pytest`: **302 passed**. genesis-core `pytest`: **109 passed**.
+- [OK] web `eslint src/features/chat src/types/chat.ts`: clean. `npm run typecheck`: clean.
+  `vitest run src/features/chat`: **49 passed** (5 files). The full 764-test run was not repeated.
+- [OK] Stale bundle: `vite build --outDir /tmp/53-11-r2-static` then `diff -rq` against `web/static` shows no
+  differences, and `git status` is empty.
+
+## Findings
+
+### Blockers
+- B1 **A message of just `/` crashes the turn after the user message is stored** (`genesis/chat/manager.py:433`).
+  - What: `_engine_text` runs `head, *rest = body[1:].split(maxsplit=1)`. For `body == "/"`, the split returns `[]`
+    and the unpacking raises `ValueError: not enough values to unpack`. The old `_listed_command` handled this case
+    with `split(...)[0] if text.strip() else ""`, so this pass introduced the bug.
+  - Concrete case (reviewer probe `/tmp/r2probe/test_r2_probe.py`, using the repo's `test_chat_api` fixture):
+    `POST /chat/sessions/{id}/messages {"text": "/"}` raises
+    `ValueError not enough values to unpack (expected at least 1, got 0)` out of the SSE generator. The stored
+    messages are `[('user', '/')]` with no assistant row, and the engine received no prompt. `send_message`'s `gen()`
+    catches only `ChatBusyError` (`genesis/api/chat.py:303-308`), so in a real server the stream ends in an error and
+    the transcript keeps an orphan user message. Inputs `"/ "` and `"/\n"` give the same result, because the API
+    strips them to `"/"`.
+  - Reachable from the web: type `/` and click **Send**. The button is enabled for any non-blank text
+    (`Composer.tsx:352`); only Enter picks a palette row.
+  - Fix (one line, no deletion needed): `parts = body[1:].split(maxsplit=1)` and then
+    `if parts and SkillStore(...).exists(parts[0]): return skill_prompt(parts[0], parts[1].strip() if len(parts) > 1 else "")`.
+    Add `"/"` to `test_no_raw_slash_prompt_reaches_the_engine`'s `typed` list. It must then produce the prompt
+    `User: /` and an `agent.result`.
+  - If skipped: a stray `/` + Send breaks that turn's stream and leaves an unanswered message in the chat.
+
+### Majors
+None.
+
+### Minors
+- m1 **A steer that starts with `/` reaches the engine raw** (`genesis/chat/manager.py:686`). This is the flagged
+  item.
+  - What: `ChatSession.steer` passes `text` to `client.steer` unchanged. A direct
+    `POST /chat/sessions/{id}/steer {"text": "/general-task-execution do it"}` during a turn sends that text to
+    `_session/steer`.
+  - Problem: D25 says no raw `/` text reaches the engine except the two mapped commands. Whether the engine runs a
+    steered `/x` as a command (here an agent with "access to all tools") was never measured. Only the local user can
+    send it, and the web never does (`commandWaits`), so this is not a blocker.
+  - Fix: before `client.steer`, apply the same rule as `stream_turn`: send `self._engine_text(text)`, prefixed with
+    `User: ` when it still starts with `/`. Store the typed `text` as now. Add one test: a steer of `/gam x` sends
+    `Use the gam skill. x`, and a steer of `/nope` sends `User: /nope`.
+  - If skipped: one engine path keeps an unmeasured command route, contrary to D25's fail-closed rule.
+
+### Nits
+- n1 **`POST /skills` (author, `replace=true`) is outside `library_lock`** (`genesis/api/skills.py:174-176`). With
+  the fetch now in a thread, an author-replace of `gam` can interleave with an install or update of `gam` writing the
+  same folder, leaving mixed files and a lockfile that says "library". Single user, unlikely. Fix: wrap the
+  `service.create(...)` call in `async with library_lock:`.
+- n2 **The pick string has two homes, and the stored text depends on the path** (`ChatThread.tsx:345`,
+  `manager.py:155-158`). Optional, and the spec agent's call because §4 words the pick as sending
+  `Use the <id> skill.`: the web could send `/${id} ${rest}` and let the backend's `skill_prompt` rewrite it. That
+  leaves one home (L-109), and the transcript would always show what the person typed (decision 2).
+
+## Not checked
+- The full genesis `pytest` (1943) and the full `vitest` (764) runs. The reviewer re-ran the chat, skills and contract
+  subsets and the web chat suite.
+- Every §5 live row, by instruction (D20, D26). That includes whether `Use the <id> skill.` loads the skill in each
+  chat mode on the real engine (53-13 R3 measured it once) and how the engine treats a `/`-steer (m1).
+- The pre-existing race where a reload pops an idle session between `ChatManager.stream_turn` returning its generator
+  and the generator's first step. The turn then runs on a session no longer in `_live`, which the reaper and `cancel`
+  cannot see. It is unchanged by this pass: the old reload popped and closed too.
+
+## Verdict: NEEDS_CHANGES
+
+Fix B1 (a one-line guard plus `"/"` in `test_no_raw_slash_prompt_reaches_the_engine`). m1 is recommended in the same
+small pass, and n1 is optional. Then re-run `tests/test_chat_manager.py`, `tests/test_chat_api.py` and ruff. No web
+change is needed unless n2 is taken. Everything else in §4 (M1, m1, n1) is done and verified.
+
+---
+
+# Round 3 — the round 2 fix pass, base genesis dd27c46 → 61ec063 (genesis-review, 2026-11-14)
+
+What this change does: `_engine_text` no longer unpacks an empty split, so a message of only `/` goes to the engine
+as `User: /`. A new `ChatSession._no_slash` holds the D25 fail-closed rule, and both the no-pieces prompt and the
+steer now go through it. `POST /skills` (author and replace) now takes `library_lock`, like install, update and
+delete. n2 is not taken (the spec agent decides).
+
+Scope: code-level review of the delta only (one commit, `61ec063`, 4 files, +94/−12, no web change). No §5 live row
+was run and no fleet instance was touched (D20). HEAD = `61ec063`; `git rev-parse` resolves both shas.
+
+## Round 2 items
+
+**B1 (a lone `/` crashed `_engine_text`): fixed.**
+- `genesis/chat/manager.py:433-435`: `parts = body[1:].split(maxsplit=1)`. The skill branch now runs only when
+  `parts` is non-empty, and `parts[1]` is read only when `len(parts) > 1`. A lone `/` falls through to `return text`.
+  `_no_slash` (`:438-442`) then prefixes it with `User: `.
+- Test: `test_no_raw_slash_prompt_reaches_the_engine` (`tests/test_chat_manager.py:351-367`) now includes `"/"`. It
+  asserts that every input ends in `agent.result` and that the last prompt is `User: /`.
+- Fail-first, reproduced by the reviewer: the dd27c46 source with the 61ec063 tests (extracted to `/tmp/53-11-r3`,
+  `genesis.chat.manager.__file__` confirmed to be the old copy) fails this test.
+- Through the API: the round 2 probe (`/tmp/r2probe/test_r2_probe.py`, `POST …/messages {"text": "/"}`) now gives
+  no error, stored messages `[('user', '/'), ('assistant', 'You have no runs.')]`, and prompts `['User: /']`. In
+  round 2 it gave a `ValueError` and an orphan user row.
+
+**m1 (a steer starting with `/` reached the engine raw): fixed.**
+- `manager.py:692`: `client.steer(self._no_slash(text))`. The stored message (`:696`), `_steers` (`:698`) and both
+  `user.steer` events (`:699`, `:703`) keep the typed `text`, as decision 2 requires.
+- The engine is reached only from `client.prompt(...)` (`manager.py:506`) and `live.steer(...)` (`:1129` →
+  `ChatSession.steer`). `grep "\.steer(\|\.prompt(" genesis/chat genesis/api` finds no other sender, so both engine
+  paths now apply D25.
+- Test: `test_a_steer_never_reaches_the_engine_starting_with_a_slash` (`tests/test_chat_manager.py:369-393`). The
+  engine gets `["Use the gam skill. x", "User: /general-task-execution do it", "plain"]`, and the stored steers are
+  the three typed texts. On dd27c46 this test fails (reviewer re-run, same setup as B1).
+
+**n1 (`POST /skills` outside `library_lock`): fixed.**
+- `genesis/api/skills.py:176-179`: `service.create(...)` runs inside `async with library_lock:`. Install (`:94`),
+  update (`:113`) and delete (`:189`) already held the lock. Validation (`:168-173`) and `_reload()` (`:184`) stay
+  outside the lock, so it is not held across a chat-client reload. `service.create` is synchronous inside an
+  `asyncio.Lock`, so nothing awaits while the lock is held and there is no deadlock. The update's fetch runs in a
+  thread under the same lock, which makes the author wait.
+- Test: `test_authoring_a_skill_waits_for_a_running_library_update` (`tests/test_skills_api.py:412-454`). On dd27c46
+  it fails with `assert 73433.376769 >= 73433.79825625`: the author finished 0.42 s before the update, which matches
+  the As built claim. The test also checks that the later write wins (`SKILL.md == GOOD_MD`).
+
+**n2: not taken.** It is the spec agent's call and optional. It stays open as written in round 2.
+
+## Checklist (from `genesis-ctx check --since dd27c46 --repo genesis`; areas api, chat, release-ci, security)
+
+- [OK] ADR-031 / ADR-033 / ADR-034 / ADR-045: chat stays read-only. The delta adds no tool, trust or write path. It
+  narrows what reaches the engine (`manager.py:438-442`, `:692`) and keeps the skills store writes behind the API and
+  the lock (`skills.py:176-179`).
+- [OK] L-017 (fail-closed trust): `_no_slash` fails closed for any leading `/` not mapped to a managed skill
+  (`manager.py:442`). The tests cover `/general-task-execution`, `/nope at all`, `/usage` and `/`.
+- [OK] L-046 (slash commands go through `prompt()`): `/clear` and `/compact` still leave through `_command_turn`
+  (`manager.py:457-460`), and nothing in the delta calls `commands/execute`.
+- [OK] L-109 (one home for a contract): the D25 rule now has one home, `_no_slash`, used by both engine paths
+  (`:493`, `:692`). Before this pass the rule was inline in `stream_turn` and missing from steer.
+- [OK] L-094 (every producing path): both engine senders were listed by grep (`:506`, `:1129`) and both are covered.
+  All four library writers (install, update, author, delete) now hold `library_lock`.
+- [OK] L-026 (no blocking on the loop under a turn): unchanged. `service.create` was already synchronous on the loop
+  before this pass, and the lock adds no blocking I/O.
+- [OK] L-025 / L-027 (pinned ruff): `.venv/bin/ruff check genesis tests/test_chat_manager.py tests/test_skills_api.py`
+  → `All checks passed!`
+- [OK] L-092 (test naming): the new tests are `test_*` functions in existing modules, and no non-test symbol is named
+  `test*`.
+- [OK] L-111 (live acceptance is separate): the §5 live rows stay open by instruction. See Not checked.
+- [N/A] L-030 / web gates (`npm run lint/typecheck/test/build`): no `web/**` file changed (`git diff --stat`), so
+  `web/static` needs no commit.
+- [N/A] `packages/kiro-agent-sdk` pytest: no file under `packages/` changed.
+- [N/A] ADR-001, 002, 004, 005, 010, 011, 012, 019, 020, 021, 023, 026, 027, 028, 029, 030, 032, 035, 037, 041, 042,
+  043, 046, 047, 050, 051, 053, 055, 059, 060, 063, 065, 068, 069, 071, 073, 074, 075, 076, 077, 080, 081, 082, 083,
+  085: the delta touches no graph, MCP injection, route set, bind, credits, persistence, KB, stage, story, test
+  execution, report-origin or release code. It changes only the text sent to the engine and one lock scope.
+- [N/A] L-001, 003, 004, 007, 010, 016, 018, 019, 024, 031, 039, 041, 042, 044, 045, 047, 048, 051, 056, 057, 058,
+  061, 068, 069, 073, 081, 086, 087, 088, 089, 093, 096, 098, 099, 100, 101, 104, 105, 107, 112: same reason. There
+  is no release in this invocation, so L-056 and L-057 apply at the release step, not here.
+
+## Gates (run by the reviewer)
+- `.venv/bin/python -m pytest -q -p no:warnings tests/test_chat_manager.py tests/test_chat_api.py tests/test_skills_api.py`
+  → **84 passed** in 16.19 s.
+- `ruff check` as above → clean.
+- Fail-first: the three new or changed tests against the dd27c46 source → **3 failed** (B1, m1, n1).
+- Not re-run: the full genesis pytest (1945 claimed by genesis-dev). See Not checked.
+
+## Findings
+
+### Blockers
+None.
+
+### Majors
+None.
+
+### Minors
+None.
+
+### Nits
+None new. Round 2's n2 stays open for the spec agent.
+
+## Not checked
+- The full genesis `pytest` run (genesis-dev reports 1945 passed). The reviewer re-ran the three affected modules
+  (84 tests). The delta touches only `ChatSession._engine_text/_no_slash/steer` and one lock in `api/skills.py`, and
+  no other module imports these.
+- Every §5 live row, by instruction (D20, D26). That includes how the real engine treats a steer of
+  `User: /…` and `Use the <id> skill. …`.
+- The pre-existing reload-vs-first-step race noted in round 2's Not checked. This pass does not change it.
+
+## Verdict: SHIP
+
+B1, m1 and n1 are fixed as proposed. Each has a regression test, and each test fails on dd27c46 (re-run by the
+reviewer). The affected suites and ruff are green. The §5 live acceptance rows are still open and are not covered by
+this verdict (L-111).
