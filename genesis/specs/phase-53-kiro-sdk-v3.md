@@ -163,7 +163,9 @@ tools untested; D16), and two 53-08 review nits: a broken SDK install shows the 
 run's `error` event carries the message and remedy but no `code` (n2); from 53-09's review: the import between the
 sign-in and preflight code runs the wrong way (n1), `/system/kiro` probes kiro-cli three times per request (n2), and
 `memory_jobs` calls the sign-in check on the scheduler loop (n3, L-026); the testexec tests should switch off git
-commit signing themselves (they fail under a global signing config); and from 53-07, `reap_idle` has no caller.
+commit signing themselves (they fail under a global signing config); and from 53-07, `reap_idle` has no caller; from 53-10's review: after a full page reload an unread steer reads "sent
+during the turn" (no stored unread marker), and the MCP notice card lasts only for the page session (the notice is not
+stored).
 
 ## 10. Defaults
 
