@@ -19,7 +19,10 @@
    run the SDK suite once in the `python:3.13` image or on a CI branch run (not yet run: 53-04 As built; the Linux
    `/proc` reader is otherwise covered only by a fake-procfs test). `test_regression_job_handler_starts_due_apps_and_skips_busy_ones`
    reads the real date and can fail on some days (phase-51 backlog, 51-13 §1.5); a red result there is that known
-   issue, not a Phase 53 regression, and needs the user's call before tagging.
+   issue, not a Phase 53 regression, and needs the user's call before tagging. **D27:** it fails whenever the real time
+   is 00:00–02:00 IST, so tag, push and re-run CI only outside **18:30–20:30 UTC**; if a run lands in that window and
+   goes red on that test alone, re-run it outside the window rather than treating it as a regression. The python:3.13
+   image check ran in 53-11 (four failures identical on v0.81.0; the amd64 release CI decides).
 2. **genesis-workflows** next minor (expected **v0.26.0**; Phase 51 shipped v0.25.0): the `appian` skill (53-06) + its `skills-registry.json` entry; pins on the new genesis tag
    (`#subdirectory=packages/<name>`, gate 9, L-057); CI green.
 3. Never read CI variables through the API (L-100).
