@@ -87,6 +87,92 @@ built when they run.
 
 _To be filled by genesis-review (report path, verdict) and genesis-dev (fixes)._
 
+### Fix pass after round 1 (genesis-dev, 2026-11-14; §4)
+
+**Commits** (genesis, local, on master after `b9ba5d9`; not pushed, not tagged; the fleet was not restarted, D20):
+`483170e` source + tests (M1, m1, n1); `dd27c46` `web/static` only. A fresh `npm run build` after `dd27c46` leaves
+`git status --short --untracked-files=all` empty.
+
+**Changed**
+- M1 (D25), `genesis/chat/manager.py`: `engine_commands` keeps only entries named `clear` / `compact`, so the 53-13
+  `skill`-type commands and every agent command are never offered (`catalog_commands` over the recorded 53-13 frame
+  is `['/clear', '/compact']`). `_listed_command`, the raw-prompt branch and `_command_type` are removed. A typed
+  `/<id> …` where `<id>` is an installed managed skill (`SkillStore.exists`) is sent as `Use the <id> skill. …`
+  (`skill_prompt`); any other text starting with `/` goes as `User: /…`, so no prompt that starts with `/` reaches the
+  engine. `/clear` and `/compact` still map to the 53-07 §5 methods. Every turn now takes Genesis's pieces, so the D15
+  note applies on every path, and the post-turn hook runs on every non-command turn.
+- M1, web: `Composer.tsx` skill rows come only from the skill store; an exact `/<id> <text>` keeps that skill's row,
+  and a pick passes the text after the id. `ChatThread.tsx` `onPickSkill` sends `Use the <id> skill.` plus that
+  text through the normal send. The Commands rows are the backend's list, now only `/clear` and `/compact`.
+- m1, `genesis/api/skills.py`: `POST /skills/install` and `/skills/update` run the installer with
+  `asyncio.to_thread` (L-026), under one `asyncio.Lock` that `DELETE /skills/{id}` also takes for its lockfile write.
+  `ChatManager.reload_all_skill_clients` and `reload_skills` close an idle client at once. A client whose turn holds
+  the lock is marked (`_close_after_turn`) and closed by `ChatSession._turn_scope` as the turn ends. The scope also
+  wraps the Clear and Compact buttons (`run_slash_command`). `aclose_all` (shutdown) is unchanged.
+- n1: `SystemInit` and `ResultMessage` (`messages.py`), `kiro_node`'s credit comment (`agent.py`) and `SlashCommand`
+  (`web/src/types/chat.ts`) now name the v3 sources (`configOptions`, `available_commands_update`,
+  `session_info_update` `turn_completion`).
+
+**Tests, with fail-first evidence** (each new test was run on the `b9ba5d9` code before the fix):
+
+| Test | On `b9ba5d9` |
+|---|---|
+| `test_chat_manager.py::test_the_recorded_53_13_frame_yields_no_skill_commands` | failed: `['/genesis-test-authoring', '/gam', '/appian-object-generation', '/clear', '/compact']` |
+| `::test_a_session_listing_the_managed_skills_offers_no_skill_command` | failed: the same list from `/chat/commands` |
+| `::test_catalog_commands_offers_only_clear_and_compact` (replaces the `usage` mapping test) | failed: `/usage` offered |
+| `::test_a_typed_skill_command_is_sent_as_use_the_skill` (`/gam x`, `/gam`, the pick text) | failed: prompts `['/gam x', '/gam', …]` |
+| `::test_after_a_stop_a_skill_prompt_starts_with_the_note[/gam x]` | failed: the prompt was `'/gam x'`, no note |
+| `::test_after_a_stop_a_skill_prompt_starts_with_the_note[Use the gam skill. x]` | passed (the pick's text was already a normal prompt; it pins the pick path) |
+| `::test_no_raw_slash_prompt_reaches_the_engine` (skill, engine skill, agent, unknown, `/clear`, `/compact`) | failed: `['/gam x', '/gam y', '/genesis-test-authoring', '/general-task-execution do it', …]` |
+| `::test_a_slash_word_that_is_no_skill_is_the_users_text_with_genesis_pieces` (replaces the raw `usage` test) | failed: `'/general-task-execution do it'` sent raw |
+| `test_skills_api.py::test_a_reload_during_a_turn_lets_it_finish_with_its_credits_then_closes_the_client` | failed: `assert not busy_client.closed` (the reload closed the running turn's client) |
+| `::test_an_update_with_a_slow_library_fetch_keeps_another_chat_streaming` (0.6 s blocking fake fetch) | failed: `0 chunks arrived during the fetch` |
+| `test_phase53_api_contract.py::test_commands_when_the_engine_lists_the_managed_skills` | recorded on the base, the fixture held the three skill commands; re-recorded after the fix: `/clear`, `/compact` |
+| web `skills-chat.test.tsx` "picking a skill sends 'Use the <id> skill.'" | failed: `expected '/gam' to be 'Use the gam skill.'` |
+| web "picking a skill with text after its id …" (`/gam x` → `Use the gam skill. x`) | failed: no GAM row for `/gam x` |
+| web "lists each skill once when the engine lists the managed skills" (reads `fixtures/chat/commands-skills-listed.json`) | failed with the base-recorded fixture: 2 gam rows (`/gam` command and the GAM skill) |
+
+Also changed: `test_chat_api.py::test_an_unlisted_slash_text_is_sent_as_text` pinned the raw `/help` prompt; it now
+expects `User: /help`. `_StubLive` in `test_skills_api.py` gained the real session's `_lock`.
+
+**Gates** (after the fix, each its own step): genesis `pytest` **1943 passed**, run with
+`GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=commit.gpgsign GIT_CONFIG_VALUE_0=false` for the 3 testexec tests that make
+git commits (as in 53-09/53-10); `ruff check genesis` clean, plus the changed test files (`ruff check tests` still
+reports 24 errors in files this pass did not touch). The SDK has **302** tests and genesis-core **109**, both
+passing; only comments changed there, and both ruff scopes are clean. Web: `npm run lint` 0 errors (20 warnings,
+none in chat), `npm run typecheck` clean, `npm test` **764 passed** (66 files), `npm run build`. The commits are
+signed as usual; signing was turned off only for the test run.
+
+**Decisions**
+1. The pick text follows §4 literally: the web builds `Use the <id> skill. <text>`. The backend's `skill_prompt`
+   builds the same string for a typed `/<id> …`. That gives the string two homes, and a test pins the exact text in
+   each.
+2. The stored user message is what the person typed (`/gam x`). Only the prompt is rewritten, the same way the D15
+   note and the preamble are never stored.
+3. Fail closed for an unknown `/x`: with no other pieces it goes as `User: /x`, the same form a prompt with pieces
+   already uses.
+4. Taking the fetch off the loop also removes the serialization the blocking call gave by accident. Two installs, or
+   an install and a delete, could then interleave their lockfile read-modify-write, so one lock covers install,
+   update and delete.
+5. The same rule applies to `reload_skills` (one session) and to Clear and Compact, so no reload path kills a
+   running turn.
+6. `FakeV3Client.commands_fixture` (default `available-commands`) lets a test use the 53-13 command list. The old
+   fake listed custom agents only, which is why no test caught M1 (L-011).
+
+**Flag for round 2 (not in §4; nothing changed):** `POST /chat/sessions/{id}/steer` passes a steer text starting
+with `/` to `_session/steer` unchanged. A steer is not a prompt, and the web never steers a `/` text (Composer
+`commandWaits`). How the engine treats such a steer was never measured.
+
+**Lesson candidates:** (a) When a later sub-spec changes what the engine lists (53-13 added `skill`-type commands),
+point the fakes at the new recording. A stub that still serves the older shapes hides the change (extends L-011).
+(b) Taking a blocking call off the event loop removes the serialization it gave by accident, so a shared file it
+wrote needs its own lock.
+
+**Code-map changes:** `genesis/chat/manager.py` adds `skill_prompt` (public),
+`ChatSession._engine_text`, `ChatSession._turn_scope` / `_close_after_turn` and `ChatManager._reload_live`, and
+drops `_listed_command` and `_command_type`. `genesis/api/skills.py` adds a library lock, and the install and update
+routes now run the installer in a thread.
+
 ## Context manifest
 
 ```toml
