@@ -1,6 +1,6 @@
 # 53-03 — ADR draft and data model
 
-> **Status:** SPEC-DRAFTED 2026-11-03. Repos: **genesis** (one migration, store change), **project-tracker**
+> **Status:** BUILT 2026-11-10 (genesis 143e9d2; project-tracker 019cd72; review SHIP, round 2). SPEC-DRAFTED 2026-11-03. Repos: **genesis** (one migration, store change), **project-tracker**
 > (`phase-53-kiro-sdk-v3/adr-drafts.md`). Parent: `specs/phase-53-kiro-sdk-v3.md`. Decisions: 53-01 D1, D5–D10; F4.
 > genesis-docs adds the ADR at write-back (53-12); this sub-spec writes the draft only.
 

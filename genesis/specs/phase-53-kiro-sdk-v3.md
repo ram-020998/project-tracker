@@ -160,7 +160,10 @@ KiroCrew ideas from the 2026-11-03 research (secret-value redaction at write, a 
 `genesis doctor`, SSE reconnect, learning from runs, skill usage and evals, CI ratchets), and, for Phase 52, the 53-02
 W15 path-rule finding (`fs_read` `match: ["./**"]` confines absolute-path reads; `../`, symlinks, `~` and the search
 tools untested; D16), and two 53-08 review nits: a broken SDK install shows the "Install kiro-cli" hint (n1), and a
-run's `error` event carries the message and remedy but no `code` (n2).
+run's `error` event carries the message and remedy but no `code` (n2); from 53-09's review: the import between the
+sign-in and preflight code runs the wrong way (n1), `/system/kiro` probes kiro-cli three times per request (n2), and
+`memory_jobs` calls the sign-in check on the scheduler loop (n3, L-026); the testexec tests should switch off git
+commit signing themselves (they fail under a global signing config); and from 53-07, `reap_idle` has no caller.
 
 ## 10. Defaults
 

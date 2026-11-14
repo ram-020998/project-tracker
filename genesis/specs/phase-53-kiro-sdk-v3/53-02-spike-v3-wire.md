@@ -1,6 +1,6 @@
 # 53-02 — Spike: the remaining v3 wire unknowns, recorded as fixtures (gate)
 
-> **Status:** SPEC-DRAFTED 2026-11-03. Repo: **genesis** (spike harness under `genesis/scripts/spikes/53-02/`, fixtures
+> **Status:** BUILT 2026-11-10 (genesis c7c05b2..e824d3d; review SHIP; W1 PASS re-run in 53-06). SPEC-DRAFTED 2026-11-03. Repo: **genesis** (spike harness under `genesis/scripts/spikes/53-02/`, fixtures
 > under `genesis/packages/kiro-agent-sdk/tests/fixtures/v3/`, notes in this file's As built; no product code). Built by
 > genesis-dev on the user's machine with the installed `kiro-cli` (2.37.1 at spec time). Parent:
 > `specs/phase-53-kiro-sdk-v3.md`. Decisions: 53-01 D5, D6, D7, D9, D10; F3–F7, F9, F10, F15.

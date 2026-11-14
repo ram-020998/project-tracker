@@ -40,6 +40,11 @@ the DB version; `GET /api/system/kiro` shows a verified kiro-cli. User checklist
   Genesis: add a server as a custom MCP server in Settings (the custom MCP tier, ADR-029); install skills from Settings → Catalog →
   Skills.
 - Existing chats continue (first resume falls back to the preamble replay once; 53-07 §2).
+- API and SDK changes for anyone scripting against Genesis: `POST /chat/sessions/{id}/steer` is new and answers
+  `message_seq`; `GET /skills` items lost `shadows_personal`; `GET /system/kiro` gained `version`, `minimum`,
+  `verified`, `engine_v3`; `/chat/commands` lists `/clear` and `/compact` only (D21). SDK: `KiroAgentOptions` lost the
+  v2 trust options and gained `trust`, `kiro_home`, `skill_dirs` and the rest of F1; `check_kiro()` returns
+  `binary` and `minimum`; `TrustPolicy`, `KiroError`, `AgentNotActive`, `SessionStatus` are public.
 - Applications with a testing workspace: run Update testing runtime once (`playwright-appian` 0.3.1).
 
 ## 3. Docs write-back (genesis-docs)

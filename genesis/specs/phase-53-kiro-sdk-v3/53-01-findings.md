@@ -438,6 +438,12 @@ All questions up to Q18 are answered (Q17: D22; Q18: D23); nothing is open.
   the global folder; D7 removes that path. 53-08's As built flags this as unverified. Q18, asked after Q17, decides
   whether these modes need managed skills.
 
+### 10.6 Default set after 53-09 (the user may object)
+
+| # | Default | Why |
+|---|---|---|
+| F18 | **Two engine turns in one prompt are separated by a paragraph break.** When a steer at turn end starts a second engine turn inside one prompt (53-02 W7b), the backend inserts `"\n\n"` between the two turns' text, live and in the stored answer. Built in 53-10 W2b. | 53-09's live run stored `oneone KIWI`. A break keeps the two answers readable without a new UI element; the credits are already summed as one Genesis turn (53-04). |
+
 ### 10.4 53-02 complete (2026-11-10, review SHIP)
 
 W6–W19 results, the timings, the tool-id table and the 28 fixtures are in 53-02's As built. This re-spec carried them
