@@ -169,7 +169,9 @@ sign-in and preflight code runs the wrong way (n1), `/system/kiro` probes kiro-c
 commit signing themselves (they fail under a global signing config); and from 53-07, `reap_idle` has no caller; from 53-10's review: after a full page reload an unread steer reads "sent
 during the turn" (no stored unread marker), and the MCP notice card lasts only for the page session (the notice is not
 stored); from 53-11's review: nothing prunes the engine logs in the chat Kiro home (`~/.genesis/kiro-home/chat/logs/`,
-about 67 KB per chat process start).
+about 67 KB per chat process start); from 53-11 round 3 (n2): the `Use the <id> skill.` string is built in both the web
+and the backend (a test pins each copy); the web could send `/<id> <text>` and let the backend rewrite it, so the
+string has one home.
 
 ## 10. Defaults
 
