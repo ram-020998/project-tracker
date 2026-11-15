@@ -40,7 +40,12 @@ gates    = ["cd genesis/packages/genesis-core && ../../.venv/bin/python -m pytes
 
 [area.sdk-acp]
 title    = "kiro-agent-sdk: ACP client/session, tool bridge"
-paths    = ["genesis/packages/kiro-agent-sdk/src/**"]
+paths    = ["genesis/packages/kiro-agent-sdk/src/**",
+            # Phase 53 (53-12 §3): the recorded v3 wire fixtures, and the app code that probes kiro-cli
+            # (preflight, sign-in) and resolves the skills and Kiro home a workflow turn gets
+            "genesis/packages/kiro-agent-sdk/tests/fixtures/**",
+            "genesis/genesis/runtime/preflight.py", "genesis/genesis/runtime/kiro_auth.py",
+            "genesis/genesis/runtime/context.py"]
 keywords = ["acp", "sdk", "session", "agent client", "tool bridge", "mcp env"]
 skills   = ["genesis-backend-dev"]
 gates    = ["cd genesis/packages/kiro-agent-sdk && ../../.venv/bin/python -m pytest -q",
@@ -249,7 +254,10 @@ gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
 title    = "Settings, secrets, environments, MCP/CLI registries, managed-native"
 paths    = ["genesis/genesis/config/**", "genesis/genesis/runtime/settings.py",
             "genesis/genesis/mcp/native/**", "genesis/genesis/cli_tools/native/**",
-            "genesis/genesis/api/config_routes.py", "genesis/web/src/features/settings/**"]
+            "genesis/genesis/api/config_routes.py", "genesis/web/src/features/settings/**",
+            # Phase 53 (53-12 §3): readiness (kiro-cli items), sign-in, the run context
+            "genesis/genesis/runtime/preflight.py", "genesis/genesis/runtime/kiro_auth.py",
+            "genesis/genesis/runtime/context.py"]
 keywords = ["settings", "secret", "environment", "registry", "mcp", "cli", "managed native", "config"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
 gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",

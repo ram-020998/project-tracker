@@ -2,8 +2,10 @@
 
 > **Status:** 🚢 SHIPPED (live acceptance open) 2026-11-08 — playwright-appian **v0.3.0** (`d3ed993`) → genesis
 > **v0.81.0** (`62537c2`) → genesis-workflows **v0.25.0** (`6a7d432`); m0026–m0028 (DB v28); ADR-081..085. **51-12 live
-> steps 1–27 on QA are still open (D38)**; findings ship as v0.81.x patches, and the status becomes SHIPPED when they
-> pass. As built: `progress/phase-51-test-execution-engine.md`. (Spec-drafted 2026-11-02 by the genesis-spec agent.)
+> steps 1–27 on QA are still open (D38)**; the status becomes SHIPPED when they pass. **Since Phase 53 (2026-11-15,
+> 53-01 D20):** this acceptance runs after the Phase 53 release, on Kiro's v3 engine (genesis v0.82.0) with
+> playwright-appian 0.3.1, together with 53-11 §5's Phase 51 rows; findings ship as v0.82.x patches (no longer v0.81.x).
+> As built: `progress/phase-51-test-execution-engine.md`. (Spec-drafted 2026-11-02 by the genesis-spec agent.)
 > Sub-specs: `phase-51-test-execution-engine/51-01..51-18`. Findings (code facts, research, every decision):
 > `51-01-findings.md`.
 > Repos: **genesis** (backend + web, migrations **m0026**–**m0028**), **genesis-workflows** (four new workflows + one skill),

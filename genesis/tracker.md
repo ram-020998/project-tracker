@@ -244,6 +244,12 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 From Phase 47 on: ≤ 5 lines per phase; detail lives in `progress/`.
 
+- **2026-11-15 — Phase 53 (Kiro SDK v3): 🚢 SHIPPED, live acceptance open — playwright-appian v0.3.1 → genesis v0.82.0 → genesis-workflows v0.26.0 (m0029, DB v29; ADR-086).**
+  kiro-agent-sdk rebuilt for v3 only: Genesis-owned `KIRO_HOME`, projected trust, managed skills, steering, Stop, resume;
+  pytest 1943 (CI 1884), SDK 302, core 109, vitest 764, workflows 432. 53-11 SHIP after 3 rounds; first master CI red on
+  a Linux `monotonic()` test, fixed. 4 of 15 workflows live on v3; the rest and Phase 51's acceptance after release.
+  Lessons L-113–L-119. Details: `progress/phase-53-kiro-sdk-v3.md`.
+
 - **2026-11-08 — Phase 51 (Test execution engine): 🚢 SHIPPED, live acceptance open — playwright-appian v0.3.0 → genesis v0.81.0 → genesis-workflows v0.25.0 (m0026–m0028, DB v28; ADR-081..085).**
   Testing tab (library, Record / Compose, case scripts, executions, regression schedule), QA environment type,
   Verification lane; pytest 1832, vitest 726, workflows 428, apwt 1399. 51-12 code-level SHIP after 51-15/51-18; release

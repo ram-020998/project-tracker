@@ -1,6 +1,11 @@
 # Phase 53 — Kiro SDK v3: rebuild `kiro-agent-sdk` for kiro-cli's v3 engine
 
-> **Status:** SPEC-DRAFTED 2026-11-03 · **Author:** genesis-spec agent.
+> **Status:** 🚢 **SHIPPED (live acceptance open) 2026-11-15** — playwright-appian **v0.3.1** (`38f87fd`) → genesis
+> **v0.82.0** (`00e8078`) → genesis-workflows **v0.26.0** (`d0c0f53`); m0029 (DB v29); **ADR-086** Accepted; verified on
+> kiro-cli 2.37.1. Only 4 of 15 agent-node workflows were live-accepted on v3 before the release (D24, D26); the rest
+> of 53-11 §5 and Phase 51's postponed acceptance (D20) run after it, findings as v0.82.x patches. As built:
+> `progress/phase-53-kiro-sdk-v3.md`; follow-ups `specs/backlog/phase-53-follow-ups.md`. (Spec-drafted 2026-11-03 by the
+> genesis-spec agent.)
 > Sub-specs: `phase-53-kiro-sdk-v3/53-01..53-12`. Findings (code facts, the live v3 probe, KiroCrew research, every
 > decision): `53-01-findings.md`. Probe scripts and raw frames: `phase-53-kiro-sdk-v3/evidence/`.
 > Repos: **genesis** (`packages/kiro-agent-sdk` rebuilt, `packages/genesis-core` `kiro_node`, chat backend, preflight,

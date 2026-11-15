@@ -1068,3 +1068,77 @@ genesis-workflows/
                        multi-role setups, composing (§7); skills-registry.json entry.
 playwright-appian 0.3.0  record start --browser / --state (D-114); its own design record in planning/.
 ```
+
+**Phase 53 — Kiro SDK v3: kiro-agent-sdk rebuilt for kiro-cli's v3 engine (genesis v0.82.0 · genesis-workflows v0.26.0 · playwright-appian v0.3.1; m0029):**
+```
+genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/   (v3 only; the v2 client, the Legacy* aliases and _v3client.py are gone)
+  launch.py           resolve_binary (option → PATH → ~/.local/bin), --version probe cached on (path, mtime, size),
+                      MIN_KIRO_VERSION 2.37.1, argv `acp --agent-engine v3 [--auth-method client]`, build_env (KIRO_HOME
+                      required), KiroProcess (own group, record_tree, terminate → CloseReport), probe_engine_v3,
+                      check_kiro() → {installed, version, engine_v3, minimum_ok, verified, minimum, binary} (public).
+  transport.py        newline JSON-RPC (readuntil; over-limit line recovered), bounded writes, handlers per method,
+                      unknown request → -32601, FrameLog (token keys + registered secrets redacted, joined chunk text).
+  session.py          initialize; new/load with customAgents; activate (listed origin client → set_mode →
+                      config_option_update, else AgentNotActive + close); wait_mcp_ready (65 s); prompt (prompt key only);
+                      steer (text only); cancel (5 s grace); compact; set_config_option (model validated); close; delete;
+                      Session.calls (ToolIndex on arrival).
+  updates.py · usage.py · errors.py · timeouts.py
+                      session/update → messages (MCP @server/tool, rawInput.arguments, update for an unknown id);
+                      PromptUsage (credits summed over every non-replayed turn_completion, F17 provenance, model /
+                      fallback_from read defensively); KiroError + 15 ERROR_CODES, classify_rpc_error / classify_stderr;
+                      named limits (silent 600, tool stall 300, MCP readiness 65, notice 2, access token 30 s).
+  agent_spec.py       TrustPolicy(builtins, mcp_tools, auto_approve, mode) (public); project() → one customAgents entry
+                      (explicit tools, capability allow rules, mcp srv/* | srv/tool split at 64, includeMcpJson/Powers
+                      false, reserved mode ids renamed genesis-<id>); skill_resources(skill_dirs) → resources.
+  permissions.py      the ladder: identify() from _meta.kiro only; decide() (D18 skill loads, backstop, mode; *_once only);
+                      NOTICES / ELICITATION_NOTICE.   tool_ids.py + tool_ids.json (package data, measured on 2.37.1).
+  client.py           KiroAgentOptions (F1 + trust, kiro_home, skill_dirs, agent_id/agent_prompt, …) and KiroACPClient
+                      (start, load, new_session, delete before start, prompt, steer, steer_state, cancel, compact,
+                      set_config_option, set_mode, close; policy, notices, mcp_status); elicitation decline and
+                      access-token responder.  __init__.py  query() ends a turn with mcp_failed before the prompt.
+  messages.py         ToolCall.server, ResultMessage/TurnResult.error_code, SessionStatus (public).
+genesis/packages/kiro-agent-sdk/tests/  fake_engine.py (replays fixtures/v3/*: 30 pairs + tool-ids.json; D19 agent
+                      checks schema/genesis/recorded problems, CHECK_CUSTOM_AGENTS on), test_v3_replay / units / trust /
+                      process_tree / fixtures, test_public_surface (the exact F1 pin).
+genesis/packages/genesis-core/genesis_core/
+  nodes/agent.py      kiro_node on v3: KIRO_HOME <run>/_kiro, NODE_BUILTINS (D9), NODE_AGENT_ID genesis-node,
+                      NODE_AGENT_PROMPT, _node_mcp_trust (was _compute_effective_trust) + _trust_policy, _tool_name,
+                      _is_engine_step (engine steps not stored as tool output), SkillSourceError (exported).
+  workspace.py        KIRO_HOME_DIR "_kiro" (kept on disk, hidden from manifest()).
+genesis/genesis/
+  db/migrations/m0029_chat_kiro_session.py  chat_sessions.kiro_session_id (TEXT, nullable; DB v29).
+  chat/store.py       ChatSessionRecord.kiro_session_id, ChatStore.set_kiro_session (leaves updated_at).
+  chat/manager.py     ChatSession on v3: _build_options (chat home, mode TrustPolicy, skill_dirs for cwd_sandbox modes),
+                      _resume (session/load, else session/new + preamble), STOPPED_TURN_NOTE (D15, from the stored
+                      transcript), steer (409 when not queued; _no_slash), stop (session/cancel, client kept), _clear
+                      (new_session), _compact, _turn_scope / _close_after_turn, _finish_abandoned (shielded),
+                      ENGINE_TURN_BREAK; engine_commands / catalog_commands (/clear, /compact only, D21), skill_prompt
+                      ("Use the <id> skill.", D25), strip_steering_acks, ChatNotRunningError; ChatManager.steer,
+                      ensure_agent_catalog (throwaway client, cache keyed on the kiro-cli version), _reload_live.
+  chat/mode_profile.py  ChatModeProfile.builtins (was extra_trust), .agent_id genesis-chat-<mode>, trust_policy().
+  chat/mcp.py         chat_confirm_tools(mode) (copilot's three mutating tools).
+  api/chat.py         POST /chat/sessions/{id}/steer → {ok, message_seq, status}.
+  api/skills.py       install/update off the loop (asyncio.to_thread) under library_lock (also delete, author).
+  api/system.py       GET /system/kiro + version, minimum, verified, engine_v3.
+  runtime/preflight.py  KIRO_INSTALL_URL, kiro_cli_status(), items kiro-cli (required) + kiro-cli-verified (optional) first.
+  runtime/kiro_auth.py  _kiro() = check_kiro()'s binary (one resolver with the SDK).
+  runtime/context.py  _skill_source: the managed workspace, or the run checkout for playwright-appian; front matter
+                      checked (parse_skill_md + validate) → SkillSourceError with the remedy; no ~/.kiro/skills.
+  runtime/settings.py Settings.chat_kiro_home (state_dir/kiro-home/chat).
+  skills/store.py · model.py  SkillStore(skills_dir) (no personal dir; any bundle folder, D17); SkillInfo without
+                      shadows_personal.
+  testexec/vendor.py  VENDORED_APWT_VERSION 0.3.1 (sha256 1388cf9b…, source commit 38f87fd); vendor/…-0.3.1.tgz.
+genesis/web/src/
+  features/chat/      steering.ts (stripSteeringAcks, textsAfterTurn, steerLabel), hooks.ts useChatTurn (steer, stopping,
+                      unread, draft, STOP_FALLBACK_MS), Composer (Send + Stop during a turn), ChatThread (McpNoticeCard,
+                      AnsweredBy).   shared/ui/format.tsx AnsweredBy.   types/system.ts, features/system/hooks.ts
+                      (usePreflight), KiroSection (version, minimum, the kiro-cli items).   catalog/skills SkillCard Update.
+  test/fixtures/{chat,system,skills}/ (recorded by test_phase53_api_contract.py) + phase53-contract.test.ts.
+genesis/scripts/spikes/53-02|53-05|53-06|53-07|53-13/  probe harnesses + evidence (outside the import gates).
+genesis/scripts/probes/chat-steer-widths.mjs  the chat/skills width probe on a fixture mock (L-090).
+genesis/tests/        test_sdk_import_boundary.py (F13), chat_fakes.FakeV3Client, test_chat_v3_engine.py,
+                      test_kiro_readiness.py, test_phase53_api_contract.py; contract_fixtures.record(folder=, every=).
+genesis-workflows/skills/appian 1.0.0  the Appian skill in the library (with registry/components-registry.json, D17).
+playwright-appian 0.3.1  SKILL.md description as a >- block; strict front-matter test (js-yaml); install --skills keeps
+                      the source front matter (D-115).
+```

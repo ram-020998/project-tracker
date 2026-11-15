@@ -31,12 +31,12 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-026 (amended by 063,085) — Web UI = React+TS for a local single-user app; `genesis serve`/`up` refuse a non-loopback bind unless explicitly opted in (`--i-understand-no-auth`) — Genesis ships no auth.
 - ADR-027 — Use the established web stack (Tailwind + shadcn/Radix + React Router + TanStack Query + React Flow + …); reuse existing primitives and design tokens, not raw palette colors.
 - ADR-028 (amended by 085) — ALL backend endpoints live under `/api` (+ SPA history fallback; only static Playwright reports sit on their own loopback origin, ADR-085); the client prepends `/api` centrally — never in components.
-- ADR-029 (amends 005,020; amended by 083) — Two-tier MCP/CLI registry: curated read-only (MR-governed) + custom user-writable; tool trust = `node.tools ∩ server.allowlist`, a cap only for a node with a tool list (ADR-083: without one it trusts every tool).
+- ADR-029 (amends 005,020; amended by 083,086) — Two-tier MCP/CLI registry: curated read-only (MR-governed) + custom user-writable; tool trust = `node.tools ∩ server.allowlist`, enforced by the engine's tool list (ADR-086: no tool list = its servers within allowlists).
 - ADR-030 (amended by 037,041) — Persistence stays SQLite; move to Postgres/pgvector only on an explicit trigger (multi-user, transcript RAG, heavy analytics); keep repository signatures DB-agnostic.
-- ADR-031 (amended by 033,034,045,076) — Chat is read-only: it observes/answers, never orchestrates or mutates; trust is fail-closed (read-only `@server/tool` allowlist + `auto_deny`); writes only in the per-session sandbox (ADR-034).
-- ADR-032 — Credit usage is REAL metered data from Kiro ACP (per turn), NEVER estimated — no pricing engine; every figure carries `provenance` (metered/partial/unavailable).
+- ADR-031 (amended by 033,034,045,076,086) — Chat is read-only: it observes/answers, never orchestrates or mutates; trust is fail-closed (read-only `@server/tool` allowlist + `auto_deny`); writes only in the per-session sandbox (ADR-034).
+- ADR-032 (amended by 086) — Credit usage is REAL metered data from Kiro ACP (per turn), NEVER estimated — no pricing engine; every figure carries `provenance` (metered/partial/unavailable).
 - ADR-033 (amends 031; amended by 034) — The chat copilot may operate runs only at the run-management layer: every mutation is human-confirmed, it NEVER auto-approves a workflow's HITL gate, and gets NO config/secret/registry/deploy tools.
-- ADR-034 (amends 031,033) — Skills are first-class standalone activities beside Workflows, chat-invoked + filesystem-provisioned; chat writes ONLY inside the per-session skill-output sandbox (`fs_write_root`).
+- ADR-034 (amends 031,033; amended by 086) — Skills are first-class standalone activities beside Workflows, chat-invoked + filesystem-provisioned; chat writes ONLY inside the per-session skill-output sandbox (`fs_write_root`).
 - ADR-035 — Run input files (`format:"file"`) are provisioned into the run blackboard at launch via the multipart upload, never passed inline; bounded and sanitized.
 - ADR-036 (amended by 073) — Genesis owns the Appian KB: a Genesis-native parser + a local KB in `genesis.db`, fed only by the single dev-tagged environment (`is_dev`); Atlas/Jarvis are retired as KB sources.
 - ADR-037 (amends 030; amended by 073) — The KB stores only metadata/structure/dependency graph/bundles — NEVER SAIL source; all code (current + historical) is fetched live via the Dev MCP.
@@ -47,7 +47,7 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-042 (amended by 075) — Features & Specs are first-class sub-entities of an application (cascade with it); a spec is authored conversationally in Chat, not by a workflow, and HTML is authoritative.
 - ADR-043 — Embed the vendored Lavish annotation SDK (MIT) for in-app HTML review, themed from design tokens — don't run its server.
 - ADR-044 {amended} (amended by 056; superseded by 056) — A Feature is a workspace of artifact stages, each with its own status (no feature status derived from one artifact); the sequential unlock is superseded by ADR-056.
-- ADR-045 (amends 031; amended by 076) — The reused chat mirrors the Kiro CLI/ACP surface (model selection, slash commands, compaction, image prompts) while staying within ADR-031's read-only posture.
+- ADR-045 (amends 031; amended by 076,086) — The reused chat mirrors the Kiro CLI/ACP surface (model selection, slash commands, compaction, image prompts) while staying within ADR-031's read-only posture.
 - ADR-046 (amended by 080) — Genesis ships as a local, browser-based app: clone + venv + `scripts/install-packages.sh`, launched by `genesis up`, self-updated by git tag.
 - ADR-047 (amended by 074,081) — Scheduled maintenance syncs are fixed and backend-defined; the app sync is re-runnable as a full-package refresh.
 - ADR-048 — Core Appian-MCP credentials are environment-scoped: stored per environment in the SecretProvider (never in `environments.json`) and resolved ONLY from the dev-tagged env.
@@ -71,7 +71,7 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-066 — Capture what each agent was given and produced, per iteration, and expose it in the run-detail node summary + turn explorer.
 - ADR-067 — Use genesis-core `attach_healing` (grounded verify → heal → patch in place or one guided restart → escalate, bounded by `META.healing`) as the second reliability tier beside the ADR-011 trio.
 - ADR-068 (amends 021,062; amended by 082) — Implementation is the only lane that mutates design objects; its confirm is the single blanket approval (rollback doc first); NEVER delete an object, no delete* tool (ADR-082: test users write QA app data).
-- ADR-069 — A workflow agent node declares Kiro skills via `kiro_node(skills=[...])`; Genesis provisions them into the blackboard's `.kiro/skills/` — never rely on the host's global `~/.kiro/skills`.
+- ADR-069 (amended by 086) — A workflow agent node declares Kiro skills via `kiro_node(skills=[...])`; Genesis provisions them into the blackboard's `.kiro/skills/` — never rely on the host's global `~/.kiro/skills`.
 - ADR-070 — The Object Wiki is a local-first, Hub-shared, APPEND-ONLY per-object change ledger.
 - ADR-071 — ONE canonical story page (`/applications/:appUuid/stories/:storyId`) reached from every entry point; no parallel story surfaces.
 - ADR-072 — Every finalized or created story gets a global, monotonic `GNS_<6-digit>` id allocated from `kb_sequences` inside the finalize/create transaction.
@@ -85,6 +85,7 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-080 (amends 019,046) — The platform is one repo: the app at the root, genesis-core, kiro-agent-sdk and the parser under packages/; no internal package lists another as a dependency; one install command; one shared version = the tag.
 - ADR-081 (amends 078,047) — Test code lives as files in a per-app git workspace and genesis.db holds only the catalog; scripts reference actions and cases, never copy them; executions are program-only and run committed code.
 - ADR-082 (amends 068,021) — All test execution and agent browser sessions run only on the single QA environment, as the app's test users, changing application data through the UI only — never design objects, deployments or MCP writes.
-- ADR-083 (amends 029) — Phase 51 browser agents use Kiro's shell with the workspace's own apwt on program-opened, QA-pinned sessions; credentials never reach the agent; the missing isolation is an accepted risk until Phase 52.
+- ADR-083 (amends 029; amended by 086) — Phase 51 browser agents use Kiro's shell with the workspace's own apwt on program-opened, QA-pinned sessions; credentials never reach the agent; the missing isolation is an accepted risk until Phase 52.
 - ADR-084 (amends 061) — Deployment precedes Verification; dragging a story into Verification (after confirming QA has its changes) launches story-verification; pass → Done, product defect → Implementation, blocked → a gate.
 - ADR-085 (amends 028,026) — Serve Playwright reports only from a second loopback origin (app port + 100): static report files, no /api, GET/HEAD only, Host-checked, no traversal — never from the app's own origin.
+- ADR-086 (amends 029,031,032,034,045,069,083) — Start Kiro only as kiro-cli acp --agent-engine v3 under a Genesis-owned KIRO_HOME (nothing loaded from ~/.kiro; reads unscoped); trust: a projected agent, activation verified, fail closed; skills only from Genesis.

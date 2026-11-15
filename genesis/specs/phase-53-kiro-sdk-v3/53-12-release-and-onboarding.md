@@ -1,6 +1,6 @@
 # 53-12 — Release and onboarding
 
-> **Status:** SPEC-DRAFTED 2026-11-03. Repos: genesis, genesis-workflows, project-tracker. Parent:
+> **Status:** RUN 2026-11-15 (releases: As run below; docs write-back: As built below). SPEC-DRAFTED 2026-11-03. Repos: genesis, genesis-workflows, project-tracker. Parent:
 > `specs/phase-53-kiro-sdk-v3.md`. After 53-11 = SHIP. **genesis-release** asks before every tag and push; then
 > **genesis-docs** does the write-back.
 
@@ -81,7 +81,22 @@ the DB version; `GET /api/system/kiro` shows a verified kiro-cli. User checklist
 
 ## As built
 
-_To be filled by genesis-release (As run) and genesis-docs._
+_genesis-docs write-back, 2026-11-15 (detail: `progress/phase-53-kiro-sdk-v3.md`)._
+
+- **ADR-086** filed Accepted with `genesis-ctx add adr` per the filing note (one `--amends` with the seven ids,
+  `--status accepted`, body from `- **Context.**`); the draft's Status details folded into the Status line; ADR-029's
+  one-liner rewritten for it (`index --reviewed ADR-029 ADR-086`).
+- **Lessons:** added L-113–L-119; extended L-002, L-003, L-011, L-016, L-024, L-026, L-028, L-044, L-046 (lead now
+  "v2 only"), L-088, L-090, L-094, L-110, L-112 (decision table in the progress doc).
+- **Areas:** `sdk-acp` + `config-secrets` route `runtime/{preflight,kiro_auth,context}.py`; `sdk-acp` routes
+  `packages/kiro-agent-sdk/tests/fixtures/**`.
+- **Homes:** `context/state/current.md` overwritten (compressed to keep L0 under budget); `bible/03` Phase 53 block +
+  `tags/codemap.toml`; changelog; README rows 51 and 53; Phase 51 and Phase 53 umbrella status; tracker §6;
+  `specs/backlog/phase-53-follow-ups.md` + its `bible/08` line; `adr-drafts.md` marked filed; 53-11 status line.
+- **Architecture docs:** genesis `ea00dfd` (local, not pushed): `modules/kiro-agent-sdk.md` rewritten; ten module
+  documents, the numbered documents, the glossary and the README updated to v0.82.0.
+- **Skill:** `genesis-release` (registry-13864 download with `npm pack --registry`, `dist.shasum` check, re-vendor; the
+  D27 window); operator runs `agent-system/update.sh`.
 
 ## As run (2026-11-14/15, genesis-release)
 

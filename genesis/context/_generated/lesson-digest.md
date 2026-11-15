@@ -48,7 +48,7 @@ Full text: `genesis-ctx lesson <ID>`. Areas: `genesis-ctx area <name>`.
 - L-043 — Embedding a 3rd-party browser SDK: prefer `postMessage`-host reuse over running its server (Phase 20, ADR-043).
 - L-044 — The Kiro ACP extension surface is richer than the public docs — spike the *installed* CLI, and prefer typed methods over `execute` (Phase 21).
 - L-045 — Exposing the CLI surface in a "read-only" chat = refine the ADR, keep the human-confirm backstop (Phase 21, ADR-045).
-- L-046 — Route Kiro slash commands through the normal `prompt()` path, NOT `_kiro.dev/commands/execute` (v0.46.1 hotfix).
+- L-046 — Route Kiro slash commands through the normal `prompt()` path, NOT `_kiro.dev/commands/execute` (v0.46.1 hotfix; v2 only, Phase 53 changed it for v3).
 - L-047 — The chat MD export must match the REAL return shapes (v0.46.1 hotfix).
 - L-048 — The built SPA must ship as PACKAGE DATA, and Dev-MCP enumeration must surface errors + paginate (v0.48.2).
 - L-049 — A managed-MCP bundle can silently disagree with the registry on env-var names (v0.48.2 / genesis-workflows v0.9.4).
@@ -115,3 +115,10 @@ Full text: `genesis-ctx lesson <ID>`. Areas: `genesis-ctx area <name>`.
 - L-110 — Prove code only by what ran: a unit counts only when its own step ran and passed, at the recorded base, over its whole dependency closure, from files nobody changed, never by an import or a lone replay (Phase 51).
 - L-111 — Code review and gates do not replace live acceptance: budget a live pass on the real environment, and when a release goes first, say plainly everywhere that acceptance is still open (Phase 51).
 - L-112 — Work kept local until the release first meets CI at the tag: give long local work one CI run, or one run in the CI image, before the release commit, and never let a test assume a tool that image lacks (Phase 51).
+- L-113 — On Kiro v3, trust is the projected custom agent, never a flag (trust flags exit 2; no tools key means no tools), and set_mode's {} proves nothing: require the config_option_update to our id, else fail closed (Phase 53).
+- L-114 — v3 MCP calls nest their arguments under rawInput.arguments and load through a tool_load step that may come as a tool_call_update with no tool_call; read identity from _meta, never the title or v2's toolName (Phase 53).
+- L-115 — v3 silently drops a skill whose SKILL.md front matter fails strict YAML (': ' in a plain description): check front matter strictly before provisioning; test the producer and every writer with a strict parser (Phase 53).
+- L-116 — A permissive client hides a wrong trust set: v2 approved every call, so _compute_effective_trust's @server/tool vs bare-name match gave [] unseen; test an advisory value on the real registry before enforcing (Phase 53).
+- L-117 — Probe the engine with the product's own shapes: the real projection, the real permission ladder, the production folder layout, one case per session, and a negative control that must fail (Phase 53).
+- L-118 — sse-starlette ends a stream by cancelling its anyio task group, which re-cancels every await in the generator's finally: shield must-finish cleanup and test with a cancelled task group, never aclose() (Phase 53).
+- L-119 — Fetch a tarball from the project 13864 npm registry with npm pack <name>@<v> --registry <project URL> (anonymous reads 404), match npm view dist.shasum, and test against the vendored-version constant (Phase 53).

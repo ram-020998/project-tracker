@@ -31,13 +31,13 @@ reviewed_fp = "4def45ef57bae9e6"
 areas = ["core-engine", "sdk-acp", "config-secrets"]
 phase = ""
 rule = ""
-reviewed_fp = "d211ed184a1b7ece"
+reviewed_fp = "243679916fef1a92"
 
 [L-003]
 areas = ["runs-worker", "web-runs", "api"]
 phase = ""
 rule = "Keep the per-run SSE bus open until the run is TERMINAL; the client dedupes replayed history and CLOSES the EventSource on terminal final/error, else it reconnects and replays forever."
-reviewed_fp = "cfb096a4bdb05261"
+reviewed_fp = "730925773edfd930"
 
 [L-004]
 areas = ["db", "core-engine", "runs-worker", "api"]
@@ -85,7 +85,7 @@ reviewed_fp = "d0dcbced8ea8ff12"
 areas = ["web-runs", "web-shell"]
 phase = ""
 rule = "Mirror the event/gate/topology/steps contract shapes in `web/src/types` + the golden fixtures; a contract drift must fail a test (stubs must not hide the contract)."
-reviewed_fp = "9e465485a6ec5c0c"
+reviewed_fp = "17415363dadaa7ba"
 
 [L-012]
 areas = ["config-secrets", "web-shell"]
@@ -115,7 +115,7 @@ reviewed_fp = "0a6ec52ef00e439f"
 areas = ["observability-credits", "sdk-acp", "runs-worker", "chat", "web-runs", "core-engine"]
 phase = "11"
 rule = ""
-reviewed_fp = "a102e2a414664bd6"
+reviewed_fp = "b43f2831a1c40b09"
 
 [L-017]
 areas = ["chat", "security", "config-secrets"]
@@ -163,7 +163,7 @@ reviewed_fp = "452f8a11cf3caa42"
 areas = ["chat", "sdk-acp", "workflows-library"]
 phase = "14"
 rule = ""
-reviewed_fp = "710c9bb0868451eb"
+reviewed_fp = "398f0b1a430116ba"
 
 [L-025]
 areas = ["release-ci"]
@@ -175,7 +175,7 @@ reviewed_fp = "00dbcd9b71f833c6"
 areas = ["core-engine", "runs-worker", "db", "kb-sync", "workflows-library"]
 phase = "16"
 rule = ""
-reviewed_fp = "66e5f0173c4724e1"
+reviewed_fp = "cffc29aa96a83bad"
 
 [L-027]
 areas = ["release-ci"]
@@ -187,7 +187,7 @@ reviewed_fp = "961ae31822718ec9"
 areas = ["config-secrets", "appian-integration"]
 phase = ""
 rule = ""
-reviewed_fp = "d2acb30629f5eff9"
+reviewed_fp = "3c7745fdf24bc436"
 
 [L-029]
 areas = ["appian-integration", "config-secrets", "distribution", "workflows-library"]
@@ -283,7 +283,7 @@ reviewed_fp = "49df54bebb2057e9"
 areas = ["chat", "sdk-acp", "security", "browser-testing"]
 phase = "21"
 rule = ""
-reviewed_fp = "fdef359e936df586"
+reviewed_fp = "eefd35c86974a66e"
 
 [L-045]
 areas = ["chat", "security"]
@@ -295,7 +295,7 @@ reviewed_fp = "9334dc3268f1ec6a"
 areas = ["chat", "sdk-acp"]
 phase = ""
 rule = ""
-reviewed_fp = "f0ac4a54efeb0a37"
+reviewed_fp = "ae18addbeb870021"
 
 [L-047]
 areas = ["chat"]
@@ -547,7 +547,7 @@ reviewed_fp = "6d681ecfb9a75d7b"
 areas = ["security", "release-ci", "browser-testing"]
 phase = "47"
 rule = ""
-reviewed_fp = "fa34cf026503fa3b"
+reviewed_fp = "adbd88105b4b7cf6"
 
 [L-089]
 areas = ["release-ci", "web-shell"]
@@ -559,7 +559,7 @@ reviewed_fp = "6db85ea175ccf44e"
 areas = ["web-shell", "web-runs", "documents", "stories-workbench", "features-stages", "browser-testing"]
 phase = "48"
 rule = ""
-reviewed_fp = "6c0f361218e9c49c"
+reviewed_fp = "6f00458ca1c0bdee"
 
 [L-091]
 areas = ["db", "kb-sync", "stories-workbench", "browser-testing", "runs-worker"]
@@ -583,7 +583,7 @@ reviewed_fp = "d717824b00e1f558"
 areas = ["features-stages", "collaboration-hub", "stories-workbench", "web-shell", "runs-worker", "browser-testing"]
 phase = "49"
 rule = ""
-reviewed_fp = "9c4e94b1dd0d3d73"
+reviewed_fp = "2b61054940142305"
 
 [L-095]
 areas = ["stories-workbench", "kb-sync", "features-stages"]
@@ -679,7 +679,7 @@ reviewed_fp = "c416c15fe9fd0346"
 areas = ["browser-testing", "workflows-library"]
 phase = "51"
 rule = ""
-reviewed_fp = "0368bb75aeb5c3cd"
+reviewed_fp = "b5995f2b14061c95"
 
 [L-111]
 areas = ["release-ci"]
@@ -691,4 +691,46 @@ reviewed_fp = "c0f141491aca7192"
 areas = ["release-ci"]
 phase = "51"
 rule = ""
-reviewed_fp = "4ae426fb37cb176c"
+reviewed_fp = "82ef3fa4cacde24d"
+
+[L-113]
+areas = ["sdk-acp", "security", "chat", "core-engine"]
+phase = "53"
+rule = ""
+reviewed_fp = "fc6ec8bfa51028cc"
+
+[L-114]
+areas = ["sdk-acp", "core-engine", "chat"]
+phase = "53"
+rule = ""
+reviewed_fp = "01b969f22b751a9d"
+
+[L-115]
+areas = ["workflows-library", "browser-testing", "chat", "core-engine"]
+phase = "53"
+rule = ""
+reviewed_fp = "160ff4b4fef3e95e"
+
+[L-116]
+areas = ["core-engine", "security", "config-secrets"]
+phase = "53"
+rule = ""
+reviewed_fp = "35db68a994b5f57c"
+
+[L-117]
+areas = ["sdk-acp", "security", "chat"]
+phase = "53"
+rule = ""
+reviewed_fp = "cc4ff4a8205fbb95"
+
+[L-118]
+areas = ["chat", "api"]
+phase = "53"
+rule = ""
+reviewed_fp = "d985667b8f7715ed"
+
+[L-119]
+areas = ["release-ci", "browser-testing", "distribution"]
+phase = "53"
+rule = ""
+reviewed_fp = "12f57b04bacedd53"

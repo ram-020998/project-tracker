@@ -1,6 +1,7 @@
 # 53-11 — Review, hardening and live acceptance
 
-> **Status:** SPEC-DRAFTED 2026-11-03. Repos: genesis, genesis-workflows. Parent: `specs/phase-53-kiro-sdk-v3.md`. Run
+> **Status:** SHIP 2026-11-14/15 (review rounds 1–3 in `reviews/53-11-review.md`; fixes genesis `483170e`, `dd27c46`,
+> `61ec063`); before-release live rows PASS (§5); the after-release rows are open (D24, D26). SPEC-DRAFTED 2026-11-03. Repos: genesis, genesis-workflows. Parent: `specs/phase-53-kiro-sdk-v3.md`. Run
 > by **genesis-review** (read-only on code) after 53-02..53-10 are BUILT; report in
 > `specs/phase-53-kiro-sdk-v3/reviews/53-11-review.md` with SHIP / NEEDS_CHANGES. Findings are fixed by genesis-dev before
 > release; each fix gets a regression test.

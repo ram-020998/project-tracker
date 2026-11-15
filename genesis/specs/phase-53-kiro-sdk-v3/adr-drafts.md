@@ -1,6 +1,6 @@
 # Phase 53 — ADR draft (ADR-086)
 
-> **Status:** DRAFTED 2026-11-10 by genesis-dev in 53-03 (§2). **Proposed**, not yet in `reference/decision-log.md`.
+> **Status:** **FILED** 2026-11-15 as ADR-086 **Accepted** in `reference/decision-log.md` (Phase 53 write-back). DRAFTED 2026-11-10 by genesis-dev in 53-03 (§2). **Proposed**, not yet in `reference/decision-log.md`.
 > **Filing (53-12, genesis-docs):** `genesis-ctx add adr` with the fields in the header table, `--status accepted` (so
 > the heading, the tool's own Status line and `tags/adr.toml` all read accepted), and as `--body-file` the bullet list
 > **from `- **Context.**` on**: the tool writes the Status line itself, so fold this draft's Status details (date,

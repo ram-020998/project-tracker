@@ -27,6 +27,14 @@ refuses a library whose `genesis_core_major != CORE_MAJOR` — bump `CORE_MAJOR`
 - Record the published tarball URL in the As run:
   `https://gitlab.appian-stratus.com/api/v4/projects/13864/packages/npm/playwright-appian/-/playwright-appian-X.Y.Z.tgz`.
   Then vendor that exact tarball into genesis (the 51-05 procedure) before the genesis release that ships it (L-057).
+- **Download it with npm, not curl (L-119):** anonymous reads of that URL answer 404. Run
+  `npm pack playwright-appian@X.Y.Z --registry https://gitlab.appian-stratus.com/api/v4/projects/13864/packages/npm/`
+  (the user's `~/.npmrc` token; check that it exists by count only, never print it, never read CI variables, L-100),
+  then compare the file's SHA-1 with `npm view playwright-appian@X.Y.Z dist.shasum --registry …` and its SHA-512 with
+  `dist.integrity`, each in its own message. Copy it byte for byte to `genesis/testexec/vendor/playwright-appian-X.Y.Z.tgz`
+  (remove the old one), set `VENDORED_APWT_VERSION`, `VENDORED_APWT_SHA256` and `VENDORED_APWT_SOURCE_COMMIT` and the
+  docstring in `genesis/testexec/vendor.py`, and check that no test compares the vendored version with a literal.
+  `npm run smoke:install -- --tarball <URL>` checks the published file.
 
 ## Version locations (bump EVERY one — missing one is a known regression)
 - genesis, one shared version: the root and the three `packages/*/pyproject.toml`, the parser `__version__`, the
@@ -55,7 +63,10 @@ Ask the operator before EACH `git tag` and EACH `git push`. Never force-push or 
 `changes` rules match (a new tag runs all six). `glab ci get` can show a pipeline as running for minutes after its
 jobs ended (51-13, #7335323): read the job traces (`glab ci trace <job> -b <ref>`) before calling a pipeline stuck. Work
 that never ran in CI before the release commit meets Linux CI for the first time at the release (L-112): expect it, and
-check the release commit's first pipeline before tagging.
+check the release commit's first pipeline before tagging. **Time-of-day window (Phase 53 D27):** until backlog
+`phase-53-follow-ups.md` §6 m1 is fixed, `test_regression_job_handler_starts_due_apps_and_skips_busy_ones` fails
+whenever the real time is 00:00–02:00 IST: tag, push and re-run genesis CI only outside **18:30–20:30 UTC**, and a red
+run inside that window on that test alone is re-run outside it, not treated as a regression.
 
 ## GitLab API limits
 glab's token has read scope only: archiving a project, settings and variables are the operator's, in the GitLab UI
