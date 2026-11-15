@@ -7,7 +7,7 @@
 ## 1. Why
 
 Phase 53 rebuilt `kiro-agent-sdk` for the v3 engine and verified it on kiro-cli **2.37.1** only: the 53-02 spike,
-its 28 fixture pairs under `genesis/packages/kiro-agent-sdk/tests/fixtures/v3/`, the D19 activation probe, and
+its fixture pairs (28 from the spike, 30 after 53-05 and 53-13 added `projection-probe` and `agent-resources-skills`) under `genesis/packages/kiro-agent-sdk/tests/fixtures/v3/`, the D19 activation probe, and
 `tool_ids.json` `kiro_cli_verified: ["2.37.1"]`. Kiro CLI 3.0.0 shipped on 2026-11-03, followed by 3.1.0 (11-05),
 3.2.0 (11-10) and 3.2.1 (11-11) ([changelog](https://kiro.dev/changelog/cli/),
 [upgrade guide](https://kiro.dev/docs/cli/v3/)). On a 3.x release Genesis shows the "unverified version" warning

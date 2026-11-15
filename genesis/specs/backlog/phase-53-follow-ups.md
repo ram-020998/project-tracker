@@ -86,3 +86,7 @@ allows any path without asking. Untested: `../`, a symlink pointing out, `~`, an
   `steer-at-turn-end` and `w7/w7b/w8.jsonl`; re-scrub before a replay test depends on it (53-02 review m6).
 - `tests/fixtures/apwt/apwt-0.3.0-*.json` were recorded on apwt 0.3.0 (0.3.1 changes only the skill and
   `install --skills`); re-record at the next CLI change.
+- `packages/kiro-agent-sdk/src/kiro_agent_sdk/messages.py` docstrings still describe v2 (found at write-back; code
+  comments only, no behaviour).
+- ADR-086 item 3 names `permission_mode="auto_approve"`, an option Phase 53 removed; the code uses
+  `TrustPolicy(mode="auto_approve")`. Add a one-line correction note to ADR-086 (wording only, no decision change).
