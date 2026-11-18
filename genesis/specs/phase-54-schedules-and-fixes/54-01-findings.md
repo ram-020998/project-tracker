@@ -1,7 +1,7 @@
 # 54-01 — Findings: Schedules, fixes and UX revamps
 
 > **Status:** SPEC-DRAFTED 2026-11-19 — Q&A complete: decisions D1–D20 (§8), defaults F1–F12 (§9, confirmed); D21
-> added after 54-02 (§10).
+> added after 54-02 (§10); D22–D28 from the 54-03 mockup review (§11).
 > Parent: `specs/phase-54-schedules-and-fixes.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the schedules
@@ -225,6 +225,13 @@ schedules here.
 | D19 | **One release for the whole phase (Q18, option B).** All of Phase 54 (B1–B3, O1, O4, Schedules, custom agents, the bell, the UX revamps) ships together: genesis **v0.83.0**, then genesis-workflows **v0.27.0** (the agent-prompt workflow, `schedulable` flags; pinned on `genesis.git@v0.83.0`, L-057). No separate v0.82.x patch for the fixes. Phase 54 does not wait for the open Phase 51/53 live acceptance (the user runs it later). | User (2026-11-19): "ill do the live acceptance later. We can go with the one complete actual release." Considered: A (fixes as a v0.82.x patch first, the assistant's recommendation) and C (finish the open acceptance first). |
 | D20 | **Phase 54 is live-accepted before v0.83.0 (Q19, option A).** "Later" covers only the open Phase 51/53 acceptance. Before the tag, the review & acceptance sub-spec runs on a separate `genesis serve`: a prompt schedule firing and writing Markdown, a workflow schedule, a regression-suite schedule, a missed slot caught up, overlap skip, a gate timing out (D8), auto-pause (D12), the bell, Catalog Run of a custom agent, chat with a custom agent, the regression and app-sync migrations, B1/B2/O1/O4 reproduced then fixed, and the real-browser width probe of the new and revamped pages (L-090). Rows needing Appian Dev (an `appian-dev` read in a prompt schedule) are skipped if Dev is down, and that is said in the release notes. | User chose A (2026-11-19). Considered: B (release before its own acceptance, "SHIPPED (live acceptance open)", L-111). |
 | D21 | **No repair of runs a pre-fix state edit left stored `running` (Q20 after 54-02, option C).** Such a run keeps its `running` status and `run.final{running}` row; `reconcile_status` is unchanged; 54-04 adds no repair. The user cancels a stuck run by hand (Run Detail → Cancel). Known effect: a stuck `sync-application` run blocks that app's scheduled sync (the per-app "sync already running" skip, `runtime/sync_jobs.py:157`) until cancelled. 54-11's release notes tell users to cancel any run that shows Running with nothing happening. | User chose C (2026-11-19). Considered: A (one-time repair in m0030 + `reconcile_status` stops adopting the marker; the assistant's recommendation) and B (fix `reconcile_status` only; such runs fall to the orphan sweep and a really paused one ends failed). |
+| D22 | **Schedules list layout (54-03 review, surface 1).** No Target column. Frequency = a weekday strip (M T W T F S S, run days filled) plus one short line ("every 4 h, 08:00–20:00"); monthly and once rows show a calendar icon instead of the strip; the time zone is shown only when it differs from the machine's. Last result = the status tag only, linking to the run (or `TE-` execution), with time, reason and a gate's cancel time in a tooltip. System rows carry a lock icon (tooltip "System schedule"), no System tag; above the grid: "System schedules can't be deleted. You can change when they run or turn them off." | User review of `/dev/phase-54` (2026-11-18); the wording replaces the user's "not editable", which was wrong (D1, D15). |
+| D23 | **The row switch is on/off only (`enabled`); Pause/Resume live in the row menu.** `enabled` and `pause_reason` stay separate (F1): off = `enabled = 0`; Pause = `pause_reason = 'user'`. While a schedule is off, Run now and Pause/Resume are disabled in the UI and refused by the API (409 "schedule is off"). | 54-03 review m4, decided by the user (2026-11-18). |
+| D24 | **New / edit schedule is a full page** (option B: a step rail and a running summary), not a dialog. Skills and MCP servers are picked with the shared **`MultiSelect`** (`web/src/shared/ui/multi-select.tsx`, built in 54-03: chips when closed; search + checkboxes when open; non-pickable servers greyed under "Can't be picked" with the reason; a custom server counts only once "This server only reads" is ticked). A picked custom agent's own skills and servers show as locked chips "from <agent>"; the schedule adds its own. The Catalog → Agents editor uses the same `MultiSelect`. | User review (2026-11-18), surfaces 2 and 4; the shared component was proposed by genesis-dev and agreed. |
+| D25 | **Application-sync options on its detail page are text with an Edit button** (Edit opens the frequency step and the options), not inline inputs as in today's Settings card. | User review (2026-11-18), surface 3. |
+| D26 | **A chat with a custom agent hides the Copilot toggle.** | User review (2026-11-18), surface 6; D6 left it open. |
+| D27 | **Story Implementation tab: report and rollback document as tabs inside one card** (option A). | User review (2026-11-18), surface 8. |
+| D28 | **Approved as mocked:** schedule detail + history (3), bell (5), story Design (7), story Verification as its own tab (9), feature Overview (10), feature Activity (11). The approved mockup in `web/src/dev/mockups/phase54/` (genesis `b09b08e`) is the layout for 54-07, 54-08 and 54-09. | User review (2026-11-18). |
 
 ## 9. Defaults — ✅ confirmed by the user 2026-11-19 ("yes")
 
@@ -254,6 +261,16 @@ schedules here.
 - Umbrella §9 Deferred: review nits n1 (no `Allow` header on 405) and n2 (failed capture with a live run cancels
   without a confirm).
 - **Q20 → D21** (§8): no repair of runs a pre-fix state edit left stored `running`.
+
+## 11. After 54-03 (2026-11-19): the mockup review folded into the later sub-specs
+
+54-03 BUILT (genesis `eed5da0..b09b08e`, local; review SHIP at re-run 2); the user's review recorded as D22–D28.
+Folded by the spec agent: 54-04 §1 (`enabled` vs `pause_reason`, D23); 54-06 (`enabled` beside `state`, 409 on a
+disabled schedule); 54-07 (D22–D25, the shared `MultiSelect`, a shared row-menu primitive, time-zone canonicalisation,
+no opacity modifiers on token colours); 54-08 (D26); 54-09 (D27, the shared pieces already in `shared/ui`, a compact
+stat grid); 54-10 (A1 against `b09b08e`, keyboard check of `MultiSelect`). Backlog (umbrella §9): opacity modifiers on
+token colours generate no CSS (54-03 As built, "Found, not fixed"). Open, asked as Q21: the 12-hour time inputs
+(54-03 decision 10).
 
 ## Context manifest
 

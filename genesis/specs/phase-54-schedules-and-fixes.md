@@ -54,6 +54,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D19 | One release: genesis v0.83.0 → genesis-workflows v0.27.0. |
 | D20 | Phase 54 live-accepted before its release. |
 | D21 | No repair of runs a pre-fix state edit left stored `running`; the user cancels them by hand (after 54-02). |
+| D22–D28 | From the 54-03 mockup review: list layout (weekday strip, status tag, lock icon), switch = on/off only with Pause in the menu, full-page wizard with the shared `MultiSelect` and locked agent picks, app-sync options as text + Edit, no Copilot toggle with a custom agent, Implementation documents as tabs in one card, the rest approved as mocked. |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
@@ -94,7 +95,7 @@ testing-schedule endpoints stay until 54-07 moves the web off them.
 |---|---|---|
 | 54-01 | project-tracker | Findings, research, decisions D1–D20, defaults F1–F12 |
 | 54-02 | genesis | B1 paused-run state edit, B2 `artifact.saved` events, B3 dead code, O1 discard failed captures, O4 environment labels with `/` + honest 404 for unmatched `/api/*` — **BUILT** (genesis `ea00dfd..eed5da0`, local; review SHIP, `reviews/54-02-review.md`) |
-| 54-03 | genesis (`web/src/dev/`) | `/dev/phase-54` mockups with stub data: Schedules list/detail/wizard, Catalog → Agents + Run, bell, chat agent picker, story Design + Implementation, feature Overview + Activity |
+| 54-03 | genesis (`web/src/dev/`) | `/dev/phase-54` mockups with stub data: Schedules list/detail/wizard, Catalog → Agents + Run, bell, chat agent picker, story Design + Implementation, feature Overview + Activity — **BUILT** (genesis `eed5da0..b09b08e`, local; review SHIP; user review D22–D28) |
 | 54-04 | genesis (`runtime/`, `db/`, `testexec/regression_job.py`) | m0030; schedule model (D9); scheduler engine (F2, D10, D8, D12); system rows + regression migration (D14, D15); `runs.trigger_json`; `schedule_runs`; notifications store; ADR-087 draft kept current |
 | 54-05 | genesis (`packages/genesis-core`, `runs/`, new `agents/`), genesis-workflows | `custom_agents` store; `kiro_node` callables (F4); `agent-prompt` workflow; `schedulable` META key + parity lint; read-only server rule (D3) enforced at launch and in the node |
 | 54-06 | genesis (`api/`, `web/src/types`, `web/src/lib/api`) | Contract table: `/schedules*`, `/custom-agents*`, `/notifications*`, chat `agent_id`, activity items; removals (F7); fixtures |
@@ -122,7 +123,9 @@ Hub-shared schedules (F11); custom agents in Copilot or spec-style chat modes (D
 agent-prompt schedules (D3); URL changes (D16); multi-user anything (ADR-026). **Deferred to the backlog**
 (`specs/backlog/phase-54-follow-ups.md`, created at write-back): previous-run context (D13), cron, output destinations,
 credit caps, schedule templates, custom agents in more chat modes; from 54-02's review: the 405 answer has no `Allow`
-header (n1), and Discard on a failed capture whose run is still live cancels it without a confirm (n2, rare).
+header (n1), and Discard on a failed capture whose run is still live cancels it without a confirm (n2, rare); from
+54-03: opacity modifiers on token colours (`bg-primary/10` …) generate no CSS because `tailwind.config.ts` maps colours
+to bare `var()`; 8 existing source files use them (e.g. `VerificationSection.tsx`, `TopBar.tsx`).
 
 ## 10. Defaults
 

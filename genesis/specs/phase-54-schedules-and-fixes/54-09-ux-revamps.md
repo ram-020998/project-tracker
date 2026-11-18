@@ -2,15 +2,19 @@
 
 > **Status:** SPEC-DRAFTED 2026-11-19. Repo: genesis (`web/src/features/workbench/`, `web/src/features/features/`,
 > `web/src/shared/`, `genesis/api/features.py`). Parent: `specs/phase-54-schedules-and-fixes.md`. Built by
-> **genesis-dev** after 54-03's approval; **the approved mockup is the layout** (54-03 As built + any decisions added to
-> 54-01 §8). Current state: `54-01-findings.md` §4. Decisions: D17, D18.
+> **genesis-dev** after 54-03's approval; **the approved mockup is the layout** (`web/src/dev/mockups/phase54/story.tsx`
+> and `feature.tsx` at genesis `b09b08e`; D27, D28). Current state: `54-01-findings.md` §4. Decisions: D17, D18, D27,
+> D28.
 
 ## 1. Shared pieces
 
-Promote the 54-03 `SectionCard`, `DefinitionList`, `Timeline` and `StatusHeader` to `web/src/shared/` (exported from
-`shared/ui/index.ts` or `shared/layout`), and replace the page-local duplicates: `InfoCard` and `Row` in
-`StoryWorkspacePage.tsx`, `Shell` in `StoryTraceCards.tsx:29`, the heading markup in `VerificationSection.tsx`. Tokens
-only (ADR-027, ADR-055); no `Button asChild` (L-069): link-styled actions use a link with button classes.
+`SectionCard`, `DefinitionList`, `StatusHeader` and `Timeline` already exist in `web/src/shared/ui/` (built in 54-03,
+exported from `shared/ui/index.ts`). Replace the page-local duplicates with them: `InfoCard` and `Row` in
+`StoryWorkspacePage.tsx`, `Shell` in `StoryTraceCards.tsx:29`, the heading markup in `VerificationSection.tsx`. For
+the Implementation counts and Verification totals, promote the mockup's compact `StatGrid` (local to
+`web/src/dev/mockups/phase54/story.tsx`) to `shared/ui`, or give `MetricCard` a compact size; do not add a third grid
+(54-03 decision 3). Tokens only (ADR-027, ADR-055), and no opacity modifiers on token colours (`bg-primary/10` and the
+like generate no CSS, 54-03 As built); no `Button asChild` (L-069): link-styled actions use a link with button classes.
 
 ## 2. Story page (`StoryWorkspacePage.tsx`, ADR-071: still the one canonical page)
 
@@ -20,7 +24,8 @@ only (ADR-027, ADR-055); no `Button asChild` (L-069): link-styled actions use a 
   matches dark mode; run states, empty state and the re-run action use SectionCard + EmptyState; "Edit / chat" and
   "Re-run design" are real buttons; the stage status (draft, in review, completed) is shown.
 - **Implementation:** as approved (item 8): stat tiles and the **Objects changed** table from `report.objects[]`
-  (`useImplementationReport`), report and rollback documents in cards, run and code-review state in the header.
+  (`useImplementationReport`), the report and the rollback document as **tabs inside one card** (D27), run and
+  code-review state in the header.
   Size the table's columns from a real-browser probe (L-090).
 - **Verification:** its own tab (item 9), shown when a verification exists; `defaultStoryTab` (`story-view.ts:21`)
   opens it for the verification lane.

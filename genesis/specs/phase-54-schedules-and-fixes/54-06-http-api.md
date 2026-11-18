@@ -14,8 +14,8 @@
 | `POST /schedules` | `{name, target, schedule, policy?, enabled?}` | `Schedule` (201) | 400 invalid schedule / target; 422 server not pickable (D3); 422 workflow not `schedulable` (D7) or has file inputs |
 | `PUT /schedules/{id}` | user: any field; system: `schedule`, `enabled`, `options`, `policy` | `Schedule` | 400; 403 field not editable on a system row |
 | `DELETE /schedules/{id}` | | 204 | 403 system row |
-| `POST /schedules/{id}/run-now` | | `{run_id \| execution_key}` | 409 in flight; 409 not ready (reason) |
-| `POST /schedules/{id}/pause` · `/resume` | | `Schedule` | |
+| `POST /schedules/{id}/run-now` | | `{run_id \| execution_key}` | 409 in flight; 409 not ready (reason); 409 schedule is off (D23) |
+| `POST /schedules/{id}/pause` · `/resume` | | `Schedule` | 409 schedule is off (D23) |
 | `POST /schedules/{id}/duplicate` | | `Schedule` (201, name "<name> (copy)", disabled) | 403 system row |
 | `POST /schedules/{id}/reset` | | `Schedule` | 403 user row |
 | `GET /schedules/{id}/history` | `?limit=50&offset=` | `{items: ScheduleRun[], total, credits_total: {credits, provenance}}` | |
@@ -29,6 +29,7 @@
 | `POST /notifications/{id}/read` · `POST /notifications/read-all` | | `{unread: int}` | 404 |
 | `POST /chat/sessions` (existing) | + `agent_id?` (read-only mode only, D6) | session (+ `agent: {id, name}`) | 422 `agent_id` with another mode |
 | `GET /chat/sessions/{id}` (existing) | | + `agent: {id, name} \| null` | |
+| the existing chat mode-change endpoint | | unchanged | 422 for a session with a custom agent (D26, 54-08 §1.1) |
 | `GET /features/{id}/activity` (existing, extended, 54-09) | `?stage=&limit=&offset=` | `{items: ActivityItem[], total}` | |
 | `GET /catalog`, `GET /workflows/{id}` (existing) | | + `schedulable: bool` | |
 | `GET /runs`, `GET /runs/{id}` (existing) | | + `trigger: {source, schedule_id, schedule_name \| null, slot} \| null` | |
@@ -37,9 +38,12 @@ Shapes (`web/src/types/schedules.ts`, `customAgents.ts`, `notifications.ts`, add
 `features.ts`):
 
 - `Schedule {id, key?, kind, name, enabled, state: "active"|"paused"|"failing"|"completed", pause_reason, target,
-  schedule, summary, timezone, next_runs: string[], last_run: {slot, outcome, run_id?, at} | null, policy, options?,
-  failure_count, runs_count, editable_fields: string[]}`. `target` is the F1 union with `workflow_name`,
-  `agent_name`, `app_name` added for display.
+  schedule, summary, cadence: {days: number[] | null, line: string}, timezone, next_runs: string[], last_run: {slot,
+  outcome, reason?, run_id?, execution_key?, at, gate_cancel_at?} | null, policy, options?, failure_count, runs_count,
+  editable_fields: string[]}`. `enabled` is the on/off switch and `state` the pause state, kept apart (D23).
+  `cadence` feeds the list's weekday strip and short line (D22; `days` null for monthly and once); the backend builds
+  it, the web does not compute it (L-109). `target` is the F1 union with `workflow_name`, `agent_name`, `app_name`
+  added for display.
 - `ScheduleRun {slot, outcome, reason?, run_id?, execution_key?, started_at?, finished_at?, duration_ms?, credits?,
   provenance?}`; credits only from the run's metered usage (ADR-032), never estimated.
 - `CustomAgent {id, name, description, instructions, skills, mcp_servers: [{name, read_only_mark}], model, used_by,
@@ -93,5 +97,5 @@ adrs     = ["ADR-028", "ADR-032", "ADR-047", "ADR-031"]
 lessons  = ["L-010", "L-011", "L-039", "L-083", "L-094", "L-096", "L-109"]
 docs     = ["tracker:specs/phase-54-schedules-and-fixes/54-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/adr-drafts.md"]
 code     = ["genesis/genesis/api/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
-upstream = ["54-02", "54-04", "54-05"]
+upstream = ["54-02", "54-03", "54-04", "54-05"]
 ```

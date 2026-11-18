@@ -10,9 +10,9 @@ Forward-only, through the migration runner (L-102 if any table is rebuilt; prefe
 
 1. `scheduled_jobs` + `kind TEXT NOT NULL DEFAULT 'system'`, `target_json TEXT`, `policy_json TEXT`,
    `failure_count INTEGER NOT NULL DEFAULT 0`, `pause_reason TEXT` (`user`|`failing`|`completed`, NULL = active),
-   `runs_count INTEGER NOT NULL DEFAULT 0`. `enabled` stays as the on/off switch the user sees; `pause_reason` says why
-   an enabled-but-not-firing row is paused (keep one source of truth: define in As built whether "off" = `enabled=0`
-   or `pause_reason='user'`, and use only that one).
+   `runs_count INTEGER NOT NULL DEFAULT 0`. `enabled` is the on/off switch; `pause_reason` says why an enabled row is
+   paused. They stay separate (D23): off = `enabled = 0`; Pause = `pause_reason = 'user'`; an off schedule never fires,
+   and Run now / Pause / Resume on it are refused.
 2. `schedule_runs` (`id` PK, `schedule_id` → `scheduled_jobs.id` ON DELETE CASCADE, `slot` TEXT, `outcome` TEXT,
    `run_id` TEXT NULL, `execution_key` TEXT NULL, `reason` TEXT NULL, `started_at`, `finished_at`; index
    `(schedule_id, slot)`). Deleting a schedule deletes its rows in the same transaction (L-103).

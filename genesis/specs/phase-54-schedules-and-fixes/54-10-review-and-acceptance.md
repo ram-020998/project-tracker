@@ -37,7 +37,7 @@ skills validation, pytest), one CI run or a run in the CI image before the relea
 
 | # | Check | Pass |
 |---|---|---|
-| A1 | Mockup sign-off carried through: each new and revamped page matches what the user approved in 54-03 | user confirms |
+| A1 | Mockup sign-off carried through: each new and revamped page matches the approved mockup (`/dev/phase-54` at genesis `b09b08e`, D22–D28) | user confirms |
 | A2 | **Agent-prompt schedule:** create a custom agent (instructions + one managed skill + `genesis-kb`), schedule a prompt "once" 2 minutes ahead; it fires, writes `output.md`, the run shows it in Run Detail's documents, history shows the run with metered credits; repeat with `appian-dev` if Dev is up (else recorded as skipped, D20) | as stated |
 | A3 | **Workflow schedule:** `sync-documents` (or another flagged workflow) with stored inputs, every 1 h window; Run now; history; Runs list badge links back | as stated |
 | A4 | **Regression schedule:** an app's migrated row (or a new one from Testing → Setup's link) starts a `TE-` execution on QA (if QA is up; else recorded) | as stated |
@@ -51,7 +51,7 @@ skills validation, pytest), one CI run or a run in the CI image before the relea
 | A12 | **Bell:** notices from A5/A7/A8 listed, mark read, mark all read, links open the right page | as stated |
 | A13 | **Fixes (54-02, as built):** B1 edit a paused run's state and a gated run's state → each keeps its status, no `run.final` row, a `state.edited` note in the events, resume runs the edit; a failing edit answers 400 and leaves the run as it was; B2 a run that saves tool output shows the per-turn artifact list, and an old run stored before the fix shows its artifacts too; O1 discard a failed compose, and discard a compose waiting at its gate (a confirm dialog, then its run is cancelled with one `run.final`); O4 add, make Dev (`POST /config/environments/dev`) and delete an environment labelled `https://example-qa2.appianpreview.com`; an unknown `/api` path answers 404 JSON for GET and DELETE, a real route with the wrong method 405 | each reproduced on v0.82.0 first, then passes |
 | A14 | **UX revamps:** story Design, Implementation (Objects changed table), Verification tab; feature Overview (Needs attention across stages), Activity (all stages, filter, paging) on a real feature with history | as stated |
-| A15 | **Width probe (L-090):** the Schedules list and history, Agents tab, bell popover, story Implementation objects table, feature Activity at 1280 / 1440 / 1920 px, light and dark, in a real browser | no overflow or clipping |
+| A15 | **Width probe (L-090):** the Schedules list and history, Agents tab, bell popover, story Implementation objects table, feature Activity at 1280 / 1440 / 1920 px, light and dark, in a real browser; plus the `MultiSelect` and row menu driven by keyboard only (focus kept after removing a chip, names match visible text) | no overflow or clipping; keyboard path works |
 | A16 | **Process hygiene:** after A2–A11 no stray `kiro-cli` or MCP processes (`ps -ww`, L-104) | none |
 
 ## As built

@@ -9,7 +9,8 @@
 1. `POST /chat/sessions` accepts `agent_id` only with `mode == "read_only"` (422 otherwise, 54-06). The session stores
    the agent's **snapshot** (`custom_agents.snapshot`, 54-05 §1) on the session row or in its state (a column on
    `chat_sessions` added by m0030 if needed; coordinate with 54-04 so there is still one migration). The agent is fixed
-   for the session; `set_session_mode` (`chat/manager.py:937`) away from `read_only` clears it (record which in As built).
+   for the session: `set_session_mode` (`chat/manager.py:937`) to another mode is refused (422) for a session with an
+   agent (the toggle is hidden, D26).
 2. The read-only profile (`chat/mode_profile.py:226`, `ChatModeProfile`) is unchanged for every other session. For a
    session with an agent:
    - instructions: the read-only assistant's own prompt first, then a delimited block "Additional instructions from the
@@ -29,7 +30,9 @@
 ## 2. Web
 
 New-chat control with an optional custom agent picker (read-only mode only), the agent name in the chat header, and
-a short note that in chat the agent keeps chat's read-only tools (D5), as approved in 54-03 §2 item 6.
+a short note that in chat the agent keeps chat's read-only tools (D5), as in the approved mockup
+(`web/src/dev/mockups/phase54/bell-chat.tsx`, genesis `b09b08e`). **A chat with a custom agent hides the Copilot
+toggle (D26)**; the backend still refuses a mode change to copilot for such a session (§1.1).
 
 ## 3. Tests
 
