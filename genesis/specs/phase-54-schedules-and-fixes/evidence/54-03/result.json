@@ -1,0 +1,2708 @@
+{
+ "schedules-list-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1188,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 235,
+      "wrapped": false
+     },
+     {
+      "text": "Target",
+      "w": 229,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 240,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 233,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 60,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 166,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 330,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 127,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 77,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 85,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 206,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 442,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 136,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "catalog-agents-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "notifications-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "chat-agent-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "story-design-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": null,
+    "width": 695,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 515,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 180,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-implementation-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 263,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 169,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 129,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 109,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 115,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 695,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 515,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 180,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Objects changed",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 263,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 169,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 129,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 109,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 115,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 695,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 515,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 180,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-verification-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-1-target-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-hourly-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-daily-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-weekly-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-monthly-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-once-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-4-review-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-agent-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 170,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 282,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 139,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 85,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 108,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "portal-wizard-dialog-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   304,
+   255,
+   672,
+   491
+  ]
+ },
+ "portal-agent-dialog-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   304,
+   50,
+   672,
+   900
+  ]
+ },
+ "portal-bell-popover-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   849,
+   345,
+   386,
+   475
+  ]
+ },
+ "portal-row-menu-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1050,
+   430,
+   176,
+   138
+  ]
+ },
+ "schedules-list-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1348,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 273,
+      "wrapped": false
+     },
+     {
+      "text": "Target",
+      "w": 261,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 285,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 278,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 60,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 188,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 375,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 144,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 88,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 96,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 234,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 503,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 155,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "catalog-agents-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "notifications-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "chat-agent-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "story-design-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": null,
+    "width": 801,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 594,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 207,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-implementation-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 299,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 147,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 123,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 131,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 801,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 594,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 207,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Objects changed",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 299,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 147,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 123,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 131,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 801,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 594,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 207,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-verification-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-1-target-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-hourly-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-daily-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-weekly-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-monthly-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-once-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-4-review-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-agent-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 193,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 320,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 158,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 97,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 123,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "portal-wizard-dialog-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   384,
+   255,
+   672,
+   491
+  ]
+ },
+ "portal-agent-dialog-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   384,
+   50,
+   672,
+   900
+  ]
+ },
+ "portal-bell-popover-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1009,
+   345,
+   386,
+   475
+  ]
+ },
+ "portal-row-menu-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1210,
+   439,
+   176,
+   138
+  ]
+ },
+ "schedules-list-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 274,
+      "wrapped": false
+     },
+     {
+      "text": "Target",
+      "w": 262,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 286,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 278,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 60,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 189,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 375,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 144,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 88,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 96,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 234,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 503,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 155,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "catalog-agents-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "notifications-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "chat-agent-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "story-design-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": null,
+    "width": 803,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 595,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 208,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-implementation-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 299,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 147,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 124,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 131,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 803,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 595,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 208,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 299,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 147,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 124,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 131,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 803,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 595,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 208,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-verification-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-1-target-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-hourly-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-daily-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-weekly-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-monthly-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-once-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-4-review-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-agent-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 193,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 321,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 158,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 97,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 123,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "portal-wizard-dialog-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   624,
+   255,
+   672,
+   491
+  ]
+ },
+ "portal-agent-dialog-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   624,
+   50,
+   672,
+   900
+  ]
+ },
+ "portal-bell-popover-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1329,
+   345,
+   386,
+   475
+  ]
+ },
+ "portal-row-menu-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1451,
+   439,
+   176,
+   138
+  ]
+ },
+ "schedules-list-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1188,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 235,
+      "wrapped": false
+     },
+     {
+      "text": "Target",
+      "w": 229,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 240,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 233,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 60,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 166,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 330,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 127,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 77,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 85,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 206,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 442,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 136,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "catalog-agents-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "notifications-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "chat-agent-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "story-design-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": null,
+    "width": 695,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 515,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 180,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-implementation-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 263,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 169,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 129,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 109,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 115,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 695,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 515,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 180,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Objects changed",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 263,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 169,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 129,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 109,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 115,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 695,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 515,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 180,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-verification-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-1-target-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-hourly-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-daily-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-weekly-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-monthly-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-once-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-4-review-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-agent-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 785,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 170,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 282,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 139,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 85,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 108,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "portal-wizard-dialog-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   304,
+   255,
+   672,
+   491
+  ]
+ },
+ "portal-agent-dialog-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   304,
+   50,
+   672,
+   900
+  ]
+ },
+ "portal-bell-popover-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   849,
+   345,
+   386,
+   475
+  ]
+ },
+ "portal-row-menu-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1050,
+   430,
+   176,
+   138
+  ]
+ },
+ "schedules-list-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1348,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 273,
+      "wrapped": false
+     },
+     {
+      "text": "Target",
+      "w": 261,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 285,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 278,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 60,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 187,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 376,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 144,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 88,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 96,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 234,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 503,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 155,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "catalog-agents-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "notifications-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "chat-agent-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "story-design-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": null,
+    "width": 801,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 594,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 207,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-implementation-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 299,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 147,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 123,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 131,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 801,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 594,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 207,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Objects changed",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 299,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 147,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 123,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 131,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 801,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 594,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 207,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-verification-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-1-target-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-hourly-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-daily-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-weekly-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-monthly-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-once-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-4-review-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-agent-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 891,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 193,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 320,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 158,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 97,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 123,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "portal-wizard-dialog-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   384,
+   255,
+   672,
+   491
+  ]
+ },
+ "portal-agent-dialog-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   384,
+   50,
+   672,
+   900
+  ]
+ },
+ "portal-bell-popover-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1009,
+   345,
+   386,
+   475
+  ]
+ },
+ "portal-row-menu-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1210,
+   439,
+   176,
+   138
+  ]
+ },
+ "schedules-list-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 274,
+      "wrapped": false
+     },
+     {
+      "text": "Target",
+      "w": 262,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 286,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 278,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 60,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 187,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 376,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 145,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 88,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 97,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 234,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 503,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 155,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "catalog-agents-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "notifications-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "chat-agent-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "story-design-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": null,
+    "width": 803,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 595,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 208,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-implementation-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 299,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 147,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 124,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 131,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 803,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 595,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 208,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 299,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 147,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 124,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 131,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": null,
+    "width": 803,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 595,
+      "wrapped": false
+     },
+     {
+      "text": "Change",
+      "w": 208,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "story-verification-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-1-target-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-hourly-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-daily-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-weekly-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-monthly-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-once-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-4-review-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-agent-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 193,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 321,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 158,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 97,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 123,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "portal-wizard-dialog-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   624,
+   255,
+   672,
+   491
+  ]
+ },
+ "portal-agent-dialog-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   624,
+   50,
+   672,
+   900
+  ]
+ },
+ "portal-bell-popover-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1329,
+   345,
+   386,
+   475
+  ]
+ },
+ "portal-row-menu-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1451,
+   439,
+   176,
+   138
+  ]
+ }
+}

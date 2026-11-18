@@ -74,7 +74,205 @@ of each section, L-014); `npm run build` + commit `web/static/` as separate step
 
 ## As built
 
-_(genesis-dev fills in: commits, screenshots, the user's verdict per surface, decisions, Resume note.)_
+**Status:** BUILT 2026-11-18, review **SHIP** (re-run 1). **Waiting for the user's D17 review of `/dev/phase-54`.**
+Repo genesis, branch master, base `eed5da0`, head `33853ba`, 6 local commits (not pushed, not tagged). Source: 21 files,
++3067 lines (no deletions; no existing page changed apart from the router and the shared/ui index and icons), plus
+`web/static` in three build commits.
+
+### Commits (genesis)
+
+| sha | what |
+|---|---|
+| `414735f` | `/dev/phase-54` (lazy chunk) with all 11 surfaces; shared `SectionCard`, `DefinitionList`, `StatusHeader`, `Timeline` (+ `timeline-groups`); tests; the probe `scripts/probes/phase54-mockups.mjs` |
+| `cf5f3f6` | `web/static` for 414735f (66 files) |
+| `93444a2` | review round 1: M1, M2, m1, m2, m3, n1–n3, n5 |
+| `4b4046d` | `web/static` for 93444a2 (66 files) |
+| `631fef6` | re-run 1 nits n6 (previews include today's later slots and this month's run), n7 (stub link) |
+| `33853ba` | `web/static` for 631fef6 (65 files) |
+
+Bundle proof (L-089): each bundle commit was checked with `git show --stat <sha> -- web/static` in its own call after
+the build had exited, and a rebuild in a later call left `git status --short --untracked-files=all` empty each time.
+The reviewer's out-of-tree build matched `web/static` at `cf5f3f6` and `4b4046d`.
+
+### Changed
+
+- `web/src/app/router.tsx`: `{ path: "/dev/phase-54", element: <Phase54Mockups /> }` beside the other `/dev` routes,
+  through `React.lazy` (its own 109 KB chunk; the main chunk grew by about 1 KB, L-015). `main.tsx` already wraps the
+  router in `Suspense`.
+- `web/src/shared/ui/` (exported from `index.ts`; the page-local `InfoCard`/`Shell`/`Row` are untouched, that is 54-09):
+  - `section-card.tsx` `SectionCard {title, icon?, description?, actions?, flush?, headingLevel?}`: a Card holding a
+    `<section>` labelled by its small-caps heading.
+  - `definition-list.tsx` `DefinitionList {items: {label, value}[]}`: a `<dl>` of label-left/value-right rows; an empty
+    value renders "—".
+  - `status-header.tsx` `StatusHeader {fields: {label, value}[], actions?, aria-label?}`: a labelled region of facts
+    plus actions on the right.
+  - `timeline.tsx` `Timeline {items, now?, emptyText?, aria-label?}` and `timeline-groups.ts` (`groupTimeline`,
+    `timelineDayLabel`; pure, kept apart for fast refresh): day groups (Today / Yesterday / "Tue 17 Nov 2026"), newest
+    first, typed icon with a tone, `RelativeTime`, optional in-app `Link`.
+  - `icons.ts`: `BellOff, CalendarClock, CheckCheck, CopyPlus, Ellipsis, GitPullRequest, History, RotateCcw, Timer`.
+- `web/src/dev/mockups/phase54/`: `Phase54Mockups.tsx` (sticky header, jump list, theme button that sets the app
+  theme so portalled dialogs and popovers follow), `frame.tsx` (`MockSection`, `MockFrame` with `data-mock-frame`,
+  `DialogFrame` = a dialog drawn in place, `RowMenu` over Radix DropdownMenu), `options.ts`, `fixtures.ts`,
+  `pickers.tsx` (D3 `ServerPicker`, `SkillPicker`), `schedules.tsx` (1–3), `agents.tsx` (4), `bell-chat.tsx` (5–6),
+  `story.tsx` (7–9), `feature.tsx` (10–11), `phase54.test.tsx`.
+- Stub data (L-083): workflow ids from `genesis-workflows/registry.json`; the five system job keys of 54-01 §2.2
+  (`regression-run` is not a row: D14 retires it, its apps become "Regression: <app>" rows); `r-<12 hex>` run ids,
+  `GNS_000418`, `TE-000041/42`, `TC-0001xx`; run statuses from `statusMeta`; F1 outcomes
+  (`ok|failed|cancelled|skipped|missed|fired`) and pause reasons; credits as metered / partial / unavailable through
+  `CreditBadge`, with a total whose provenance follows `eventlog.credits_provenance`; D3's servers with their real
+  allowlist sizes (`mcp-registry.json`: appian-dev 73, genesis-kb 20, appian-atlas 33; jira/jarvis/appian-data-generator
+  none); implementation objects in `story-implementation`'s `{name, type, action, new_version, status}` shape. Next-run
+  previews are computed from page load in Asia/Kolkata.
+- What each surface shows, per the user's list:
+  - **D3** (2b and the agent editor): the six non-pickable servers are disabled checkboxes with "Can't be picked:
+    <reason>" (`aria-describedby`); `team-confluence` (custom) is pickable only after "This server only reads" is ticked
+    ("Your claim … Genesis does not check").
+  - **D5**: the agent editor, the new-chat panel and the chat header say the agent keeps chat's read-only tools; the
+    schedule step says it also has shell, file and web tools (D2).
+  - **D8/D12**: list rows "Waiting at a gate" (with "Cancelled in … if not answered · Answer") and "Paused (failing)";
+    the bell's needs-you and auto-paused notices; history rows "gate not answered within 24 h" and "run took longer
+    than the 2 h maximum".
+  - **D9**: the five forms (Every N hours with a window and Weekdays only, Daily with Weekdays only, Weekly with days,
+    Monthly with the last-day rule, Once), time zone, the frequency in words and the next 5 runs; Advanced with grace,
+    max duration, gate max wait, failures before pause, end date, max runs.
+  - **D10**: history rows `missed` ("Genesis was not running; older than the 12 h grace") and `skipped` ("previous run
+    still active", "no Dev environment").
+  - **D15**: the application-sync detail carries every `ApplicationSyncSection` field: frequency kind and window,
+    weekdays only, time zone, on/off, full sync every N days, max changed (count and %), run on this machine, next
+    run, last result, Run now, and per-app last sync (kind, time, a non-succeeded status, published Hub version, last
+    full sync).
+  - Both options where §2 asks: the wizard as **A** (a dialog, one step at a time, plus "Open option A as a real
+    dialog") and **B** (a full page with a step rail and a running summary); Implementation documents as **A** (tabs in
+    one card) and **B** (two stacked cards).
+
+### Tests
+
+- `src/shared/ui/section-blocks.test.tsx` (6): each shared piece renders its roles and passes jest-axe; Timeline day
+  labels, grouping order, per-day lists and links, empty text.
+- `src/dev/mockups/phase54/phase54.test.tsx` (24): the route smoke render through `createMemoryRouter(router.routes)`
+  at `/dev/phase-54` (h1, jump list of 11, all 11 section headings and ids); then jest-axe per section, run on every
+  `[data-mock-frame]` with all rules and on the whole section with `landmark-unique` off (two options of one surface
+  repeat region names only in the mockup); each of the 6 wizard steps, the 5 frequency forms and both details; plus
+  content checks for D3, D5, D8/D12, D9 (Weekdays only on hourly and daily), D10, D15 (the per-app `failed`), the Edit /
+  chat link, the absent "arriving in later phases" text.
+- Fail-first (review M1, M2, m1): with the pre-fix `schedules.tsx`, `fixtures.ts`, `story.tsx` and the new test file,
+  3 tests failed: "Unable to find … switch … Weekdays only", "Unable to find … text: failed", "Unable to find … link …
+  Edit / chat".
+- Gates at `33853ba`: `npm run lint` 0 errors, 20 warnings (the count before 54-03; none in new files);
+  `npm run typecheck` clean; `npm test` 68 files / **802 passed** (770 before).
+
+### Screenshots (real browser, L-090)
+
+`scripts/probes/phase54-mockups.mjs` starts Vite from `web/` (cwd `web/`), checks a known Tailwind class resolves
+(the frames' `border-dashed`), and for 1280 / 1440 / 1920 px × light / dark screenshots each section, the variants and
+the portalled surfaces, and checks page sideways scroll, element overflow per frame, table scroll and header wrap.
+Final run at `631fef6`: **150 entries, all clean**. One earlier run found the history table scrolling at 1280
+(`min-w-[820px]`); it is `min-w-[680px]` now.
+
+Folder: `specs/phase-54-schedules-and-fixes/evidence/54-03/` (20 MB, JPEG q70) + `result.json`. Names are
+`<name>-<width>-<theme>.jpg`, `<width>` ∈ 1280, 1440, 1920 and `<theme>` ∈ light, dark (6 files per name):
+
+| surface | names |
+|---|---|
+| 1 Schedules page | `schedules-list` (all rows + the empty Mine state), `portal-row-menu` |
+| 2 Wizard | `schedule-wizard` (step 2b, agent prompt), `schedule-wizard-1-target`, `-2a-workflow`, `-2c-regression`, `-3-hourly`, `-3-daily`, `-3-weekly`, `-3-monthly`, `-3-once`, `-4-review`, `portal-wizard-dialog` |
+| 3 Schedule detail | `schedule-detail` (application sync), `schedule-detail-agent` (Weekly KB digest) |
+| 4 Catalog → Agents | `catalog-agents`, `portal-agent-dialog` |
+| 5 Bell | `notifications`, `portal-bell-popover` |
+| 6 Chat | `chat-agent` |
+| 7–9 Story | `story-design`, `story-implementation`, `story-verification` |
+| 10–11 Feature | `feature-overview`, `feature-activity` |
+
+### Review
+
+`specs/phase-54-schedules-and-fixes/reviews/54-03-review.md`.
+- **Round 1: NEEDS_CHANGES.** M1 the app-sync detail lacked the per-app last status (D15); M2 the Every-N-hours form
+  had no Weekdays only (D9); m1 Edit / chat was a button calling `window.open`; m2 the probe never opened the portalled
+  surfaces; m3 two hand-rolled stat grids, one with raw keys; m4 the on/off switch over two stored states (a question
+  for the user); n1–n5.
+- Fixed in `93444a2`/`4b4046d`: M1, M2, m1, m2, m3, n1, n2, n3, n5. **Re-run 1: SHIP**, with new nits n6, n7, fixed in
+  `631fef6`/`33853ba` (not re-reviewed: fixture date arithmetic and one stub link's href/sr-only text; gates re-run
+  green, and the probe re-run at that source is all clean).
+- Open for the user: m4 and n4 (below).
+
+### Decisions / deviations
+
+No ADR deviation.
+1. **Theme button sets the app theme** (`useTheme().setTheme`, persisted), not a wrapper class as older mockups do, so
+   the portalled dialogs, popover and menu follow it.
+2. **jest-axe per frame, then the section with `landmark-unique` off** (accepted by review).
+3. **Compact `StatGrid`** (local to `story.tsx`) for the Implementation counts and the Verification totals, not the
+   shared `MetricCard`: its display numerals are too large for six or eight counts (seen in the screenshots). 54-09
+   should promote it or give `MetricCard` a compact size, not add a third grid.
+4. **Row menu over `@radix-ui/react-dropdown-menu` directly** (an existing dependency, used by `select.tsx`). 54-07
+   should add a shared menu primitive in `shared/ui`.
+5. **Application-sync options read-only with Edit** on the detail page (Edit opens the frequency step + options), not
+   inline inputs as today's Settings card. Alternative: inline editing on the detail page. *Question for the user.*
+6. **On/off switch = "does it fire"** (off for Off, Paused and Paused (failing)); turning it on resumes and clears the
+   failure count. F1 keeps `enabled` and `pause_reason` apart, so the user must say which field the switch writes
+   (review m4). *Question for the user.*
+7. **Copilot is shown disabled** in a custom-agent chat ("Not available in a chat with a custom agent"); D6 says only
+   the read-only assistant takes an agent but not what happens to the Copilot toggle in that session. Alternative:
+   hide the toggle. *Question for the user.*
+8. **The wizard's agent-prompt step** shows the picked custom agent's skills and servers in a summary line, but the
+   skill and server pickers show only the schedule's own picks. Alternative: show the agent's picks as locked, ticked
+   rows. *Question for the user.*
+9. **Section 9 Verification** credits shown as "n/a" (unavailable) to show that provenance; a real verification run
+   is metered.
+10. Native `type="time"` inputs show 12-hour AM/PM in an en-US browser locale beside 24-hour words and previews
+    (review n4); the real form behaves the same. *Mentioned to the user.*
+
+### Found, not fixed (out of scope; for follow-up)
+
+- **Opacity modifiers on token colours generate no CSS.** `tailwind.config.ts` maps colours to bare `var(--…)` (no
+  `<alpha-value>`), so `bg-primary/10`, `border-warning/40`, `bg-warning/10`, `bg-surface-1/70`, `ring-primary/40` and
+  similar produce no rule at all: 0 matches in the built CSS. 8 source files use `bg-primary/10` (for example
+  `VerificationSection.tsx` gate panel, `TopBar.tsx` header, the run-inspection mockup). The new code avoids them
+  (`grad-brand-soft`, `*-subtle`). Backlog item for the docs agent.
+
+### Lesson candidates
+
+1. **An opacity modifier on a `var()` colour is a silent no-op in this Tailwind setup.** Classes such as
+   `bg-primary/10` pass lint, typecheck and jsdom tests and render nothing; only a grep of the built CSS shows it. Use
+   the `*-subtle` tokens or `grad-brand-soft`, or define the colours with `<alpha-value>`.
+2. **A mockup page that shows two options of one surface side by side needs jest-axe per option frame**: equal region
+   names across the options trip `landmark-unique` though neither option alone has a defect. Run axe per frame with all
+   rules and on the page with only that rule off.
+3. **A mockup's dates must be relative to page load, including previews** (review n2, n6): fixed dates turn into "next
+   runs" in the past by the time the user reviews.
+
+### Code-map changes (for genesis-docs, bible/03)
+
+- `web/src/shared/ui/section-card.tsx` `SectionCard`, `definition-list.tsx` `DefinitionList`, `status-header.tsx`
+  `StatusHeader`, `timeline.tsx` `Timeline` + `timeline-groups.ts` `groupTimeline`/`timelineDayLabel`; all exported
+  from `shared/ui/index.ts`. `icons.ts` gains 9 icons.
+- `web/src/app/router.tsx`: `/dev/phase-54` (lazy).
+- `web/src/dev/mockups/phase54/**`: the Phase 54 mockups (dev-only).
+- `scripts/probes/phase54-mockups.mjs`: the mockup width/theme probe (sections, variants, portalled surfaces).
+
+### User review (D17) — per surface
+
+_(to fill in from the user's verdict: approved / changes, with any change recorded in 54-01 §8 as a decision)_
+
+| # | surface | verdict | changes |
+|---|---|---|---|
+| 1 | Schedules page | — | |
+| 2 | New / edit schedule (A dialog or B full page) | — | |
+| 3 | Schedule detail + history | — | |
+| 4 | Catalog → Agents | — | |
+| 5 | Notification bell | — | |
+| 6 | Chat with a custom agent | — | |
+| 7 | Story Design tab | — | |
+| 8 | Story Implementation tab (A tabs or B stacked) | — | |
+| 9 | Story Verification tab | — | |
+| 10 | Feature Overview tab | — | |
+| 11 | Feature Activity tab | — | |
+
+### Resume note
+
+Done: the build, gates, screenshots and review (SHIP). Next: the user reviews `/dev/phase-54` and answers the
+questions in Decisions 5–8 and review m4; record the verdict per surface in the table above. Then the spec agent folds
+the changes into 54-07/54-08/54-09 (D17); 54-07/08/09 do not start before that. Open: nothing in the code.
 
 ## Context manifest
 
