@@ -241,6 +241,19 @@ schedules here.
 | F11 | **Machine scope.** User schedules run on the machine that holds them; not published to the Hub. The designated-machine rule stays app-sync only. | ADR-063 (local-first). |
 | F12 | **Build order.** 54-02 fixes → 54-03 mockups (D17 gate) → 54-04 scheduler + storage → 54-05 custom agents + `agent-prompt` → 54-06 HTTP API contract → 54-07 Schedules web + bell → 54-08 chat custom agent → 54-09 UX revamps → 54-10 review + acceptance → 54-11 release + docs. | Backend before web; the mockup gate before any new or revamped surface is wired. |
 
+## 10. After 54-02 (2026-11-19): As built folded into the later sub-specs
+
+54-02 BUILT (genesis `ea00dfd..eed5da0`, local; review SHIP). Folded by the spec agent:
+- 54-06 §3a: the web `agent.prompt` kind drift, the failed-capture `proposals` type, `state.edited` as a `custom` note,
+  the environment routes as built and the catch-all's 404/405 rule.
+- 54-10 A13: rewritten for the fixes as built (gated runs, the 400 on a failed edit, old runs' artifacts, the
+  gate-waiting capture confirm, the new make-Dev route, 404 vs 405).
+- 54-11: release-note API changes and the two stale architecture docs; 54-02's lesson candidates and code-map changes.
+- Umbrella §9 Deferred: review nits n1 (no `Allow` header on 405) and n2 (failed capture with a live run cancels
+  without a confirm).
+- Open, asked as Q20: runs edited before the fix may be stored `running` with a `run.final{running}` row, which
+  `reconcile_status` keeps adopting after a restart; nothing repairs them.
+
 ## Context manifest
 
 ```toml

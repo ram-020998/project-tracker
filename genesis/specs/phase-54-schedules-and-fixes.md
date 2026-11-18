@@ -92,7 +92,7 @@ testing-schedule endpoints stay until 54-07 moves the web off them.
 | Sub-phase | Repo | Content |
 |---|---|---|
 | 54-01 | project-tracker | Findings, research, decisions D1–D20, defaults F1–F12 |
-| 54-02 | genesis | B1 paused-run state edit, B2 `artifact.saved` events, B3 dead code, O1 discard failed captures, O4 environment labels with `/` + honest 404 for unmatched `/api/*` |
+| 54-02 | genesis | B1 paused-run state edit, B2 `artifact.saved` events, B3 dead code, O1 discard failed captures, O4 environment labels with `/` + honest 404 for unmatched `/api/*` — **BUILT** (genesis `ea00dfd..eed5da0`, local; review SHIP, `reviews/54-02-review.md`) |
 | 54-03 | genesis (`web/src/dev/`) | `/dev/phase-54` mockups with stub data: Schedules list/detail/wizard, Catalog → Agents + Run, bell, chat agent picker, story Design + Implementation, feature Overview + Activity |
 | 54-04 | genesis (`runtime/`, `db/`, `testexec/regression_job.py`) | m0030; schedule model (D9); scheduler engine (F2, D10, D8, D12); system rows + regression migration (D14, D15); `runs.trigger_json`; `schedule_runs`; notifications store; ADR-087 draft kept current |
 | 54-05 | genesis (`packages/genesis-core`, `runs/`, new `agents/`), genesis-workflows | `custom_agents` store; `kiro_node` callables (F4); `agent-prompt` workflow; `schedulable` META key + parity lint; read-only server rule (D3) enforced at launch and in the node |
@@ -120,7 +120,8 @@ Workspace; previous-run context (D13); per-schedule credit caps; schedule-level 
 Hub-shared schedules (F11); custom agents in Copilot or spec-style chat modes (D6); write-capable MCP servers in
 agent-prompt schedules (D3); URL changes (D16); multi-user anything (ADR-026). **Deferred to the backlog**
 (`specs/backlog/phase-54-follow-ups.md`, created at write-back): previous-run context (D13), cron, output destinations,
-credit caps, schedule templates, custom agents in more chat modes.
+credit caps, schedule templates, custom agents in more chat modes; from 54-02's review: the 405 answer has no `Allow`
+header (n1), and Discard on a failed capture whose run is still live cancels it without a confirm (n2, rare).
 
 ## 10. Defaults
 

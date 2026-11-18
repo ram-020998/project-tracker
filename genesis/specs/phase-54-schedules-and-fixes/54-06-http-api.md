@@ -62,6 +62,20 @@ Shapes (`web/src/types/schedules.ts`, `customAgents.ts`, `notifications.ts`, add
 Golden JSON fixtures for each new shape from real responses of a test app (L-011, L-083); web tests parse them through
 the same client functions the pages use (L-109). Backend route tests for every row of §1, including each error.
 
+## 3a. Carried from 54-02's As built (this sub-spec owns the web contract)
+
+1. **Event kinds drift:** `agent.prompt` is canonical in the backend (`_CANONICAL_CUSTOM`) but missing from the web
+   `CANONICAL_EVENT_KINDS` and `EVENT_FIXTURES` (`web/src/test/fixtures/events.ts`). Add it; the contract test must
+   fail on any kind present in one list only (L-011).
+2. **Capture type:** `Capture["proposals"]` requires a `proposals` list, but a failed capture stores `{error}` only.
+   Make the type a union of the real stored shapes and drop the test cast (`failedProposals` in the O1 test).
+3. A state edit is logged as kind `custom` with `data.type: "state.edited"` (54-02 decision 1); 54-06 adds no event
+   kind for it.
+4. Environment routes as built in 54-02: `DELETE /config/environments/{label:path}`, `POST /config/environments/dev
+   {label, is_dev}`; the old `…/{label}/dev` is gone. Unmatched `/api/*` → 404 JSON for every method; a real route
+   with the wrong method → 405 (so `GET /config/environments/<x>` is 405). New routes in §1 must keep the catch-all's
+   behaviour: add a route-table test for `/schedules/*`, `/custom-agents/*`, `/notifications/*`.
+
 ## 4. Gates
 
 `cd genesis && .venv/bin/python -m pytest -q -p no:warnings`, `ruff check genesis`; web `npm run lint && npm run
@@ -79,5 +93,5 @@ adrs     = ["ADR-028", "ADR-032", "ADR-047", "ADR-031"]
 lessons  = ["L-010", "L-011", "L-039", "L-083", "L-094", "L-096", "L-109"]
 docs     = ["tracker:specs/phase-54-schedules-and-fixes/54-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/adr-drafts.md"]
 code     = ["genesis/genesis/api/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
-upstream = ["54-04", "54-05"]
+upstream = ["54-02", "54-04", "54-05"]
 ```
