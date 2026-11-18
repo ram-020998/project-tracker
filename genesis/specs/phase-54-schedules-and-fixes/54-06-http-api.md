@@ -5,6 +5,35 @@
 > 54-09) adds its routes; this sub-spec owns the contract table, the web types, the client functions, the golden
 > fixtures and the removals (F7). All routes under `/api` (ADR-028); the client prepends `/api` centrally (L-010).
 
+## 0. From 54-04's As built (read it: "For 54-05 / 54-06")
+
+- **Wiring:** `app.state.scheduler`, `app.state.schedule_store`, `app.state.notifications`. Every `ScheduleStore` call
+  is blocking: call it off the event loop (L-026).
+- **Store calls the routes use:** `list(kind)`, `get(id)`, `get_by_key(job_key)`, `regression_for(app_uuid)`,
+  `create_user(...)`, `update(id, ...)` (a system row accepts only schedule, enabled, options, policy), `delete_user`,
+  `duplicate` (off, "<name> (copy)"), `reset_system(job_key)`, `set_pause(id, "user" | None)` (None resumes and clears
+  the failure count), `history(id, limit, offset) -> (rows, total)`, `open_fire_for(id)`.
+- **Engine:** Run now = `await scheduler.run_now(id) -> row_id` (the run id lands on the row once the handler starts
+  it; the route answers the row id and the run id when known); preview = `next_runs(schedule, now, 5)`;
+  `gate_cancel_at` = make `Scheduler._gate_cancel_at` public and use it for `last_run.gate_cancel_at` (§1 shape).
+- **Errors → HTTP:** `ScheduleError` 400, `ScheduleNotFound` 404, `ScheduleForbidden` 403, `ScheduleConflict` 409.
+  The 409 messages are fixed: "schedule is off", "a run of this schedule is still active", "another Genesis process on
+  this machine runs the schedules", "this schedule has nothing to run in this build". Add the third to §1's run-now
+  and pause rows.
+- **History rows** (`schedule_runs`): `{id, schedule_id, slot ("YYYY-MM-DDTHH:MM" | "manual:<utc>Z"), outcome, run_id,
+  execution_key, reason, started_at, finished_at, gate_opened_at, idle_since, idle_s}`; §1's `ScheduleRun` adds
+  `duration_ms`, `idle_s` (D31) and credits from the run. A recovered stale row reads "interrupted before its result was
+  recorded" (outcome `failed`, not counted toward failures). A red regression run is `failed` with a notice but not
+  counted (D30); expose `counts_toward_pause: bool` on the row so the web can say so.
+- **Notifications:** `NotificationStore(db).add/list/unread_count/mark_read(id) -> bool/mark_all_read() -> int`; source
+  `schedules`; kinds `needs_you`, `failed`, `auto_paused`, `missed`; links `/runs/<id>` or `/schedules/<id>`.
+- **Runs:** `RunRecord.trigger` is `{source:"schedule", schedule_id, slot}` or None; add it to `api/_shared.py`'s run
+  dict (with `schedule_name` resolved, null if the schedule is gone).
+- **Removals (§2), consumers known today:** `api/schedules.py` (3 routes and `_next_due`); `api/testing.py:101-104`
+  (the setup's `schedule` key, replaced by the pointer); `testexec/regression_service.py` (`schedule_view`,
+  `save_schedule`, `_cadence_of`, `get/set_schedule`, `SCHEDULE_NOTE`, `CADENCES`); `PUT …/testing/schedule`; the web
+  callers. Re-grep before removing (L-094).
+
 ## 1. Contract table
 
 | Method + path | Body / query | Answer | Errors |

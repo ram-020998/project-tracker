@@ -49,7 +49,10 @@ in the release notes:
 - **Architecture docs** (`genesis/docs/architecture/`): scheduler, notifications, custom agents, the `agent-prompt`
   workflow, `kiro_node` callables, the navigation; and the 54-02 hand-off: `modules/configuration-and-secrets.md:589-590`
   and `modules/api.md:245` still give the old environment routes; write the new forms and the catch-all's 404/405 rule.
-- **54-02 candidates:** the four lesson candidates and the code-map changes in 54-02's As built.
+  From 54-04: `modules/scheduler-and-jobs.md` still names `regression_job.py`, the dispatcher and the old job keys;
+  `api.md:539`, `data-and-migrations.md` (m0030, the `scheduled_jobs` columns, `:296`) and
+  `knowledge-base.md:532/573/762` need the same update.
+- **54-02, 54-03 and 54-04 candidates:** the lesson candidates and code-map changes in each As built.
 - `context/state/current.md` (versions, DB v30, test counts, what works: Schedules, custom agents, bell; known open
   items unchanged from Phase 51/53 plus any skipped 54-10 rows), code map, `progress/phase-54-schedules-and-fixes.md`,
   `changelog.md`, README row 54 → SHIPPED, tracker §6, `specs/backlog/phase-54-follow-ups.md` (umbrella §9 Deferred +

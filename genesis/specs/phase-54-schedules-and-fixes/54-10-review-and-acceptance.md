@@ -13,9 +13,10 @@
    name; `appian-dev-write`, `appian-dev-packages`, `appian-devops`, `jira`, `jarvis`, `appian-data-generator` refused.
 2. **Chat (D6, ADR-031/034):** a session with a custom agent has no shell, writes only in its sandbox, only read-only
    MCP tools; activation verified (L-113); other modes reject `agent_id`.
-3. **Engine rules (D8, D10, D12):** missed/overlap/gate/timeout/failure logic matches 54-04 §3; every cancel goes
-   through the stop-intent + CAS path (L-108); every handler reaches a terminal `schedule_runs` row on every error
-   path (L-107); the tick runs only under the run-owner lock (L-097).
+3. **Engine rules (D8, D10, D12, D30, D31):** missed/overlap/gate/timeout/failure logic matches 54-04 §3 and its As
+   built; every cancel goes through the stop-intent + CAS path (L-108); every handler reaches a terminal `schedule_runs`
+   row on every error path (L-107); the tick runs only under the run-owner lock (L-097). **Review `9a365c0`** (54-04
+   m3, a past `once` cannot be turned on): fixed after 54-04's SHIP and not yet reviewed.
 4. **Migration (L-081, L-102, L-103):** m0030 forward-only; user-modified app sync kept; regression entries became rows
    once; `regression-run` not re-created by `ensure_defaults`; deleting a schedule removes its `schedule_runs` rows.
 5. **Credits (ADR-032):** history credits come only from metered run usage, with provenance; no estimate.
@@ -43,8 +44,8 @@ skills validation, pytest), one CI run or a run in the CI image before the relea
 | A4 | **Regression schedule:** an app's migrated row (or a new one from Testing → Setup's link) starts a `TE-` execution on QA (if QA is up; else recorded) | as stated |
 | A5 | **Missed slot:** stop `genesis serve` across a slot, start it within grace → one catch-up run; across two slots → one run + one `missed` row + one bell notice; a `once` beyond grace → `missed` and completed | as stated |
 | A6 | **Overlap:** a slot due while the previous run is still running → `skipped` with the reason | as stated |
-| A7 | **Gate wait:** a schedule whose run reaches an escalation gate (an `agent-prompt` prompt that cannot produce output, or a fixture) → "needs you" notice; unanswered → cancelled at the next slot / max wait, `failed` "gate not answered", no second `run.final` | as stated |
-| A8 | **Failures:** three failing runs → Paused (failing) + notice; Resume clears; a readiness skip (sign Kiro out, or uninstall the workflow) is `skipped`, not a failure | as stated |
+| A7 | **Gate wait:** a schedule whose run reaches an escalation gate (an `agent-prompt` prompt that cannot produce output, or a fixture) → "needs you" notice; unanswered → cancelled at the next slot / max wait, `failed` "gate not answered", no second `run.final`; a run answered at its gate after a while, or paused by hand and resumed, is not cancelled as "timed out" because of that idle time (D31), also across a `genesis serve` restart while it waits | as stated |
+| A8 | **Failures:** three failing runs → Paused (failing) + notice; Resume clears; a readiness skip (sign Kiro out, or uninstall the workflow) is `skipped`, not a failure; a regression run with red tests is `failed` with a notice but does not count toward the pause (D30) | as stated |
 | A9 | **System rows:** app sync edited from its row (all former Settings fields), runs from Run now; document sync shows `failed` when its run fails; Reset to default; Settings → General has no sync card | as stated |
 | A10 | **Catalog → Agents:** create, edit, Run once, delete refused while a schedule uses it | as stated |
 | A11 | **Chat with a custom agent:** read-only session, the agent's instruction visibly applied, a mutating or shell request refused with the notice; resume after a `genesis serve` restart keeps the agent | as stated |

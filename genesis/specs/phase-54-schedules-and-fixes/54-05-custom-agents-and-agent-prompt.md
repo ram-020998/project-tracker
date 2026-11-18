@@ -5,6 +5,20 @@
 > `specs/phase-54-schedules-and-fixes.md`. Built by **genesis-dev**. Decisions: D2–D5, D7, F3–F5
 > (`54-01-findings.md` §8–§9). ADR draft: `adr-drafts.md`.
 
+## 0. From 54-04's As built (read it: "For 54-05 / 54-06")
+
+- **Hook:** `register_target_handlers(scheduler, run_manager=, executions=, kb_store=, agent_prompt_inputs=None,
+  kiro_ready=None)` in `api/app.py`. 54-05 passes `agent_prompt_inputs=fn(target: dict) -> dict` returning the
+  `agent-prompt` inputs (§4) with the custom-agent snapshot taken at call time. Raise `LookupError` or `ValueError`
+  (agent gone, a server no longer pickable under D3) and the row is recorded `failed` with that message. The handler
+  already checks that `agent-prompt` is installed and Kiro is signed in, and starts the run with its trigger; today it
+  records `skipped` ("nothing to run in this build") until the hook is passed.
+- **`schedulable`:** the workflow handler reads `meta.get("schedulable") is True`; §5 adds the key to the loader, the
+  parity lint and the library.
+- **`custom_agents`** exists (m0030) with the F3 columns: `name` UNIQUE, `skills_json` and `mcp_servers_json`
+  default `'[]'`, `model` nullable. §1 builds the store over it; no migration change.
+- A one-off Run (§6) leaves `trigger` None.
+
 ## 1. Custom agents store (`genesis/agents/`)
 
 Over m0030's `custom_agents` (54-04 §1): `list`, `get`, `create`, `update`, `delete` (409 with the schedule names when

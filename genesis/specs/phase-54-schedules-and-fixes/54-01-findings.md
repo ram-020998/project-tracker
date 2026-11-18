@@ -1,7 +1,7 @@
 # 54-01 — Findings: Schedules, fixes and UX revamps
 
 > **Status:** SPEC-DRAFTED 2026-11-19 — Q&A complete: decisions D1–D20 (§8), defaults F1–F12 (§9, confirmed); D21
-> added after 54-02 (§10); D22–D29 from the 54-03 mockup review (§11).
+> added after 54-02 (§10); D22–D29 from the 54-03 mockup review (§11); D30–D31 during 54-04 (§12).
 > Parent: `specs/phase-54-schedules-and-fixes.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the schedules
@@ -233,6 +233,8 @@ schedules here.
 | D27 | **Story Implementation tab: report and rollback document as tabs inside one card** (option A). | User review (2026-11-18), surface 8. |
 | D28 | **Approved as mocked:** schedule detail + history (3), bell (5), story Design (7), story Verification as its own tab (9), feature Overview (10), feature Activity (11). The approved mockup in `web/src/dev/mockups/phase54/` (genesis `b09b08e`) is the layout for 54-07, 54-08 and 54-09. | User review (2026-11-18). |
 | D29 | **Time fields use a 24-hour control (Q21, option B).** Every time field (schedule wizard, application-sync options, advanced end date's time) is a shared `TimeInput` in `web/src/shared/ui/` showing `HH:MM` 24-hour whatever the browser locale, matching the frequency text and next-run previews: hour and minute fields, typed digits and arrow keys, a label per field, jest-axe and a userEvent keyboard test. Replaces the native `type="time"` used in the mockup. Built in 54-07; the mockup is not revised. | User chose B (2026-11-19) after 54-03 decision 10 recorded "yes" as "no change". Considered: A (keep the native control; AM/PM on an en-US locale). |
+| D30 | **A regression run whose tests fail is recorded `failed` with a bell notice, but does not count toward auto-pause (54-04 Q1, option B).** Red tests are a product finding, not a broken schedule; only a run that could not execute counts toward D12's N. | User, asked by genesis-dev during 54-04 (2026-11-19). |
+| D31 | **Time a scheduled run spends at a gate or paused does not count toward its max run duration; a run the user paused by hand is never auto-cancelled (54-04 Q2, option A).** The gate wait (D8) has its own limit. The idle time is stored on the `schedule_runs` row (`gate_opened_at`, `idle_since`, `idle_s`), so a restart keeps it. | User, asked by genesis-dev during 54-04 (2026-11-19); the storage detail is 54-04 review B1. |
 
 ## 9. Defaults — ✅ confirmed by the user 2026-11-19 ("yes")
 
@@ -272,6 +274,16 @@ no opacity modifiers on token colours); 54-08 (D26); 54-09 (D27, the shared piec
 stat grid); 54-10 (A1 against `b09b08e`, keyboard check of `MultiSelect`). Backlog (umbrella §9): opacity modifiers on
 token colours generate no CSS (54-03 As built, "Found, not fixed"). Q21 → D29: a 24-hour time control (54-03
 decision 10 corrected: the user's "yes" did not mean "no change").
+
+## 12. After 54-04 (2026-11-19): As built folded into the later sub-specs
+
+54-04 BUILT (genesis `b09b08e..9a365c0`, local; review SHIP at re-run 2; `9a365c0`, a past `once` cannot be turned on,
+was fixed after SHIP and is not reviewed). The user's answers to genesis-dev's Q1 and Q2 are D30 and D31; the ten
+defaults the user accepted are listed once, in 54-04's As built ("Decisions / deviations"). Folded by the spec agent:
+54-05 §0 (the `agent_prompt_inputs` hook, the `schedulable` read, the `custom_agents` columns); 54-06 §0 (store and
+engine calls, error → HTTP mapping, 409 messages, history row shape, `gate_cancel_at`, `trigger` in the run dict, the
+removal list); 54-07 (D30, D31 and the "interrupted" outcome in the history); 54-10 (A7, A8, a restart check, the
+unreviewed `9a365c0`); 54-11 (docs hand-off, DB v30); umbrella §9 (the follow-ups).
 
 ## Context manifest
 

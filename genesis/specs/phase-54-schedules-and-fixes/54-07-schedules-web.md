@@ -44,7 +44,9 @@ Rules:
 - the `application-sync` detail holds everything today's `ApplicationSyncSection.tsx` shows (D15), then that component
   and its mount in `SettingsPage.tsx:68` are removed;
 - history shows outcome pills (including `missed` and `skipped` with the reason), run links, duration, credits with
-  provenance (ADR-032) and the total;
+  provenance (ADR-032) and the total; a row that does not count toward auto-pause (`counts_toward_pause: false`: a red
+  regression run, D30, or an "interrupted" recovered row) says so; a run's gate or paused time (`idle_s`, D31) is shown
+  beside its duration;
 - Paused (failing) and waiting-at-gate states are visible on the row and the detail, with Resume / Open run;
 - delete asks for confirmation and says the runs stay in Runs (F8);
 - **time zones (54-03 decision 11):** browsers may name the machine's zone by an alias ("Asia/Calcutta" for
