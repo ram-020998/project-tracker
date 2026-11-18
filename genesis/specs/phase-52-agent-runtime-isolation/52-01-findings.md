@@ -687,12 +687,36 @@ folder. Points that bear on §14:
   per request; `remote_session/git_gateway.py`); mediated secret use (the agent names a secret and an exact origin,
   trusted code sends the request, `secrets_mediation/`); re-applying a changed sandbox policy at the next turn.
 
+## 19. Baseline change since the brief (checked 2026-11-18)
+
+Phase 51 (test execution engine) and Phase 53 (kiro-agent-sdk v3) shipped while this Q&A was paused: genesis
+**v0.82.0**, genesis-workflows v0.26.0, playwright-appian v0.3.1, DB **v29** (`context/state/current.md`). The problem
+in §1–§5 still stands as **ADR-083 risks (a)–(c)**, which ADR-083 and ADR-086 item 7 leave open "until Phase 52":
+(a) the shell and built-in read tools reach the user's files and the loopback API; (b) the agent shell inherits the
+worker's whole environment; (c) test-user passwords sit in the `apwt open --login` and Playwright replay subprocess
+environments. Facts in the brief that are now out of date, and what they change:
+
+| Brief / decision | Now (source) | Effect |
+|---|---|---|
+| §3.1–§3.2: `auto_approve` default, `--trust-all-tools` for nodes without a tool list | Kiro runs only as `kiro-cli acp --agent-engine v3`, no trust flags; trust is a projected custom agent with an explicit tool list, activation verified, fail closed, plus a Genesis allowlist backstop on every permission request; workflow built-ins auto-approved; MCP = `node.tools ∩ allowlist`, enforced by the projected tool list (ADR-086 items 1, 3; L-113, L-116) | The uncapped tool list is gone. D9 matches what ships; D18's engine-side filter already exists, the gateway adds the server-side cap |
+| §4 / §9.2: the user's global Kiro configuration loaded into workflow turns | A Genesis-owned `KIRO_HOME` for every process: `<run folder>/_kiro/` per run, `~/.genesis/kiro-home/chat/` for chat; nothing from `~/.kiro` (ADR-086 item 2; ADR-083 risk (d) closed) | §9.2 is done. The per-run home lives in the run folder, so the sandbox mount (D11) covers it; chat's home moves into the app container's volume |
+| D8 / D19 "Genesis uses V2 today" | V3 everywhere; auth is still the default `cli` owner (kiro-cli's own login); verified kiro-cli = 2.37.1 only, 3.x unverified (`specs/backlog/kiro-cli-3x-reverify.md`) | The V3 switch is done; what remains of D8/D19 is `--auth-method client` and Genesis's own sign-in. D19's kiro-cli 3.0.0 rule applies only once 3.x is reverified |
+| D7 / D18 MCP behaviour | v3 MCP specifics: arguments under `rawInput.arguments`, an on-demand `tool_load` step, a dead server is not restarted and is detected from the failure text (L-114) | The relay and gateway must keep these semantics; the D18 mount check covers start failures, L-114 covers deaths |
+| D15 / D27 "changes to Phase 51", the open cross-phase item | Phase 51 shipped its interim D3c design (ADR-083): agents use the shell and `npx --no-install apwt`, program nodes open sessions with `open --login`, program-only `TE-` executions | The open item resolves itself: Phase 52 changes shipped code. D15/D27 close ADR-083 risk (c); D1 and D23 close (a); the clean sandbox environment closes (b). ADR-083 is amended when Phase 52 ships |
+| D11 one-time import | DB at **m0029**; per-run `_kiro/` homes; the vendored testing runtime (`testexec/vendor/`) | The import covers v29 and the per-run homes |
+| D14 API token | Playwright reports are served on a second loopback origin, app port + 100 (ADR-085) | That origin is forwarded and covered by D14's Origin/Host and token rules too |
+| D17 "Release 1 follows Phase 51's release" | Done. Open instead: Phase 53 live acceptance (53-11 §5) and Phase 51's postponed live acceptance (51-12 steps 1–27) | Sequencing with those is a Q&A item |
+| Skills (ADR-069) | Managed skills only, front matter checked strictly before provisioning (ADR-086, L-115) | Unchanged by Phase 52; provisioning still writes into the run folder |
+
+The spec set must cite ADR-081–ADR-086 and lessons L-101–L-119 where they apply (areas `sdk-acp`, `chat`,
+`browser-testing`, `security`).
+
 ## Context manifest
 
 ```toml
 areas    = ["core-engine", "sdk-acp", "runs-worker", "security", "distribution", "api", "chat", "config-secrets", "workflows-library", "browser-testing", "web-shell"]
-adrs     = ["ADR-002", "ADR-004", "ADR-010", "ADR-012", "ADR-017", "ADR-019", "ADR-020", "ADR-022", "ADR-026", "ADR-028", "ADR-029", "ADR-031", "ADR-032", "ADR-033", "ADR-046", "ADR-051", "ADR-069", "ADR-077", "ADR-080"]
-lessons  = ["L-001", "L-017", "L-021", "L-041", "L-044", "L-087", "L-088", "L-097", "L-100"]
+adrs     = ["ADR-002", "ADR-004", "ADR-010", "ADR-012", "ADR-017", "ADR-019", "ADR-020", "ADR-022", "ADR-026", "ADR-028", "ADR-029", "ADR-031", "ADR-032", "ADR-033", "ADR-046", "ADR-051", "ADR-069", "ADR-077", "ADR-080", "ADR-083", "ADR-085", "ADR-086"]
+lessons  = ["L-001", "L-017", "L-021", "L-041", "L-044", "L-087", "L-088", "L-097", "L-100", "L-113", "L-114", "L-115", "L-116", "L-117"]
 docs     = ["tracker:specs/phase-51-test-execution-engine/51-01-findings.md", "tracker:specs/phase-51-test-execution-engine/51-03-spike-sandboxed-shell.md"]
 code     = ["genesis/packages/kiro-agent-sdk/src/kiro_agent_sdk/client.py", "genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/packages/genesis-core/genesis_core/mcp/registry.py", "genesis/genesis/runs/supervisor.py", "genesis/genesis/runs/worker.py", "genesis/genesis/api/run_routes.py"]
 upstream = []
