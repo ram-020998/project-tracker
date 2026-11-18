@@ -1,0 +1,83 @@
+# 54-06 — HTTP API: schedules, custom agents, notifications, chat agent, feature activity
+
+> **Status:** SPEC-DRAFTED 2026-11-19. Repo: genesis (`genesis/api/`, `web/src/types/`, `web/src/lib/api/`). Parent:
+> `specs/phase-54-schedules-and-fixes.md`. Built by **genesis-dev**. Each backend sub-spec (54-04, 54-05, 54-08,
+> 54-09) adds its routes; this sub-spec owns the contract table, the web types, the client functions, the golden
+> fixtures and the removals (F7). All routes under `/api` (ADR-028); the client prepends `/api` centrally (L-010).
+
+## 1. Contract table
+
+| Method + path | Body / query | Answer | Errors |
+|---|---|---|---|
+| `GET /schedules` | `?kind=system\|user`, `?state=active\|paused\|failing` | `{items: Schedule[]}` | |
+| `GET /schedules/{id}` | | `Schedule` | 404 |
+| `POST /schedules` | `{name, target, schedule, policy?, enabled?}` | `Schedule` (201) | 400 invalid schedule / target; 422 server not pickable (D3); 422 workflow not `schedulable` (D7) or has file inputs |
+| `PUT /schedules/{id}` | user: any field; system: `schedule`, `enabled`, `options`, `policy` | `Schedule` | 400; 403 field not editable on a system row |
+| `DELETE /schedules/{id}` | | 204 | 403 system row |
+| `POST /schedules/{id}/run-now` | | `{run_id \| execution_key}` | 409 in flight; 409 not ready (reason) |
+| `POST /schedules/{id}/pause` · `/resume` | | `Schedule` | |
+| `POST /schedules/{id}/duplicate` | | `Schedule` (201, name "<name> (copy)", disabled) | 403 system row |
+| `POST /schedules/{id}/reset` | | `Schedule` | 403 user row |
+| `GET /schedules/{id}/history` | `?limit=50&offset=` | `{items: ScheduleRun[], total, credits_total: {credits, provenance}}` | |
+| `POST /schedules/preview` | `{schedule}` | `{next: string[5], summary: string, timezone}` | 400 |
+| `GET /schedules/pickable` | | `{workflows: [{id, name, inputs_schema}], servers: [{name, tier, pickable, reason?}], skills: [...], models: [...]}` | |
+| `GET /custom-agents` · `GET /custom-agents/{id}` | | `CustomAgent[]` · `CustomAgent` (+ `used_by: [{schedule_id, name}]`) | 404 |
+| `POST /custom-agents` · `PUT /custom-agents/{id}` | `{name, description?, instructions, skills, mcp_servers, model?}` | `CustomAgent` | 400; 409 name taken; 422 server not pickable / unknown skill |
+| `DELETE /custom-agents/{id}` | | 204 | 409 in use (`used_by` in the body) |
+| `POST /custom-agents/{id}/run` | `{prompt}` | `{run_id}` | 409 `agent-prompt` not installed (L-033) |
+| `GET /notifications` | `?unread=true&limit=&offset=` | `{items: Notification[], unread: int}` | |
+| `POST /notifications/{id}/read` · `POST /notifications/read-all` | | `{unread: int}` | 404 |
+| `POST /chat/sessions` (existing) | + `agent_id?` (read-only mode only, D6) | session (+ `agent: {id, name}`) | 422 `agent_id` with another mode |
+| `GET /chat/sessions/{id}` (existing) | | + `agent: {id, name} \| null` | |
+| `GET /features/{id}/activity` (existing, extended, 54-09) | `?stage=&limit=&offset=` | `{items: ActivityItem[], total}` | |
+| `GET /catalog`, `GET /workflows/{id}` (existing) | | + `schedulable: bool` | |
+| `GET /runs`, `GET /runs/{id}` (existing) | | + `trigger: {source, schedule_id, schedule_name \| null, slot} \| null` | |
+
+Shapes (`web/src/types/schedules.ts`, `customAgents.ts`, `notifications.ts`, additions to `run.ts`, `chat.ts`,
+`features.ts`):
+
+- `Schedule {id, key?, kind, name, enabled, state: "active"|"paused"|"failing"|"completed", pause_reason, target,
+  schedule, summary, timezone, next_runs: string[], last_run: {slot, outcome, run_id?, at} | null, policy, options?,
+  failure_count, runs_count, editable_fields: string[]}`. `target` is the F1 union with `workflow_name`,
+  `agent_name`, `app_name` added for display.
+- `ScheduleRun {slot, outcome, reason?, run_id?, execution_key?, started_at?, finished_at?, duration_ms?, credits?,
+  provenance?}`; credits only from the run's metered usage (ADR-032), never estimated.
+- `CustomAgent {id, name, description, instructions, skills, mcp_servers: [{name, read_only_mark}], model, used_by,
+  created_at, updated_at}`.
+- `Notification {id, source, kind: "needs_you"|"failed"|"auto_paused"|"missed", title, body, link, created_at, read_at}`.
+- `ActivityItem {type: "lifecycle"|"run"|"change_request"|"finalization", stage, action, from_state?, to_state?,
+  label, actor?, at, link?}`.
+
+## 2. Removals (F7, after 54-07 moves the web)
+
+`GET/PUT /system/sync-settings`, `POST /system/sync-settings/run-now`, `GET /system/schedules`,
+`PUT /applications/{uuid}/testing/schedule` (and the `schedule` part of the testing setup GET, replaced by a
+`schedule: {id, summary, next_run} | null` pointer to the app's regression row). Before removing, list every consumer
+(web callers and hooks, copilot tool definitions, scripts in `genesis/scripts/`, tests, fleet `gsm`) in As built
+(L-094). Static routes such as `/schedules/preview` and `/schedules/pickable` are registered before
+`/schedules/{id}` and the order is proven by a test (L-096).
+
+## 3. Fixtures and tests
+
+Golden JSON fixtures for each new shape from real responses of a test app (L-011, L-083); web tests parse them through
+the same client functions the pages use (L-109). Backend route tests for every row of §1, including each error.
+
+## 4. Gates
+
+`cd genesis && .venv/bin/python -m pytest -q -p no:warnings`, `ruff check genesis`; web `npm run lint && npm run
+typecheck && npm test`.
+
+## As built
+
+_(genesis-dev fills in: commits, the consumer list for §2, tests, review verdict, decisions/deviations, Resume note.)_
+
+## Context manifest
+
+```toml
+areas    = ["api", "runs-worker", "chat", "web-shell"]
+adrs     = ["ADR-028", "ADR-032", "ADR-047", "ADR-031"]
+lessons  = ["L-010", "L-011", "L-039", "L-083", "L-094", "L-096", "L-109"]
+docs     = ["tracker:specs/phase-54-schedules-and-fixes/54-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/adr-drafts.md"]
+code     = ["genesis/genesis/api/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
+upstream = ["54-04", "54-05"]
+```
