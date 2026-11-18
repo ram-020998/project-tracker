@@ -1,6 +1,7 @@
 # 54-01 — Findings: Schedules, fixes and UX revamps
 
-> **Status:** SPEC-DRAFTED 2026-11-19 — Q&A complete: decisions D1–D20 (§8), defaults F1–F12 (§9, confirmed).
+> **Status:** SPEC-DRAFTED 2026-11-19 — Q&A complete: decisions D1–D20 (§8), defaults F1–F12 (§9, confirmed); D21
+> added after 54-02 (§10).
 > Parent: `specs/phase-54-schedules-and-fixes.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the schedules
@@ -223,6 +224,7 @@ schedules here.
 | D18 | **Feature Activity covers every feature-level event (Q17, option A).** `GET /features/{id}/activity` (`api/features.py:667`, today the spec's audit only) returns, newest first and paged: every stage's lifecycle transitions from the append-only audit (m0013, `audit.list_for("stage", <stage id>)` for each of Spec, UX Design, Technical Design, Feature Breakdown, Test Design), each stage's runs (started, finished, failed, cancelled; linked), change requests (opened, applied, discarded; the existing CR labels), and story finalization. Each item has a type, stage, actor, time and link. The web shows a day-grouped timeline with typed icons, `RelativeTime`, links and a stage filter. Story-level events (lane moves, story runs) stay on the story page and board. | User chose A (2026-11-19). Considered: B (+ story-level events; long on big features, duplicated elsewhere) and C (lifecycle of every stage only). |
 | D19 | **One release for the whole phase (Q18, option B).** All of Phase 54 (B1–B3, O1, O4, Schedules, custom agents, the bell, the UX revamps) ships together: genesis **v0.83.0**, then genesis-workflows **v0.27.0** (the agent-prompt workflow, `schedulable` flags; pinned on `genesis.git@v0.83.0`, L-057). No separate v0.82.x patch for the fixes. Phase 54 does not wait for the open Phase 51/53 live acceptance (the user runs it later). | User (2026-11-19): "ill do the live acceptance later. We can go with the one complete actual release." Considered: A (fixes as a v0.82.x patch first, the assistant's recommendation) and C (finish the open acceptance first). |
 | D20 | **Phase 54 is live-accepted before v0.83.0 (Q19, option A).** "Later" covers only the open Phase 51/53 acceptance. Before the tag, the review & acceptance sub-spec runs on a separate `genesis serve`: a prompt schedule firing and writing Markdown, a workflow schedule, a regression-suite schedule, a missed slot caught up, overlap skip, a gate timing out (D8), auto-pause (D12), the bell, Catalog Run of a custom agent, chat with a custom agent, the regression and app-sync migrations, B1/B2/O1/O4 reproduced then fixed, and the real-browser width probe of the new and revamped pages (L-090). Rows needing Appian Dev (an `appian-dev` read in a prompt schedule) are skipped if Dev is down, and that is said in the release notes. | User chose A (2026-11-19). Considered: B (release before its own acceptance, "SHIPPED (live acceptance open)", L-111). |
+| D21 | **No repair of runs a pre-fix state edit left stored `running` (Q20 after 54-02, option C).** Such a run keeps its `running` status and `run.final{running}` row; `reconcile_status` is unchanged; 54-04 adds no repair. The user cancels a stuck run by hand (Run Detail → Cancel). Known effect: a stuck `sync-application` run blocks that app's scheduled sync (the per-app "sync already running" skip, `runtime/sync_jobs.py:157`) until cancelled. 54-11's release notes tell users to cancel any run that shows Running with nothing happening. | User chose C (2026-11-19). Considered: A (one-time repair in m0030 + `reconcile_status` stops adopting the marker; the assistant's recommendation) and B (fix `reconcile_status` only; such runs fall to the orphan sweep and a really paused one ends failed). |
 
 ## 9. Defaults — ✅ confirmed by the user 2026-11-19 ("yes")
 
@@ -251,8 +253,7 @@ schedules here.
 - 54-11: release-note API changes and the two stale architecture docs; 54-02's lesson candidates and code-map changes.
 - Umbrella §9 Deferred: review nits n1 (no `Allow` header on 405) and n2 (failed capture with a live run cancels
   without a confirm).
-- Open, asked as Q20: runs edited before the fix may be stored `running` with a `run.final{running}` row, which
-  `reconcile_status` keeps adopting after a restart; nothing repairs them.
+- **Q20 → D21** (§8): no repair of runs a pre-fix state edit left stored `running`.
 
 ## Context manifest
 

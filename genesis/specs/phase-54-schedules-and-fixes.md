@@ -53,6 +53,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D18 | Feature Activity covers every feature-level event (all stages' lifecycle, stage runs, CRs, finalization). |
 | D19 | One release: genesis v0.83.0 → genesis-workflows v0.27.0. |
 | D20 | Phase 54 live-accepted before its release. |
+| D21 | No repair of runs a pre-fix state edit left stored `running`; the user cancels them by hand (after 54-02). |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 

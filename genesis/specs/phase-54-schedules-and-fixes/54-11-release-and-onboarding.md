@@ -28,6 +28,9 @@ in the release notes:
 - Agent-prompt schedules and Catalog → Agents need the `agent-prompt` workflow installed.
 - Unattended agent-prompt runs have Kiro's shell (ADR-083 risks until Phase 52) and only read-only MCP servers; a
   custom server's "read-only" mark is your own claim.
+- A run whose state was edited before v0.83.0 may still show **Running** with nothing happening (54-02 fixed the cause,
+  not old runs, D21): cancel it from Run Detail. A stuck `sync-application` run blocks that app's scheduled sync until
+  you do.
 - API changes for anyone scripting: new `/schedules*`, `/custom-agents*`, `/notifications*`; removed
   `/system/sync-settings*`, `/system/schedules`, `PUT /applications/{uuid}/testing/schedule`; `runs` items gained
   `trigger`; catalog items gained `schedulable`; `POST /chat/sessions` accepts `agent_id`; make-Dev moved from

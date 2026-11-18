@@ -29,6 +29,8 @@ Forward-only, through the migration runner (L-102 if any table is rebuilt; prefe
      enabled; its `since` value is kept in `target_json` if the regression code reads it;
    - the `regression-run` row is deleted after the copy. Test the migration from real stored rows (a copy of the
      user's `scheduled_jobs` shape, L-083), including an app-sync row with `user_modified=1`.
+   - **No repair of old runs** stored `running` by a pre-fix state edit (D21): m0030 does not touch `runs.status`, and
+     `reconcile_status` is unchanged.
 
 ## 2. Schedule model (`runtime/scheduler.py`)
 
