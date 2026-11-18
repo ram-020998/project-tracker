@@ -74,10 +74,12 @@ of each section, L-014); `npm run build` + commit `web/static/` as separate step
 
 ## As built
 
-**Status:** BUILT 2026-11-18, review **SHIP** (re-run 1). **Waiting for the user's D17 review of `/dev/phase-54`.**
-Repo genesis, branch master, base `eed5da0`, head `33853ba`, 6 local commits (not pushed, not tagged). Source: 21 files,
-+3067 lines (no deletions; no existing page changed apart from the router and the shared/ui index and icons), plus
-`web/static` in three build commits.
+**Status:** BUILT 2026-11-18, review **SHIP** (re-run 2). The user's D17 review is done: verdicts and requested changes
+are in "User review (D17)" below; the mockups were revised to match. Next: the spec agent records the changes in 54-01
+§8 and folds them into 54-07/54-08/54-09.
+Repo genesis, branch master, base `eed5da0`, head `b09b08e`, 10 local commits (not pushed, not tagged). Source: 23
+files, +3360 lines (no existing page changed apart from the router and the shared/ui index and icons), plus `web/static`
+in five build commits.
 
 ### Commits (genesis)
 
@@ -89,10 +91,14 @@ Repo genesis, branch master, base `eed5da0`, head `33853ba`, 6 local commits (no
 | `4b4046d` | `web/static` for 93444a2 (66 files) |
 | `631fef6` | re-run 1 nits n6 (previews include today's later slots and this month's run), n7 (stub link) |
 | `33853ba` | `web/static` for 631fef6 (65 files) |
+| `f1a4b57` | the user's D17 review: revised Schedules grid, wizard B only, Implementation A only, no Copilot toggle, locked agent picks, shared `MultiSelect` for skills and servers |
+| `0342a12` | `web/static` for f1a4b57 (66 files) |
+| `9d57c96` | re-run 2: m5 focus after removing a chip, m6 trigger named "Add <label>", n8 keyboard test |
+| `b09b08e` | `web/static` for 9d57c96 (65 files) |
 
 Bundle proof (L-089): each bundle commit was checked with `git show --stat <sha> -- web/static` in its own call after
 the build had exited, and a rebuild in a later call left `git status --short --untracked-files=all` empty each time.
-The reviewer's out-of-tree build matched `web/static` at `cf5f3f6` and `4b4046d`.
+The reviewer's out-of-tree build matched `web/static` at `cf5f3f6`, `4b4046d` and `0342a12`.
 
 ### Changed
 
@@ -124,14 +130,15 @@ The reviewer's out-of-tree build matched `web/static` at `cf5f3f6` and `4b4046d`
   none); implementation objects in `story-implementation`'s `{name, type, action, new_version, status}` shape. Next-run
   previews are computed from page load in Asia/Kolkata.
 - What each surface shows, per the user's list:
-  - **D3** (2b and the agent editor): the six non-pickable servers are disabled checkboxes with "Can't be picked:
-    <reason>" (`aria-describedby`); `team-confluence` (custom) is pickable only after "This server only reads" is ticked
-    ("Your claim … Genesis does not check").
+  - **D3** (2b and the agent editor): the six non-pickable servers are listed under "Can't be picked", disabled, with
+    their reason as the checkbox's description; `team-confluence` (custom) counts only after "This server only reads"
+    is ticked ("Your claim … Genesis does not check"). Since the D17 revision this sits inside the server
+    multi-select dropdown.
   - **D5**: the agent editor, the new-chat panel and the chat header say the agent keeps chat's read-only tools; the
     schedule step says it also has shell, file and web tools (D2).
-  - **D8/D12**: list rows "Waiting at a gate" (with "Cancelled in … if not answered · Answer") and "Paused (failing)";
-    the bell's needs-you and auto-paused notices; history rows "gate not answered within 24 h" and "run took longer
-    than the 2 h maximum".
+  - **D8/D12**: list rows "Waiting at a gate" and "Paused (failing)" (the gate's cancel time is in the last-result
+    tooltip since the D17 revision); the bell's needs-you and auto-paused notices; history rows "gate not answered
+    within 24 h" and "run took longer than the 2 h maximum".
   - **D9**: the five forms (Every N hours with a window and Weekdays only, Daily with Weekdays only, Weekly with days,
     Monthly with the last-day rule, Once), time zone, the frequency in words and the next 5 runs; Advanced with grace,
     max duration, gate max wait, failures before pause, end date, max runs.
@@ -141,47 +148,75 @@ The reviewer's out-of-tree build matched `web/static` at `cf5f3f6` and `4b4046d`
     weekdays only, time zone, on/off, full sync every N days, max changed (count and %), run on this machine, next
     run, last result, Run now, and per-app last sync (kind, time, a non-succeeded status, published Hub version, last
     full sync).
-  - Both options where §2 asks: the wizard as **A** (a dialog, one step at a time, plus "Open option A as a real
-    dialog") and **B** (a full page with a step rail and a running summary); Implementation documents as **A** (tabs in
-    one card) and **B** (two stacked cards).
+  - Both options where §2 asks were built first: the wizard as **A** (a dialog) and **B** (a full page with a step rail
+    and a running summary); Implementation documents as **A** (tabs in one card) and **B** (two stacked cards). The
+    user chose **B** and **A**; the other options were removed in `f1a4b57`.
+- **D17 revision (`f1a4b57`, `9d57c96`)**, from the user's review:
+  - Schedules grid (`schedules.tsx` `Cadence`, `LastResult`): no Target column; Frequency is a weekday strip (M T W T
+    F S S, run days filled; `role="img"` named "Weekdays", "Every day", "Sunday", …) plus one short line from
+    `fixtures.ts` `CADENCE`; monthly and once rows show an icon instead of the strip; the zone shows only when it
+    differs from this machine's, compared by canonical id (`canonicalZone`: this host reports "Asia/Calcutta");
+    Last result is the status tag only, a link to the run (or the `TE-` execution), with the time, the reason and a
+    gate's cancel time in a tooltip; system rows have a lock icon (tooltip "System schedule") instead of a System
+    tag, and a line above the grid reads "System schedules can't be deleted. You can change when they run or turn
+    them off."; the switch shows and writes `enabled` only, and Pause / Resume are in the row menu.
+  - New shared `web/src/shared/ui/multi-select.tsx` `MultiSelect {options, value, onChange, locked?, confirmed?,
+    onConfirmedChange?, label, placeholder?, searchPlaceholder?}` (Radix Popover with an Anchor on the field; native
+    button trigger named "Add <label>"; no new dependency). Closed: chips (removable; locked chips "· from <agent>";
+    an unconfirmed pick marked "not counted until …"). Open: a search box and grouped checkbox lists; an option has an
+    optional description, tag, `disabledReason` and `requiresConfirm`. Removing a chip moves focus to the trigger.
+    `pickers.tsx` now wraps it for skills (descriptions from the SKILL.md front matter) and servers.
+  - Wizard step 2b: the custom agent's skills and servers are locked picks (`options.ts` `fromAgent`); the schedule
+    adds its own.
+  - Chat with a custom agent: no Copilot toggle.
+  - Probe: portals for the server and skill multi-selects and the last-result tooltip; `timezoneId: "Asia/Kolkata"`.
 
 ### Tests
 
 - `src/shared/ui/section-blocks.test.tsx` (6): each shared piece renders its roles and passes jest-axe; Timeline day
   labels, grouping order, per-day lists and links, empty text.
+- `src/shared/ui/multi-select.test.tsx` (4): chips and locked chips, groups, search, a blocked option disabled with
+  its reason, a pick that counts only once confirmed, and the keyboard path (Tab to Add, Enter opens on the search
+  box, Escape returns to Add, removing a chip leaves focus on Add); jest-axe closed and open. Mutation check: without
+  the focus call the keyboard test fails.
 - `src/dev/mockups/phase54/phase54.test.tsx` (24): the route smoke render through `createMemoryRouter(router.routes)`
   at `/dev/phase-54` (h1, jump list of 11, all 11 section headings and ids); then jest-axe per section, run on every
-  `[data-mock-frame]` with all rules and on the whole section with `landmark-unique` off (two options of one surface
+  `[data-mock-frame]` with all rules and on the whole section with `landmark-unique` off (two states of one surface
   repeat region names only in the mockup); each of the 6 wizard steps, the 5 frequency forms and both details; plus
-  content checks for D3, D5, D8/D12, D9 (Weekdays only on hourly and daily), D10, D15 (the per-app `failed`), the Edit /
-  chat link, the absent "arriving in later phases" text.
+  content checks for D3 (through the open server dropdown: blocked reason, confirm, locked "from KB explorer" chips),
+  D5, D8/D12, D9 (Weekdays only on hourly and daily), D10, D15 (the per-app `failed`), the Edit / chat link, the
+  absent "arriving in later phases" text, and the D17 changes (grid column headers, no "System" text, 5 lock icons,
+  weekday strip names, switch states, one Objects table, no Copilot switch).
 - Fail-first (review M1, M2, m1): with the pre-fix `schedules.tsx`, `fixtures.ts`, `story.tsx` and the new test file,
   3 tests failed: "Unable to find … switch … Weekdays only", "Unable to find … text: failed", "Unable to find … link …
   Edit / chat".
-- Gates at `33853ba`: `npm run lint` 0 errors, 20 warnings (the count before 54-03; none in new files);
-  `npm run typecheck` clean; `npm test` 68 files / **802 passed** (770 before).
+- Gates at `b09b08e`: `npm run lint` 0 errors, 20 warnings (the count before 54-03; none in new files);
+  `npm run typecheck` clean; `npm test` 69 files / **806 passed** (770 before).
 
 ### Screenshots (real browser, L-090)
 
 `scripts/probes/phase54-mockups.mjs` starts Vite from `web/` (cwd `web/`), checks a known Tailwind class resolves
 (the frames' `border-dashed`), and for 1280 / 1440 / 1920 px × light / dark screenshots each section, the variants and
 the portalled surfaces, and checks page sideways scroll, element overflow per frame, table scroll and header wrap.
-Final run at `631fef6`: **150 entries, all clean**. One earlier run found the history table scrolling at 1280
-(`min-w-[820px]`); it is `min-w-[680px]` now.
+Final run at `9d57c96` (the source of `b09b08e`): **162 entries, all clean**. One earlier run found the history table
+scrolling at 1280 (`min-w-[820px]`); it is `min-w-[680px]` now.
 
-Folder: `specs/phase-54-schedules-and-fixes/evidence/54-03/` (20 MB, JPEG q70) + `result.json`. Names are
+Folder: `specs/phase-54-schedules-and-fixes/evidence/54-03/` (16 MB, JPEG q70) + `result.json`. Names are
 `<name>-<width>-<theme>.jpg`, `<width>` ∈ 1280, 1440, 1920 and `<theme>` ∈ light, dark (6 files per name):
 
 | surface | names |
 |---|---|
-| 1 Schedules page | `schedules-list` (all rows + the empty Mine state), `portal-row-menu` |
-| 2 Wizard | `schedule-wizard` (step 2b, agent prompt), `schedule-wizard-1-target`, `-2a-workflow`, `-2c-regression`, `-3-hourly`, `-3-daily`, `-3-weekly`, `-3-monthly`, `-3-once`, `-4-review`, `portal-wizard-dialog` |
+| 1 Schedules page | `schedules-list` (all rows + the empty Mine state), `portal-row-menu`, `portal-last-result-tooltip` |
+| 2 Wizard (full page) | `schedule-wizard` (step 2b, agent prompt), `schedule-wizard-1-target`, `-2a-workflow`, `-2c-regression`, `-3-hourly`, `-3-daily`, `-3-weekly`, `-3-monthly`, `-3-once`, `-4-review`, `portal-server-multiselect` |
 | 3 Schedule detail | `schedule-detail` (application sync), `schedule-detail-agent` (Weekly KB digest) |
-| 4 Catalog → Agents | `catalog-agents`, `portal-agent-dialog` |
+| 4 Catalog → Agents | `catalog-agents`, `portal-agent-dialog`, `portal-skill-multiselect` |
 | 5 Bell | `notifications`, `portal-bell-popover` |
 | 6 Chat | `chat-agent` |
 | 7–9 Story | `story-design`, `story-implementation`, `story-verification` |
 | 10–11 Feature | `feature-overview`, `feature-activity` |
+
+The first-round screenshots (both wizard and Implementation options, the old grid) are in project-tracker history at
+`e9e7e8b`.
 
 ### Review
 
@@ -191,9 +226,13 @@ Folder: `specs/phase-54-schedules-and-fixes/evidence/54-03/` (20 MB, JPEG q70) +
   surfaces; m3 two hand-rolled stat grids, one with raw keys; m4 the on/off switch over two stored states (a question
   for the user); n1–n5.
 - Fixed in `93444a2`/`4b4046d`: M1, M2, m1, m2, m3, n1, n2, n3, n5. **Re-run 1: SHIP**, with new nits n6, n7, fixed in
-  `631fef6`/`33853ba` (not re-reviewed: fixture date arithmetic and one stub link's href/sr-only text; gates re-run
-  green, and the probe re-run at that source is all clean).
-- Open for the user: m4 and n4 (below).
+  `631fef6`/`33853ba`.
+- m4 (the switch) and n4 (time inputs) went to the user (below).
+- **Re-run 2 (the D17 revision, `4b4046d..0342a12`): SHIP.** Every D17 request checked; the reviewer drove the
+  MultiSelect keyboard path in a real browser. New: m5 removing a chip by keyboard dropped focus to `<body>`; m6 the
+  trigger's name "Choose …" did not contain its visible "Add" (WCAG 2.5.3); n8 no keyboard test; n9 carry the zone
+  alias to 54-07. m5, m6, n8 fixed in `9d57c96`/`b09b08e` (not re-reviewed: a focus call, a label and a test; gates
+  green, the new keyboard test fails without the fix, probe re-run all clean). n9 is in Decisions 11.
 
 ### Decisions / deviations
 
@@ -206,21 +245,28 @@ No ADR deviation.
    should promote it or give `MetricCard` a compact size, not add a third grid.
 4. **Row menu over `@radix-ui/react-dropdown-menu` directly** (an existing dependency, used by `select.tsx`). 54-07
    should add a shared menu primitive in `shared/ui`.
-5. **Application-sync options read-only with Edit** on the detail page (Edit opens the frequency step + options), not
-   inline inputs as today's Settings card. Alternative: inline editing on the detail page. *Question for the user.*
-6. **On/off switch = "does it fire"** (off for Off, Paused and Paused (failing)); turning it on resumes and clears the
-   failure count. F1 keeps `enabled` and `pause_reason` apart, so the user must say which field the switch writes
-   (review m4). *Question for the user.*
-7. **Copilot is shown disabled** in a custom-agent chat ("Not available in a chat with a custom agent"); D6 says only
-   the read-only assistant takes an agent but not what happens to the Copilot toggle in that session. Alternative:
-   hide the toggle. *Question for the user.*
-8. **The wizard's agent-prompt step** shows the picked custom agent's skills and servers in a summary line, but the
-   skill and server pickers show only the schedule's own picks. Alternative: show the agent's picks as locked, ticked
-   rows. *Question for the user.*
+5. **Application-sync options: text with an Edit button** on the detail page (Edit opens the frequency step +
+   options), not inline inputs as today's Settings card. *User: text with Edit (2026-11-18).*
+6. **On/off switch writes `enabled` only; Pause / Resume stay in the row menu** (review m4; F1 keeps `enabled` and
+   `pause_reason` apart). *User (2026-11-18).* In the mockup, Run now and Pause/Resume are disabled while a schedule
+   is off.
+7. **No Copilot toggle in a chat with a custom agent** (D6 left it open). *User: hide it (2026-11-18).*
+8. **Wizard step 2b shows the custom agent's skills and servers as locked picks** "from <agent>"; the schedule adds
+   its own. *User: yes (2026-11-18).*
 9. **Section 9 Verification** credits shown as "n/a" (unavailable) to show that provenance; a real verification run
    is metered.
-10. Native `type="time"` inputs show 12-hour AM/PM in an en-US browser locale beside 24-hour words and previews
-    (review n4); the real form behaves the same. *Mentioned to the user.*
+10. **Time inputs**: native `type="time"` shows 12-hour AM/PM in an en-US browser locale beside 24-hour words and
+    previews (review n4). The user answered "yes" to "the real form will do the same unless we change the control";
+    recorded as **accepted, no change**. *To confirm with the user* (it could also mean "change the control").
+11. **Time zones (for 54-07, review n9):** this host's browser reports its zone as "Asia/Calcutta", not
+    "Asia/Kolkata" (ICU alias). Compare zones by canonical id (`Intl.DateTimeFormat(…, {timeZone}).resolvedOptions()`),
+    map the machine's zone onto the picker's option values when defaulting to it, and validate stored ids before
+    formatting (an unknown id throws `RangeError`).
+12. **Schedules grid wording:** the user asked for a line saying system schedules are "not editable". They are
+    editable (when they run, on/off; D1, D15) and only not deletable, so the line reads "System schedules can't be
+    deleted. You can change when they run or turn them off." *User agreed (2026-11-18).*
+13. **Shared `MultiSelect`** (proposed by me, agreed by the user): built in `shared/ui` now so 54-05/54-07 reuse it,
+    not copy the mockup. 54-07 should still add a shared row-menu primitive (Decision 4).
 
 ### Found, not fixed (out of scope; for follow-up)
 
@@ -240,39 +286,49 @@ No ADR deviation.
    rules and on the page with only that rule off.
 3. **A mockup's dates must be relative to page load, including previews** (review n2, n6): fixed dates turn into "next
    runs" in the past by the time the user reviews.
+4. **The browser may name the machine's zone by an alias** ("Asia/Calcutta" for "Asia/Kolkata" here): compare zone ids
+   only after canonicalising both through `Intl`, and pin `timezoneId` in a probe.
+5. **A chip whose own button removes it drops keyboard focus to `<body>`**: move focus to a stable control (the
+   trigger) in the same handler, and pin it with a userEvent keyboard test; jest-axe sees neither this nor a visible
+   label missing from the accessible name (WCAG 2.5.3, review m5, m6).
 
 ### Code-map changes (for genesis-docs, bible/03)
 
 - `web/src/shared/ui/section-card.tsx` `SectionCard`, `definition-list.tsx` `DefinitionList`, `status-header.tsx`
-  `StatusHeader`, `timeline.tsx` `Timeline` + `timeline-groups.ts` `groupTimeline`/`timelineDayLabel`; all exported
-  from `shared/ui/index.ts`. `icons.ts` gains 9 icons.
+  `StatusHeader`, `timeline.tsx` `Timeline` + `timeline-groups.ts` `groupTimeline`/`timelineDayLabel`,
+  `multi-select.tsx` `MultiSelect`; all exported from `shared/ui/index.ts`. `icons.ts` gains 9 icons.
 - `web/src/app/router.tsx`: `/dev/phase-54` (lazy).
 - `web/src/dev/mockups/phase54/**`: the Phase 54 mockups (dev-only).
 - `scripts/probes/phase54-mockups.mjs`: the mockup width/theme probe (sections, variants, portalled surfaces).
 
 ### User review (D17) — per surface
 
-_(to fill in from the user's verdict: approved / changes, with any change recorded in 54-01 §8 as a decision)_
+The user's review, 2026-11-18. Each change is for the spec agent to record in 54-01 §8 and fold into the sub-spec in
+the last column. "Changes" rows were revised in `f1a4b57`/`9d57c96`; the user agreed to each proposal but has not
+re-opened the revised page yet.
 
-| # | surface | verdict | changes |
+| # | surface | verdict | changes (→ sub-spec) |
 |---|---|---|---|
-| 1 | Schedules page | — | |
-| 2 | New / edit schedule (A dialog or B full page) | — | |
-| 3 | Schedule detail + history | — | |
-| 4 | Catalog → Agents | — | |
-| 5 | Notification bell | — | |
-| 6 | Chat with a custom agent | — | |
-| 7 | Story Design tab | — | |
-| 8 | Story Implementation tab (A tabs or B stacked) | — | |
-| 9 | Story Verification tab | — | |
-| 10 | Feature Overview tab | — | |
-| 11 | Feature Activity tab | — | |
+| 1 | Schedules page | changes | No Target column; Frequency as a weekday strip + one short line (monthly/once: icon + line; zone only when it differs from the machine's); Last result = status tag only, its time, reason and gate cancel time in a tooltip, the tag opens the run; no System tag, a lock icon with a "System schedule" tooltip and the line "System schedules can't be deleted. You can change when they run or turn them off." above the grid; the switch writes `enabled` only, Pause/Resume in the row menu (→ 54-07; the switch rule also → 54-04/54-06) |
+| 2 | New / edit schedule | changes | Option **B**, the full page with a step rail and a running summary; skills and servers as multi-select dropdowns (shared `MultiSelect`); the custom agent's skills and servers shown as locked picks (→ 54-07) |
+| 3 | Schedule detail + history | approved | Application-sync options as text with an Edit button, not inline inputs (→ 54-07) |
+| 4 | Catalog → Agents | changes | Skills and servers in the agent editor as multi-select dropdowns (→ 54-07) |
+| 5 | Notification bell | approved | — |
+| 6 | Chat with a custom agent | changes | Hide the Copilot toggle in a chat with a custom agent (→ 54-08) |
+| 7 | Story Design tab | approved | — |
+| 8 | Story Implementation tab | changes | Option **A**: report and rollback document as tabs inside one card (→ 54-09) |
+| 9 | Story Verification tab | approved | — |
+| 10 | Feature Overview tab | approved | — |
+| 11 | Feature Activity tab | approved | — |
+
+Also for the spec agent: Decisions 10 (time inputs, to confirm) and 11 (zone aliases, → 54-07).
 
 ### Resume note
 
-Done: the build, gates, screenshots and review (SHIP). Next: the user reviews `/dev/phase-54` and answers the
-questions in Decisions 5–8 and review m4; record the verdict per surface in the table above. Then the spec agent folds
-the changes into 54-07/54-08/54-09 (D17); 54-07/08/09 do not start before that. Open: nothing in the code.
+Done: the build, gates, screenshots, review (SHIP, re-run 2), the user's D17 review and the revision it asked for.
+Next: (1) the user may re-open `/dev/phase-54` to see the revised surfaces 1, 2, 4, 6 and 8, and confirm Decision 10;
+(2) the spec agent records the table above in 54-01 §8 and folds it into 54-04/54-06/54-07/54-08/54-09 (D17);
+54-07/08/09 do not start before that. Open: nothing in the code.
 
 ## Context manifest
 

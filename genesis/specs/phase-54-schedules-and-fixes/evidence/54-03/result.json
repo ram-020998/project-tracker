@@ -11,32 +11,27 @@
     "heads": [
      {
       "text": "Name",
-      "w": 235,
-      "wrapped": false
-     },
-     {
-      "text": "Target",
-      "w": 229,
+      "w": 360,
       "wrapped": false
      },
      {
       "text": "Frequency",
-      "w": 240,
+      "w": 381,
       "wrapped": false
      },
      {
       "text": "Next run",
-      "w": 142,
+      "w": 157,
       "wrapped": false
      },
      {
       "text": "Last result",
-      "w": 233,
+      "w": 177,
       "wrapped": false
      },
      {
       "text": "On",
-      "w": 60,
+      "w": 66,
       "wrapped": false
      },
      {
@@ -68,7 +63,7 @@
     "heads": [
      {
       "text": "Slot",
-      "w": 166,
+      "w": 165,
       "wrapped": false
      },
      {
@@ -170,55 +165,6 @@
   "theme_class": "theme-light",
   "overflow": [],
   "tables": [
-   {
-    "label": "Objects changed",
-    "width": 785,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 263,
-      "wrapped": false
-     },
-     {
-      "text": "Type",
-      "w": 169,
-      "wrapped": false
-     },
-     {
-      "text": "Action",
-      "w": 129,
-      "wrapped": false
-     },
-     {
-      "text": "New version",
-      "w": 109,
-      "wrapped": false
-     },
-     {
-      "text": "Status",
-      "w": 115,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
-   {
-    "label": null,
-    "width": 695,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 515,
-      "wrapped": false
-     },
-     {
-      "text": "Change",
-      "w": 180,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
    {
     "label": "Objects changed",
     "width": 785,
@@ -394,7 +340,7 @@
    }
   ]
  },
- "portal-wizard-dialog-1280-light": {
+ "portal-server-multiselect-1280-light": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "overflow": [],
@@ -402,10 +348,24 @@
   "theme_class": "theme-light",
   "portal_in_viewport": true,
   "portal_box": [
-   304,
-   255,
-   672,
-   491
+   294,
+   483,
+   612,
+   414
+  ]
+ },
+ "portal-skill-multiselect-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   325,
+   656,
+   630,
+   320
   ]
  },
  "portal-agent-dialog-1280-light": {
@@ -417,9 +377,9 @@
   "portal_in_viewport": true,
   "portal_box": [
    304,
-   50,
+   131,
    672,
-   900
+   739
   ]
  },
  "portal-bell-popover-1280-light": {
@@ -445,9 +405,23 @@
   "portal_in_viewport": true,
   "portal_box": [
    1050,
-   430,
+   467,
    176,
    138
+  ]
+ },
+ "portal-last-result-tooltip-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   828,
+   384,
+   391,
+   48
   ]
  },
  "schedules-list-1440-light": {
@@ -462,32 +436,27 @@
     "heads": [
      {
       "text": "Name",
-      "w": 273,
-      "wrapped": false
-     },
-     {
-      "text": "Target",
-      "w": 261,
+      "w": 410,
       "wrapped": false
      },
      {
       "text": "Frequency",
-      "w": 285,
+      "w": 434,
       "wrapped": false
      },
      {
       "text": "Next run",
-      "w": 142,
+      "w": 179,
       "wrapped": false
      },
      {
       "text": "Last result",
-      "w": 278,
+      "w": 201,
       "wrapped": false
      },
      {
       "text": "On",
-      "w": 60,
+      "w": 75,
       "wrapped": false
      },
      {
@@ -669,55 +638,6 @@
      }
     ],
     "scrolls": false
-   },
-   {
-    "label": "Objects changed",
-    "width": 891,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 299,
-      "wrapped": false
-     },
-     {
-      "text": "Type",
-      "w": 192,
-      "wrapped": false
-     },
-     {
-      "text": "Action",
-      "w": 147,
-      "wrapped": false
-     },
-     {
-      "text": "New version",
-      "w": 123,
-      "wrapped": false
-     },
-     {
-      "text": "Status",
-      "w": 131,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
-   {
-    "label": null,
-    "width": 801,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 594,
-      "wrapped": false
-     },
-     {
-      "text": "Change",
-      "w": 207,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
    }
   ]
  },
@@ -845,7 +765,7 @@
    }
   ]
  },
- "portal-wizard-dialog-1440-light": {
+ "portal-server-multiselect-1440-light": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "overflow": [],
@@ -853,10 +773,24 @@
   "theme_class": "theme-light",
   "portal_in_viewport": true,
   "portal_box": [
-   384,
-   255,
-   672,
-   491
+   294,
+   467,
+   772,
+   414
+  ]
+ },
+ "portal-skill-multiselect-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   405,
+   656,
+   630,
+   320
   ]
  },
  "portal-agent-dialog-1440-light": {
@@ -868,9 +802,9 @@
   "portal_in_viewport": true,
   "portal_box": [
    384,
-   50,
+   131,
    672,
-   900
+   739
   ]
  },
  "portal-bell-popover-1440-light": {
@@ -896,9 +830,23 @@
   "portal_in_viewport": true,
   "portal_box": [
    1210,
-   439,
+   467,
    176,
    138
+  ]
+ },
+ "portal-last-result-tooltip-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   954,
+   384,
+   391,
+   48
   ]
  },
  "schedules-list-1920-light": {
@@ -913,32 +861,27 @@
     "heads": [
      {
       "text": "Name",
-      "w": 274,
-      "wrapped": false
-     },
-     {
-      "text": "Target",
-      "w": 262,
+      "w": 411,
       "wrapped": false
      },
      {
       "text": "Frequency",
-      "w": 286,
+      "w": 435,
       "wrapped": false
      },
      {
       "text": "Next run",
-      "w": 142,
+      "w": 179,
       "wrapped": false
      },
      {
       "text": "Last result",
-      "w": 278,
+      "w": 202,
       "wrapped": false
      },
      {
       "text": "On",
-      "w": 60,
+      "w": 75,
       "wrapped": false
      },
      {
@@ -970,17 +913,17 @@
     "heads": [
      {
       "text": "Slot",
-      "w": 189,
+      "w": 187,
       "wrapped": false
      },
      {
       "text": "Outcome",
-      "w": 375,
+      "w": 376,
       "wrapped": false
      },
      {
       "text": "Run",
-      "w": 144,
+      "w": 145,
       "wrapped": false
      },
      {
@@ -990,7 +933,7 @@
      },
      {
       "text": "Credits",
-      "w": 96,
+      "w": 97,
       "wrapped": false
      }
     ],
@@ -1072,55 +1015,6 @@
   "theme_class": "theme-light",
   "overflow": [],
   "tables": [
-   {
-    "label": "Objects changed",
-    "width": 893,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 299,
-      "wrapped": false
-     },
-     {
-      "text": "Type",
-      "w": 192,
-      "wrapped": false
-     },
-     {
-      "text": "Action",
-      "w": 147,
-      "wrapped": false
-     },
-     {
-      "text": "New version",
-      "w": 124,
-      "wrapped": false
-     },
-     {
-      "text": "Status",
-      "w": 131,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
-   {
-    "label": null,
-    "width": 803,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 595,
-      "wrapped": false
-     },
-     {
-      "text": "Change",
-      "w": 208,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
    {
     "label": "Objects changed",
     "width": 893,
@@ -1296,7 +1190,7 @@
    }
   ]
  },
- "portal-wizard-dialog-1920-light": {
+ "portal-server-multiselect-1920-light": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "overflow": [],
@@ -1304,10 +1198,24 @@
   "theme_class": "theme-light",
   "portal_in_viewport": true,
   "portal_box": [
-   624,
-   255,
-   672,
-   491
+   533,
+   467,
+   774,
+   414
+  ]
+ },
+ "portal-skill-multiselect-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   251,
+   593,
+   630,
+   320
   ]
  },
  "portal-agent-dialog-1920-light": {
@@ -1319,9 +1227,9 @@
   "portal_in_viewport": true,
   "portal_box": [
    624,
-   50,
+   131,
    672,
-   900
+   739
   ]
  },
  "portal-bell-popover-1920-light": {
@@ -1347,9 +1255,23 @@
   "portal_in_viewport": true,
   "portal_box": [
    1451,
-   439,
+   467,
    176,
    138
+  ]
+ },
+ "portal-last-result-tooltip-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1194,
+   384,
+   391,
+   48
   ]
  },
  "schedules-list-1280-dark": {
@@ -1364,32 +1286,27 @@
     "heads": [
      {
       "text": "Name",
-      "w": 235,
-      "wrapped": false
-     },
-     {
-      "text": "Target",
-      "w": 229,
+      "w": 360,
       "wrapped": false
      },
      {
       "text": "Frequency",
-      "w": 240,
+      "w": 381,
       "wrapped": false
      },
      {
       "text": "Next run",
-      "w": 142,
+      "w": 157,
       "wrapped": false
      },
      {
       "text": "Last result",
-      "w": 233,
+      "w": 177,
       "wrapped": false
      },
      {
       "text": "On",
-      "w": 60,
+      "w": 66,
       "wrapped": false
      },
      {
@@ -1421,12 +1338,12 @@
     "heads": [
      {
       "text": "Slot",
-      "w": 166,
+      "w": 164,
       "wrapped": false
      },
      {
       "text": "Outcome",
-      "w": 330,
+      "w": 331,
       "wrapped": false
      },
      {
@@ -1523,55 +1440,6 @@
   "theme_class": "theme-dark",
   "overflow": [],
   "tables": [
-   {
-    "label": "Objects changed",
-    "width": 785,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 263,
-      "wrapped": false
-     },
-     {
-      "text": "Type",
-      "w": 169,
-      "wrapped": false
-     },
-     {
-      "text": "Action",
-      "w": 129,
-      "wrapped": false
-     },
-     {
-      "text": "New version",
-      "w": 109,
-      "wrapped": false
-     },
-     {
-      "text": "Status",
-      "w": 115,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
-   {
-    "label": null,
-    "width": 695,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 515,
-      "wrapped": false
-     },
-     {
-      "text": "Change",
-      "w": 180,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
    {
     "label": "Objects changed",
     "width": 785,
@@ -1747,7 +1615,7 @@
    }
   ]
  },
- "portal-wizard-dialog-1280-dark": {
+ "portal-server-multiselect-1280-dark": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "overflow": [],
@@ -1755,10 +1623,24 @@
   "theme_class": "theme-dark",
   "portal_in_viewport": true,
   "portal_box": [
-   304,
-   255,
-   672,
-   491
+   294,
+   483,
+   612,
+   414
+  ]
+ },
+ "portal-skill-multiselect-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   325,
+   656,
+   630,
+   320
   ]
  },
  "portal-agent-dialog-1280-dark": {
@@ -1770,9 +1652,9 @@
   "portal_in_viewport": true,
   "portal_box": [
    304,
-   50,
+   131,
    672,
-   900
+   739
   ]
  },
  "portal-bell-popover-1280-dark": {
@@ -1798,9 +1680,23 @@
   "portal_in_viewport": true,
   "portal_box": [
    1050,
-   430,
+   467,
    176,
    138
+  ]
+ },
+ "portal-last-result-tooltip-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   828,
+   384,
+   391,
+   48
   ]
  },
  "schedules-list-1440-dark": {
@@ -1815,32 +1711,27 @@
     "heads": [
      {
       "text": "Name",
-      "w": 273,
-      "wrapped": false
-     },
-     {
-      "text": "Target",
-      "w": 261,
+      "w": 410,
       "wrapped": false
      },
      {
       "text": "Frequency",
-      "w": 285,
+      "w": 434,
       "wrapped": false
      },
      {
       "text": "Next run",
-      "w": 142,
+      "w": 179,
       "wrapped": false
      },
      {
       "text": "Last result",
-      "w": 278,
+      "w": 201,
       "wrapped": false
      },
      {
       "text": "On",
-      "w": 60,
+      "w": 75,
       "wrapped": false
      },
      {
@@ -1882,7 +1773,7 @@
      },
      {
       "text": "Run",
-      "w": 144,
+      "w": 145,
       "wrapped": false
      },
      {
@@ -1892,7 +1783,7 @@
      },
      {
       "text": "Credits",
-      "w": 96,
+      "w": 97,
       "wrapped": false
      }
     ],
@@ -1974,55 +1865,6 @@
   "theme_class": "theme-dark",
   "overflow": [],
   "tables": [
-   {
-    "label": "Objects changed",
-    "width": 891,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 299,
-      "wrapped": false
-     },
-     {
-      "text": "Type",
-      "w": 192,
-      "wrapped": false
-     },
-     {
-      "text": "Action",
-      "w": 147,
-      "wrapped": false
-     },
-     {
-      "text": "New version",
-      "w": 123,
-      "wrapped": false
-     },
-     {
-      "text": "Status",
-      "w": 131,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
-   {
-    "label": null,
-    "width": 801,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 594,
-      "wrapped": false
-     },
-     {
-      "text": "Change",
-      "w": 207,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
    {
     "label": "Objects changed",
     "width": 891,
@@ -2198,7 +2040,7 @@
    }
   ]
  },
- "portal-wizard-dialog-1440-dark": {
+ "portal-server-multiselect-1440-dark": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "overflow": [],
@@ -2206,10 +2048,24 @@
   "theme_class": "theme-dark",
   "portal_in_viewport": true,
   "portal_box": [
-   384,
-   255,
-   672,
-   491
+   294,
+   467,
+   772,
+   414
+  ]
+ },
+ "portal-skill-multiselect-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   405,
+   656,
+   630,
+   320
   ]
  },
  "portal-agent-dialog-1440-dark": {
@@ -2221,9 +2077,9 @@
   "portal_in_viewport": true,
   "portal_box": [
    384,
-   50,
+   131,
    672,
-   900
+   739
   ]
  },
  "portal-bell-popover-1440-dark": {
@@ -2249,9 +2105,23 @@
   "portal_in_viewport": true,
   "portal_box": [
    1210,
-   439,
+   467,
    176,
    138
+  ]
+ },
+ "portal-last-result-tooltip-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   954,
+   384,
+   391,
+   48
   ]
  },
  "schedules-list-1920-dark": {
@@ -2266,32 +2136,27 @@
     "heads": [
      {
       "text": "Name",
-      "w": 274,
-      "wrapped": false
-     },
-     {
-      "text": "Target",
-      "w": 262,
+      "w": 411,
       "wrapped": false
      },
      {
       "text": "Frequency",
-      "w": 286,
+      "w": 435,
       "wrapped": false
      },
      {
       "text": "Next run",
-      "w": 142,
+      "w": 179,
       "wrapped": false
      },
      {
       "text": "Last result",
-      "w": 278,
+      "w": 202,
       "wrapped": false
      },
      {
       "text": "On",
-      "w": 60,
+      "w": 75,
       "wrapped": false
      },
      {
@@ -2473,55 +2338,6 @@
      }
     ],
     "scrolls": false
-   },
-   {
-    "label": "Objects changed",
-    "width": 893,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 299,
-      "wrapped": false
-     },
-     {
-      "text": "Type",
-      "w": 192,
-      "wrapped": false
-     },
-     {
-      "text": "Action",
-      "w": 147,
-      "wrapped": false
-     },
-     {
-      "text": "New version",
-      "w": 124,
-      "wrapped": false
-     },
-     {
-      "text": "Status",
-      "w": 131,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
-   },
-   {
-    "label": null,
-    "width": 803,
-    "heads": [
-     {
-      "text": "Object",
-      "w": 595,
-      "wrapped": false
-     },
-     {
-      "text": "Change",
-      "w": 208,
-      "wrapped": false
-     }
-    ],
-    "scrolls": false
    }
   ]
  },
@@ -2649,7 +2465,7 @@
    }
   ]
  },
- "portal-wizard-dialog-1920-dark": {
+ "portal-server-multiselect-1920-dark": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "overflow": [],
@@ -2657,10 +2473,24 @@
   "theme_class": "theme-dark",
   "portal_in_viewport": true,
   "portal_box": [
-   624,
-   255,
-   672,
-   491
+   533,
+   467,
+   774,
+   414
+  ]
+ },
+ "portal-skill-multiselect-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   251,
+   593,
+   630,
+   320
   ]
  },
  "portal-agent-dialog-1920-dark": {
@@ -2672,9 +2502,9 @@
   "portal_in_viewport": true,
   "portal_box": [
    624,
-   50,
+   131,
    672,
-   900
+   739
   ]
  },
  "portal-bell-popover-1920-dark": {
@@ -2700,9 +2530,23 @@
   "portal_in_viewport": true,
   "portal_box": [
    1451,
-   439,
+   467,
    176,
    138
+  ]
+ },
+ "portal-last-result-tooltip-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "portal_in_viewport": true,
+  "portal_box": [
+   1194,
+   384,
+   391,
+   48
   ]
  }
 }

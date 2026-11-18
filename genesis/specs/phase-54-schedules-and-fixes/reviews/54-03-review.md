@@ -283,3 +283,146 @@ Every round-1 checklist line stays as it was, except these:
 M1 and M2 are fixed, each with an assertion that fails on the old source. m1–m3 and n1–n3, n5 are fixed too. All gates
 are green at `4b4046d`, and the bundle is identical to a fresh build. n6 and n7 are nits: fix them in passing or note
 them for the user. They don't block the D17 review. m4 and n4 must be raised with the user at that review.
+
+---
+
+## Re-run 2 — previous head 4b4046d, new head 0342a12 (genesis-review, 2026-11-18)
+
+What this round does: it applies the user's D17 browser-review answers to the `/dev/phase-54` mockups. The schedules
+grid loses its Target column and gets a weekday strip, a tag-only last result with a tooltip, and a lock icon on system
+rows. The wizard keeps only the full-page layout, the Implementation tab keeps only the tabs-in-one-card layout, and
+the custom-agent chat has no Copilot toggle. Skills and servers are now picked through a new shared
+`web/src/shared/ui/multi-select.tsx`, in both the wizard (with the custom agent's picks locked) and the agent editor.
+The commits are `631fef6` + `33853ba` (re-run 1's n6, n7) and `f1a4b57` + `0342a12`. Delta reviewed:
+`git diff 4b4046d..0342a12` (13 source files, +513/−242, plus 66 `web/static` files).
+
+### Gates (run by the reviewer at 0342a12)
+- `git rev-parse --short HEAD` = `0342a12`. `git status --short --untracked-files=all` is empty.
+- `npm run lint`: 0 errors, 20 warnings, the same count as before.
+- `npm run typecheck`: clean.
+- `npx vitest run`: 69 files, 805 tests passed.
+- Stale bundle: `npx vite build --outDir /tmp/54-03-r2-static` then `diff -r /tmp/54-03-r2-static web/static` gives no
+  output, so the committed bundle is fresh. `git show --stat 0342a12 -- web/static` shows 66 files.
+- Probe evidence: `evidence/54-03/result.json` has 162 entries (written 17:30), including the 6 portal kinds × 3 widths
+  × 2 themes. I scanned it for `page_hscroll`, `overflow`, `tailwind_ok: false`, table `scrolls` and wrapped headers,
+  and found 0 flagged entries. I viewed `schedules-list-1440-light`, `portal-server-multiselect-1440-dark` and
+  `portal-last-result-tooltip-1440-light`, and each matches the D17 description.
+- The Python and playwright-appian gates are N/A: no Python, workflow or apwt file changed. `scripts/probes/*.mjs` is a
+  dev probe that no test runs.
+
+### Re-run 1 nits
+- n6: **fixed** (`fixtures.ts:23-45`). The `upcoming()` helper builds candidates from day offset 0, drops times
+  `<= NOW` and keeps 5. `monthEnds` now starts with this month.
+- n7: **fixed** (`story.tsx:99-103`). The stub link points at `#story-design`, has a `title`, and has sr-only text
+  saying it is a stub. It no longer opens a missing route.
+
+### The D17 requests, each checked
+- The on/off switch writes `enabled` only: **OK**. `schedules.tsx` has `<Switch checked={s.enabled}>`. Pause and
+  Resume are row-menu items, and both are disabled when the schedule is off. The test asserts that "Hello Appian
+  check: on" is checked (a user-paused schedule) and that "KB Hub pull: off" is not. This closes round 1's m4.
+- Application-sync options: **OK**, unchanged (not in the diff).
+- No Copilot toggle in a custom-agent chat: **OK**. `bell-chat.tsx` drops the Switch, and the test asserts there is no
+  `switch "Copilot"`.
+- Step 2b shows the custom agent's skills and servers as locked picks: **OK**. `options.ts` `fromAgent` builds the
+  locked map, and `schedules.tsx` passes it to both pickers, keyed by agent so a switch of agent resets them. The test
+  finds 3 "· from KB explorer" chips and no Remove button on them. The screenshot shows locked rows checked and
+  disabled, with "from KB explorer" beside them.
+- Time inputs (native AM/PM in en-US): no code change. Confirming this with the user is still open (author's note).
+- Schedules grid: **OK** on every point. The test asserts the column headers
+  `Name, Frequency, Next run, Last result, On, Actions`, no "System" text, 5 `img "System schedule"`, the weekday
+  strip's names, and the line above the grid. The screenshots show the remaining points:
+  - The strip with monthly and once rows using an icon instead.
+  - The zone shown only on the Europe/London row.
+  - A tag-only last result whose tooltip reads "about 5 hours ago · Waiting at a gate: cancelled in about 19 hours if
+    not answered".
+  - The tag is a `Link` to `/runs/<id>`, or to the execution for a regression schedule.
+  - `CADENCE` covers every `SCHEDULES` id (1–5, 11–15), and each short line matches that row's `frequency` text.
+- Option B (full page) only: **OK**. The test asserts the `navigation "Wizard steps"` and no "Option A".
+- Multi-select dropdowns in the wizard and the agent editor: **OK**. Both mockups use `pickers.tsx` on `MultiSelect`.
+  Closed, it shows chips. Open, it has a search box and grouped checkbox lists ("Read-only servers" and "Can't be
+  picked"), with the reason as the accessible description. The custom server counts only after "This server only
+  reads" is ticked. Locked picks read "from <agent>". The unit tests and the 2b mockup test cover these, with jest-axe
+  on the open popover.
+- Implementation option A only: **OK**. The test asserts one `table "Objects changed"` and a `tab "Rollback
+  document"`.
+
+### MultiSelect keyboard path (real browser)
+I ran a read-only Playwright probe of my own: `/tmp/54-03-kbd/kbd.mjs`, Chromium 1440×1000 against Vite from the
+current source, on the agent editor's skills picker. The results:
+
+| Step | Result |
+|---|---|
+| Tab from the "Remove gam" chip | focus lands on `button "Choose skills"` (the Add trigger) |
+| Enter on Add | the popover opens, focus moves to `input[search] "Search skills"` |
+| Tab ×9 | search, then the 5 skill checkboxes, then back to search. Focus loops inside the popover and it stays open |
+| Shift+Tab from search | focus goes to the last checkbox and the popover stays open (it loops backwards too) |
+| Escape from a checkbox | the popover closes and focus returns to `button "Choose skills"` |
+| Space on a checkbox | it toggles: `appian` was removed and its chip disappeared. Escape returns focus to Add |
+| Enter on a chip's Remove button | **focus drops to `<body>`** (m5). The next Tab reaches Add only because Chromium keeps the focus starting point |
+
+Disabled options ("Can't be picked") are skipped by Tab, as native disabled checkboxes are. Their reason is exposed as
+`aria-describedby`, which the tests assert. Opening, moving through, and closing with focus returned all work.
+
+### New findings (this round's delta)
+
+#### Blockers / Majors
+None.
+
+#### Minors
+- m5 **Removing a chip by keyboard loses focus** (`multi-select.tsx`, the chip `<button aria-label="Remove …">` →
+  `toggle(v)`).
+  - What: the button removes its own chip, so the focused element unmounts.
+  - Problem: the probe's last step shows that Enter on "Remove gam" leaves `document.activeElement === <body>`. A
+    screen-reader user loses their place. A browser without a sequential-focus starting point sends the next Tab to the
+    top of the page. This is now a shared primitive that 54-07 and 54-05 will reuse, so the issue spreads with it.
+  - Fix: hold a ref on the trigger and call `triggerRef.current?.focus()` after `toggle(v)` in the two Remove handlers.
+    Focusing the next chip's Remove button also works. Add a userEvent test asserting that focus is on "Choose …"
+    after the removal (see n8).
+  - If skipped: 54-07 ships the focus loss in the wizard and the agent editor.
+- m6 **The Add trigger's accessible name doesn't contain its visible label** (`multi-select.tsx`, trigger
+  `aria-label={\`Choose ${label}\`}` while the visible text is "Add").
+  - Problem: this fails WCAG 2.5.3 Label in Name (level A). A voice-control user who says "click Add" gets no match.
+    jest-axe does not check this rule, so the green axe runs don't cover it.
+  - Fix: name it `Add ${label}` (for example "Add skills"), either through the aria-label or by dropping the aria-label
+    and adding `<span className="sr-only"> {label}</span>`. Update the names in the tests and in the probe's `PORTALS`.
+  - If skipped: the mismatch becomes the shared default.
+
+#### Nits
+- n8 **No keyboard test for the MultiSelect** (`multi-select.test.tsx`). The three tests use clicks only. A small
+  userEvent test would pin the keyboard path the probe saw, so a later Radix bump or a switch to `modal` can't change
+  it unseen: Tab to Add, Enter, focus on the search box, Escape, focus back on Add, plus the m5 assertion.
+- n9 **Carry the zone-alias finding into 54-07** (author's own note, confirmed by reading `schedules.tsx`
+  `canonicalZone`). On this host, `Intl` reports "Asia/Calcutta" for the machine. Comparing both sides after
+  canonicalising handles that. 54-07's "default to the machine's zone" also has to map the machine's zone onto the
+  picker's option values (`TIMEZONES` lists "Asia/Kolkata"), or the default matches no option. An unknown zone id
+  makes `Intl.DateTimeFormat` throw `RangeError`, so 54-07 must validate stored ids before formatting them.
+
+### Checklist delta
+Every round-1 and re-run-1 line stays as it was, except these:
+- ADR-027 / ADR-055: **OK**. `MultiSelect` uses the existing `@radix-ui/react-popover` 1.1.2 (`package.json:25`),
+  `cn`, the curated `icons`, and design tokens only (`bg-warning-subtle`, `border-warning` and `shadow-e3` are already
+  used elsewhere, for example in `EnvironmentsSection.tsx`). It adds no dependency.
+- L-069: **OK**. The trigger is `PopoverPrimitive.Trigger asChild` on a native `<button>`, and `Anchor asChild` is on
+  a `<div>`. There is no `Button asChild`.
+- L-014: **OK**. The new tests import `axe` from `jest-axe` through the existing ambient types, and no new `.d.ts` was
+  added.
+- L-090: **OK**. The probe adds the two multi-select portals and the tooltip, and its `tailwind_ok` guard holds on all
+  162 entries.
+- L-089: **OK**. The bundle commit `0342a12` has 66 `web/static` files and matches a fresh build.
+- ADR-028 / L-010: **OK**. The mockups make no fetch, and the links are SPA routes.
+- Coding standards §3 (shared primitives, accessibility): **OK**, apart from m5 and m6. The primitive lives in
+  `src/shared/ui`, is exported from `index.ts`, and has its own tests with jest-axe.
+
+### Not checked (re-run 2)
+- The keyboard path in Firefox and Safari, and with a real screen reader. My probe ran in Chromium only.
+- 159 of the 162 screenshots. I viewed only the three listed above.
+- The time-input AM/PM decision, which the author will confirm with the user.
+- The probe's own run at 0342a12. `result.json` is from 17:30. I relied on the clean tree and the identical bundle.
+
+### Verdict: SHIP
+Every D17 request is implemented and pinned by a test or a screenshot. Re-run 1's n6 and n7 are fixed. All gates are
+green at `0342a12`, and the bundle is identical to a fresh build. The MultiSelect's keyboard path works in Chromium:
+Add can be reached by Tab, opening puts focus in the search box, Tab moves through the enabled checkboxes inside the
+popover, and Escape closes it and returns focus to Add. m5 (focus lost after removing a chip) and m6 (the trigger's name
+doesn't match "Add") are minors in a dev mockup's new primitive. Fix them before 54-05 and 54-07 reuse it, ideally with
+n8's keyboard test, and carry n9 into 54-07.
