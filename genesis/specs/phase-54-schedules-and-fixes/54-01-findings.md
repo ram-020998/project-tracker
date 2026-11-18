@@ -1,7 +1,7 @@
 # 54-01 — Findings: Schedules, fixes and UX revamps
 
 > **Status:** SPEC-DRAFTED 2026-11-19 — Q&A complete: decisions D1–D20 (§8), defaults F1–F12 (§9, confirmed); D21
-> added after 54-02 (§10); D22–D28 from the 54-03 mockup review (§11).
+> added after 54-02 (§10); D22–D29 from the 54-03 mockup review (§11).
 > Parent: `specs/phase-54-schedules-and-fixes.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the schedules
@@ -232,6 +232,7 @@ schedules here.
 | D26 | **A chat with a custom agent hides the Copilot toggle.** | User review (2026-11-18), surface 6; D6 left it open. |
 | D27 | **Story Implementation tab: report and rollback document as tabs inside one card** (option A). | User review (2026-11-18), surface 8. |
 | D28 | **Approved as mocked:** schedule detail + history (3), bell (5), story Design (7), story Verification as its own tab (9), feature Overview (10), feature Activity (11). The approved mockup in `web/src/dev/mockups/phase54/` (genesis `b09b08e`) is the layout for 54-07, 54-08 and 54-09. | User review (2026-11-18). |
+| D29 | **Time fields use a 24-hour control (Q21, option B).** Every time field (schedule wizard, application-sync options, advanced end date's time) is a shared `TimeInput` in `web/src/shared/ui/` showing `HH:MM` 24-hour whatever the browser locale, matching the frequency text and next-run previews: hour and minute fields, typed digits and arrow keys, a label per field, jest-axe and a userEvent keyboard test. Replaces the native `type="time"` used in the mockup. Built in 54-07; the mockup is not revised. | User chose B (2026-11-19) after 54-03 decision 10 recorded "yes" as "no change". Considered: A (keep the native control; AM/PM on an en-US locale). |
 
 ## 9. Defaults — ✅ confirmed by the user 2026-11-19 ("yes")
 
@@ -269,8 +270,8 @@ Folded by the spec agent: 54-04 §1 (`enabled` vs `pause_reason`, D23); 54-06 (`
 disabled schedule); 54-07 (D22–D25, the shared `MultiSelect`, a shared row-menu primitive, time-zone canonicalisation,
 no opacity modifiers on token colours); 54-08 (D26); 54-09 (D27, the shared pieces already in `shared/ui`, a compact
 stat grid); 54-10 (A1 against `b09b08e`, keyboard check of `MultiSelect`). Backlog (umbrella §9): opacity modifiers on
-token colours generate no CSS (54-03 As built, "Found, not fixed"). Open, asked as Q21: the 12-hour time inputs
-(54-03 decision 10).
+token colours generate no CSS (54-03 As built, "Found, not fixed"). Q21 → D29: a 24-hour time control (54-03
+decision 10 corrected: the user's "yes" did not mean "no change").
 
 ## Context manifest
 

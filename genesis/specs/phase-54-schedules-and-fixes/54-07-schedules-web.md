@@ -28,6 +28,9 @@ build the real page from it and its shared pieces (`SectionCard`, `DefinitionLis
 - **New / edit (D24):** a full page (`/schedules/new`, `/schedules/:id/edit`) with the step rail and running summary;
   skills and servers through `MultiSelect`; a picked custom agent's skills and servers as locked chips "from <agent>".
 - **Application-sync detail (D25):** options shown as text with an Edit button.
+- **Time fields (D29):** a new shared `TimeInput` in `shared/ui` (24-hour `HH:MM` whatever the locale; hour and minute
+  fields, typed digits and arrow keys, a label per field) replaces every native `type="time"`; jest-axe and a userEvent
+  keyboard test.
 
 Rules:
 - the frequency summary and next runs come from the backend (`summary`, `next_runs`, `POST /schedules/preview` while

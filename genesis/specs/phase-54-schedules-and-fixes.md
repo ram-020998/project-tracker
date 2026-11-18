@@ -54,7 +54,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D19 | One release: genesis v0.83.0 → genesis-workflows v0.27.0. |
 | D20 | Phase 54 live-accepted before its release. |
 | D21 | No repair of runs a pre-fix state edit left stored `running`; the user cancels them by hand (after 54-02). |
-| D22–D28 | From the 54-03 mockup review: list layout (weekday strip, status tag, lock icon), switch = on/off only with Pause in the menu, full-page wizard with the shared `MultiSelect` and locked agent picks, app-sync options as text + Edit, no Copilot toggle with a custom agent, Implementation documents as tabs in one card, the rest approved as mocked. |
+| D22–D29 | From the 54-03 mockup review: list layout (weekday strip, status tag, lock icon), switch = on/off only with Pause in the menu, full-page wizard with the shared `MultiSelect` and locked agent picks, app-sync options as text + Edit, no Copilot toggle with a custom agent, Implementation documents as tabs in one card, the rest approved as mocked, a 24-hour time control. |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
