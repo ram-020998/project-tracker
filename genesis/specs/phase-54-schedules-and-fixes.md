@@ -58,6 +58,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D30 | A regression run with red tests is `failed` with a notice but does not count toward auto-pause (during 54-04). |
 | D31 | Gate and paused time does not count toward a run's max duration; a hand-paused run is never auto-cancelled (during 54-04). |
 | D32–D35 | During 54-05: workflow runs load custom-only MCP servers; the D3 rule lives in `genesis_core/mcp/pickable.py` and the node re-checks it; `schedulable` on `agent-prompt`, `sync-documents`, `generate-business-map`, `hello-appian`; a model change is refused while the model list is unreadable. |
+| D36–D38 | During 54-06: `counts_toward_pause` and the chat-session snapshot column added to the unreleased m0030 in place (the fleet must not apply m0030 before the release); chat `agent_id` answers 409 until 54-08; the API defaults (422 body, run-now answer, `?limit=0` unread count). |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
@@ -152,6 +153,7 @@ F1–F12 in `54-01-findings.md` §9 (confirmed 2026-11-19).
 | Removing old endpoints breaks a caller (L-094) | 54-06 lists every consumer (backend, web, tests, copilot tools) before removal |
 | Laptop sleep makes due times drift | D10 grace + `missed` records; acceptance step simulates a gap |
 | The open Phase 51/53 acceptance ships v0.82.x patches during this build | Each sub-spec rebases on current master before it starts |
+| A fleet restart applies the in-progress m0030, after which further in-place edits (D36, D37) would never reach it | Do not restart the fleet's `genesis serve` before the release; any sub-spec that edits m0030 re-checks process start times first; if the fleet has applied it, use a new migration |
 | Mockup review delays the web work | 54-04..54-06 (backend) proceed while the user reviews 54-03 |
 
 ## 12. ADR summaries

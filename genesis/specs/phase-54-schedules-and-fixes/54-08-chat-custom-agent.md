@@ -6,9 +6,10 @@
 
 ## 1. Backend
 
-1. `POST /chat/sessions` accepts `agent_id` only with `mode == "read_only"` (422 otherwise, 54-06). The session stores
-   the agent's **snapshot** (`custom_agents.snapshot`, 54-05 §1) on the session row or in its state (a column on
-   `chat_sessions` added by m0030 if needed; coordinate with 54-04 so there is still one migration). The agent is fixed
+1. `POST /chat/sessions` accepts `agent_id` only with `mode == "read_only"` (422 otherwise, 54-06). **54-06 already
+   added** the `mode` field, the validation, the `chat_sessions` snapshot column (in m0030) and a 409 stub for a valid
+   read-only `agent_id` (D37); 54-08 stores the snapshot, projects it, and removes the 409. The session stores
+   the agent's **snapshot** (`custom_agents.snapshot`, 54-05 §1) in the column 54-06 added to `chat_sessions`. The agent is fixed
    for the session: `set_session_mode` (`chat/manager.py:937`) to another mode is refused (422) for a session with an
    agent (the toggle is hidden, D26).
 2. The read-only profile (`chat/mode_profile.py:226`, `ChatModeProfile`) is unchanged for every other session. For a

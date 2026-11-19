@@ -58,6 +58,19 @@
 - **`schedulable`:** `InstalledWorkflowInfo.schedulable` / `schedulable_of(meta)`; `/api/catalog` items already carry
   it; the file-input rule is `runtime.schedule_targets.file_inputs(meta, stored)` (use it for `pickable.workflows`).
 
+## 0c. Decided during the build (D36–D38, `54-01-findings.md` §8)
+
+- **D36:** `schedule_runs.counts_toward_pause` is added to the unreleased m0030 in place; the scheduler writes it, the
+  history reads only it.
+- **D37:** `POST /chat/sessions` gains `mode`; `agent_id` rules as D37; the `chat_sessions` snapshot column is added to
+  m0030 in place; a valid read-only `agent_id` answers 409 until 54-08.
+- **D38:** the 422 body, `ScheduleRefused`, model check, pause vs owner lock, run-now answer, pickable models/skills,
+  `?limit=0` for the unread count, `ActivityItem` type only. Where §1's table differs (a separate unread-count route,
+  the run-now answer), D38 wins.
+- **Both in-place m0030 edits** hold only while the fleet has not applied m0030 (D36's condition): before editing,
+  re-check that neither fleet `genesis serve` restarted since 2026-11-18 18:48 (`ps -ww -eo pid,lstart,command`), read
+  only.
+
 ## 1. Contract table
 
 | Method + path | Body / query | Answer | Errors |

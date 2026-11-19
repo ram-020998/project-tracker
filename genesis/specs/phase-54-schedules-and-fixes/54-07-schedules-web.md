@@ -51,6 +51,10 @@ Rules:
   regression run, D30, or an "interrupted" recovered row) says so; a run's gate or paused time (`idle_s`, D31) is shown
   beside its duration;
 - Paused (failing) and waiting-at-gate states are visible on the row and the detail, with Resume / Open run;
+- **Run now (D38 d):** the answer's `run_id` / `execution_key` are usually null; refresh the schedule (or its open
+  history row) to show the run link once the handler sets it.
+- **Models (D38 e):** `pickable.models` null means Kiro's model list cannot be read: show "model list unavailable" and
+  keep the current model; a change is refused then (D35).
 - delete asks for confirmation and says the runs stay in Runs (F8);
 - **time zones (54-03 decision 11):** browsers may name the machine's zone by an alias ("Asia/Calcutta" for
   "Asia/Kolkata" on this Mac). Compare zone ids only after canonicalising both through `Intl` (`resolvedOptions()`),
