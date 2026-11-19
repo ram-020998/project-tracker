@@ -1,0 +1,938 @@
+{
+ "story-design-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [],
+  "frame_theme": "light",
+  "surface": "rgb(255, 255, 255)",
+  "frame_bg": "rgb(255, 255, 255)",
+  "frame_fg": "rgb(17, 23, 38)"
+ },
+ "story-overview-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "story-implementation-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     163,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-implementation-rollback-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     163,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-verification-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-filter-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-rerun-confirm-1280-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   448,
+   419,
+   384,
+   162
+  ]
+ },
+ "story-design-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [],
+  "frame_theme": "light",
+  "surface": "rgb(255, 255, 255)",
+  "frame_bg": "rgb(255, 255, 255)",
+  "frame_fg": "rgb(17, 23, 38)"
+ },
+ "story-overview-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "story-implementation-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 270,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     270,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-implementation-rollback-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 270,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     270,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-verification-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-filter-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-rerun-confirm-1440-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   528,
+   419,
+   384,
+   162
+  ]
+ },
+ "story-design-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [],
+  "frame_theme": "light",
+  "surface": "rgb(255, 255, 255)",
+  "frame_bg": "rgb(255, 255, 255)",
+  "frame_fg": "rgb(17, 23, 38)"
+ },
+ "story-overview-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "story-implementation-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 409,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     409,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-implementation-rollback-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 409,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     409,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-verification-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-filter-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-rerun-confirm-1920-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   768,
+   419,
+   384,
+   162
+  ]
+ },
+ "story-design-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [],
+  "frame_theme": "dark",
+  "surface": "rgb(18, 21, 28)",
+  "frame_bg": "rgb(18, 21, 28)",
+  "frame_fg": "rgb(238, 241, 247)"
+ },
+ "story-overview-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "story-implementation-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     163,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-implementation-rollback-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     163,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-verification-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-filter-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-rerun-confirm-1280-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   448,
+   419,
+   384,
+   162
+  ]
+ },
+ "story-design-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [],
+  "frame_theme": "dark",
+  "surface": "rgb(18, 21, 28)",
+  "frame_bg": "rgb(18, 21, 28)",
+  "frame_fg": "rgb(238, 241, 247)"
+ },
+ "story-overview-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "story-implementation-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 270,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     270,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-implementation-rollback-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 270,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     270,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-verification-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-filter-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-rerun-confirm-1440-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   528,
+   419,
+   384,
+   162
+  ]
+ },
+ "story-design-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [],
+  "frame_theme": "dark",
+  "surface": "rgb(18, 21, 28)",
+  "frame_bg": "rgb(18, 21, 28)",
+  "frame_fg": "rgb(238, 241, 247)"
+ },
+ "story-overview-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "story-implementation-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 409,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     409,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-implementation-rollback-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 409,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false,
+    "spill": [],
+    "cols": [
+     409,
+     152,
+     120,
+     108,
+     104
+    ]
+   }
+  ]
+ },
+ "story-verification-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-overview-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "feature-activity-filter-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-rerun-confirm-1920-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   768,
+   419,
+   384,
+   162
+  ]
+ }
+}

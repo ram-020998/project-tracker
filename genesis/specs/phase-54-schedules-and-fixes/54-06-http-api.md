@@ -122,7 +122,9 @@ Shapes (`web/src/types/schedules.ts`, `customAgents.ts`, `notifications.ts`, add
   created_at, updated_at}`.
 - `Notification {id, source, kind: "needs_you"|"failed"|"auto_paused"|"missed", title, body, link, created_at, read_at}`.
 - `ActivityItem {type: "lifecycle"|"run"|"change_request"|"finalization", stage, action, from_state?, to_state?,
-  label, actor?, at, link?}`.
+  label, actor?, at, link?}`. As built in 54-09: `stage` is the backend stage key (`spec`, `ux_design`,
+  `technical_design`, `breakdown`, `test_design`); additive `cr_label?` on change_request items and `run_id?`,
+  `run_status?` on run items.
 
 ## 2. Removals (F7, after 54-07 moves the web)
 
