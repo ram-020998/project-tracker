@@ -6,6 +6,16 @@
 > and `feature.tsx` at genesis `b09b08e`; D27, D28). Current state: `54-01-findings.md` §4. Decisions: D17, D18, D27,
 > D28.
 
+## 0. Carry-over from 54-07 (built first, with its own commit)
+
+**D42, current zone names in the schedule zone picker** (`web/src/features/schedules/`, the zone helper 54-07 added):
+add a map of legacy IANA alias → current name (`Asia/Calcutta` → `Asia/Kolkata` and the other legacy aliases browsers
+list, from tzdata's `backward` links; keep it small and documented), apply it to the picker's options and the default
+machine zone so new schedules store the current name, and show a stored alias under its current name. Nothing is
+migrated; comparisons stay canonical. Tests: with the browser zone `Asia/Calcutta`, a new schedule stores
+`Asia/Kolkata`; a stored `Asia/Calcutta` row shows `Asia/Kolkata` and saves unchanged unless edited; the list has no
+duplicate entry for one zone.
+
 ## 1. Shared pieces
 
 `SectionCard`, `DefinitionList`, `StatusHeader` and `Timeline` already exist in `web/src/shared/ui/` (built in 54-03,
@@ -78,6 +88,6 @@ areas    = ["stories-workbench", "features-stages", "web-shell", "api"]
 adrs     = ["ADR-027", "ADR-050", "ADR-055", "ADR-056", "ADR-058", "ADR-068", "ADR-071", "ADR-076", "ADR-084"]
 lessons  = ["L-014", "L-039", "L-063", "L-069", "L-073", "L-083", "L-089", "L-090", "L-094"]
 docs     = ["tracker:specs/phase-54-schedules-and-fixes/54-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/54-03-mockups.md", "tracker:specs/phase-43-unified-story-workspace.md"]
-code     = ["genesis/web/src/features/workbench/**", "genesis/web/src/features/features/**", "genesis/web/src/shared/**", "genesis/genesis/api/features.py"]
-upstream = ["54-03", "54-06"]
+code     = ["genesis/web/src/features/workbench/**", "genesis/web/src/features/features/**", "genesis/web/src/shared/**", "genesis/genesis/api/features.py", "genesis/web/src/features/schedules/**"]
+upstream = ["54-03", "54-06", "54-07"]
 ```

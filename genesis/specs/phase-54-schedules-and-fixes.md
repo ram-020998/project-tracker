@@ -61,6 +61,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D36–D39 | During 54-06: `counts_toward_pause` and the chat-session snapshot column added to the unreleased m0030 in place (the fleet must not apply m0030 before the release); chat `agent_id` answers 409 until 54-08; the API defaults (422 body, run-now answer, `?limit=0` unread count); `GET /schedules/{id}/sync-status` for the app-sync detail. |
 | D40 | A second regression schedule for the same app is refused (spec reading of D14; after 54-06). |
 | D41 | The Agents Run dialog shows an Open run link (as mocked); D40 also refuses Duplicate of a regression schedule (after 54-07). |
+| D42 | The zone picker shows and stores current IANA names (`Asia/Kolkata`, not `Asia/Calcutta`); built in 54-09 §0. |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 

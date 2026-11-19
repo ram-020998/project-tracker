@@ -2,7 +2,7 @@
 
 > **Status:** SPEC-DRAFTED 2026-11-19 — Q&A complete: decisions D1–D20 (§8), defaults F1–F12 (§9, confirmed); D21
 > added after 54-02 (§10); D22–D29 from the 54-03 mockup review (§11); D30–D31 during 54-04 (§12); D32–D35 during
-> 54-05 (§13); D36–D39 during 54-06; D40 after 54-06 (§14); D41 after 54-07 (§15).
+> 54-05 (§13); D36–D39 during 54-06; D40 after 54-06 (§14); D41–D42 after 54-07 (§15).
 > Parent: `specs/phase-54-schedules-and-fixes.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the schedules
@@ -245,6 +245,7 @@ schedules here.
 | D39 | **The application-sync detail's per-app data comes from `GET /schedules/{id}/sync-status` (54-06 Q4, option B).** It returns `{collab_enabled, per_app[]}` with today's `/system/sync-settings` per-app shape, 404 for any other schedule; only the application-sync detail page calls it, so `Schedule` keeps one shape for every row and the list does no KB reads. This lets 54-07 remove `/system/sync-settings` (F7) without losing D15's fields. | User chose B (2026-11-19). Considered: A (an `app_sync` block on the `Schedule`, KB reads on every list load) and C (leave it to 54-07, outside the contract). |
 | D40 | **One regression schedule per application (a reading of D14, set by the spec agent after 54-06; the user may object).** Creating a second regression schedule for an app that already has one is refused (409, naming the existing schedule); Testing → Setup's link opens the existing one. Built in 54-07 §0. | D14 says "one row per app"; 54-06's review found nothing enforces it and `regression_for` silently returns the oldest. |
 | D41 | **54-07 rulings confirmed by the spec agent (the user may object):** (1) the Catalog → Agents Run dialog shows the started run with an **Open run** link, as in the approved mockup (D28), instead of §3's "opens the new run"; (2) D40 also refuses **Duplicate** of a regression schedule (409 with `existing: {id, name}`), since the copy would be a second schedule for the app. | Both follow decisions already made (D28's mockup is the layout; D40). |
+| D42 | **The zone picker shows and stores current IANA names (Q26, option B).** A small map of legacy alias → current name (`Asia/Calcutta` → `Asia/Kolkata`, and the other legacy aliases browsers still list, taken from tzdata's `backward` links) is applied to the picker's options and to the default machine zone, so a new schedule stores `Asia/Kolkata`. A stored alias keeps working and is shown under its current name; nothing is migrated. Comparisons stay canonical. Built as a carry-over in 54-09 §0. | User chose B (2026-11-19). Considered: A (leave the browser's list; two names for one zone on one page). |
 | D38 | **54-06 API defaults (54-06 Q3, accepted as a set):** (a) every 422 body is `{detail, field, refused?}` at the top level; an `agent_prompt` target is checked for an existing agent (inside the store's write lock, 54-06 §0b n1), pickable servers (`target.mcp_servers`, with `refused`) and installed skills (`target.skills`); a workflow target that is not `schedulable` or has file inputs is 422 on `target.workflow_id` / `target.inputs`; through a new `ScheduleRefused(ScheduleError)` mapped before `ScheduleError`. (b) A schedule's own model follows D35 (checked only when it changes). (c) Pause / Resume are not refused when another Genesis process owns the schedules; only Run now answers the owner-lock 409. (d) Run now answers `{row_id, run_id, execution_key}`, the ids usually null at that moment. (e) `pickable.models` = `[{id, name}]` or null when Kiro's model list cannot be read; `pickable.skills` = `[{id, name, description}]`. (f) The unread count is the `unread` field; `GET /notifications?limit=0` returns only the count (no separate route). (g) 54-06 adds only the `ActivityItem` type; the activity route is 54-09's. | User accepted (2026-11-19). |
 
 ## 9. Defaults — ✅ confirmed by the user 2026-11-19 ("yes")
@@ -319,8 +320,8 @@ with no effective day), D40 (one regression schedule per app) and n3 (the duplic
 of its rulings. Folded by the spec agent: 54-08 §2 (reuse `useCustomAgents`, the editor's tools-note wording, the
 shared `RowMenu`); 54-09 §1 (`RowMenu`, `TimeInput` now shared; the bell's labelled Popover); 54-10 A17 (the live rows
 54-07 could not run, and its page probe `scripts/probes/phase54-pages.mjs`); umbrella §9 (a sync-option range refusal
-not shown on its field; the pre-existing opacity-modifier files, listed in 54-07's As built). Open, asked as Q26: the
-zone picker shows `Asia/Calcutta`.
+not shown on its field; the pre-existing opacity-modifier files, listed in 54-07's As built). Q26 → D42 (current IANA
+zone names in the picker; built in 54-09 §0).
 
 ## Context manifest
 
