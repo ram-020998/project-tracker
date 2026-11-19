@@ -16,6 +16,15 @@ migrated; comparisons stay canonical. Tests: with the browser zone `Asia/Calcutt
 `Asia/Kolkata`; a stored `Asia/Calcutta` row shows `Asia/Kolkata` and saves unchanged unless edited; the list has no
 duplicate entry for one zone.
 
+## 0b. Decided during the build (D45, `54-01-findings.md` §8)
+
+Data sources and layout points the spec and mockup left open, all ten settled by D45: CR items from the CR store only;
+bound runs plus Test Design's top-ups (no matching by inputs); finalization label without an actor; `summary` and
+`run_status` on `GET /features/{id}` (every stage-row read carries `run_status`, L-039; add both to 54-06's contract
+table); no rolled-up badge or progress bar on the feature page; omit detail rows with no recorded data; Re-run design
+gated and confirmed; code-review state from the lane ("Moved past code review", never "Passed"); the Verification
+report kept as a "Report" card; no "Open report in new tab" on Implementation. Where §2–§4 differ, D45 wins.
+
 ## 1. Shared pieces
 
 `SectionCard`, `DefinitionList`, `StatusHeader` and `Timeline` already exist in `web/src/shared/ui/` (built in 54-03,

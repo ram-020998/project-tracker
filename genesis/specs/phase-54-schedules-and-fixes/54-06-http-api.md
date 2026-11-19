@@ -102,6 +102,7 @@
 | `GET /chat/sessions/{id}` (existing) | | + `agent: {id, name} \| null` | |
 | the existing chat mode-change endpoint | | unchanged | 422 for a session with a custom agent (D26, 54-08 §1.1) |
 | `GET /features/{id}/activity` (existing, extended, 54-09) | `?stage=&limit=&offset=` | `{items: ActivityItem[], total}` | |
+| `GET /features/{id}` (existing, extended, 54-09, D45) | | + `summary: {stories, epics, test_cases, stories_with_open_questions, stories_not_on_board, last_activity_at}`; each stage row + `run_status` (also on every other read returning stage rows, L-039) | |
 | `GET /catalog`, `GET /workflows/{id}` (existing) | | + `schedulable: bool` | |
 | `GET /runs`, `GET /runs/{id}` (existing) | | + `trigger: {source, schedule_id, schedule_name \| null, slot} \| null` | |
 

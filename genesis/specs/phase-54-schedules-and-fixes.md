@@ -63,6 +63,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D41 | The Agents Run dialog shows an Open run link (as mocked); D40 also refuses Duplicate of a regression schedule (after 54-07). |
 | D42 | The zone picker shows and stores current IANA names (`Asia/Kolkata`, not `Asia/Calcutta`); built in 54-09 §0. |
 | D43–D44 | In chat a custom server with no tool allowlist adds no tools (ADR-031); each custom agent has its own Kiro agent id, and an explicit model wins over the agent's (after 54-08). |
+| D45 | 54-09's ten data-source and layout points (CR items from the CR store, honest run history, no invented actors or rows, `summary` + `run_status` on the feature read, gated Re-run design, lane-derived code-review wording, no blob-URL report). |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
