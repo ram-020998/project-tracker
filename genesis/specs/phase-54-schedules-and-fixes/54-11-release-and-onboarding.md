@@ -34,6 +34,8 @@ in the release notes:
   as a curated one is never used in a run.
 - Unattended agent-prompt runs have Kiro's shell (ADR-083 risks until Phase 52) and only read-only MCP servers; a
   custom server's "read-only" mark is your own claim.
+- In chat, a custom agent keeps chat's read-only tools; a custom server with no tool allowlist adds no tools there
+  (give it an allowlist in Settings → MCP to use it in chat, D43).
 - A run whose state was edited before v0.83.0 may still show **Running** with nothing happening (54-02 fixed the cause,
   not old runs, D21): cancel it from Run Detail. A stuck `sync-application` run blocks that app's scheduled sync until
   you do.

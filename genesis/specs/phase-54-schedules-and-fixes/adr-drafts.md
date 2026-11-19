@@ -31,7 +31,9 @@
      reusing a curated name is never used in a run (D32).
   4. **Custom agents** are Genesis-owned profiles (instructions, skills, read-only servers, model), maintained in
      Catalog → Agents, never read from `~/.kiro/agents` (ADR-086); usable by agent-prompt schedules, a one-off Run, and
-     the read-only chat mode only (D4–D6). Genesis still projects the real agent, so the mode's or node's trust wins.
+     the read-only chat mode only (D4–D6). Genesis still projects the real agent, so the mode's or node's trust wins:
+     in chat a picked server contributes only its read-only allowlisted tools, and a custom server with no allowlist
+     contributes none (D43, ADR-031).
   5. **Frequency** forms: every N hours in a window, daily times, weekly days, monthly day, once; IANA time zone; next
      runs previewed; no cron (D9).
   6. **Unattended behaviour.** Missed slots: the most recent runs once within a grace window (default 12 h), older
