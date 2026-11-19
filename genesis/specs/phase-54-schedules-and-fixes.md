@@ -110,7 +110,7 @@ testing-schedule endpoints stay until 54-07 moves the web off them.
 | 54-06 | genesis (`api/`, `web/src/types`, `web/src/lib/api`) | Contract table: `/schedules*`, `/custom-agents*`, `/notifications*`, chat `agent_id`, activity items; removals (F7); fixtures — **BUILT** (genesis `9f63fc2..a6cc287`, local; review SHIP); the removals moved to 54-07 |
 | 54-07 | genesis (`web/`) | Schedules page, wizard, detail + history; Catalog → Agents tab + Run; bell; Settings → General card removed; Testing → Setup link; Runs badge; nav entry — **BUILT** (genesis `a6cc287..41971a0`, local; review SHIP; with the F7 removals and the 54-06 review fixes) |
 | 54-08 | genesis (`chat/`, `api/chat.py`, `web/src/features/chat/`) | Read-only chat session with a custom agent (D6) — **BUILT** (genesis `41971a0..8f8b1a1`, local; review SHIP; live no-prompt probe PASS) |
-| 54-09 | genesis (`web/src/features/workbench/`, `web/src/features/features/`, `api/features.py`, `shared/`) | Story Design + Implementation tabs; feature Overview + Activity (+ activity endpoint, D18); shared section card / definition list / timeline |
+| 54-09 | genesis (`web/src/features/workbench/`, `web/src/features/features/`, `api/features.py`, `shared/`) | Story Design + Implementation tabs; feature Overview + Activity (+ activity endpoint, D18); shared section card / definition list / timeline — **BUILT** (genesis `8f8b1a1..2ad1c50`, local; review SHIP; with D42) |
 | 54-10 | all | Review + gates + live acceptance (D20) |
 | 54-11 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-087, lessons, areas, state, progress) |
 
@@ -143,7 +143,9 @@ round's Feedback stays in later `agent-prompt` prompts) and n5 (a hand-sent non-
 L-106 pattern in `memory-consolidation` / `memory-maintenance`, whose escalation routes every non-approve answer,
 Feedback included, to the reject path; from 54-07: a sync-option range refusal (such as 150 %) is a field-less 400
 shown as the general message, not on its field; the pre-existing opacity-modifier files it listed (`TopBar.tsx`,
-`RunDetailPage.tsx`, `RunsTable.tsx`, `LaunchForm.tsx`, `SetupView.tsx`, `Badge`'s primary tone).
+`RunDetailPage.tsx`, `RunsTable.tsx`, `LaunchForm.tsx`, `SetupView.tsx`, `Badge`'s primary tone); from 54-09: feature
+Activity pages by offset, so an item arriving between "Load more" clicks can repeat once (a cursor would fix it); a
+stage card's "Last run" shows only the status (the stage row stores no run time).
 
 ## 10. Defaults
 

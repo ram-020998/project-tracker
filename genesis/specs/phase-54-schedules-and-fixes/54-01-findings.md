@@ -335,6 +335,14 @@ rulings. Folded: 54-10 A11 (the live rows 54-08 lists, including a refused non-a
 probe re-run); 54-11 release note (D43); the ADR-087 draft (chat's posture for a custom agent); umbrella ledger. Process
 note for the remaining sub-specs: load the pack's "Also applies" lessons for the code you touch before writing it.
 
+## 17. After 54-09 (2026-11-19): As built folded into 54-10 and the umbrella
+
+54-09 BUILT (genesis `8f8b1a1..2ad1c50`, 7 commits, local; review SHIP at re-run 1). Its review M1 (the Design tab's
+"Open in new tab" served agent HTML on the app's origin; now `script-src 'none'` + `nosniff`) became a whole-phase
+review item, 54-10 §1 item 9b. Folded: 54-10 A14 (the live rows 54-09 could not run, the probe re-run); umbrella ledger
+and follow-ups (offset paging may repeat an item; a stage card's "Last run" has no time). All feature sub-specs
+(54-02..54-09) are BUILT; next is 54-10.
+
 ## Context manifest
 
 ```toml
