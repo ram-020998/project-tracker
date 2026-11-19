@@ -60,6 +60,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D32–D35 | During 54-05: workflow runs load custom-only MCP servers; the D3 rule lives in `genesis_core/mcp/pickable.py` and the node re-checks it; `schedulable` on `agent-prompt`, `sync-documents`, `generate-business-map`, `hello-appian`; a model change is refused while the model list is unreadable. |
 | D36–D39 | During 54-06: `counts_toward_pause` and the chat-session snapshot column added to the unreleased m0030 in place (the fleet must not apply m0030 before the release); chat `agent_id` answers 409 until 54-08; the API defaults (422 body, run-now answer, `?limit=0` unread count); `GET /schedules/{id}/sync-status` for the app-sync detail. |
 | D40 | A second regression schedule for the same app is refused (spec reading of D14; after 54-06). |
+| D41 | The Agents Run dialog shows an Open run link (as mocked); D40 also refuses Duplicate of a regression schedule (after 54-07). |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
@@ -104,7 +105,7 @@ testing-schedule endpoints stay until 54-07 moves the web off them.
 | 54-04 | genesis (`runtime/`, `db/`, `testexec/regression_job.py`) | m0030; schedule model (D9); scheduler engine (F2, D10, D8, D12); system rows + regression migration (D14, D15); `runs.trigger_json`; `schedule_runs`; notifications store; ADR-087 draft kept current — **BUILT** (genesis `b09b08e..9a365c0`, local; review SHIP; `9a365c0` unreviewed, carried to 54-10) |
 | 54-05 | genesis (`packages/genesis-core`, `runs/`, new `agents/`), genesis-workflows | `custom_agents` store; `kiro_node` callables (F4); `agent-prompt` workflow; `schedulable` META key + parity lint; read-only server rule (D3) enforced at launch and in the node — **BUILT** (genesis `9a365c0..9f63fc2`, genesis-workflows `d0c0f53..7b35f8a`, local; review SHIP) |
 | 54-06 | genesis (`api/`, `web/src/types`, `web/src/lib/api`) | Contract table: `/schedules*`, `/custom-agents*`, `/notifications*`, chat `agent_id`, activity items; removals (F7); fixtures — **BUILT** (genesis `9f63fc2..a6cc287`, local; review SHIP); the removals moved to 54-07 |
-| 54-07 | genesis (`web/`) | Schedules page, wizard, detail + history; Catalog → Agents tab + Run; bell; Settings → General card removed; Testing → Setup link; Runs badge; nav entry |
+| 54-07 | genesis (`web/`) | Schedules page, wizard, detail + history; Catalog → Agents tab + Run; bell; Settings → General card removed; Testing → Setup link; Runs badge; nav entry — **BUILT** (genesis `a6cc287..41971a0`, local; review SHIP; with the F7 removals and the 54-06 review fixes) |
 | 54-08 | genesis (`chat/`, `api/chat.py`, `web/src/features/chat/`) | Read-only chat session with a custom agent (D6) |
 | 54-09 | genesis (`web/src/features/workbench/`, `web/src/features/features/`, `api/features.py`, `shared/`) | Story Design + Implementation tabs; feature Overview + Activity (+ activity endpoint, D18); shared section card / definition list / timeline |
 | 54-10 | all | Review + gates + live acceptance (D20) |
@@ -137,7 +138,9 @@ event loop (pre-existing, L-026); review nits n1 (a third copy of the `_installe
 few-bytecode window between the open row's commit and `_mine.add`), accepted; from 54-05: review n4 (an earlier gate
 round's Feedback stays in later `agent-prompt` prompts) and n5 (a hand-sent non-string Feedback), and the pre-existing
 L-106 pattern in `memory-consolidation` / `memory-maintenance`, whose escalation routes every non-approve answer,
-Feedback included, to the reject path.
+Feedback included, to the reject path; from 54-07: a sync-option range refusal (such as 150 %) is a field-less 400
+shown as the general message, not on its field; the pre-existing opacity-modifier files it listed (`TopBar.tsx`,
+`RunDetailPage.tsx`, `RunsTable.tsx`, `LaunchForm.tsx`, `SetupView.tsx`, `Badge`'s primary tone).
 
 ## 10. Defaults
 

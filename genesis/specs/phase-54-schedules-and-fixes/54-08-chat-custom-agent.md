@@ -32,6 +32,10 @@
 
 ## 2. Web
 
+From 54-07's As built: reuse `useCustomAgents` (`features/catalog/agents/hooks.ts`) for the picker, take the tools-note
+wording from the Agents editor so both say the same thing, and use the shared `RowMenu` if a menu is needed;
+`ScheduledBadge` is a model for a small linked badge in the chat header.
+
 New-chat control with an optional custom agent picker (read-only mode only), the agent name in the chat header, and
 a short note that in chat the agent keeps chat's read-only tools (D5), as in the approved mockup
 (`web/src/dev/mockups/phase54/bell-chat.tsx`, genesis `b09b08e`). **A chat with a custom agent hides the Copilot

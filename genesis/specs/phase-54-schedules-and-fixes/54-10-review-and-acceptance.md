@@ -55,6 +55,7 @@ skills validation, pytest), one CI run or a run in the CI image before the relea
 | A14 | **UX revamps:** story Design, Implementation (Objects changed table), Verification tab; feature Overview (Needs attention across stages), Activity (all stages, filter, paging) on a real feature with history | as stated |
 | A15 | **Width probe (L-090):** the Schedules list and history, Agents tab, bell popover, story Implementation objects table, feature Activity at 1280 / 1440 / 1920 px, light and dark, in a real browser; plus the `MultiSelect`, row menu and `TimeInput` (24-hour, D29) driven by keyboard only (focus kept after removing a chip, names match visible text) | no overflow or clipping; keyboard path works |
 | A16 | **Process hygiene:** after A2–A11 no stray `kiro-cli` or MCP processes (`ps -ww`, L-104) | none |
+| A17 | **54-07 rows it could not run offline:** a scheduled run waiting at a gate (row tint, banner, Open run, the tooltip's cancel time); Run now on a real run with the run link appearing; Delete and Reset to default through the row menu's confirm dialogs; Kiro's real model list in the wizard and the agent editor; the migrated regression and app-sync rows on the Schedules page; the bell with real scheduler notices. Re-run `scripts/probes/phase54-pages.mjs` against the release candidate's own throwaway server (never the fleet before the release, D36) | as stated |
 
 ## As built
 

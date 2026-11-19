@@ -15,6 +15,9 @@ the Implementation counts and Verification totals, promote the mockup's compact 
 `web/src/dev/mockups/phase54/story.tsx`) to `shared/ui`, or give `MetricCard` a compact size; do not add a third grid
 (54-03 decision 3). Tokens only (ADR-027, ADR-055), and no opacity modifiers on token colours (`bg-primary/10` and the
 like generate no CSS, 54-03 As built); no `Button asChild` (L-069): link-styled actions use a link with button classes.
+`RowMenu` and `TimeInput` are also in `shared/ui` now (54-07); use `RowMenu` for any row actions. Do not touch the
+pre-existing opacity-modifier files 54-07 listed unless the page you revamp contains one (then replace it in that file
+only and say so in As built).
 
 ## 2. Story page (`StoryWorkspacePage.tsx`, ADR-071: still the one canonical page)
 
