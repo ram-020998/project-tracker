@@ -4,6 +4,25 @@
 > by **genesis-dev** after the 54-03 mockups are approved; **the approved mockup is the layout** (read 54-03's As built
 > and any decisions it added to 54-01 §8 first). Contract: 54-06.
 
+## 0. From 54-06's As built (read it first: "§2 consumer list" and "For 54-07 / 54-08 / 54-09")
+
+- **Removals (F7):** 54-07 removes the old routes. Work from 54-06's re-grepped consumer list and its replacement map
+  (backend routes and store methods, web clients, hooks and components, tests and fixtures); re-grep before each
+  removal (L-094). Keep `validate_sync_options`, `app_sync_per_app` and `collab_enabled`; the testing setup GET's
+  `schedule` key becomes the pointer `{id, summary, next_run} | null`.
+- **Client functions** (`schedulesApi`, `customAgentsApi`, `notificationsApi`, `fieldRefusalOf`, `inUseOf`), the 16
+  golden fixtures and the 422 field names are listed in 54-06's As built; write the TanStack Query hooks over them.
+- **Backend follow-ups from 54-06's review, fixed here** (each with a fail-first test):
+  1. **n8:** `PUT /schedules/{id}` merges `options` (and the old target's model, D35) from a read taken before the
+     store's write lock, so two concurrent saves of different keys can drop one. Merge and validate inside
+     `ScheduleStore.update` under `BEGIN IMMEDIATE` (L-091).
+  2. **n7:** `validate_schedule` accepts a schedule with no effective day (e.g. `days: [5]` + `weekdays_only`, "Weekly
+     on no day at 09:00"); refuse it (400 / the D38 422 on `schedule`).
+  3. **D40:** a second regression schedule for an app that already has one is refused (409 naming the existing
+     schedule); the Testing → Setup link opens the existing one.
+  4. **n3:** remove the old `ScheduleCadence` / `RegressionSchedule` from `types/testing.ts` with the testing schedule
+     editor, leaving one `ScheduleCadence` (`types/schedules.ts`).
+
 ## 1. Navigation and routes
 
 - `PRIMARY_NAV` (`web/src/shared/layout/nav.ts:15-23`): add **Schedules** (`/schedules`, a clock/calendar icon from
@@ -107,8 +126,8 @@ changes, Resume note.)_
 ```toml
 areas    = ["web-shell", "config-secrets", "browser-testing", "web-runs", "features-stages"]
 adrs     = ["ADR-027", "ADR-028", "ADR-032", "ADR-049", "ADR-055"]
-lessons  = ["L-011", "L-014", "L-069", "L-089", "L-090", "L-094", "L-109"]
+lessons  = ["L-011", "L-014", "L-069", "L-089", "L-090", "L-091", "L-094", "L-109"]
 docs     = ["tracker:specs/phase-54-schedules-and-fixes/54-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/54-03-mockups.md", "tracker:specs/phase-54-schedules-and-fixes/54-06-http-api.md", "tracker:specs/phase-54-schedules-and-fixes/adr-drafts.md"]
-code     = ["genesis/web/src/shared/layout/**", "genesis/web/src/app/router.tsx", "genesis/web/src/features/catalog/**", "genesis/web/src/features/settings/**", "genesis/web/src/features/testing/**", "genesis/web/src/features/runs/**", "genesis/web/src/features/run-detail/**"]
-upstream = ["54-03", "54-06"]
+code     = ["genesis/web/src/shared/layout/**", "genesis/web/src/app/router.tsx", "genesis/web/src/features/catalog/**", "genesis/web/src/features/settings/**", "genesis/web/src/features/testing/**", "genesis/web/src/features/runs/**", "genesis/web/src/features/run-detail/**", "genesis/genesis/api/schedules.py", "genesis/genesis/runtime/schedule_store.py"]
+upstream = ["54-03", "54-04", "54-05", "54-06"]
 ```

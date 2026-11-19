@@ -9,7 +9,8 @@
 1. `POST /chat/sessions` accepts `agent_id` only with `mode == "read_only"` (422 otherwise, 54-06). **54-06 already
    added** the `mode` field, the validation, the `chat_sessions` snapshot column (in m0030) and a 409 stub for a valid
    read-only `agent_id` (D37); 54-08 stores the snapshot, projects it, and removes the 409. The session stores
-   the agent's **snapshot** (`custom_agents.snapshot`, 54-05 §1) in the column 54-06 added to `chat_sessions`. The agent is fixed
+   the agent's **snapshot** (`custom_agents.snapshot`, 54-05 §1) in `agent_json` (54-06 As built: the column is `chat_sessions.agent_json`). 54-08 still owes, per 54-06's As built: store
+   the snapshot, remove the 409, build the chat projection, and rebuild it on resume. The agent is fixed
    for the session: `set_session_mode` (`chat/manager.py:937`) to another mode is refused (422) for a session with an
    agent (the toggle is hidden, D26).
 2. The read-only profile (`chat/mode_profile.py:226`, `ChatModeProfile`) is unchanged for every other session. For a
@@ -58,5 +59,5 @@ adrs     = ["ADR-029", "ADR-031", "ADR-034", "ADR-045", "ADR-086"]
 lessons  = ["L-017", "L-024", "L-089", "L-113", "L-116", "L-117"]
 docs     = ["tracker:specs/phase-54-schedules-and-fixes/54-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/54-03-mockups.md", "tracker:specs/phase-54-schedules-and-fixes/54-05-custom-agents-and-agent-prompt.md"]
 code     = ["genesis/genesis/chat/**", "genesis/genesis/api/chat.py", "genesis/web/src/features/chat/**"]
-upstream = ["54-03", "54-05", "54-06"]
+upstream = ["54-03", "54-05", "54-06", "54-07"]
 ```
