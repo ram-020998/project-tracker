@@ -39,7 +39,10 @@ Rules:
 - the workflow step reuses `buildLaunchForm` (`features/catalog/launch-schema.ts:38`) and `LaunchForm` widgets; file
   widgets are not offered (54-05 §5);
 - servers, skills, models and workflows come from `GET /schedules/pickable`; a non-pickable server is shown disabled
-  with its reason (D3); a custom server needs the "this server only reads" checkbox;
+  with its `reason` (D3); a server with `needs_read_only_mark` needs the "this server only reads" checkbox before it
+  counts;
+- a 422 on save names the blocking field (it can be an unchanged one, such as a skill since uninstalled or a server
+  since removed, 54-05 review n3); show it on that field, in the schedule wizard and the agent editor;
 - system rows show only their editable fields (`editable_fields`), no Delete, a **Reset to default**;
 - the `application-sync` detail holds everything today's `ApplicationSyncSection.tsx` shows (D15), then that component
   and its mount in `SettingsPage.tsx:68` are removed;

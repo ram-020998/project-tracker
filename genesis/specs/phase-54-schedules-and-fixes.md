@@ -57,6 +57,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D22–D29 | From the 54-03 mockup review: list layout (weekday strip, status tag, lock icon), switch = on/off only with Pause in the menu, full-page wizard with the shared `MultiSelect` and locked agent picks, app-sync options as text + Edit, no Copilot toggle with a custom agent, Implementation documents as tabs in one card, the rest approved as mocked, a 24-hour time control. |
 | D30 | A regression run with red tests is `failed` with a notice but does not count toward auto-pause (during 54-04). |
 | D31 | Gate and paused time does not count toward a run's max duration; a hand-paused run is never auto-cancelled (during 54-04). |
+| D32–D35 | During 54-05: workflow runs load custom-only MCP servers; the D3 rule lives in `genesis_core/mcp/pickable.py` and the node re-checks it; `schedulable` on `agent-prompt`, `sync-documents`, `generate-business-map`, `hello-appian`; a model change is refused while the model list is unreadable. |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
@@ -99,7 +100,7 @@ testing-schedule endpoints stay until 54-07 moves the web off them.
 | 54-02 | genesis | B1 paused-run state edit, B2 `artifact.saved` events, B3 dead code, O1 discard failed captures, O4 environment labels with `/` + honest 404 for unmatched `/api/*` — **BUILT** (genesis `ea00dfd..eed5da0`, local; review SHIP, `reviews/54-02-review.md`) |
 | 54-03 | genesis (`web/src/dev/`) | `/dev/phase-54` mockups with stub data: Schedules list/detail/wizard, Catalog → Agents + Run, bell, chat agent picker, story Design + Implementation, feature Overview + Activity — **BUILT** (genesis `eed5da0..b09b08e`, local; review SHIP; user review D22–D28) |
 | 54-04 | genesis (`runtime/`, `db/`, `testexec/regression_job.py`) | m0030; schedule model (D9); scheduler engine (F2, D10, D8, D12); system rows + regression migration (D14, D15); `runs.trigger_json`; `schedule_runs`; notifications store; ADR-087 draft kept current — **BUILT** (genesis `b09b08e..9a365c0`, local; review SHIP; `9a365c0` unreviewed, carried to 54-10) |
-| 54-05 | genesis (`packages/genesis-core`, `runs/`, new `agents/`), genesis-workflows | `custom_agents` store; `kiro_node` callables (F4); `agent-prompt` workflow; `schedulable` META key + parity lint; read-only server rule (D3) enforced at launch and in the node |
+| 54-05 | genesis (`packages/genesis-core`, `runs/`, new `agents/`), genesis-workflows | `custom_agents` store; `kiro_node` callables (F4); `agent-prompt` workflow; `schedulable` META key + parity lint; read-only server rule (D3) enforced at launch and in the node — **BUILT** (genesis `9a365c0..9f63fc2`, genesis-workflows `d0c0f53..7b35f8a`, local; review SHIP) |
 | 54-06 | genesis (`api/`, `web/src/types`, `web/src/lib/api`) | Contract table: `/schedules*`, `/custom-agents*`, `/notifications*`, chat `agent_id`, activity items; removals (F7); fixtures |
 | 54-07 | genesis (`web/`) | Schedules page, wizard, detail + history; Catalog → Agents tab + Run; bell; Settings → General card removed; Testing → Setup link; Runs badge; nav entry |
 | 54-08 | genesis (`chat/`, `api/chat.py`, `web/src/features/chat/`) | Read-only chat session with a custom agent (D6) |
@@ -131,7 +132,10 @@ to bare `var()`; 8 existing source files use them (e.g. `VerificationSection.tsx
 repeated hour when clocks go back, a schedule edited inside that hour could re-fire a slot (`slot_key` drops `fold`,
 one hour a year); `memory_jobs._kiro_ready` / `_installed` and `start_sync` inside the serial app sync still run on the
 event loop (pre-existing, L-026); review nits n1 (a third copy of the `_installed` / `_kiro_ready` helpers) and n4 (a
-few-bytecode window between the open row's commit and `_mine.add`), accepted.
+few-bytecode window between the open row's commit and `_mine.add`), accepted; from 54-05: review n4 (an earlier gate
+round's Feedback stays in later `agent-prompt` prompts) and n5 (a hand-sent non-string Feedback), and the pre-existing
+L-106 pattern in `memory-consolidation` / `memory-maintenance`, whose escalation routes every non-approve answer,
+Feedback included, to the reject path.
 
 ## 10. Defaults
 

@@ -1,7 +1,8 @@
 # 54-01 — Findings: Schedules, fixes and UX revamps
 
 > **Status:** SPEC-DRAFTED 2026-11-19 — Q&A complete: decisions D1–D20 (§8), defaults F1–F12 (§9, confirmed); D21
-> added after 54-02 (§10); D22–D29 from the 54-03 mockup review (§11); D30–D31 during 54-04 (§12).
+> added after 54-02 (§10); D22–D29 from the 54-03 mockup review (§11); D30–D31 during 54-04 (§12); D32–D35 during
+> 54-05 (§13).
 > Parent: `specs/phase-54-schedules-and-fixes.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the schedules
@@ -235,6 +236,10 @@ schedules here.
 | D29 | **Time fields use a 24-hour control (Q21, option B).** Every time field (schedule wizard, application-sync options, advanced end date's time) is a shared `TimeInput` in `web/src/shared/ui/` showing `HH:MM` 24-hour whatever the browser locale, matching the frequency text and next-run previews: hour and minute fields, typed digits and arrow keys, a label per field, jest-axe and a userEvent keyboard test. Replaces the native `type="time"` used in the mockup. Built in 54-07; the mockup is not revised. | User chose B (2026-11-19) after 54-03 decision 10 recorded "yes" as "no change". Considered: A (keep the native control; AM/PM on an en-US locale). |
 | D30 | **A regression run whose tests fail is recorded `failed` with a bell notice, but does not count toward auto-pause (54-04 Q1, option B).** Red tests are a product finding, not a broken schedule; only a run that could not execute counts toward D12's N. | User, asked by genesis-dev during 54-04 (2026-11-19). |
 | D31 | **Time a scheduled run spends at a gate or paused does not count toward its max run duration; a run the user paused by hand is never auto-cancelled (54-04 Q2, option A).** The gate wait (D8) has its own limit. The idle time is stored on the `schedule_runs` row (`gate_opened_at`, `idle_since`, `idle_s`), so a restart keeps it. | User, asked by genesis-dev during 54-04 (2026-11-19); the storage detail is 54-04 review B1. |
+| D32 | **Workflow runs load custom-only MCP servers (54-05 Q1, option A).** The run worker builds its registry from the curated tier plus custom entries whose names are not curated (`from_layers(override=False)`); before 54-05 workflow runs saw no custom server at all. A custom entry that reuses a curated name is never applied in a run and is never pickable. A node still gets only the servers it names (agent-prompt: the picks). | User, asked by genesis-dev during 54-05 (2026-11-19). Needed for D3's custom-server picks to reach the run. |
+| D33 | **The D3 rule has one home in genesis-core, `genesis_core/mcp/pickable.py`** (`PICKABLE_CURATED`, `pickable_servers`, `check_picks`), used by the custom-agents store, the schedule hook, the Run route, the agent-prompt node and (54-08) chat. The node re-checks the picks against the worker's own registry before any skill is provisioned or any turn starts, and never trusts a flag in its inputs (`POST /api/runs` accepts any inputs). Replaces 54-05 §4's "the app passes the pickable decision in inputs". | User, asked by genesis-dev during 54-05 (2026-11-19). |
+| D34 | **`schedulable: true` on `agent-prompt`, `sync-documents`, `generate-business-map`, `hello-appian`** (the last three bumped to 0.1.1). `memory-consolidation` and `memory-maintenance` are not flagged: consolidation's cursor has no guard against a second concurrent run. Their system schedules are unaffected (D7). Reasons per workflow in 54-05's As built. | User accepted genesis-dev's list during 54-05 (2026-11-19). |
+| D35 | **A custom agent's model change is refused while the model list cannot be read;** an unchanged model needs no list. | User accepted during 54-05 (2026-11-19). |
 
 ## 9. Defaults — ✅ confirmed by the user 2026-11-19 ("yes")
 
@@ -284,6 +289,15 @@ defaults the user accepted are listed once, in 54-04's As built ("Decisions / de
 engine calls, error → HTTP mapping, 409 messages, history row shape, `gate_cancel_at`, `trigger` in the run dict, the
 removal list); 54-07 (D30, D31 and the "interrupted" outcome in the history); 54-10 (A7, A8, a restart check, the
 unreviewed `9a365c0`); 54-11 (docs hand-off, DB v30); umbrella §9 (the follow-ups).
+
+## 13. After 54-05 (2026-11-19): As built folded into the later sub-specs
+
+54-05 BUILT (genesis `9a365c0..9f63fc2`, genesis-workflows `d0c0f53..7b35f8a`, local; review SHIP at re-run 1). The
+user's answers to genesis-dev's Q1–Q4 are D32–D35. Folded by the spec agent: 54-06 §0b (custom-agent store calls,
+error mapping, the `pickable_servers` shape, the n1 agent-exists check on schedule save, CRUD in
+`api/custom_agents.py`); 54-07 (`needs_read_only_mark`, field-level 422 messages); 54-08 (`check_picks` and the
+snapshot); 54-10 (the live rows 54-05 could not run); 54-11 (pins and `genesis_core_version` move together, the
+0.82-app note, the bumped workflows); umbrella §9 (n4, n5, the memory workflows' Feedback route).
 
 ## Context manifest
 

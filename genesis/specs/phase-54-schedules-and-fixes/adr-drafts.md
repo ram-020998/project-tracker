@@ -26,7 +26,9 @@
      risks a–c accepted for unattended runs until Phase 52), and only **read-only MCP servers**: never
      `appian-dev-write` (ADR-068), `appian-dev-packages` (ADR-073), `appian-devops`, or a curated server with no
      `tool_allowlist`; a custom server only with the user's read-only mark (D3). So it is not a mutating MCP node and
-     ADR-021 needs no `pre_mutation` gate.
+     ADR-021 needs no `pre_mutation` gate. The rule has one home, `genesis_core/mcp/pickable.py`, and the node re-checks
+     it against the worker's own registry before any turn (D33). Workflow runs load custom-only servers; a custom entry
+     reusing a curated name is never used in a run (D32).
   4. **Custom agents** are Genesis-owned profiles (instructions, skills, read-only servers, model), maintained in
      Catalog → Agents, never read from `~/.kiro/agents` (ADR-086); usable by agent-prompt schedules, a one-off Run, and
      the read-only chat mode only (D4–D6). Genesis still projects the real agent, so the mode's or node's trust wins.

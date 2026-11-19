@@ -17,7 +17,8 @@
      custom agent <name>" (the assistant's rules keep precedence: ADR-031);
    - skills: the agent's skills, if installed, are listed to the model; they are reached through the chat cwd as today
      (Phase 53, managed skills only);
-   - MCP: the agent's servers are added to the session's servers, each still capped to its **read-only** allowlist in
+   - MCP: the agent's servers are validated with `check_picks(config.merged_mcp_registry(), picks)` (D33; 54-05 As
+     built) and added to the session's servers, each still capped to its **read-only** allowlist in
      the projected agent and backed by the permission ladder's `auto_deny` (ADR-031, L-017); a custom server marked
      read-only by the user is added with the same fail-closed treatment (no tool is trusted beyond the read-only
      allowlist build, L-116);

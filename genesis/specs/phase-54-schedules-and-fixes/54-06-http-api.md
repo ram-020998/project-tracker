@@ -34,6 +34,30 @@
   `save_schedule`, `_cadence_of`, `get/set_schedule`, `SCHEDULE_NOTE`, `CADENCES`); `PUT …/testing/schedule`; the web
   callers. Re-grep before removing (L-094).
 
+## 0b. From 54-05's As built (read it: "For 54-06 / 54-07 / 54-08")
+
+- **Custom agents store** (`app.state.custom_agents`, `genesis.agents.CustomAgentStore`; blocking, call through
+  `asyncio.to_thread`): `list()`, `get(id)`, `used_by(id)`, `create(data, *, models=None)`, `update(id, data, *,
+  models=None)` (only the given fields; unknown fields 400), `delete(id)`; `to_dict()` = `{id, name, description,
+  instructions, skills, mcp_servers: [{name, read_only_mark}], model, created_at, updated_at}`. Pass `models=` the ids
+  from `ChatManager.available_models()["models"]` (None when the probe fails) only when the model changes (D35).
+- **Errors → HTTP:** map `CustomAgentRefused` (422: server not pickable, skill not installed, unknown model, model list
+  unavailable) **before** its parent `CustomAgentError` (400); `CustomAgentNotFound` 404; `CustomAgentConflict` 409
+  (name taken, or in use with `.used_by`). A 422 can come from an unchanged field (a skill since uninstalled): the body
+  names the blocking field so the web can show it.
+- **Routes:** put the CRUD in `api/custom_agents.py` beside the existing Run route
+  (`register_custom_agent_routes(api, *, agents, run_manager, registry)`); static paths before
+  `/custom-agents/{agent_id}` (L-096). The Run route exists: `200 {run_id}`; 400 prompt empty or > 20 000; 404; 409
+  `agent-prompt` not installed; 422 a server no longer pickable.
+- **Schedule save with an agent (54-05 review n1):** `POST/PUT /schedules` with an `agent_prompt` target that names an
+  `agent_id` must check the agent exists inside the same `BEGIN IMMEDIATE` as the write (L-091); today
+  `ScheduleStore.create_user` checks only the type.
+- **`GET /schedules/pickable` `servers`** = `pickable_servers(config.merged_mcp_registry())`: sorted `{name, tier:
+  "curated" | "custom" | null, pickable, needs_read_only_mark, reason}`; validate picks with `check_picks(registry,
+  picks)` → normalized picks or `NotPickableError(.refused=[{name, reason}])` (422 with the list). One home: D33.
+- **`schedulable`:** `InstalledWorkflowInfo.schedulable` / `schedulable_of(meta)`; `/api/catalog` items already carry
+  it; the file-input rule is `runtime.schedule_targets.file_inputs(meta, stored)` (use it for `pickable.workflows`).
+
 ## 1. Contract table
 
 | Method + path | Body / query | Answer | Errors |
@@ -49,11 +73,11 @@
 | `POST /schedules/{id}/reset` | | `Schedule` | 403 user row |
 | `GET /schedules/{id}/history` | `?limit=50&offset=` | `{items: ScheduleRun[], total, credits_total: {credits, provenance}}` | |
 | `POST /schedules/preview` | `{schedule}` | `{next: string[5], summary: string, timezone}` | 400 |
-| `GET /schedules/pickable` | | `{workflows: [{id, name, inputs_schema}], servers: [{name, tier, pickable, reason?}], skills: [...], models: [...]}` | |
+| `GET /schedules/pickable` | | `{workflows: [{id, name, inputs_schema}], servers: [{name, tier, pickable, needs_read_only_mark, reason}], skills: [...], models: [...]}` | |
 | `GET /custom-agents` · `GET /custom-agents/{id}` | | `CustomAgent[]` · `CustomAgent` (+ `used_by: [{schedule_id, name}]`) | 404 |
 | `POST /custom-agents` · `PUT /custom-agents/{id}` | `{name, description?, instructions, skills, mcp_servers, model?}` | `CustomAgent` | 400; 409 name taken; 422 server not pickable / unknown skill |
 | `DELETE /custom-agents/{id}` | | 204 | 409 in use (`used_by` in the body) |
-| `POST /custom-agents/{id}/run` | `{prompt}` | `{run_id}` | 409 `agent-prompt` not installed (L-033) |
+| `POST /custom-agents/{id}/run` | `{prompt}` | `{run_id}` | 400 prompt empty or > 20 000; 404; 409 `agent-prompt` not installed (L-033); 422 server no longer pickable (built in 54-05) |
 | `GET /notifications` | `?unread=true&limit=&offset=` | `{items: Notification[], unread: int}` | |
 | `POST /notifications/{id}/read` · `POST /notifications/read-all` | | `{unread: int}` | 404 |
 | `POST /chat/sessions` (existing) | + `agent_id?` (read-only mode only, D6) | session (+ `agent: {id, name}`) | 422 `agent_id` with another mode |

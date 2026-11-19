@@ -12,8 +12,12 @@
    the release commit holds every changed file (L-056), including web fixtures and migration; one CI run before the
    release commit (L-112); tag; push on the user's go-ahead; CI green (packages, genesis, frontend, clean-install).
    If no web file changed in a follow-up tag, force the frontend job with a real `web/**` touch (L-030).
-2. **genesis-workflows v0.27.0**: `agent-prompt` 0.1.0, `schedulable` flags (54-05 §5), `registry.json` entries; pins on
-   `genesis.git@v0.83.0` (`#subdirectory=packages/<name>`, L-057); CI green.
+2. **genesis-workflows v0.27.0**: `agent-prompt` 0.1.0; `schedulable` on `agent-prompt`, `sync-documents`,
+   `generate-business-map`, `hello-appian` (the last three 0.1.1, D34); `registry.json` entries. The pins **and**
+   `registry.json` `genesis_core_version` move to `genesis.git@v0.83.0` together (`#subdirectory=packages/<name>`,
+   L-057): until then the library's CI cannot import `genesis_core.mcp.pickable`. Give it a CI-image run before the
+   release commit (L-112). CI green. Release note: `agent-prompt` needs genesis ≥ 0.83.0; the major-only gate
+   (ADR-019) does not stop a 0.82 app from loading it, where it fails at its first node.
 3. Never read CI variables through the API (L-100).
 4. Rows of 54-10 §3 that could not run (Dev or QA down) are named in the release notes, README row and state (L-111).
 
@@ -26,6 +30,8 @@ in the release notes:
 - Schedules is a new page; the application-sync settings moved there from Settings → General, the regression schedule
   from Testing → Setup (existing cadences were migrated).
 - Agent-prompt schedules and Catalog → Agents need the `agent-prompt` workflow installed.
+- Workflow runs now see your custom MCP servers when a workflow names them (D32); a custom server with the same name
+  as a curated one is never used in a run.
 - Unattended agent-prompt runs have Kiro's shell (ADR-083 risks until Phase 52) and only read-only MCP servers; a
   custom server's "read-only" mark is your own claim.
 - A run whose state was edited before v0.83.0 may still show **Running** with nothing happening (54-02 fixed the cause,
