@@ -1,6 +1,6 @@
 # 54-07 — Web: Schedules page, Catalog → Agents, notification bell, moves out of Settings and Testing
 
-> **Status:** SPEC-DRAFTED 2026-11-19. Repo: genesis (`web/`). Parent: `specs/phase-54-schedules-and-fixes.md`. Built
+> **Status:** BUILT 2026-11-19 (review SHIP at re-run 2, genesis `41971a0`). Repo: genesis (`web/`). Parent: `specs/phase-54-schedules-and-fixes.md`. Built
 > by **genesis-dev** after the 54-03 mockups are approved; **the approved mockup is the layout** (read 54-03's As built
 > and any decisions it added to 54-01 §8 first). Contract: 54-06.
 
@@ -118,97 +118,386 @@ separate step and verify the commit with `git show --stat <sha> -- web/static` a
 
 ## As built
 
-**Status:** IN PROGRESS. Session 1 stopped at a clean boundary (context past ~60%). Repo genesis, branch master, base
-`a6cc287`, head `491ad0b`, 3 local commits (not pushed, not tagged). Not yet reviewed.
+**Status:** BUILT 2026-11-19. Review **SHIP** at re-run 2, head `41971a0`. Repo genesis, branch master, base `a6cc287`.
+There are 13 local commits (not pushed, not tagged). Source, tests and fixtures: 68 files, +4062/−1028. `web/static` is
+in five build commits. No migration: the DB stays **v30**, and the fleet was not restarted (D36).
 
-### Commits (genesis), session 1
+### Commits (genesis)
 
 | sha | what |
 |---|---|
-| `b94a976` | §0 backend follow-ups: n8, n7, D40 (each with a fail-first test) |
-| `23661ed` | shared `RowMenu` and `TimeInput` (+ tests); `qk.schedules`/`customAgents`/`notifications`; `features/schedules/hooks.ts` |
-| `491ad0b` | `web/static` for `23661ed` (65 files; checked with `git show --stat 491ad0b -- web/static` after the build settled, tree clean) |
+| `b94a976` | §0 backend follow-ups n8, n7 and D40, each with a fail-first test |
+| `23661ed` | shared `RowMenu` and `TimeInput` with tests; the query keys; `features/schedules/hooks.ts` |
+| `491ad0b` | `web/static` for `23661ed` |
+| `9fe47ee` | Schedules page (list, detail, wizard); `LaunchFields`; nav, routes and breadcrumbs |
+| `5881557` | Catalog → Agents tab and the notification bell |
+| `ce3f418` | the §5 moves and the F7 removals (backend and web), with n3 |
+| `a3a4371` | `web/static` for `ce3f418` |
+| `63e88f6` | real-browser probe findings, plus the probes `phase54-seed.py` and `phase54-pages.mjs` |
+| `fb6982f` | `web/static` for `63e88f6` |
+| `efba8db` | review round 1: m1, m2, m3, n1, n2, n3 |
+| `d9c68b0` | `web/static` for `efba8db` |
+| `5672ad1` | review re-run 1: M1, n4, n5 |
+| `41971a0` | `web/static` for `5672ad1` |
 
-### Done so far
+Every bundle commit was checked with `git show --stat <sha> -- web/static` in its own call after the build had
+settled, and `git status --short --untracked-files=all` was empty each time (L-089). The reviewer's fresh build
+matched `web/static` at `fb6982f`, `d9c68b0` and `41971a0`.
 
-- **n8** (`runtime/schedule_store.py`, `api/schedule_routes.py`):
-  - `ScheduleStore.update(..., options_check=, target_check=)` merges `options` over the row read after
-    `BEGIN IMMEDIATE`, then runs `options_check(merged)` (`validate_sync_options` for application-sync).
-  - `target_check(stored_target, new_target)` decides D35's "the model changed" against that same row. The route
-    reads Kiro's model list (async) only when the model differs from its own pre-read. If the store sees a change
-    the route did not, the save is refused (422 `target.model`, "model list is not available; try again"), never
-    accepted unchecked.
-  - The route's `_options` helper is gone. `_checked_target` now returns `(target, target_check)`; a create runs the
-    check at once.
-- **n7** (`runtime/schedule_model.py` `validate_schedule`): `run_days(out) == []` is a `ValueError`, "this schedule
-  runs on no day: pick a weekday or turn off weekdays only". That is 400 on create, update and preview. `describe` is
-  unchanged, so a raw dict can still read "Weekly on no day" in its unit test.
-- **D40** (`_one_regression_per_app`, inside the write's `BEGIN IMMEDIATE` in `create_user` and `update`): a second
-  regression schedule for an app is a `ScheduleConflict` with `.existing = {id, name}`. The answer is 409 `{detail,
-  existing}`; `_error` adds `existing` to the body. The check also applies to `duplicate` (it goes through
-  `create_user`), and a row may re-save its own target.
-- **Tests:** `tests/test_schedules_api.py` has 4 new tests (`…_n8` ×2, `…_n7`, `…_d40`). All 4 failed at `a6cc287`
-  for the right reason: options `(3, 500) != (3, 77)`, the model race answered 200, n7 answered 201, and D40
-  answered 201. `tests/test_scheduler.py`: the adopt-default test now expects merged options, and the duplicate test
-  expects D40's 409 on a regression row (a workflow row is duplicated instead).
-  `pytest tests/test_schedules_api.py tests/test_scheduler.py tests/test_schedule_migration.py tests/test_sync_jobs.py
-  tests/test_testexec_regression.py`: 147 passed. `ruff check genesis`: clean. **The full genesis pytest has not been
-  run yet.**
-- **Web, shared:**
-  - `shared/ui/row-menu.tsx` `RowMenu {label, items: {label, onSelect, icon?, danger?, disabled?, disabledReason?}[]}`:
-    a native trigger with Radix's own `asChild` (not `Button asChild`, L-069).
-  - `shared/ui/time-input.tsx` `TimeInput {value "HH:MM", onChange, label, id?, disabled?}`: a `group` of two
-    spinbuttons, "<label> hour" and "<label> minute". Focus selects the field. Two hour digits, or one above 2, move
-    on to the minute. ArrowUp/ArrowDown step and wrap. A partial value is padded on blur (read from the DOM, not the
-    stale state).
-  - Both are exported from `shared/ui/index.ts`. `shared/ui/row-menu-time-input.test.tsx` (5 tests): userEvent
-    keyboard paths and jest-axe. Axe runs with `region` off for the portalled menu, a page-level rule.
-- **Web, data:**
-  - `lib/query/keys.ts`: `qk.schedules.{all, list, detail, history, syncStatus, preview, pickable}`,
-    `qk.customAgents`, `qk.notifications`.
-  - `features/schedules/hooks.ts`: `useSchedules`, `useSchedule`, `useScheduleHistory(id, offset)`
-    (`HISTORY_PAGE` 50), `useSyncStatus(id, enabled)`, `usePickable`, `useSchedulePreview(spec)` (debounced 300 ms),
-    `useCreateSchedule`, `useUpdateSchedule`, `useScheduleAction` (runNow, pause, resume, duplicate, reset, remove).
-  - **D38 d:** a query polls every 2 s while its newest slot row is `fired` with no `run_id`/`execution_key`
-    (`awaitingRunLink`), and every 10 s while a run is in flight, so the run link appears after Run now and after a
-    reload.
-- Web gates at `23661ed`: `npm run typecheck` clean, eslint clean on the changed files, `npm test` **821 passed** in
-  71 files (816 before).
+### Changed
 
-### Resume note — what is next (in this order)
+**Backend (§0).**
+- **n8.** `ScheduleStore.update(..., options_check=, target_check=)` (`runtime/schedule_store.py`):
+  - `options` are merged over the row read after `BEGIN IMMEDIATE`. `options_check(merged)` then validates them
+    (`validate_sync_options` for application-sync).
+  - `target_check(stored, new)` decides D35's "the model changed" against that same row.
+  - In `api/schedule_routes.py`, `_checked_target` returns `(target, target_check)`. Kiro's model list is read
+    (async) only when the model differs from the route's pre-read. A change that only the store sees is refused
+    (422 `target.model`, "not available; try again"), never accepted unchecked. A create checks at once.
+  - The route's old `_options` is gone. A non-object `options` is still 400.
+- **n7.** `validate_schedule` (`runtime/schedule_model.py`) refuses `run_days(out) == []` with "this schedule runs on no
+  day: pick a weekday or turn off weekdays only". That is 400 on create, update and preview.
+- **D40.** `_one_regression_per_app` runs inside the write's `BEGIN IMMEDIATE` in `create_user` and `update`, so
+  Duplicate is covered too. It raises `ScheduleConflict(existing={id, name})`, and `_error` answers 409
+  `{detail, existing}`. A row may re-save its own target.
 
-1. **Schedules page** `features/schedules/` from `dev/mockups/phase54/schedules.tsx` (read the whole file; it is the
-   layout):
-   - the list (`SchedulesTable`, `Cadence`, `LastResult`, filter chips, the lock line, empty Mine);
-   - the full-page wizard (`FullPageWizard`, step rail, summary, `RadioCards`, the four steps);
-   - the detail (`StatusHeader`, history with `credits_total` labelled "total of the shown runs", Sync options as
-     text + Edit, per-app table from `useSyncStatus`).
+**Web, shared** (`shared/ui`, exported from `index.ts`).
+- `row-menu.tsx` `RowMenu {label, items: {label, onSelect, icon?, danger?, disabled?, disabledReason?}[]}`, over Radix
+  DropdownMenu. The trigger is a native button under Radix's own `asChild`, never `Button asChild` (L-069).
+- `time-input.tsx` `TimeInput {value "HH:MM", onChange, label, id?, disabled?}` (D29):
+  - a `group` of two spinbuttons, "<label> hour" and "<label> minute";
+  - focus selects the field, two hour digits (or one above 2) move on to the minute, and ArrowUp/ArrowDown step and
+    wrap;
+  - a partial value is padded on blur.
+  - It replaces every native `type="time"`: the three in `ApplicationSyncSection` and one in `ScheduleSection`, both
+    now removed, and the wizard uses only `TimeInput`. The test asserts that no `input[type=time]` is left.
 
-   Replace the mock's local `canonicalZone`/`MACHINE_ZONE` with a tested helper that validates the id
-   (try/catch `RangeError`) and maps the machine zone onto the picker's values. Use `TimeInput` for every time,
-   `RowMenu` for the row menu, `MultiSelect` for skills and servers (locked "from <agent>"; `requiresConfirm` for
-   `needs_read_only_mark`), and `buildLaunchForm` + `LaunchForm` with no file widgets. Show "model list unavailable"
-   when `pickable.models` is null. Put a 422 on its field via `fieldRefusalOf`. Delete needs a confirm that says the
-   runs stay (F8). A system row gets `editable_fields` only and Reset to default. Show the D30/D31 history notes.
-2. Nav (`PRIMARY_NAV` after Runs, an icon from `icons.ts`), routes (`/schedules`, `/new`, `/:id`, `/:id/edit`,
-   `/catalog/agents` before `catalog/:workflowId`) and breadcrumbs.
-3. Catalog → Agents (`features/catalog/agents/`, from `mockups/phase54/agents.tsx`) and the bell (`TopBar.tsx`,
-   from `bell-chat.tsx`, polling `unreadCount` every 30 s and on focus).
-4. Moves (§5): Testing → Setup pointer and "Schedule regression" (`/schedules/new?target=regression&app=<uuid>`;
-   when the pointer exists, Open schedule, per D40); the Runs list and Run Detail badge from `run.trigger` (fixture
-   `runs/run-scheduled`); the Catalog workflow detail's Schedulable badge and Schedule action.
-5. **Removals (F7)** from 54-06's "§2 consumer list", re-grepped before each one. The backend setup GET's
-   `schedule` becomes `{id, summary, next_run} | null` (`regression_for` + `describe` + `next_runs`). Drop
-   `ScheduleStore.update_settings` and its test line, the D39 parity line in `test_schedules_api.py`, the old
-   `ScheduleCadence`/`RegressionSchedule` (n3) and `testing/schedule.json`. Finish with the grep proof.
-6. Gates (full pytest, recording whether the run fell in 00:00–02:00 IST; ruff; web lint, typecheck, test, build,
-   then a separate `web/static` commit), the real-browser probe (1280/1440/1920, light and dark; screenshots to
-   `evidence/54-07/`), `genesis-review`, then the full As built and the "For 54-08 / 54-09 / 54-10" note.
+**Web, data.**
+- `lib/query/keys.ts` gains `qk.schedules.*`, `qk.customAgents.*` and `qk.notifications.*`. `qk.config.syncSettings`
+  is removed.
+- `features/schedules/hooks.ts`: `useSchedules`, `useSchedule`, `useScheduleHistory(id, offset)`, `useSyncStatus`,
+  `usePickable`, `useSchedulePreview` (debounced 300 ms), `useCreateSchedule`, `useUpdateSchedule` and
+  `useScheduleAction`.
+- **D38 d:** the polling is driven by the data. A query refetches every 2 s while its newest slot row is `fired` with no
+  run link (`awaitingRunLink`), and every 10 s while a run is in flight. So the run link appears after Run now and also
+  after a reload.
+- `features/catalog/agents/hooks.ts` and `features/notifications/hooks.ts` hold the other hooks. The unread count is
+  polled every 30 s and on window focus.
 
-Open problems: none. Decisions so far, for the final As built:
-1. D40 also refuses Duplicate of a regression row (409), since the copy would be a second schedule for the app.
-2. D40's message names the existing schedule, not the app (the store does not read app names). The 409 body adds
-   `existing: {id, name}` so the web can link to it.
+**Schedules page** (`features/schedules/`, built from the approved mockup).
+- `SchedulesPage.tsx` (D22, D23):
+  - filter chips, the lock line, and a lock icon with a tooltip on system rows;
+  - the weekday strip and the backend's `cadence.line`, with a calendar icon for monthly and once;
+  - the zone only when it differs from the machine's;
+  - Last result as an `OutcomeBadge` that links to the run or `TE-` execution, with time, reason and gate cancel time
+    in its tooltip;
+  - the switch writes `enabled` only;
+  - `ScheduleRowMenu` holds Run now, Pause/Resume, Edit, Duplicate, Delete or Reset to default. Run now and
+    Pause/Resume are disabled with a reason while the schedule is off, and Run now also while a run is in flight;
+  - a Paused (failing) row is tinted `bg-danger-subtle`;
+  - an empty Mine shows its empty state.
+- `useScheduleActions.tsx`: the actions and their `ConfirmDialog`s. Delete says the runs stay in Runs, marked
+  "Scheduled (deleted)" (F8).
+- `ScheduleDetailPage.tsx` (D15, D25, D30, D31, D39, F9):
+  - a `StatusHeader` with State, Next run, Last result and Failures in a row, plus Run now, Pause/Resume, Edit and a
+    "More actions" menu;
+  - banners for Paused (failing), with Resume, and for waiting at a gate, with Open run;
+  - the history: slot, outcome with its reason, "Doesn't count toward auto-pause" when `counts_toward_pause` is
+    false, the run link (or "Starting…"), the duration with "incl. N at a gate or paused" from `idle_s`, and metered
+    credits per row;
+  - a footer "Total of the N shown slots (M with runs)" with the provenance note, and Newer/Older paging over 50;
+  - side cards for Target, Frequency, Run policy and, for application-sync, Sync options as text with an Edit button;
+  - application-sync also gets "Last sync per application" from `GET /schedules/{id}/sync-status`: kind, time, changed
+    count, a non-succeeded status, fallback reason, Hub version and last full sync. Every field of the old card is kept.
+- `ScheduleWizardPage.tsx` (D24, D29, D35, D38 e):
+  - a full page with a step rail and a running summary. A user row has four steps (Target, Configure, Frequency,
+    Name & review). A system row has two ("Frequency & options", Review) and sends only its `editable_fields`, with
+    only the option keys that changed.
+  - The workflow step reuses `LaunchFields`, which was extracted from `LaunchForm` without changing its behaviour.
+    Workflows come from `pickable.workflows`, which excludes file inputs, and no file widget renders without `files`.
+  - The agent step has the custom agent `Select`, the prompt, `SkillPicker` and `ServerPicker` over `MultiSelect`, and
+    `ModelPicker`:
+    - the agent's own picks show as locked chips "from <agent>";
+    - a server with `needs_read_only_mark` needs "This server only reads" ticked before Next;
+    - a pick that is no longer available is named with a Remove button;
+    - `ModelPicker` says "Model list unavailable: keeping …" when `pickable.models` is null.
+  - The regression step disables an app that already has a schedule, with a link to it (D40). The name defaults to
+    "Regression: <app>".
+  - The frequency step has the five D9 forms with `TimeInput`, the zone picker, the backend preview (summary and next 5
+    runs, or its error), Advanced (grace, max duration, gate wait, failures, end date plus `TimeInput`, max runs) and,
+    for app-sync, the sync options.
+  - A 422 from `fieldRefusalOf` opens its field's step (`stepOfField`) and shows the message on the field
+    (`data-field`), including `refused`. A 409 with `existing` links to that schedule.
+- `wizard-model.ts`: `freqOf`/`toSpec` map stored schedules to and from the forms. An hourly window's `days` and a
+  weekly row's `weekdays_only` are kept apart from the form's own fields (review m1 and M1). Also here: `toPolicy`,
+  `draftOf`, `createBody`, `updateBody`, `serverPicks` and `stepOfField`.
+- `zones.ts`: `canonicalZone`, `sameZone`, `machineZone`, `zoneOptions(keep)` (the stored spelling replaces its
+  alias), `pickZoneOption`, `formatInZone` (an unknown id falls back to UTC, never throws), `slotText` and `endAtText`.
+- `logic.ts`: `stateOf`, `matchesFilter`, `daysInWords`, `OUTCOME`, `resultHref`, `historyNotes`, `targetLabel`,
+  `SYSTEM_RUNS`, `serverOptions` and `needsMark`.
+- `components.tsx` (`Cadence`, `OutcomeBadge`, `LastResult`, `StateBadge`, `ScheduleRowMenu`), `pickers.tsx` and
+  `ScheduledBadge.tsx`.
+
+**Nav and routes.**
+- `PRIMARY_NAV` gets Schedules (`CalendarClock`) after Runs. The command palette picks it up.
+- `router.tsx` adds `schedules`, `schedules/new`, `schedules/:id`, `schedules/:id/edit` and `catalog/agents`. Each
+  static route is registered before its param route (L-096).
+- `breadcrumbs.ts` adds `/schedules`, `/new`, `/:id` (the label is set by the detail and wizard pages), `/:id/edit` and
+  `/catalog/agents`.
+
+**Catalog → Agents** (`features/catalog/agents/AgentsTab.tsx`; `CatalogPage` has a third URL-driven tab).
+- Cards show skills, servers, model and "Used by N schedules".
+- The editor dialog has name, description, instructions, the shared skill and server pickers, the model, and the
+  schedule-versus-chat tools note. A 422 shows on its field, and a 409 name clash on Name.
+- The Run dialog starts the agent once and shows "Started run … Open run".
+- Delete asks for confirmation. A 409 opens "Can't delete <agent>", which links each schedule that uses it.
+
+**Bell** (`features/notifications/NotificationBell.tsx`, which replaces the `TopBar` placeholder).
+- The unread badge reads "99+" above 99.
+- A popover labelled by its heading lists notices with an icon per kind, an sr-only kind label, the body and the
+  relative time.
+- Opening a notice marks it read and follows its link. Each notice has a mark-read control, and the panel has Mark all
+  read and an empty state.
+
+**Moves (§5).**
+- Testing → Setup: `setup/SchedulePointer.tsx` replaces `ScheduleSection`. It shows the summary and next run with Open
+  schedule, or Schedule regression, which opens `/schedules/new?target=regression&app=<uuid>`.
+- `ScheduledBadge` appears on `RunsTable` and the `RunDetailPage` header (F10). The link stops the row's own click.
+- `WorkflowDetail` shows a "Schedulable" badge and a Schedule action, which opens
+  `/schedules/new?target=workflow&workflow=<id>`, for installed workflows with `schedulable: true`.
+
+**Removals (F7, n3).** Each one was re-grepped first (L-094).
+- Backend:
+  - `api/schedules.py` is deleted (`/system/schedules`, `/system/sync-settings` GET/PUT/run-now, `_next_due`,
+    `SyncSettingsBody`), together with its registration in `api/app.py`.
+  - `ScheduleStore.update_settings` is removed.
+  - `PUT /applications/{uuid}/testing/schedule` and `ScheduleBody` are removed.
+  - In `testexec/regression_service.py`, `schedule_view`, `save_schedule`, `_cadence_of`, `_validate_schedule`,
+    `get_schedule`, `set_schedule`, `SCHEDULE_NOTE` and `CADENCES` are replaced by `regression_pointer(store, app_uuid)`
+    → `{id, summary, next_run} | null`. The testing setup GET/PUT and the regression suite GET both use it (L-109).
+  - Two docstrings in `sync_jobs.py` are updated.
+  - Kept: `validate_sync_options`, `app_sync_per_app` and `collab_enabled`.
+- Web:
+  - `ApplicationSyncSection.tsx`, `syncSchedule.ts` and `ScheduleSection.tsx` are deleted, along with the mount in
+    `SettingsPage.tsx`.
+  - Also removed: `systemApi` `getSyncSettings`, `putSyncSettings` and `runSyncNow` with their `Sync*` types;
+    `useSyncSettings`, `useSaveSyncSettings` and `useRunSyncNow`; `testingApi.saveSchedule`.
+  - `types/testing.ts` `RegressionSchedule` and `ScheduleCadence` (n3) become `RegressionSchedulePointer`, so one
+    `ScheduleCadence` is left (`types/schedules.ts`).
+  - `test/fixtures/testing/schedule.json` is deleted. `testing/setup.json` and `regression.json` had only their
+    `schedule` key edited to `null`: a full regeneration churned 28 unrelated fixtures (timestamps, ids), and I
+    restored those. `testing/schedule-pointer.json` is new and was recorded from a real response.
+- Grep proof, at `ce3f418` and again by the reviewer: no import or call of any removed name is left in genesis,
+  genesis-workflows, playwright-appian or `genesis-fleet/bin`. What remains is a docstring, unrelated functions named
+  `get_schedule`/`reset_schedule`, a migration-test docstring, and the tests that assert the old routes now 404.
+
+**Probes** (`scripts/probes/`).
+- `phase54-seed.py` prepares and seeds a throwaway Genesis home. It refuses `~/.genesis`, and it quotes SKILL.md
+  descriptions (L-115: an unquoted ": " made the managed skill silently vanish on the first try).
+- `phase54-pages.mjs` covers the pages and portals at three widths × two themes, with `timezoneId: "Asia/Calcutta"`.
+  It checks that the zone cells show only the UTC row.
+
+### Tests
+
+- **Backend** (`tests/`):
+  - **New:** `test_two_saves_of_different_options_keep_both_n8`,
+    `test_a_model_changed_by_another_save_is_checked_against_the_stored_one_n8`,
+    `test_a_schedule_with_no_effective_day_is_refused_n7` and `test_a_second_regression_schedule_for_an_app_is_refused_d40`.
+    All four failed at `a6cc287` for the right reason: options `(3, 500) != (3, 77)`, the model race answered 200, n7
+    answered 201, and D40 answered 201.
+  - **Rewritten for the pointer:** `test_the_schedule_pointer_is_the_apps_own_regression_row` and
+    `test_the_old_schedule_route_is_gone_and_the_setup_read_points_to_the_row` (records `schedule-pointer`).
+  - **`test_sync_jobs.py`:** the system rows now come through `GET /api/schedules?kind=system`, and the per-app status
+    through `/schedules/{id}/sync-status`. The sync-settings GET/PUT and run-now tests are removed; `test_schedules_api`
+    covers those paths.
+  - **`test_schedules_api.py`:** the D39 parity line is now 404 checks for the four removed routes.
+  - **`test_scheduler.py`:** expects merged options and D40 on duplicate.
+- **Web:**
+  - `shared/ui/row-menu-time-input.test.tsx` (5): RowMenu and TimeInput by keyboard, with jest-axe.
+  - `features/schedules/zones.test.ts` (5): uses the Asia/Calcutta alias.
+  - `features/schedules/wizard-model.test.ts` (10): a 7-shape round trip, the M1 form switch, system-row updates and
+    `stepOfField`.
+  - `features/schedules/schedules.test.tsx` (12):
+    - list: lock icons, strip names, line text, gate state and jest-axe;
+    - the switch writes `enabled` only, and the Mine filter and its empty state;
+    - the row menu by keyboard: disabled while off, Delete confirms that runs stay, Reset to default for system rows;
+    - the zone shown only for UTC with `TZ=Asia/Calcutta`;
+    - detail: app-sync options as text with Edit, per-app status, D30/D31 notes, the credits total and jest-axe;
+    - Run now refreshes until the link appears (D38 d);
+    - wizard: locked picks, "model list unavailable", the server MultiSelect by keyboard, no `type=time`, the backend
+      preview, and the 422 on `target.mcp_servers` with jest-axe;
+    - a system-row edit sends only the changed options;
+    - a cleared sync option is refused;
+    - the regression auto-name follows the app;
+    - D40 "Already scheduled", and launch-form reuse.
+  - `features/schedules/moves.test.tsx` (3): the F10 badges from `runs/run-scheduled`, and the Schedulable badge and
+    Schedule action.
+  - `features/catalog/agents/agents.test.tsx` (4): list and jest-axe; the editor's server and skill pickers by keyboard,
+    a blocked server disabled with its reason, jest-axe open, and a 422 on `mcp_servers`; Run; the in-use delete.
+  - `features/notifications/bell.test.tsx` (4): count, kinds and jest-axe open; mark one read and all read; open a
+    notice; empty. jest-axe found a real bug here: the popover was a dialog with no name, and is now
+    `aria-labelledby` its heading.
+  - **Changed:** `testing/setup.test.tsx` (pointer and Schedule regression; the old schedule editor tests are removed),
+    `testing/contract.test.ts` (`Exact<RegressionSchedulePointer>` against the recorded fixture, `null` in setup and
+    regression), and `settings/settings.test.tsx` (General shows no Application sync and makes no sync-settings call;
+    the old card tests and MSW handlers are removed).
+- **Mutation and fail-first:**
+  - the old `wizard-model.ts` fails 3 of the m1 cases and the M1 case;
+  - the old `ScheduleWizardPage.tsx` fails n1 and n2/n5;
+  - the reviewer reproduced each in a scratch export.
+- **Gates:**
+  - genesis `pytest -q -p no:warnings`: **2079 passed** at `ce3f418`, 17:09–17:20 IST, which is **outside** the
+    00:00–02:00 window, with nothing deselected. The reviewer re-ran it at `fb6982f` (17:45–17:56 IST, 2079 passed). No
+    backend file changed after that. `ruff check genesis` is clean.
+  - Web at `5672ad1`: `npm run lint` 0 errors and 20 warnings, the same 20 as before with none in a new file;
+    `npm run typecheck` clean; `npm test` **855 passed** in 77 files (816 at `a6cc287`).
+
+### Screenshots (real browser, L-090)
+
+- **Setup:** a separate Genesis server on loopback 8790 (reports origin 8890) with the throwaway home `/tmp/p54-b1`
+  (checked through the process environment), seeded by `scripts/probes/phase54-seed.py`. The fleet was not used or
+  restarted, and the real `~/.genesis` was not touched. The server was stopped afterwards.
+- **Run:** `scripts/probes/phase54-pages.mjs` at 1280/1440/1920 × light/dark, browser zone `Asia/Calcutta`. On the
+  final bundle (`41971a0`): **96 entries, all clean**, meaning:
+  - no sideways page scroll and no overflow;
+  - no table that scrolls or has a header that wraps;
+  - portals inside the viewport, and Tailwind and theme resolved;
+  - the zone cells show only "UTC".
+- **Finding fixed:** the first run found the history table scrolling at 1280 (`min-w-[680px]`). `63e88f6` fixed it:
+  `min-w-[560px]`, no duration on skipped/missed rows, and the gate/paused note moved under the policy card.
+- **Folder:** `specs/phase-54-schedules-and-fixes/evidence/54-07/` (7 MB, JPEG q70) plus `result.json`. Names are
+  `<name>-<width>-<theme>.jpg`, 6 files per name:
+
+| surface | names |
+|---|---|
+| Schedules list | `schedules-list`, `portal-row-menu`, `portal-last-result-tooltip` |
+| Detail and history | `schedule-detail-agent` (agent prompt; ok, failed, missed, skipped; credits total), `schedule-detail-app-sync` (sync options, per-app), `schedule-detail-failing` (Paused (failing) banner) |
+| Wizard | `schedule-wizard-1-target`, `-2a-workflow`, `-2b-agent`, `-2c-regression`, `-3-frequency`, `schedule-wizard-system-edit`, `portal-server-multiselect` (locked "from KB explorer", "Can't be picked") |
+| Catalog → Agents | `catalog-agents`, `portal-agent-editor` |
+| Bell | `portal-bell-popover` |
+
+Not probed live: a run waiting at a gate. The seed's open row with no live run is closed "interrupted" by the server's
+recovery sweep, which is correct behaviour. The fixture tests cover the gate state.
+
+### Review
+
+`specs/phase-54-schedules-and-fixes/reviews/54-07-review.md`.
+- **Round 1 (`fb6982f`): SHIP**, with m1 (the wizard dropped stored `days`/`weekdays_only` it does not show), m2 (no
+  keyboard pick for every MultiSelect use), m3 (dead `errorFor`) and n1–n3. All were fixed in `efba8db`.
+- **Re-run 1 (`d9c68b0`): NEEDS_CHANGES.** M1: my m1 fix let Daily/Hourly's "Weekdays only" leak into the Weekly form.
+  Also n4 and n5. Fixed in `5672ad1`.
+- **Re-run 2 (`41971a0`): SHIP** with no findings. The reviewer ran each new test against the old code.
+- The reviewer agreed with all nine of my decisions below, and asked that decision 3 be recorded as a deviation.
+
+### Decisions / deviations
+
+No ADR deviation. Mine:
+1. **D40 also refuses Duplicate** of a regression row (409), since the copy would be a second schedule for the app. The
+   message names the existing schedule, not the app (the store does not read app names). The 409 body adds
+   `existing: {id, name}`, which the wizard links to.
+2. **n8 model race fails closed.** If the store's locked read shows a model change the route did not see, the save is
+   refused ("model list not available; try again") rather than checked against a list it never read. A retry passes.
+3. **Deviation from §3's wording:** the agent Run dialog shows the started run with an **Open run** link, as in the
+   approved mockup, instead of navigating on its own.
+4. **The regression step lists the tracked apps** without a per-app suite case count (no cheap API). An app that
+   already has a schedule is disabled with a link to it. A new row is named "Regression: <app>" unless a name was
+   typed.
+5. **The wizard has no "Schedules › New" subtitle**, because the breadcrumb shows it. A system row gets a one-line
+   subtitle instead.
+6. **The agent editor's skills come from `GET /schedules/pickable`** (`skills.list()`, the same installed managed list
+   §3 names), so the editor and the wizard read one list.
+7. **One pointer reader:** `regression_pointer` serves the testing setup GET/PUT and the regression suite GET. The
+   suite's `schedule` key became the pointer too, since it had the same old shape. Its only web reader was the
+   contract test.
+8. **`LaunchFields`** was extracted from `LaunchForm` without changing its behaviour, so the wizard reuses the widgets.
+   File widgets render only when the caller passes `files`.
+9. **`policy.end_at` is sent as a local `YYYY-MM-DDTHH:MM`.** The scheduler reads it in the schedule's zone
+   (`scheduler.py:298`, `parse_instant(end_at, tz)`).
+10. **A sync-option range refusal** (such as 150 %) stays a field-less 400, shown as the general message on Review. A
+    blank option is refused on the frequency step, inside the Sync options fieldset (review n1, n4).
+11. **Zone picker:** the options are `Intl.supportedValuesOf("timeZone")`, which on this Mac lists `Asia/Calcutta` and
+    not `Asia/Kolkata`. A stored id replaces its alias in the list, and a new schedule defaults to the machine's zone
+    mapped onto the list. So a new schedule on this Mac stores "Asia/Calcutta", which Python's tzdata accepts as a link.
+    Comparisons are canonical everywhere.
+
+### Lesson candidates
+
+1. **A fix that keeps a hidden field must keep it in its own slot.** Review m1 asked the wizard to keep a stored
+   `weekdays_only` the Weekly form does not show. Putting it back into the shared form field let a value the user set
+   on another form leak into Weekly (re-run 1 M1). Store a value the form does not show in a field only the loader
+   sets, and test a form switch, not only a round trip.
+2. **Regenerating golden fixtures rewrites every timestamp and id they hold.** `GENESIS_WRITE_CONTRACT_FIXTURES=1` on
+   two test files churned 30 fixtures to change one key in two of them. Restore the unrelated files and edit only the
+   key that changed. The shape check (`record`) still proves the result matches the real response.
+3. **A seeded SKILL.md with ": " in a plain description vanishes silently** (L-115 again, this time in a probe seed).
+   The skill was missing and the API answered 422 "skills not installed". Quote generated front matter
+   (`json.dumps`) in every writer, scripts included.
+4. **A data-driven poll beats a mutation-driven one for "the id arrives later"** (D38 d). Polling while the newest row
+   is `fired` without a run link also covers a reload and another tab, and needs no state of its own.
+5. **jest-axe on an open Radix Popover finds a dialog with no name.** Pass `aria-labelledby` to `PopoverContent` with
+   the panel's heading id. The mockup's per-frame axe run never opened the popover.
+
+### Code-map changes (for genesis-docs, bible/03)
+
+- `genesis/runtime/schedule_store.py`:
+  - `ScheduleStore.update(..., options_check=, target_check=)` (both run under the write lock);
+  - `_one_regression_per_app`;
+  - `ScheduleConflict.existing`;
+  - `update_settings` is removed.
+- `genesis/runtime/schedule_model.py`: `validate_schedule` refuses a schedule with no effective day.
+- `genesis/api/schedule_routes.py`: `_checked_target` returns `(target, target_check)`; `_options_check`; `_model_of`;
+  the 409 body carries `existing`.
+- `genesis/api/schedules.py`: **deleted**, along with its registration in `api/app.py`.
+- `genesis/api/testing.py`: `PUT …/testing/schedule` and `ScheduleBody` are removed; the setup's `schedule` is the
+  pointer.
+- `genesis/testexec/regression_service.py`: `regression_pointer` replaces `schedule_view`, `save_schedule`,
+  `get/set_schedule`, `SCHEDULE_NOTE` and `CADENCES`.
+- Web, `shared/ui`: `row-menu.tsx` `RowMenu`, `time-input.tsx` `TimeInput`.
+- Web, `features/schedules/` (new):
+  - pages: `SchedulesPage`, `ScheduleDetailPage`, `ScheduleWizardPage`;
+  - logic: `hooks.ts`, `logic.ts`, `zones.ts`, `wizard-model.ts`;
+  - pieces: `components.tsx`, `useScheduleActions.tsx`, `pickers.tsx`, `ScheduledBadge.tsx`.
+- Web, catalog:
+  - `features/catalog/agents/` (new): `AgentsTab`, `hooks.ts`;
+  - `features/catalog/LaunchFields.tsx` (new, used by `LaunchForm` and the wizard);
+  - `CatalogPage` has an Agents tab.
+- Web, `features/notifications/` (new): `NotificationBell`, `hooks.ts`, mounted in `shared/layout/TopBar.tsx`.
+- Web, testing: `features/testing/setup/SchedulePointer.tsx` replaces `ScheduleSection.tsx`.
+- Web, removed: `features/settings/components/ApplicationSyncSection.tsx` and `syncSchedule.ts`.
+- Web, types: `types/testing.ts` `RegressionSchedulePointer` replaces `RegressionSchedule`/`ScheduleCadence`.
+- Web, nav: `shared/layout/nav.ts` (Schedules), `breadcrumbs.ts`, and `app/router.tsx` (the four `schedules` routes and
+  `catalog/agents`).
+- `scripts/probes/phase54-seed.py` and `phase54-pages.mjs` (new).
+- Docs that still describe the removed routes (54-06's list, for genesis-docs): `docs/architecture/modules/api.md`,
+  `knowledge-base.md`, `scheduler-and-jobs.md`, `testing.md` and `web-app.md`.
+
+### For 54-08 / 54-09 / 54-10
+
+- **54-08 (chat custom agent):**
+  - reuse `useCustomAgents` (`features/catalog/agents/hooks.ts`) for the new-session agent picker;
+  - the tools note wording is in `AgentsTab`'s editor;
+  - `ScheduledBadge` is a model for a small linked badge if the chat header needs one;
+  - `RowMenu` is shared now.
+- **54-09 (UX revamps):**
+  - `RowMenu`, `TimeInput`, `SectionCard`, `DefinitionList` and `StatusHeader` are in `shared/ui`;
+  - the bell is the first consumer of a labelled Popover (see lesson candidate 5);
+  - pre-existing opacity modifiers on token colours (backlog) are still in `TopBar.tsx` (`bg-surface-1/70`),
+    `RunDetailPage.tsx` (`bg-surface-1/70`), `RunsTable.tsx` (`bg-warning-subtle/30`), `LaunchForm.tsx`
+    (`border-warning/30`, `border-info/30`, `border-danger/40`), `SetupView.tsx` (`border-warning/40`) and `Badge`'s
+    `primary` tone (`bg-primary/15`); 54-07 added none and changed none of them.
+- **54-10 (review and acceptance), live rows not covered here:**
+  - a scheduled run actually waiting at a gate (row tint, banner, Open run, the tooltip's cancel time);
+  - Run now on a real run, with the link appearing;
+  - the row menu → ConfirmDialog hand-off for Delete and Reset in a real browser;
+  - Kiro's real model list in the wizard and agent editor (only `models: null` and the fixture list were exercised);
+  - the regression and app-sync migrations seen on the Schedules page;
+  - the bell with real notices from the scheduler;
+  - the Schedules screens after m0030 on the fleet (D36: only at the release).
+  - `scripts/probes/phase54-pages.mjs` can be re-run against the release candidate's own throwaway server.
+- **Follow-ups (not fixed):**
+  - the zone picker shows ICU's alias names (`Asia/Calcutta`), because `Intl.supportedValuesOf` lists those;
+  - a preferred-name map would be a small addition if the user wants "Asia/Kolkata" shown;
+  - a sync-option range refusal is not shown on its field (decision 10).
 
 ## Context manifest
 
