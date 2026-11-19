@@ -27,7 +27,8 @@ build the real page from it and its shared pieces (`SectionCard`, `DefinitionLis
   dependency) and use it here; the mockup's `RowMenu` is dev-only (54-03 decision 4).
 - **New / edit (D24):** a full page (`/schedules/new`, `/schedules/:id/edit`) with the step rail and running summary;
   skills and servers through `MultiSelect`; a picked custom agent's skills and servers as locked chips "from <agent>".
-- **Application-sync detail (D25):** options shown as text with an Edit button.
+- **Application-sync detail (D25, D39):** options shown as text with an Edit button; the per-app last sync and
+  `collab_enabled` come from `GET /schedules/{id}/sync-status`.
 - **Time fields (D29):** a new shared `TimeInput` in `shared/ui` (24-hour `HH:MM` whatever the locale; hour and minute
   fields, typed digits and arrow keys, a label per field) replaces every native `type="time"`; jest-axe and a userEvent
   keyboard test.

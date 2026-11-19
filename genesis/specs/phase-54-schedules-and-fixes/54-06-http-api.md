@@ -58,7 +58,7 @@
 - **`schedulable`:** `InstalledWorkflowInfo.schedulable` / `schedulable_of(meta)`; `/api/catalog` items already carry
   it; the file-input rule is `runtime.schedule_targets.file_inputs(meta, stored)` (use it for `pickable.workflows`).
 
-## 0c. Decided during the build (D36–D38, `54-01-findings.md` §8)
+## 0c. Decided during the build (D36–D39, `54-01-findings.md` §8)
 
 - **D36:** `schedule_runs.counts_toward_pause` is added to the unreleased m0030 in place; the scheduler writes it, the
   history reads only it.
@@ -67,6 +67,10 @@
 - **D38:** the 422 body, `ScheduleRefused`, model check, pause vs owner lock, run-now answer, pickable models/skills,
   `?limit=0` for the unread count, `ActivityItem` type only. Where §1's table differs (a separate unread-count route,
   the run-now answer), D38 wins.
+- **D39:** `GET /schedules/{id}/sync-status` → `{collab_enabled, per_app[]}`, `per_app` items in today's
+  `/system/sync-settings` shape (last sync kind, time, status, changed count, fallback reason, last full sync,
+  published version); 404 for any schedule other than `application-sync`. Only the application-sync detail page calls
+  it (D15, D25); `Schedule` keeps one shape for every row. Covered by the route-table test.
 - **Both in-place m0030 edits** hold only while the fleet has not applied m0030 (D36's condition): before editing,
   re-check that neither fleet `genesis serve` restarted since 2026-11-18 18:48 (`ps -ww -eo pid,lstart,command`), read
   only.
@@ -85,6 +89,7 @@
 | `POST /schedules/{id}/duplicate` | | `Schedule` (201, name "<name> (copy)", disabled) | 403 system row |
 | `POST /schedules/{id}/reset` | | `Schedule` | 403 user row |
 | `GET /schedules/{id}/history` | `?limit=50&offset=` | `{items: ScheduleRun[], total, credits_total: {credits, provenance}}` | |
+| `GET /schedules/{id}/sync-status` | | `{collab_enabled, per_app: [...]}` (today's `/system/sync-settings` per-app shape, D39) | 404 for any schedule other than `application-sync` |
 | `POST /schedules/preview` | `{schedule}` | `{next: string[5], summary: string, timezone}` | 400 |
 | `GET /schedules/pickable` | | `{workflows: [{id, name, inputs_schema}], servers: [{name, tier, pickable, needs_read_only_mark, reason}], skills: [...], models: [...]}` | |
 | `GET /custom-agents` · `GET /custom-agents/{id}` | | `CustomAgent[]` · `CustomAgent` (+ `used_by: [{schedule_id, name}]`) | 404 |

@@ -58,7 +58,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D30 | A regression run with red tests is `failed` with a notice but does not count toward auto-pause (during 54-04). |
 | D31 | Gate and paused time does not count toward a run's max duration; a hand-paused run is never auto-cancelled (during 54-04). |
 | D32–D35 | During 54-05: workflow runs load custom-only MCP servers; the D3 rule lives in `genesis_core/mcp/pickable.py` and the node re-checks it; `schedulable` on `agent-prompt`, `sync-documents`, `generate-business-map`, `hello-appian`; a model change is refused while the model list is unreadable. |
-| D36–D38 | During 54-06: `counts_toward_pause` and the chat-session snapshot column added to the unreleased m0030 in place (the fleet must not apply m0030 before the release); chat `agent_id` answers 409 until 54-08; the API defaults (422 body, run-now answer, `?limit=0` unread count). |
+| D36–D39 | During 54-06: `counts_toward_pause` and the chat-session snapshot column added to the unreleased m0030 in place (the fleet must not apply m0030 before the release); chat `agent_id` answers 409 until 54-08; the API defaults (422 body, run-now answer, `?limit=0` unread count); `GET /schedules/{id}/sync-status` for the app-sync detail. |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
