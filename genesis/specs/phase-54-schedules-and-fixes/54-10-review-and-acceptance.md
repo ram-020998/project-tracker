@@ -38,7 +38,13 @@ genesis-core (pytest, ruff), kiro-agent-sdk (pytest, ruff), genesis (pytest, ruf
 typecheck && npm test`, `npm run build` + committed `web/static/`), genesis-workflows (`ci/validate_library.py`,
 skills validation, pytest), one CI run or a run in the CI image before the release commit (L-112).
 
-## 3. Live acceptance (separate `genesis serve` on the release candidate, the user's real login; D20)
+## 3. Live acceptance (the release candidate on a copy of the user's real Genesis home, D46)
+
+**Set-up (D46), before any row:** copy `~/.genesis` to a throwaway folder (mode 700) with SQLite's online backup for
+`genesis.db` and `memory.db`, files for the rest; start the release candidate on another port against the copy; before
+its first tick, turn collaboration off on the copy and turn off every system schedule except the one a row tests; Appian
+writes only with the user's go-ahead; never print, commit or attach the copy's files; delete it at the end. The fleet
+is never restarted (D36).
 
 | # | Check | Pass |
 |---|---|---|

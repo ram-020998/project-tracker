@@ -64,6 +64,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D42 | The zone picker shows and stores current IANA names (`Asia/Kolkata`, not `Asia/Calcutta`); built in 54-09 §0. |
 | D43–D44 | In chat a custom server with no tool allowlist adds no tools (ADR-031); each custom agent has its own Kiro agent id, and an explicit model wins over the agent's (after 54-08). |
 | D45 | 54-09's ten data-source and layout points (CR items from the CR store, honest run history, no invented actors or rows, `summary` + `run_status` on the feature read, gated Re-run design, lane-derived code-review wording, no blob-URL report). |
+| D46 | 54-10 runs on a copy of the user's real home (SQLite online backup, collaboration and other system schedules off on the copy, deleted afterwards); the fleet stays at v29 until the release. |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
