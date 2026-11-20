@@ -19,6 +19,10 @@
    release commit (L-112). CI green. Release note: `agent-prompt` needs genesis ≥ 0.83.0; the major-only gate
    (ADR-019) does not stop a 0.82 app from loading it, where it fails at its first node.
 3. Never read CI variables through the API (L-100).
+3b. **Known CI risks at the tag (54-10 round 2):** `test_parse_returns_populated_result` counts bundles in filesystem
+   order (backlog `phase-54-follow-ups.md` §2) and could go red if the runner's file order differs; the two
+   `test_sail_cli` failures seen in `python:3.13` under colima are arm64-only. If either goes red at the tag, stop and
+   ask the user; do not re-tag or skip the test on your own.
 4. Rows of 54-10 §3 that could not run (Dev or QA down) are named in the release notes, README row and state (L-111).
 
 ## 2. Deploy

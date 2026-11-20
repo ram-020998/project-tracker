@@ -120,7 +120,7 @@ testing-schedule endpoints stay until 54-07 moves the web off them.
 | 54-07 | genesis (`web/`) | Schedules page, wizard, detail + history; Catalog → Agents tab + Run; bell; Settings → General card removed; Testing → Setup link; Runs badge; nav entry — **BUILT** (genesis `a6cc287..41971a0`, local; review SHIP; with the F7 removals and the 54-06 review fixes) |
 | 54-08 | genesis (`chat/`, `api/chat.py`, `web/src/features/chat/`) | Read-only chat session with a custom agent (D6) — **BUILT** (genesis `41971a0..8f8b1a1`, local; review SHIP; live no-prompt probe PASS) |
 | 54-09 | genesis (`web/src/features/workbench/`, `web/src/features/features/`, `api/features.py`, `shared/`) | Story Design + Implementation tabs; feature Overview + Activity (+ activity endpoint, D18); shared section card / definition list / timeline — **BUILT** (genesis `8f8b1a1..2ad1c50`, local; review SHIP; with D42) |
-| 54-10 | all | Review + gates + live acceptance (D20) — round 1 NEEDS_CHANGES; re-review after 54-12 |
+| 54-10 | all | Review + gates + live acceptance (D20) — **SHIP** (round 2, genesis `9980b0c`; `reviews/54-10-review.md`; not-run rows listed there for 54-11) |
 | 54-11 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-087, lessons, areas, state, progress) |
 | 54-12 | genesis (genesis-core, runtime, api, web) | Fix pass: 54-10 round-1 findings (B1, M1, M2, m1–m6, nits; D48, D49) and the user's A1 changes (D50); built between 54-10's round 1 and its re-review (D51) — **BUILT** (genesis `2ad1c50..9980b0c`, local; review SHIP at round 2; no migration change) |
 
