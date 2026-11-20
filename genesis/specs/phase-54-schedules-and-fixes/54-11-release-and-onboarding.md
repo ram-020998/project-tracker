@@ -82,7 +82,8 @@ in the release notes:
 ## As built
 
 **§3 done 2026-11-20 (genesis-docs).** Detail and the lesson decisions: `progress/phase-54-schedules-and-fixes.md`.
-- **ADR-087** filed Accepted (`genesis-ctx add adr … --amends ADR-047 ADR-049 --status accepted --phase 54`), after
+- **ADR-087** filed Accepted (`genesis-ctx add adr … --amends ADR-047 ADR-049 --status accepted --phase 54`; ADR-029
+  added to its amends afterwards at the user's call), after
   bringing `adr-drafts.md` up to date (n6: D22 as amended by D50, D30, D31, D36–D43, D48, D49). ADR-047's and ADR-049's
   Status lines and one-liners point to it.
 - **Lessons:** added L-120–L-125; extended L-005, L-011, L-014, L-026, L-043, L-080, L-090, L-091, L-094, L-096,
@@ -94,7 +95,8 @@ in the release notes:
   counts); changelog, tracker §6, README row 54 → SHIPPED, `bible/08`, umbrella status.
 - **Backlog:** `specs/backlog/phase-54-follow-ups.md` §3–§7 appended (§1–§2 kept).
 - **Architecture docs:** genesis `bd99ee7` (local, not pushed; ships with the next release).
-- **L0:** ~23,970 / 24,000 tokens after tightening the state snapshot; a compression is proposed to the user.
+- **L0:** fits after tightening the state snapshot and moving the open Phase 51/53 acceptance detail into their
+  progress docs (a one-line pointer in state).
 - `genesis-ctx index` + full `lint`: green.
 
 ## As run (2026-11-20, genesis-release)

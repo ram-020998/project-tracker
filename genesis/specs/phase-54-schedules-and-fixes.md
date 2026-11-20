@@ -1,7 +1,7 @@
 # Phase 54 — Schedules, custom agents, fixes and UX revamps
 
 > **Status:** 🚢 **SHIPPED 2026-11-20** — genesis **v0.83.0** (`9617e06`) → genesis-workflows **v0.27.0** (`9066541`),
-> CI green; m0030 (DB v30); **ADR-087 Accepted** (amends ADR-047, ADR-049). Live-accepted before the release (54-10 SHIP,
+> CI green; m0030 (DB v30); **ADR-087 Accepted** (amends ADR-047, ADR-049, ADR-029). Live-accepted before the release (54-10 SHIP,
 > round 2; the not-run rows are in the release notes, 54-11 As run). Known issue m7 (backlog §1). Progress:
 > `progress/phase-54-schedules-and-fixes.md`; follow-ups: `specs/backlog/phase-54-follow-ups.md`.
 > Spec-drafted 2026-11-19 (genesis-spec). Q&A complete: decisions D1–D20, defaults F1–F12; build rulings D21–D52

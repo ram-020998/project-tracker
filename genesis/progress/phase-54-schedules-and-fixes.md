@@ -4,7 +4,7 @@
 > the app and the three packages at 0.83.0, `CORE_MAJOR` 1 and `KB_FORMAT_VERSION` 1 unchanged) → genesis-workflows
 > **v0.27.0** (`9066541`; `agent-prompt` 0.1.0; `schedulable` on `agent-prompt`, `sync-documents` 0.1.1,
 > `generate-business-map` 0.1.1, `hello-appian` 0.1.1; all internal pins on `genesis.git@v0.83.0`) · playwright-appian
-> unchanged at v0.3.1 · m0030 (DB 29 → 30; memory.db v1) · **ADR-087** Accepted (amends ADR-047, ADR-049).
+> unchanged at v0.3.1 · m0030 (DB 29 → 30; memory.db v1) · **ADR-087** Accepted (amends ADR-047, ADR-049, ADR-029).
 > Live-accepted before the release (D20): 54-10 SHIP at round 2, with the rows named under "Live acceptance" not run.
 > Spec: `specs/phase-54-schedules-and-fixes.md` + `54-01..54-12` (each with its As built; 54-11 has the As run).
 > Reviews: `specs/phase-54-schedules-and-fixes/reviews/`. Follow-ups: `specs/backlog/phase-54-follow-ups.md`.
@@ -87,9 +87,8 @@ acceptance stay open.
 ## Decisions and deviations
 
 - **ADR-087** filed Accepted from `adr-drafts.md`, brought up to date first (54-10 review n6): D22 as amended by D50,
-  D30, D31, D36–D43, D48, D49. It also records that the worker's registry refines ADR-029 for runs (D32: custom-only
-  names, a custom entry never replaces a curated one in a run); no formal amendment link was added (the release named
-  only ADR-047 and ADR-049). ADR-047's and ADR-049's one-liners and Status lines now point to ADR-087.
+  D30, D31, D36–D43, D48, D49. At the user's call it also amends ADR-029 (D32: a workflow run adds only custom-only
+  servers, and a custom entry never replaces a curated one in a run; chat and Settings keep the override). ADR-047's and ADR-049's one-liners and Status lines now point to ADR-087.
 - D36/D37: m0030 was edited in place twice before the release, safe because neither fleet database had applied it
   (process start times checked each time); the fleet stayed down until 54-11.
 - D52: m7 shipped as a known issue at the user's choice; the parser's filesystem-order bundle count is backlog §2 (it
@@ -153,8 +152,9 @@ sub-agents with disjoint files and checked here.
    `genesis/agents/**`; `kb-sync` gains `sync_jobs.py`; `features-stages` gains `services/feature_activity.py`;
    `web-shell` gains `features/schedules/**` and `features/notifications/**`; `web-runs` gains `features/schedules/**`.
 2. No skill changed, so `update.sh` is not needed.
-3. **L0 is at ~23,970 / 24,000 tokens.** ADR-087, six lessons and two one-liners pushed it to ~24,280; the state
-   snapshot was tightened to fit (no rule dropped). The next phase will not fit without a compression; proposed to the
-   user, not applied.
+3. **L0.** ADR-087, six lessons and two one-liners pushed it to ~24,280 tokens; the state snapshot was tightened to
+   fit (no rule dropped), and at the user's request the open Phase 51/53 acceptance detail moved out of state into the
+   two progress docs' "Live acceptance" sections, with a one-line pointer left in state. The digests were not merged
+   or regrouped.
 4. ADR-087's body and the lesson bodies were written from scratch files (`context/.packs/`, git-ignored); every
    `genesis-ctx add` ran alone.

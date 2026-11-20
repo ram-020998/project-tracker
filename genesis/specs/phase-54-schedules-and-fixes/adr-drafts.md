@@ -7,8 +7,8 @@
 
 ## ADR-087 (filed) — Schedules: one user-managed schedule model for system jobs, workflows, agent prompts and regression suites
 
-- **Status.** ACCEPTED 2026-11-20 — Phase 54, genesis v0.83.0 + genesis-workflows v0.27.0. Amends **ADR-047** and
-  **ADR-049**.
+- **Status.** ACCEPTED 2026-11-20 — Phase 54, genesis v0.83.0 + genesis-workflows v0.27.0. Amends **ADR-047**, **ADR-049**
+  and (added at the write-back, the user's call) **ADR-029**.
 - **Areas.** runs-worker, config-secrets, web-shell, workflows-library, chat, security.
 - **Rule (one-liner, ≤ 220 chars).** Every schedule lives in `scheduled_jobs` and is managed on the Schedules page: system jobs editable not deletable; user schedules run a `schedulable` workflow, an agent prompt or a regression suite.
 - **Context.** ADR-047 made scheduled syncs fixed and backend-defined; ADR-074 later made the app sync configurable in
@@ -94,8 +94,8 @@
   `generate-business-map` and `hello-appian` (not the memory workflows, whose cursor has no concurrency guard, D34);
   `agent-prompt` needs genesis ≥ 0.83.0, which the major-only gate (ADR-019) does not enforce. Known issue shipped:
   a one-time schedule paused during its run and resumed afterwards gets a false `missed` row (m7, D52,
-  `specs/backlog/phase-54-follow-ups.md` §1). Refines ADR-029 for runs: the worker's registry adds custom-only names and
-  never lets a custom entry replace a curated one (D32). Amends ADR-047: scheduled jobs are no longer fixed and
+  `specs/backlog/phase-54-follow-ups.md` §1). Amends ADR-029: in a workflow run the worker's registry adds the custom-only
+  names and never lets a custom entry replace a curated one of the same name (D32); chat and Settings keep the override. Amends ADR-047: scheduled jobs are no longer fixed and
   backend-defined in the UI sense; the system jobs stay backend-seeded but are user-editable rows on the Schedules page,
   and users create their own schedules. Amends ADR-049: the primary navigation as built is Home · Workbench · Chat ·
   Runs · Schedules · Catalog · Documents · Memory, with Settings pinned.

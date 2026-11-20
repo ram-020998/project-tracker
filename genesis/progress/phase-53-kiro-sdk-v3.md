@@ -79,6 +79,8 @@ after a load; `~/.local/bin`); A4's chat part; A5 (MCP notice, too-old and newer
 **Still open (D24, D26):** A1 for the other 8 Appian workflows when Dev is up (`story-implementation` only with the
 user's go-ahead, ADR-068), A2's remaining modes, A8, A9(a); and with Phase 51's postponed acceptance (51-12 steps 1–27
 on QA, D20), `story-verification`, `action-capture`, `setup-composer` on v3 and the cancelled-run `apwt` reap check.
+**As of 2026-11-20 (Phase 54 write-back):** still open; it now runs on genesis v0.83.0 and findings ship as v0.83.x
+patches. This section is the home of the open items (state points here).
 
 ## Decisions and deviations
 

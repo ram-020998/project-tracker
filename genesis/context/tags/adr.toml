@@ -380,10 +380,10 @@ status = "accepted"
 areas = ["config-secrets", "workflows-library", "chat"]
 paths = []
 amends = ["ADR-005", "ADR-020"]
-amended_by = ["ADR-083", "ADR-086"]
+amended_by = ["ADR-083", "ADR-086", "ADR-087"]
 superseded_by = ""
 rule = "Two-tier MCP/CLI registry: curated read-only (MR-governed) + custom user-writable; tool trust = `node.tools ∩ server.allowlist`, enforced by the engine's tool list (ADR-086: no tool list = its servers within allowlists)."
-reviewed_fp = "81784f999df25207"
+reviewed_fp = "608faab58954da12"
 b04 = "skip"
 
 [ADR-030]
@@ -1065,8 +1065,8 @@ title = "Schedules: one user-managed schedule model for system jobs, workflows, 
 status = "accepted"
 areas = ["runs-worker", "config-secrets", "web-shell", "workflows-library", "chat", "security"]
 paths = []
-amends = ["ADR-047", "ADR-049"]
+amends = ["ADR-047", "ADR-049", "ADR-029"]
 amended_by = []
 superseded_by = ""
 rule = "Every schedule lives in `scheduled_jobs` and is managed on the Schedules page: system jobs editable not deletable; user schedules run a `schedulable` workflow, an agent prompt or a regression suite."
-reviewed_fp = "dc450fe64c1495fd"
+reviewed_fp = "ffc792cad0f0fc57"

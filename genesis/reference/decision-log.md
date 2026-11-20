@@ -343,7 +343,7 @@ client routes and break full-page refreshes on them.
 
 ### ADR-029 — Two-Tier MCP/CLI Registry (revises ADR-005/020)
 
-**Status:** Accepted (2026-07-11) · **Revises:** ADR-005 (shared registry), ADR-020 (no global mcp.json)
+**Status:** Accepted (2026-07-11) · **Revises:** ADR-005 (shared registry), ADR-020 (no global mcp.json) · **Amended by ADR-087 (Phase 54, genesis v0.83.0):** a workflow run adds only custom-only servers; a custom entry never replaces a curated one in a run (D32).
 
 **Context:** Genesis resolves MCP servers and CLIs from a single read-only manifest installed from
 the `genesis-workflows` library. Users cannot add custom integrations from the app — they must MR
@@ -1826,8 +1826,8 @@ remove-propagation (delete a card when a teammate clears `on_board`). See bible/
   `generate-business-map` and `hello-appian` (not the memory workflows, whose cursor has no concurrency guard, D34);
   `agent-prompt` needs genesis ≥ 0.83.0, which the major-only gate (ADR-019) does not enforce. Known issue shipped:
   a one-time schedule paused during its run and resumed afterwards gets a false `missed` row (m7, D52,
-  `specs/backlog/phase-54-follow-ups.md` §1). Refines ADR-029 for runs: the worker's registry adds custom-only names and
-  never lets a custom entry replace a curated one (D32). Amends ADR-047: scheduled jobs are no longer fixed and
+  `specs/backlog/phase-54-follow-ups.md` §1). Amends ADR-029: in a workflow run the worker's registry adds the custom-only
+  names and never lets a custom entry replace a curated one of the same name (D32); chat and Settings keep the override. Amends ADR-047: scheduled jobs are no longer fixed and
   backend-defined in the UI sense; the system jobs stay backend-seeded but are user-editable rows on the Schedules page,
   and users create their own schedules. Amends ADR-049: the primary navigation as built is Home · Workbench · Chat ·
   Runs · Schedules · Catalog · Documents · Memory, with Settings pinned.

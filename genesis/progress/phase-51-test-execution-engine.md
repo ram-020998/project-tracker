@@ -81,6 +81,9 @@ main 12/12; step 20 widths). **Still open (D38):** steps 1–27 on v0.81.0 with 
 workflows, a QA replay, a two-role sign-in, the Verification lane end to end, the new dialogs in a real browser,
 pause/restart/cancel on the live instances, step 24 on userb (needs an execution there), the F10 re-measure of the
 900 s turns, and the m5 check (Remove script refused during a running verification).
+**As of 2026-11-20 (Phase 54 write-back):** still open. Since Phase 53 (D20) it runs on Kiro's v3 engine with
+playwright-appian 0.3.1, now on genesis v0.83.0; findings ship as v0.83.x patches. This section is the home of the open
+items (state points here).
 
 ## Decisions and deviations
 

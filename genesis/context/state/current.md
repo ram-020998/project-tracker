@@ -58,9 +58,8 @@ One shared version, one install script (ADR-080). kiro-cli: minimum and only ver
 
 ## Known open items
 
-- **Live acceptance still open:** Phase 51 (51-12 steps 1–27, D20, on v3 with apwt 0.3.1: `story-verification`,
-  `action-capture`, `setup-composer` on QA, the `apwt` reap check) and Phase 53 (53-11 §5: A1 for 8 Appian workflows,
-  A2's other modes, A8, A9(a)). Findings ship as v0.83.x patches.
+- **Phase 51/53 live acceptance still open** (runs on v0.83.0; findings as v0.83.x patches): see
+  `progress/phase-51-test-execution-engine.md` and `progress/phase-53-kiro-sdk-v3.md`, "Live acceptance".
 - **Phase 54 rows not run (54-10 round 2):** `story-implementation`; a real paused or gated `story-verification`, the
   implementation report frame on a fresh run, a gate-waiting compose discard (need QA + a fresh implementation);
   Activity with pulled CRs and the pulled-artifact frame on real data; the app-sync export / `genesis-delta-*` path (no

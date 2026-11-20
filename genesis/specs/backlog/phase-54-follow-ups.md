@@ -117,9 +117,6 @@ Probes:
   consolidation runs "before the 07:00 app-sync" (the first slot is 08:00); `validate_sync_options`'s docstring calls
   the current route "the old `PUT /schedules/{id}`"; `ScheduleStore.regression_for` says it returns "the oldest" row
   (D40 allows only one).
-- ADR-029 says a custom MCP entry overrides a curated one by name; since D32 the run worker never applies such an
-  override (`from_layers(override=False)`), while chat and Settings still do. ADR-087's Consequences record it; a formal
-  amendment link on ADR-029 is the user's call.
 
 ## 7. Release leftovers for the user (54-11 As run)
 
