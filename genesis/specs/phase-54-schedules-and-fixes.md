@@ -68,6 +68,8 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D47 | 54-10 live permissions: colima CI-image run, a QA regression, an app-sync Run now on Dev, a design re-run on story 74 (no `story-implementation`), 5–10 credits; A13's "reproduced" half is 54-02's fail-first tests; the fleet stays down until 54-11. |
 | D48 | The 54-10 fix pass also closes three older agent-HTML paths: the pulled stage artifact's frame (sandboxed, annotation checked live), the CR document and the spec-clause link (CSP + nosniff). |
 | D49 | B1 is in this release: program steps run off the worker's event loop (genesis-core `program_node`, API unchanged) and the scheduler survives "database is locked" without losing slots or recording false outcomes; A2, A7, A9 re-run live after the fix. |
+| D50 | A1 verdict: everything matches the mockup except six changes (Runs-page filters, search and grid on Schedules; no line above the grid; whole row clickable; Remove / Clear read for read notices; one Edit on app sync; search on Catalog → Agents). |
+| D51 | The 54-10 round-1 fixes and the D50 changes are one new sub-spec, 54-12, built before 54-10's re-review. |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
@@ -91,6 +93,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | Chat with a custom agent | 54-08 |
 | UX revamps: story Design/Implementation, feature Overview/Activity (+ activity backend) | 54-09 |
 | Review, hardening, live acceptance | 54-10 |
+| Fix pass after 54-10's round 1 (review findings + the user's A1 changes) | 54-12 |
 | Release + docs write-back | 54-11 |
 
 ## 6. Session plan
@@ -98,7 +101,8 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 S1 = 54-02 → S2 = 54-03 (**gate:** the user approves the mockups; requested changes are recorded as decisions in
 54-01 §8 and folded into 54-07/54-08/54-09 before they start) → S3 = 54-04 → S4 = 54-05 (genesis + genesis-workflows)
 → S5 = 54-06 (each backend sub-spec adds its routes; 54-06 owns the contract table, web types and fixtures) → S6 =
-54-07 → S7 = 54-08 → S8 = 54-09 → S9 = 54-10 (genesis-review) → S10 = 54-11 (genesis-release, then genesis-docs). One at
+54-07 → S7 = 54-08 → S8 = 54-09 → S9 = 54-10 round 1 (genesis-review) → S9b = 54-12 (genesis-dev, the fix pass) → S9c
+= 54-10 re-review and remaining live rows → S10 = 54-11 (genesis-release, then genesis-docs). One at
 a time: they share the genesis checkout. Every intermediate commit keeps the gates green; the old sync-settings and
 testing-schedule endpoints stay until 54-07 moves the web off them.
 
@@ -115,8 +119,9 @@ testing-schedule endpoints stay until 54-07 moves the web off them.
 | 54-07 | genesis (`web/`) | Schedules page, wizard, detail + history; Catalog → Agents tab + Run; bell; Settings → General card removed; Testing → Setup link; Runs badge; nav entry — **BUILT** (genesis `a6cc287..41971a0`, local; review SHIP; with the F7 removals and the 54-06 review fixes) |
 | 54-08 | genesis (`chat/`, `api/chat.py`, `web/src/features/chat/`) | Read-only chat session with a custom agent (D6) — **BUILT** (genesis `41971a0..8f8b1a1`, local; review SHIP; live no-prompt probe PASS) |
 | 54-09 | genesis (`web/src/features/workbench/`, `web/src/features/features/`, `api/features.py`, `shared/`) | Story Design + Implementation tabs; feature Overview + Activity (+ activity endpoint, D18); shared section card / definition list / timeline — **BUILT** (genesis `8f8b1a1..2ad1c50`, local; review SHIP; with D42) |
-| 54-10 | all | Review + gates + live acceptance (D20) |
+| 54-10 | all | Review + gates + live acceptance (D20) — round 1 NEEDS_CHANGES; re-review after 54-12 |
 | 54-11 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-087, lessons, areas, state, progress) |
+| 54-12 | genesis (genesis-core, runtime, api, web) | Fix pass: 54-10 round-1 findings (B1, M1, M2, m1–m6, nits; D48, D49) and the user's A1 changes (D50); built between 54-10's round 1 and its re-review (D51) |
 
 API sub-spec: **54-06**.
 

@@ -98,6 +98,8 @@
 | `POST /custom-agents/{id}/run` | `{prompt}` | `{run_id}` | 400 prompt empty or > 20 000; 404; 409 `agent-prompt` not installed (L-033); 422 server no longer pickable (built in 54-05) |
 | `GET /notifications` | `?unread=true&limit=&offset=` | `{items: Notification[], unread: int}` | |
 | `POST /notifications/{id}/read` · `POST /notifications/read-all` | | `{unread: int}` | 404 |
+| `DELETE /notifications/{id}` (54-12, D50) | | 204 | 404 unknown; 409 unread |
+| `POST /notifications/clear-read` (54-12, D50) | | `{removed: int, unread: int}` | |
 | `POST /chat/sessions` (existing) | + `agent_id?` (read-only mode only, D6) | session (+ `agent: {id, name}`) | 422 `agent_id` with another mode |
 | `GET /chat/sessions/{id}` (existing) | | + `agent: {id, name} \| null` | |
 | the existing chat mode-change endpoint | | unchanged | 422 for a session with a custom agent (D26, 54-08 §1.1) |

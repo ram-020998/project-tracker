@@ -69,32 +69,11 @@ is never restarted (D36).
 | A16 | **Process hygiene:** after A2–A11 no stray `kiro-cli` or MCP processes (`ps -ww`, L-104) | none |
 | A17 | **54-07 rows it could not run offline:** a scheduled run waiting at a gate (row tint, banner, Open run, the tooltip's cancel time); Run now on a real run with the run link appearing; Delete and Reset to default through the row menu's confirm dialogs; Kiro's real model list in the wizard and the agent editor; the migrated regression and app-sync rows on the Schedules page; the bell with real scheduler notices. Re-run `scripts/probes/phase54-pages.mjs` against the release candidate's own throwaway server (never the fleet before the release, D36) | as stated |
 
-## 4. Fix pass after review round 1 (genesis-dev, one pass; `reviews/54-10-review.md`, NEEDS_CHANGES)
+## 4. Fix pass after review round 1
 
-Each finding gets a regression test that fails on the old code; genesis-review re-reviews, then re-runs the affected
-live rows on the copy (D46).
-- **B1 (D49):** genesis-core `program_node` runs program steps off the worker's event loop (no write transaction open
-  across a blocking step; API unchanged, `CORE_MAJOR` 1; all existing workflow tests unchanged); the scheduler retries a
-  "database is locked" write with a bounded wait (`busy_timeout` on its connections) and never records a lost slot, a
-  false `missed` "Genesis was not running", a pause that did not take, or a stale `running`. Re-run A2, A7 (pause of a
-  running run, D31), A9.
-- **M1 (D48):** the three older agent-HTML paths. The sandboxed frames already throw a `localStorage` `SecurityError`;
-  if the annotation SDK breaks under the sandbox, stop and ask. The read-only spec's own clause scripts stop running
-  under the CSP: the `#clause` jump keeps working, the highlight does not; keep the highlight without a script in the
-  document (for example from the host page) or record it as a known limit and ask.
-- **M2:** the Objects changed table's type column ("Record Type Relationships") overlaps the Action tag at 1280, 1440
-  and 1920 px, both themes; fix from a real-browser probe (L-090) with real story 74's data.
-- **m1:** Resume of a hand-paused `once` past its time leaves it Active forever; apply the 9a365c0 rule on Resume too
-  (record `missed`, mark completed).
-- **m2:** a workflow-type schedule that targets `agent-prompt` skips the read-only server check at save; route it
-  through `check_picks` (D33) or refuse `agent-prompt` as a workflow target.
-- **m3:** idle time is lost when a run leaves a gate and finishes between two ticks; record it from stored state
-  (D31).
-- **m4:** after m0030 every system schedule shows "Never run" although its last run is stored; carry the stored
-  `last_run_*` into `last_run` (migration data step or read fallback; one reader, L-109).
-- **m5:** Pause answers 200 when its status write fails; answer the failure (covered with B1).
-- **m6:** the application-sync detail's table headers wrap at 1280 and 1440 px; fix from the probe.
-- Nits: as listed in the report; take or defer each and say which.
+Moved to its own sub-spec, **54-12** (`54-12-review-fixes.md`, D51): the round-1 findings (B1, M1, M2, m1–m6, nits) and
+the user's A1 changes (D50). After 54-12 is built, this sub-spec re-reviews its diff and re-runs the affected rows
+(54-12 §5).
 
 ## As built
 
@@ -107,6 +86,6 @@ areas    = ["runs-worker", "web-shell"]
 adrs     = ["ADR-011", "ADR-021", "ADR-031", "ADR-047", "ADR-049", "ADR-068", "ADR-073", "ADR-083", "ADR-086"]
 lessons  = ["L-026", "L-081", "L-089", "L-090", "L-094", "L-096", "L-097", "L-102", "L-103", "L-104", "L-107", "L-108", "L-110", "L-111", "L-112", "L-113"]
 docs     = ["tracker:specs/phase-54-schedules-and-fixes.md", "tracker:specs/phase-54-schedules-and-fixes/54-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/adr-drafts.md"]
-code     = ["genesis/genesis/runtime/scheduler.py", "genesis/genesis/runtime/schedule_store.py", "genesis/packages/genesis-core/genesis_core/nodes/program.py"]
-upstream = ["54-02", "54-03", "54-04", "54-05", "54-06", "54-07", "54-08", "54-09"]
+code     = ["genesis/genesis/runtime/scheduler.py", "genesis/genesis/runtime/schedule_store.py"]
+upstream = ["54-02", "54-03", "54-04", "54-05", "54-06", "54-07", "54-08", "54-09", "54-12"]
 ```
