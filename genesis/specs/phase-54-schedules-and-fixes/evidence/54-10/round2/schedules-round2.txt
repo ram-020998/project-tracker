@@ -1,0 +1,18 @@
+#1 Application sync (all tracked apps) enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    manual:2026-11-20T13:16:07Z ok | 1 apps: 1 ok, 0 skipped, 0 error (1 empty) | r-b616fcaf8368 done idle 0 counts None cr None unavailable
+#29 A2r2 agent prompt behind a long run enabled=True state=completed fails=0 runs=1 credits_total={'credits': 0.262878772172471, 'provenance': 'metered'}
+    2026-11-20T17:37 ok | None | r-27238652735c done idle 0 counts None cr 0.262878772172471 metered
+#30 A6r2 skip behind a long run enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T17:37 skipped | previous run still active | None None idle 0 counts None cr None None
+    2026-11-20T17:36 ok | None | r-e7b8efd21382 done idle 0 counts None cr None unavailable
+#31 A7r2 pause while running (D31) enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T17:41 ok | None | r-51d373bdbeb4 done idle 0 counts None cr None unavailable
+#32 n1r2 gate notice in zone enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T17:55 cancelled | run cancelled | r-45e47b9bf693 cancelled idle 3362 counts None cr None unavailable
+#33 A7r3 pause while running (D31) enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T17:56 ok | None | r-81583989db7e done idle 360 counts None cr None unavailable
+#34 B1r2 fire during app sync enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T18:48 ok | None | r-ecbf13399f70 done idle 0 counts None cr None unavailable
+#35 A4r2 GSS regression on QA enabled=False state=active fails=0 runs=2 credits_total={'credits': None, 'provenance': 'unavailable'}
+    manual:2026-11-20T13:48:41Z failed | TE-000014 failed | None None idle 0 counts False cr None unavailable
+    2026-11-20T18:49 ok | TE-000013 passed | None None idle 0 counts None cr None unavailable

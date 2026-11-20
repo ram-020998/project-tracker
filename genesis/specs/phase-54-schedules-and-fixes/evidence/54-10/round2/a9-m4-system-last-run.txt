@@ -1,0 +1,5 @@
+1 application-sync False {"slot": null, "outcome": "ok", "reason": "1 apps: 1 ok, 0 skipped, 0 error (1 empty)", "run_id": null, "execution_key": null, "at": "2026-11-19T14:30:12.512401+00:00", "gate_cancel_at": null}
+2 document-library-sync False {"slot": "manual:2026-11-20T07:41:36Z", "outcome": "skipped", "reason": "gws connector not connected", "run_id": null, "execution_key": null, "at": "2026-11-20T07:41:36.203653+00:00", "gate_cancel_at": null}
+3 memory-consolidation False {"slot": null, "outcome": "skipped", "reason": "no new chat sessions since the last consolidation", "run_id": null, "execution_key": null, "at": "2026-11-18T21:39:36.951534+00:00", "gate_cancel_at": null}
+4 memory-maintenance False {"slot": null, "outcome": "ok", "reason": "memory-maintenance completed (r-af2ff497cec6)", "run_id": null, "execution_key": null, "at": "2026-11-14T21:31:06.464989+00:00", "gate_cancel_at": null}
+5 kb-hub-pull False null

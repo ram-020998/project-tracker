@@ -1,5 +1,8 @@
 # Review 54-10 — whole Phase 54, genesis `ea00dfd..2ad1c50`, genesis-workflows `d0c0f53..7b35f8a` (genesis-review, 2026-11-20)
 
+**Final verdict: SHIP (round 2, 2026-11-20, genesis `9980b0c`, genesis-workflows `7b35f8a`).** Round 2 is at the end
+of this file ("Round 2"); its A-row table is the one 54-11's release notes use. Round 1 below is kept as written.
+
 **Round 1 (interim: live rows that need the user's go-ahead are still open, see §3).**
 
 **The user's answers in this session (recorded in `54-01-findings.md` §8):**
@@ -380,7 +383,7 @@ B1, M1 and M2 must be fixed, each with its regression test, and the minors shoul
 54-12 §1, with D50's six A1 changes in 54-12 §2. Then I re-review the 54-12 diff, run the CI-image gate, and re-run the
 rows listed in the Resume note.
 
-## Resume note (2026-11-20 14:00 IST, end of round 1)
+## Resume note (2026-11-20 14:00 IST, end of round 1; closed by round 2)
 
 **Copy and server: kept running for the re-review (user's instruction).**
 - **Copy:** `/tmp/g5410` (mode 700). It holds `home/` (the copy of `~/.genesis`, DB v30, paths rewritten to the copy)
@@ -439,3 +442,180 @@ rows listed in the Resume note.
 - A real paused or gated `story-verification`, the report frame on a fresh implementation run, and a gate-waiting
   compose discard: these need QA plus credits and a fresh `story-implementation`. Ask again at the re-review if wanted.
 - A14 Activity with pulled CRs: no pulled CR in the copy, and collaboration is off.
+
+---
+
+# Round 2 — the 54-12 fix pass, genesis `2ad1c50..9980b0c` (genesis-review, 2026-11-20)
+
+What this change does: 54-12 fixes round 1's findings and D50's six A1 changes. A program step now runs off the
+worker's event loop, so it no longer holds `genesis.db`'s write lock (B1). Scheduler, notification and run-status writes
+wait for and retry a busy database, and a pause that cannot be stored answers 503 (m5). Agent-written HTML opened
+read-only gets `script-src 'none'` + nosniff, and a pulled stage frame is sandboxed (M1). The rest are the Objects
+changed and app-sync table widths (M2, m6), m1–m4, nits n1–n4, and the shared `SearchInput` / `DataTable`, row click,
+bell Remove / Clear read and Agents search (D50).
+
+Inputs: 54-12 spec and As built (13 commits), its review (`reviews/54-12-review.md`, SHIP round 2), D47–D52
+(`54-01-findings.md` §8), `genesis-ctx check --since 2ad1c50 --repo genesis` (117 files, 52 outside `web/static`). HEADs
+resolved: genesis `9980b0c`, genesis-workflows `7b35f8a` (unchanged); both trees clean. No migration changed
+(`git diff --stat 2ad1c50 -- genesis/db/migrations` empty), so the copy's v30 database stayed valid.
+
+## Round-1 findings: fixed?
+
+| Finding | Fixed in | Regression test (fails on the old code) | Re-checked live (copy, `9980b0c`) |
+|---|---|---|---|
+| B1 blocking step holds the write lock | `076604e`, `3a4e0c2` (`nodes/program.py` `await asyncio.to_thread`; `db/database.py` `retry_when_busy`, busy timeout) | `packages/genesis-core/tests/test_program_off_loop.py` (2 of 4 fail on the old `program.py`; **I ran this myself** from an exported tree with the old file: `assert 0 >= 10`, lock tests FAILED), `tests/test_busy_database.py` (11) | A2/A6: a 180 s blocking step in flight, the agent-prompt once fired on time and ended `ok`; 0 of 210 lock samples locked (`round2/b1-locksample.txt`) |
+| M1 three HTML paths | `235e4bc`, `2ee4cb9` | `tests/test_read_only_html_headers.py` (6), `features.test.tsx` pulled-frame sandbox | Live headers on the real spec, stage and CR document as the UI opens them (`annotate=0`): CSP + nosniff, 0 `<script>`; 50 scriptless `gn-anchor`s, no duplicate id |
+| M2 Objects changed overlap | `411d74b`, `15a9124` | `StoryWorkspacePage.test.tsx` pin; probe | story 74, real objects: no spill at 1280/1440/1920 × light/dark (`round2/story74/result.json`) |
+| m1 Resume of a past once | `8c7522e` | `test_54_12_m1_…` (**ran it against the old `schedule_store.py`: fails, state `active`**) | unit only; but see m7 below |
+| m2 agent-prompt as a workflow target | `8c7522e` | `test_54_12_m2_…` | POST → 422 `target.workflow_id`; `/schedules/pickable` workflows exclude `agent-prompt` |
+| m3 idle time lost | `8c7522e` | `test_54_12_m3_…` (**fails on the old `scheduler.py`**) | A7: `idle_s 360` kept; a gate run cancelled between ticks kept `idle_s 3362` (#32) |
+| m4 "Never run" | `8c7522e` | `test_54_12_m4_…` | system rows show their stored result (`round2/a9-m4-system-last-run.txt`); `kb-hub-pull` (no stored run) still says Never run, correctly |
+| m5 pause 200 that did not take | `076604e`, `2ee4cb9` (store first, then mark, then kill) | `test_busy_database.py` pause tests (4) | A7: pause → 200 `awaiting_input:paused`, the run was not cancelled while paused past its limit |
+| m6 app-sync headers wrap | `411d74b` | probe | `phase54-pages.mjs`: 96 views clean (round 1: WARN) |
+| n1 UTC cancel time | `8c7522e` | `test_54_12_n1_…` (**fails on the old scheduler**) | notice #17: "by 2026-11-21 17:55 (Asia/Kolkata)" |
+| n2 duplicate operation id | `8c7522e` | `test_54_12_n2_…` | — |
+| n3 Outcome "Running" at a gate | `411d74b` | `schedules.test.tsx` detail | — (no gated scheduled run open during round 2) |
+| n4 400 without field | `8c7522e` | `test_schedules_api.py` n4 | — |
+| n5 `.kiro/` files in documents, n6 ADR draft D30/D31 | deferred (54-12 As built) | — | n5 still visible (agent-prompt run lists its skill files); n6 is genesis-docs' |
+
+genesis-core spot check (ADR-019): `program_node(*, name, fn)` keeps its signature and return; `CORE_MAJOR = 1`
+(`genesis_core/types.py:12`); every workflow's tests pass unchanged (genesis-workflows pytest 463). No workflow
+`graph.py` uses the running loop, `interrupt()` or a thread-bound connection inside a program step (`git grep` for
+`get_event_loop|get_running_loop|run_until_complete|asyncio.run(|interrupt(|check_same_thread|sqlite3.connect`: none);
+the `ctx.extras` stores open a connection per call. `to_thread` copies context variables
+(`test_a_program_step_sees_the_callers_context_variables`).
+
+## Checklist (54-12 diff)
+
+### ADRs
+- [OK] ADR-001 — control flow stays in LangGraph; the step only moves to a thread inside its node (`nodes/program.py:29`).
+- [OK] ADR-009 — pause / resume of a running run (A7) and a gate (#32, n1) work live.
+- [OK] ADR-012 — the graph still runs in the worker; `_emit` is serialized for steps on threads (`runs/worker.py:44-50`).
+- [OK] ADR-019 — above.
+- [OK] ADR-024 — async engine kept; blocking work leaves the loop (`to_thread`); the boot seed runs once, without the bounded retry (`scheduler.py:158-160`).
+- [OK] ADR-026 — the copy bound 127.0.0.1 only (`lsof`: :8790, :8890).
+- [OK] ADR-027/055 — new shared primitives in `shared/ui` (`data-table.tsx`, `SearchInput` in `input.tsx`); added web lines have no hex, palette class, opacity modifier or `asChild` (diff grep: none).
+- [OK] ADR-028 — the two new routes are under `/api` (`api/notifications.py:44,56`); the client prepends it (`lib/api/notifications.ts:19-21`).
+- [OK] ADR-032 — credits only from `agent.result` (A2r2 0.2629 metered; A14 9.6166 metered via `aggregate_credits`).
+- [OK] ADR-043 — pulled frame `sandbox="allow-scripts"` (`StageBuilderPage.tsx:163`); the annotate=1 copies stay framed only. Live on real data not possible (no pulled artifact in the copy); 54-12's probe evidence shows the SDK loads and posts in the sandbox.
+- [OK] ADR-047 — system rows editable, not deletable; app-sync Run now works (A9).
+- [OK] ADR-061/071/084 — one story page; the design re-run is lane-gated and moves the card (A14).
+- [OK] ADR-065 — collaboration off by both gates (`/api/collab/status` `{"enabled":false}`).
+- [OK] ADR-068/073 — no write tool reached; the app-sync Run now created no package (empty incremental).
+- [OK] ADR-077 — pack and check used; no `--trust-all-tools`.
+- [OK] ADR-081 — A8's red test was committed through Genesis's own script save (`PUT …/test-cases/TC-000007/script` → commit `e118fb1`), and the execution ran committed code.
+- [OK] ADR-082 — both executions on QA (`GAM Test`) as the app's test users.
+- [OK] ADR-086 — chat-agent probe PASS at `9980b0c` (activation, read-only projection, failing control, resume).
+- [N/A] ADR-002, 003, 004, 007, 008, 010, 011, 013, 017, 018, 020, 021, 022, 023, 025, 029, 030, 031, 033, 034, 035,
+  036, 037, 039, 041, 042, 044, 045, 046, 049, 050, 051, 053, 054, 056–060, 062, 063, 064, 066, 067, 069, 070, 072,
+  074–076, 078–080, 083, 085 — not changed in a way the rule governs (no ACP, MCP, chat, KB, migration, stage or
+  reports-origin change in this diff).
+
+### Lessons
+- [OK] L-005 — no new event kind. [OK] L-011/L-083 — `notification-cleared.json` and the re-recorded `schedule-pickable.json` are real shapes; `phase54-contract.test.ts` covers both routes.
+- [OK] L-014 — jest-axe on the bell, Agents and Schedules tests. [OK] L-069 — no `Button asChild`.
+- [OK] L-026 — B1's fix generalizes it; proven fail-first and live.
+- [OK] L-089 — each bundle commit matches a fresh build (`vite build --outDir /tmp/54-10-static-r2`, `diff -r` IDENTICAL). One slip of mine: I sent a script fix and its run in one message (`d50kbd.mjs`); its output names the fixed text, so the run used the fixed file.
+- [OK] L-090 — widths from real browsers on real data (story 74, the copy's schedules).
+- [OK] L-091 — `NotificationStore.remove` checks and deletes under `BEGIN IMMEDIATE`; `retry_when_busy` re-runs whole transactions only; `create_user` retries only its INSERT (`_insert_user`).
+- [OK] L-094 — callers: `program_node` is used by every workflow and `healing.py:110,151` (workflows pytest 463, core 124); `status_outcome` by `_fire` and `_last_run`; `READ_ONLY_HTML_HEADERS` by all five read-only routes.
+- [OK] L-096 — `clear-read` is registered before `/{notification_id:int}` (`test_schedules_api.py:759`).
+- [OK] L-107/L-108 — a busy close keeps its result; pause stores first, marks, then kills; a terminal `run.final` is reconciled with a tracked worker (tests in `test_busy_database.py`).
+- [OK] L-109 — one headers constant, one outcome rule, one search box, one table.
+- [OK] L-110 — fail-first re-run by me from `git archive 9980b0c` with the old file swapped in; every gate below ran at `9980b0c`.
+- [OK] L-111 — the not-run rows are listed below.
+- [OK, with known environment failures] L-112 — `python:3.13` run done (below).
+- [OK] L-113/L-117 — probe with a control that must fail: PASS.
+- [N/A] L-102/L-103 — no migration. Every other lesson in the check: area not touched in a way it governs.
+
+### Gates (run by me at `9980b0c`)
+- [OK] genesis `pytest -q -p no:warnings`: **2122 passed** in 689 s, **17:14:24–17:25:54 IST** (outside 00:00–02:00; nothing deselected). `~/.genesis` was watched once a second during the run and did not change (round 1's "observation" is not reproduced).
+- [OK] `ruff check` clean in genesis, genesis-core, kiro-agent-sdk (ruff 0.15.20).
+- [OK] genesis-core **124 passed**; kiro-agent-sdk **302 passed**; genesis-appian-parser all passed + 1 skipped (macOS).
+- [OK] web `npm run lint` 0 errors, 20 warnings, none in the 54-12 files (`eslint` on the changed files: clean); `npm run typecheck` clean; `npm test` **906 passed (81 files)**; out-of-tree build IDENTICAL to `web/static`.
+- [OK] genesis-workflows `validate_library` PASSED (19), `validate_skills` PASSED (5), pytest **463 passed**.
+- [OK with named environment failures] **`python:3.13` (colima, arm64; image created 2026-11-05, Python 3.13.18)**, clean `git archive 9980b0c`, `scripts/install-packages.sh --editable --dev`: genesis ruff clean, **2052 passed, 68 skipped, 2 failed**; genesis-core 124; kiro-agent-sdk 302; parser **1 failed**. The three failures are not from 54-12:
+  - `test_sail_cli.py::test_extract_sail_binary_for_host` and `::test_install_appian_dev_bundle_installs_both`: the image is aarch64 and the bundled SAIL binary is not (CI runs amd64).
+  - `genesis-appian-parser` `test_parse_returns_populated_result`: 179 bundles, expected 174, every run in the image. Cause: `package_reader.py:36,45,66` unzips and walks with `os.walk`, whose order depends on the filesystem. The parser is unchanged since v0.82.0, whose amd64 CI passed. **Deferred (D52):** `specs/backlog/phase-54-follow-ups.md` §2. Risk for 54-11: if the CI runner's filesystem order differs, the parser job can go red at the tag.
+  - colima stopped afterwards (`colima status`: not running); my container and image removed.
+  - Log: `evidence/54-10/round2/ci-image-python313.txt`.
+
+## Findings (round 2)
+
+### Blockers / Majors
+None.
+
+### Minors
+- m7 **A once paused during its in-flight run gets a false `missed` row on Resume** (`runtime/schedule_store.py`
+  `set_pause`, the 54-12 m1 branch). What: Resume of a past `once` records `missed` unless the schedule is already
+  `completed`. Problem: `close_fire` does not complete a once that is paused (`pause_reason` not NULL), so the case
+  "fires → paused by hand while its run is in flight → run ends `ok` → resumed" adds `missed` "the schedule was paused
+  at its time" for the slot that ran, and the list shows Missed as its last result (`/tmp/54-10-probe/once_resume2.py`:
+  history `ok` then `missed` for `2026-11-19T16:00`). Fix: record `missed` only when that slot has no fired row; still
+  complete. **Deferred by the user (D52):** backlog §1, shipped as a known issue named in 54-11's release notes.
+- The parser's filesystem-order bundle count (above): pre-existing, **deferred (D52)**, backlog §2.
+
+### Nits
+- n7 The application-sync detail shows "Last result OK" in its header (m4's fallback) while History says "No runs yet"
+  and "Runs so far 0". It is true (no history row exists), but the two cards read as a contradiction until the first
+  run after m0030. Optional: a line under History, "Last run before schedules were added: <time>".
+- n5 (deferred by 54-12) is still visible: an agent-prompt run's documents list its `.kiro/skills/**` files.
+- `scripts/probes/phase54-ux-pages.mjs` still waits for seed-only text ("Design stage") and its init script still
+  reads `localStorage` in sandboxed frames (the 54-12 probe guards this; this older probe does not). Probe-only.
+
+## §3 Live acceptance, round 2 (copy `/tmp/g5410`, server restarted 17:42 IST as pid 54322 on `9980b0c`, D46)
+
+Before the restart: the only non-terminal run was `r-12174a8034e6`, waiting at a gate (no worker), so no run was
+active. Collaboration off; only my own probe schedules and #26 were on during the rows, and I turned mine off
+afterwards. The fleet (:8760/:8761) and `~/.genesis` were never started or touched. Credits this round: **9.88
+metered** (A2r2 0.2629, A14 9.6166); the probes and the regression runs spend none. Evidence:
+`evidence/54-10/round2/` (secret scan: 130 files, 0 hits).
+
+**Every row, for 54-11's release notes (L-111):**
+
+| # | Result | Evidence |
+|---|---|---|
+| A1 | **PASS** — user verdict D52: matches the mockup, including the six D50 changes. Also checked by me: no line above the grid, lock tooltips on 5 system rows, Enter on a focused row and a click on a plain cell open it, the row menu does not, search on schedule and target name, the five filters, Agents search and its empty state | `round2/a1-d50-keyboard.txt`, `round2/pages/` |
+| A2 | **PASS** — once #29 fired at 17:37 while a 180 s blocking step was running; `r-27238652735c` `done` in 18 s, `ok`, 0.2629 metered; no "database is locked" in the log since the restart | `round2/b1-locksample.txt`, `round2/schedules-round2.txt` |
+| A3 | PASS (round 1) | — |
+| A4 | **PASS** — regression schedule #35 for AS GSS Full Application fired at 18:49 → `TE-000013` on QA (GAM Test), 2 of 2 passed, history `ok` | `round2/a4-a8-executions.txt` |
+| A5 | PASS (round 1) | — |
+| A6 | **PASS** — also behind a long-running (blocking) run: #30's 17:37 slot `skipped` "previous run still active"; the first run ended `ok` | `round2/schedules-round2.txt` |
+| A7 | **PASS** — #33: paused by hand 20 s into a running 150 s step (200, `awaiting_input:paused`), kept paused 6.5 min past its 5-min limit, not cancelled; resumed → `ok`, `idle_s 360`; plus the gate parts (round 1) | `round2/a7r2.txt` |
+| A8 | **PASS** — auto-pause, Resume and readiness skip (round 1); red regression (D52 3): `TC-000007`'s assertion broken and committed through Genesis (`e118fb1`), Run now → `TE-000014` failed (0 of 2), history `failed`, `counts_toward_pause` false, failure count still 0, notice "Scheduled run A4r2 GSS regression on QA failed" | `round2/a4-a8-executions.txt`, `round2/schedules-round2.txt` |
+| A9 | **PASS** — edit, Reset, Settings card, document sync (round 1); m4 fallback on every system row; Sync options card without Edit; **app-sync Run now on Dev → `ok` "1 apps: 1 ok, 0 skipped, 0 error (1 empty)"** (`r-b616fcaf8368`: `plan_sync → record_empty_sync`). **No changes on Dev; export path not exercised** (D52 4). Turned on for the Run now, off again right after | `round2/a9-m4-system-last-run.txt`, `round2/a9-locksample.txt` |
+| A10, A10b, A11 | PASS (round 1); chat-agent probe re-run at `9980b0c`: **PASS** | `round2/chat-agent-probe.json` |
+| A12 | **PASS** — Remove (×) only on read notices, by keyboard; focus returns to the panel heading; Clear read leaves only the unread one and then disables; DELETE unread 409, unknown 404; light and dark | `round2/a12/` |
+| A13 | PASS on the release candidate (round 1); the v0.82.0 half = 54-02's fail-first tests (D47) | — |
+| A14 | **PASS** — Objects changed (M2) fixed on story 74's real data; **design re-run** (D52 2): story 74 moved Code Review → Design Review on the copy's board, Re-run design from the Design tab, confirm "This replaces the current design document…", `design/start` 200, card to Design, `r-e4e6b4c16d6d` done in 5 min with no gate, document replaced (hash `403c1b2a…` → `3751387c…`, stage In review, card back in Design Review), 9.62 metered; dark mode readable; "Open in new tab" URL served with CSP + nosniff. **Not run:** a real paused or gated `story-verification`, and the implementation report frame on a fresh run (both need QA plus a fresh `story-implementation`, which D47 rules out); Activity with pulled CRs (none in the copy, collaboration off) | `round2/a14/`, `round2/story74/` |
+| A15 | **PASS** — Schedules list/detail/wizard, Agents, bell, portals (96 views), story 74 Objects changed (6), Runs (6): no sideways scroll, no header wrap, no spill; keyboard paths (round 1) | `round2/pages/`, `round2/story74/`, `round2/runs/` |
+| A16 | **PASS** — after the old server's stop and after every row: no `kiro-cli`, kas or MCP process from the copy (`ps -ww`; the remaining kas processes are the user's session and this reviewer's) | — |
+| A17 | **PASS** — `phase54-pages.mjs` re-run: all clean (round 1's m6 WARN gone); the rest as round 1 | `round2/pages/result.json` |
+
+**The three probes:** `phase54-pages.mjs` clean; `probe_chat_agent.py` PASS; `phase54-ux-pages.mjs` stops on its first
+page waiting for seed-only text (as in round 1; a probe limit, not a product bug). Its views are covered by
+`phase54-12-probe.mjs --only story74-objects|schedule|catalog` against the copy (clean, apart from bell WARNs that only
+say no read notice was left to show Remove on, after A12 cleared them).
+
+**Not run, for 54-11's release notes:**
+- `story-implementation` (D47 no).
+- A real paused or gated `story-verification`; the implementation report frame on a fresh run; a gate-waiting compose
+  discard (QA plus a fresh `story-implementation`).
+- A14 Activity with pulled CRs; M1's pulled-artifact frame on real data (no pulled artifact in the copy, collaboration
+  off; 54-12's throwaway-home probe covers it).
+- The app-sync export / `genesis-delta-*` package path (no changes on Dev, D52 4).
+- **Known issue shipped:** m7 (backlog §1).
+
+## Not checked (round 2)
+- A live CI pipeline at the tag (needs a push; 54-11's job). The parser job's filesystem-order risk is named above.
+- n3 live (no gated scheduled run was open during round 2; covered by the detail-page test).
+
+## Verdict: SHIP
+
+No blocker or major. Every round-1 finding is fixed with a regression test that fails on the old code (B1, m1, m3 and
+n1 re-proved by me). All gates are green at `9980b0c`, apart from three `python:3.13`/arm64 failures that are not from
+54-12 and are named above. Every A-row is PASS or named as not run. m7 and the parser's bundle order are deferred by the
+user (D52, backlog §1–§2), and m7 ships as a known issue.
+
+**Clean-up (after this verdict):** stop the copy's server (:8790, pid 54322); delete `/tmp/g5410`, `/tmp/g5410-lib`, and
+`/tmp/54-10-probe` (its `once_resume2.py` steps are written out in backlog §1).

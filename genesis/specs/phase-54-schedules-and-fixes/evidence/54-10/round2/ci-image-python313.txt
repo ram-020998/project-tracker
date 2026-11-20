@@ -1,0 +1,22 @@
+start 17:36:49
+python: Python 3.13.18
+== genesis
+All checks passed!
+=========================== short test summary info ============================
+FAILED tests/test_sail_cli.py::test_extract_sail_binary_for_host - assert (No...
+FAILED tests/test_sail_cli.py::test_install_appian_dev_bundle_installs_both
+2 failed, 2052 passed, 68 skipped in 416.73s (0:06:56)
+== genesis-core
+All checks passed!
+....................................................                     [100%]
+124 passed in 9.52s
+== kiro-agent-sdk
+All checks passed!
+..............                                                           [100%]
+302 passed in 5.60s
+== genesis-appian-parser
+All checks passed!
+=========================== short test summary info ============================
+FAILED tests/test_parse.py::test_parse_returns_populated_result - AssertionEr...
+rc=0
+end 17:59:41

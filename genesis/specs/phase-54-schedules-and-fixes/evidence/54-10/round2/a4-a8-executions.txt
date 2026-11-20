@@ -1,0 +1,6 @@
+TE-000013|regression|passed|GAM Test|{"passed": 2, "failed": 0, "flaky": 0, "blocked": 0, "skipped": 0, "not-run": 0, "scenarios": 2, "cases": 3}|{"source": "schedule", "schedule_id": 35, "slot": "2026-11-20T18:49"}|2026-11-20T13:19:37.034765+00:00|2026-11-20T13:20:23.300025+00:00
+TE-000014|regression|failed|GAM Test|{"passed": 0, "failed": 2, "flaky": 0, "blocked": 0, "skipped": 0, "not-run": 0, "scenarios": 2, "cases": 3}|{"source": "schedule", "schedule_id": 35, "slot": "manual:2026-11-20T13:48:41Z"}|2026-11-20T13:48:42.399412+00:00|2026-11-20T13:50:00.336706+00:00
+e118fb1 54-10 A8 (D52 3): break one assertion on purpose so the regression is red
+
+ cases/TC-000007.ts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)

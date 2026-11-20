@@ -1,0 +1,19 @@
+line above grid gone: true | lock tooltips: 5
+Enter on row -> /schedules/24
+click on Frequency cell -> /schedules/24
+row menu opens, stays on list: true /schedules
+search 'digest' rows: 3
+search workflow target 'Sync documents' rows: [ 'A3 sync documents hourly' ]
+search agent target 'KB explorer' rows: [
+  'A2 KB digest once',
+  'A2 KB digest once (2)',
+  'A2r2 agent prompt behind a long run'
+]
+filter System: 5
+filter Mine: 26
+filter Paused: 26
+filter Failing: 6
+filter All: 31
+agents search 'dev': [ 'Dev reader' ]
+agents search 'zzzz' empty state: 1
+page errors: []

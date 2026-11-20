@@ -1,0 +1,17 @@
+17:56:35 running r-81583989db7e
+17:56:55 pause -> 200 awaiting_input:paused
+17:56:55 run awaiting_input:paused | row fired None idle_s 0
+17:57:25 run awaiting_input:paused | row fired None idle_s 0
+17:57:55 run awaiting_input:paused | row fired None idle_s 0
+17:58:25 run awaiting_input:paused | row fired None idle_s 0
+17:58:55 run awaiting_input:paused | row fired None idle_s 0
+17:59:25 run awaiting_input:paused | row fired None idle_s 0
+17:59:55 run awaiting_input:paused | row fired None idle_s 0
+18:00:25 run awaiting_input:paused | row fired None idle_s 0
+18:00:55 run awaiting_input:paused | row fired None idle_s 0
+18:01:25 run awaiting_input:paused | row fired None idle_s 0
+18:01:55 run awaiting_input:paused | row fired None idle_s 0
+18:02:25 run awaiting_input:paused | row fired None idle_s 0
+18:02:55 run awaiting_input:paused | row fired None idle_s 0
+18:03:25 resume -> 200 None
+18:06:36 end: run done | row ok None idle_s 360 duration_ms 600567

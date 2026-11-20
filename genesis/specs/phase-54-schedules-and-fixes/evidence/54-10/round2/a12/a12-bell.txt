@@ -1,0 +1,10 @@
+54-10 round 2, A12 (D50 4) — /tmp/54-10-probe/bell2.mjs on the RC copy :8790 (genesis 9980b0c), 2026-11-20 ~17:41 IST
+before: items 16 unread 1
+unread item has Remove: 0 | has Mark read: 1
+after Remove: items 15 unread 1 | removed id gone: true | focus: H2 Notifications · 1 unread
+popover still open: 1
+Clear read enabled: true
+after Clear read: items 1 unread 1 | only unread left: true
+Clear read now disabled: true | bell label: Notifications, 1 unread
+DELETE unread -> 409 | DELETE unknown -> 404 | clear-read again -> {"removed":0,"unread":1}
+page errors: []

@@ -1,0 +1,306 @@
+[
+ {
+  "id": 1,
+  "name": "Application sync (all tracked apps)",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 0,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "manual:2026-11-20T13:16:07Z",
+   "outcome": "ok",
+   "reason": "1 apps: 1 ok, 0 skipped, 0 error (1 empty)",
+   "run_id": "r-b616fcaf8368",
+   "execution_key": null,
+   "at": "2026-11-20T13:16:17.198649+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "manual:2026-11-20T13:16:07Z",
+    "outcome": "ok",
+    "reason": "1 apps: 1 ok, 0 skipped, 0 error (1 empty)",
+    "run_id": "r-b616fcaf8368",
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 10189,
+    "run_status": "done"
+   }
+  ]
+ },
+ {
+  "id": 29,
+  "name": "A2r2 agent prompt behind a long run",
+  "enabled": true,
+  "state": "completed",
+  "failure_count": 0,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T17:37",
+   "outcome": "ok",
+   "reason": null,
+   "run_id": "r-27238652735c",
+   "execution_key": null,
+   "at": "2026-11-20T12:08:33.236808+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": 0.262878772172471,
+   "provenance": "metered"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T17:37",
+    "outcome": "ok",
+    "reason": null,
+    "run_id": "r-27238652735c",
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": 0.262878772172471,
+    "provenance": "metered",
+    "duration_ms": 60051,
+    "run_status": "done"
+   }
+  ]
+ },
+ {
+  "id": 30,
+  "name": "A6r2 skip behind a long run",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 0,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T17:37",
+   "outcome": "skipped",
+   "reason": "previous run still active",
+   "run_id": null,
+   "execution_key": null,
+   "at": "2026-11-20T12:07:33.184896+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T17:37",
+    "outcome": "skipped",
+    "reason": "previous run still active",
+    "run_id": null,
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": null,
+    "duration_ms": 0,
+    "run_status": null
+   },
+   {
+    "slot": "2026-11-20T17:36",
+    "outcome": "ok",
+    "reason": null,
+    "run_id": "r-e7b8efd21382",
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 240160,
+    "run_status": "done"
+   }
+  ]
+ },
+ {
+  "id": 31,
+  "name": "A7r2 pause while running (D31)",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 0,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T17:41",
+   "outcome": "ok",
+   "reason": null,
+   "run_id": "r-51d373bdbeb4",
+   "execution_key": null,
+   "at": "2026-11-20T12:14:33.516779+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T17:41",
+    "outcome": "ok",
+    "reason": null,
+    "run_id": "r-51d373bdbeb4",
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 180125,
+    "run_status": "done"
+   }
+  ]
+ },
+ {
+  "id": 32,
+  "name": "n1r2 gate notice in zone",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 0,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T17:55",
+   "outcome": "cancelled",
+   "reason": "run cancelled",
+   "run_id": "r-45e47b9bf693",
+   "execution_key": null,
+   "at": "2026-11-20T13:22:36.322903+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T17:55",
+    "outcome": "cancelled",
+    "reason": "run cancelled",
+    "run_id": "r-45e47b9bf693",
+    "idle_s": 3362,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 3422395,
+    "run_status": "cancelled"
+   }
+  ]
+ },
+ {
+  "id": 33,
+  "name": "A7r3 pause while running (D31)",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 0,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T17:56",
+   "outcome": "ok",
+   "reason": null,
+   "run_id": "r-81583989db7e",
+   "execution_key": null,
+   "at": "2026-11-20T12:36:34.518376+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T17:56",
+    "outcome": "ok",
+    "reason": null,
+    "run_id": "r-81583989db7e",
+    "idle_s": 360,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 600567,
+    "run_status": "done"
+   }
+  ]
+ },
+ {
+  "id": 34,
+  "name": "B1r2 fire during app sync",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 0,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T18:48",
+   "outcome": "ok",
+   "reason": null,
+   "run_id": "r-ecbf13399f70",
+   "execution_key": null,
+   "at": "2026-11-20T13:19:36.235922+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T18:48",
+    "outcome": "ok",
+    "reason": null,
+    "run_id": "r-ecbf13399f70",
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 60030,
+    "run_status": "done"
+   }
+  ]
+ },
+ {
+  "id": 35,
+  "name": "A4r2 GSS regression on QA",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 0,
+  "runs_count": 2,
+  "last_run": {
+   "slot": "manual:2026-11-20T13:48:41Z",
+   "outcome": "failed",
+   "reason": "TE-000014 failed",
+   "run_id": null,
+   "execution_key": "TE-000014",
+   "at": "2026-11-20T13:50:37.140874+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "manual:2026-11-20T13:48:41Z",
+    "outcome": "failed",
+    "reason": "TE-000014 failed",
+    "run_id": null,
+    "idle_s": 0,
+    "counts_toward_pause": false,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 115572,
+    "run_status": null
+   },
+   {
+    "slot": "2026-11-20T18:49",
+    "outcome": "ok",
+    "reason": "TE-000013 passed",
+    "run_id": null,
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 60028,
+    "run_status": null
+   }
+  ]
+ }
+]

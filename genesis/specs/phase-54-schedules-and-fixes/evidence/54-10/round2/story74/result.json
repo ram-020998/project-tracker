@@ -1,0 +1,482 @@
+{
+ "story74-objects-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 128,
+    "lines": 2
+   }
+  ],
+  "focused": null
+ },
+ "bell-1280-light": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    838,
+    56,
+    418,
+    292
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Mark read: Scheduled run n1r2 gate notice in zone needs you",
+    "Mark read: Scheduled run A17 gate wait (Run now) needs you"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-light"
+  }
+ },
+ "story74-objects-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 270,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 128,
+    "lines": 2
+   }
+  ],
+  "focused": null
+ },
+ "bell-1440-light": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    998,
+    56,
+    418,
+    292
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Mark read: Scheduled run n1r2 gate notice in zone needs you",
+    "Mark read: Scheduled run A17 gate wait (Run now) needs you"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-light"
+  }
+ },
+ "story74-objects-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 329,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 232,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 208,
+    "lines": 1
+   }
+  ],
+  "focused": null
+ },
+ "bell-1920-light": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    1478,
+    56,
+    418,
+    292
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Mark read: Scheduled run n1r2 gate notice in zone needs you",
+    "Mark read: Scheduled run A17 gate wait (Run now) needs you"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-light"
+  }
+ },
+ "story74-objects-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 128,
+    "lines": 2
+   }
+  ],
+  "focused": null
+ },
+ "bell-1280-dark": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    838,
+    56,
+    418,
+    292
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Mark read: Scheduled run n1r2 gate notice in zone needs you",
+    "Mark read: Scheduled run A17 gate wait (Run now) needs you"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-dark"
+  }
+ },
+ "story74-objects-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 270,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 128,
+    "lines": 2
+   }
+  ],
+  "focused": null
+ },
+ "bell-1440-dark": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    998,
+    56,
+    418,
+    292
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Mark read: Scheduled run n1r2 gate notice in zone needs you",
+    "Mark read: Scheduled run A17 gate wait (Run now) needs you"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-dark"
+  }
+ },
+ "story74-objects-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 329,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 232,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 208,
+    "lines": 1
+   }
+  ],
+  "focused": null
+ },
+ "bell-1920-dark": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    1478,
+    56,
+    418,
+    292
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Mark read: Scheduled run n1r2 gate notice in zone needs you",
+    "Mark read: Scheduled run A17 gate wait (Run now) needs you"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-dark"
+  }
+ }
+}
