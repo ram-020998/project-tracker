@@ -169,3 +169,6 @@ areas = ["browser-testing", "stories-workbench", "features-stages", "runs-worker
 
 ["Phase 53 — Kiro SDK v3: kiro-agent-sdk rebuilt for kiro-cli's v3 engine (genesis v0.82.0 · genesis-workflows v0.26.0 · playwright-appian v0.3.1; m0029)"]
 areas = ["sdk-acp", "chat", "core-engine", "config-secrets", "security", "api", "db", "workflows-library", "browser-testing"]
+
+["Phase 54 — Schedules, custom agents, fixes and UX revamps (genesis v0.83.0 · genesis-workflows v0.27.0; m0030)"]
+areas = ["runs-worker", "db", "api", "chat", "config-secrets", "core-engine", "web-shell", "web-runs", "features-stages", "stories-workbench", "browser-testing", "workflows-library"]

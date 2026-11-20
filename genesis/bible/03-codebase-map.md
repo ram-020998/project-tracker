@@ -1142,3 +1142,68 @@ genesis-workflows/skills/appian 1.0.0  the Appian skill in the library (with reg
 playwright-appian 0.3.1  SKILL.md description as a >- block; strict front-matter test (js-yaml); install --skills keeps
                       the source front matter (D-115).
 ```
+
+**Phase 54 — Schedules, custom agents, fixes and UX revamps (genesis v0.83.0 · genesis-workflows v0.27.0; m0030):**
+```
+genesis/genesis/
+  db/migrations/m0030_schedules.py  scheduled_jobs + kind/target_json/policy_json/failure_count/pause_reason/runs_count;
+                      schedule_runs (one row per slot; gate_opened_at, idle_since, idle_s, counts_toward_pause);
+                      notifications; custom_agents; runs.trigger_json; chat_sessions.agent_json. Data step: rows → system,
+                      each enabled regression-run entry → its own user row, then regression-run deleted (DB v30).
+  db/database.py      Database(busy_timeout_s=30); retry_when_busy (BUSY_RETRIES 3, 1 s doubling; re-runs one whole tx).
+  runtime/schedule_model.py  validate_schedule (days, monthly, once; refuses a no-day schedule) / validate_policy,
+                      POLICY_DEFAULTS, SYSTEM_POLICY, slots_between, next_runs, due (grace), describe, run_days, slot_key,
+                      slot_instant, parse_instant, machine_timezone (pure; re-exported by scheduler.py).
+  runtime/scheduler.py  Scheduler (register, register_target, tick under the run-owner lock, run_now, gate_cancel_at,
+                      _up_since), Fire, Started, status_outcome, MAX_MISSED_ROWS, MISSED_DOWN/MISSED_UP.
+  runtime/schedule_store.py  ScheduleStore (BEGIN IMMEDIATE + retry_when_busy on every write; update(options_check=,
+                      target_check=); _one_regression_per_app; _agent_exists; _insert_user; set_pause; history; last_runs;
+                      names), ScheduledJob, validate_target, RETIRED_JOB_KEYS, ScheduleError/Refused/NotFound/Forbidden/
+                      Conflict(existing).
+  runtime/schedule_targets.py  register_target_handlers (workflow, agent_prompt, regression), file_inputs, has_agent_node.
+  runtime/notifications.py  NotificationStore (add dedupes by ref+kind while unread, list, unread_count, mark_read,
+                      mark_all_read, remove, clear_read), NotificationUnread.
+  runtime/sync_jobs.py  handlers take a Fire; document-library-sync returns Started; app_sync_timeout_min;
+                      validate_sync_options (moved here); regression-run gone.   runtime/memory_jobs.py  returns Started.
+  agents/             store.py CustomAgentStore (CustomAgent, snapshot, used_by/used_by_map, CustomAgentError/Refused(field,
+                      refused)/NotFound/Conflict); prompt_inputs.py build_agent_prompt_inputs (schedule hook + Run route).
+  chat/custom_agent.py  agent_engine_id (genesis-chat-agent-<id>), agent_prompt, agent_servers (NO_ALLOWLIST),
+                      session_snapshot.   chat/mode_profile.py takes_custom_agent.   chat/manager.py _build_options
+                      projects the agent; create_session(agent=).   chat/store.py writes agent_json.
+  runs/manager.py     start(trigger=); _spawn_edit (state edits never write status); CANONICAL_KINDS (+ artifact.saved,
+                      tool_output.recorded); reconcile_status adopts a terminal run.final with a tracked worker; pause
+                      stores → marks → kills.   runs/store.py RunRecord.trigger, RunStopNotStored.   runs/steps.py
+                      event_node, _legacy_custom.   runs/worker.py _load_registries (curated + custom-only), _EMIT_LOCK.
+  dist/loader.py      schedulable_of, InstalledWorkflowInfo.schedulable.   lint/contract.py MIRRORED_BOOL_KEYS.
+  services/feature_activity.py  FeatureActivity.items/page/summary, with_run_status, STAGE_NAMES.
+  testexec/           regression_job.py DELETED; regression_service.regression_pointer; execution_service
+                      _schedule_trigger; recording._discard (failed + gated captures) + _cancel_bound_run.
+  kb/spec_clauses.py  overlay_labels(interactive=) + :target anchors (_ANCHOR).   kb/testdesign.py live_case_count.
+  api/                schedule_routes.py (/schedules*, sync-status), notifications.py, custom_agents.py (CRUD + run);
+                      schedules.py DELETED; _shared._record(trigger), kiro_models, READ_ONLY_HTML_HEADERS; config_routes
+                      POST /config/environments/dev + DELETE {label:path}; app.py every-method SPA catch-all (404/405 JSON);
+                      chat.py mode/agent_id; features.py activity {items,total} + summary + run_status; testing.py
+                      schedule pointer (PUT …/testing/schedule removed); workbench.py design artifact CSP + nosniff.
+genesis/packages/genesis-core/genesis_core/
+  nodes/agent.py      kiro_node(mcp=, skills=, model=) accept PerRun callables (_per_run).   nodes/program.py step via
+                      asyncio.to_thread.   mcp/registry.py tier, overrides_curated, from_layers(override=).
+  mcp/pickable.py     the read-only server rule (D3): PICKABLE_CURATED, NOT_PICKABLE_CURATED, classify, pickable_servers,
+                      check_picks, NotPickableError.
+genesis/web/src/
+  features/schedules/  SchedulesPage, ScheduleDetailPage, ScheduleWizardPage, hooks, logic, zones (ZONE_RENAMES), wizard-model,
+                      components, useScheduleActions, pickers, ScheduledBadge.
+  features/catalog/agents/  AgentsTab, hooks, notes (CHAT_TOOLS_NOTE).   features/catalog/LaunchFields.tsx.
+  features/notifications/  NotificationBell (in TopBar), hooks.   features/chat/agent.tsx  NewChatPicker, ChatAgentHeader.
+  features/testing/setup/SchedulePointer.tsx (replaces ScheduleSection).   settings ApplicationSyncSection DELETED.
+  features/workbench/  frame-theme.ts, story-view.ts (designRerunBlock, codeReviewState), StoryWorkspacePage tabs.
+  features/features/   overview.ts (needsAttention, prerequisiteText, waitsAtGate), ActivityFeed (Timeline, paged).
+  shared/ui/          SectionCard, DefinitionList, StatusHeader, Timeline, MultiSelect, RowMenu, TimeInput, StatGrid,
+                      DataTable, SearchInput.   shared/layout/nav.ts Schedules after Runs.   app/router.tsx schedules*,
+                      catalog/agents, /dev/phase-54.   types/{schedules,customAgents,notifications}.ts + lib/api clients.
+  test/fixtures/{schedules,agents,notifications,events}/ + phase54-contract.test.ts.
+genesis/scripts/probes/  phase54-mockups.mjs, phase54-seed.py, phase54-pages.mjs, phase54-ux-seed.py, phase54-ux-pages.mjs,
+                      phase54-12-probe.mjs.   scripts/spikes/54-08/  the zero-credit chat-agent probe.
+genesis-workflows/workflows/agent-prompt/  0.1.0: run_agent (per-run skills/servers/model, D3 re-check) → validate_output
+                      → 2 retries → escalate (approve/feedback → retry_agent, reject → give_up); schedulable.
+                      schedulable: true + 0.1.1 on sync-documents, generate-business-map, hello-appian.
+```

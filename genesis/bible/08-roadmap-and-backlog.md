@@ -41,6 +41,7 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
 - [Backlog — Phase 50 follow-ups (updater `scope` label, `genesis status` port, ruff pin in genesis-workflows, protect its refs + CI token, guards against batched steps and the CI-variables API)](../specs/backlog/phase-50-follow-ups.md)
 - [Backlog — Phase 51 follow-ups (shell-guard open paths, apwt `--json` gaps, the first v0.81.x patch items §23–§24, deferred scope §25, release leftovers and live acceptance §26)](../specs/backlog/phase-51-follow-ups.md)
 - [Backlog — Phase 53 follow-ups (non-SDK KiroCrew ideas, Phase 52 path-rule input, readiness and chat nits, the D27 clock test, release leftovers)](../specs/backlog/phase-53-follow-ups.md)
+- [Backlog — Phase 54 follow-ups (m7, the parser bundle order, the umbrella's deferred scope, build findings, the flaky reap test)](../specs/backlog/phase-54-follow-ups.md)
 - [Backlog — Skill → Workflow Migration Program (formerly Phase 8)](../specs/backlog/skill-migration-program.md)
 - [Backlog — The Object Wiki as agent grounding/memory](../specs/backlog/wiki-as-agent-memory.md)
 - [Backlog — Story → Object Wiki cross-link ("Objects changed" on the story Implementation tab; ⌘K over wiki objects)](../specs/backlog/wiki-story-cross-link.md)
@@ -69,7 +70,7 @@ Shipped-phase detail now lives in `archive/bible-08-shipped-phases.md` (Phase 47
   secrets); **rotate the shared `GITLAB_PUSH_TOKEN`** (done 2026-11-01, Phase 50 D20: revoked, the new token set only in genesis-workflows) + refresh the expired Artifactory npm token; the
   `lcp` MCP image placeholder (`<lcp-image>`) in `mcp-registry.json`.
 
-**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-11-15 Phases 1–51 and 53 are shipped; Phase 53 (kiro-agent-sdk on Kiro's v3 engine: playwright-appian v0.3.1 → genesis v0.82.0 → genesis-workflows v0.26.0, ADR-086) has live acceptance partly open (53-11 §5, D24, D26), and Phase 51's (51-12 steps 1–27 on QA, D38) now runs on v3 with playwright-appian 0.3.1 (D20); findings as v0.82.x patches; follow-ups in `specs/backlog/phase-53-follow-ups.md` and `phase-51-follow-ups.md`. Phase 52 (agent runtime isolation) is specced separately. The Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
+**Do not start backlog or a *new* phase unless explicitly asked.** **(As of 2026-11-20 Phases 1–51, 53 and 54 are shipped; Phase 54 (Schedules, custom agents, fixes and UX revamps: genesis v0.83.0 → genesis-workflows v0.27.0, ADR-087) was live-accepted before its release, with named not-run rows; Phase 53 (kiro-agent-sdk on Kiro's v3 engine, ADR-086) has live acceptance partly open (53-11 §5, D24, D26), and Phase 51's (51-12 steps 1–27 on QA, D38) runs on v3 with playwright-appian 0.3.1 (D20); findings as v0.83.x patches; follow-ups in `specs/backlog/phase-54-follow-ups.md`, `phase-53-follow-ups.md` and `phase-51-follow-ups.md`. Phase 52 (agent runtime isolation) is specced separately. The Phase-16 note that follows is historical.)** (Phase 16 is **actively being implemented** with the
 human's go-ahead — specs are pushed and 16-01/16-02 are shipped + CI-green; continue in the build order per §9's Phase-16
 block. This does not authorize starting any phase *beyond* 16 or any `specs/backlog/` work.)
 

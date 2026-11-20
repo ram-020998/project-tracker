@@ -596,10 +596,10 @@ status = "accepted"
 areas = ["kb-sync", "runs-worker", "api", "config-secrets"]
 paths = []
 amends = []
-amended_by = ["ADR-074", "ADR-081"]
+amended_by = ["ADR-074", "ADR-081", "ADR-087"]
 superseded_by = ""
-rule = "Scheduled maintenance syncs are fixed and backend-defined; the app sync is re-runnable as a full-package refresh."
-reviewed_fp = "36d765365525f1fe"
+rule = "Scheduled maintenance syncs are backend-defined system schedules, editable not deletable on the Schedules page (ADR-087); the app sync is re-runnable as a full-package refresh."
+reviewed_fp = "0fb104460250f437"
 b04 = "include"
 
 [ADR-048]
@@ -620,10 +620,10 @@ status = "accepted"
 areas = ["web-shell", "config-secrets", "features-stages"]
 paths = []
 amends = []
-amended_by = ["ADR-061"]
+amended_by = ["ADR-061", "ADR-087"]
 superseded_by = ""
-rule = "Applications-first IA: primary nav is Applications · Chat · Runs · Documents, Applications is the landing; Overview + Catalog live in Settings."
-reviewed_fp = "e1e276419efd1c1c"
+rule = "Applications-first IA; primary nav as built (ADR-087): Home (the applications landing) · Workbench · Chat · Runs · Schedules · Catalog · Documents · Memory, Settings pinned."
+reviewed_fp = "9d5a4e82de1586d3"
 b04 = "include"
 
 [ADR-050]
@@ -1059,3 +1059,14 @@ amended_by = []
 superseded_by = ""
 rule = "Start Kiro only as kiro-cli acp --agent-engine v3 under a Genesis-owned KIRO_HOME (nothing loaded from ~/.kiro; reads unscoped); trust: a projected agent, activation verified, fail closed; skills only from Genesis."
 reviewed_fp = "ea666e81cd67a0b1"
+
+[ADR-087]
+title = "Schedules: one user-managed schedule model for system jobs, workflows, agent prompts and regression suites (Phase 54)"
+status = "accepted"
+areas = ["runs-worker", "config-secrets", "web-shell", "workflows-library", "chat", "security"]
+paths = []
+amends = ["ADR-047", "ADR-049"]
+amended_by = []
+superseded_by = ""
+rule = "Every schedule lives in `scheduled_jobs` and is managed on the Schedules page: system jobs editable not deletable; user schedules run a `schedulable` workflow, an agent prompt or a regression suite."
+reviewed_fp = "dc450fe64c1495fd"

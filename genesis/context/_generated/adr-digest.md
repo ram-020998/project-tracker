@@ -49,9 +49,9 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-044 {amended} (amended by 056; superseded by 056) — A Feature is a workspace of artifact stages, each with its own status (no feature status derived from one artifact); the sequential unlock is superseded by ADR-056.
 - ADR-045 (amends 031; amended by 076,086) — The reused chat mirrors the Kiro CLI/ACP surface (model selection, slash commands, compaction, image prompts) while staying within ADR-031's read-only posture.
 - ADR-046 (amended by 080) — Genesis ships as a local, browser-based app: clone + venv + `scripts/install-packages.sh`, launched by `genesis up`, self-updated by git tag.
-- ADR-047 (amended by 074,081) — Scheduled maintenance syncs are fixed and backend-defined; the app sync is re-runnable as a full-package refresh.
+- ADR-047 (amended by 074,081,087) — Scheduled maintenance syncs are backend-defined system schedules, editable not deletable on the Schedules page (ADR-087); the app sync is re-runnable as a full-package refresh.
 - ADR-048 — Core Appian-MCP credentials are environment-scoped: stored per environment in the SecretProvider (never in `environments.json`) and resolved ONLY from the dev-tagged env.
-- ADR-049 (amended by 061) — Applications-first IA: primary nav is Applications · Chat · Runs · Documents, Applications is the landing; Overview + Catalog live in Settings.
+- ADR-049 (amended by 061,087) — Applications-first IA; primary nav as built (ADR-087): Home (the applications landing) · Workbench · Chat · Runs · Schedules · Catalog · Documents · Memory, Settings pinned.
 - ADR-050 (amended by 076) — Model SDLC lifecycle state as typed domain objects; EVERY status change goes through the single `LifecycleService.transition` authority.
 - ADR-051 — The workflow-agent turn path depends on the `AgentProvider` Protocol (`KiroAcpProvider` default), never binds nodes to the Kiro/ACP loader directly.
 - ADR-052 — Source documents only through the `DocumentProvider` Protocol (provider-neutral `DocRef`/`DocMeta`).
@@ -89,3 +89,4 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-084 (amends 061) — Deployment precedes Verification; dragging a story into Verification (after confirming QA has its changes) launches story-verification; pass → Done, product defect → Implementation, blocked → a gate.
 - ADR-085 (amends 028,026) — Serve Playwright reports only from a second loopback origin (app port + 100): static report files, no /api, GET/HEAD only, Host-checked, no traversal — never from the app's own origin.
 - ADR-086 (amends 029,031,032,034,045,069,083) — Start Kiro only as kiro-cli acp --agent-engine v3 under a Genesis-owned KIRO_HOME (nothing loaded from ~/.kiro; reads unscoped); trust: a projected agent, activation verified, fail closed; skills only from Genesis.
+- ADR-087 (amends 047,049) — Every schedule lives in `scheduled_jobs` and is managed on the Schedules page: system jobs editable not deletable; user schedules run a `schedulable` workflow, an agent prompt or a regression suite.

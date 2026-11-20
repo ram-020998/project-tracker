@@ -49,7 +49,7 @@ reviewed_fp = "9e68eea68783b6db"
 areas = ["runs-worker", "core-engine", "web-runs"]
 phase = ""
 rule = "Use only the canonical event kinds (run.started, node.completed, agent.*, validator.result, retry.scheduled, gate.*, run.final, error) — there is NO node.started/node.failed; running = run.cursor."
-reviewed_fp = "f45ac596836c68d4"
+reviewed_fp = "fa01a3df883ec5b6"
 
 [L-006]
 areas = ["web-runs", "workflows-library", "core-engine"]
@@ -85,7 +85,7 @@ reviewed_fp = "d0dcbced8ea8ff12"
 areas = ["web-runs", "web-shell"]
 phase = ""
 rule = "Mirror the event/gate/topology/steps contract shapes in `web/src/types` + the golden fixtures; a contract drift must fail a test (stubs must not hide the contract)."
-reviewed_fp = "17415363dadaa7ba"
+reviewed_fp = "0e6ccff853c059e0"
 
 [L-012]
 areas = ["config-secrets", "web-shell"]
@@ -103,7 +103,7 @@ reviewed_fp = "45ddc9e17932c726"
 areas = ["web-shell"]
 phase = ""
 rule = "jest-axe v9 ships no types: keep its ambient `declare module` + matcher augmentation in the existing pure-ambient `.d.ts` files; extend the matcher globally in `web/src/test-setup.ts`."
-reviewed_fp = "0ff067a80e251576"
+reviewed_fp = "745e1d2a463ca324"
 
 [L-015]
 areas = ["web-shell", "web-runs"]
@@ -175,7 +175,7 @@ reviewed_fp = "00dbcd9b71f833c6"
 areas = ["core-engine", "runs-worker", "db", "kb-sync", "workflows-library"]
 phase = "16"
 rule = ""
-reviewed_fp = "cffc29aa96a83bad"
+reviewed_fp = "f4e52b963f685947"
 
 [L-027]
 areas = ["release-ci"]
@@ -277,7 +277,7 @@ reviewed_fp = "e310dee5ea084c6d"
 areas = ["features-stages", "web-shell"]
 phase = "20"
 rule = ""
-reviewed_fp = "49df54bebb2057e9"
+reviewed_fp = "3a9fb78c2c74a1c2"
 
 [L-044]
 areas = ["chat", "sdk-acp", "security", "browser-testing"]
@@ -499,7 +499,7 @@ reviewed_fp = "321267bde438e7e9"
 areas = ["kb-sync", "collaboration-hub"]
 phase = "45"
 rule = ""
-reviewed_fp = "05a1b5d7db9fd156"
+reviewed_fp = "ce12490f2979a9c7"
 
 [L-081]
 areas = ["kb-sync", "config-secrets", "runs-worker", "api", "browser-testing"]
@@ -559,13 +559,13 @@ reviewed_fp = "6db85ea175ccf44e"
 areas = ["web-shell", "web-runs", "documents", "stories-workbench", "features-stages", "browser-testing"]
 phase = "48"
 rule = ""
-reviewed_fp = "6f00458ca1c0bdee"
+reviewed_fp = "386bf35a139b8125"
 
 [L-091]
 areas = ["db", "kb-sync", "stories-workbench", "browser-testing", "runs-worker"]
 phase = "49"
 rule = ""
-reviewed_fp = "6ee43161bdde2930"
+reviewed_fp = "42aec1300fa4a8e5"
 
 [L-092]
 areas = ["release-ci", "workflows-library", "db"]
@@ -583,7 +583,7 @@ reviewed_fp = "d717824b00e1f558"
 areas = ["features-stages", "collaboration-hub", "stories-workbench", "web-shell", "runs-worker", "browser-testing"]
 phase = "49"
 rule = ""
-reviewed_fp = "2b61054940142305"
+reviewed_fp = "dba3c8c7afff191f"
 
 [L-095]
 areas = ["stories-workbench", "kb-sync", "features-stages"]
@@ -595,7 +595,7 @@ reviewed_fp = "0d97f4e7359a51ed"
 areas = ["api", "features-stages", "browser-testing"]
 phase = "49"
 rule = ""
-reviewed_fp = "e2198362db0d4580"
+reviewed_fp = "5cbff401f2b7d363"
 
 [L-097]
 areas = ["runs-worker"]
@@ -655,31 +655,31 @@ reviewed_fp = "af3a7a99a75a90ea"
 areas = ["core-engine", "workflows-library", "runs-worker"]
 phase = "51"
 rule = ""
-reviewed_fp = "08e49b30c24df562"
+reviewed_fp = "34580c69491ba17d"
 
 [L-107]
 areas = ["runs-worker", "api", "browser-testing"]
 phase = "51"
 rule = ""
-reviewed_fp = "6896582725778806"
+reviewed_fp = "4d8038de71f6846e"
 
 [L-108]
 areas = ["runs-worker"]
 phase = "51"
 rule = ""
-reviewed_fp = "36a5a309c00d7a66"
+reviewed_fp = "916737fe297d48cd"
 
 [L-109]
 areas = ["browser-testing", "workflows-library", "api"]
 phase = "51"
 rule = ""
-reviewed_fp = "c416c15fe9fd0346"
+reviewed_fp = "d5b7638d77610919"
 
 [L-110]
 areas = ["browser-testing", "workflows-library"]
 phase = "51"
 rule = ""
-reviewed_fp = "b5995f2b14061c95"
+reviewed_fp = "6fd9d374d0694428"
 
 [L-111]
 areas = ["release-ci"]
@@ -691,7 +691,7 @@ reviewed_fp = "c0f141491aca7192"
 areas = ["release-ci"]
 phase = "51"
 rule = ""
-reviewed_fp = "82ef3fa4cacde24d"
+reviewed_fp = "293903c7d8ce5386"
 
 [L-113]
 areas = ["sdk-acp", "security", "chat", "core-engine"]
@@ -709,13 +709,13 @@ reviewed_fp = "01b969f22b751a9d"
 areas = ["workflows-library", "browser-testing", "chat", "core-engine"]
 phase = "53"
 rule = ""
-reviewed_fp = "160ff4b4fef3e95e"
+reviewed_fp = "33791388427f2a38"
 
 [L-116]
 areas = ["core-engine", "security", "config-secrets"]
 phase = "53"
 rule = ""
-reviewed_fp = "35db68a994b5f57c"
+reviewed_fp = "3c503552201966ef"
 
 [L-117]
 areas = ["sdk-acp", "security", "chat"]
@@ -734,3 +734,39 @@ areas = ["release-ci", "browser-testing", "distribution"]
 phase = "53"
 rule = ""
 reviewed_fp = "12f57b04bacedd53"
+
+[L-120]
+areas = ["runs-worker", "kb-sync", "memory", "documents"]
+phase = "54"
+rule = ""
+reviewed_fp = "6fe904dd3608e8ba"
+
+[L-121]
+areas = ["runs-worker"]
+phase = "54"
+rule = ""
+reviewed_fp = "8ca14aba28676615"
+
+[L-122]
+areas = ["runs-worker", "web-runs", "core-engine"]
+phase = "54"
+rule = ""
+reviewed_fp = "0497f89c5a1cce0a"
+
+[L-123]
+areas = ["web-shell", "web-runs", "stories-workbench", "features-stages"]
+phase = "54"
+rule = ""
+reviewed_fp = "5d74399b3472b013"
+
+[L-124]
+areas = ["runs-worker", "db"]
+phase = "54"
+rule = ""
+reviewed_fp = "b838850efef9385c"
+
+[L-125]
+areas = ["db", "release-ci", "distribution"]
+phase = "54"
+rule = ""
+reviewed_fp = "a04ab521cf4cf4e6"

@@ -122,3 +122,9 @@ Full text: `genesis-ctx lesson <ID>`. Areas: `genesis-ctx area <name>`.
 - L-117 — Probe the engine with the product's own shapes: the real projection, the real permission ladder, the production folder layout, one case per session, and a negative control that must fail (Phase 53).
 - L-118 — sse-starlette ends a stream by cancelling its anyio task group, which re-cancels every await in the generator's finally: shield must-finish cleanup and test with a cancelled task group, never aclose() (Phase 53).
 - L-119 — Fetch a tarball from the project 13864 npm registry with npm pack <name>@<v> --registry <project URL> (anonymous reads 404), match npm view dist.shasum, and test against the vendored-version constant (Phase 53).
+- L-120 — A handler that starts a run must record that run's final status, not "started ok": hand the run id to whatever follows the run to its end (Phase 54).
+- L-121 — A worker started for a side operation (a state edit, a read) must never write the run's status or replace its tracked worker: give the op its own event handler and fail the op, not the run (Phase 54).
+- L-122 — An event kind missing from the canonical list is stored as `custom` and shown nowhere: keep one backend list and test the web list and fixtures against it both ways (Phase 54).
+- L-123 — An opacity modifier on a var() token colour (bg-primary/10) generates no CSS here: use the *-subtle tokens, and probe the old page before moving such a class into a shared component (Phase 54).
+- L-124 — Everything a level-triggered loop decides from must live on the durable row, stamped by the loop's own clock, or a restart changes the decision (Phase 54).
+- L-125 — Copy a live WAL database with SQLite's online backup (.backup), never a plain file copy, and check that a server is up by its port or ps, not by a pid file (Phase 54).

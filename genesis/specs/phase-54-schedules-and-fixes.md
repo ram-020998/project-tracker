@@ -1,11 +1,14 @@
 # Phase 54 — Schedules, custom agents, fixes and UX revamps
 
-> **Status:** 📝 **SPEC-DRAFTED 2026-11-19** (genesis-spec). Q&A complete: decisions D1–D20, defaults F1–F12
+> **Status:** 🚢 **SHIPPED 2026-11-20** — genesis **v0.83.0** (`9617e06`) → genesis-workflows **v0.27.0** (`9066541`),
+> CI green; m0030 (DB v30); **ADR-087 Accepted** (amends ADR-047, ADR-049). Live-accepted before the release (54-10 SHIP,
+> round 2; the not-run rows are in the release notes, 54-11 As run). Known issue m7 (backlog §1). Progress:
+> `progress/phase-54-schedules-and-fixes.md`; follow-ups: `specs/backlog/phase-54-follow-ups.md`.
+> Spec-drafted 2026-11-19 (genesis-spec). Q&A complete: decisions D1–D20, defaults F1–F12; build rulings D21–D52
 > (`phase-54-schedules-and-fixes/54-01-findings.md` §8–§9).
-> Sub-specs: `phase-54-schedules-and-fixes/54-01..54-11`. ADR draft: `phase-54-schedules-and-fixes/adr-drafts.md`.
+> Sub-specs: `phase-54-schedules-and-fixes/54-01..54-12`. ADR draft (filed): `phase-54-schedules-and-fixes/adr-drafts.md`.
 > Repos: **genesis** (scheduler, store, migration m0030, APIs, web, chat, `packages/genesis-core` `kiro_node`),
 > **genesis-workflows** (the `agent-prompt` workflow, `schedulable` flags), **project-tracker** (ADR-087, areas).
-> Proposed ADR: **ADR-087** — one user-managed schedule model; amends ADR-047 and ADR-049.
 > Builds on genesis v0.82.0. Does not wait for the open Phase 51/53 live acceptance (D19); Phase 52 stays deferred.
 
 ## 1. Why this phase exists
@@ -121,7 +124,7 @@ testing-schedule endpoints stay until 54-07 moves the web off them.
 | 54-08 | genesis (`chat/`, `api/chat.py`, `web/src/features/chat/`) | Read-only chat session with a custom agent (D6) — **BUILT** (genesis `41971a0..8f8b1a1`, local; review SHIP; live no-prompt probe PASS) |
 | 54-09 | genesis (`web/src/features/workbench/`, `web/src/features/features/`, `api/features.py`, `shared/`) | Story Design + Implementation tabs; feature Overview + Activity (+ activity endpoint, D18); shared section card / definition list / timeline — **BUILT** (genesis `8f8b1a1..2ad1c50`, local; review SHIP; with D42) |
 | 54-10 | all | Review + gates + live acceptance (D20) — **SHIP** (round 2, genesis `9980b0c`; `reviews/54-10-review.md`; not-run rows listed there for 54-11) |
-| 54-11 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-087, lessons, areas, state, progress) |
+| 54-11 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-087, lessons, areas, state, progress) — **SHIPPED** (genesis v0.83.0 `9617e06`, genesis-workflows v0.27.0 `9066541`; fleet on v0.83.0 / DB v30; write-back 2026-11-20) |
 | 54-12 | genesis (genesis-core, runtime, api, web) | Fix pass: 54-10 round-1 findings (B1, M1, M2, m1–m6, nits; D48, D49) and the user's A1 changes (D50); built between 54-10's round 1 and its re-review (D51) — **BUILT** (genesis `2ad1c50..9980b0c`, local; review SHIP at round 2; no migration change) |
 
 API sub-spec: **54-06**.
@@ -182,7 +185,7 @@ F1–F12 in `54-01-findings.md` §9 (confirmed 2026-11-19).
 
 ## 12. ADR summaries
 
-- **ADR-087 (proposed) — Schedules.** Every schedule lives in `scheduled_jobs` and is managed on the Schedules page;
+- **ADR-087 (Accepted 2026-11-20; `genesis-ctx adr ADR-087`) — Schedules.** Every schedule lives in `scheduled_jobs` and is managed on the Schedules page;
   system schedules are editable, not deletable; user schedules run a `schedulable` workflow, an agent prompt (read-only
   servers, D9 built-ins) or a regression suite; custom agents are Genesis-owned profiles; missed, overlap, gate and
   failure rules as D8/D10/D12; runs record their trigger. Amends **ADR-047** (no longer fixed and backend-defined) and
