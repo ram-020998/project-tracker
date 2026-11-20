@@ -1,0 +1,61 @@
+#1 Application sync (all tracked apps) enabled=False state=active fails=0 runs=0 credits_total={'credits': None, 'provenance': 'unavailable'}
+#2 Document library sync enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    manual:2026-11-20T07:41:36Z skipped | gws connector not connected | None None idle 0 counts None cr None None
+    manual:2026-11-20T07:39:43Z ok | None | r-32cddf5de9ec done idle 0 counts None cr None unavailable
+#3 Memory consolidation (nightly) enabled=False state=active fails=0 runs=0 credits_total={'credits': None, 'provenance': 'unavailable'}
+#4 Memory maintenance (weekly) enabled=False state=active fails=0 runs=0 credits_total={'credits': None, 'provenance': 'unavailable'}
+#5 KB Hub pull (pull-first, all tracked apps) enabled=False state=active fails=0 runs=0 credits_total={'credits': None, 'provenance': 'unavailable'}
+#7 A2 KB digest once enabled=True state=completed fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:02 failed | interrupted before its result was recorded | None None idle 0 counts False cr None None
+#8 A6 overlap enabled=False state=active fails=0 runs=2 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:03 ok | None | r-d37494d6b9b8 done idle 0 counts None cr None unavailable
+    2026-11-20T12:02 ok | None | r-1f53de1cca34 done idle 0 counts None cr None unavailable
+#9 A7 gate cancelled at next slot enabled=False state=active fails=2 runs=2 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:05 failed | database is locked | r-f8eb96462ca1 failed idle 0 counts True cr None unavailable
+    2026-11-20T12:02 failed | database is locked | r-ec5c7f8aa8fe failed idle 0 counts True cr None unavailable
+#10 A8 fails enabled=False state=active fails=1 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:05 skipped | previous run still active | None None idle 0 counts None cr None None
+    2026-11-20T12:04 missed | Genesis was not running | None None idle 0 counts None cr None None
+    2026-11-20T12:03 missed | Genesis was not running | None None idle 0 counts None cr None None
+    2026-11-20T12:02 failed | run failed | r-ae7051ae33f1 failed idle 0 counts True cr None unavailable
+#11 A7 D31 gate answered late enabled=False state=active fails=1 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:02 failed | database is locked | r-f2208f909ec0 failed idle 0 counts True cr None unavailable
+#12 A7 D31 paused by hand enabled=False state=active fails=1 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:02 failed | timed out | r-6dda3c62aae1 cancelled idle 0 counts True cr None unavailable
+#13 A8 three failures enabled=False state=active fails=0 runs=3 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:15 failed | probe-54-10: failing on purpose (mode=fail) | r-b62197949d2b failed idle 0 counts True cr None unavailable
+    2026-11-20T12:14 failed | probe-54-10: failing on purpose (mode=fail) | r-994c95be0386 failed idle 0 counts True cr None unavailable
+    2026-11-20T12:13 failed | probe-54-10: failing on purpose (mode=fail) | r-e487f069213e failed idle 0 counts True cr None unavailable
+#14 A7 gate cancelled at next slot (2) enabled=False state=active fails=1 runs=2 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:15 cancelled | run cancelled | r-a6a76448c13d cancelled idle 0 counts None cr None unavailable
+    2026-11-20T12:13 failed | gate not answered | r-98b069be00a0 cancelled idle 0 counts True cr None unavailable
+#15 A6 overlap behind a paused run enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:15 skipped | previous run still active | None None idle 0 counts None cr None None
+    2026-11-20T12:13 cancelled | run cancelled | r-b4cb4b971194 cancelled idle 0 counts None cr None unavailable
+#16 A7 D31 gate answered late (2) enabled=True state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:13 ok | None | r-7448529855e0 done idle 0 counts None cr None unavailable
+#17 A5 one slot across a stop enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:21 ok | None | r-78c56605d055 done idle 0 counts None cr None unavailable
+#18 A5 two slots across a stop enabled=False state=active fails=0 runs=2 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:22 ok | None | r-890acb6f61ce done idle 0 counts None cr None unavailable
+    2026-11-20T12:21 ok | None | r-25af72def823 done idle 0 counts None cr None unavailable
+#19 A5 once beyond grace enabled=False state=completed fails=0 runs=0 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T09:00 missed | Genesis was not running | None None idle 0 counts None cr None None
+#20 A5b one slot across a stop enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:27 ok | None | r-53ce88ba098c done idle 0 counts None cr None unavailable
+#21 A5b two slots across a stop enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:28 ok | None | r-a7ea68ff1aee done idle 0 counts None cr None unavailable
+    2026-11-20T12:27 missed | Genesis was not running | None None idle 0 counts None cr None None
+#22 A8 readiness skip (uninstalled) enabled=False state=active fails=0 runs=0 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:35 skipped | probe-54-10 workflow not installed | None None idle 0 counts None cr None None
+#23 A2 KB digest once (2) enabled=True state=completed fails=0 runs=1 credits_total={'credits': 0.2607037072470979, 'provenance': 'metered'}
+    2026-11-20T12:38 ok | None | r-af3bbdbc3bc3 done idle 0 counts None cr 0.2607037072470979 metered
+#24 Weekly KB digest enabled=False state=active fails=0 runs=0 credits_total={'credits': None, 'provenance': 'unavailable'}
+#25 Regression-like failing (probe) enabled=True state=failing fails=3 runs=3 credits_total={'credits': None, 'provenance': 'unavailable'}
+    2026-11-20T12:50 failed | probe-54-10: failing on purpose (mode=fail) | r-e17fd369700f failed idle 0 counts True cr None unavailable
+    2026-11-20T12:49 failed | probe-54-10: failing on purpose (mode=fail) | r-e35889c28234 failed idle 0 counts True cr None unavailable
+    2026-11-20T12:48 failed | probe-54-10: failing on purpose (mode=fail) | r-fcae4a005ecd failed idle 0 counts True cr None unavailable
+#26 A17 gate wait (Run now) enabled=True state=active fails=0 runs=0 credits_total={'credits': None, 'provenance': 'unavailable'}
+    manual:2026-11-20T07:46:11Z fired | None | r-12174a8034e6 awaiting_input:gate idle 0 counts None cr None unavailable
+#28 A3 sync documents hourly enabled=False state=active fails=0 runs=1 credits_total={'credits': None, 'provenance': 'unavailable'}
+    manual:2026-11-20T07:51:47Z ok | None | r-6842ebf0aaea done idle 0 counts None cr None unavailable

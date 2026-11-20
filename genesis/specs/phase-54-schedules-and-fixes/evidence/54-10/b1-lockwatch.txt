@@ -1,0 +1,27 @@
+54-10 B1 — one run's blocking program node holds genesis.db's write lock (RC 2ad1c50 on the copy, :8790)
+
+Probe: /tmp/54-10-probe/lockwatch.py 20 — starts ONE probe-54-10 run (program node: time.sleep(20), no agent, no MCP)
+with nothing else running, and tries BEGIN IMMEDIATE (timeout 0.2 s) on genesis.db every 2 s.
+
+run r-11faf90760ba
+  0.0s lock=free run=running
+  2.3s lock=LOCKED (database is locked) run=running
+  4.5s .. 20.2s lock=LOCKED (database is locked) run=running   (every sample)
+ 22.3s lock=free run=done
+ 24.3s .. 38.4s lock=free run=done
+
+Same mechanism in a real workflow: genesis-workflows sync-application export_package is a sync program node that polls
+the export with time.sleep(3) for up to 240 s (graph.py:360-377), so every application sync holds the lock for its
+export. The fleet's own log (~/.genesis/run/genesis.log, read only) has 25 "database is locked" lines on v0.82.0 and
+before, e.g. 2026-11-18 12:01 and 2026-11-09 12:01 (just after the 12:00 sync slot).
+
+Effects seen live on the RC while a 150 s sleep run held the lock (12:02-12:05 IST, schedules #7-#12):
+- #7 (A2 agent-prompt "once"): the run never started (RunManager.start INSERT: database is locked); the close also
+  failed; the next tick closed the row "interrupted before its result was recorded"; the once is completed - the
+  user's scheduled prompt is lost.
+- #9, #11: gated probe runs failed "database is locked" (LangGraph checkpointer put), counted as failures.
+- #12: Pause by hand answered 200 but "could not store status 'awaiting_input:paused'"; the run stayed "running",
+  and the scheduler later cancelled it as "timed out" (D31 broken).
+- #10: run r-ae7051ae33f1 has run.final{failed} in run_events but runs.status stays "running" (status write lost);
+  ticks were late, so slots 12:03/12:04 were recorded "missed - Genesis was not running" while Genesis ran.
+Serve-log excerpt: b1-db-locked-serve-log-excerpt.txt.

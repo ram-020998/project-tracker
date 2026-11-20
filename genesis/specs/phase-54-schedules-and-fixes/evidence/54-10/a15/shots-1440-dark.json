@@ -1,0 +1,136 @@
+[
+ {
+  "name": "schedules",
+  "url": "/schedules",
+  "file": "/tmp/54-10-probe/a15/schedules-1440-dark.png",
+  "hscroll": false,
+  "cls": "theme-dark",
+  "h1": [
+   "Schedules"
+  ],
+  "overflowing_cells": [],
+  "errors": []
+ },
+ {
+  "name": "sched-detail-failing",
+  "url": "/schedules/25",
+  "file": "/tmp/54-10-probe/a15/sched-detail-failing-1440-dark.png",
+  "hscroll": false,
+  "cls": "theme-dark",
+  "h1": [
+   "Regression-like failing (probe)",
+   "History",
+   "Target",
+   "Frequency",
+   "Run policy"
+  ],
+  "overflowing_cells": [],
+  "errors": []
+ },
+ {
+  "name": "sched-detail-ok",
+  "url": "/schedules/16",
+  "file": "/tmp/54-10-probe/a15/sched-detail-ok-1440-dark.png",
+  "hscroll": false,
+  "cls": "theme-dark",
+  "h1": [
+   "A7 D31 gate answered late (2)",
+   "History",
+   "Target",
+   "Frequency",
+   "Run policy"
+  ],
+  "overflowing_cells": [],
+  "errors": []
+ },
+ {
+  "name": "sched-app-sync",
+  "url": "/schedules/1",
+  "file": "/tmp/54-10-probe/a15/sched-app-sync-1440-dark.png",
+  "hscroll": false,
+  "cls": "theme-dark",
+  "h1": [
+   "Application sync (all tracked apps)",
+   "History",
+   "Last sync per application",
+   "Target",
+   "Frequency",
+   "Sync options"
+  ],
+  "overflowing_cells": [],
+  "errors": []
+ },
+ {
+  "name": "agents",
+  "url": "/catalog/agents",
+  "file": "/tmp/54-10-probe/a15/agents-1440-dark.png",
+  "hscroll": false,
+  "cls": "theme-dark",
+  "h1": [
+   "Catalog"
+  ],
+  "overflowing_cells": [],
+  "errors": []
+ },
+ {
+  "name": "story74-impl",
+  "url": "/applications/_a-0000e5bc-4a9a-8000-9bbc-011c48011c48_930416/stories/74",
+  "file": "/tmp/54-10-probe/a15/story74-impl-1440-dark.png",
+  "hscroll": false,
+  "cls": "theme-dark",
+  "h1": [
+   "Create Template / Section / Question tables and synced Record Types (AS_GSS_DocumentBuilder* graph)",
+   "Objects",
+   "Results",
+   "Objects changed",
+   "Documents",
+   "Details"
+  ],
+  "overflowing_cells": [
+   "Record Type Relationships"
+  ],
+  "errors": []
+ },
+ {
+  "name": "story74-design",
+  "url": "/applications/_a-0000e5bc-4a9a-8000-9bbc-011c48011c48_930416/stories/74",
+  "file": "/tmp/54-10-probe/a15/story74-design-1440-dark.png",
+  "hscroll": false,
+  "cls": "theme-dark",
+  "h1": [
+   "Create Template / Section / Question tables and synced Record Types (AS_GSS_DocumentBuilder* graph)",
+   "Design document",
+   "Details",
+   "Design chat"
+  ],
+  "overflowing_cells": [],
+  "errors": []
+ },
+ {
+  "name": "feature4-activity",
+  "url": "/applications/_a-0000e5bc-4a9a-8000-9bbc-011c48011c48_930416/features/4",
+  "file": "/tmp/54-10-probe/a15/feature4-activity-1440-dark.png",
+  "hscroll": false,
+  "cls": "theme-dark",
+  "h1": [
+   "Document Builder",
+   "Activity"
+  ],
+  "overflowing_cells": [],
+  "errors": []
+ },
+ {
+  "name": "feature4-overview",
+  "url": "/applications/_a-0000e5bc-4a9a-8000-9bbc-011c48011c48_930416/features/4",
+  "file": "/tmp/54-10-probe/a15/feature4-overview-1440-dark.png",
+  "hscroll": false,
+  "cls": "theme-dark",
+  "h1": [
+   "Document Builder",
+   "Needs attention",
+   "Stages"
+  ],
+  "overflowing_cells": [],
+  "errors": []
+ }
+]

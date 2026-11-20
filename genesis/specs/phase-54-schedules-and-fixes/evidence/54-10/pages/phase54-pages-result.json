@@ -1,0 +1,1604 @@
+{
+ "schedules-list-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 982,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 277,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 346,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 145,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 106,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 60,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "zone_cells": [
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ]
+ },
+ "schedule-detail-agent-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-app-sync-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Last sync per application",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 176,
+      "wrapped": true
+     },
+     {
+      "text": "Last sync",
+      "w": 367,
+      "wrapped": true
+     },
+     {
+      "text": "Last full sync",
+      "w": 105,
+      "wrapped": true
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-detail-failing-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 146,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 221,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 76,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 84,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1-target-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2b-agent-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-frequency-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-system-edit-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "catalog-agents-1280-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-row-menu-1280-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1071,
+   688,
+   176,
+   170
+  ]
+ },
+ "portal-last-result-tooltip-1280-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   946,
+   556,
+   270,
+   48
+  ]
+ },
+ "portal-server-multiselect-1280-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   521,
+   181,
+   406,
+   414
+  ]
+ },
+ "portal-bell-popover-1280-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   870,
+   56,
+   386,
+   475
+  ]
+ },
+ "portal-agent-editor-1280-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   304,
+   94,
+   672,
+   813
+  ]
+ },
+ "schedules-list-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 366,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 383,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 161,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 117,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 66,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "zone_cells": [
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ]
+ },
+ "schedule-detail-agent-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-app-sync-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Last sync per application",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 193,
+      "wrapped": true
+     },
+     {
+      "text": "Last sync",
+      "w": 447,
+      "wrapped": true
+     },
+     {
+      "text": "Last full sync",
+      "w": 114,
+      "wrapped": true
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-detail-failing-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 153,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 303,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 131,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 80,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 87,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1-target-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2b-agent-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-frequency-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-system-edit-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "catalog-agents-1440-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-row-menu-1440-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1231,
+   688,
+   176,
+   170
+  ]
+ },
+ "portal-last-result-tooltip-1440-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1088,
+   540,
+   270,
+   48
+  ]
+ },
+ "portal-server-multiselect-1440-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   521,
+   181,
+   566,
+   414
+  ]
+ },
+ "portal-bell-popover-1440-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1030,
+   56,
+   386,
+   475
+  ]
+ },
+ "portal-agent-editor-1440-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   384,
+   94,
+   672,
+   813
+  ]
+ },
+ "schedules-list-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 436,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 456,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 191,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 139,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 79,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "zone_cells": [
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ]
+ },
+ "schedule-detail-agent-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-app-sync-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Last sync per application",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 225,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 535,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 133,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-detail-failing-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 181,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 359,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 155,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 94,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 103,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1-target-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2b-agent-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-frequency-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-system-edit-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "catalog-agents-1920-light": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-light",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-row-menu-1920-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1575,
+   688,
+   176,
+   170
+  ]
+ },
+ "portal-last-result-tooltip-1920-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1398,
+   540,
+   270,
+   48
+  ]
+ },
+ "portal-server-multiselect-1920-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   657,
+   165,
+   774,
+   414
+  ]
+ },
+ "portal-bell-popover-1920-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1510,
+   56,
+   386,
+   475
+  ]
+ },
+ "portal-agent-editor-1920-light": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   624,
+   94,
+   672,
+   813
+  ]
+ },
+ "schedules-list-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 982,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 277,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 346,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 145,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 106,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 60,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "zone_cells": [
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ]
+ },
+ "schedule-detail-agent-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-app-sync-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Last sync per application",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 176,
+      "wrapped": true
+     },
+     {
+      "text": "Last sync",
+      "w": 367,
+      "wrapped": true
+     },
+     {
+      "text": "Last full sync",
+      "w": 105,
+      "wrapped": true
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-detail-failing-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 146,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 221,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 76,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 84,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1-target-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2b-agent-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-frequency-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-system-edit-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "catalog-agents-1280-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-row-menu-1280-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1071,
+   688,
+   176,
+   170
+  ]
+ },
+ "portal-last-result-tooltip-1280-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   946,
+   556,
+   270,
+   48
+  ]
+ },
+ "portal-server-multiselect-1280-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   521,
+   181,
+   406,
+   414
+  ]
+ },
+ "portal-bell-popover-1280-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   870,
+   56,
+   386,
+   475
+  ]
+ },
+ "portal-agent-editor-1280-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   304,
+   94,
+   672,
+   813
+  ]
+ },
+ "schedules-list-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 366,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 383,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 161,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 117,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 66,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "zone_cells": [
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ]
+ },
+ "schedule-detail-agent-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-app-sync-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Last sync per application",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 193,
+      "wrapped": true
+     },
+     {
+      "text": "Last sync",
+      "w": 447,
+      "wrapped": true
+     },
+     {
+      "text": "Last full sync",
+      "w": 114,
+      "wrapped": true
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-detail-failing-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 153,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 303,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 131,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 80,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 87,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1-target-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2b-agent-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-frequency-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-system-edit-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "catalog-agents-1440-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-row-menu-1440-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1231,
+   688,
+   176,
+   170
+  ]
+ },
+ "portal-last-result-tooltip-1440-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1088,
+   540,
+   270,
+   48
+  ]
+ },
+ "portal-server-multiselect-1440-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   521,
+   181,
+   566,
+   414
+  ]
+ },
+ "portal-bell-popover-1440-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1030,
+   56,
+   386,
+   475
+  ]
+ },
+ "portal-agent-editor-1440-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   384,
+   94,
+   672,
+   813
+  ]
+ },
+ "schedules-list-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "Name",
+      "w": 436,
+      "wrapped": false
+     },
+     {
+      "text": "Frequency",
+      "w": 456,
+      "wrapped": false
+     },
+     {
+      "text": "Next run",
+      "w": 191,
+      "wrapped": false
+     },
+     {
+      "text": "Last result",
+      "w": 139,
+      "wrapped": false
+     },
+     {
+      "text": "On",
+      "w": 79,
+      "wrapped": false
+     },
+     {
+      "text": "Actions",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "zone_cells": [
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ]
+ },
+ "schedule-detail-agent-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-detail-app-sync-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Last sync per application",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 225,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 535,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 133,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-detail-failing-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 181,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 359,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 155,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 94,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 103,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ]
+ },
+ "schedule-wizard-1-target-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2a-workflow-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2b-agent-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-2c-regression-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-3-frequency-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "schedule-wizard-system-edit-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "catalog-agents-1920-dark": {
+  "page_hscroll": false,
+  "tailwind_ok": true,
+  "theme_class": "theme-dark",
+  "overflow": [],
+  "tables": []
+ },
+ "portal-row-menu-1920-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1575,
+   688,
+   176,
+   170
+  ]
+ },
+ "portal-last-result-tooltip-1920-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1398,
+   540,
+   270,
+   48
+  ]
+ },
+ "portal-server-multiselect-1920-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   657,
+   165,
+   774,
+   414
+  ]
+ },
+ "portal-bell-popover-1920-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   1510,
+   56,
+   386,
+   475
+  ]
+ },
+ "portal-agent-editor-1920-dark": {
+  "page_hscroll": false,
+  "overflow": [],
+  "tables": [],
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "portal_in_viewport": true,
+  "portal_box": [
+   624,
+   94,
+   672,
+   813
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "B1_gated": {
+  "patch_http": 200,
+  "status_after": "awaiting_input:gate",
+  "new_run_final_rows": [],
+  "notes": [
+   "{\"data\": {\"type\": \"state.edited\", \"keys\": [\"decisions\"]}}"
+  ],
+  "after_approve": "done",
+  "edit_kept_in_state": true
+ },
+ "B1_paused": {
+  "patch_http": 200,
+  "status_after": "awaiting_input:paused",
+  "new_run_final_rows": [],
+  "notes": [
+   "{\"data\": {\"type\": \"state.edited\", \"keys\": [\"decisions\"]}}"
+  ],
+  "bad_patch": [
+   400,
+   "{'detail': \"key 'no_such_key_54_10' is not editable (allowed: ['artifacts', 'decisions', 'inputs']); declare it in META.editable to permit edits\"}",
+   "awaiting_input:paused"
+  ],
+  "after_resume": "awaiting_input:gate",
+  "after_approve": "done",
+  "edit_kept_in_state": true
+ },
+ "O4": {
+  "add": 422,
+  "make_dev": 400,
+  "is_dev_after": null,
+  "restore_dev": 200,
+  "delete": 200,
+  "gone": true,
+  "dev_is_mergeassist": true
+ },
+ "404_GET": [
+  404,
+  {
+   "detail": "Not Found"
+  }
+ ],
+ "404_DELETE": [
+  404,
+  {
+   "detail": "Not Found"
+  }
+ ],
+ "405_wrong_method": [
+  405,
+  {
+   "detail": "Method Not Allowed"
+  }
+ ]
+}

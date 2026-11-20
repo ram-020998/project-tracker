@@ -1,0 +1,237 @@
+[
+ {
+  "id": 8,
+  "name": "A6 overlap",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 0,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T12:03",
+   "outcome": "fired",
+   "reason": null,
+   "run_id": "r-d37494d6b9b8",
+   "execution_key": null,
+   "at": "2026-11-20T06:35:11.692199+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T12:03",
+    "outcome": "fired",
+    "reason": null,
+    "run_id": "r-d37494d6b9b8",
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": null,
+    "run_status": "done"
+   },
+   {
+    "slot": "2026-11-20T12:02",
+    "outcome": "ok",
+    "reason": null,
+    "run_id": "r-1f53de1cca34",
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 182358,
+    "run_status": "done"
+   }
+  ]
+ },
+ {
+  "id": 9,
+  "name": "A7 gate cancelled at next slot",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 1,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T12:05",
+   "outcome": "fired",
+   "reason": null,
+   "run_id": "r-f8eb96462ca1",
+   "execution_key": null,
+   "at": "2026-11-20T06:35:11.692199+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T12:05",
+    "outcome": "fired",
+    "reason": null,
+    "run_id": "r-f8eb96462ca1",
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": null,
+    "run_status": "failed"
+   },
+   {
+    "slot": "2026-11-20T12:02",
+    "outcome": "failed",
+    "reason": "database is locked",
+    "run_id": "r-ec5c7f8aa8fe",
+    "idle_s": 0,
+    "counts_toward_pause": true,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 182358,
+    "run_status": "failed"
+   }
+  ]
+ },
+ {
+  "id": 10,
+  "name": "A8 fails",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 0,
+  "runs_count": 0,
+  "last_run": {
+   "slot": "2026-11-20T12:05",
+   "outcome": "skipped",
+   "reason": "previous run still active",
+   "run_id": null,
+   "execution_key": null,
+   "at": "2026-11-20T06:35:11.692199+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T12:05",
+    "outcome": "skipped",
+    "reason": "previous run still active",
+    "run_id": null,
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": null,
+    "duration_ms": 0,
+    "run_status": null
+   },
+   {
+    "slot": "2026-11-20T12:04",
+    "outcome": "missed",
+    "reason": "Genesis was not running",
+    "run_id": null,
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": null,
+    "duration_ms": 0,
+    "run_status": null
+   },
+   {
+    "slot": "2026-11-20T12:03",
+    "outcome": "missed",
+    "reason": "Genesis was not running",
+    "run_id": null,
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": null,
+    "duration_ms": 0,
+    "run_status": null
+   },
+   {
+    "slot": "2026-11-20T12:02",
+    "outcome": "fired",
+    "reason": null,
+    "run_id": "r-ae7051ae33f1",
+    "idle_s": 0,
+    "counts_toward_pause": null,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": null,
+    "run_status": "running"
+   }
+  ]
+ },
+ {
+  "id": 11,
+  "name": "A7 D31 gate answered late",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 1,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T12:02",
+   "outcome": "failed",
+   "reason": "database is locked",
+   "run_id": "r-f2208f909ec0",
+   "execution_key": null,
+   "at": "2026-11-20T06:35:11.692199+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T12:02",
+    "outcome": "failed",
+    "reason": "database is locked",
+    "run_id": "r-f2208f909ec0",
+    "idle_s": 0,
+    "counts_toward_pause": true,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 182358,
+    "run_status": "failed"
+   }
+  ]
+ },
+ {
+  "id": 12,
+  "name": "A7 D31 paused by hand",
+  "enabled": false,
+  "state": "active",
+  "failure_count": 1,
+  "runs_count": 1,
+  "last_run": {
+   "slot": "2026-11-20T12:02",
+   "outcome": "failed",
+   "reason": "timed out",
+   "run_id": "r-6dda3c62aae1",
+   "execution_key": null,
+   "at": "2026-11-20T06:35:11.692199+00:00",
+   "gate_cancel_at": null
+  },
+  "credits_total": {
+   "credits": null,
+   "provenance": "unavailable"
+  },
+  "history": [
+   {
+    "slot": "2026-11-20T12:02",
+    "outcome": "failed",
+    "reason": "timed out",
+    "run_id": "r-6dda3c62aae1",
+    "idle_s": 0,
+    "counts_toward_pause": true,
+    "credits": null,
+    "provenance": "unavailable",
+    "duration_ms": 182358,
+    "run_status": "cancelled"
+   }
+  ]
+ }
+]

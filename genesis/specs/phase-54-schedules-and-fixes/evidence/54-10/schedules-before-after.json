@@ -1,0 +1,227 @@
+{
+ "v29_rows": [
+  {
+   "job_key": "application-sync",
+   "enabled": 1,
+   "schedule": {
+    "kind": "interval_window",
+    "weekdays_only": true,
+    "timezone": "Asia/Kolkata",
+    "every_hours": 4,
+    "start": "08:00",
+    "end": "20:00"
+   },
+   "has_options": true,
+   "user_modified": 1
+  },
+  {
+   "job_key": "document-library-sync",
+   "enabled": 1,
+   "schedule": {
+    "kind": "daily_times",
+    "times": [
+     "08:00",
+     "12:00",
+     "16:00",
+     "20:00"
+    ],
+    "weekdays_only": true,
+    "timezone": "Asia/Kolkata"
+   },
+   "has_options": false,
+   "user_modified": 0
+  },
+  {
+   "job_key": "kb-hub-pull",
+   "enabled": 0,
+   "schedule": {
+    "kind": "daily_times",
+    "times": [
+     "06:30"
+    ],
+    "weekdays_only": true,
+    "timezone": "Asia/Kolkata"
+   },
+   "has_options": false,
+   "user_modified": 0
+  },
+  {
+   "job_key": "memory-consolidation",
+   "enabled": 1,
+   "schedule": {
+    "kind": "daily_times",
+    "times": [
+     "02:00"
+    ],
+    "weekdays_only": false,
+    "timezone": "Asia/Kolkata"
+   },
+   "has_options": false,
+   "user_modified": 0
+  },
+  {
+   "job_key": "memory-maintenance",
+   "enabled": 1,
+   "schedule": {
+    "kind": "daily_times",
+    "times": [
+     "03:00"
+    ],
+    "days": [
+     6
+    ],
+    "timezone": "Asia/Kolkata"
+   },
+   "has_options": false,
+   "user_modified": 0
+  },
+  {
+   "job_key": "regression-run",
+   "enabled": 1,
+   "schedule": {
+    "kind": "interval_window",
+    "every_hours": 1,
+    "start": "00:00",
+    "end": "23:00",
+    "weekdays_only": false,
+    "timezone": "Asia/Kolkata"
+   },
+   "has_options": true,
+   "user_modified": 1
+  }
+ ],
+ "v30_rows": [
+  {
+   "id": 1,
+   "job_key": "application-sync",
+   "kind": "system",
+   "name": "Application sync (all tracked apps)",
+   "enabled": 1,
+   "user_modified": 1,
+   "schedule_json": {
+    "kind": "interval_window",
+    "weekdays_only": true,
+    "timezone": "Asia/Kolkata",
+    "every_hours": 4,
+    "start": "08:00",
+    "end": "20:00"
+   },
+   "target_json": null,
+   "last_fired_slot": "2026-11-19T20:00"
+  },
+  {
+   "id": 2,
+   "job_key": "document-library-sync",
+   "kind": "system",
+   "name": "Document library sync",
+   "enabled": 1,
+   "user_modified": 0,
+   "schedule_json": {
+    "kind": "daily_times",
+    "times": [
+     "08:00",
+     "12:00",
+     "16:00",
+     "20:00"
+    ],
+    "weekdays_only": true,
+    "timezone": "Asia/Kolkata"
+   },
+   "target_json": null,
+   "last_fired_slot": "2026-11-19T20:00"
+  },
+  {
+   "id": 5,
+   "job_key": "kb-hub-pull",
+   "kind": "system",
+   "name": "KB Hub pull (pull-first, all tracked apps)",
+   "enabled": 0,
+   "user_modified": 0,
+   "schedule_json": {
+    "kind": "daily_times",
+    "times": [
+     "06:30"
+    ],
+    "weekdays_only": true,
+    "timezone": "Asia/Kolkata"
+   },
+   "target_json": null,
+   "last_fired_slot": null
+  },
+  {
+   "id": 3,
+   "job_key": "memory-consolidation",
+   "kind": "system",
+   "name": "Memory consolidation (nightly)",
+   "enabled": 1,
+   "user_modified": 0,
+   "schedule_json": {
+    "kind": "daily_times",
+    "times": [
+     "02:00"
+    ],
+    "weekdays_only": false,
+    "timezone": "Asia/Kolkata"
+   },
+   "target_json": null,
+   "last_fired_slot": "2026-11-19T02:00"
+  },
+  {
+   "id": 4,
+   "job_key": "memory-maintenance",
+   "kind": "system",
+   "name": "Memory maintenance (weekly)",
+   "enabled": 1,
+   "user_modified": 0,
+   "schedule_json": {
+    "kind": "daily_times",
+    "times": [
+     "03:00"
+    ],
+    "days": [
+     6
+    ],
+    "timezone": "Asia/Kolkata"
+   },
+   "target_json": null,
+   "last_fired_slot": "2026-11-15T03:00"
+  }
+ ],
+ "after_off": [
+  {
+   "id": 1,
+   "job_key": "application-sync",
+   "kind": "system",
+   "enabled": 0,
+   "user_modified": 1
+  },
+  {
+   "id": 2,
+   "job_key": "document-library-sync",
+   "kind": "system",
+   "enabled": 0,
+   "user_modified": 1
+  },
+  {
+   "id": 3,
+   "job_key": "memory-consolidation",
+   "kind": "system",
+   "enabled": 0,
+   "user_modified": 1
+  },
+  {
+   "id": 4,
+   "job_key": "memory-maintenance",
+   "kind": "system",
+   "enabled": 0,
+   "user_modified": 1
+  },
+  {
+   "id": 5,
+   "job_key": "kb-hub-pull",
+   "kind": "system",
+   "enabled": 0,
+   "user_modified": 1
+  }
+ ]
+}

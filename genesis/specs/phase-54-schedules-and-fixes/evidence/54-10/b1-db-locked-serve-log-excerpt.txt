@@ -1,0 +1,12 @@
+39:2026-11-20 12:02:44,349 ERROR   genesis.scheduler: scheduled job user-eda6b48182e3 failed
+74:sqlite3.OperationalError: database is locked
+75:2026-11-20 12:02:56,500 ERROR   genesis.runs.manager: RunManager: could not store status 'awaiting_input:paused' for run r-6dda3c62aae1 before run.final
+83:sqlite3.OperationalError: database is locked  [request_id=9ed255287796]
+85:2026-11-20 12:03:15,453 ERROR   genesis.scheduler: scheduler: could not record the result of user-eda6b48182e3
+102:sqlite3.OperationalError: database is locked
+117:sqlite3.OperationalError: database is locked
+129:sqlite3.OperationalError: database is locked
+130:2026-11-20 12:04:15,284 ERROR   genesis.runs.manager: RunManager: could not store status 'failed' for run r-ae7051ae33f1 before run.final
+138:sqlite3.OperationalError: database is locked
+252:sqlite3.OperationalError: database is locked
+342:sqlite3.OperationalError: database is locked
