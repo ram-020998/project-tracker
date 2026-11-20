@@ -70,6 +70,7 @@ actions (environment delete, failed Compose proposals) and three code defects (�
 | D49 | B1 is in this release: program steps run off the worker's event loop (genesis-core `program_node`, API unchanged) and the scheduler survives "database is locked" without losing slots or recording false outcomes; A2, A7, A9 re-run live after the fix. |
 | D50 | A1 verdict: everything matches the mockup except six changes (Runs-page filters, search and grid on Schedules; no line above the grid; whole row clickable; Remove / Clear read for read notices; one Edit on app sync; search on Catalog → Agents). |
 | D51 | The 54-10 round-1 fixes and the D50 changes are one new sub-spec, 54-12, built before 54-10's re-review. |
+| D52 | 54-10 round 2: A1 matches; A14 and A8 finished on the copy; A9 passes without an export; m7 and the parser's order-dependent bundle count go to the backlog (`specs/backlog/phase-54-follow-ups.md`), m7 named in the release notes; then the release. |
 
 ## 4. Current state (code-grounded — full detail in `54-01-findings.md` §2–§4)
 
@@ -140,7 +141,9 @@ Workspace; previous-run context (D13); per-schedule credit caps; schedule-level 
 Hub-shared schedules (F11); custom agents in Copilot or spec-style chat modes (D6); write-capable MCP servers in
 agent-prompt schedules (D3); URL changes (D16); multi-user anything (ADR-026). **Deferred to the backlog**
 (`specs/backlog/phase-54-follow-ups.md`, created at write-back): previous-run context (D13), cron, output destinations,
-credit caps, schedule templates, custom agents in more chat modes; from 54-02's review: the 405 answer has no `Allow`
+credit caps, schedule templates, custom agents in more chat modes; m7 (a paused-then-resumed `once` gets a false "missed" row) and
+the parser's bundle count depends on filesystem order (54-10 round 2), both already filed in
+`specs/backlog/phase-54-follow-ups.md` (D52); from 54-02's review: the 405 answer has no `Allow`
 header (n1), and Discard on a failed capture whose run is still live cancels it without a confirm (n2, rare); from
 54-03: opacity modifiers on token colours (`bg-primary/10` …) generate no CSS because `tailwind.config.ts` maps colours
 to bare `var()`; 8 existing source files use them (e.g. `VerificationSection.tsx`, `TopBar.tsx`); from 54-04: in the

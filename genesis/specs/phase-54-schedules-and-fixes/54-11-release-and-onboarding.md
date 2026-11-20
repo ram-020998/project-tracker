@@ -39,6 +39,10 @@ in the release notes:
 - A run whose state was edited before v0.83.0 may still show **Running** with nothing happening (54-02 fixed the cause,
   not old runs, D21): cancel it from Run Detail. A stuck `sync-application` run blocks that app's scheduled sync until
   you do.
+- **Known issue (D52, m7):** pausing a one-time schedule while its run is still going and resuming it afterwards adds a
+  false "Missed" row, and the list shows Missed as its last result; the run itself is unaffected
+  (`specs/backlog/phase-54-follow-ups.md` §1).
+- Name every 54-10 row recorded "not run" or "export path not exercised" (A9) in the release notes (L-111).
 - API changes for anyone scripting: new `/schedules*`, `/custom-agents*`, `/notifications*`; removed
   `/system/sync-settings*`, `/system/schedules`, `PUT /applications/{uuid}/testing/schedule`; `runs` items gained
   `trigger`; catalog items gained `schedulable`; `POST /chat/sessions` accepts `agent_id`; make-Dev moved from
@@ -67,7 +71,8 @@ in the release notes:
 - `context/state/current.md` (versions, DB v30, test counts, what works: Schedules, custom agents, bell; known open
   items unchanged from Phase 51/53 plus any skipped 54-10 rows), code map, `progress/phase-54-schedules-and-fixes.md`,
   `changelog.md`, README row 54 → SHIPPED, tracker §6, `specs/backlog/phase-54-follow-ups.md` (umbrella §9 Deferred +
-  build findings). `genesis-ctx index && lint` green.
+  build findings). `genesis-ctx index && lint` green. The backlog file already exists (created 2026-11-20 with m7 and
+  the parser bundle-order bug, D52): append to it, do not replace it.
 
 ## As built
 
