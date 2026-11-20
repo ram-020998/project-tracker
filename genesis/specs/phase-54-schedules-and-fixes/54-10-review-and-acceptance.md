@@ -29,7 +29,9 @@
 9b. **Agent-written HTML never runs on the app's origin** (54-09 review M1): every route that serves an agent-authored
    document (design artifact, verification report, implementation report, run docs) either renders it in a sandboxed
    frame or serves it with `Content-Security-Policy: script-src 'none'` and `X-Content-Type-Options: nosniff`; list
-   each route with file:line and its protection.
+   each route with file:line and its protection. **This covers the three pre-Phase-54 paths too (D48):** a pulled
+   stage artifact's annotation frame (`sandbox="allow-scripts"` without `allow-same-origin`, annotation still working
+   live), the change-request document and the spec-clause link (CSP + `nosniff`).
 10. **ADR draft** matches what was built (`adr-drafts.md`), including ADR-049's navigation list.
 
 ## 2. Gates
