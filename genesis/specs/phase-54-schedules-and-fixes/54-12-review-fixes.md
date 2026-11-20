@@ -77,7 +77,11 @@ after the build has settled (L-089). Do not restart the fleet (D36).
 
 Re-review this diff; re-run on the copy: A2, A7 (pause of a running run, D31), A9, A12 (bell Remove / Clear read),
 A14 (Objects table), A15, A17, and A1 for the six D50 changes; then the rows still waiting on the user's go-ahead
-(D47). 54-10's verdict then decides 54-11.
+(D47). 54-10's verdict then decides 54-11. **The copy's server must be restarted first** (`/tmp/g5410/serve.sh`, with
+no run active): the one on :8790 has run since before 54-12 and holds the old code in memory. 54-12 changed no
+migration (m4 is a read fallback), so the copy's v30 database stays valid. **The copy's server must be restarted first** (`/tmp/g5410/serve.sh`, with
+no run active): the one on :8790 has run since before 54-12 and holds the old code in memory. 54-12 changed no
+migration (m4 is a read fallback), so the copy's v30 database stays valid.
 
 ## As built
 

@@ -47,7 +47,8 @@ in the release notes:
 
 ## 3. Docs write-back (genesis-docs)
 
-- **ADR-087** from `adr-drafts.md` via `genesis-ctx add adr --id ADR-087 --title … --areas runs-worker,config-secrets,web-shell,workflows-library,chat,security --rule … --amends ADR-047 ADR-049 --status accepted --phase 54 --body-file …` (one `--amends` flag, ids space-separated).
+- **ADR-087** from `adr-drafts.md`; first bring the draft up to date with what was built (54-10 review n6: D22's
+  amended list line (D50), D30, D31, D36–D43, D48, D49) via `genesis-ctx add adr --id ADR-087 --title … --areas runs-worker,config-secrets,web-shell,workflows-library,chat,security --rule … --amends ADR-047 ADR-049 --status accepted --phase 54 --body-file …` (one `--amends` flag, ids space-separated).
 - **Lessons** from the As built sections (candidates expected: a fire-and-forget handler reports success for a run that
   later fails; an op-specific worker must not write run status; an event type missing from the canonical list is
   stored but invisible).
