@@ -120,6 +120,6 @@ Probes:
 
 ## 7. Release leftovers for the user (54-11 As run)
 
-- Delete the CI branch `ci/phase-54-pre-release` on origin (a push; GitLab UI or the user's go-ahead).
+- The CI branch `ci/phase-54-pre-release` was deleted from origin by the user (2026-11-20).
 - Delete `/tmp/genesis-release-54-11/` (it holds the user's databases in `backup/`; keep it until v0.83.0 is trusted),
   `/tmp/colima/gr-54-11` and `/tmp/genesis-release-54-11/img1` (copies of public repo trees).

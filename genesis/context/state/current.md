@@ -67,7 +67,7 @@ One shared version, one install script (ADR-080). kiro-cli: minimum and only ver
 - **Known issue m7:** a one-time schedule paused during its run and resumed afterwards gets a false "Missed" row
   (`specs/backlog/phase-54-follow-ups.md` §1).
 - **For the user:** delete the release backup `/tmp/genesis-release-54-11/` (it holds your databases) once happy with
-  v0.83.0, and the scratch `/tmp/colima/gr-54-11`; delete the CI branch `ci/phase-54-pre-release` on origin.
+  v0.83.0, and the scratch `/tmp/colima/gr-54-11`.
 - kiro-cli 3.x unverified (`specs/backlog/kiro-cli-3x-reverify.md`); agent isolation is Phase 52 (ADR-083 a–c).
 - Unconfirmed from Phase 50 (user): `details.kb_format_version` = 1 on each instance; old library checkouts to `_archived/`.
 - Backlog: `specs/backlog/phase-54-follow-ups.md`, `phase-53-follow-ups.md`, `phase-51-follow-ups.md`, `phase-50-follow-ups.md`.
