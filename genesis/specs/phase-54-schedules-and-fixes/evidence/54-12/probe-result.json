@@ -1,0 +1,2530 @@
+{
+ "schedules-list-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 982,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 259,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 354,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 150,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 102,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 68,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-search-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 982,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 219,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 333,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 136,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 148,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 98,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-row-focus-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 982,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 259,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 354,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 150,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 102,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 68,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Weekly KB digest"
+ },
+ "schedule-app-sync-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 168,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 243,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 54,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 87,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 95,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 305,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 139,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 204,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-search-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "runs-list-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 982,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 235,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 100,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 119,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 118,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 91,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 178,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "runs-row-focus-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 982,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 235,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 100,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 119,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 118,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 91,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 178,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Approval needed\tstory-verificationv0.1.0\t"
+ },
+ "story74-objects-1280-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Process Model",
+    "one_line": 121,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Interface",
+    "one_line": 83,
+    "box": 128,
+    "lines": 1
+   }
+  ],
+  "focused": null
+ },
+ "bell-1280-light": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    838,
+    56,
+    418,
+    475
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Remove: Scheduled run Hello every 2 hours failed",
+    "Remove: Schedule Business map refresh missed 3 runs",
+    "Mark read: Schedule Hello weekdays missed 2 runs",
+    "Mark read: Scheduled run Weekly KB digest failed",
+    "Mark read: Scheduled run Weekly KB digest failed"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-light"
+  }
+ },
+ "schedules-list-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 360,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 385,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 74,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-search-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 257,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 389,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 159,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 173,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 115,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-row-focus-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 360,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 385,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 74,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Weekly KB digest"
+ },
+ "schedule-app-sync-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 196,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 283,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 63,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 101,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 111,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 355,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 162,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 237,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-search-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "runs-list-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 173,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 292,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 122,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 166,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 93,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 184,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "runs-row-focus-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 173,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 292,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 122,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 166,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 93,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 184,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Approval needed\tstory-verificationv0.1.0\t"
+ },
+ "story74-objects-1440-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 270,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Process Model",
+    "one_line": 121,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Interface",
+    "one_line": 83,
+    "box": 128,
+    "lines": 1
+   }
+  ],
+  "focused": null
+ },
+ "bell-1440-light": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    998,
+    56,
+    418,
+    475
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Remove: Scheduled run Hello every 2 hours failed",
+    "Remove: Schedule Business map refresh missed 3 runs",
+    "Mark read: Schedule Hello weekdays missed 2 runs",
+    "Mark read: Scheduled run Weekly KB digest failed",
+    "Mark read: Scheduled run Weekly KB digest failed"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-light"
+  }
+ },
+ "schedules-list-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 428,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 459,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 195,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 132,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 88,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-search-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 306,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 464,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 190,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 206,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 137,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-row-focus-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 428,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 459,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 195,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 132,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 88,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Weekly KB digest"
+ },
+ "schedule-app-sync-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 232,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 335,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 74,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 132,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 420,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 281,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-search-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "runs-list-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 205,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 345,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 131,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 145,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 196,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 217,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "runs-row-focus-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 205,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 345,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 131,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 145,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 196,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 217,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Approval needed\tstory-verificationv0.1.0\t"
+ },
+ "story74-objects-1920-light": {
+  "page_hscroll": false,
+  "theme_class": "theme-light",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 329,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 232,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Process Model",
+    "one_line": 121,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Interface",
+    "one_line": 83,
+    "box": 208,
+    "lines": 1
+   }
+  ],
+  "focused": null
+ },
+ "bell-1920-light": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    1478,
+    56,
+    418,
+    475
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Remove: Scheduled run Hello every 2 hours failed",
+    "Remove: Schedule Business map refresh missed 3 runs",
+    "Mark read: Schedule Hello weekdays missed 2 runs",
+    "Mark read: Scheduled run Weekly KB digest failed",
+    "Mark read: Scheduled run Weekly KB digest failed"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-light"
+  }
+ },
+ "schedules-list-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 982,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 259,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 354,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 150,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 102,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 68,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-search-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 982,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 219,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 333,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 136,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 148,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 98,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-row-focus-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 982,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 259,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 354,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 150,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 102,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 68,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Weekly KB digest"
+ },
+ "schedule-app-sync-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 168,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 243,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 54,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 87,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 95,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 305,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 139,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 204,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-search-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "runs-list-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 982,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 235,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 100,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 119,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 118,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 91,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 178,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "runs-row-focus-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 982,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 142,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 235,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 100,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 119,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 118,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 91,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 178,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Approval needed\tstory-verificationv0.1.0\t"
+ },
+ "story74-objects-1280-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 647,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Process Model",
+    "one_line": 121,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Interface",
+    "one_line": 83,
+    "box": 128,
+    "lines": 1
+   }
+  ],
+  "focused": null
+ },
+ "bell-1280-dark": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    838,
+    56,
+    418,
+    475
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Remove: Scheduled run Hello every 2 hours failed",
+    "Remove: Schedule Business map refresh missed 3 runs",
+    "Mark read: Schedule Hello weekdays missed 2 runs",
+    "Mark read: Scheduled run Weekly KB digest failed",
+    "Mark read: Scheduled run Weekly KB digest failed"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-dark"
+  }
+ },
+ "schedules-list-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 360,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 385,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 74,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-search-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 257,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 389,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 159,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 173,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 115,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-row-focus-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 360,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 385,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 163,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 74,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Weekly KB digest"
+ },
+ "schedule-app-sync-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 196,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 283,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 63,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 101,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 111,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 355,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 162,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 237,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-search-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "runs-list-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 173,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 292,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 122,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 166,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 93,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 184,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "runs-row-focus-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 1142,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 173,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 292,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 122,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 166,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 93,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 184,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Approval needed\tstory-verificationv0.1.0\t"
+ },
+ "story74-objects-1440-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 754,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 270,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 152,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 128,
+    "lines": 2
+   },
+   {
+    "type": "Process Model",
+    "one_line": 121,
+    "box": 128,
+    "lines": 1
+   },
+   {
+    "type": "Interface",
+    "one_line": 83,
+    "box": 128,
+    "lines": 1
+   }
+  ],
+  "focused": null
+ },
+ "bell-1440-dark": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    998,
+    56,
+    418,
+    475
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Remove: Scheduled run Hello every 2 hours failed",
+    "Remove: Schedule Business map refresh missed 3 runs",
+    "Mark read: Schedule Hello weekdays missed 2 runs",
+    "Mark read: Scheduled run Weekly KB digest failed",
+    "Mark read: Scheduled run Weekly KB digest failed"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-dark"
+  }
+ },
+ "schedules-list-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 428,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 459,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 195,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 132,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 88,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-search-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 306,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 464,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 190,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 206,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 137,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "schedules-row-focus-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedules",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "NAME",
+      "w": 428,
+      "wrapped": false
+     },
+     {
+      "text": "FREQUENCY",
+      "w": 459,
+      "wrapped": false
+     },
+     {
+      "text": "NEXT RUN",
+      "w": 195,
+      "wrapped": false
+     },
+     {
+      "text": "LAST RESULT",
+      "w": 132,
+      "wrapped": false
+     },
+     {
+      "text": "ON",
+      "w": 88,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 48,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Weekly KB digest"
+ },
+ "schedule-app-sync-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Schedule history",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Slot",
+      "w": 232,
+      "wrapped": false
+     },
+     {
+      "text": "Outcome",
+      "w": 335,
+      "wrapped": false
+     },
+     {
+      "text": "Run",
+      "w": 74,
+      "wrapped": false
+     },
+     {
+      "text": "Duration",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "Credits",
+      "w": 132,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   },
+   {
+    "label": "Last sync per application",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Application",
+      "w": 420,
+      "wrapped": false
+     },
+     {
+      "text": "Last sync",
+      "w": 192,
+      "wrapped": false
+     },
+     {
+      "text": "Last full sync",
+      "w": 281,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "catalog-agents-search-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [],
+  "spills": [],
+  "focused": null
+ },
+ "runs-list-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 205,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 345,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 131,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 145,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 196,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 217,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": null
+ },
+ "runs-row-focus-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Runs",
+    "width": 1350,
+    "heads": [
+     {
+      "text": "STATUS",
+      "w": 205,
+      "wrapped": false
+     },
+     {
+      "text": "WORKFLOW",
+      "w": 345,
+      "wrapped": false
+     },
+     {
+      "text": "RUN",
+      "w": 131,
+      "wrapped": false
+     },
+     {
+      "text": "CURRENT NODE",
+      "w": 145,
+      "wrapped": false
+     },
+     {
+      "text": "STARTED",
+      "w": 196,
+      "wrapped": false
+     },
+     {
+      "text": "DURATION",
+      "w": 111,
+      "wrapped": false
+     },
+     {
+      "text": "ACTIONS",
+      "w": 217,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "focused": "Approval needed\tstory-verificationv0.1.0\t"
+ },
+ "story74-objects-1920-dark": {
+  "page_hscroll": false,
+  "theme_class": "theme-dark",
+  "tailwind_ok": true,
+  "tables": [
+   {
+    "label": "Objects changed",
+    "width": 893,
+    "heads": [
+     {
+      "text": "Object",
+      "w": 329,
+      "wrapped": false
+     },
+     {
+      "text": "Type",
+      "w": 232,
+      "wrapped": false
+     },
+     {
+      "text": "Action",
+      "w": 120,
+      "wrapped": false
+     },
+     {
+      "text": "New version",
+      "w": 108,
+      "wrapped": false
+     },
+     {
+      "text": "Status",
+      "w": 104,
+      "wrapped": false
+     }
+    ],
+    "scrolls": false
+   }
+  ],
+  "spills": [],
+  "type_cells": [
+   {
+    "type": "Database Table",
+    "one_line": 132,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Record Type",
+    "one_line": 107,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Record Type Relationships",
+    "one_line": 204,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Process Model",
+    "one_line": 121,
+    "box": 208,
+    "lines": 1
+   },
+   {
+    "type": "Interface",
+    "one_line": 83,
+    "box": 208,
+    "lines": 1
+   }
+  ],
+  "focused": null
+ },
+ "bell-1920-dark": {
+  "portal": {
+   "in_viewport": true,
+   "box": [
+    1478,
+    56,
+    418,
+    475
+   ],
+   "buttons": [
+    "Mark all read",
+    "Clear read",
+    "Remove: Scheduled run Hello every 2 hours failed",
+    "Remove: Schedule Business map refresh missed 3 runs",
+    "Mark read: Schedule Hello weekdays missed 2 runs",
+    "Mark read: Scheduled run Weekly KB digest failed",
+    "Mark read: Scheduled run Weekly KB digest failed"
+   ],
+   "heading_wraps": false,
+   "theme_class": "theme-dark"
+  }
+ },
+ "m1-pulled-frame": {
+  "sandbox": "allow-scripts",
+  "origin": "null",
+  "sdk_script": true,
+  "custom_elements": [],
+  "storage": "SecurityError: Failed to read the 'localStorage' property from 'Window': The doc",
+  "can_read_parent": false,
+  "messages_from_frame": [
+   {
+    "type": "lavish:layoutDiagnostics",
+    "origin": "null"
+   },
+   {
+    "type": "lavish:reviewState",
+    "origin": "null"
+   }
+  ]
+ },
+ "m1-clause-link": {
+  "cid": "c-770d7c1e",
+  "csp": "script-src 'none'; object-src 'none'",
+  "nosniff": "nosniff",
+  "target": "a.gn-anchor#c-770d7c1e",
+  "scrollY": 574,
+  "outline": "solid 2px",
+  "in_view": true,
+  "scripts": 0,
+  "console_csp": []
+ },
+ "bell-remove-clear": {
+  "removedTitle": "Scheduled run Hello every 2 hours failed",
+  "afterRemove": {
+   "focus": "h2",
+   "focus_text": "Notifications · 3 unread"
+  },
+  "afterClear": {
+   "items": 3,
+   "clear_disabled": true,
+   "focus": "h2"
+  },
+  "server_items": 3,
+  "unread": 3,
+  "any_read_left": false
+ }
+}
