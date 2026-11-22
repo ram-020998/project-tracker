@@ -41,7 +41,7 @@
 - **Status.** PROPOSED — Phase 55. Amends **ADR-011** (an agent node's escalation goes to the standard gate),
   **ADR-031** (a new run-scoped chat mode) and **ADR-033** (new human-confirmed run actions).
 - **Areas.** core-engine, runs-worker, chat, workflows-library, web-runs.
-- **Rule (one-liner).** Every agent node escalates to genesis-core's standard gate (retry with guidance, accept, fix then accept, rerun with inputs, restart from a step, stop); a Resolve agent only proposes, the human confirms, program code applies.
+- **Rule (one-liner).** Every agent node escalates to genesis-core's standard gate (retry with guidance, accept, fix then accept, rerun with instructions, restart from a step, stop); a Resolve agent only proposes, the human confirms, program code applies.
 - **Context.** Most escalate gates routed every answer, Reject included, to END and the run ended `done`; the payload
   carried no failure detail; no run-level relaunch, override or retry-from-node existed (55-01 §3).
 - **Decision.**
@@ -49,13 +49,17 @@
      `attach_healing`; payload extended additively with the failed node, validator messages, retry/heal history, last
      error, files with roles, and the actions allowed in the current state (L-106). The reliability lint requires it
      (or a custom gate declared beside it).
-  2. **Actions (D6).** Retry the failed step with guidance (gate answer); accept as is (gate answer → forward, `done`,
-     the finalizer promotes); fix then accept (program copies the confirmed file, then accept); rerun from the start with
-     changed inputs (`RunManager` relaunch; the escalated run `cancelled` and linked; stage/story runs through their
-     `reset_for_rerun`, F9); restart from a step (`fork`, ADR-025); stop (gate answer → `failed`, reason recorded).
-     Old approve / reject / feedback map to accept / stop / retry.
-  3. **Resolve agent (D7, F7).** A chat session bound to the run, shown only in Run Detail's Resolve panel, started
-     when the user first opens it; read-only access to the run (events, steps, gate, its files copied into the
+  2. **Actions (D6 as amended by D13, D15; keys `retry`, `accept`, `fix_accept`, `relaunch`, `restart_from`, `stop`,
+     D12).** Retry the failed step with guidance (gate answer); accept as is (gate answer → forward, `done`, the
+     finalizer promotes); fix then accept (program copies the confirmed file, then accept); rerun from the start with
+     additional instructions (`RunManager` relaunch: every input reused, the instructions in every agent node's prompt
+     and kept across resume and fork; the escalated run `cancelled` and linked; a bound stage/story moved to the new
+     run, D13); restart from an earlier step (a fork from that checkpoint, the original's checkpoints untouched per
+     ADR-025, then the escalated run `cancelled` and linked and the binding moved before the new run starts, D15);
+     stop (gate answer → `failed`, reason recorded). Old approve / reject / feedback map to accept / stop / retry. The
+     plain fork (ADR-009 mode 3) is unchanged.
+  3. **Resolve agent (D7, D14, F7).** A chat session bound to the run, shown only in Run Detail's **Resolve tab**
+     (`/runs/<id>/resolve`), started when the user first opens it; read-only access to the run (events, steps, gate, its files copied into the
      sandbox; tool outputs readable while the run waits, D9); it records **proposals** only; the user's Confirm on a
      proposal card calls the API, and program code applies it. It never answers a gate itself (ADR-033 intact). Every
      action is audited in `copilot_actions`. Every escalation raises a "needs you" bell notification.

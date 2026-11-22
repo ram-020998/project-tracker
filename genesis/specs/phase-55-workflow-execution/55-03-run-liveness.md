@@ -2,8 +2,8 @@
 
 > **Status:** SPEC-DRAFTED 2026-11-22. Repo: genesis (`genesis/runs/`, `genesis/api/run_routes.py`,
 > `web/src/features/run-detail/`). Parent: `specs/phase-55-workflow-execution.md`. Built by **genesis-dev**.
-> Decisions: D10, F12, F13 (`55-01-findings.md`). ADR draft: ADR-090 (`adr-drafts.md`). The web part (§5) waits for
-> the user's approval of the 55-02 graph-state mockups; §1–§4 may start before.
+> Decisions: D10, D12 (items 2, 3), F12, F13 (`55-01-findings.md`). ADR draft: ADR-090 (`adr-drafts.md`). The 55-02
+> mockups are approved (D12), so §5 may start.
 
 ## 0. Spike first (record the result in As built)
 
@@ -31,7 +31,12 @@ If `tasks` proves unsuitable, fall back to the worker emitting start itself arou
 
 - `RunSnapshot`: `{version, run: {status, gate, cursor, started_at, ended_at}, active_nodes: [..], nodes: {id:
   {status: pending|running|ok|failed|awaiting|paused|cancelled, executions, attempts, started_at, ended_at,
-  duration_s, credits}}, edges: {"src->dst": count}, legacy: bool}`. `version` = the run's highest event `seq` (F13).
+  duration_s, credits}}, edges: {"src->dst": count}, active_edges: [{src, dst, state: running|waiting}], legacy:
+  bool}`. `version` = the run's highest event `seq` (F13).
+- **`active_edges` (D12 items 2, 3):** for each active node, only the edge **just taken** into it — from the node that
+  completed last before this node's `node.started` (or before its `gate.awaiting`) — so on a loop re-entry
+  `reassemble → verify` is lit, not `assemble → verify`. State `running` for a running node, `waiting` for a gate that
+  waits (drawn in the warning colour). The fold records the order of completions, not only counts.
 - Fold rules: `node.started` → running (also after `ok`: a loop re-entry, L-059); `node.completed` → ok, `executions`
   +1, edge from the previous completed node; `gate.awaiting` → awaiting; `gate.resolved` → running; `error` on the
   active node → failed; `run.final` paused / cancelled → the active node takes that status; credits from
@@ -74,7 +79,8 @@ If `tasks` proves unsuitable, fall back to the worker emitting start itself arou
   The Live badge shows **Live** only while connected, **Reconnecting…** while retrying, **Polling** otherwise.
 - `RunDetailPage.tsx` / `RunGraph.tsx` / `node-states.ts`: node status only from the snapshot; remove `runningNode =
   run.cursor` (`RunDetailPage.tsx:97`) and `running = edge.target === runningNode` (`RunGraph.tsx:87`); an edge is
-  lit when its target is running and its source has executed; traversed edges from `snapshot.edges`. Remove the dead
+  lit only when it is in `snapshot.active_edges` (running, or waiting in the warning colour, D12); traversed edges from
+  `snapshot.edges`. Match the approved `/dev/phase-55` graph states (genesis `d0aa1b2`, 55-02 As built). Remove the dead
   loop heuristic and the `after=0` `useRunStream` replay from the graph path. The Refresh control refetches the
   snapshot. A running node shows its elapsed time; a loop node shows "round k".
 - The layout still re-runs only on topology change (L-067); level-of-detail unchanged (L-034).
@@ -83,8 +89,8 @@ If `tasks` proves unsuitable, fall back to the worker emitting start itself arou
 
 - Worker: `tasks` events → `node.started` for a straight path, a retry loop, a gate + resume, a kill + resume
   (from §0's real payloads, not invented ones).
-- Fold: each rule in §2; a 30k-event fixture folds incrementally (time bounded); legacy run; two-reader version
-  monotonic.
+- Fold: each rule in §2; `active_edges` on a straight path, a loop re-entry (only the edge just taken) and a waiting
+  gate; a 30k-event fixture folds incrementally (time bounded); legacy run; two-reader version monotonic.
 - SSE: `id:` frames, `Last-Event-ID` resume, no replay, overflow → `resync`, a cancelled task group cleans up (L-118),
   CRLF framing in the client reader (L-018).
 - Web: node and edge states per graph state of 55-02; a lower version ignored; reconnect; badge states; jest-axe.

@@ -12,13 +12,14 @@
 | `GET /runs/{id}/snapshot` | 55-03 | `?since_version=N` | `RunSnapshot` or `{unchanged: true, version}` | 404 |
 | `GET /runs/{id}/live` (SSE) | 55-03 | `Last-Event-ID` / `?after=` | lifecycle frames with `id:`; `resync`; `ping` | 404 |
 | `GET /runs/{id}/documents` | 55-05 | — | `RunDocuments` | 404 |
-| `POST /runs/{id}/respond` (extended) | 55-06 | a legacy decision **or** `{action, guidance? , reason?, ...extra}` | as today | 400 unavailable action, 409 not at a gate |
-| `POST /runs/{id}/fix-and-accept` | 55-06 | `{path, proposal_id? , source_file}` | `{run_id, status}` | 400 path refused, 409 not available |
-| `POST /runs/{id}/relaunch` | 55-06 | `{inputs}` (multipart when files change, as `/runs/upload`) | `{run_id, from_run}` | 400 invalid inputs / binding key edited, 409 run still running (not at a gate) |
-| `POST /runs/{id}/fork` | exists | unchanged | unchanged | — |
+| `POST /runs/{id}/respond` (extended) | 55-06 | a legacy decision **or** `{action: retry\|accept\|stop\|<extra>, guidance?, reason?, ...extra}` | as today | 400 action not allowed (`allowed[action]` is a reason), 409 not at a gate |
+| `POST /runs/{id}/fix-and-accept` | 55-06 | `{path, proposal_id?, source_file}` | `{run_id, status}` | 400 path refused, 409 not allowed |
+| `POST /runs/{id}/relaunch` | 55-06 | `{instructions}` (D13; the inputs are reused unchanged, no multipart) | `{run_id, from_run}` | 400 instructions too long, 409 run still running (not at a gate) |
+| `POST /runs/{id}/restart-from` | 55-06 | `{as_node, values?}` (D15) | `{run_id, from_run, as_node}` | 400 unknown node / invalid values, 409 run running (not at a gate) |
+| `POST /runs/{id}/fork` | exists | unchanged (ADR-009 mode 3: no cancel, no rebind) | unchanged | — |
 | `POST /runs/{id}/resolve` | 55-07 | — | `{session_id, created}` (idempotent: returns the existing session) | 409 run never escalated |
 | `GET /runs/{id}/resolve` | 55-07 | — | `{session_id?, proposals: [...], credits}` | 404 |
-| `POST /runs/{id}/resolve/proposals/{pid}/confirm` | 55-07 | optional edited params (guidance text, inputs) | `{outcome}` (new run id where relevant) | 409 stale, 400 invalid |
+| `POST /runs/{id}/resolve/proposals/{pid}/confirm` | 55-07 | optional edited params (guidance text, instructions, reason) | `{outcome}` (new run id where relevant) | 409 stale, 400 invalid |
 | `POST /runs/{id}/resolve/proposals/{pid}/dismiss` | 55-07 | — | `{ok}` | 404 |
 | chat messages / stream of the Resolve session | exists | the existing `/chat/sessions/{sid}/…` routes | + the `resolve.proposal` event | — |
 
@@ -36,9 +37,13 @@ build finds a cleaner home that needs no migration (e.g. a column already presen
 
 ## 3. Web types and fixtures
 
-`web/src/types/`: `RunSnapshot`, `LiveHint`, `RunDocuments`, `RunDocument`, `EscalationPayload` (the `escalation`
-block), `EscalationAction`, `ResolveProposal`, the new event kinds (`node.started`, `memory.brief`, `file.written`,
-`run.relaunched`) in the one web list tested against the backend list both ways (L-122). `web/src/lib/api/runs.ts` (and
+`web/src/types/`: `RunSnapshot` (with `active_edges`), `LiveHint`, `RunDocuments`, `RunDocument`, `EscalationPayload`
+(the F6 fields under the approved mockup's names, D12 item 10: `failed_node`, `validator_messages`, `history`,
+`last_error`, `files`, `allowed`), `ActionKey` (`retry | accept | fix_accept | relaunch | restart_from | stop`),
+`ResolveProposal`, the run `trigger` shape (`source`, `from_run`, `instructions?`, `as_node?`), the new event kinds
+(`node.started`, `memory.brief`, `file.written`, `run.relaunched`) in the one web list tested against the backend list
+both ways (L-122). Move the mockup's types from `web/src/dev/mockups/phase55/fixtures.ts` into `web/src/types/` rather
+than redefining them, and point the mockup at the real types. `web/src/lib/api/runs.ts` (and
 a `resolve.ts`): one client function per route. Golden fixtures captured from real responses of a real run on the
 local build (L-011, L-083), not hand-written.
 

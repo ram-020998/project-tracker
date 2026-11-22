@@ -15,8 +15,10 @@
 2. **Escalation (ADR-089 draft, D6, F6, F8):** every action routed and stored as specified in every adopted workflow
    (L-106); Reject / stop ends `failed`, never `done`; accept and fix-then-accept refused when unavailable; the agent
    cannot answer a gate, relaunch, fork or stop (ADR-033) — only `propose_action`; every action audited; relaunch
-   cancels through the stop-intent + CAS path with no second `run.final` (L-108); bound runs rebound (L-061); the
-   lint refuses an escalation that is not the standard gate.
+   cancels through the stop-intent + CAS path with no second `run.final` (L-108); rerun reuses the inputs unchanged
+   and puts the instructions in every agent node's prompt (D13); restart from a step cancels the original and moves
+   the binding before the new run starts (D15); bound runs rebound (L-061); the
+   lint refuses an escalation that is not the standard gate; payload and action names match the approved mockup (D12).
 3. **Resolve chat (ADR-031/034/086):** no shell; writes only in the sandbox; activation verified (L-113); a write outside
    the sandbox and an unlisted tool refused live (negative control, L-117).
 4. **Liveness (ADR-090 draft, D10):** `node.started` canonical in both lists and the fixtures (L-122); the snapshot fold
@@ -46,12 +48,12 @@ the agent rows; never print, commit or attach the copy's files; delete it at the
 
 | # | Check | Pass |
 |---|---|---|
-| A1 | Mockup sign-off carried through: Documents, Resolve and graph states match the approved `/dev/phase-55` | user confirms |
+| A1 | Mockup sign-off carried through: Documents, the Resolve tab and graph states match the approved `/dev/phase-55` (genesis `d0aa1b2`, D12–D15) | user confirms |
 | A2 | **Graph liveness** on a long run (technical-design-analysis or test-design-analysis on a real feature): program nodes show running; a minutes-long agent node shows running throughout with elapsed time; only the edge into the running node is lit; a loop re-entry shows round 2; at five random moments the graph equals the event log within 3 s | as stated |
 | A3 | **Liveness under faults:** block the SSE (devtools offline for the stream, or stop the proxy) → badge Polling, graph still current within 3 s; reconnect resumes without replaying; restart `genesis serve` mid-run (no other run active) → the snapshot rebuilds; pause / resume and a gate show correctly | as stated |
 | A4 | **Memory brief:** after `scripts/install-packages.sh`, the embedder is ready and the back-fill embedded every current memory (count); three real runs (a feature-stage, a story and an agent-prompt run) each have `_memory/brief.md`; the user reviews them for relevance; the captured prompts carry the line; the memory jobs and a sync run have none | user reviews the briefs |
-| A5 | **Escalation, stage workflow:** a real escalation of a stage run (a forced validator failure on the candidate, or a real one); the bell notice; Resolve opens and its first turn explains the failure and proposes actions; **accept** → `done`, the stage shows the artifact (finalizer); a second escalation → **fix then accept** with a reviewed diff | as stated |
-| A6 | **Escalation, every action:** on cheap runs (agent-prompt / hello-appian with a forced failure): retry with guidance (guidance in the captured prompt, run continues), relaunch with changed inputs (old `cancelled`, new run linked; a stage-bound run rebound), restart from a step (fork, original untouched), stop (`failed`, reason shown); an unavailable action disabled with its reason; a stale proposal refused | as stated |
+| A5 | **Escalation, stage workflow:** a real escalation of a stage run (a forced validator failure on the candidate, or a real one); the bell notice opens `/runs/<id>/resolve` without starting the agent; opening Resolve starts it and its first turn explains the failure and proposes actions; **accept** → `done`, the stage shows the artifact (finalizer); a second escalation → **fix then accept** with a reviewed diff | as stated |
+| A6 | **Escalation, every action:** on cheap runs (agent-prompt / hello-appian with a forced failure): retry with guidance (guidance in the captured prompt, run continues); **rerun from the start with additional instructions** (the new run has the same inputs, the instructions are in every agent node's captured prompt and survive a pause/resume, the old run `cancelled` and linked; on a stage-bound run the stage moves to the new run, D13); **restart from an earlier step** (the new run starts from that step's checkpoint and runs, the original's checkpoints unchanged, the old run `cancelled` and linked, a stage-bound run's stage moves to the new run, D15); stop (`failed`, reason shown); an unavailable action disabled with its reason; a stale proposal refused; each result shown in the Resolve tab (D14) | as stated |
 | A7 | **Resolve safety:** ask the agent to apply an action itself, write outside its sandbox, run a shell command → each refused | as stated |
 | A8 | **Documents:** the four stage workflows, story-implementation, test-execution and one old run: every file in the right category and step; Output pinned; write counts after a retry; tool outputs as metadata after the end; Open in step | as stated |
 | A9 | **Width probe** (L-090): Documents and Resolve at 1280 / 1440 / 1920 px, light and dark, screenshots | no overflow, user confirms |

@@ -29,7 +29,8 @@ Catalog on each instance (L-033); check `/openapi.json` `info.version`, the DB v
 checklist in the release notes:
 - Each run with an agent step now starts with a memory brief (`_memory/brief.md`, listed under Inputs); your personal
   memories are included for your own runs and never published to the Hub.
-- Escalations: open the **Resolve** panel on the run; the agent explains and proposes, you confirm. Reject at an old
+- Escalations: open the **Resolve** tab on the run; the agent explains and proposes, you confirm. Rerun and Restart
+  from a step move the feature stage (or story) to the new run and end the old run Cancelled. Reject at an old
   gate now ends the run **failed**, not done.
 - The Documents tab is reorganized by step and type; tool-output files are still removed at the end of a run.
 - The run graph shows the node that is really running; **Live / Reconnecting / Polling** shows the connection.
