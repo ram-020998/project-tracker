@@ -1,0 +1,21 @@
+id: liveness-probe
+name: "Liveness probe"
+version: 0.1.0
+inputs_schema:
+  type: object
+  properties:
+    fail: {type: boolean, default: false}
+editable: [inputs, decisions]
+graph:
+  nodes:
+    - {id: prepare, label: Prepare, kind: program}
+    - {id: work, label: Work, kind: program}
+    - {id: check, label: Check, kind: program}
+    - {id: approve, label: Approve, kind: gate}
+    - {id: finish, label: Finish, kind: program}
+  edges:
+    - {from: prepare, to: work}
+    - {from: work, to: check}
+    - {from: check, to: work, condition: again}
+    - {from: check, to: approve, condition: done}
+    - {from: approve, to: finish}

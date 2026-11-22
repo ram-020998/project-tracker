@@ -1,0 +1,237 @@
+{
+  "agent-running-1280-light": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [],
+    "executed": 0,
+    "nodes": [
+      "Make result: running",
+      "Validate result: pending",
+      "Finish: pending",
+      "Escalate: pending"
+    ],
+    "wraps": []
+  },
+  "agent-running-1440-light": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [],
+    "executed": 0,
+    "nodes": [
+      "Make result: running",
+      "Validate result: pending",
+      "Finish: pending",
+      "Escalate: pending"
+    ],
+    "wraps": []
+  },
+  "agent-running-1920-light": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [],
+    "executed": 0,
+    "nodes": [
+      "Make result: running",
+      "Validate result: pending",
+      "Finish: pending",
+      "Escalate: pending"
+    ],
+    "wraps": []
+  },
+  "agent-running-1280-dark": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [],
+    "executed": 0,
+    "nodes": [
+      "Make result: running",
+      "Validate result: pending",
+      "Finish: pending",
+      "Escalate: pending"
+    ],
+    "wraps": []
+  },
+  "agent-running-1440-dark": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [],
+    "executed": 0,
+    "nodes": [
+      "Make result: running",
+      "Validate result: pending",
+      "Finish: pending",
+      "Escalate: pending"
+    ],
+    "wraps": []
+  },
+  "agent-running-1920-dark": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 0,
+    "nodes": [
+      "Make result: running",
+      "Validate result: pending",
+      "Finish: pending",
+      "Escalate: pending"
+    ],
+    "wraps": []
+  },
+  "agent-ended-1280-light": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "finished",
+    "lit": [],
+    "executed": 2,
+    "nodes": [
+      "Make result: ok",
+      "Validate result: ok",
+      "Finish: ok",
+      "Escalate: skipped"
+    ],
+    "wraps": []
+  },
+  "agent-ended-1440-light": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "finished",
+    "lit": [],
+    "executed": 2,
+    "nodes": [
+      "Make result: ok",
+      "Validate result: ok",
+      "Finish: ok",
+      "Escalate: skipped"
+    ],
+    "wraps": []
+  },
+  "agent-ended-1920-light": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "finished",
+    "lit": [],
+    "executed": 2,
+    "nodes": [
+      "Make result: ok",
+      "Validate result: ok",
+      "Finish: ok",
+      "Escalate: skipped"
+    ],
+    "wraps": []
+  },
+  "agent-ended-1280-dark": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 2,
+    "nodes": [
+      "Make result: ok",
+      "Validate result: ok",
+      "Finish: ok",
+      "Escalate: skipped"
+    ],
+    "wraps": []
+  },
+  "agent-ended-1440-dark": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 2,
+    "nodes": [
+      "Make result: ok",
+      "Validate result: ok",
+      "Finish: ok",
+      "Escalate: skipped"
+    ],
+    "wraps": []
+  },
+  "agent-ended-1920-dark": {
+    "run": "r-86a0a8e446bc",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 2,
+    "nodes": [
+      "Make result: ok",
+      "Validate result: ok",
+      "Finish: ok",
+      "Escalate: skipped"
+    ],
+    "wraps": []
+  },
+  "agent_snapshot": {
+    "version": 95,
+    "run": {
+      "status": "done",
+      "gate": null,
+      "cursor": "finish",
+      "started_at": "2026-11-22T19:55:27.904936+00:00",
+      "ended_at": "2026-11-22T19:55:45.896653+00:00"
+    },
+    "active_nodes": [],
+    "nodes": {
+      "make_result": {
+        "status": "ok",
+        "executions": 1,
+        "attempts": 1,
+        "started_at": "2026-11-22T19:55:28.548241+00:00",
+        "ended_at": "2026-11-22T19:55:45.881219+00:00",
+        "duration_s": 17.333,
+        "credits": 0.3117937380762853,
+        "tool_calls": 5,
+        "messages": 1,
+        "entered_from": null
+      },
+      "v_result": {
+        "status": "ok",
+        "executions": 1,
+        "attempts": 1,
+        "started_at": "2026-11-22T19:55:45.882207+00:00",
+        "ended_at": "2026-11-22T19:55:45.888207+00:00",
+        "duration_s": 0.006,
+        "credits": null,
+        "tool_calls": 0,
+        "messages": 0,
+        "entered_from": null
+      },
+      "finish": {
+        "status": "ok",
+        "executions": 1,
+        "attempts": 1,
+        "started_at": "2026-11-22T19:55:45.889732+00:00",
+        "ended_at": "2026-11-22T19:55:45.892757+00:00",
+        "duration_s": 0.003,
+        "credits": null,
+        "tool_calls": 0,
+        "messages": 0,
+        "entered_from": null
+      }
+    },
+    "edges": {
+      "make_result->v_result": 1,
+      "v_result->finish": 1
+    },
+    "active_edges": [],
+    "legacy": false
+  }
+}
