@@ -1,0 +1,337 @@
+# 55-01 — Findings: Workflow execution enhancements
+
+> **Status:** SPEC-DRAFTED 2026-11-22 — Q&A complete: decisions D1–D11 (§9), defaults F1–F15 (§10, confirmed).
+> Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
+>
+> What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
+> they work today (code-grounded), the external and KiroCrew research, the proposed design, the open questions, and
+> every decision.
+
+---
+
+## 1. The request (as stated by the user, 2026-11-22)
+
+Phase 55 improves workflow execution for **every** workflow. Four parts:
+
+1. **Memory brief.** At the start of each run an agent step looks at the workflow and its inputs, queries `memory.db`
+   for items useful to this run, and writes a memory file into the run's blackboard. Every later agent node's prompt
+   gets one line saying the file exists and may be used for extra context. Example: a remark a UX person made in a chat
+   (distilled into memory) helps a later `ux-design-analysis` run.
+2. **Agent-assisted escalation.** Today an escalation is a program gate: the user picks approve / reject / feedback and
+   has no real control over what happens next. Instead, an escalated run opens in an agent chat: the agent shows what
+   went wrong and why it escalated, which artifacts exist, and suggests next steps (rerun from the start with a changed
+   input; mark the run complete and move its artifact to the real destination; cancel and start a new run; …). The user
+   can chat about the run and decides; Genesis applies the decision.
+3. **Documents tab.** Run Detail's Documents tab shows many files with unclear names, tool outputs mixed in. Every
+   document gets a clear category: input, output, per-node artifacts (which node, when, latest version), tool outputs
+   apart, other files. A full page revamp is allowed. The assistant is to inventory the real document types and propose
+   the categorization.
+4. **Run graph liveness.** The live graph lags the backend, looks stuck while the backend has moved on, and highlights
+   edges whose target is not active. It must show the true latest state: live streaming if possible, otherwise a 2–5 s
+   refresh or a manual refresh, but never wrong. A standard, solid implementation.
+
+The user confirmed this restatement and wants all four in Phase 55 (D1).
+
+Paths below: `genesis/` = `/Users/ramaswamy.u/repo-gitlab/ramaswamy.u/genesis/genesis/`; `web/` = `genesis/web/src/`;
+`core/` = `genesis/packages/genesis-core/genesis_core/`; `wf/` = `genesis-workflows/workflows/`.
+
+## 2. Memory today (verified 2026-11-22)
+
+### 2.1 Store and data
+
+- `~/.genesis/memory.db` (`mm0001`, `genesis/memory/migrations/mm0001_memory.py:34-177`): `memories` (+ `memories_fts`),
+  `memory_entities`, `memory_entity_links`, `memory_relationships`, `memory_links`, `memory_communities`,
+  `memory_consolidation_state`. `Memory` (`genesis/memory/models.py:35-153`): `memory_type` semantic|episodic|procedural,
+  `scope` personal|shared (+ `owner`), `text`, `summary`, `importance` 0..1, `tags_json`, `entities_json`, `origin`
+  consolidation|reflection|user, bi-temporal `valid_from`/`valid_to`/`superseded_by`, `archived`, `pinned`,
+  `protected`, `user_verified`, `embedding_status`.
+- Entities carry `entity_kind` application|feature|record_type|concept and a free-text `entity_ref`; no workflow, story
+  or run anchor.
+- Real data: **63 memories** — shared semantic 39 (consolidation 28, reflection 10, user 1), shared episodic 11, shared
+  procedural 9, personal procedural 4; 55 entities, 92 entity links, 28 relationships; 0 pinned.
+- **Semantic retrieval is effectively off:** 62 of 63 have `embedding_status=skipped` (no `genesis[embeddings]` extra
+  installed); retrieval is keyword (FTS5) + entity graph + importance/recency.
+- **Anchors are inconsistent:** one app appears as `app:as-gss-full`, `app:as-gss-full-application`,
+  `_a-0000e5bc-…_930416` and `a-0000e5bc-…_930416`; features as `feature-4-document-builder`. A lookup by `app_uuid`
+  misses most of them.
+
+### 2.2 Retrieval and injection
+
+- `HybridRetriever.search(query, scope, owner, entity_ids, types, top_k=8, depth=1)` (`genesis/memory/retrieval.py:137-196`):
+  0.55·relevance + 0.20·recency (τ 30 d) + 0.25·importance; current, non-archived only; no query → recency×importance.
+- Read-only `genesis-memory` MCP (`genesis/mcp/memory_server.py:42-85`): `search_memory`, `get_personal_memory`,
+  `get_entity`, `get_entity_memories`, `get_related_entities`, `get_relationships`; `mode=ro`, 32 KB output cap, never
+  `mark_used`.
+- **Chat only:** wired in `genesis/chat/mcp.py:41,83-87,127-131` with a `_MEMORY_HINT` steering line
+  (`genesis/chat/mode_profile.py:21-22`). No `genesis-memory` entry in `mcp-registry.json`; the worker's launch provider
+  handles only `genesis-kb` (`genesis/runs/worker.py:~88-100`). No workflow uses memory except the two memory jobs.
+- `ctx.extras["memory_store"]` and the lazy `embedder_factory` are already in every run's context
+  (`genesis/runtime/context.py:~176-178`).
+- ADR-053 (Phase 26) made injection **MCP-only, no auto pre-fetch**; "agentic-node MCP injection" and "auto-prefetch"
+  were deferred seams (`specs/phase-26-agentic-memory-layer/26-05-…md` §1, §6–7; umbrella `:224`).
+
+### 2.3 Where a platform-wide brief would hook in
+
+- Prompt: `kiro_node` builds `prompt = prompt_fn(state, ctx, out_path)` at `core/nodes/agent.py:364`, then saves it to
+  `_prompts/` (`:~372-378`, the `agent.prompt` event) and sends it (`:~455`). A suffix added right after `:364` reaches
+  every agent node of every workflow and stays accurate in the captured prompt. `NODE_AGENT_PROMPT` (`:41-46`) is a
+  static agent system prompt.
+- Run start: the worker loads `build, META`, builds `ctx`, compiles, then `astream(new_state(...))`
+  (`genesis/runs/worker.py:~146-176`). A step before `astream` (for `op == "run"` only) needs no `graph.py` edit; wrapping
+  every graph in a parent StateGraph would change node names and checkpoint topology (L-006) and is avoided.
+- The reliability lint (`genesis/lint/reliability.py:71`) inspects only the compiled graph; ADR-011 governs agent nodes.
+- Run inputs: no universal app/feature/story field; 15 of 19 workflows carry `app_uuid`, the stage and story workflows
+  also `feature_id`/`story_id`. Without context: `agent-prompt`, `code-review`, `erd-generation`, `hello-appian`.
+- Self-reference: `memory-consolidation` and `memory-maintenance` write memory and must not read a brief of it.
+
+## 3. Escalation today (verified 2026-11-22)
+
+### 3.1 Mechanism
+
+- `hitl_gate(name, kind, prompt_fn, options)` (`core/nodes/gate.py:19-54`); payload `{node, kind, prompt, options
+  (default approve/reject), context_refs: dict(state.artifacts), raised_at}`; a `{"feedback":…}` answer sets
+  `decisions["<gate>.feedback"]`. `attach_reliability` (`core/nodes/reliability.py:25-75`) routes `escalate →
+  on_exhaust_gate`; `attach_healing` (`core/nodes/healing.py:87-161`) escalates after one heal and one restart.
+- **The payload is thin:** no error, validator message or retry history; only a few workflows put the last validator
+  message in the prompt text.
+- **Most escalate gates route to END, and any answer ends the run `done`** (`genesis/runs/worker.py:129-134` reports a
+  finished graph with no explicit status as `done`). So **Reject also yields `done`**, and the bound finalizer then
+  promotes whatever artifact exists. Workflows that read the answer: `agent-prompt` (approve/feedback → retry, else
+  `give_up` failed), `generate-business-map`, `memory-*`, `setup-composer` [retry, discard], `story-verification`
+  [send_back, accept, stop] + `escalate_blocked` (state-aware prompts, L-106), `story-implementation`
+  `escalate_reverify`, `code-review` `review_escalate`. The five stage/story analysis workflows and `ux-design-analysis`
+  go `escalate → (cleanup) → END`.
+
+### 3.2 Run operations
+
+- Routes in `genesis/api/run_routes.py`: `/respond` (`:199-208`), `/pause`, `/resume`, `/cancel`, `PATCH /state`
+  (inputs, decisions, artifacts + `META.editable`), `/fork {as_node, values}` (`:210`), `/artifacts…` (`:219-262`).
+- Statuses (`genesis/runs/store.py:26-34`): pending, running, awaiting_input:gate, awaiting_input:paused, done, failed,
+  cancelled. `_finalize` (`genesis/runs/manager.py:138-159`) is the single compare-and-set terminal write, store then
+  announce (L-093).
+- **Missing:** a human "mark complete" override; a generic "rerun with changed inputs" (exists only per stage/story via
+  `reset_for_rerun`, `genesis/api/features.py:1151,1413`, `genesis/api/workbench.py:227-386`); "retry from node".
+  Fork copies state only; the new run's blackboard is empty while `state.artifacts` still point at the old folder
+  (`manager.py:653-669`; not verified live).
+
+### 3.3 Run → app bridges
+
+`StageFinalizer` (ux, technical-design, feature-breakdown, test-design → fixed artifact names, `_BINDINGS`
+`genesis/chat/stage_finalizer.py:110-121`), `StoryDesignFinalizer`, `StoryImplementationFinalizer`,
+`StoryVerificationFinalizer`, `ChatRunSupervisor`, test-exec/capture/compose finalizers. Each acts on `run.final` with
+`status == "done"` (verification also on failed/cancelled), requires the run to be the one currently bound (L-061) and
+the artifact file to exist, and has a level-triggered `reconcile` (L-058). A human-override `done` through `_finalize`
+would trigger them unchanged.
+
+### 3.4 Chat pieces that exist
+
+- Modes (`genesis/chat/store.py:25-33`): read_only, copilot, feature_spec, ux_design, technical_design,
+  feature_breakdown, story_design, test_design. Copilot control MCP (`genesis/mcp/control_server.py:39-92`): read tools
+  + confirm-gated `start_run`, `respond_to_gate`, `cancel_run` (ADR-033, `permission_mode="ask"` → confirm card,
+  `copilot_actions` audit). Introspection MCP: `get_run`, `get_run_steps`, `get_run_events`, `list_failures`, … — **no
+  tool reads blackboard files**.
+- `chat_run_links(run_id PK, session_id)` (m0004): one session per run, linked only via the control-token `POST /runs`;
+  no API binds an existing run.
+- The StageFinalizer pattern already pre-binds a chat to a run's output: create the session, copy files into
+  `skill_output_dir/<session>/`, `enqueue_system_turn` with a seed (L-042).
+- The notification bell (`web/features/notifications/`) is fed only by schedules (`genesis/runtime/scheduler.py:398`);
+  a manual run's escalation does not reach it.
+- Web gate UI: `web/features/run-detail/components/hitl/HitlBar.tsx` (`GatePanel`: options, Feedback, context chips).
+
+## 4. Documents tab today (verified 2026-11-22)
+
+### 4.1 Code
+
+- `web/features/run-detail/components/docs/DocumentsTab.tsx:74-165`: a flat card rail sorted by name; "Result" is a
+  filename regex (`doc-utils.ts:20`); a "Show tool outputs" switch only when `_toolcalls/` exists; never shows
+  `_prompts/`, `uploads/`, `.kiro/`, `checkout/`. Polls `GET /runs/{id}/artifacts` every 4 s while active.
+- `GET /runs/{id}/artifacts` = `RunWorkspace.manifest()` (`core/workspace.py:69-83`): an `rglob` with bytes only (no
+  mtime, node or role), `_kiro/` excluded. No manifest/metadata file exists.
+
+### 4.2 What is in a run folder (10 real runs under `~/Genesis/runs`, joined to `run_events`)
+
+| Run | Files | With an attributing event | Without |
+|---|---|---|---|
+| ux-design-analysis r-d945d439d221 | 23 | 14 (all `_prompts`) | 9 |
+| technical-design-analysis r-d5ed99071d49 | 31 | 19 | 12 |
+| feature-breakdown-analysis r-f9a818a124cb | 22 | 10 | 12 |
+| story-design-analysis r-0aa082031405 | 15 | 7 | 8 |
+| story-implementation r-fb5a9cd14f72 | 89 (74 `.kiro`) | 5 | 84 |
+| agent-prompt r-87781054aa00 | 17 (15 `_kiro`) | 1 | 16 |
+| memory-consolidation r-ea0fcbed1c4c | 33 (26 `_kiro`) | 2 | 31 |
+| test-design-analysis r-cbf4ee22a3da | 36 | 21 | 15 |
+| test-execution r-6f190dcfbac4 | 37 (`checkout/` 29, `report/` 5) | 0 | 37 |
+| sync-application r-ea9479eee17e | 1 | 0 | 1 |
+
+- Only `_prompts/*` are fully attributed (`agent.prompt`: node, iteration, attempt, ts). **Every real deliverable**
+  (`analysis.html`, `technical-design.html`, `breakdown.html`, …) and every program/validator file has **no** event: its
+  node and write time are unknown.
+- `_toolcalls/` is purged at terminal (`genesis/runs/manager.py:203-218`) and by the workflows' `cleanup` nodes, which
+  also delete root files not in `META.artifacts`; `tool_output.recorded` events survive (old runs stored them as
+  `custom`, node NULL: 2732 rows; `artifact.saved` 79 rows).
+- Files are **overwritten in place** on retry, loop and heal; only prompts are versioned per turn.
+- Output files are touched empty before the turn finishes, so a zero-byte file can appear mid-run.
+- File patterns observed: inputs (`uploads/*`; materialised `spec.txt`, `uxdesign.txt`, `story.json`, …); final
+  outputs (`analysis.html`, `technical-design.html`, `breakdown.html`, `test-design.html`, `implementation-report.html`,
+  `rollback.md`, `output.md`, `report/*`); intermediates (`screens.json`, `grounding.json`, `sections.json`,
+  `epics.json`, …); control/verdict (`verify.json`, `heal.json`, `reconcile.json`, `result.json`, `report.json`);
+  prompts; tool outputs; internal (`_kiro/`, `.kiro/`, `.DS_Store`); workspace trees (`checkout/`); derived media
+  (`pages/*.png`).
+
+### 4.3 Declared roles
+
+- `workflow.yaml` `artifacts:` lists inputs, intermediates and results together, with no role. No `outputs:` key.
+- Final output is derivable without guessing only from `_BINDINGS` (four stage workflows) or a `result.json`
+  `{"artifact": …}` some workflows write; `result.json` has no common schema.
+- Uploaded inputs: `inputs_schema.*.format: "file"` → `uploads/<name>` (ADR-035).
+
+## 5. Run graph liveness today (verified 2026-11-22)
+
+**Root cause:** the backend never records that a node started; the graph infers "running" from the last completed node.
+
+- Worker: `compiled.astream(..., stream_mode=["updates","custom"])` (`genesis/runs/worker.py:170`); `updates` fires
+  only when a node **finishes**. `runs.cursor` is set by `note_progress` to the **completed** node
+  (`genesis/runs/store.py:157-166`), after `node.completed` is published (`manager.py:238-241`, a small race).
+  `kiro_node`'s `agent_start`/`agent_end` are non-canonical → stored as `custom`. Program nodes emit nothing before
+  completing (61 of 83 and 88 of 121 completions in two large runs).
+- `/steps` (`genesis/runs/steps.py:17-74`): re-reads and parses the whole log per call (up to 30k events); a node is
+  `running` once any event names it, `ok` after its first `node.completed` and **never returns to running** on a loop
+  re-entry (L-059); a program node is absent until it completes.
+- Web (`web/features/run-detail/`):
+  - `RunDetailPage.tsx:97` `runningNode = run.cursor` and `RunGraph.tsx:87` `running = edge.target === runningNode`
+    → **the edge into the last completed node pulses** (the reported wrong-edge symptom).
+  - `useRunSteps` polls only while some step reads `running` (`hooks.ts:137-144`); the SSE tail invalidates `/steps`
+    only on `node.completed`/gate/error (`hooks.ts:175-222`). During a 5–13 min agent node (real runs: 787 s, 415 s,
+    350 s) nothing refreshes the graph → "stuck".
+  - `deriveNodeStates(..., events=undefined, ...)` (`RunDetailPage.tsx:94`): the loop re-entry heuristic is dead code;
+    the cursor is marked `current` but skipped because it is already `ok` (`node-states.ts:114-121`).
+  - `useRunStream` opens `EventSource(?after=0)` on every mount, replaying the whole log (30k events, ~360 refetch
+    triggers); `onerror` closes it for good (no reconnect); "Live" shows during replay; no `visibilitychange` handling.
+  - A "Reload graph" button exists (`RunGraph.tsx:128-140`) but reloads the same misleading model.
+- Transport: worker stdout JSON lines → `Supervisor._pump` thread (exceptions swallowed, `supervisor.py:79-82`) →
+  synchronous `eventlog.append` per event → `EventBus` (unbounded history per run, `_cbuses` never pruned,
+  `manager.py:91,125`) → SSE `GET /runs/{id}/events/stream` (`run_routes.py:350-374`): no `id:` field, no
+  `Last-Event-ID`, `asyncio.to_thread(next, sub)` parks a thread per subscriber until the next event (a gated run emits
+  none). Worker stderr is a PIPE read only at exit (latent block risk, not reproduced).
+- History: `c04dc7e` (`/steps` authoritative, L-060), `c90bcc0` (stop client folding, `/transitions`, L-066),
+  `f4ca84a` (refresh button), `7afd9ce` (per-node SSE). Every fix patched around the same missing "started" signal.
+
+## 6. Research (2026-11-22)
+
+### 6.1 External
+
+- **LangGraph stream modes** ([streaming docs](https://docs.langchain.com/oss/python/langgraph/streaming),
+  [Pregel.stream reference](https://reference.langchain.com/python/langgraph/pregel/main/Pregel/stream)): besides
+  `updates`/`custom`, `tasks` emits task start and finish events with results and errors, and `checkpoints` emits each
+  checkpoint in `get_state()` form; both need a checkpointer; `debug` combines them. A `version="v2"` output format gives
+  one typed `StreamPart` shape for all modes (LangGraph ≥ 1.1; Genesis runs 1.2.8). This is the standard way to know a
+  node started.
+- **HITL patterns** ([LangChain HITL overview](https://docs.langchain.com/oss/javascript/concepts/human-in-the-loop),
+  [Agent Inbox](https://github.com/langchain-ai/agent-inbox)): an interrupt is answered by accept, edit, respond (free
+  text back to the agent) or ignore; the pause is durable on the checkpoint. None of them lets an agent choose the
+  route; the human's answer resumes the thread.
+- **Artifacts in workflow UIs**: Argo shows artifacts per step in the DAG and a list by step name and path, previews
+  known types sandboxed ([artifact visualization](https://argo-workflows.readthedocs.io/en/latest/artifact-visualization/));
+  Prefect artifacts carry a key, a description and versions, attached to a task run or a flow run
+  ([Prefect artifacts](https://www.prefect.io/docs/v3/concepts/artifacts)). Common ground: an artifact is declared with
+  a role and a producing step; the UI groups by step and by role and keeps versions.
+- **Run views** ([Temporal Web UI](https://docs.temporal.io/devtools/web-ui/),
+  [Temporal UI redesign](https://temporal.io/blog/the-dark-magic-of-workflow-exploration)): the history is grouped
+  into event groups with summaries; "pending activities" (started, not finished) is a first-class view.
+
+Content was rephrased for compliance with licensing restrictions.
+
+### 6.2 KiroCrew (reference only; `/Users/ramaswamy.u/repo/KiroCrew`)
+
+- Memory: a bounded **prefetch** at session start (`src/kiro_crew/context_assembly/store_admission.py:625`, 5 s
+  embedding deadline, keyword fallback), injected blocks each switchable, a resumed session does not re-inject, plus a
+  pointer line to the `memory_recall` tool for the rest (`docs/architecture/context-management.md:176-205,262-272`). A
+  file-based `briefing.md` per member (`src/kiro_crew/members_parts/prompt_layers.py:238`).
+- Escalation: a worker reports `blocked|question` (`src/kiro_crew/agent_parts/spec_prompts.py:929-948`); the conductor
+  adjudicates and records the decision; person-facing `ask_question` cards; options rendered from the newest reply only
+  (`docs/decisions/2026-09-13-options-are-read-from-the-newest-reply-only.md`). Reusable rule: the agent returns a
+  validated proposal, the host applies it only after a person confirms.
+- Live status: `src/kiro_crew/dashboard_feed.py:1-60` (subscribe once; a baseline fold value plus updates ordered by
+  revision; stale updates dropped), `crew_log/bus.py` (a lost event is repaired by the next read of the fold),
+  `projection/checkpoint.py` (fold savepoints), an SSE helper with a per-client write deadline, a subscriber cap and a
+  20 s keepalive (`apps/builtins/auto_improvement/backend/sse.py:1-115`); "the page polls for most state".
+
+## 7. Proposed design (assistant draft for the Q&A; §9 decisions win where they differ — D2 replaced the agent brief with a program prefetch, D7 put the chat in Run Detail only, D9 dropped versions and tool-output files)
+
+- **Memory brief:** a platform step at run start (not a `graph.py` edit) writes `_memory/brief.md`; one line appended to
+  every agent prompt at `core/nodes/agent.py:364`; idempotent on resume; excluded for the memory workflows; its own
+  events. Needs an ADR-053 amendment (prefetch into a file).
+- **Escalation:** the gate node stays (ADR-011); an escalation chat bound to the run gets the run's failure context and
+  files; the agent proposes, the human confirms, program code applies (ADR-001, ADR-033 amendment for new run actions:
+  mark complete + promote, rerun with changed inputs, retry from a node); fix the escalate→END "any answer is done" bug.
+- **Documents:** record per-file metadata (producing node, iteration, time, role) at write time; declare artifact roles
+  per workflow; a categorized, node-grouped Documents page; tool outputs listed from their events.
+- **Run graph:** `tasks` stream mode → a canonical `node.started` (amends L-005); one server-side run snapshot with a
+  version; edges from node states only; SSE as a change hint with `id:`/resume and reconnect; a 2–3 s poll floor while
+  active.
+
+## 8. Open questions (asked one at a time 2026-11-22; all answered — Q1→D1, Q2→D2, Q3→D3, Q4→D4, Q5→D5, Q6→D6, Q7→D7, Q8→D8, Q9→D9, Q10→D10, Q11→D11, Q12→§10 defaults)
+
+1. Scope and restatement.
+2. Memory step: an agent turn, a program step, or both (program narrows, agent selects)? → program prefetch, KiroCrew-style.
+3. Which embedder.
+4. Which workflows get the memory brief.
+5. Personal memories in the brief.
+6. Escalation: which actions the agent may propose and how each is applied.
+7. Escalation: where the chat lives.
+8. Documents: layout and categories (+ the mockup sub-spec).
+9. Documents: keeping versions and tool-output files.
+10. Run graph: live SSE vs poll.
+11. Release ordering against the open Phase 51/53/54 live acceptance.
+12. The remaining defaults and the sub-spec plan.
+
+## 9. Decisions (locked with the user, one at a time)
+
+| # | Decision | Reason |
+|---|---|---|
+| D1 | **Scope: all four parts in Phase 55, as restated in §1** — memory brief, agent-assisted escalation, Documents tab categorization/revamp, reliable run graph — applying to every workflow. Spec set: findings, the four feature sub-specs, an API sub-spec, review & acceptance, release & onboarding. | User (2026-11-22): "Yes the restatement is right and i want all 4 in phase 55." |
+| D2 | **Memory brief = KiroCrew-style program prefetch (option K), not an agent turn.** At run start, program code renders a generic run description (the workflow's `META` summary and node descriptions + every input, ids resolved to names via the KB; no per-workflow declaration), runs `HybridRetriever`, and writes a budgeted top-k to `_memory/brief.md` (memory marked as data, not instructions). Every agent prompt gets one line pointing at the brief, and every agent node gets the read-only `genesis-memory` MCP to fetch more on demand (KiroCrew's `[Memory tools]` → `memory_recall` pattern). No new agent node, so no ADR-011 question; no credits, < 1 s. Needs an ADR-053 amendment (prefetch into a file + memory MCP on workflow nodes, both deferred Phase 26 seams). The embedder becomes on by default (the model is D3). Option A (an agent turn queries and writes the brief) is the upgrade path if live briefs prove poor. | User (2026-11-22): "Ill agree with K". Considered: A (agent queries; better relevance today with messy anchors, but one turn and 30–90 s per run, ADR-011 exception), B/C (per-workflow input declarations or program-narrows-agent-selects; both need inputs→query rules). KiroCrew evidence: `src/kiro_crew/memory.py:1068` `get_context(query=<message>)`, `context_assembly/store_admission.py:625`, `docs/architecture/context-management.md:176-283`. |
+| D3 | **Default embedder = fastembed `BAAI/bge-small-en-v1.5`** (ONNX, ~130 MB, 384-d), replacing model2vec `potion-base-8M` as the default backend (`genesis/memory/embedder.py:27-29`); installed by default (not an optional extra). Reason: the brief embeds the run description inside every run's worker (ADR-012), so load time and RAM count per run; bge-small matches paraphrase far better than static vectors at ~1 s load. Proposed defaults (unless the user objects): the model is fetched by `scripts/install-packages.sh` with a pinned checksum (no first-use download inside a run); existing `embedding_status=skipped` memories are back-filled once. Amends ADR-054's default (it named model2vec). | User (2026-11-22): "Ill go with your recommendation". KiroCrew uses Qwen3-Embedding-0.6B Q8_0 (610 MB, 1,024-d, llama.cpp in-process, 1.6–2.5 GB peak RSS; `KiroCrew/docs/system-specs/modules/memory-skills-hooks.md:3576-3604`) — rejected as too heavy per worker for a 63-memory store. Considered: potion-base-8M (lighter, weaker). |
+| D4 | **Which runs get a brief: every run whose graph has at least one agent node, by default.** Runs with no agent node (`sync-application`, `sync-documents`, `test-execution`) are skipped automatically (detected from the compiled graph, no flag). A new optional `META.memory_brief: false` opts a workflow out; `memory-consolidation` and `memory-maintenance` set it (they write memory and must not read a brief of it). No other per-workflow configuration. Scheduled runs get it like any run. A resumed run reuses its brief (written once per run); a fork copies the brief into the new run (the original untouched, ADR-025). | User (2026-11-22): "I agree with this". Considered: only the feature-stage and story workflows. |
+| D5 | **The brief includes the user's personal memories (option B)** in a separate "Your preferences" section, retrieved with the owner Genesis already uses (`canonical_username(settings)`); shared memories in their own section. The brief stays in the local run folder (`_memory/`) and is never published to the Hub; a personal memory is never copied into anything published (the agent may follow a preference in its output). | User (2026-11-22): "B". Single-user app: every run, scheduled ones included, is the user's; personal procedural memories are among the most useful hints. Considered: A (shared only). |
+| D6 | **One standard escalation gate in genesis-core, adopted by every workflow, with a fixed action set.** The agent only suggests; each action runs after the user presses Confirm on a card; program code applies it (ADR-001, ADR-033). Actions: (1) **Retry the failed step with guidance** — gate answer → back to the node, retry budget reset, the user-edited guidance added to its prompt; (2) **Accept the output as it is** — gate answer → the graph continues as if the check passed (assemble/present/cleanup run), the run ends `done`, the bound finalizer promotes the artifact; (3) **Fix the output, then accept** — the agent drafts a corrected file, the user reviews the diff and confirms, program code copies it into the run, then as (2); (4) **Rerun from the start with changed inputs** — a new generic `RunManager` relaunch: a new run with the edited inputs, the escalated run ends `cancelled` and is linked to it, stage/story runs rebound via the existing `reset_for_rerun` path; (5) **Restart from an earlier step** — `RunManager.fork` (exists; original untouched, ADR-025); (6) **Stop the run** — gate answer → END `failed` with the reason recorded, nothing promoted. Today's Approve / Reject / Feedback map to 2 / 6 / 1; workflows with richer gates (e.g. story-verification send-back) keep their own options beside the standard ones. Gate wording and the agent's suggestions are built from the run's state (L-106: e.g. no Accept when the output is missing or empty). Every action is audited in `copilot_actions`. Fixes the "any answer ends `done`" bug (§3.1). | User (2026-11-22): "this is good". |
+| D7 | **The escalation chat lives in Run Detail only (option A):** a **Resolve** panel on the escalated run's page, beside the graph and Documents, holding the chat, the suggested-action cards and the Confirm cards; not listed on the Chat page (hidden like the stage chat modes, `genesis/chat/store.py:29`). Reuses the existing chat components (`ChatThread`, confirm cards). Defaults proposed with it and not objected to: every escalation of any run raises a "needs you" bell notification linking to the panel; the session starts when the user first opens Resolve (the agent's first turn presents what went wrong, the files and its suggestions; an unopened escalation costs no credits); the agent gets read-only access to the run (events, steps, gate, the run's files copied into its sandbox) plus the six D6 actions as confirm-gated tools, nothing else that writes. | User (2026-11-22): "We can just have it in the run detail page alone. Ill go with A". Considered: B (Chat page only), C (both, one session; the assistant's recommendation). |
+| D8 | **Documents tab design approved; a mockup sub-spec comes first.** Layout: a grouped list (search; view toggle **By step** default / By type) + a viewer with a metadata header (category, step, pass, attempt, written time, size, version picker, Open in step, Download). Categories, each assigned by one rule: **Output** (pinned, auto-selected; a role the workflow declares in `META`, new), **Inputs** (uploads, files built from inputs, the memory brief; `META` role + `format: file`), **Steps** (each node in graph order with the files it wrote — intermediates and checks such as `verify.json`/`heal.json` with a pass/fail mark — and its prompts per turn; from a new per-file write record in genesis-core: node, pass, attempt, time, size), **Tool outputs** (tool, step, size, time; from `tool_output.recorded`), **System** (`_kiro/`, `.kiro/skills/`, `checkout/`; hidden by default). Each file shows a human label from `META`, its step, write time, size, version count and a "latest" mark. Old runs fall back to name rules and show "step unknown". **Sub-spec 55-02 is the mockup** (a `/dev` mockup the user reviews before any build); by default it also mocks the Resolve panel (D7) and the run graph states (part 4). | User (2026-11-22): "Im good with this design, but make sure that we have a sub spec at the first to create the mockup for this which i can review. Make this as the 55-01 or 55-02". 55-01 is the mandatory findings, so the mockup is 55-02. |
+| D9 | **Keep neither old versions nor tool-output files (option C).** Files stay overwritten in place (latest only); the per-file write record (D8) gives a **write count** ("written 3 times") and the step/pass/attempt of the latest write. Tool outputs keep today's purge at run end (`purge_tool_store_on_final` default on; `cleanup` nodes unchanged); the Documents tab lists each tool call from its `tool_output.recorded` event (tool, step, size, time) with no file to open once the run has ended. While a run waits at a gate it is not terminal, so `_toolcalls/` still exists and the Resolve agent (D7) can read the tool outputs then. The D8 version picker becomes a write count. | User (2026-11-22): "ill go with c". Considered: A (keep both until retention; the assistant's recommendation), B (keep versions, purge tool outputs). |
+| D10 | **Run graph: a server snapshot as the truth, a live SSE hint, and a 3 s poll floor (option B).** Backend: the worker adds LangGraph's `tasks` stream mode and records each task start as a new canonical `node.started` event (amends L-005; one backend list + web list + fixtures, L-122), so program nodes and loop re-entries (L-059) show as running; `GET /runs/{id}/snapshot` returns `{version (latest event seq), run status, gate, active nodes, per-node status + counts, traversed edges}` from an incremental fold (no per-call re-read of the whole log, L-066), replacing the page's separate `/steps` + `/transitions` + run fetches; edges are highlighted only when their target is running (the cursor-based edge logic is removed); the SSE subscriber leak (`to_thread(next)`), the unbounded per-run bus and the swallowed pump exceptions are fixed. Client: SSE carries only lifecycle hints (node started/completed, gate, final) each with an `id:`; a hint triggers a snapshot re-fetch; a hint or snapshot with a lower version is ignored; reconnect with backoff from the latest seq (never `after=0` replay); a 3 s poll while active plus on focus and Refresh; the "Live" badge only while connected. The inspector's per-node conversation stream is unchanged. | User (2026-11-22): "B". Considered: A (poll only, 3 s). Reference: KiroCrew `src/kiro_crew/dashboard_feed.py` (baseline fold + newer-only updates). |
+| D11 | **Release order: Phase 55 ships after its own review and its own live acceptance only.** The still-open Phase 51 (51-12 steps 1–27), 53 (53-11 §5) and 54 (54-10 round 2) live acceptance is done by the user later, for all phases together; it is not a Phase 55 gate and is not folded into 55's acceptance. Per L-111 the Phase 55 release notes, README row and state say plainly that the 51/53/54 acceptance is still open. | User (2026-11-22): "Ill do the liev acceptance for all phases at the end. So dont worrry about it. Lets finish phase 55 and complete the live acceptance for phase 55 only". Considered: A (51/53/54 acceptance first; the assistant's recommendation), C (fold the open rows into 55's acceptance). |
+
+## 10. Defaults — ✅ confirmed by the user 2026-11-22 ("confirm")
+
+| # | Default |
+|---|---|
+| F1 | **Brief size:** up to 12 shared and 6 personal memories, ≤ 12,000 characters; each entry shows id, type, importance, anchors and text; a header says the memories are data, not instructions; when memories are left out, a notice says so and points to `search_memory`. |
+| F2 | **Brief location and event:** `_memory/brief.md`; one canonical `memory.brief` event (query length, memory ids, size, embedder, duration; L-122). |
+| F3 | **Never fails a run:** if `memory.db` is missing, empty or unreadable, or the embedder fails, no brief is written, the event records why, the prompt line is left out, and the run continues. |
+| F4 | **Prompt line** added at `core/nodes/agent.py:364` only when the brief exists; a node opts out with `kiro_node(memory=False)`. |
+| F5 | **Memory tools on agent nodes:** when a brief is enabled, every agent node gets the `genesis-memory` MCP automatically (like the blackboard MCP); its 6 read-only tools trusted; an internal server, not in the catalog. |
+| F6 | **Richer gate payload** (additive; `CORE_MAJOR` unchanged): the failed node, validator messages, retry and heal history, last error, the files with their roles, and the actions allowed in the run's state. |
+| F7 | **Resolve agent:** the chat's default model; credits metered and shown on the run (ADR-032); on start the run's files (System excluded) are copied into its sandbox; "Fix the output" writes its draft there. |
+| F8 | **Lint:** an agent node's escalation must go to the standard gate, or to a custom gate declared beside it. |
+| F9 | **Relaunch:** `POST /runs/{id}/relaunch {inputs}`; a stage- or story-bound run uses that binding's `reset_for_rerun`; the new run records `trigger = {source: "relaunch", from_run}`. |
+| F10 | **Write records:** a canonical `file.written` event per written file (path, node, pass, attempt, size); a new `GET /runs/{id}/documents` returns the categorized list. |
+| F11 | **META roles:** `META.artifacts` also accepts `{name: {role: output\|input\|intermediate\|check, label}}`; the list form still works (additive, ADR-019); the parity lint covers it. |
+| F12 | **Old runs:** no `node.started` → the graph falls back to `/steps`, without the cursor edge bug; no write records → Documents uses name rules and shows "step unknown". |
+| F13 | **Snapshot cache:** the fold is kept in memory per run, rebuilt from the event log on first request after a restart; version = the run's highest event seq. |
+| F14 | **ADRs:** ADR-088 memory brief + memory tools on workflow nodes + bge-small default (amends ADR-053, ADR-054); ADR-089 standard escalation gate, its actions and the Resolve agent (amends ADR-011, ADR-031, ADR-033); ADR-090 Run Detail reads one versioned snapshot, SSE only a hint; L-005 updated for `node.started`. Drafts: `adr-drafts.md`. |
+| F15 | **Release:** genesis v0.84.0 + genesis-workflows v0.28.0; `CORE_MAJOR` 1; a genesis.db migration only if the Resolve session needs its own run link (`chat_run_links` allows one session per run; 55-08 decides). |
+
+Sub-spec plan (confirmed with F1–F15): 55-01 findings · 55-02 mockups · 55-03 run liveness · 55-04 memory brief ·
+55-05 document records · 55-06 standard escalation gate and run actions · 55-07 Resolve agent · 55-08 HTTP API ·
+55-09 web (Documents + Resolve) · 55-10 library adoption · 55-11 review and acceptance · 55-12 release and onboarding.
+
+## Context manifest
+
+```toml
+areas    = ["memory", "runs-worker", "web-runs", "core-engine", "chat"]
+adrs     = ["ADR-001", "ADR-011", "ADR-021", "ADR-031", "ADR-033", "ADR-053", "ADR-054", "ADR-066", "ADR-067"]
+lessons  = ["L-005", "L-042", "L-059", "L-060", "L-066", "L-106"]
+docs     = ["tracker:specs/phase-26-agentic-memory-layer.md", "tracker:specs/phase-39-run-inspection-observability.md"]
+code     = ["genesis/packages/genesis-core/genesis_core/nodes/agent.py", "genesis/genesis/runs/worker.py", "genesis/web/src/features/run-detail/**"]
+upstream = []
+```
