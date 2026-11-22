@@ -76,41 +76,6 @@
   "overflow": [],
   "clipped_text": []
  },
- "resolve-side-unopened-1280-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-first-turn-1280-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-chatting-1280-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-manual-1280-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-no-accept-1280-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
  "resolve-tab-unopened-1280-light": {
   "page_hscroll": false,
   "tailwind_ok": true,
@@ -238,8 +203,8 @@
   "theme_class": "theme-light",
   "portal_in_viewport": true,
   "portal_box": [
-   863,
-   569,
+   488,
+   722,
    384,
    202
   ],
@@ -346,41 +311,6 @@
   "clipped_text": []
  },
  "docs-states-several-1440-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-unopened-1440-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-first-turn-1440-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-chatting-1440-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-manual-1440-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-no-accept-1440-light": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "theme_class": "theme-light",
@@ -514,8 +444,8 @@
   "theme_class": "theme-light",
   "portal_in_viewport": true,
   "portal_box": [
-   1023,
-   569,
+   568,
+   722,
    384,
    202
   ],
@@ -622,41 +552,6 @@
   "clipped_text": []
  },
  "docs-states-several-1920-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-unopened-1920-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-first-turn-1920-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-chatting-1920-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-manual-1920-light": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-light",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-no-accept-1920-light": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "theme_class": "theme-light",
@@ -790,8 +685,8 @@
   "theme_class": "theme-light",
   "portal_in_viewport": true,
   "portal_box": [
-   1343,
-   569,
+   808,
+   722,
    384,
    202
   ],
@@ -898,41 +793,6 @@
   "clipped_text": []
  },
  "docs-states-several-1280-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-unopened-1280-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-first-turn-1280-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-chatting-1280-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-manual-1280-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-no-accept-1280-dark": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "theme_class": "theme-dark",
@@ -1066,8 +926,8 @@
   "theme_class": "theme-dark",
   "portal_in_viewport": true,
   "portal_box": [
-   863,
-   569,
+   488,
+   722,
    384,
    202
   ],
@@ -1174,41 +1034,6 @@
   "clipped_text": []
  },
  "docs-states-several-1440-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-unopened-1440-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-first-turn-1440-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-chatting-1440-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-manual-1440-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-no-accept-1440-dark": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "theme_class": "theme-dark",
@@ -1342,8 +1167,8 @@
   "theme_class": "theme-dark",
   "portal_in_viewport": true,
   "portal_box": [
-   1023,
-   569,
+   568,
+   722,
    384,
    202
   ],
@@ -1450,41 +1275,6 @@
   "clipped_text": []
  },
  "docs-states-several-1920-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-unopened-1920-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-first-turn-1920-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-chatting-1920-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-manual-1920-dark": {
-  "page_hscroll": false,
-  "tailwind_ok": true,
-  "theme_class": "theme-dark",
-  "overflow": [],
-  "clipped_text": []
- },
- "resolve-side-no-accept-1920-dark": {
   "page_hscroll": false,
   "tailwind_ok": true,
   "theme_class": "theme-dark",
@@ -1618,8 +1408,8 @@
   "theme_class": "theme-dark",
   "portal_in_viewport": true,
   "portal_box": [
-   1343,
-   569,
+   808,
+   722,
    384,
    202
   ],

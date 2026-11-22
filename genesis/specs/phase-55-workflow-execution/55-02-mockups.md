@@ -79,10 +79,10 @@ upstream = []
 ## As built
 
 **Status:** BUILT 2026-11-22, review **SHIP** (re-run 1). **User's D8 review done 2026-11-23: approved with one
-change** (Rerun from the start, revised in `09fd371`); Decisions 4 and 9 still await an explicit answer (see "User
-review"). Next: the spec agent records the change in 55-01 §9 and folds it into 55-06/55-08/55-09 before the web parts
-of 55-03 and 55-09 start. Repo genesis, branch master, base `7f32ac0`, head `d914111`, 8 local commits (not pushed,
-not tagged). Source: 12 files under `web/src/dev/mockups/phase55/` plus the
+change** (Rerun from the start, revised in `09fd371`), and the user's two choices (Resolve as a tab; a fork rebinds
+the stage and cancels the original), applied in `7495448`/`1778a50`. Next: the spec agent records the change and the
+choices in 55-01 §9 and folds them into 55-03/55-06/55-08/55-09 before the web parts of 55-03 and 55-09 start. Repo
+genesis, branch master, base `7f32ac0`, head `d0aa1b2`, 12 local commits (not pushed, not tagged). Source: 12 files under `web/src/dev/mockups/phase55/` plus the
 router, a one-word export change in the Phase 54 mockup, and a probe script. No app page changed.
 
 ### Commits (genesis)
@@ -97,6 +97,10 @@ router, a one-word export change in the Phase 54 mockup, and a probe script. No 
 | `772980b` | `web/static` for c563ad8 (66 files) |
 | `09fd371` | the user's D8 change: Rerun from the start takes this run's inputs unchanged and asks only for additional instructions for every agent step |
 | `d914111` | `web/static` for 09fd371 (67 files) |
+| `7495448` | the user's choices: Resolve is a Run Detail tab (the side-panel option removed); Restart from a step binds the stage to the new run and cancels this run |
+| `a7305db` | `web/static` for 7495448 (68 files) |
+| `1778a50` | the action results show inside the Resolve tab |
+| `d0aa1b2` | `web/static` for 1778a50 (66 files) |
 
 Bundle proof (L-089): I checked each bundle commit with `git show --stat <sha> -- web/static` in its own call after the
 build had exited. Each time, a rebuild in a later call left `git status --short --untracked-files=all` empty. The
@@ -200,6 +204,10 @@ What each surface shows:
   with the pre-fix `resolve.tsx`, 5 tests fail.
 - D8 change (`09fd371`): the relaunch dialog test now asserts one textbox, "Additional instructions for the new run",
   its "every agent step" hint and no input fields; it fails on the previous dialog.
+- D8 choices (`7495448`): the Resolve test runs once per state on the tab (5 tests; the 5 side-panel ones are gone)
+  and asserts the Resolve tab; the fork dialog and result tests assert the rebinding and the cancel.
+- Gates at `1778a50`: lint 0 errors / 20 warnings (baseline); typecheck clean; `npm test` 82 files / **943 passed**
+  (37 in `phase55.test.tsx`).
 - Gates at `09fd371`:
   - `npm run lint`: 0 errors, 20 warnings, the baseline count; none in new files.
   - `npm run typecheck`: clean.
@@ -216,8 +224,9 @@ The final run at `c563ad8` (the source of `772980b`) gave **216 entries, all cle
 - diff lines were cut off in the side panel: they wrap now;
 - the chat did not open on its newest turn.
 
-Re-run after the D8 change, at `09fd371` (the source of `d914111`): 216 entries, all clean; the folder below holds
-that run.
+Re-run after the D8 change and choices, at `1778a50` (the source of `d0aa1b2`): **186 entries, all clean** (the side
+panel is gone, so 30 fewer). The folder below holds that run only; the side-panel screenshots are in project-tracker
+history at `a1f7448`.
 
 Folder: `specs/phase-55-workflow-execution/evidence/55-02/` (15 MB, JPEG q70, plus `result.json`). Names are
 `<name>-<width>-<theme>.jpg`:
@@ -227,7 +236,7 @@ Folder: `specs/phase-55-workflow-execution/evidence/55-02/` (15 MB, JPEG q70, pl
 | 1 By step | `docs-by-step` |
 | 2 By type | `docs-by-type` |
 | 3 States | `docs-states-live-draft`, `-live-assemble`, `-tool-metadata`, `-old-run`, `-no-output`, `-several` (plus `docs-states`) |
-| 4 Resolve | `resolve-side-<state>`, `resolve-tab-<state>` (state ∈ unopened, first-turn, chatting, manual, no-accept); `resolve-dialog-<action>`, `resolve-result-<action>` (action ∈ retry, accept, fix_accept, relaunch, restart_from, stop); `portal-resolve-menu`, `portal-step-picker` |
+| 4 Resolve | `resolve-tab-<state>` (state ∈ unopened, first-turn, chatting, manual, no-accept); `resolve-dialog-<action>`, `resolve-result-<action>` (action ∈ retry, accept, fix_accept, relaunch, restart_from, stop); `portal-resolve-menu`, `portal-step-picker` |
 | 5 Bell | `bell`, `portal-bell-popover` |
 | 6 Graph | `graph-states` (all 7 states, the Live badges and Refresh) |
 
@@ -307,6 +316,10 @@ The user's review, 2026-11-23 ("Everything looks good. One change…"). The chan
 | 5 | Escalation in the bell | approved | — |
 | 6 | Run graph states | approved | — |
 
-Decisions 1–3, 5–8 and 10–12 above are taken as approved with the page ("Everything looks good"). **Still open:
-Decision 9** (placement A side panel or B tab; both are built) and **Decision 4** (does a fork keep the stage bound to
-the escalated run, as drawn, or rebind it and cancel the original like Rerun?). Asked of the user 2026-11-23.
+Decisions 1–3, 5–8 and 10–12 above are taken as approved with the page ("Everything looks good"). The user's answers to
+the two open ones (2026-11-23, "my choices 1. B 2. bind the stage to the new run and cancel the old one"):
+
+| decision | choice (→ sub-spec) |
+|---|---|
+| 9 Placement | **B, a Resolve tab** in Run Detail beside Flow and Documents, with the facts sidebar; the side panel was removed from the mockup in `7495448`. The results of the actions show in that tab (`1778a50`). D7 "a Resolve panel … beside the graph and Documents" reads as this tab (→ 55-09). |
+| 4 Fork | **Restart from an earlier step binds the stage (or story) to the new run and cancels the escalated run**, which links to it, like Rerun. This amends D6 action 5 ("`RunManager.fork`; original untouched"): the fork still seeds a new thread from the checkpoint (ADR-025 holds, the original's checkpoints are untouched) but the original run then ends `cancelled` through the stop-intent + CAS path, and the stage/story binding moves to the new run before it starts (L-061, L-108; → 55-06, 55-08, 55-09). |
