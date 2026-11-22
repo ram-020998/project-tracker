@@ -78,9 +78,11 @@ upstream = []
 
 ## As built
 
-**Status:** BUILT 2026-11-22, review **SHIP** (re-run 1). **Waiting for the user's D8 review of `/dev/phase-55`.**
-The web parts of 55-03 and all of 55-09 do not start before it. Repo genesis, branch master, base `7f32ac0`, head
-`772980b`, 6 local commits (not pushed, not tagged). Source: 12 files under `web/src/dev/mockups/phase55/` plus the
+**Status:** BUILT 2026-11-22, review **SHIP** (re-run 1). **User's D8 review done 2026-11-23: approved with one
+change** (Rerun from the start, revised in `09fd371`); Decisions 4 and 9 still await an explicit answer (see "User
+review"). Next: the spec agent records the change in 55-01 §9 and folds it into 55-06/55-08/55-09 before the web parts
+of 55-03 and 55-09 start. Repo genesis, branch master, base `7f32ac0`, head `d914111`, 8 local commits (not pushed,
+not tagged). Source: 12 files under `web/src/dev/mockups/phase55/` plus the
 router, a one-word export change in the Phase 54 mockup, and a probe script. No app page changed.
 
 ### Commits (genesis)
@@ -93,6 +95,8 @@ router, a one-word export change in the Phase 54 mockup, and a probe script. No 
 | `640b037` | `web/static` for d9f4509 (68 files) |
 | `c563ad8` | the Resolve thread starts at the top on a state switch |
 | `772980b` | `web/static` for c563ad8 (66 files) |
+| `09fd371` | the user's D8 change: Rerun from the start takes this run's inputs unchanged and asks only for additional instructions for every agent step |
+| `d914111` | `web/static` for 09fd371 (67 files) |
 
 Bundle proof (L-089): I checked each bundle commit with `git show --stat <sha> -- web/static` in its own call after the
 build had exited. Each time, a rebuild in a later call left `git status --short --untracked-files=all` empty. The
@@ -124,7 +128,6 @@ Stub data (L-083; the reviewer checked it against the sources):
   - its 19 real `_prompts/<node>-p<pass>-a<attempt>-<ms>.txt` names;
   - its 8 workstreams;
   - its node ids and labels from `workflow.yaml`;
-  - its real `runs.inputs` (relaunch prefill);
   - its 125 `tool_output.recorded` events: the real split (plan 1, analyze 113, draft 8, synthesize 2, verify 1) and
     real rows call_1–8, call_123 and call_125.
 - **Memory brief:** memories #40, #13 (shared) and #9 (personal) from `memory.db`.
@@ -195,7 +198,9 @@ What each surface shows:
     into the expected node, per graph state (`reassemble->verify` on the loop).
 - Fail-first: with the pre-fix `documents.tsx`, the live-draft and several tests fail. The reviewer also showed that
   with the pre-fix `resolve.tsx`, 5 tests fail.
-- Gates at `c563ad8`:
+- D8 change (`09fd371`): the relaunch dialog test now asserts one textbox, "Additional instructions for the new run",
+  its "every agent step" hint and no input fields; it fails on the previous dialog.
+- Gates at `09fd371`:
   - `npm run lint`: 0 errors, 20 warnings, the baseline count; none in new files.
   - `npm run typecheck`: clean.
   - `npm test`: 82 files, **948 passed** (906 at v0.83.0).
@@ -210,6 +215,9 @@ The final run at `c563ad8` (the source of `772980b`) gave **216 entries, all cle
 - a "via" edge note overlapped its count;
 - diff lines were cut off in the side panel: they wrap now;
 - the chat did not open on its newest turn.
+
+Re-run after the D8 change, at `09fd371` (the source of `d914111`): 216 entries, all clean; the folder below holds
+that run.
 
 Folder: `specs/phase-55-workflow-execution/evidence/55-02/` (15 MB, JPEG q70, plus `result.json`). Names are
 `<name>-<width>-<theme>.jpg`:
@@ -287,5 +295,18 @@ No ADR deviation. Choices the spec did not cover; each is for the user to confir
 
 ### User review (D8): per surface
 
-To fill in after the user's review: verdict (approved / changes) per surface 1–6, and answers to Decisions 4 and 9.
-Changes go to 55-01 §9 as new decisions.
+The user's review, 2026-11-23 ("Everything looks good. One change…"). The change is for the spec agent to record in
+55-01 §9 and fold into the sub-specs in the last column.
+
+| # | surface | verdict | changes (→ sub-spec) |
+|---|---|---|---|
+| 1 | Documents tab, By step | approved | — |
+| 2 | Documents tab, By type | approved | — |
+| 3 | Documents states | approved | — |
+| 4 | Resolve panel, dialogs, results | changes | **Rerun from the start** no longer shows the run's inputs: the new run takes every input from the escalated run (feature id, stage id and the rest) unchanged, and the user only gives **additional instructions**, which are passed to every agent node of the new run. The action is renamed "Rerun from the start with additional instructions". This amends D6 action 4 ("with changed inputs") and F9 (`POST /runs/{id}/relaunch {inputs}` → `{instructions}`); 55-06 must define how the instructions reach every agent node's prompt (likely beside the F4 prompt line in `kiro_node`) and that they persist for the new run's resume and fork (→ 55-06, 55-08, 55-09). Revised in `09fd371`. |
+| 5 | Escalation in the bell | approved | — |
+| 6 | Run graph states | approved | — |
+
+Decisions 1–3, 5–8 and 10–12 above are taken as approved with the page ("Everything looks good"). **Still open:
+Decision 9** (placement A side panel or B tab; both are built) and **Decision 4** (does a fork keep the stage bound to
+the escalated run, as drawn, or rebind it and cancel the original like Rerun?). Asked of the user 2026-11-23.
