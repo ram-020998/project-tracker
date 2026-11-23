@@ -20,6 +20,10 @@
    and puts the instructions in every agent node's prompt (D13); restart from a step cancels the original and moves
    the binding before the new run starts (D15); bound runs rebound (L-061); the
    lint refuses an escalation that is not the standard gate; payload and action names match the approved mockup (D12).
+   From 55-06's As built: the untested path where a relaunch's rebind raises after the old run was cancelled; a fork
+   whose process exits before its final event is applied (n4); a relaunch skips the stage re-run's prerequisite checks
+   and reads the old snapshots (decision 5a, inherent to D13); queue-managed workflows refused; the launch environment
+   is not stored (m1, as for resume).
 3. **Resolve chat (ADR-031/034/086):** no shell; writes only in the sandbox; activation verified (L-113); a write outside
    the sandbox and an unlisted tool refused live (negative control, L-117).
 4. **Liveness (ADR-090 draft, D10, D16):** `node.started` canonical in both lists and the fixtures (L-122); the snapshot fold

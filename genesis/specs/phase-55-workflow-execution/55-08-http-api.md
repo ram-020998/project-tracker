@@ -14,8 +14,8 @@
 | `GET /runs/{id}/documents` | 55-05 (built) | — | `RunDocuments` as built (55-05 As built decisions 9–15: `writes` = record count, 0 = unknown; `writing`, `legacy`, `roles_declared`, `status`, `version`; steps with `label`, `description`, `kind`; `tool_outputs`). **Two fixes here:** `legacy` = "the run finished with no write records" (review N4; a new run that has not written yet is not legacy); `writing` only while the run is `pending`/`running` (review m5: a paused or gated run must not show "being written"). `execution` counts distinct task ids (a gate resumed with the same id is one execution), which can differ from the snapshot's ↻; 55-09 labels it so. `file.written` is **not** a `/live` hint: Documents re-reads on `node.completed` (the files are diffed at the same task finish) and the 3 s poll | 404 |
 | `POST /runs/{id}/respond` (extended) | 55-06 | a legacy decision **or** `{action: retry\|accept\|stop\|<extra>, guidance?, reason?, ...extra}` | as today | 400 action not allowed (`allowed[action]` is a reason), 409 not at a gate |
 | `POST /runs/{id}/fix-and-accept` | 55-06 | `{path, proposal_id?, source_file}` | `{run_id, status}` | 400 path refused, 409 not allowed |
-| `POST /runs/{id}/relaunch` | 55-06 | `{instructions}` (D13; the inputs are reused unchanged, no multipart) | `{run_id, from_run}` | 400 instructions too long, 409 run still running (not at a gate) |
-| `POST /runs/{id}/restart-from` | 55-06 | `{as_node, values?}` (D15) | `{run_id, from_run, as_node}` | 400 unknown node / invalid values, 409 run running (not at a gate) |
+| `POST /runs/{id}/relaunch` | 55-06 | `{instructions}` (D13; the inputs are reused unchanged, no multipart) | `{run_id, from_run}` | 400 instructions too long, 409 run still running (not at a gate), 409 a queue-managed workflow (55-06 decision 8, with its reason) |
+| `POST /runs/{id}/restart-from` | 55-06 | `{from_step, values?}` (D15, D21: the step the user restarts **from**; the server resolves it to a checkpoint — the latest one whose `next` holds that step — and forks there, so the caller never deals with `as_node`'s "continue after" meaning) | `{run_id, from_run, from_step}` | 400 unknown step / no checkpoint before it / invalid values, 409 run running (not at a gate), 409 a queue-managed workflow (55-06 decision 8, with its reason) |
 | `POST /runs/{id}/fork` | exists | unchanged (ADR-009 mode 3: no cancel, no rebind) | unchanged | — |
 | `POST /runs/{id}/resolve` | 55-07 | — | `{session_id, created}` (idempotent: returns the existing session) | 409 run never escalated |
 | `GET /runs/{id}/resolve` | 55-07 | — | `{session_id?, proposals: [...], credits}` | 404 |
@@ -30,6 +30,14 @@ copilot control MCP, tests) before an existing one changes (L-094).
 **System files (D20):** `GET /runs/{id}/artifacts/{name:path}` and its `/download` refuse (403) a path under `_kiro/`,
 `.kiro/`, `.pids/` or `checkout/` — the run's Kiro home is not confirmed free of secrets — so the "not previewable"
 rule of 55-09 is enforced on the server, not only hidden in the page; list the routes' other readers first (L-094).
+
+**From 55-06's As built (D21):** the routes for respond (action dicts), fix-and-accept, relaunch and restart-from are
+added here (55-06 built the `RunManager` methods only). Error mapping: `RunActionError` and `GateResponseError` → 400;
+`RunStateError` → 409; an unknown workflow (`FileNotFoundError`) → 409. Each mutating route returns the new run id and
+the caller follows it (L-120). Contract rows for the enriched gate payload (`history`, `files`, `allowed` with the six
+keys + one per extra option, `extra_options [{id, label, hint}]`) and `run.relaunched {to_run, source}`. **Scheduler
+follow-up (55-06 m2):** a scheduled run that is relaunched or restarted must not leave its schedule's history on the
+cancelled run — the scheduler follows `run.relaunched.to_run` to the run that finishes (L-120). **Audit:** see D22.
 
 ## 2. Resolve session storage (F15)
 

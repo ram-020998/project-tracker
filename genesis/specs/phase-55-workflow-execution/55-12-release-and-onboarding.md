@@ -45,7 +45,10 @@ checklist in the release notes:
 Gather the lesson candidates and code-map changes from every As built (55-03's: spike the real stream before
 designing on it, the `__interrupt__` chunk swallowed on every gate; an unread stderr PIPE blocks the child; a count
 on a node and its incoming edge share one rule; from D19: evidence of a memory feature carries the user's memories —
-redact before committing, since deleting later leaves the text in history).
+redact before committing, since deleting later leaves the text in history; 55-06's: a fork copies the state that made
+the run fail, a path built from an id is a path, a loop variable shadowing a binding). Update the reliability
+standard / `docs/architecture` text that names `hitl_gate` as the escalation target, and L-106 (every answer routed,
+now by the standard gate).
 
 File ADR-088, ADR-089 and ADR-090 from `adr-drafts.md` into `reference/decision-log.md` (amendment links on ADR-011,
 ADR-031, ADR-033, ADR-053, ADR-054); update L-005 (`node.started` canonical) and add the phase's lesson candidates from

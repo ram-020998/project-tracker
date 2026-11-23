@@ -50,7 +50,9 @@
   this run ends Cancelled and links to it (D13, D15).
 - After an action: its result shown **inside the Resolve tab** (D14) — the outcome note in the thread and the result
   card as mocked, with a link to the new run for relaunch and restart from a step; the graph and Documents refresh
-  through 55-03.
+  through 55-03. The restart dialog lets the user pick **the step to restart from** (D21); a queue-managed workflow
+  (test-execution, story-verification, setup-composer, action-capture, test-design top-ups) shows Rerun and Restart
+  disabled with the server's reason (55-06 decision 8). A stopped run's graph shows the gate's `<gate>_stop` step.
 - Credits of the conversation shown in the tab ("This chat") with provenance, and included in the run header's total
   (ADR-032, D12).
 - The legacy gate panel (`hitl/HitlBar.tsx` `GatePanel`) stays for approval / pre_mutation / review gates and for a

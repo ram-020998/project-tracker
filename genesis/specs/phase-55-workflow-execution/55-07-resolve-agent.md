@@ -19,7 +19,7 @@
   - **`propose_action(action, params, rationale)`** — the only tool with an effect: it validates `action` (one of
     the mockup's keys `retry`, `accept`, `fix_accept`, `relaunch`, `restart_from`, `stop`, or an extra option, D12
     item 10) against the gate's current `allowed` and `params` against the action's schema (guidance text for retry;
-    **instructions** text for relaunch, D13 — never changed inputs; `as_node` + optional `values` for restart_from;
+    **instructions** text for relaunch, D13 — never changed inputs; the step to restart from (+ optional `values`) for restart_from, D21;
     `path` + `source_file` for fix_accept, the source inside the sandbox's `drafts/`; a reason for stop), stores a
     **proposal** and returns its id. It applies nothing.
   - Trust = exactly these tools + the sandboxed fs built-ins; tested on the real projection with a negative control
@@ -32,7 +32,12 @@
   params, rationale). Emitted on the session stream as a `resolve.proposal` event so the panel renders a card (55-09).
   A newer proposal for the same action supersedes the older one. Dismiss → `dismissed`.
 - **Confirm** (the user, via 55-08's route) re-validates against the run's current gate payload (stale → 409 with the
-  reason) and calls the 55-06 operation; the outcome (for relaunch and restart_from: the new run id, the old run
+  reason) and calls the 55-06 operation — `RunManager.respond / fix_and_accept / relaunch / restart_from` with
+  `source="resolve"`, the `session_id` and `proposal_id` (the proposal row's `tool_call_id`; `_audit` writes the
+  confirmation and outcome onto it). Before `fix_and_accept`, check that the session is **this run's own** Resolve
+  session (55-06 decision 12 checks only that it exists). Proposal cards and `propose_action` follow `gate.allowed`
+  (computed when the gate is raised; the methods re-check at apply time), and the sandbox copy can use `gate.files`.
+  A restart proposal names the **step to restart from** (D21), not a LangGraph `as_node`. The outcome (for relaunch and restart_from: the new run id, the old run
   `cancelled`, the stage / story moved, D13, D15) is written back to the row and posted to the session as a system
   note, so the agent knows what happened, and shown in the Resolve tab (D14).
 - When the run leaves the gate (answered elsewhere, cancelled, ended), open proposals become `stale`.

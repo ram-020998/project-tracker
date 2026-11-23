@@ -6,9 +6,16 @@
 
 ## 1. Standard escalation gate (D6, F8)
 
-Every workflow with an agent node (16) replaces its escalate `hitl_gate` with `escalation_gate` (55-06), keeps its own
-extra options beside the standard ones, and gets route tests: each action → its route → the stored outcome → the run
-status (L-106).
+Every workflow with an agent node (16) replaces its escalate `hitl_gate` with **one shared**
+`escalation_gate("escalate", extra_options=[…])` (55-06), passed as `on_exhaust_gate=` / `gate=` to every
+`attach_reliability` / `attach_healing` call, with `attach_healing(artifact=<the deliverable>)` so Accept is offered
+only when the deliverable exists (55-06 decision 2). Custom answers move to `extra_options`. The
+`escalate → (cleanup) → END` edges go, because the gate routes accept and stop; **a workflow whose cleanup must run
+on stop routes stop through it** with the gate's `stop_to=` (D21: an additive genesis-core option this sub-spec adds;
+the run still ends `failed` with the reason, L-065). Turn green: `validate_library` (56 F8 violations in 16 workflows
+at 55-06, listed in its As built) and the 7 library tests that run the lint (`_template`, action-capture,
+agent-prompt, code-review, hello-appian, setup-composer, story-verification). Add a healing-wrapped history assertion
+(55-06 review n3). Route tests: each action → its route → the stored outcome → the run status (L-106).
 
 | Workflow | Today (55-01 §3.1) | After |
 |---|---|---|
@@ -69,6 +76,6 @@ areas    = ["workflows-library", "core-engine"]
 adrs     = ["ADR-006", "ADR-011", "ADR-014", "ADR-019", "ADR-021", "ADR-067", "ADR-084"]
 lessons  = ["L-013", "L-020", "L-022", "L-057", "L-065", "L-092", "L-106", "L-110", "L-112"]
 docs     = ["tracker:specs/phase-55-workflow-execution/55-01-findings.md", "tracker:specs/phase-55-workflow-execution/adr-drafts.md"]
-code     = ["genesis-workflows/workflows/**", "genesis-workflows/registry.json", "genesis-workflows/ci/**", "genesis/genesis/cli/create_workflow.py"]
+code     = ["genesis-workflows/workflows/**", "genesis-workflows/registry.json", "genesis-workflows/ci/**", "genesis-workflows/schemas/**", "genesis/genesis/cli/create_workflow.py", "genesis/packages/genesis-core/genesis_core/nodes/escalation.py"]
 upstream = ["55-04", "55-05", "55-06"]
 ```
