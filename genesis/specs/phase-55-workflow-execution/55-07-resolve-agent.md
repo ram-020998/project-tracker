@@ -29,7 +29,8 @@
 ## 2. Proposals
 
 - Stored in `copilot_actions` as `proposed` (source `resolve`, the session, the run, the gate occurrence, action,
-  params, rationale). Emitted on the session stream as a `resolve.proposal` event so the panel renders a card (55-09).
+  params, rationale) — that table holds the Resolve proposal → confirm flow only; the audit of the action itself is
+  the run's event (D22). Emitted on the session stream as a `resolve.proposal` event so the panel renders a card (55-09).
   A newer proposal for the same action supersedes the older one. Dismiss → `dismissed`.
 - **Confirm** (the user, via 55-08's route) re-validates against the run's current gate payload (stale → 409 with the
   reason) and calls the 55-06 operation — `RunManager.respond / fix_and_accept / relaunch / restart_from` with

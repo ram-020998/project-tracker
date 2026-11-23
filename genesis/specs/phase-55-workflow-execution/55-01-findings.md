@@ -2,7 +2,7 @@
 
 > **Status:** SPEC-DRAFTED 2026-11-22 — Q&A complete: decisions D1–D11 (§9), defaults F1–F15 (§10, confirmed); D12–D15
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
-> from the user (§13); D20 after 55-05 (§14); D21 after 55-06 (§15); D22, D23 open with the user.
+> from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 from the user (§15); D23 open with the user.
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -416,6 +416,15 @@ step); **55-08** (the four routes, error mapping, the enriched payload and `run.
 disabled for queue-managed workflows; the `<gate>_stop` step); **55-10** (one shared gate, `artifact=`, `stop_to=`
 for cleanup, the 56 violations and 7 tests); **55-11** (the untested rebind-failure path and the other limits);
 **55-12** (the lesson candidates, the docs that name `hitl_gate`).
+
+**D22 (user, 2026-11-23):** option A — **the run's own event log is the audit for every escalation action**
+(amends D6's "every action is audited in `copilot_actions`"). Every action, from a Resolve proposal or the manual
+menu, is recorded on the run's events (`gate.resolved`, `run.relaunched`, the `_resolve` `file.written`) with `actor`,
+`source` (`resolve` | `manual`), `action`, its parameters and, when there is one, the `proposal_id`. `copilot_actions`
+keeps only the Resolve proposal → confirm flow (as 55-06 built it). No migration for the audit; the audit survives a
+deleted chat and lives as long as the run (retention reclaims it with the run's events). Folded into 55-07, 55-08 and
+the ADR-089 draft. Considered: B (m0031 rebuilds `copilot_actions` with a nullable session, `actor`, `source`; a
+cross-run audit table nothing needs today).
 
 ## Context manifest
 

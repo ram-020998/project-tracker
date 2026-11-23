@@ -15,7 +15,8 @@
    **Review genesis `419d8363`** (55-04's review fixes: not re-reviewed, full suite not re-run after it).
 2. **Escalation (ADR-089 draft, D6, F6, F8):** every action routed and stored as specified in every adopted workflow
    (L-106); Reject / stop ends `failed`, never `done`; accept and fix-then-accept refused when unavailable; the agent
-   cannot answer a gate, relaunch, fork or stop (ADR-033) — only `propose_action`; every action audited; relaunch
+   cannot answer a gate, relaunch, fork or stop (ADR-033) — only `propose_action`; every action audited on the run's
+   events with actor, source, action, parameters and proposal id (D22); relaunch
    cancels through the stop-intent + CAS path with no second `run.final` (L-108); rerun reuses the inputs unchanged
    and puts the instructions in every agent node's prompt (D13); restart from a step cancels the original and moves
    the binding before the new run starts (D15); bound runs rebound (L-061); the

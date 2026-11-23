@@ -58,6 +58,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D19 | No memory text in any commit: the 55-04 evidence briefs were redacted and the unpushed commits rewritten; later evidence carrying memory text is committed only redacted. |
 | D20 | 55-05 build rulings as built (worker scan + `task_finish`, `execution` = distinct task ids, old-run step from `artifact.saved`, record-count write numbers, the kill limit); `file.written` not a live hint; System files listed but not previewable, enforced by the file routes. |
 | D21 | 55-06 build rulings as built (one shared gate, relaunch rebinds without the stage re-run endpoints, queue-managed workflows refused for relaunch/restart, restart copies the folder and resets budgets); restart takes the step to restart from; `escalation_gate(stop_to=)` for cleanup on stop. |
+| D22 | The run's event log is the audit for every escalation action (actor, source, action, parameters, proposal id); `copilot_actions` keeps only the Resolve proposal flow; no audit migration (amends D6). |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 

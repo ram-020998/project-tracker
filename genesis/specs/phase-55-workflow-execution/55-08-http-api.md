@@ -37,7 +37,10 @@ added here (55-06 built the `RunManager` methods only). Error mapping: `RunActio
 the caller follows it (L-120). Contract rows for the enriched gate payload (`history`, `files`, `allowed` with the six
 keys + one per extra option, `extra_options [{id, label, hint}]`) and `run.relaunched {to_run, source}`. **Scheduler
 follow-up (55-06 m2):** a scheduled run that is relaunched or restarted must not leave its schedule's history on the
-cancelled run — the scheduler follows `run.relaunched.to_run` to the run that finishes (L-120). **Audit:** see D22.
+cancelled run — the scheduler follows `run.relaunched.to_run` to the run that finishes (L-120). **Audit (D22):** no
+audit migration; every action route makes sure the run's event (`gate.resolved`, `run.relaunched`, the `_resolve`
+`file.written`) carries `actor`, `source` (`resolve` | `manual`), `action`, the parameters and the `proposal_id` when
+there is one (55-06 records `source` today — add the rest), and the contract rows list those fields.
 
 ## 2. Resolve session storage (F15)
 
