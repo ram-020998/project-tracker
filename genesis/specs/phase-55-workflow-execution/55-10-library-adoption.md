@@ -27,7 +27,9 @@ agent-prompt, code-review, hello-appian, setup-composer, story-verification). Ad
 | agent-prompt | approve / feedback → `retry_agent`, else `give_up` (failed) | retry (guidance) → the agent; accept only with a non-empty `output.md`; stop → failed |
 | generate-business-map, memory-consolidation, memory-maintenance, action-capture, erd-generation, hello-appian | approve → continue, else error / END | accept → continue; stop → failed; retry → the failed node |
 
-Workflows with no agent node (`sync-application`, `sync-documents`, `test-execution`) are unchanged by §1.
+Workflows with no agent node (`sync-application`, `sync-documents`, `test-execution`) are unchanged by §1. Once a
+workflow adopts the gate, its Resolve tab gets the F6 facts and Fix then accept (55-09); a run of a workflow still on
+the old gate keeps the old panel and the computed action map, so check one adopted and one legacy run in 55-11.
 
 ## 2. Artifact roles and labels (F11)
 

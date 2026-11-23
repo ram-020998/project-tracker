@@ -43,7 +43,8 @@
    migration 55-08 recorded is forward-only
    (L-102).
 7. **genesis-core (ADR-019):** additive; `CORE_MAJOR` 1; an old library version still runs (legacy escalation payload).
-8. **Web:** tokens only, no `Button asChild`, jest-axe on new views.
+8. **Web:** tokens only, no `Button asChild`, jest-axe on new views. **Review 55-09's last fix** (for the re-review's
+   new finding; committed after the SHIP, not re-reviewed).
 9. **ADR drafts** match what was built (`adr-drafts.md`).
 
 ## 2. Gates
@@ -65,7 +66,7 @@ user locally and committed to `evidence/` only redacted (ids, types, scores, len
 
 | # | Check | Pass |
 |---|---|---|
-| A1 | Mockup sign-off carried through: Documents, the Resolve tab and graph states match the approved `/dev/phase-55` (genesis `d0aa1b2`, D12–D15) | user confirms |
+| A1 | Mockup sign-off carried through: Documents, the Resolve tab and graph states match the approved `/dev/phase-55` (genesis `d0aa1b2`, D12–D15), except the recorded differences the user rules on here: "round k" without "of N" (D16); no "OK · check failed N times" (deferred, D27); no Feature/Stage row in the Resolve facts sidebar and manual-action results lost on reload (D27) | user confirms |
 | A2 | **Graph liveness** on a long run (technical-design-analysis or test-design-analysis on a real feature): program nodes show running; a minutes-long agent node shows running throughout with elapsed time; only the edge into the running node is lit; a loop re-entry shows round 2; at five random moments the graph equals the event log within 3 s | as stated |
 | A3 | **Liveness under faults:** block the SSE (devtools offline for the stream, or stop the proxy) → badge Polling, graph still current within 3 s; reconnect resumes without replaying; restart `genesis serve` mid-run (no other run active) → the snapshot rebuilds; pause / resume and a gate show correctly | as stated |
 | A4 | **Memory brief:** after `scripts/install-packages.sh`, the embedder is ready and the back-fill embedded every current memory (count); three real runs (a feature-stage, a story and an agent-prompt run) each have `_memory/brief.md`; the user reviews them for relevance, **including the two 55-04 calls (D17):** memory #27 is not in the feature-4 brief (ranking), and a run with no context still gets 12 weakly related memories (no minimum similarity); the captured prompts carry the line; the memory jobs and a sync run have none; **live negative control:** in the same run an agent asked to call a tool outside the six memory tools and its node's own list is refused | user reviews the briefs |
@@ -76,6 +77,7 @@ user locally and committed to `evidence/` only redacted (ids, types, scores, len
 | A9 | **Width probe** (L-090): Documents and Resolve at 1280 / 1440 / 1920 px, light and dark, screenshots | no overflow, user confirms |
 | A10 | **Credits:** the Resolve conversation's credits are metered with provenance on the panel (ADR-032) | as stated |
 | A11 | **From 55-08 (D26):** each action also run from the **manual** menu (not only a Resolve Confirm), each audit event carrying actor / source / action / params / proposal id (D22); a **scheduled** run relaunched from its gate keeps its schedule row, which closes with the new run's result; a Resolve chat present at a consolidation run is skipped and does not hold the cursor (D25); the System 403 seen from the real page; the Genesis-turn stream on a live turn (55-08's fixture came from the fake engine) | as stated |
+| A12 | **From 55-09 (D27):** type and press Stop during a real first turn (unit-tested only); a reload during the first turn (does the stream replay in-flight events?); Resolve on a run of a workflow still on the old gate (computed action map, old panel in the inspector); Rerun and Restart on a run bound to a real feature stage or story (the stage / story moves, the dialogs' text is true) | as stated |
 
 Rows that cannot run (e.g. Dev down for a stage run) are recorded "not run" with the reason and named in the release
 notes (L-111).

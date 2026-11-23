@@ -2,7 +2,7 @@
 
 > **Status:** 📝 **SPEC-DRAFTED 2026-11-22** (genesis-spec). Q&A complete: decisions D1–D11, defaults F1–F15; D12–D15
 > from the 55-02 mockup review (2026-11-23); D16–D20 during the build (`phase-55-workflow-execution/55-01-findings.md` §9–§14).
-> 55-02..55-08 BUILT.
+> 55-02..55-09 BUILT.
 > Sub-specs: `phase-55-workflow-execution/55-01..55-12`. ADR drafts: `phase-55-workflow-execution/adr-drafts.md`
 > (ADR-088, ADR-089, ADR-090).
 > Repos: **genesis** (worker, runs, memory, chat, API, web, `packages/genesis-core` nodes and lint),
@@ -63,6 +63,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D24 | 55-07 build rulings as built: Resolve reads stay unscoped (ADR-086; writes sandboxed), no migration (session id `resolve-<run_id>`), Resolve routes and restart-from built in 55-07, an interim write guard until 55-08. |
 | D25 | Memory consolidation skips Resolve chats (`run_resolve` left out of `memory/chat_read.py`). |
 | D26 | 55-08 build rulings as built: one error mapping (400 arguments / not allowed, 409 state), one D23 reader (`runs/relaunch_policy.py`), the audit's `copilot` source, the manual Fix needs Resolve opened, `allowed` read live from `/resolve/escalation`. |
+| D27 | 55-09: "OK · check failed N times" deferred to the backlog (user); two mockup differences (no Feature/Stage row in the Resolve facts; manual-action results lost on reload) for 55-11 A1. |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
@@ -113,7 +114,7 @@ Every intermediate commit keeps the gates green. Fold each As built into the lat
 | 55-06 | genesis (`packages/genesis-core` nodes + `lint/reliability.py`, `runs/manager.py`, `api/features.py`, `api/workbench.py`) | `escalation_gate` (routes, payload, guidance and run-instructions lines), old answers mapped, relaunch with instructions, restart from a step (fork + rebind + cancel), fix-then-accept, `copilot_actions` audit — **BUILT** (genesis `6c6f93a5`, `a9a1cce8`, `88b57a52`, local; review SHIP; D21; the library lint red until 55-10) |
 | 55-07 | genesis (`chat/`, `mcp/`, `runtime/notifications.py`) | `run_resolve` chat mode, run-scoped read tools + `propose_action`, sandbox copy, first-turn seed, notifications on every escalation — **BUILT** (genesis `70f7c383`, `0a4acd0c`, local; review SHIP; D24) |
 | 55-08 | genesis (`api/`, `runs/`, `lint/`, `web/src/types`, `web/src/lib/api`) | Contract table for every new route; the D23 relaunchable reader and guard; the D22 audit fields; the 55-05 `legacy`/`writing` fixes; System paths refused; fixtures from real responses; no migration expected (D24) — **BUILT** (genesis `bd9873c6`, `be3097b3`, `1f8fd8b5`, local; review SHIP; D26; no migration) |
-| 55-09 | genesis (`web/`) | Documents tab revamp; Resolve tab (chat, proposal cards, manual action menu, confirm dialogs, results; `/runs/:runId/resolve`) |
+| 55-09 | genesis (`web/`) | Documents tab revamp; Resolve tab (chat, proposal cards, manual action menu, confirm dialogs, results; `/runs/:runId/resolve`) — **BUILT** (genesis `1f8fd8b5..a09c5fbe`, local; review SHIP with m4 deferred; D27) |
 | 55-10 | genesis-workflows | Standard gate in every workflow with an agent node; `META.artifacts` roles + labels; `memory_brief: false` on the memory workflows; versions bumped |
 | 55-11 | all | Review + gates + live acceptance (Phase 55 only, D11) |
 | 55-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-088..090, L-005, lessons, areas, state, progress) |
@@ -134,8 +135,9 @@ row and state say the Phase 51/53/54 live acceptance is still open (D11, L-111).
 **In:** §2. **Out:** an agent-written memory brief (D2's upgrade path); per-workflow memory query declarations;
 keeping old file versions or tool-output files after a run (D9); a Resolve chat on the Chat page (D7); the Resolve
 agent applying actions itself; Qwen3-size embedders; parallel-branch attribution of file writes (no workflow uses
-`Send`; 55-05 records the limit); multi-user anything (ADR-026). **Deferred** (to `specs/backlog/phase-55-follow-ups.md`
-at write-back): the agent-written brief, versions, memory-usage feedback into ranking (`mark_used`), anchor
+`Send`; 55-05 records the limit); multi-user anything (ADR-026). **Deferred** (to `specs/backlog/phase-55-follow-ups.md`,
+created 2026-11-23 with §1 the "check failed N times" label (D27) and §2 a liveness test flake; the write-back adds
+the rest): the agent-written brief, versions, memory-usage feedback into ranking (`mark_used`), anchor
 normalization in consolidation.
 
 ## 10. Defaults
