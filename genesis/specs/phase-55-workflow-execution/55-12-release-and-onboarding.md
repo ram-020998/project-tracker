@@ -38,7 +38,10 @@ checklist in the release notes:
   from a step move the feature stage (or story) to the new run and end the old run Cancelled; they are offered only
   for workflows marked relaunchable (story-implementation is not: re-run it from the Implementation lane). Reject at an old
   gate now ends the run **failed**, not done.
-- The Documents tab is reorganized by step and type; tool-output files are still removed at the end of a run.
+- The Documents tab is reorganized by step and type; tool-output files are still removed at the end of a run, and
+  their group then disappears; System files are no longer listed.
+- Workflow authors can set a model per agent step (`META.models`, `META.default_model` in `workflow.yaml`); a model
+  your Kiro account lacks falls back to the next one, with a note on the turn.
 - The run graph shows the node that is really running; **Live / Reconnecting / Polling** shows the connection.
 
 ## 3. Write-back (genesis-docs)
@@ -49,7 +52,9 @@ on a node and its incoming edge share one rule; from D19: evidence of a memory f
 redact before committing, since deleting later leaves the text in history; 55-06's: a fork copies the state that made
 the run fail, a path built from an id is a path, a loop variable shadowing a binding). Update the reliability
 standard / `docs/architecture` text that names `hitl_gate` as the escalation target, and L-106 (every answer routed,
-now by the standard gate).
+now by the standard gate). Document the new workflow `META` keys for authors (the library steering and the
+`genesis-workflow-authoring` skill): `artifacts` map form, `relaunchable` / `relaunch_hint`, `memory_brief`, `models` /
+`default_model` (D29).
 
 File ADR-088, ADR-089 and ADR-090 from `adr-drafts.md` into `reference/decision-log.md` (amendment links on ADR-011,
 ADR-031, ADR-033, ADR-053, ADR-054); update L-005 (`node.started` canonical) and add the phase's lesson candidates from
@@ -67,5 +72,5 @@ adrs     = ["ADR-019", "ADR-046", "ADR-080"]
 lessons  = ["L-030", "L-033", "L-056", "L-057", "L-089", "L-100", "L-111", "L-112"]
 docs     = ["tracker:specs/phase-55-workflow-execution/adr-drafts.md", "tracker:specs/phase-54-schedules-and-fixes/54-11-release-and-onboarding.md"]
 code     = ["genesis/pyproject.toml", "genesis/scripts/install-packages.sh", "genesis-workflows/registry.json"]
-upstream = ["55-11"]
+upstream = ["55-11", "55-13"]
 ```

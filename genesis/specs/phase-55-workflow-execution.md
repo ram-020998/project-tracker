@@ -64,6 +64,9 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D25 | Memory consolidation skips Resolve chats (`run_resolve` left out of `memory/chat_read.py`). |
 | D26 | 55-08 build rulings as built: one error mapping (400 arguments / not allowed, 409 state), one D23 reader (`runs/relaunch_policy.py`), the audit's `copilot` source, the manual Fix needs Resolve opened, `allowed` read live from `/resolve/escalation`. |
 | D27 | 55-09: "OK · check failed N times" deferred to the backlog (user); two mockup differences (no Feature/Stage row in the Resolve facts; manual-action results lost on reload) for 55-11 A1. |
+| D28 | Graph cards show status as a tinted card plus a small standard lucide status icon (no tag), back to 84 px (sub-spec 55-13). |
+| D29 | A model per agent node from the workflow files: `META.models` + `META.default_model`; per-run → node → default → Kiro's default; an unavailable model falls back with a `model.fallback` warning (55-13). |
+| D30 | Documents hides System, and hides Tool outputs once their files are purged and on old runs (amends D8, D9; 55-13). |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
@@ -90,6 +93,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | HTTP API (contract table, types, fixtures; migration if needed) | 55-08 |
 | Web: Documents tab revamp, Resolve tab | 55-09 |
 | Library adoption (genesis-workflows) | 55-10 |
+| Live-testing changes: status-coloured graph cards, a model per agent node, a leaner Documents list (D28–D30) | 55-13 |
 | Review, hardening, live acceptance | 55-11 |
 | Release + docs write-back | 55-12 |
 
@@ -98,7 +102,8 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 S1 = 55-02 (**gate:** the user reviews `/dev/phase-55`; requested changes become decisions in 55-01 §9 and are folded
 into 55-03 / 55-09 by the spec agent before they start) → S2 = 55-03 → S3 = 55-04 → S4 = 55-05 → S5 = 55-06 → S6 =
 55-07 → S7 = 55-08 (each backend sub-spec adds its own routes; 55-08 owns the contract table, web types and fixtures
-and adds what is left) → S8 = 55-09 → S9 = 55-10 (genesis-workflows, against the local genesis build) → S10 = 55-11
+and adds what is left) → S8 = 55-09 → S9 = 55-10 (genesis-workflows, against the local genesis build) → S9b = 55-13
+(the live-testing changes, D28–D30) → S10 = 55-11
 (genesis-review) → S11 = 55-12 (genesis-release, then genesis-docs). One at a time: they share the genesis checkout.
 Every intermediate commit keeps the gates green. Fold each As built into the later sub-specs before they start.
 
@@ -118,6 +123,7 @@ Every intermediate commit keeps the gates green. Fold each As built into the lat
 | 55-10 | genesis-workflows | Standard gate in every workflow with an agent node; `META.artifacts` roles + labels; `memory_brief: false` on the memory workflows; versions bumped |
 | 55-11 | all | Review + gates + live acceptance (Phase 55 only, D11) |
 | 55-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-088..090, L-005, lessons, areas, state, progress) |
+| 55-13 | genesis (`web/src/features/run-detail/`, `shared/ui/icons.ts`, genesis-core `kiro_node`, `runs/worker.py`, `lint/contract.py`) | Status-coloured 84 px graph cards with standard status icons (D28); `META.models` / `default_model` with fallback and `model.fallback` (D29); Documents hides System and spent Tool outputs (D30); built after 55-10, before 55-11 |
 
 API sub-spec: **55-08**.
 

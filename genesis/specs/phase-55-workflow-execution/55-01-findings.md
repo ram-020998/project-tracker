@@ -3,7 +3,7 @@
 > **Status:** SPEC-DRAFTED 2026-11-22 — Q&A complete: decisions D1–D11 (§9), defaults F1–F15 (§10, confirmed); D12–D15
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
 > from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
-> from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18).
+> from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18); D28–D30 from the user's live testing → 55-13 (§19).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -492,6 +492,45 @@ the library adopts the gate, every Resolve tab gets the F6 facts and Fix then ac
 panel); **55-11** (typing and Stop during a real first turn; Resolve on a legacy gate; a reload mid-turn; rerun and
 restart on a run bound to a feature stage or story; the two mockup differences at A1; review the unreviewed fix);
 backlog `specs/backlog/phase-55-follow-ups.md` §1 (m4) and §2 (the liveness test flake).
+
+## 19. Live-testing observations (2026-11-23, during 55-10) → sub-spec 55-13
+
+The user's three observations from live use, built as one small sub-spec **55-13**, after 55-10 and before 55-11:
+(1) the run graph's node cards grew from 84 px (v0.83.0 `layout.ts NODE_H`) to 104 px in 55-03 because of the status
+tag row; show the status as the card's colour instead, keep the height, keep the text aligned and readable; (2) a model
+per agent node, configurable in the workflow files only (not in the app), defaulting when unset; (3) hide the System
+category in Documents, and hide Tool outputs once their files are deleted.
+
+**D28 (user, 2026-11-23):** option B — **status as a tinted card plus a small standard status icon**, no text tag. The
+card takes its status colour as a `*-subtle` background and a status-coloured border (tokens only; no opacity
+modifiers, L-123); a running card keeps its pulse. A 14 px icon at the right end of the header row gives a non-colour
+cue (WCAG 1.4.1), with the status name in the card's tooltip and screen-reader label. **Standard icons** (the user's
+condition): lucide-react (0.451.0, the app's icon set) re-exported through `web/src/shared/ui/icons.ts` as one
+`NODE_STATUS_ICON` map beside `NODE_KIND_ICON`: ok `CircleCheck`, failed `CircleX`, running `LoaderCircle` (spinning),
+paused `CirclePause`, awaiting `Hourglass`, retrying `RotateCcw`, skipped `CircleMinus`, pending `CircleDashed`,
+cancelled `Ban` (the dev confirms each name exists in 0.451.0 and uses the nearest standard lucide icon otherwise).
+The tag row goes; the run count joins the meta line; the card returns to 84 px. Considered: A (tint only; colour is the
+only cue), C (a left colour strip; colour only).
+
+**D29 (user, 2026-11-23):** option B, with the proposed shape — **a model per agent node from the workflow files.**
+`META.models: {<agent node>: "<model id>"}` plus an optional `META.default_model`, mirrored in `workflow.yaml` and
+checked by the parity lint (a `models` key that is not an agent node of the compiled graph, or a non-string value, is a
+lint error; one reader, L-109). Not editable in the app. Precedence: a per-run model (agent-prompt's input or its
+custom agent's model, today's `kiro_node(model=callable)`) → `META.models[node]` → `META.default_model` → Kiro's
+default (today's behaviour when nothing is set). The worker puts the map in `ctx.extras` and `kiro_node` resolves it
+(genesis-core additive, `CORE_MAJOR` 1); no `graph.py` changes; the turn records the model it used (`agent.prompt`
+`model`). **An unavailable model falls back:** availability depends on the user's Kiro account and kiro-cli version, so
+the lint cannot check ids; when the named model is not in the models Kiro lists at session start, the node uses the
+next model in the precedence order and records a canonical `model.fallback {node, requested, used, reason}` warning
+(L-122), and the turn shows "used X instead of Y" beside 53-06's engine fallback. Considered: A (fail the step and
+escalate).
+
+**D30 (user, 2026-11-23): Documents hides System and spent Tool outputs** (amends D8's "System, collapsed" and D9's
+"tool outputs as metadata after the run ends"). System (`_kiro/`, `.kiro/`, `.pids/`, `checkout/`) is not shown in
+either view; the file routes keep refusing those paths (D20). The Tool outputs group shows only while at least one of
+its files exists (during a run, and while it waits at a gate, D9); once they are purged at the end, and on old runs,
+the group and its rows are hidden. The tool-call records stay in the run's events and the node's turn explorer.
+Written as sub-spec 55-13 with D28 and D29.
 
 ## Context manifest
 
