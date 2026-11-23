@@ -21,10 +21,12 @@
    lint refuses an escalation that is not the standard gate; payload and action names match the approved mockup (D12).
 3. **Resolve chat (ADR-031/034/086):** no shell; writes only in the sandbox; activation verified (L-113); a write outside
    the sandbox and an unlisted tool refused live (negative control, L-117).
-4. **Liveness (ADR-090 draft, D10):** `node.started` canonical in both lists and the fixtures (L-122); the snapshot fold
+4. **Liveness (ADR-090 draft, D10, D16):** `node.started` canonical in both lists and the fixtures (L-122); the snapshot fold
    is incremental (no whole-log read per call, L-066); SSE never replays the log, honours `Last-Event-ID`, bounded
    queues, cleanup shielded (L-118); edges lit only into a running node; cursor semantics unchanged for its other
-   readers (L-094).
+   readers (L-094). 55-03 was reviewed SHIP on its own; re-check only what later sub-specs changed in its files.
+   Not covered by 55-03: edge counts under a parallel fan-out, and two `serve` processes watching one live run (the
+   second relies on the 3 s poll by design).
 5. **Documents (D8, D9, F10–F12):** categories by rule, not by guessed names; tool-output files still purged at the end;
    old runs fall back honestly; agent HTML never runs on the app's origin.
 6. **Contracts (55-08):** fixtures from real responses; route order proven (L-096); m0031 (if built) forward-only

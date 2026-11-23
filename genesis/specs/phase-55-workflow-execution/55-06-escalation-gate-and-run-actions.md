@@ -26,7 +26,9 @@
   `fix_accept` only when the failed node's output exists and is non-empty, else the reason (e.g. "technical-design.html
   was not produced: …"); `retry` and `stop` always. `RunManager`, when it logs `gate.awaiting`, adds `history` (with
   times, from the failed node's `validator.result`, `retry.scheduled` and healing events), `files` (55-05 roles and
-  write counts) and `allowed.relaunch` / `allowed.restart_from` (run-level, §3).
+  write counts) and `allowed.relaunch` / `allowed.restart_from` (run-level, §3). The enriched payload is what
+  `snapshot.run.gate` carries (55-03), so the snapshot fold needs no change; the gate node already reads `awaiting`
+  with a `waiting` edge. `interrupt()`'s `__interrupt__` updates chunk is filtered by the worker (55-03 `_internal`).
 - **Answers** (keys = the mockup's `ActionKey`): `{"action": "retry", "guidance": str}` → `retry_to`, the node's retry
   budget reset (`retries[node] = 0`; for healing, the heal/restart budget reset), guidance stored in
   `decisions["<failed_node>.guidance"]`; `{"action": "accept"}` → `accept_to`, `decisions["<gate>.outcome"] =

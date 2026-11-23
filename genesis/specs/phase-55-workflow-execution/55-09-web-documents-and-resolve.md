@@ -19,14 +19,18 @@
   in the graph inspector), Download; the existing previews (`DocumentViewer.tsx`, `DocumentPreview`) unchanged; agent
   HTML keeps its sandboxed frame / CSP (54-10 §1 9b).
 - Old runs: name-rule categories, "step unknown", the one-line note (F12).
-- Polling: refetch while active (or on a 55-03 `file.written` hint if the live stream carries it), never per keystroke.
+- Polling: refetch while active on the same rhythm as the graph — on each `/live` lifecycle hint (a `node.completed`
+  is when a node's files are diffed, 55-05) and the 3 s poll floor — never per keystroke; no new hint kind.
 
 ## 2. Resolve tab (D14)
 
 - A **Resolve** tab in Run Detail beside Flow and Documents, with the facts sidebar on the right, as approved in
   `/dev/phase-55` (genesis `d0aa1b2`); reached at the SPA route `/runs/:runId/resolve` (registered before any generic
   run route, L-096). Shown when the run waits at an escalation gate, and kept readable afterwards for the history.
-  The run pill of a run waiting at an escalation gate reads "Needs you" (D12 n1).
+  Key it on `snapshot.run.status`, `snapshot.run.gate` (which carries the 55-06 payload) and `active_nodes` from
+  55-03's `useRunSnapshot`; do not add a second poll of the run.
+  The run pill of a run waiting at an escalation gate reads "Needs you" (D12 n1): change `statusMeta` for the
+  escalation-gate case (55-03 left it unchanged).
 - Not opened yet: the summary strip (failed step, one-line reason, **Open Resolve**) → `POST /runs/{id}/resolve`.
 - The conversation reuses the chat components (`ChatThread`, composer, the turn stream) bound to the Resolve session;
   no second chat UI.

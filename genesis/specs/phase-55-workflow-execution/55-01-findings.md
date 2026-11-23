@@ -1,7 +1,7 @@
 # 55-01 — Findings: Workflow execution enhancements
 
 > **Status:** SPEC-DRAFTED 2026-11-22 — Q&A complete: decisions D1–D11 (§9), defaults F1–F15 (§10, confirmed); D12–D15
-> from the 55-02 mockup review (§9, folded per §11).
+> from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -305,6 +305,7 @@ Content was rephrased for compliance with licensing restrictions.
 | D13 | **Rerun from the start takes the run's inputs unchanged and asks only for additional instructions** (amends D6 action 4 and F9). The action is "Rerun from the start with additional instructions": every input of the escalated run (feature id, stage id and the rest; uploads re-provisioned) is reused as is; the user gives free-text instructions; **every agent node of the new run** gets them in its prompt (a line beside the F4 memory line in `kiro_node`); they persist for the new run's resume and fork. `POST /runs/{id}/relaunch {instructions}` replaces `{inputs}`. The escalated run ends `cancelled` and links to the new run; a bound stage/story moves to it. | User (2026-11-23), 55-02 review row 4; mocked in genesis `09fd371`. |
 | D14 | **Resolve is its own Run Detail tab** beside Flow and Documents, with the facts sidebar on the right; the side-panel placement is dropped; the results of each action show inside the Resolve tab. D7's "panel" reads as this tab. | User (2026-11-23): "my choices 1. B"; mocked in `7495448`, `1778a50`. |
 | D15 | **Restart from an earlier step binds the stage (or story) to the new run and cancels the escalated run**, which links to it, like Rerun (amends D6 action 5). The fork still seeds a new thread from the chosen checkpoint and the original's checkpoints and history are untouched (ADR-025); the original then ends `cancelled` through the stop-intent + CAS path (L-108), and the binding moves to the new run before it starts (L-061). The forked run starts running at once (not left paused). The plain `POST /runs/{id}/fork` (ADR-009 mode 3, no cancel, no rebind) is unchanged. | User (2026-11-23): "2. bind the stage to the new run and cancel the old one"; mocked in `7495448`. |
+| D16 | **55-03 build rulings, taken as built** (55-03 As built "Decisions / deviations" 1–12; review SHIP): no `?since_version` (a pause writes no event, so an equal seq cannot prove the snapshot unchanged; the client keeps an equal version, drops a lower one); a reconnect that missed hints gets one `resync` frame, not a replay; `run.final` hint frames carry `status`; snapshot nodes also carry `tool_calls`, `messages`, `entered_from`, and the page no longer fetches `/steps` or `/transitions`; an edge count = completed hops + the hop into an unfinished node; ↻ counts the current or stopped execution; a stopped execution's time runs to the terminal `run.final` or the stored pause time; `legacy` = node activity with no `node.started`; badge Polling / Live / Reconnecting / Finished; Refresh in the header; `fold_steps` keeps its old loop rule for its other readers; `/live` read with `fetch` + `readSse`. **One deviation from the approved mockup:** a re-entered node shows "round k", not "round k of N", and no per-item label ("workstream 4 of 8"), because nothing generic in the event log gives N or the item; the user can object at 55-11 A1. | Spec agent (2026-11-23), folding the 55-03 As built; the "of N" deviation reported to the user. |
 
 ## 10. Defaults — ✅ confirmed by the user 2026-11-22 ("confirm")
 
@@ -339,6 +340,19 @@ mockup, D12 item 10; relaunch with instructions, D13; `restart_from` = fork + re
 (relaunch body `{instructions}`; a new `POST /runs/{id}/restart-from`; payload field names); **55-09** (the Resolve tab
 and route, D14; row wording, brief placement, System in By type, credits, "Needs you" pill, validator label, D12);
 **55-11** (A5, A6 rows); umbrella §3 and ADR-089 draft. 55-02 is BUILT; next is 55-03.
+
+## 12. After 55-03 (2026-11-23): As built folded into the later sub-specs
+
+55-03 BUILT (genesis `793c04b6..29775149`, local; review SHIP after one round). D16 records its build rulings.
+Folded: **55-05** (diff at the forwarded `tasks` finish, which also comes for an erroring node; a fresh stat snapshot
+at every start because a gate or a resumed task starts again with the same id; fan-out attributed to `"_parallel"`;
+reuse the `SnapshotCache` read-after-seq pattern); **55-06** (the enriched gate payload reaches `snapshot.run.gate`
+with no fold change; `__interrupt__` already filtered); **55-08** (`/snapshot` and `/live` rows as built, no
+`?since_version`, the real fixtures); **55-09** (the Resolve tab keys on the snapshot; "Needs you" is a `statusMeta`
+change; Documents re-read on lifecycle hints + the 3 s poll); **55-11** (§1 item 4, untested fan-out and two-serve
+cases); **55-12** (the lesson candidates); ADR-090 draft text. Two 55-03 bug fixes worth noting for the release
+notes: every gate's `__interrupt__` chunk used to raise in `on_event` and be swallowed by the pump, and a worker that
+wrote more than 64 KB to stderr blocked on the unread pipe. Next is 55-04.
 
 ## Context manifest
 

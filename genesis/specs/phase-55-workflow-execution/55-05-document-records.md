@@ -7,18 +7,28 @@
 
 ## 1. Write records (`file.written`)
 
-- **Where:** in the worker, using 55-03's task start/finish. At a task start, take a stat snapshot (path, size, mtime)
-  of the run folder; at its finish, diff and emit one canonical **`file.written`** `{path, node, execution, iteration?,
-  attempt?, bytes, mtime}` per new or changed file, attributed to that node (F10). This catches every writer — program
-  code, validators, `kiro_node` output docs, agent fs writes — with no change to each node type.
+- **Where:** in the worker, using 55-03's task stream (see 55-03 As built §0 for the real payloads). At a task start,
+  take a stat snapshot (path, size, mtime) of the run folder; at the task's **finish** event (the `tasks` finish
+  `{id, name, error, result, interrupts}`, which 55-03's worker receives but does not forward yet — forward it, e.g.
+  `task_finish`; it also comes for an erroring node, which has no `updates` chunk), diff and emit one canonical
+  **`file.written`** `{path, node, execution, iteration?, attempt?, bytes, mtime}` per new or changed file,
+  attributed to that node (F10). This catches every writer — program code, validators, `kiro_node` output docs,
+  agent fs writes — with no change to each node type.
+- **Same task id again:** a gate task, and a task resumed after a kill, **starts again with the same task id**
+  (55-03 spike): take a fresh snapshot at each start and diff against it, so a resumed task does not re-report files
+  written before the kill, and a file written before the kill and not touched again keeps its first record. Never
+  forward the task's `input` (the whole state, ADR-010).
+- **Fan-out:** in a `Send`/parallel fan-out both branch starts come before either finishes (55-03 spike), so the diff
+  cannot tell the branches apart; no workflow fans out today — attribute such writes to `"_parallel"` with both node
+  names and record the limit.
 - Excluded from the diff: `_kiro/`, `.kiro/`, `_toolcalls/` (tool outputs have `tool_output.recorded`), `_prompts/`
   (`agent.prompt`), `.DS_Store`. Files written before the graph starts (uploads, ADR-035; the memory brief, 55-04) get a
   `file.written` with `node: "_launch"` / `"_memory"`.
 - `execution` = the node's nth completion; `iteration` / `attempt` from the node's last `agent.prompt` when it is an
   agent node.
 - A zero-byte file at a node's start that is filled later shows as "being written" until a `file.written` arrives.
-- Limits (record in As built): no workflow uses parallel `Send` branches, so one node runs at a time; a write by a
-  background thread after its node finished is attributed to the next node.
+- Limits (record in As built): a write by a background thread after its node finished is attributed to the next
+  node.
 - Add `file.written` to `CANONICAL_KINDS`, the web list and fixtures (L-122). Stat cost: a run folder holds tens of
   files outside the excluded trees; measure on the largest real run and record it.
 
@@ -53,7 +63,8 @@ Each document: `{path, label, category, node, execution, iteration, attempt, byt
 file.written for the path, D9), latest: true, preview_kind, media_type, passed?}` — `passed` for a check from its
 node's `validator.result`. Plus `steps: [{node, label (GraphNode.description), documents, prompts}]` in graph order,
 and `tool_outputs: [...]`. Bounded work per call (no whole-log fold on every poll; reuse the 55-03 incremental fold or
-an `after_seq` cursor, L-066).
+an `after_seq` cursor, L-066; 55-03's `SnapshotCache` reads only its `FOLD_KINDS` after the last folded seq — add
+`file.written` and `tool_output.recorded` to a fold the same way rather than re-reading the log).
 
 ## 4. Endpoint (added here; 55-08 owns the contract table)
 

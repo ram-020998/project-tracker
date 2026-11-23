@@ -9,8 +9,8 @@
 
 | Method + path | From | Body / query | Answer | Errors |
 |---|---|---|---|---|
-| `GET /runs/{id}/snapshot` | 55-03 | `?since_version=N` | `RunSnapshot` or `{unchanged: true, version}` | 404 |
-| `GET /runs/{id}/live` (SSE) | 55-03 | `Last-Event-ID` / `?after=` | lifecycle frames with `id:`; `resync`; `ping` | 404 |
+| `GET /runs/{id}/snapshot` | 55-03 (built) | — (`?since_version` not built: a pause writes no event, so an equal seq cannot prove the snapshot unchanged; the client keeps an equal version and drops a lower one) | `RunSnapshot`, nodes also carrying `tool_calls`, `messages`, `entered_from` | 404 |
+| `GET /runs/{id}/live` (SSE) | 55-03 (built) | `Last-Event-ID` / `?after=` | lifecycle hint frames with `id:`; `run.final` frames carry `status` (the client closes only on a terminal one); a reconnect that missed hints gets one `resync` frame, never a replay; `ping` every 15 s; read with `fetch` + `readSse`, not `EventSource` | 404 |
 | `GET /runs/{id}/documents` | 55-05 | — | `RunDocuments` | 404 |
 | `POST /runs/{id}/respond` (extended) | 55-06 | a legacy decision **or** `{action: retry\|accept\|stop\|<extra>, guidance?, reason?, ...extra}` | as today | 400 action not allowed (`allowed[action]` is a reason), 409 not at a gate |
 | `POST /runs/{id}/fix-and-accept` | 55-06 | `{path, proposal_id?, source_file}` | `{run_id, status}` | 400 path refused, 409 not allowed |
@@ -37,7 +37,7 @@ build finds a cleaner home that needs no migration (e.g. a column already presen
 
 ## 3. Web types and fixtures
 
-`web/src/types/`: `RunSnapshot` (with `active_edges`), `LiveHint`, `RunDocuments`, `RunDocument`, `EscalationPayload`
+`web/src/types/`: `RunSnapshot` (built in 55-03 as `types/snapshot.ts`, with `active_edges` and the extra node fields; its fixtures `web/src/test/fixtures/runs/{snapshot-gate,snapshot-done,live-frames,graph-states}.json` are real), `LiveHint`, `RunDocuments`, `RunDocument`, `EscalationPayload`
 (the F6 fields under the approved mockup's names, D12 item 10: `failed_node`, `validator_messages`, `history`,
 `last_error`, `files`, `allowed`), `ActionKey` (`retry | accept | fix_accept | relaunch | restart_from | stop`),
 `ResolveProposal`, the run `trigger` shape (`source`, `from_run`, `instructions?`, `as_node?`), the new event kinds

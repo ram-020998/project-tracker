@@ -1,7 +1,8 @@
 # Phase 55 — Workflow execution: memory brief, agent-assisted escalation, Documents and a reliable run graph
 
 > **Status:** 📝 **SPEC-DRAFTED 2026-11-22** (genesis-spec). Q&A complete: decisions D1–D11, defaults F1–F15; D12–D15
-> from the 55-02 mockup review (2026-11-23) (`phase-55-workflow-execution/55-01-findings.md` §9–§11). 55-02 BUILT.
+> from the 55-02 mockup review (2026-11-23); D16 after 55-03 (`phase-55-workflow-execution/55-01-findings.md` §9–§12).
+> 55-02, 55-03 BUILT.
 > Sub-specs: `phase-55-workflow-execution/55-01..55-12`. ADR drafts: `phase-55-workflow-execution/adr-drafts.md`
 > (ADR-088, ADR-089, ADR-090).
 > Repos: **genesis** (worker, runs, memory, chat, API, web, `packages/genesis-core` nodes and lint),
@@ -51,6 +52,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D13 | Rerun from the start reuses every input unchanged and takes only additional instructions, which every agent node of the new run gets (amends D6 action 4, F9: `relaunch {instructions}`). |
 | D14 | Resolve is its own Run Detail tab beside Flow and Documents with the facts sidebar; action results show in that tab. |
 | D15 | Restart from an earlier step forks from the checkpoint, moves the stage/story to the new run and cancels the escalated run, which links to it (amends D6 action 5); the plain fork is unchanged. |
+| D16 | 55-03 build rulings as built (no `?since_version`, one `resync` on a missed reconnect, extra snapshot node fields, edge/↻ count rules, badge states); one mockup deviation: "round k" without "of N". |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
@@ -95,7 +97,7 @@ Every intermediate commit keeps the gates green. Fold each As built into the lat
 |---|---|---|
 | 55-01 | project-tracker | Findings, research, decisions D1–D11, defaults F1–F15 |
 | 55-02 | genesis (`web/src/dev/`) | `/dev/phase-55` mockups with stub data: Documents tab (both views, every category, old-run fallback, live run), Resolve (first turn, proposals, confirm, each action's result), graph states (running program node, loop re-entry, gate, paused, disconnected) — **BUILT** (genesis `7f32ac0..d0aa1b2`, local; review SHIP; user review D12–D15: Resolve as a tab) |
-| 55-03 | genesis (`runs/`, `api/run_routes.py`, `web/src/features/run-detail/`) | `tasks` stream → `node.started`; snapshot fold + `GET /runs/{id}/snapshot`; hint SSE `GET /runs/{id}/live`; bounded bus, async subscribers, pump logging, stderr drain; graph web on the snapshot |
+| 55-03 | genesis (`runs/`, `api/run_routes.py`, `web/src/features/run-detail/`) | `tasks` stream → `node.started`; snapshot fold + `GET /runs/{id}/snapshot`; hint SSE `GET /runs/{id}/live`; bounded bus, async subscribers, pump logging, stderr drain; graph web on the snapshot — **BUILT** (genesis `793c04b6..29775149`, local; review SHIP; D16) |
 | 55-04 | genesis (`memory/`, `runs/worker.py`, `runtime/context.py`, `mcp/memory_server.py`, `packages/genesis-core` `kiro_node`, `scripts/install-packages.sh`) | Run description, prefetch, `memory.brief` event, prompt line, memory MCP on nodes, bge-small default + install + back-fill, fork copy |
 | 55-05 | genesis (`runs/`, `lint/contract.py`, `packages/genesis-core`) | `file.written` from the worker's task start/finish diff; `META.artifacts` map form + parity lint; `runs/documents.py` categorization; `GET /runs/{id}/documents` |
 | 55-06 | genesis (`packages/genesis-core` nodes + `lint/reliability.py`, `runs/manager.py`, `api/features.py`, `api/workbench.py`) | `escalation_gate` (routes, payload, guidance and run-instructions lines), old answers mapped, relaunch with instructions, restart from a step (fork + rebind + cancel), fix-then-accept, `copilot_actions` audit |

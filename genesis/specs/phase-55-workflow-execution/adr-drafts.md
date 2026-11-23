@@ -77,9 +77,14 @@
 - **Rule (one-liner).** The run graph renders only from GET /runs/{id}/snapshot (versioned by event seq); SSE sends lifecycle hints that trigger a re-fetch, with a 3 s poll floor; edges light only when their target runs.
 - **Context.** The backend never recorded a node start; the cursor is the last completed node; the web lit the edge into
   it and stopped polling between completions (55-01 §5).
-- **Decision (D10, F12, F13).** The worker adds LangGraph's `tasks` stream mode and records `node.started`; an
-  incremental server fold serves the snapshot (version = highest seq; rebuilt from the log after a restart); the SSE
-  hint stream carries `id:` and resumes from the latest seq, never replaying the log; stale versions are ignored; poll
-  every 3 s while active and on focus/Refresh; old runs fall back to `/steps` without the cursor edge.
+- **Decision (D10, F12, F13; as built in 55-03).** The worker adds LangGraph's `tasks` stream mode and records
+  `node.started` (a gate task and a task resumed after a kill start again with the same task id); an incremental
+  server fold serves the snapshot (version = highest seq; rebuilt from the log after a restart; reads only the fold's
+  kinds after the last folded seq); a run is `legacy` when it has node activity but no `node.started`; an edge count is
+  the completed hops plus the hop into an unfinished node; the hint stream (`/live`) carries `id:`, never replays the
+  log, sends one `resync` to a reconnect that missed hints, and puts `status` on `run.final` frames; no
+  `?since_version` (a pause writes no event, so an equal seq cannot prove the snapshot unchanged); the client keeps an
+  equal version and drops a lower one; poll every 3 s while active and on focus / visibility / online / Refresh; old
+  runs fall back without the cursor edge.
 - **Consequences.** One new canonical event kind; `/steps` and `/transitions` stay for other readers; the event bus
   and SSE subscribers become bounded.
