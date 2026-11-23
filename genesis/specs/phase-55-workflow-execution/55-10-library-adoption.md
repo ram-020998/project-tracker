@@ -32,6 +32,13 @@ check "Heal decision", `sections.json` intermediate "Section plan"; story-implem
 `report.json`. The four stage workflows' outputs equal their `StageFinalizer` binding artifacts
 (`genesis/chat/stage_finalizer.py:110-121`) — a test checks it.
 
+Two places must accept the map form (55-05 As built): `schemas/workflow.schema.json` (`artifacts` is an array of
+strings today) and the workflows' `cleanup` nodes, which do `set(META["artifacts"])`: with a map that yields the keys
+but bypasses the parser and ignores globs, so route them through the same role parser (one reader, L-109; the
+library cannot import genesis, so keep the rule exact-name-only there, or give each workflow a self-contained helper,
+L-022/standalone `graph.py`) and test that cleanup keeps every declared file. `validate_library` passes on the map
+form.
+
 ## 3. Memory opt-outs (D4)
 
 `memory-consolidation` and `memory-maintenance`: `META.memory_brief: false` (mirrored in `workflow.yaml`, parity lint).

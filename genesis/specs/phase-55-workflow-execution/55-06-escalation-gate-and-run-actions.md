@@ -62,7 +62,10 @@ only approve / reject / feedback, plus the run operations of §3).
 - **`fix_and_accept(run_id, *, path, source_file)`:** only while the run waits at an `escalation_gate` and
   `allowed.fix_accept` is `null`; `path` must resolve inside the run folder, be an existing file of category output / intermediate / check
   (55-05), never `_kiro/`, `.kiro/`, `_toolcalls/`, `_prompts/`, `uploads/`; `source_file` must resolve inside the
-  Resolve session's sandbox (55-07); atomic write; a `file.written {node: "_resolve", source: "resolve"}` event; then
+  Resolve session's sandbox (55-07); atomic write; then `RunManager` logs one `file.written {path, node: "_resolve",
+  source: "resolve", bytes, mtime}` itself — the worker's diff will **not** catch it, because the copy lands before the
+  resumed gate task's start snapshot (55-05 As built) — and adds `"_resolve"` to `PSEUDO_NODES` (`genesis/runs/writes.py`)
+  and the categorizer, so the file reads "Fixed in Resolve", not the step that wrote the earlier version; then
   `respond(accept)`.
 - **Binding registry (shared by relaunch and restart_from):** one registry maps bound workflows to two operations:
   `rerun(run, trigger)` — the existing rerun entry points (stage runs: `genesis/api/features.py:1151,1413`; story

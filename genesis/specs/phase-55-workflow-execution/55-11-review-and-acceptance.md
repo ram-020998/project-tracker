@@ -28,8 +28,9 @@
    readers (L-094). 55-03 was reviewed SHIP on its own; re-check only what later sub-specs changed in its files.
    Not covered by 55-03: edge counts under a parallel fan-out, and two `serve` processes watching one live run (the
    second relies on the 3 s poll by design).
-5. **Documents (D8, D9, F10–F12):** categories by rule, not by guessed names; tool-output files still purged at the end;
-   old runs fall back honestly; agent HTML never runs on the app's origin.
+5. **Documents (D8, D9, D20, F10–F12):** categories by rule, not by guessed names; tool-output files still purged at the end;
+   old runs fall back honestly; agent HTML never runs on the app's origin; 55-08's `legacy` and `writing` fixes; no
+   System file previewable; the fan-out start order under the real runner (55-05 did not spike it).
 6. **Contracts (55-08):** fixtures from real responses; route order proven (L-096); m0031 (if built) forward-only
    (L-102).
 7. **genesis-core (ADR-019):** additive; `CORE_MAJOR` 1; an old library version still runs (legacy escalation payload).
@@ -62,7 +63,7 @@ user locally and committed to `evidence/` only redacted (ids, types, scores, len
 | A5 | **Escalation, stage workflow:** a real escalation of a stage run (a forced validator failure on the candidate, or a real one); the bell notice opens `/runs/<id>/resolve` without starting the agent; opening Resolve starts it and its first turn explains the failure and proposes actions; **accept** → `done`, the stage shows the artifact (finalizer); a second escalation → **fix then accept** with a reviewed diff | as stated |
 | A6 | **Escalation, every action:** on cheap runs (agent-prompt / hello-appian with a forced failure): retry with guidance (guidance in the captured prompt, run continues); **rerun from the start with additional instructions** (the new run has the same inputs, the instructions are in every agent node's captured prompt and survive a pause/resume, the old run `cancelled` and linked; on a stage-bound run the stage moves to the new run, D13); **restart from an earlier step** (the new run starts from that step's checkpoint and runs, the original's checkpoints unchanged, the old run `cancelled` and linked, a stage-bound run's stage moves to the new run, D15); stop (`failed`, reason shown); an unavailable action disabled with its reason; a stale proposal refused; each result shown in the Resolve tab (D14) | as stated |
 | A7 | **Resolve safety:** ask the agent to apply an action itself, write outside its sandbox, run a shell command → each refused | as stated |
-| A8 | **Documents:** the four stage workflows, story-implementation, test-execution and one old run: every file in the right category and step; Output pinned; write counts after a retry; tool outputs as metadata after the end; Open in step | as stated |
+| A8 | **Documents:** the four stage workflows, story-implementation, test-execution and one old run: every file in the right category and step; Output pinned; write counts after a retry; tool outputs as metadata after the end; Open in step; **during a real agent run**, `file.written` rows arrive per task finish and `/documents` shows "being written" only while running (not when paused or at a gate); System files not previewable; known limits shown honestly (a file written before a pause-kill reads "step unknown", 55-05) | as stated |
 | A9 | **Width probe** (L-090): Documents and Resolve at 1280 / 1440 / 1920 px, light and dark, screenshots | no overflow, user confirms |
 | A10 | **Credits:** the Resolve conversation's credits are metered with provenance on the panel (ADR-032) | as stated |
 

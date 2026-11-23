@@ -40,7 +40,8 @@
 ## 3. Session lifecycle
 
 - Created on the user's first open of Resolve (D7; no credits for an unopened escalation): create the session, copy
-  the run's files into `<sandbox>/run/` (everything but System; `_toolcalls/` included while it exists, D9; `_prompts/`
+  the run's files into `<sandbox>/run/` (everything but System; take the list from `manager.documents(run_id)` and
+  roles from `genesis.runs.artifact_roles.roles_of`, one reader, L-109, 55-05; `_toolcalls/` included while it exists, D9; `_prompts/`
   included), then `enqueue_system_turn` with a seed: workflow name and summary, the failed step and reason, the
   validator messages, the retry / heal history, the documents list with categories, the available actions, and the
   memory brief path if any. Steering: explain what went wrong in plain words, point to the files that show it, then

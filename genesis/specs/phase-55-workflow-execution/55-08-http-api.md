@@ -11,7 +11,7 @@
 |---|---|---|---|---|
 | `GET /runs/{id}/snapshot` | 55-03 (built) | — (`?since_version` not built: a pause writes no event, so an equal seq cannot prove the snapshot unchanged; the client keeps an equal version and drops a lower one) | `RunSnapshot`, nodes also carrying `tool_calls`, `messages`, `entered_from` | 404 |
 | `GET /runs/{id}/live` (SSE) | 55-03 (built) | `Last-Event-ID` / `?after=` | lifecycle hint frames with `id:`; `run.final` frames carry `status` (the client closes only on a terminal one); a reconnect that missed hints gets one `resync` frame, never a replay; `ping` every 15 s; read with `fetch` + `readSse`, not `EventSource` | 404 |
-| `GET /runs/{id}/documents` | 55-05 | — | `RunDocuments` | 404 |
+| `GET /runs/{id}/documents` | 55-05 (built) | — | `RunDocuments` as built (55-05 As built decisions 9–15: `writes` = record count, 0 = unknown; `writing`, `legacy`, `roles_declared`, `status`, `version`; steps with `label`, `description`, `kind`; `tool_outputs`). **Two fixes here:** `legacy` = "the run finished with no write records" (review N4; a new run that has not written yet is not legacy); `writing` only while the run is `pending`/`running` (review m5: a paused or gated run must not show "being written"). `execution` counts distinct task ids (a gate resumed with the same id is one execution), which can differ from the snapshot's ↻; 55-09 labels it so. `file.written` is **not** a `/live` hint: Documents re-reads on `node.completed` (the files are diffed at the same task finish) and the 3 s poll | 404 |
 | `POST /runs/{id}/respond` (extended) | 55-06 | a legacy decision **or** `{action: retry\|accept\|stop\|<extra>, guidance?, reason?, ...extra}` | as today | 400 action not allowed (`allowed[action]` is a reason), 409 not at a gate |
 | `POST /runs/{id}/fix-and-accept` | 55-06 | `{path, proposal_id?, source_file}` | `{run_id, status}` | 400 path refused, 409 not allowed |
 | `POST /runs/{id}/relaunch` | 55-06 | `{instructions}` (D13; the inputs are reused unchanged, no multipart) | `{run_id, from_run}` | 400 instructions too long, 409 run still running (not at a gate) |
@@ -26,6 +26,10 @@
 Every mutating route writes its `copilot_actions` row (55-06 §3). Register specific routes before any generic path
 route that also matches them and prove the order by behaviour (L-096). Each route is listed with its consumers (web,
 copilot control MCP, tests) before an existing one changes (L-094).
+
+**System files (D20):** `GET /runs/{id}/artifacts/{name:path}` and its `/download` refuse (403) a path under `_kiro/`,
+`.kiro/`, `.pids/` or `checkout/` — the run's Kiro home is not confirmed free of secrets — so the "not previewable"
+rule of 55-09 is enforced on the server, not only hidden in the page; list the routes' other readers first (L-094).
 
 ## 2. Resolve session storage (F15)
 
@@ -63,6 +67,6 @@ areas    = ["api", "runs-worker", "chat", "db"]
 adrs     = ["ADR-025", "ADR-026", "ADR-028", "ADR-030", "ADR-033", "ADR-035"]
 lessons  = ["L-010", "L-011", "L-083", "L-091", "L-094", "L-096", "L-102", "L-109", "L-122"]
 docs     = ["tracker:specs/phase-55-workflow-execution/55-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/54-06-http-api.md"]
-code     = ["genesis/genesis/api/run_routes.py", "genesis/genesis/db/migrations/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
+code     = ["genesis/genesis/api/run_routes.py", "genesis/genesis/runs/documents.py", "genesis/genesis/db/migrations/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
 upstream = ["55-03", "55-05", "55-06", "55-07"]
 ```

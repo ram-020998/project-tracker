@@ -1,8 +1,8 @@
 # Phase 55 — Workflow execution: memory brief, agent-assisted escalation, Documents and a reliable run graph
 
 > **Status:** 📝 **SPEC-DRAFTED 2026-11-22** (genesis-spec). Q&A complete: decisions D1–D11, defaults F1–F15; D12–D15
-> from the 55-02 mockup review (2026-11-23); D16 after 55-03, D17 after 55-04 (`phase-55-workflow-execution/55-01-findings.md` §9–§13).
-> 55-02, 55-03, 55-04 BUILT.
+> from the 55-02 mockup review (2026-11-23); D16–D20 during the build (`phase-55-workflow-execution/55-01-findings.md` §9–§14).
+> 55-02..55-05 BUILT.
 > Sub-specs: `phase-55-workflow-execution/55-01..55-12`. ADR drafts: `phase-55-workflow-execution/adr-drafts.md`
 > (ADR-088, ADR-089, ADR-090).
 > Repos: **genesis** (worker, runs, memory, chat, API, web, `packages/genesis-core` nodes and lint),
@@ -56,6 +56,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D17 | 55-04 build rulings as built: the quantized `bge-small-en-v1.5-onnx-q` model (~67 MB, pinned), `genesis memory status` / `reembed`, feature/story hints first, no minimum similarity, read-only memory server; #27 missing from the feature-4 brief, judged at 55-11. |
 | D18 | The fleet's two memory schedules are off on both instances until Phase 55 ships (the dev venv already writes briefs); 55-12 turns them back on. |
 | D19 | No memory text in any commit: the 55-04 evidence briefs were redacted and the unpushed commits rewritten; later evidence carrying memory text is committed only redacted. |
+| D20 | 55-05 build rulings as built (worker scan + `task_finish`, `execution` = distinct task ids, old-run step from `artifact.saved`, record-count write numbers, the kill limit); `file.written` not a live hint; System files listed but not previewable, enforced by the file routes. |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
@@ -102,7 +103,7 @@ Every intermediate commit keeps the gates green. Fold each As built into the lat
 | 55-02 | genesis (`web/src/dev/`) | `/dev/phase-55` mockups with stub data: Documents tab (both views, every category, old-run fallback, live run), Resolve (first turn, proposals, confirm, each action's result), graph states (running program node, loop re-entry, gate, paused, disconnected) — **BUILT** (genesis `7f32ac0..d0aa1b2`, local; review SHIP; user review D12–D15: Resolve as a tab) |
 | 55-03 | genesis (`runs/`, `api/run_routes.py`, `web/src/features/run-detail/`) | `tasks` stream → `node.started`; snapshot fold + `GET /runs/{id}/snapshot`; hint SSE `GET /runs/{id}/live`; bounded bus, async subscribers, pump logging, stderr drain; graph web on the snapshot — **BUILT** (genesis `793c04b6..29775149`, local; review SHIP; D16) |
 | 55-04 | genesis (`memory/`, `runs/worker.py`, `runtime/context.py`, `mcp/memory_server.py`, `packages/genesis-core` `kiro_node`, `scripts/install-packages.sh`) | Run description, prefetch, `memory.brief` event, prompt line, memory MCP on nodes, bge-small default + install + back-fill, fork copy — **BUILT** (genesis `d1ab6d13`, `419d8363`, local; review SHIP; `419d8363` unreviewed, carried to 55-11; D17) |
-| 55-05 | genesis (`runs/`, `lint/contract.py`, `packages/genesis-core`) | `file.written` from the worker's task start/finish diff; `META.artifacts` map form + parity lint; `runs/documents.py` categorization; `GET /runs/{id}/documents` |
+| 55-05 | genesis (`runs/`, `lint/contract.py`, `packages/genesis-core`) | `file.written` from the worker's task start/finish diff; `META.artifacts` map form + parity lint; `runs/documents.py` categorization; `GET /runs/{id}/documents` — **BUILT** (genesis `5bbae6d3`, `7d67c548`, `3c3e38ae`, local; review SHIP; D20) |
 | 55-06 | genesis (`packages/genesis-core` nodes + `lint/reliability.py`, `runs/manager.py`, `api/features.py`, `api/workbench.py`) | `escalation_gate` (routes, payload, guidance and run-instructions lines), old answers mapped, relaunch with instructions, restart from a step (fork + rebind + cancel), fix-then-accept, `copilot_actions` audit |
 | 55-07 | genesis (`chat/`, `mcp/`, `runtime/notifications.py`) | `run_resolve` chat mode, run-scoped read tools + `propose_action`, sandbox copy, first-turn seed, notifications on every escalation |
 | 55-08 | genesis (`api/`, `db/`, `web/src/types`, `web/src/lib/api`) | Contract table for every new route; Resolve session storage (m0031 if needed); fixtures from real responses |

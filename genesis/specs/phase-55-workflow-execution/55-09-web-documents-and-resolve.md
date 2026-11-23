@@ -11,9 +11,15 @@
   approved layout, fed only by `GET /runs/{id}/documents` (55-05/55-08): search; **By step** (default) / **By type**
   toggle (persisted pref); groups Output (pinned, auto-selected) · Inputs · Steps in graph order (files, check pass/fail,
   "Prompts (n)") · Tool outputs (metadata; "files removed at the end of the run" once gone, D9) · System (collapsed).
-- Row: label, file name, step, relative written time (exact on hover), size, "written N times · latest" (tooltip:
-  earlier writes are not kept, D12); "being written" for a zero-byte file during its node. The memory brief sits under
+- Row: label, file name, step, relative written time (exact on hover), size, "written N times · latest" only when
+  `writes > 0` (0 = unknown on old runs: show nothing; tooltip: earlier writes are not kept, D12); "being written"
+  for a zero-byte file during its node (`writing`, true only while the run is running, 55-08). The memory brief sits under
   Inputs with the step "Run start (before the first step)"; System is kept, collapsed, in By type too (D12).
+- Pseudo-steps from 55-05/55-06: `_launch` files (uploads, a test checkout) under Inputs as "Run start"; `_memory`
+  (the brief); `_resolve` as "Fixed in Resolve"; `_parallel` rows named with their nodes and no step. Prompt labels
+  "Turn k · <item>" as built. A list-form workflow (no roles declared) still shows each file's step.
+- **System files are listed but neither previewed nor downloadable** (`_kiro/`, `.kiro/`, `.pids/`, `checkout/`):
+  `_kiro/` holds the run's Kiro home (settings, sessions, logs), not yet confirmed free of secrets (55-05 review).
 - A validator step whose check failed reads "OK · check failed N times" (D12 n3).
 - Viewer header: category, step · pass · attempt, written time, size, write count, **Open in step** (selects the node
   in the graph inspector), Download; the existing previews (`DocumentViewer.tsx`, `DocumentPreview`) unchanged; agent
