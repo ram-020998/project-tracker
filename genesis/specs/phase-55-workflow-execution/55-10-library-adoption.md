@@ -46,11 +46,23 @@ library cannot import genesis, so keep the rule exact-name-only there, or give e
 L-022/standalone `graph.py`) and test that cleanup keeps every declared file. `validate_library` passes on the map
 form.
 
-## 3. Memory opt-outs (D4)
+## 3. Memory opt-outs (D4) and relaunchable flags (D23)
 
+**Relaunchable (D23):** set `META.relaunchable` (+ `workflow.yaml`) per workflow; the default is `false`, so declare
+`true` only where a fresh run with the same inputs is safe. Starting list (confirm each against the workflow's
+bindings and side effects, record it in As built): `true` — ux-design-analysis, technical-design-analysis,
+feature-breakdown-analysis, test-design-analysis (a top-up run stays refused per run), story-design-analysis,
+generate-business-map, code-review, erd-generation, agent-prompt, hello-appian; `false` with a `relaunch_hint` —
+story-implementation ("Re-run it from the Implementation lane"; the platform also refuses it for `appian-dev-write`),
+story-verification ("Drag the story into Verification again"), test-execution ("Run it again from Testing"),
+setup-composer and action-capture ("Start it again from Testing → Library"), memory-consolidation and
+memory-maintenance ("Use Run now on the Schedules page"), sync-application and sync-documents (no agent node; hint as
+for the memory jobs).
+
+**Memory opt-outs (D4):**
 `memory-consolidation` and `memory-maintenance`: `META.memory_brief: false` (mirrored in `workflow.yaml`, parity lint).
 Check first that the library schema (`schemas/`) and the parity lint accept the key (55-04 added the key on the
-platform side only). Until this ships, the fleet's nightly memory runs get a brief (55-04 As built; see 55-01 §13).
+platform side only). Until this ships, the fleet's memory schedules stay off (D18, 55-01 §13).
 
 ## 4. Versions and scaffolder
 

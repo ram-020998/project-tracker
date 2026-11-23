@@ -35,7 +35,8 @@ checklist in the release notes:
   back to keyword and entity matching; `genesis memory reembed` back-fills, `genesis memory status` shows the state.
 - The memory MCP server now opens `memory.db` read-only (chat too).
 - Escalations: open the **Resolve** tab on the run; the agent explains and proposes, you confirm. Rerun and Restart
-  from a step move the feature stage (or story) to the new run and end the old run Cancelled. Reject at an old
+  from a step move the feature stage (or story) to the new run and end the old run Cancelled; they are offered only
+  for workflows marked relaunchable (story-implementation is not: re-run it from the Implementation lane). Reject at an old
   gate now ends the run **failed**, not done.
 - The Documents tab is reorganized by step and type; tool-output files are still removed at the end of a run.
 - The run graph shows the node that is really running; **Live / Reconnecting / Polling** shows the connection.

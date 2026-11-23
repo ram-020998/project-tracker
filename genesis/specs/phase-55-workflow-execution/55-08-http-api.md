@@ -42,6 +42,15 @@ audit migration; every action route makes sure the run's event (`gate.resolved`,
 `file.written`) carries `actor`, `source` (`resolve` | `manual`), `action`, the parameters and the `proposal_id` when
 there is one (55-06 records `source` today — add the rest), and the contract rows list those fields.
 
+**Relaunchable flag (D23), built here:** one reader for `META.relaunchable` (bool, default `false`) and
+`META.relaunch_hint` (str), used by `RunManager` (it computes `allowed.relaunch` / `allowed.restart_from` when it
+enriches the gate payload, and `relaunch` / `restart_from` re-check at apply time) and by the parity lint
+(`genesis/lint/contract.py`, both keys mirrored in `workflow.yaml`; L-109, a parity test). When false the reason is
+the hint, else "This workflow can't be started again from Resolve; start it from where you launched it". **Guard:**
+whatever the flag says, refuse (409) a workflow whose `required_mcp` or any node's MCP includes `appian-dev-write`
+(ADR-068). The 55-06 service refusals stay where a run that skips the queue would break an execution record
+(ADR-081) and for a test-design top-up (per run); list each with its reason in As built.
+
 ## 2. Resolve session storage (F15)
 
 `chat_run_links(run_id PK, session_id)` keeps one copilot session per run, so the Resolve session gets its own table:
@@ -78,6 +87,6 @@ areas    = ["api", "runs-worker", "chat", "db"]
 adrs     = ["ADR-025", "ADR-026", "ADR-028", "ADR-030", "ADR-033", "ADR-035"]
 lessons  = ["L-010", "L-011", "L-083", "L-091", "L-094", "L-096", "L-102", "L-109", "L-122"]
 docs     = ["tracker:specs/phase-55-workflow-execution/55-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/54-06-http-api.md"]
-code     = ["genesis/genesis/api/run_routes.py", "genesis/genesis/runs/documents.py", "genesis/genesis/db/migrations/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
+code     = ["genesis/genesis/api/run_routes.py", "genesis/genesis/runs/documents.py", "genesis/genesis/runs/manager.py", "genesis/genesis/lint/contract.py", "genesis/genesis/db/migrations/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
 upstream = ["55-03", "55-05", "55-06", "55-07"]
 ```

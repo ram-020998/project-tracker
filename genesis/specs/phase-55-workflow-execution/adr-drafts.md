@@ -63,7 +63,9 @@
      run, D13); restart from an earlier step (a fork from that checkpoint, the original's checkpoints untouched per
      ADR-025, then the escalated run `cancelled` and linked and the binding moved before the new run starts, D15);
      stop (gate answer → `failed`, reason recorded). Old approve / reject / feedback map to accept / stop / retry. The
-     plain fork (ADR-009 mode 3) is unchanged.
+     plain fork (ADR-009 mode 3) is unchanged. Rerun and restart are offered only for a workflow that declares
+     `META.relaunchable: true` (default false, with an optional `relaunch_hint`), and never for one that uses
+     `appian-dev-write`, whatever its flag (ADR-068 stays the single approval for Dev changes; D23).
   3. **Resolve agent (D7, D14, F7).** A chat session bound to the run, shown only in Run Detail's **Resolve tab**
      (`/runs/<id>/resolve`), started when the user first opens it; read-only access to the run (events, steps, gate, its files copied into the
      sandbox; tool outputs readable while the run waits, D9); it records **proposals** only; the user's Confirm on a

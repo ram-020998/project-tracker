@@ -2,7 +2,7 @@
 
 > **Status:** SPEC-DRAFTED 2026-11-22 — Q&A complete: decisions D1–D11 (§9), defaults F1–F15 (§10, confirmed); D12–D15
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
-> from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 from the user (§15); D23 open with the user.
+> from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -425,6 +425,22 @@ keeps only the Resolve proposal → confirm flow (as 55-06 built it). No migrati
 deleted chat and lives as long as the run (retention reclaims it with the run's events). Folded into 55-07, 55-08 and
 the ADR-089 draft. Considered: B (m0031 rebuilds `copilot_actions` with a nullable session, `actor`, `source`; a
 cross-run audit table nothing needs today).
+
+**D23 (user, 2026-11-23):** **a workflow-level flag decides whether Resolve may start a new run** (the user's idea,
+refined): `META.relaunchable: bool` (default **false**, opt-in) + optional `META.relaunch_hint: str`, both mirrored
+in `workflow.yaml` and checked by the parity lint through one reader (L-109). It covers both actions that start a new
+run, Rerun from the start (D13) and Restart from a step (D15); `allowed.relaunch` / `allowed.restart_from` read it and
+give the hint (or a generic reason) when false. Default false so an older or unflagged library workflow is never
+relaunchable on v0.84.0. **Code guard (ADR-068):** the platform refuses to relaunch or restart a workflow that uses a
+write-capable MCP server (`appian-dev-write`) even if it declares `relaunchable: true`, so the Implementation lane's
+confirm stays the single approval for Dev changes. `story-implementation` declares `relaunchable: false` with the hint
+"Re-run it from the Implementation lane"; Retry with guidance, Accept, Fix then accept and Stop stay offered inside its
+escalated run. 55-06's hard-coded refusals (test-execution, story-verification, setup-composer, action-capture,
+test-design top-ups) are covered by the default; the service checks stay only where a run that skips the queue would
+break an execution record (ADR-081), and a test-design top-up stays refused per run. Folded into 55-08 (the reader, the
+`allowed` computation, the guard), 55-09, 55-10 (the flags per workflow), 55-11, 55-12 and the ADR-089 draft.
+Considered: A (refuse Rerun and Restart for `story-implementation` only), B (allow it with a Dev-write confirm; an
+ADR-068 amendment).
 
 ## Context manifest
 
