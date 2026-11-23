@@ -1,0 +1,28 @@
+{
+ "run_id": "r-fb5a9cd14f72",
+ "owner": "admin.user",
+ "type": "memory.brief",
+ "query_chars": 3911,
+ "shared_ids": [
+  26,
+  28,
+  34,
+  31,
+  35,
+  33,
+  30,
+  47,
+  49,
+  6,
+  32,
+  83
+ ],
+ "personal_ids": [
+  44,
+  43,
+  87
+ ],
+ "chars": 7795,
+ "embedder": "BAAI/bge-small-en-v1.5",
+ "duration_ms": 93
+}

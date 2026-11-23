@@ -1,0 +1,6 @@
+{"timestamp":"2026-11-23T07:20:14.243Z","level":"info","message":"Connected with transport","transportType":"stdio","era":"legacy","protocolVersion":"2024-11-05","versionNegotiation":"auto","eraProbeBudgetMs":30000,"connectDurationMs":144,"serverName":"genesis-memory"}
+{"timestamp":"2026-11-23T07:20:14.243Z","level":"info","message":"mcp.connect.ok","serverName":"genesis-memory"}
+{"timestamp":"2026-11-23T07:20:14.245Z","level":"info","message":"mcp.listTools.ok","serverName":"genesis-memory"}
+{"timestamp":"2026-11-23T07:20:14.246Z","level":"info","message":"Connected","instanceId":"mcp-inst-2","serverName":"genesis-memory"}
+{"timestamp":"2026-11-23T07:20:23.073Z","level":"info","message":"mcp.callTool.ok","requestId":"fe60d7c6-58f3-4678-83e1-ad0d4756cc4e","conversationId":"sess_b3a909e7-44aa-4245-a47a-bd0e482538e2","rootConversationId":"sess_b3a909e7-44aa-4245-a47a-bd0e482538e2","turnId":"685ce904-043d-4321-b5d2-b2e1adde072a","rootTurnId":"685ce904-043d-4321-b5d2-b2e1adde072a","serverName":"genesis-memory"}
+{"timestamp":"2026-11-23T07:20:30.488Z","level":"info","message":"mcp.closeConnection.ok","serverName":"genesis-memory"}

@@ -35,6 +35,12 @@
   anchors); KiroCrew's Qwen3-Embedding-0.6B (too heavy per worker).
 - **Consequences.** genesis-core additive (`CORE_MAJOR` 1); one new canonical event; brief quality depends on the
   embedder and the run description; personal memories now reach workflow agents.
+- **As built (55-04, genesis `d1ab6d13`/`419d8363`).** The model is fastembed's own source, the quantized ONNX
+  `qdrant/bge-small-en-v1.5-onnx-q` at a pinned revision (5 files, 67 MB, SHA-256 in `genesis/memory/model.py`),
+  loaded with `specific_model_path` + `local_files_only` from `<state>/models/`; `install-packages.sh --no-model` skips
+  it (CI test jobs). Keyword and entity hints come from the most specific level that resolves (feature/story, else
+  app). The memory server reaches nodes through `ctx.extras["memory_mcp"]`, trust exactly `@genesis-memory/<six
+  tools>`; the memory MCP is now read-only by its handle and index (chat too). `memory=False` opts a node out.
 
 ## ADR-089 (draft) — One standard escalation gate with confirm-gated actions, resolved with a run-bound agent in Run Detail
 

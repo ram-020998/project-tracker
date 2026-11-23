@@ -1,0 +1,28 @@
+{
+ "run_id": "r-fb5a9cd14f72",
+ "owner": "admin.user",
+ "type": "memory.brief",
+ "query_chars": 3911,
+ "shared_ids": [
+  26,
+  28,
+  30,
+  31,
+  35,
+  34,
+  33,
+  49,
+  47,
+  32,
+  6,
+  40
+ ],
+ "personal_ids": [
+  87,
+  43,
+  44
+ ],
+ "chars": 8023,
+ "embedder": "null",
+ "duration_ms": 7
+}
