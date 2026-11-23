@@ -368,6 +368,12 @@ accept `memory_brief`); **55-11** (review `419d8363`; the #27 and no-context cal
 the memory tools; a CI-image run with fastembed and a Linux offline load); **55-12** (release notes: the ~67 MB model
 download, `reembed`, `status`, the read-only memory server).
 
+**D18 (user, 2026-11-23):** option B — the user turned the `memory-consolidation` and `memory-maintenance` schedules
+**off on both fleet instances** (main :8760, userb :8761) until Phase 55 ships, so no memory run gets a brief before
+55-10's opt-out. Other fleet runs keep getting briefs from the dev venv. 55-12's deploy step turns both back on after
+the library release (consolidation catches up from its cursor). Considered: A (leave it), C (take the fleet off the
+dev venv until v0.84.0; the thorough fix, a backlog candidate if L-099 recurs).
+
 ## Context manifest
 
 ```toml

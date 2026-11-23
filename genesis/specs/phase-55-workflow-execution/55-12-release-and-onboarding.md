@@ -24,8 +24,9 @@
 ## 2. Deploy
 
 Never restart while a run is active. Fleet: `gsm provision --all --no-mcp --no-env --force` (it runs the install
-script, which fetches the embedder model and back-fills memories), `gsm restart --all`; update every workflow from
-Catalog on each instance (L-033); check `/openapi.json` `info.version`, the DB version and the embedder state. User
+script, which fetches the embedder model and back-fills memories), `gsm restart --all`; update every workflow from Catalog on each instance (L-033); **turn the `memory-consolidation` and
+`memory-maintenance` schedules back on on both instances** once the library release with `memory_brief: false` is
+installed (they were turned off for the build, D18); check `/openapi.json` `info.version`, the DB version and the embedder state. User
 checklist in the release notes:
 - Each run with an agent step now starts with a memory brief (`_memory/brief.md`, listed under Inputs); your personal
   memories are included for your own runs and never published to the Hub.
