@@ -111,7 +111,10 @@ only approve / reject / feedback, plus the run operations of §3).
 ## 5. Gates
 
 genesis-core pytest + ruff; genesis pytest + ruff; genesis-workflows `ci/validate_library.py` + pytest against the local
-core.
+core. The F8 lint rule makes `validate_library` fail on every workflow that still escalates through `hitl_gate`
+until 55-10 adopts the gate: record that the only new failures are that rule, workflow by workflow; every workflow's
+own pytest must still pass (the old gates keep working at run time). The library's CI is unaffected until its pin
+moves (55-12).
 
 ## Context manifest
 
