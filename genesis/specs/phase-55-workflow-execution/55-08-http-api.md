@@ -61,6 +61,10 @@ resolved_at, run_id, result_run_id, error}`; **replace `ResolveService._allowed`
 the D23 reader and guard**, and apply the same guard to the manual relaunch and restart routes. A proposal too long to
 store whole is refused with guidance to shorten it (55-07); keep that answer in the contract.
 
+**Memory consolidation skips Resolve chats (D25), built here:** `genesis/memory/chat_read.py` leaves out
+`run_resolve` sessions (a mode filter, tested with a Resolve session beside a normal chat; the consolidation cursor
+still advances past them).
+
 ## 2. Resolve session storage (F15; settled by 55-07, D24)
 
 **No migration.** 55-07 names the Resolve session `resolve-<run_id>`, so the run → session link is the session id
@@ -95,6 +99,6 @@ areas    = ["api", "runs-worker", "chat", "db"]
 adrs     = ["ADR-025", "ADR-026", "ADR-028", "ADR-030", "ADR-033", "ADR-035"]
 lessons  = ["L-010", "L-011", "L-083", "L-091", "L-094", "L-096", "L-102", "L-109", "L-122"]
 docs     = ["tracker:specs/phase-55-workflow-execution/55-01-findings.md", "tracker:specs/phase-54-schedules-and-fixes/54-06-http-api.md"]
-code     = ["genesis/genesis/api/run_routes.py", "genesis/genesis/runs/documents.py", "genesis/genesis/runs/manager.py", "genesis/genesis/lint/contract.py", "genesis/genesis/db/migrations/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
+code     = ["genesis/genesis/api/run_routes.py", "genesis/genesis/runs/documents.py", "genesis/genesis/runs/manager.py", "genesis/genesis/lint/contract.py", "genesis/genesis/memory/chat_read.py", "genesis/genesis/db/migrations/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
 upstream = ["55-03", "55-05", "55-06", "55-07"]
 ```

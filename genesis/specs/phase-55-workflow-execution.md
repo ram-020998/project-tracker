@@ -61,6 +61,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D22 | The run's event log is the audit for every escalation action (actor, source, action, parameters, proposal id); `copilot_actions` keeps only the Resolve proposal flow; no audit migration (amends D6). |
 | D23 | `META.relaunchable` (default false, opt-in) + `relaunch_hint` decide whether Rerun and Restart from a step are offered; the platform never relaunches a workflow that uses `appian-dev-write` (ADR-068); `story-implementation` is false. |
 | D24 | 55-07 build rulings as built: Resolve reads stay unscoped (ADR-086; writes sandboxed), no migration (session id `resolve-<run_id>`), Resolve routes and restart-from built in 55-07, an interim write guard until 55-08. |
+| D25 | Memory consolidation skips Resolve chats (`run_resolve` left out of `memory/chat_read.py`). |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 

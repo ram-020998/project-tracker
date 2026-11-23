@@ -2,8 +2,8 @@
 
 > **Status:** SPEC-DRAFTED 2026-11-22 — Q&A complete: decisions D1–D11 (§9), defaults F1–F15 (§10, confirmed); D12–D15
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
-> from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07 (§16);
-> D25 open with the user.
+> from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
+> from the user (§16).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -456,6 +456,13 @@ manual routes; the long-proposal refusal); **55-09** (open, first turn from the 
 `/resolve/escalation`, editable fields, restart names a step, the legacy action map); **55-11** (a live Confirm of
 each action; a write-outside attempt the agent will act on; the v3 meta tools; restart on a healing workflow);
 umbrella and **55-12** (no migration expected, DB v30).
+
+**D25 (user, 2026-11-23):** option A — **memory consolidation skips Resolve chats.** `genesis/memory/chat_read.py`
+leaves out `run_resolve` sessions, so nothing from a Resolve chat becomes a memory (a Resolve chat quotes the run's
+brief and one run's failure detail, which would feed memories back into themselves). A durable decision made in
+Resolve is stated in a feature or spec chat or added on the Memory page. Built in 55-08 (a small backend item there);
+checked in 55-11 and named in the ADR-088 draft. Considered: B (read like every chat), C (read only the user's
+messages; splits them from their context).
 
 ## Context manifest
 

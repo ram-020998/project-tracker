@@ -11,7 +11,8 @@
 1. **Memory brief (ADR-088 draft, D2–D5, D17, F1–F5):** built only for `op == "run"`, only with an agent node, honours
    `memory_brief: false`; never fails a run on any error path; personal memories only in their section and never in
    anything published to the Hub; the brief marked as data; the memory MCP trusted for exactly its six read tools on the
-   real projection; the embedder never loaded in the web process (ADR-054); the model never downloaded inside a run.
+   real projection; the embedder never loaded in the web process (ADR-054); the model never downloaded inside a run;
+   consolidation skips `run_resolve` chats (D25).
    **Review genesis `419d8363`** (55-04's review fixes: not re-reviewed, full suite not re-run after it).
 2. **Escalation (ADR-089 draft, D6, F6, F8):** every action routed and stored as specified in every adopted workflow
    (L-106); Reject / stop ends `failed`, never `done`; accept and fix-then-accept refused when unavailable; the agent

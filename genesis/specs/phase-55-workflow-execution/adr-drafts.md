@@ -26,7 +26,7 @@
      out (the two memory workflows). Resume reuses the brief; a fork copies it (ADR-025).
   4. **Never fails a run (F3).** Any failure → no brief, a `memory.brief` event with the reason, no prompt line.
   5. **Privacy (D5).** The brief stays in the local run folder; a personal memory is never copied into anything
-     published to the Hub.
+     published to the Hub. Memory consolidation skips Resolve chats, which quote the brief (D25).
   6. **Embedder (D3).** fastembed `BAAI/bge-small-en-v1.5` is the default backend, installed by default and fetched by
      `scripts/install-packages.sh` with a pinned checksum; loaded only in worker/MCP subprocesses (ADR-054 unchanged on
      that); existing memories back-filled once.
