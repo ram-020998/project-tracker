@@ -1,0 +1,557 @@
+{
+  "_tailwind": true,
+  "_runs": {
+    "docs": "r-ca6821f59132",
+    "esc": "r-7c5795792bc2"
+  },
+  "docs-by-step-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 330,
+    "sidebar_w": null
+  },
+  "docs-by-step-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 330,
+    "sidebar_w": null
+  },
+  "docs-by-step-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 381,
+    "sidebar_w": null
+  },
+  "docs-by-step-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 381,
+    "sidebar_w": null
+  },
+  "docs-by-step-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 535,
+    "sidebar_w": null
+  },
+  "docs-by-step-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 535,
+    "sidebar_w": null
+  },
+  "docs-by-type-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 330,
+    "sidebar_w": null
+  },
+  "docs-by-type-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 330,
+    "sidebar_w": null
+  },
+  "docs-by-type-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 381,
+    "sidebar_w": null
+  },
+  "docs-by-type-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 381,
+    "sidebar_w": null
+  },
+  "docs-by-type-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 535,
+    "sidebar_w": null
+  },
+  "docs-by-type-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 535,
+    "sidebar_w": null
+  },
+  "docs-prompt-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 330,
+    "sidebar_w": null
+  },
+  "docs-prompt-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 330,
+    "sidebar_w": null
+  },
+  "docs-prompt-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 381,
+    "sidebar_w": null
+  },
+  "docs-prompt-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 381,
+    "sidebar_w": null
+  },
+  "docs-prompt-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 535,
+    "sidebar_w": null
+  },
+  "docs-prompt-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 535,
+    "sidebar_w": null
+  },
+  "resolve-flow-strip-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": null
+  },
+  "resolve-flow-strip-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": null
+  },
+  "resolve-flow-strip-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": null
+  },
+  "resolve-flow-strip-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": null
+  },
+  "resolve-flow-strip-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": null
+  },
+  "resolve-flow-strip-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": null
+  },
+  "resolve-unopened-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-unopened-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-unopened-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-unopened-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-unopened-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-unopened-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-restart-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-restart-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-restart-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-restart-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-restart-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-restart-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-relaunch-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-relaunch-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-relaunch-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-relaunch-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-relaunch-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-dialog-relaunch-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "docs-gated-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 330,
+    "sidebar_w": null
+  },
+  "docs-gated-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 330,
+    "sidebar_w": null
+  },
+  "docs-gated-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 381,
+    "sidebar_w": null
+  },
+  "docs-gated-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 381,
+    "sidebar_w": null
+  },
+  "docs-gated-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 535,
+    "sidebar_w": null
+  },
+  "docs-gated-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": 535,
+    "sidebar_w": null
+  },
+  "resolve-result-stop-text": "Stopped · the run ends Failed\nyou confirmed less than a minute ago\n\nReason: “Probe: the inputs name another feature.”. Nothing moved to the feature stage.",
+  "resolve-result-stop-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-stop-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-stop-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-stop-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-stop-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-stop-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-relaunch-text": "Relaunched with your instructions · this run is Cancelled\nyou confirmed less than a minute ago\n\nThe new run is r-dd526a7ced7d; a bound feature stage or story is now bound to it.\n\nGo to the new run",
+  "resolve-result-relaunch-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-relaunch-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-relaunch-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-relaunch-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-relaunch-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-result-relaunch-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-first-turn-1280-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-first-turn-1280-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-first-turn-1440-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-first-turn-1440-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-first-turn-1920-light": {
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "resolve-first-turn-1920-dark": {
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "wraps": [],
+    "rail_spill": [],
+    "rail_w": null,
+    "sidebar_w": 280
+  },
+  "_agent": {
+    "credits": {
+      "total": 0.749781,
+      "provenance": "metered"
+    },
+    "proposals": [
+      {
+        "action": "stop",
+        "status": "proposed"
+      },
+      {
+        "action": "fix_accept",
+        "status": "proposed"
+      }
+    ],
+    "confirmed": {
+      "action": "stop",
+      "result": "Fixed and accepted · the run is Done\nyou confirmed less than a minute ago\n\nYour corrected file was copied into the run (Documents shows it as Fixed in Resolve), then the run was accepted."
+    }
+  }
+}
