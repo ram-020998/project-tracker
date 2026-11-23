@@ -102,3 +102,221 @@ docs     = ["tracker:specs/phase-55-workflow-execution/55-01-findings.md", "trac
 code     = ["genesis/genesis/api/run_routes.py", "genesis/genesis/runs/documents.py", "genesis/genesis/runs/manager.py", "genesis/genesis/lint/contract.py", "genesis/genesis/memory/chat_read.py", "genesis/genesis/db/migrations/**", "genesis/web/src/types/**", "genesis/web/src/lib/api/**"]
 upstream = ["55-03", "55-05", "55-06", "55-07"]
 ```
+
+## As built
+
+**Status:** BUILT 2026-11-23, review **SHIP** (round 1; `reviews/55-08-review.md`). Repo genesis, branch master, base
+`0a4acd0c`, head `1f8fd8b5`, 3 local commits (not pushed, not tagged). **No migration** (DB stays v30, D24); no
+genesis-core or kiro-agent-sdk change (`CORE_MAJOR` 1).
+
+### Commits (genesis)
+
+| sha | what |
+|---|---|
+| `bd9873c6` | source, tests, web types and client, recorded fixtures |
+| `be3097b3` | `web/static` for bd9873c6 (66 files) |
+| `1f8fd8b5` | review fixes m1, n2, n3 (backend and tests only; no web file, so no bundle) |
+
+Bundle proof (L-089): `git show --stat be3097b3 -- web/static` in its own call after the build exited; a second build in
+a later call left `git status --short --untracked-files=all` empty. The reviewer's out-of-tree build was identical.
+
+### The contract table as built (every Phase 55 route; all under `/api`)
+
+Error mapping for the run-action routes (`run_routes._action_errors`): `RunActionError`, `GateResponseError`,
+`StateEditError` → **400**; `RunStateError`, `FileNotFoundError` (workflow not installed), `InputValidationError` (the
+old inputs fail the installed schema) → **409**; unknown run → **404**. Error bodies are `{detail: str}` (fixtures
+`runs/error-400.json`, `runs/error-409.json`).
+
+| Method + path | Body | Answer | Errors | Consumers (L-094) | Fixture |
+|---|---|---|---|---|---|
+| `GET /runs/{id}/snapshot` | — | `RunSnapshot` (55-03) | 404 | web `useRunSnapshot` | `runs/snapshot-{gate,done}.json` |
+| `GET /runs/{id}/live` (SSE) | `Last-Event-ID` / `?after=` | hint frames (55-03), no `?since_version` (D16) | 404 | web `useRunLive` | `runs/live-frames.json` |
+| `GET /runs/{id}/documents` | — | `RunDocuments`; `legacy` = finished with no write record; `writing` only while pending/running | 404 | web `runsApi.documents` (55-09), genesis-resolve `get_run_documents` | `runs/documents-done.json` |
+| `GET /runs/{id}/artifacts/{name:path}` and `…/download` | `?mode=` | as before | **403** System file (`_kiro/ .kiro/ .pids/ checkout/`, judged on the resolved path and the requested name, case-insensitive), 404, 413, 415 | DocumentViewer, DocumentsTab, NodeIterationsDialog (`_prompts/`), documents `useArtifactContent`; no MCP server | — |
+| `POST /runs/{id}/respond` | `{decision}`: legacy string / `{feedback}` / action dict `{action, guidance?, reason?, …}` | `{ok, run_id}` (same run) | 400 not allowed (the `allowed` reason) or a run operation; **409 not at a gate** (also a running or paused run) or terminal | web `hitl-hooks`, copilot `respond_to_gate` (recorded `source: "copilot"`) | `runs/respond.json` |
+| `POST /runs/{id}/fix-and-accept` | `{path, source_file, proposal_id?}` (`source_file` in the run's Resolve sandbox `resolve-<run_id>`) | `{run_id, status}` (same run, resumed) | 400 Resolve never opened / path refused / not a sandbox file / `allowed.fix_accept` reason / proposal not of this run; 409 not at a standard gate | web (55-09 manual menu) | `runs/fix-and-accept.json` |
+| `POST /runs/{id}/relaunch` | `{instructions}` (≤ 4,000) | `{run_id: new, from_run}` | 400 too long / an upload gone; 409 running or paused, replaced already, write guard, a service refusal, not relaunchable, bound object moved, workflow unreadable, inputs refused | web (55-09) | `runs/relaunch.json` |
+| `POST /runs/{id}/restart-from` | `{from_step, values?}` | `{run_id: new, from_run, from_step}` | 400 unknown / first / fan-in step, invalid `values`; 409 as relaunch (plus done) | web (55-09) | `runs/restart-from.json` |
+| `POST /runs/{id}/fork` | unchanged | unchanged | — | web state editor | — |
+| `GET /runs/{id}` | — | as before; `trigger` is now a union: schedule `{source, schedule_id, schedule_name, slot}` or `{source: relaunch \| restart_from \| fork, from_run, instructions?, from_step?, as_node?}` | 404 | Runs list, Run Detail, `ScheduledBadge` | `runs/run-{relaunched,restarted}.json`, `runs/escalation-gate.json` (the `gate`) |
+| `POST /runs/{id}/resolve` | — | `{session_id, created}` | 404, 409 never escalated | web `resolveApi.open` | `resolve/open.json` |
+| `GET /runs/{id}/resolve` | — | `{session_id \| null, proposals: ResolveProposal[], credits: {total, provenance}}` | 404 | `resolveApi.summary` | `resolve/summary.json` |
+| `GET /runs/{id}/resolve/escalation` | — | `{run_id, workflow_id, status, gate_seq, gate, allowed (live), steps}` or `{…, gate: null, note}` | 404 | `resolveApi.escalation`, genesis-resolve `get_escalation` | `resolve/escalation.json` |
+| `POST /runs/{id}/resolve/proposals` (internal) | `{action, params, rationale}` + `X-Genesis-Resolve-Token` | `{ok, proposal_id, superseded, note}` | 400 invalid / too long to store whole ("shorten the rationale or the text params"), 403, 409 | genesis-resolve MCP only (not in the web client) | — |
+| `POST /runs/{id}/resolve/proposals/{pid}/confirm` | optional `{guidance \| instructions \| reason}` | `{proposal_id, action, status, new_run_id?}` | 400, 403, 404, 409 stale | `resolveApi.confirm` | `resolve/confirm-{retry,relaunch}.json` |
+| `POST /runs/{id}/resolve/proposals/{pid}/dismiss` | — | `{ok}` | 404, 409 | `resolveApi.dismiss` | `resolve/dismiss.json` |
+| session stream `GET /chat/sessions/{sid}/notifications/stream` | — | + `resolve.proposal {proposal}`, `resolve.note {kind: resolve.escalation \| resolve.outcome, text, gate_seq? \| proposal_id?, status?, new_run_id?}`, Genesis-turn chat events with `turn: "genesis"` | — | `chatApi.streamNotifications<ResolveStreamEvent>` | `resolve/stream-{proposal,note,genesis-turn}.json` |
+
+**Event audit (D22)**, fixtures `runs/action-events.json`, `runs/fix-events.json`: `gate.resolved {decision, source,
+actor: "user", action, params, proposal_id?}`; `run.relaunched {to_run, from_step? | as_node?, source, actor, action:
+relaunch | restart_from, params, proposal_id?}`; the `_resolve` `file.written {path, node: "_resolve", bytes, mtime,
+source, actor, action: "fix_accept", params: {path, source_file, bytes}, proposal_id?}`. `source` is `manual`,
+`resolve` or `copilot`. `copilot_actions` gets rows only for Resolve-sourced actions.
+
+**Enriched gate payload** (`EscalationPayload`): `node, kind: "escalation", prompt, options, context_refs, raised_at,
+failed_node, validator_messages, history [{at, kind, text, ok?}], last_error, files [{path, role, bytes, writes,
+check?}], allowed {retry, accept, fix_accept, relaunch, restart_from, stop, <extra ids>}, extra_options [{id, label,
+hint}]`.
+
+### Changed
+
+- `genesis/runs/relaunch_policy.py` (new): `parse_relaunch` (the one D23 reader), `relaunch_policy`, `RelaunchPolicy`
+  (`write_refusal`, `flag_refusal`, `refusal`), `WRITE_SERVERS`, `DEFAULT_REFUSAL`, `HINT_MAX`.
+- `genesis/runs/manager.py`: `_relaunch_policy`, `_new_run_refusal` (order: status → replaced → write guard → service
+  refusal → flag → bound object), `_relaunch_refusal` / `_restart_refusal` on it; `gate_allowed` re-reads `relaunch` /
+  `restart_from` live for a standard gate; `respond` refuses a run not at a gate and logs the audit
+  (`_action_of`, `_audit_fields`, `ACTOR_USER`); `_audit` only for `source == "resolve"`; `fix_and_accept` logs the
+  audit, passes `proposal_id` to its accept, writes `mtime` in the worker's ISO form; `relaunch` / `restart_from` log
+  the audit and set `_replacing` before the cancel; `replaced_by`, `current_run`, `_FOLLOW_MAX`.
+- `genesis/api/run_routes.py`: `_action_errors`; routes `fix-and-accept`, `relaunch`, `restart-from`; `respond` with
+  the copilot source and `{ok, run_id}`; `_artifact_path` 403 for System paths. `genesis/api/_shared.py`:
+  `FixAndAccept`, `Relaunch`, `RestartFrom` body models (module level, L-096); `_trigger` for run-made triggers,
+  `RUN_TRIGGER_SOURCES`.
+- `genesis/runs/documents.py`: `is_system_path`, `_SYSTEM_FOLDED`, `_WRITING`; `legacy` / `writing` rules; status sets
+  from `runs.store`.
+- `genesis/lint/contract.py`: `check_relaunch` (through `parse_relaunch`).
+- `genesis/chat/resolve.py`: `_allowed` = `RunManager.gate_allowed`; `WRITE_SERVERS` / `WRITE_REFUSAL` removed.
+- `genesis/runtime/scheduler.py`: `_successor`; `_follow` switches the row to the replacement (`set_run`, gate wait
+  cleared) and waits while the replacement's record does not exist.
+- `genesis/memory/chat_read.py`: `sessions_since` leaves out `RUN_CHAT_MODES` in the query.
+- Web: `types/escalation.ts`, `types/resolve.ts`, `types/runDocuments.ts` (new); `types/run.ts` `RunTrigger` =
+  `ScheduleTrigger | RunActionTrigger`; `lib/api/runs.ts` `documents`, `fixAndAccept`, `relaunch`, `restartFrom`,
+  `GateDecision` with `ActionAnswer`, typed `respond`; `lib/api/resolve.ts` `resolveApi` (new, exported);
+  `chatApi.streamNotifications<T>`; `dev/mockups/phase55/fixtures.ts` imports `ActionKey`, `HistoryEntry`,
+  `EscalationPayload`, `RunDocCategory` (and `resolve.tsx` `GateFile`); golden `events.ts` payloads for `gate.resolved`
+  and `run.relaunched` in the audit shape; `phase54-contract.test.ts` uses `ScheduleTrigger`.
+
+### Tests
+
+- `tests/test_phase55_api.py` (46, real subprocess workers on the 55-06 `esc` fixtures, the real app through
+  `TestClient`, records the fixtures above): the reader (12 cases incl. review m1's string/non-list forms), the write
+  refusal with a hint, the parity lint (9 cases), **one reader** (patching `parse_relaunch` changes both the lint and
+  the manager, L-109), unflagged workflow refused and a service refusal first, an unreadable workflow refused; respond
+  (404, 409 terminal, 400 not allowed, 400 run operation, the audit, copilot source) and 409 for a running run; fix-and-
+  accept (Resolve not opened, four 400s, the audit on `file.written` and `gate.resolved`, ISO mtime, 409 after) and the
+  `allowed` 400; relaunch (404, 400, the audit, the trigger, 409 replaced / running / service / flag / Dev write, nothing
+  cancelled by a refusal); restart-from (400 unknown step, 400 values, the audit, the trigger, 409 done, 409 flag); the
+  Resolve routes and their audit; the session-stream events; `/documents` writing and legacy per status (7); System
+  paths 403 on both routes (8 names incl. `..`, upper case, a symlink, `%2F`), `_prompts/` still 200; `is_system_path`;
+  `current_run` with the in-flight successor seen at the cancel; the consolidation filter (Resolve chat before and
+  after normal ones, limit, cursor); route order over the whole `/runs` table and one behaviour check per new route
+  (L-096).
+- `tests/test_scheduler.py` (+2): a relaunched scheduled run followed to the new run (stored, a new engine keeps it,
+  closes `ok`, history row on the new run); a replacement still being made keeps the row open, and closes on the old
+  run when it fails.
+- Updated: `test_run_actions.py` (fixtures declare `relaunchable: true`; audit fields), `test_resolve.py` (the D23 guard
+  through `required_mcp` and a node's `mcp`, also refusing the manual operations; audit fields).
+- Web: `src/test/fixtures/phase55-contract.test.ts` (8): every recorded fixture through its client function with
+  `Exact<T>` keys both ways; the mockup's `ESC_GATE` and action list match the recorded gate (D12 item 10); refusals keep
+  status and words; trigger shapes; audit keys on every recorded action event and the golden events; documents; Resolve
+  routes; stream events. Negative control: a fixture with a key dropped and one added fails it (restored).
+- **Mutation probes** (`/tmp/gr-55-08/probe.py`, 11, each killed, files restored): scheduler not following; Resolve
+  chats read; writing while paused; System files served; only the requested name checked; no write guard; flag
+  ignored; no in-flight successor; respond resuming a running run; no audit fields; the lint with its own reader.
+- **Gates:** genesis full pytest **2379 passed, 4 skipped** at `1f8fd8b5`'s tree (scratch
+  `GENESIS_STATE_DIR=/tmp/gr-55-08/full2/state`; 2376 at bd9873c6, reproduced by the reviewer; 2331 at 55-07);
+  `ruff check genesis` clean. Web: typecheck clean, lint 0 errors / 20 warnings (baseline), vitest 84 files / **971
+  passed** (963 before). genesis-workflows `validate_library`: the same 56 F8 violations as at 55-06, none about
+  relaunch.
+
+### Review
+
+`reviews/55-08-review.md`, round 1 **SHIP**, choices a–h agreed. m1 (the write guard failed open on a string server
+list), n2, n3 fixed in `1f8fd8b5` with tests (not re-reviewed; full suite re-run green). m2 and n1 recorded below.
+
+### Decisions / deviations
+
+No ADR deviation. No migration. Choices the spec did not cover:
+1. **Service refusals kept (D23, ADR-081):** test-execution ("started again from Testing") and story-verification
+   ("started again by moving the card into Verification") keep an execution record; setup-composer and action-capture
+   ("started again from Testing") keep a capture record bound to the run (`CaptureStore.bind_run` / `set_status(run_id=)`),
+   which a run that skips their queue breaks the same way; a test-design top-up stays refused per run (its `Binding.refusal`).
+   They come before the flag, so their reason shows. D23's text kept them "only where … an execution record": for the
+   spec agent to note.
+2. **fix-and-accept's `allowed` refusal is 400**, by the D21 mapping, not the table's "409 not allowed"; 409 is "not at
+   a standard gate". The spec row should be corrected.
+3. **`source: "copilot"`** for a respond carrying a chat control token (ADR-033: confirmed in chat first). D22 and the
+   ADR-089 draft should list it beside `resolve | manual`.
+4. **Relaunch's `InputValidationError` is 409** (the body has no inputs to fix), with the details.
+5. **respond refuses a run that does not wait at a gate (409).** Before, it logged `gate.resolved` and spawned a second
+   resume worker on a running run (L-121 shape).
+6. **The consolidation filter is in the query**: Resolve chats never count toward `limit` and never hold the cursor;
+   the cursor moves to the newest normal session, past any Resolve chat before it; one after it is never returned, so
+   the preflight skips a Resolve-only window (no run, no credits).
+7. **Write-guard text** "This workflow writes to the Dev environment (appian-dev-write), so Genesis never starts it
+   again from a run. <hint, else 'Start it again from where you launched it.'>"; the lint reports `relaunchable: true`
+   on a workflow that uses appian-dev-write, and (m1) a server list given as a string or another non-list. An unreadable
+   workflow is refused ("Genesis cannot read this workflow (<error>)…").
+8. **`gate_allowed` re-reads `relaunch` / `restart_from` live** for a standard gate (a library update of the flag, or a
+   gate raised by an older server, gets the D23 rules); the methods re-check at apply time as before.
+9. **The scheduler follows a replacement being made**: the relaunch names its new run before it cancels (`_replacing`,
+   popped in `finally`), so a tick never closes the row on the cancel; the row switches only once the new run's record
+   exists.
+10. **The manual fix route's sandbox** is the run's Resolve session (`resolve-<run_id>`); `proposal_id`, when given,
+    must be that session's and is audit only (the proposal then goes stale with its gate, not "confirmed").
+11. **Bug fixed:** the `_resolve` `file.written` `mtime` was a float; it is ISO like the worker's.
+12. **Web types:** the mockup's `ActionKey`, `HistoryEntry` and the payload names moved to `types/escalation.ts`; the
+    mockup's `DocRow` stays mockup-local (55-05 built different names: `execution`/`iteration`/`attempt`), but its
+    `DocCategory` is `RunDocCategory | "tool"`. `ChatSessionMode` is not extended with `run_resolve` (55-09 if needed).
+    The internal proposals route has no web client function. The Genesis-turn events are recorded from the chat manager
+    over the fake v3 engine (the same chat event shapes plus `turn`), not a live turn (no credit-heavy runs asked).
+13. The golden `events.ts` payloads for `gate.resolved` and `run.relaunched` now carry the audit fields.
+
+**Limits (recorded, not fixed):**
+- m2: the guard sees only what `workflow.yaml` declares (`required_mcp`, graph `mcp`); nothing checks that a
+  `kiro_node(mcp=…)` server is in `required_mcp`. No library workflow differs today. A publish-time lint for 55-10 or
+  the backlog.
+- n1: the snapshot's (and `GET /runs/{id}`'s) `gate.allowed.relaunch` / `restart_from` are the values from when the gate
+  was raised; `/resolve/escalation`'s `allowed` is live. Safe (apply re-checks). 55-09 should read the live map.
+- A crash between the cancel and the `run.relaunched` log loses `_replacing`: the schedule row then closes as cancelled.
+- Followers other than the scheduler (a copilot chat's run links) do not follow a replacement (not in scope).
+
+### Live effect before the release (the fleet runs from the editable dev venv)
+
+Nothing in the routes, the manager, the scheduler or the memory reader reaches the fleet until a server restart (the
+servers hold v0.83.0 in memory). New fleet workers import HEAD, but this sub-spec changes no worker code. The CLI from
+the dev venv gets the new parity lint (`check_relaunch`): no installed workflow declares the keys, so nothing changes.
+After a restart onto this code: every library workflow is unflagged until 55-10, so Rerun and Restart are refused for
+all of them, from Resolve and the routes (the D23 default), and the D23 write guard replaces the interim one, so the
+55-07 "do not restart before 55-08" note is cleared. Nothing was restarted and no live run was made.
+
+### Lesson candidates
+
+1. **A guard that iterates a declared list must not accept a string**: `for s in "appian-dev-write"` yields its
+   characters, so a YAML scalar turned the ADR-068 guard off silently (review m1). Read lists through one helper that
+   treats a string as one item and reports it.
+2. **An action route on a non-waiting run must refuse, not resume**: `respond` on a running run spawned a second resume
+   worker because the gate check returned None and the answer passed through unchecked.
+3. **A follower of a replaced run needs the successor before the cancel**: naming the new run first (an in-flight map)
+   closes the window in which a level-triggered loop sees only the cancel.
+
+### Code-map changes (for genesis-docs, bible/03)
+
+- `genesis/runs/relaunch_policy.py` (new) as listed. `runs/manager.py`: `_new_run_refusal`, `_relaunch_policy`,
+  `replaced_by`, `current_run`, `_replacing`, `_action_of`, `_audit_fields`, `ACTOR_USER`. `runs/documents.py`:
+  `is_system_path`. `lint/contract.py`: `check_relaunch`. `runtime/scheduler.py`: `_successor`.
+- `api/run_routes.py`: `fix-and-accept`, `relaunch`, `restart-from`, `_action_errors`, the System-path 403.
+  `api/_shared.py`: `FixAndAccept`, `Relaunch`, `RestartFrom`, `RUN_TRIGGER_SOURCES`.
+- `chat/resolve.py`: interim guard removed. `memory/chat_read.py`: the `RUN_CHAT_MODES` filter.
+- Web: `types/{escalation,resolve,runDocuments}.ts`, `lib/api/resolve.ts`, fixtures `test/fixtures/resolve/*`,
+  `test/fixtures/runs/{action-events,fix-events,escalation-gate,respond,fix-and-accept,relaunch,restart-from,
+  run-relaunched,run-restarted,error-400,error-409}.json`, `test/fixtures/phase55-contract.test.ts`.
+- Docs: D22 (`copilot` source), the ADR-089 draft (sources, the guard text), ADR-088 draft (D25 as built), the
+  `docs/architecture` runs-and-workers page (the routes, the relaunch policy, the System-path refusal).
+
+### For 55-09+
+
+- **55-09:** Documents from `runsApi.documents` (`writes` 0 = unknown; System rows listed, never previewed: the routes
+  answer 403). Resolve: `resolveApi.open` → `chatApi.streamNotifications<ResolveStreamEvent>(session_id, …)` and
+  `chatApi` messages; cards and the manual menu from `/resolve/escalation`'s live `allowed` (n1), not the snapshot's;
+  restart names a step from `steps`; follow `run_id` / `new_run_id` (L-120). Manual actions: `runsApi.respond` (action
+  dicts), `fixAndAccept` (needs Resolve opened), `relaunch`, `restartFrom`. Show the 409 reasons as is (they say where
+  to start the run instead). The relaunch confirm for a done `story-implementation` is moot: it is always refused (D23).
+- **55-10:** set `relaunchable` / `relaunch_hint` per workflow in META and `workflow.yaml` (the lint checks both; a
+  server list must be a list); `story-implementation` `relaunchable: false` + "Re-run it from the Implementation lane"
+  (the guard refuses it anyway); consider the m2 lint (agent node `mcp` ⊆ `required_mcp`).
+- **55-11:** a live Confirm and a manual run of each action; a scheduled run relaunched from its gate (the row follows);
+  a Resolve chat present at consolidation time; the System 403 from the real page.
+- **Spec/docs corrections:** §1's fix-and-accept "409 not allowed" → 400 (decision 2); D22's sources + `copilot`
+  (decision 3); D23's service-refusal list (decision 1).
+- Cleanup for the user: `/tmp/gr-55-08/` (scratch states, logs, the probe) and the reviewer's `/tmp/gr-55-08-review/`.
