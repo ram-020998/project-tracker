@@ -44,7 +44,8 @@ checklist in the release notes:
 
 Gather the lesson candidates and code-map changes from every As built (55-03's: spike the real stream before
 designing on it, the `__interrupt__` chunk swallowed on every gate; an unread stderr PIPE blocks the child; a count
-on a node and its incoming edge share one rule).
+on a node and its incoming edge share one rule; from D19: evidence of a memory feature carries the user's memories —
+redact before committing, since deleting later leaves the text in history).
 
 File ADR-088, ADR-089 and ADR-090 from `adr-drafts.md` into `reference/decision-log.md` (amendment links on ADR-011,
 ADR-031, ADR-033, ADR-053, ADR-054); update L-005 (`node.started` canonical) and add the phase's lesson candidates from

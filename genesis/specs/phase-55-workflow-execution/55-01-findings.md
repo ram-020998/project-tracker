@@ -1,7 +1,8 @@
 # 55-01 — Findings: Workflow execution enhancements
 
 > **Status:** SPEC-DRAFTED 2026-11-22 — Q&A complete: decisions D1–D11 (§9), defaults F1–F15 (§10, confirmed); D12–D15
-> from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04 (§13).
+> from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
+> from the user (§13).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -373,6 +374,17 @@ download, `reembed`, `status`, the read-only memory server).
 55-10's opt-out. Other fleet runs keep getting briefs from the dev venv. 55-12's deploy step turns both back on after
 the library release (consolidation catches up from its cursor). Considered: A (leave it), C (take the fleet off the
 dev venv until v0.84.0; the thorough fix, a backlog candidate if L-099 recurs).
+
+**D19 (user, 2026-11-23):** option A — **no memory text in any commit.** The 55-04 evidence held the full text of the
+user's memories (personal ones included) in seven brief files (`evidence/55-04/briefs-bge/*.md`,
+`briefs-keyword-entity/*.md`, `live-r-ea61596cd428/brief.md`); the other evidence files hold ids, scores and run
+descriptions only (checked against every memory's text). The spec agent redacted the seven files (ids, types,
+importance and text length kept; anchors and text removed) and rewrote the three unpushed commits from the 55-04 As
+built on (`git filter-branch --tree-filter`, range `77a41ec..main`, nothing pushed was touched), so no commit holds the
+text; a scan of every unpushed commit against all 68 memory texts finds none. The old commits stay only in the local
+backup ref `refs/original/refs/heads/main` until the user removes it. Rule from now on (55-11 set-up, every later
+evidence folder): briefs, Resolve sandboxes, prompts and tool outputs that carry memory text are reviewed locally and
+committed only redacted. Considered: B (keep; repo is the user's), C (delete in a new commit; text stays in history).
 
 ## Context manifest
 

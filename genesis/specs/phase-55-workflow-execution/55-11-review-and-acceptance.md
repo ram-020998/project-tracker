@@ -49,7 +49,9 @@ image run that fetches the model and loads it with the network off, on Linux).
 **Set-up:** copy `~/.genesis` to a throwaway folder (mode 700) with SQLite's online backup for `genesis.db` and
 `memory.db` (L-125); start the candidate on another port against the copy; collaboration and system schedules off on
 the copy except what a row tests; Appian writes only with the user's go-ahead; the user sets the credit budget before
-the agent rows; never print, commit or attach the copy's files; delete it at the end. The fleet is not restarted.
+the agent rows; never print, commit or attach the copy's files; delete it at the end. **No memory text in any commit
+(D19):** a brief, a captured prompt, a Resolve sandbox file or a tool output that carries memory text is shown to the
+user locally and committed to `evidence/` only redacted (ids, types, scores, lengths). The fleet is not restarted.
 
 | # | Check | Pass |
 |---|---|---|

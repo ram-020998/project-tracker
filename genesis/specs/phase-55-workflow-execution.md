@@ -55,6 +55,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D16 | 55-03 build rulings as built (no `?since_version`, one `resync` on a missed reconnect, extra snapshot node fields, edge/↻ count rules, badge states); one mockup deviation: "round k" without "of N". |
 | D17 | 55-04 build rulings as built: the quantized `bge-small-en-v1.5-onnx-q` model (~67 MB, pinned), `genesis memory status` / `reembed`, feature/story hints first, no minimum similarity, read-only memory server; #27 missing from the feature-4 brief, judged at 55-11. |
 | D18 | The fleet's two memory schedules are off on both instances until Phase 55 ships (the dev venv already writes briefs); 55-12 turns them back on. |
+| D19 | No memory text in any commit: the 55-04 evidence briefs were redacted and the unpushed commits rewritten; later evidence carrying memory text is committed only redacted. |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
