@@ -23,7 +23,10 @@
   names and record the limit.
 - Excluded from the diff: `_kiro/`, `.kiro/`, `_toolcalls/` (tool outputs have `tool_output.recorded`), `_prompts/`
   (`agent.prompt`), `.DS_Store`. Files written before the graph starts (uploads, ADR-035; the memory brief, 55-04) get a
-  `file.written` with `node: "_launch"` / `"_memory"`.
+  `file.written` with `node: "_launch"` / `"_memory"`. The brief is written once at run start, before any node,
+  atomically via `brief.md.part` (55-04): never report a `*.part` file; a fork's copied `_memory/brief.md` has no
+  `memory.brief` event in the new run, so attribute it from the file itself (step "Run start (before the first step)",
+  D12 item 5).
 - `execution` = the node's nth completion; `iteration` / `attempt` from the node's last `agent.prompt` when it is an
   agent node.
 - A zero-byte file at a node's start that is filled later shows as "being written" until a `file.written` arrives.

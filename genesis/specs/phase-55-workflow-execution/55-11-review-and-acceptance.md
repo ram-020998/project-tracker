@@ -8,10 +8,11 @@
 
 ## 1. Independent review (file:line evidence each; plus `genesis-ctx check --since <phase base>` per repo)
 
-1. **Memory brief (ADR-088 draft, D2–D5, F1–F5):** built only for `op == "run"`, only with an agent node, honours
+1. **Memory brief (ADR-088 draft, D2–D5, D17, F1–F5):** built only for `op == "run"`, only with an agent node, honours
    `memory_brief: false`; never fails a run on any error path; personal memories only in their section and never in
    anything published to the Hub; the brief marked as data; the memory MCP trusted for exactly its six read tools on the
    real projection; the embedder never loaded in the web process (ADR-054); the model never downloaded inside a run.
+   **Review genesis `419d8363`** (55-04's review fixes: not re-reviewed, full suite not re-run after it).
 2. **Escalation (ADR-089 draft, D6, F6, F8):** every action routed and stored as specified in every adopted workflow
    (L-106); Reject / stop ends `failed`, never `done`; accept and fix-then-accept refused when unavailable; the agent
    cannot answer a gate, relaunch, fork or stop (ADR-033) — only `propose_action`; every action audited; relaunch
@@ -39,7 +40,9 @@
 
 genesis-core, kiro-agent-sdk, genesis (pytest, ruff); web (`npm run lint && npm run typecheck && npm test`, `npm run
 build` + committed `web/static/`); genesis-workflows (`ci/validate_library.py`, skills validation, pytest); one CI run
-or a run in the CI image before the release commit (L-112).
+or a run in the CI image before the release commit (L-112) — **with fastembed installed on the python:3.13 image**
+(55-04 proved the offline model load on macOS only; the CI test jobs install with `--no-model`, so add one job or one
+image run that fetches the model and loads it with the network off, on Linux).
 
 ## 3. Live acceptance (the release candidate on a copy of the user's real Genesis home)
 
@@ -53,7 +56,7 @@ the agent rows; never print, commit or attach the copy's files; delete it at the
 | A1 | Mockup sign-off carried through: Documents, the Resolve tab and graph states match the approved `/dev/phase-55` (genesis `d0aa1b2`, D12–D15) | user confirms |
 | A2 | **Graph liveness** on a long run (technical-design-analysis or test-design-analysis on a real feature): program nodes show running; a minutes-long agent node shows running throughout with elapsed time; only the edge into the running node is lit; a loop re-entry shows round 2; at five random moments the graph equals the event log within 3 s | as stated |
 | A3 | **Liveness under faults:** block the SSE (devtools offline for the stream, or stop the proxy) → badge Polling, graph still current within 3 s; reconnect resumes without replaying; restart `genesis serve` mid-run (no other run active) → the snapshot rebuilds; pause / resume and a gate show correctly | as stated |
-| A4 | **Memory brief:** after `scripts/install-packages.sh`, the embedder is ready and the back-fill embedded every current memory (count); three real runs (a feature-stage, a story and an agent-prompt run) each have `_memory/brief.md`; the user reviews them for relevance; the captured prompts carry the line; the memory jobs and a sync run have none | user reviews the briefs |
+| A4 | **Memory brief:** after `scripts/install-packages.sh`, the embedder is ready and the back-fill embedded every current memory (count); three real runs (a feature-stage, a story and an agent-prompt run) each have `_memory/brief.md`; the user reviews them for relevance, **including the two 55-04 calls (D17):** memory #27 is not in the feature-4 brief (ranking), and a run with no context still gets 12 weakly related memories (no minimum similarity); the captured prompts carry the line; the memory jobs and a sync run have none; **live negative control:** in the same run an agent asked to call a tool outside the six memory tools and its node's own list is refused | user reviews the briefs |
 | A5 | **Escalation, stage workflow:** a real escalation of a stage run (a forced validator failure on the candidate, or a real one); the bell notice opens `/runs/<id>/resolve` without starting the agent; opening Resolve starts it and its first turn explains the failure and proposes actions; **accept** → `done`, the stage shows the artifact (finalizer); a second escalation → **fix then accept** with a reviewed diff | as stated |
 | A6 | **Escalation, every action:** on cheap runs (agent-prompt / hello-appian with a forced failure): retry with guidance (guidance in the captured prompt, run continues); **rerun from the start with additional instructions** (the new run has the same inputs, the instructions are in every agent node's captured prompt and survive a pause/resume, the old run `cancelled` and linked; on a stage-bound run the stage moves to the new run, D13); **restart from an earlier step** (the new run starts from that step's checkpoint and runs, the original's checkpoints unchanged, the old run `cancelled` and linked, a stage-bound run's stage moves to the new run, D15); stop (`failed`, reason shown); an unavailable action disabled with its reason; a stale proposal refused; each result shown in the Resolve tab (D14) | as stated |
 | A7 | **Resolve safety:** ask the agent to apply an action itself, write outside its sandbox, run a shell command → each refused | as stated |

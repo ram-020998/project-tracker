@@ -42,8 +42,9 @@
   its validator, so an old round's guidance does not leak into later prompts (54-05 review n4).
 - **Run instructions in the prompt (D13):** `kiro_node` also appends "Additional instructions from the user for this
   run: <text>" to **every** agent node's prompt when `ctx.extras["run_instructions"]` is set (the worker sets it from
-  the run's `trigger.instructions`, §3). Order: memory line, run instructions, node guidance. The captured prompt
-  includes them (ADR-066).
+  the run's `trigger.instructions`, §3), beside 55-04's `MEMORY_LINE`. Order: memory line, run instructions, node
+  guidance. The captured prompt includes them (ADR-066). A relaunch is a new `op == "run"`, so it gets a fresh
+  memory brief; `restart_from` (a fork) reuses the copied one (55-04).
 - `CORE_MAJOR` unchanged; `hitl_gate` unchanged for approval / pre_mutation / review gates.
 
 ## 2. Reliability lint (F8)

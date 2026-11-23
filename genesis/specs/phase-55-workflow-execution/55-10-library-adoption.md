@@ -35,6 +35,8 @@ check "Heal decision", `sections.json` intermediate "Section plan"; story-implem
 ## 3. Memory opt-outs (D4)
 
 `memory-consolidation` and `memory-maintenance`: `META.memory_brief: false` (mirrored in `workflow.yaml`, parity lint).
+Check first that the library schema (`schemas/`) and the parity lint accept the key (55-04 added the key on the
+platform side only). Until this ships, the fleet's nightly memory runs get a brief (55-04 As built; see 55-01 §13).
 
 ## 4. Versions and scaffolder
 

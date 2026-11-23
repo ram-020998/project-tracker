@@ -29,6 +29,10 @@ Catalog on each instance (L-033); check `/openapi.json` `info.version`, the DB v
 checklist in the release notes:
 - Each run with an agent step now starts with a memory brief (`_memory/brief.md`, listed under Inputs); your personal
   memories are included for your own runs and never published to the Hub.
+- The install and the in-app updater now download the embedding model once (~67 MB, `qdrant/bge-small-en-v1.5-onnx-q`
+  from huggingface.co, checksums pinned in `genesis/memory/model.py`); a failed download only warns and briefs fall
+  back to keyword and entity matching; `genesis memory reembed` back-fills, `genesis memory status` shows the state.
+- The memory MCP server now opens `memory.db` read-only (chat too).
 - Escalations: open the **Resolve** tab on the run; the agent explains and proposes, you confirm. Rerun and Restart
   from a step move the feature stage (or story) to the new run and end the old run Cancelled. Reject at an old
   gate now ends the run **failed**, not done.
