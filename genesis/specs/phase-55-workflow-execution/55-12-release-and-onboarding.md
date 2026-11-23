@@ -7,8 +7,8 @@
 ## 1. Release order (one release)
 
 1. **genesis v0.84.0** (or the next minor if a v0.83.x patch moved it): the version in the `pyproject.toml` files of
-   the app and the three packages (one shared version, ADR-080), `create_app`, `web/src/version.ts`; m0031 if 55-08
-   built it (DB v30 → v31); fastembed as a core dependency and the pinned model checksum; `npm run build` + commit
+   the app and the three packages (one shared version, ADR-080), `create_app`, `web/src/version.ts`; a migration only
+   if 55-08 recorded one (none expected: 55-07 needed none, D24; DB stays v30); fastembed as a core dependency and the pinned model checksum; `npm run build` + commit
    `web/static/` as separate steps (L-089); verify the release commit holds every changed file (L-056), fixtures and
    migration included; one CI run before the release commit (L-112); tag; push on the user's go-ahead; CI green
    (packages, genesis, frontend, clean-install). If no web file changed in a follow-up tag, force the frontend job with

@@ -38,6 +38,11 @@
   The run pill of a run waiting at an escalation gate reads "Needs you" (D12 n1): change `statusMeta` for the
   escalation-gate case (55-03 left it unchanged).
 - Not opened yet: the summary strip (failed step, one-line reason, **Open Resolve**) → `POST /runs/{id}/resolve`.
+- The first turn runs in the background (55-07): read it, the proposals and the notes from the session's
+  notification stream; on reload, rebuild from `GET /chat/sessions/{sid}` (system messages with `meta.kind`) and
+  `GET /runs/{id}/resolve`. Cards follow `GET /runs/{id}/resolve/escalation`'s `allowed`; Confirm may edit only the
+  guidance, the instructions or the reason; a restart card names a step from `steps`; follow `new_run_id` (L-120).
+  An old library gate (no F6 fields) gets a computed action map without Fix then accept (55-07).
 - The conversation reuses the chat components (`ChatThread`, composer, the turn stream) bound to the Resolve session;
   no second chat UI.
 - **Proposal cards** from `resolve.proposal` events: action, parameters (editable guidance text for retry; an

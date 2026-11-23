@@ -51,13 +51,21 @@ whatever the flag says, refuse (409) a workflow whose `required_mcp` or any node
 (ADR-068). The 55-06 service refusals stay where a run that skips the queue would break an execution record
 (ADR-081) and for a test-design top-up (per run); list each with its reason in As built.
 
-## 2. Resolve session storage (F15)
+**From 55-07's As built (D24):** 55-07 already built the Resolve routes (open, read, escalation, proposals confirm /
+dismiss), an internal token-checked route its MCP server uses to store a proposal, and `POST /runs/{id}/restart-from
+{from_step, values?}` → `RunManager.restart_from(run_id, from_step=…)`. Here: contract rows and **recorded** fixtures
+for those routes and the session-stream events (`resolve.proposal {proposal}`, `resolve.note {kind, text, gate_seq |
+proposal_id}`, Genesis-turn events carrying `turn: "genesis"`); the `ResolveProposal` type `{id, action, params,
+rationale, status: proposed | applying | confirmed | failed | dismissed | stale | superseded, gate_seq, proposed_at,
+resolved_at, run_id, result_run_id, error}`; **replace `ResolveService._allowed`'s interim `WRITE_SERVERS` guard with
+the D23 reader and guard**, and apply the same guard to the manual relaunch and restart routes. A proposal too long to
+store whole is refused with guidance to shorten it (55-07); keep that answer in the contract.
 
-`chat_run_links(run_id PK, session_id)` keeps one copilot session per run, so the Resolve session gets its own table:
-**m0031** `run_resolve_sessions(run_id TEXT PRIMARY KEY REFERENCES runs ON DELETE CASCADE, session_id TEXT NOT NULL
-REFERENCES chat_sessions ON DELETE CASCADE, created_at)`. Forward-only, through the migration runner (L-102). If the
-build finds a cleaner home that needs no migration (e.g. a column already present), record it as a decision in
-55-01 §9 before choosing it. No fleet restart on an unreleased migration (risk table).
+## 2. Resolve session storage (F15; settled by 55-07, D24)
+
+**No migration.** 55-07 names the Resolve session `resolve-<run_id>`, so the run → session link is the session id
+itself; `chat_run_links` keeps its one copilot session per run. Drop the planned m0031 `run_resolve_sessions` table;
+add a migration only if this sub-spec finds a need, recorded as a decision in 55-01 §9 first. DB stays v30.
 
 ## 3. Web types and fixtures
 
