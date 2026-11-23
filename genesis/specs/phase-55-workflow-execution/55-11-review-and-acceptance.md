@@ -75,6 +75,7 @@ user locally and committed to `evidence/` only redacted (ids, types, scores, len
 | A8 | **Documents:** the four stage workflows, story-implementation, test-execution and one old run: every file in the right category and step; Output pinned; write counts after a retry; tool outputs as metadata after the end; Open in step; **during a real agent run**, `file.written` rows arrive per task finish and `/documents` shows "being written" only while running (not when paused or at a gate); System files not previewable; known limits shown honestly (a file written before a pause-kill reads "step unknown", 55-05) | as stated |
 | A9 | **Width probe** (L-090): Documents and Resolve at 1280 / 1440 / 1920 px, light and dark, screenshots | no overflow, user confirms |
 | A10 | **Credits:** the Resolve conversation's credits are metered with provenance on the panel (ADR-032) | as stated |
+| A11 | **From 55-08 (D26):** each action also run from the **manual** menu (not only a Resolve Confirm), each audit event carrying actor / source / action / params / proposal id (D22); a **scheduled** run relaunched from its gate keeps its schedule row, which closes with the new run's result; a Resolve chat present at a consolidation run is skipped and does not hold the cursor (D25); the System 403 seen from the real page; the Genesis-turn stream on a live turn (55-08's fixture came from the fake engine) | as stated |
 
 Rows that cannot run (e.g. Dev down for a stage run) are recorded "not run" with the reason and named in the release
 notes (L-111).

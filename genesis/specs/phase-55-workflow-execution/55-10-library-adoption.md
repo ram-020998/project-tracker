@@ -49,7 +49,9 @@ form.
 ## 3. Memory opt-outs (D4) and relaunchable flags (D23)
 
 **Relaunchable (D23):** set `META.relaunchable` (+ `workflow.yaml`) per workflow; the default is `false`, so declare
-`true` only where a fresh run with the same inputs is safe. Starting list (confirm each against the workflow's
+`true` only where a fresh run with the same inputs is safe. The 55-08 parity lint checks both places (a server list
+must be a list). **Add the D26 lint:** every agent node's `mcp` ⊆ the workflow's `required_mcp`, so the Dev-write guard
+(which reads `required_mcp` and the nodes' `mcp`) can never miss a server a node uses. Starting list (confirm each against the workflow's
 bindings and side effects, record it in As built): `true` — ux-design-analysis, technical-design-analysis,
 feature-breakdown-analysis, test-design-analysis (a top-up run stays refused per run), story-design-analysis,
 generate-business-map, code-review, erd-generation, agent-prompt, hello-appian; `false` with a `relaunch_hint` —

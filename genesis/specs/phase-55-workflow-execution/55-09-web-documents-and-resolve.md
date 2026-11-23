@@ -40,8 +40,14 @@
 - Not opened yet: the summary strip (failed step, one-line reason, **Open Resolve**) → `POST /runs/{id}/resolve`.
 - The first turn runs in the background (55-07): read it, the proposals and the notes from the session's
   notification stream; on reload, rebuild from `GET /chat/sessions/{sid}` (system messages with `meta.kind`) and
-  `GET /runs/{id}/resolve`. Cards follow `GET /runs/{id}/resolve/escalation`'s `allowed`; Confirm may edit only the
-  guidance, the instructions or the reason; a restart card names a step from `steps`; follow `new_run_id` (L-120).
+  `GET /runs/{id}/resolve`. Cards **and the manual menu** follow `GET /runs/{id}/resolve/escalation`'s **live**
+  `allowed` — never the snapshot's copy, which is taken when the gate is raised (55-08 n1); Confirm may edit only the
+  guidance, the instructions or the reason; a restart card names a step from `steps`; follow `run_id` / `new_run_id`
+  (L-120). Clients as built in 55-08 (its As built's contract table is the one home for the shapes): `resolveApi.open`
+  → `chatApi.streamNotifications<ResolveStreamEvent>(session_id, …)` and `chatApi` messages; manual actions through
+  `runsApi.respond` (action dicts), `fixAndAccept`, `relaunch`, `restartFrom`. **Manual Fix needs the Resolve chat**
+  (its draft comes from there): offer it only once Resolve is open, else say so. Show 409 reasons as is (they say where
+  to start the run instead, D23).
   An old library gate (no F6 fields) gets a computed action map without Fix then accept (55-07).
 - The conversation reuses the chat components (`ChatThread`, composer, the turn stream) bound to the Resolve session;
   no second chat UI.

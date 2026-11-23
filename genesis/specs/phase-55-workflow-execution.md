@@ -2,7 +2,7 @@
 
 > **Status:** 📝 **SPEC-DRAFTED 2026-11-22** (genesis-spec). Q&A complete: decisions D1–D11, defaults F1–F15; D12–D15
 > from the 55-02 mockup review (2026-11-23); D16–D20 during the build (`phase-55-workflow-execution/55-01-findings.md` §9–§14).
-> 55-02..55-07 BUILT.
+> 55-02..55-08 BUILT.
 > Sub-specs: `phase-55-workflow-execution/55-01..55-12`. ADR drafts: `phase-55-workflow-execution/adr-drafts.md`
 > (ADR-088, ADR-089, ADR-090).
 > Repos: **genesis** (worker, runs, memory, chat, API, web, `packages/genesis-core` nodes and lint),
@@ -62,6 +62,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D23 | `META.relaunchable` (default false, opt-in) + `relaunch_hint` decide whether Rerun and Restart from a step are offered; the platform never relaunches a workflow that uses `appian-dev-write` (ADR-068); `story-implementation` is false. |
 | D24 | 55-07 build rulings as built: Resolve reads stay unscoped (ADR-086; writes sandboxed), no migration (session id `resolve-<run_id>`), Resolve routes and restart-from built in 55-07, an interim write guard until 55-08. |
 | D25 | Memory consolidation skips Resolve chats (`run_resolve` left out of `memory/chat_read.py`). |
+| D26 | 55-08 build rulings as built: one error mapping (400 arguments / not allowed, 409 state), one D23 reader (`runs/relaunch_policy.py`), the audit's `copilot` source, the manual Fix needs Resolve opened, `allowed` read live from `/resolve/escalation`. |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
@@ -111,7 +112,7 @@ Every intermediate commit keeps the gates green. Fold each As built into the lat
 | 55-05 | genesis (`runs/`, `lint/contract.py`, `packages/genesis-core`) | `file.written` from the worker's task start/finish diff; `META.artifacts` map form + parity lint; `runs/documents.py` categorization; `GET /runs/{id}/documents` — **BUILT** (genesis `5bbae6d3`, `7d67c548`, `3c3e38ae`, local; review SHIP; D20) |
 | 55-06 | genesis (`packages/genesis-core` nodes + `lint/reliability.py`, `runs/manager.py`, `api/features.py`, `api/workbench.py`) | `escalation_gate` (routes, payload, guidance and run-instructions lines), old answers mapped, relaunch with instructions, restart from a step (fork + rebind + cancel), fix-then-accept, `copilot_actions` audit — **BUILT** (genesis `6c6f93a5`, `a9a1cce8`, `88b57a52`, local; review SHIP; D21; the library lint red until 55-10) |
 | 55-07 | genesis (`chat/`, `mcp/`, `runtime/notifications.py`) | `run_resolve` chat mode, run-scoped read tools + `propose_action`, sandbox copy, first-turn seed, notifications on every escalation — **BUILT** (genesis `70f7c383`, `0a4acd0c`, local; review SHIP; D24) |
-| 55-08 | genesis (`api/`, `runs/`, `lint/`, `web/src/types`, `web/src/lib/api`) | Contract table for every new route; the D23 relaunchable reader and guard; the D22 audit fields; the 55-05 `legacy`/`writing` fixes; System paths refused; fixtures from real responses; no migration expected (D24) |
+| 55-08 | genesis (`api/`, `runs/`, `lint/`, `web/src/types`, `web/src/lib/api`) | Contract table for every new route; the D23 relaunchable reader and guard; the D22 audit fields; the 55-05 `legacy`/`writing` fixes; System paths refused; fixtures from real responses; no migration expected (D24) — **BUILT** (genesis `bd9873c6`, `be3097b3`, `1f8fd8b5`, local; review SHIP; D26; no migration) |
 | 55-09 | genesis (`web/`) | Documents tab revamp; Resolve tab (chat, proposal cards, manual action menu, confirm dialogs, results; `/runs/:runId/resolve`) |
 | 55-10 | genesis-workflows | Standard gate in every workflow with an agent node; `META.artifacts` roles + labels; `memory_brief: false` on the memory workflows; versions bumped |
 | 55-11 | all | Review + gates + live acceptance (Phase 55 only, D11) |

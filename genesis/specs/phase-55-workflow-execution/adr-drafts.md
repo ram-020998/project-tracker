@@ -70,7 +70,7 @@
      (`/runs/<id>/resolve`), started when the user first opens it; read-only access to the run (events, steps, gate, its files copied into the
      sandbox; tool outputs readable while the run waits, D9); it records **proposals** only; the user's Confirm on a
      proposal card calls the API, and program code applies it. It never answers a gate itself (ADR-033 intact). Every
-     action, from Resolve or the manual menu, is audited on the run's own events (actor, source, action, parameters,
+     action, from Resolve, the manual menu or the chat copilot, is audited on the run's own events (actor, source, action, parameters,
      proposal id; D22); `copilot_actions` holds the Resolve proposal flow only. Every escalation raises a "needs you" bell notification.
 - **Alternatives.** Keep per-workflow gates (the `done`-on-reject bug stays); let the agent call mutating tools behind
   a permission prompt (weaker: the agent picks the parameters at call time); a Chat-page session (user chose Run

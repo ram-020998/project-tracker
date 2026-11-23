@@ -3,7 +3,7 @@
 > **Status:** SPEC-DRAFTED 2026-11-22 — Q&A complete: decisions D1–D11 (§9), defaults F1–F15 (§10, confirmed); D12–D15
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
 > from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
-> from the user (§16).
+> from the user (§16); D26 after 55-08 (§17).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -312,6 +312,7 @@ Content was rephrased for compliance with licensing restrictions.
 | D20 | **55-05 build rulings, taken as built** (55-05 As built "Decisions / deviations" 1–18; review SHIP at round 2): no `mtime` on `RunWorkspace.manifest` (Documents lists the folder with the worker's own `scan`; genesis-core untouched); the worker forwards `task_finish` with its diff and the manager logs `file.written`; `execution` = the node's nth distinct task id (a gate resumed with the same id stays one; can differ from the snapshot's ↻); `.pids/` excluded and listed as System; a list-form workflow gets the name rules but keeps each file's step; `_launch` files without a role are inputs; `_parallel` writes have no step; **deviation from F12:** an old run's file saved by reference takes its step from its `artifact.saved` event instead of `node: null`; `writes` = record count (0 = unknown); labels from the role, the upload's input title, or "Turn k · <item>" for prompts; `written_at` = current mtime; only existing files are documents; extra fields `writing`, `legacy`, `roles_declared`, `status`, `version`; `FoldCache` shared with the snapshot. Limits accepted: a task killed before its finish (pause, crash) leaves no record of what it wrote; a write between two nodes is reported only when the file changes again; `*.part` is never listed; the fan-out start order is not spiked. **Spec-agent rulings while folding:** `file.written` is not a `/live` hint (Documents re-reads on `node.completed`); System files (`_kiro/`, `.kiro/`, `.pids/`, `checkout/`) are listed but neither previewed nor downloaded, refused by the file routes (55-08), because the run's Kiro home is not confirmed free of secrets. | Spec agent (2026-11-23), folding the 55-05 As built. |
 | D21 | **55-06 build rulings, taken as built** (55-06 As built "Decisions / deviations" 1–15; review SHIP): one gate serves all a workflow's agents (`decisions["_escalation.from"]`); a healing escalation's `failed_node` is the verify node, and Accept depends on `attach_healing(artifact=)`; the payload also carries `extra_options [{id, label, hint}]`; an unknown answer stops the run (`failed`), never `done`; **relaunch does not call the stage / story re-run endpoints** (they delete the stage folder the unchanged inputs point into and re-snapshot upstream, against D13) — it starts with the old inputs and rebinds before the worker spawns (L-061), so it skips the re-run's prerequisite checks and reads the old snapshots; validate, then cancel; one run is never replaced twice (`_replace_lock`, `_replaced_by`); **relaunch and restart_from are refused for queue-managed workflows** (test-execution, story-verification, setup-composer, action-capture, test-design top-ups), each refusal saying where to restart instead (ADR-081/082); restart_from copies the run folder (without `_kiro/`, `_toolcalls/`, `.pids/`), rewrites the absolute state pointers, and resets `status`, `retries`, `_healing` and the `_escalation.*` markers; the plain fork carries a relaunch's instructions; fix_and_accept takes the Resolve `session_id`; fix targets limited (category output / intermediate / check, ≤ 25 MB, never System, `_memory`, `uploads`, `*.part`); history wording as the mockup, without "of N"; stop's reason becomes the run's `detail`. Limits accepted: the launch environment is not stored (relaunch uses the active one, as resume does); a rebind that raises after the cancel is untested. **Spec-agent rulings while folding:** (1) **restart takes the step to restart from**, not LangGraph's `as_node` (which continues *after* the named node): `POST /runs/{id}/restart-from {from_step}`, and the server forks from the latest checkpoint whose `next` holds that step (55-08); (2) a workflow whose cleanup must run on stop routes stop through it with a new additive `escalation_gate(stop_to=)` (55-10); the run still ends `failed`. | Spec agent (2026-11-23), folding the 55-06 As built. |
 | D24 | **55-07 build rulings, taken as built** (55-07 As built "Decisions / deviations"; review SHIP after one round): **reads stay unscoped** — `run_resolve` confines writes to the sandbox (`fs_write_root`) but not reads, like every sandboxed chat mode, because ADR-086 rejected read path-scoping and deferred it to Phase 52 (55-07 §1's "confined" means writes; no ADR deviation, confirmed by the spec agent); **no migration** — the Resolve session id is `resolve-<run_id>`, so the id is the run → session link; the Resolve routes, an internal token-checked proposal route for the MCP server and `restart_from(from_step=)` were built in 55-07 (planned for 55-08); the first turn runs in the background, its events and the proposal events go to the session's notification stream; a proposal too long to store whole is refused with guidance to shorten it; an old library gate gets a computed action map without Fix then accept; an interim guard refuses Rerun/Restart for a workflow that declares `appian-dev-write` until 55-08's D23 reader replaces it; Confirm applies once even on a double click. The review's M finding (a restart dropped every earlier step's decisions, inherited from 55-06) is fixed. Limits accepted: an off-thread refresh racing the run's end can put `run/_toolcalls/` back (retention removes it); a cold-start turn can see one note twice; two `serve` processes on one home refuse each other's proposals. | Spec agent (2026-11-23), folding the 55-07 As built. |
+| D26 | **55-08 build rulings, taken as built** (55-08 As built "Decisions / deviations"; review SHIP): one error mapping — bad arguments or an action the gate doesn't allow → 400; the run's state, a workflow that isn't installed, or old inputs the installed schema now refuses → 409 (so fix-and-accept "not allowed" is 400, and a relaunch whose stored inputs fail the current schema is 409, since the caller cannot fix them in the body); relaunch and restart-from answer the **new** run's id, respond and fix-and-accept the same run's id; one D23 reader in `genesis/runs/relaunch_policy.py` used by `RunManager`, Resolve and the parity lint (a test proves they agree); the `appian-dev-write` guard checks `required_mcp` and every graph node's `mcp`, on the manual routes and Resolve; the audit's third source `copilot`; the System-path 403 covers `..`, case, symlinks and encoded slashes; the manual fix route takes its draft from the run's Resolve chat, so Resolve must have been opened; the snapshot's copy of `allowed` is taken when the gate is raised, `/resolve/escalation` reads it fresh. Two older bugs fixed: respond on a run not at a gate started a second worker (now 409); the fix's `file.written` stored `mtime` as a number. Limits: the guard sees only servers declared in `workflow.yaml` (no workflow differs today; a lint in 55-10); the Genesis-turn stream fixture is from the fake engine. | Spec agent (2026-11-23), folding the 55-08 As built. |
 
 ## 10. Defaults — ✅ confirmed by the user 2026-11-22 ("confirm")
 
@@ -422,7 +423,7 @@ for cleanup, the 56 violations and 7 tests); **55-11** (the untested rebind-fail
 **D22 (user, 2026-11-23):** option A — **the run's own event log is the audit for every escalation action**
 (amends D6's "every action is audited in `copilot_actions`"). Every action, from a Resolve proposal or the manual
 menu, is recorded on the run's events (`gate.resolved`, `run.relaunched`, the `_resolve` `file.written`) with `actor`,
-`source` (`resolve` | `manual`), `action`, its parameters and, when there is one, the `proposal_id`. `copilot_actions`
+`source` (`resolve` | `manual` | `copilot` — a gate answer relayed by the chat copilot, added in 55-08), `action`, its parameters and, when there is one, the `proposal_id`. `copilot_actions`
 keeps only the Resolve proposal → confirm flow (as 55-06 built it). No migration for the audit; the audit survives a
 deleted chat and lives as long as the run (retention reclaims it with the run's events). Folded into 55-07, 55-08 and
 the ADR-089 draft. Considered: B (m0031 rebuilds `copilot_actions` with a nullable session, `actor`, `source`; a
@@ -438,8 +439,9 @@ write-capable MCP server (`appian-dev-write`) even if it declares `relaunchable:
 confirm stays the single approval for Dev changes. `story-implementation` declares `relaunchable: false` with the hint
 "Re-run it from the Implementation lane"; Retry with guidance, Accept, Fix then accept and Stop stay offered inside its
 escalated run. 55-06's hard-coded refusals (test-execution, story-verification, setup-composer, action-capture,
-test-design top-ups) are covered by the default; the service checks stay only where a run that skips the queue would
-break an execution record (ADR-081), and a test-design top-up stays refused per run. Folded into 55-08 (the reader, the
+test-design top-ups) are covered by the default; the service checks stay where a run that skips the queue would
+break an execution or capture record (ADR-081; 55-08 kept all four — setup-composer and action-capture tie their
+capture records to the run), and a test-design top-up stays refused per run. Folded into 55-08 (the reader, the
 `allowed` computation, the guard), 55-09, 55-10 (the flags per workflow), 55-11, 55-12 and the ADR-089 draft.
 Considered: A (refuse Rerun and Restart for `story-implementation` only), B (allow it with a Dev-write confirm; an
 ADR-068 amendment).
@@ -463,6 +465,21 @@ brief and one run's failure detail, which would feed memories back into themselv
 Resolve is stated in a feature or spec chat or added on the Memory page. Built in 55-08 (a small backend item there);
 checked in 55-11 and named in the ADR-088 draft. Considered: B (read like every chat), C (read only the user's
 messages; splits them from their context).
+
+## 17. After 55-08 (2026-11-23): As built folded into the later sub-specs
+
+55-08 BUILT (genesis `bd9873c6`, `be3097b3`, `1f8fd8b5`, local; review SHIP; genesis 2379 passed, 4 skipped; web 971;
+no migration, DB v30). D26 records its build rulings; D22 and D23 corrected in place (the `copilot` source; the four
+kept service refusals). The full contract table is in 55-08's As built ("The contract table as built") and is the
+one home for route shapes from now on; §1's planning table is superseded by it (its fix-and-accept "409 not allowed"
+is 400 as built). Live effect: nothing until a server restart; after one, every library workflow refuses Rerun and
+Restart until 55-10 sets the flags, and 55-07's "don't restart the fleet yet" warning no longer applies. Folded:
+**55-09** (the clients to use; cards and the manual menu from `/resolve/escalation`'s live `allowed`, never the
+snapshot's copy; manual Fix needs Resolve opened; show 409 reasons as is; System rows 403); **55-10** (set the flags;
+a lint that every agent node's `mcp` ⊆ `required_mcp`, so the Dev-write guard sees every server); **55-11** (a live
+Confirm and a manual run of each action, a scheduled run relaunched from its gate, a Resolve chat present at
+consolidation time, the System 403 from the page, a live Genesis-turn stream since the fixture came from the fake
+engine); ADR-089 draft (the `copilot` source).
 
 ## Context manifest
 
