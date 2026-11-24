@@ -1,8 +1,8 @@
 # 55-12 — Release and onboarding
 
 > **Status:** SPEC-DRAFTED 2026-11-22. Repos: genesis, genesis-workflows, project-tracker. Parent:
-> `specs/phase-55-workflow-execution.md`. After 55-11 = SHIP **and its live acceptance passed** (D11).
-> **genesis-release** asks before every tag and push; then **genesis-docs** does the write-back.
+> `specs/phase-55-workflow-execution.md`. After 55-11 = SHIP on its review and gates (D37: the user's live acceptance
+> follows the release). **genesis-release** asks before every tag and push; then **genesis-docs** does the write-back.
 
 ## 1. Release order (one release)
 
@@ -27,8 +27,9 @@
    assertion**; if it fails, stop and ask the user (do not re-tag or skip it). The library's last commit after
    `1d3b9ea` ran only locally, so the library also gets an image run at its release commit against the v0.84.0 pins
    (L-112).
-4. Name every 55-11 row recorded "not run" in the release notes, README row and state; also state that the Phase
-   51 / 53 / 54 live acceptance is still open (D11, L-111).
+4. State in the release notes, README row and state that **Phase 55's live acceptance (55-11 §3, A1–A14) is open**
+   and run by the user after the release, findings as v0.84.x patches (D36, D37, L-111); the umbrella status reads
+   `SHIPPED (live acceptance open)`. Also state that the Phase 51 / 53 / 54 live acceptance is still open (D11, L-111).
 
 ## 2. Deploy
 

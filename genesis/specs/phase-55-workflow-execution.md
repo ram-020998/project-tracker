@@ -8,7 +8,8 @@
 > Repos: **genesis** (worker, runs, memory, chat, API, web, `packages/genesis-core` nodes and lint),
 > **genesis-workflows** (every workflow with an agent node adopts the standard escalation gate and artifact roles),
 > **project-tracker** (ADRs, areas, lessons). Builds on genesis v0.83.0 / genesis-workflows v0.27.0.
-> Ships after its own review and its own live acceptance; the open Phase 51/53/54 live acceptance is not a gate (D11).
+> Ships after 55-11's review and gates (D37); the user's own live acceptance of Phase 55 follows the release, and the
+> open Phase 51/53/54 live acceptance is not a gate (D11).
 
 ## 1. Why this phase exists
 
@@ -47,7 +48,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D8 | Documents layout (grouped list + viewer; By step / By type; Output · Inputs · Steps · Tool outputs · System); **55-02 mockup first**, reviewed by the user. |
 | D9 | No old versions and no tool-output files kept: a write count instead of versions; tool outputs as event metadata after the run ends. |
 | D10 | Run graph: versioned server snapshot, `node.started` from LangGraph's `tasks` mode, edges from node states, SSE hints with `id:`/resume, 3 s poll floor, honest Live badge. |
-| D11 | Phase 55 ships after its own review and live acceptance; Phase 51/53/54 acceptance is done later by the user and named as open in the release (L-111). |
+| D11 | Phase 55 ships after its own review and live acceptance *(amended by D37: after the review; live acceptance follows the release)*; Phase 51/53/54 acceptance is done later by the user and named as open in the release (L-111). |
 | D12 | 55-02 mockups approved as mocked (genesis `d0aa1b2`), with the dev's open choices: "written N times · latest", the edge into a waiting gate lit in the warning colour, on a loop re-entry only the edge just taken lit, the brief under Inputs, System collapsed in By type, Resolve credits in the tab and the run total, the bell links to `/runs/<id>/resolve`, the mockup's payload and action names are the contract, "Needs you" pill. |
 | D13 | Rerun from the start reuses every input unchanged and takes only additional instructions, which every agent node of the new run gets (amends D6 action 4, F9: `relaunch {instructions}`). |
 | D14 | Resolve is its own Run Detail tab beside Flow and Documents with the facts sidebar; action results show in that tab. |
@@ -72,6 +73,8 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D33 | 55-13 build rulings as built: the model fallback decided before the turn from one read of Kiro's model list (a promptless session, only when a model is set); one reader `runs/node_models.py`. |
 | D34 | userb stays on its v0.83.0 server (with the new web bundle, so its Run Detail graph and Documents are broken) until 55-12 deploys v0.84.0 to both instances. |
 | D35 | 55-11 M1 not fixed: runs of workflows still on the old gate are the user's to handle; the release notes say to answer them from the gate panel; legacy-gate checks are observations. |
+| D36 | The user runs 55-11's live rows personally; the reviewer does the review, the gates and the fix-pass re-review only. |
+| D37 | Release before the user's live checks (amends D11): fix m1, m3, m4 → re-review → 55-12 releases; live acceptance open, findings as v0.84.x patches, stated everywhere (L-111). |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
@@ -126,7 +129,7 @@ Every intermediate commit keeps the gates green. Fold each As built into the lat
 | 55-08 | genesis (`api/`, `runs/`, `lint/`, `web/src/types`, `web/src/lib/api`) | Contract table for every new route; the D23 relaunchable reader and guard; the D22 audit fields; the 55-05 `legacy`/`writing` fixes; System paths refused; fixtures from real responses; no migration expected (D24) — **BUILT** (genesis `bd9873c6`, `be3097b3`, `1f8fd8b5`, local; review SHIP; D26; no migration) |
 | 55-09 | genesis (`web/`) | Documents tab revamp; Resolve tab (chat, proposal cards, manual action menu, confirm dialogs, results; `/runs/:runId/resolve`) — **BUILT** (genesis `1f8fd8b5..a09c5fbe`, local; review SHIP with m4 deferred; D27) |
 | 55-10 | genesis-workflows | Standard gate in every workflow with an agent node; `META.artifacts` roles + labels; `memory_brief: false` on the memory workflows; versions bumped — **BUILT** (genesis-workflows `60c12f3..3c29e73`, genesis `014ef888..361c99a6`, local; review SHIP; D31) |
-| 55-11 | all | Review + gates + live acceptance (Phase 55 only, D11) |
+| 55-11 | all | Review + gates (genesis-review) + the fix pass; live acceptance run by the user after the release (D36, D37) |
 | 55-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-088..090, L-005, lessons, areas, state, progress) |
 | 55-13 | genesis (`web/src/features/run-detail/`, `shared/ui/icons.ts`, genesis-core `kiro_node`, `runs/worker.py`, `lint/contract.py`) | Status-coloured 84 px graph cards with standard status icons (D28); `META.models` / `default_model` with fallback and `model.fallback` (D29); Documents hides System and spent Tool outputs (D30); built after 55-10, before 55-11 — **BUILT** (genesis `7cf01475..76b27a57`, local; review SHIP; D33) |
 
@@ -134,7 +137,8 @@ API sub-spec: **55-08**.
 
 ## 8. Release plan
 
-One release after 55-11 = SHIP with its live acceptance done (D11): **genesis v0.84.0** (app + three packages at one
+One release after 55-11 = SHIP on the review and gates (D37: the user's live acceptance follows the release; findings
+ship as v0.84.x patches; release notes, README row and state say it is open, L-111): **genesis v0.84.0** (app + three packages at one
 shared version, ADR-080; genesis-core additive, `CORE_MAJOR` 1; no migration expected — 55-07 needed none, D24, so DB
 stays v30 unless 55-08 records one), then **genesis-workflows
 v0.28.0** (pins on `genesis.git@v0.84.0`, L-057; the standard gate needs genesis ≥ 0.84.0). The release notes, README

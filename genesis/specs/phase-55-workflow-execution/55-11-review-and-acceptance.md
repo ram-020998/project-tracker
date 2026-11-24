@@ -3,8 +3,9 @@
 > **Status:** SPEC-DRAFTED 2026-11-22. Repos: genesis, genesis-workflows. Parent:
 > `specs/phase-55-workflow-execution.md`. Run by **genesis-review** (read-only on code) after 55-02..55-10 are BUILT;
 > report in `specs/phase-55-workflow-execution/reviews/55-11-review.md` with SHIP / NEEDS_CHANGES. Findings are fixed
-> by genesis-dev before the release, each with a regression test. **D11:** the release waits for §3; the open Phase
-> 51/53/54 acceptance is not part of it.
+> by genesis-dev before the release, each with a regression test. **D36, D37:** the release waits for §1–§2 and the
+> re-review of the fix pass, not for §3; the user runs §3 after the release (findings as v0.84.x patches). The open
+> Phase 51/53/54 acceptance is not part of it. **M1 is not fixed (D35).**
 
 ## 1. Independent review (file:line evidence each; plus `genesis-ctx check --since <phase base>` per repo)
 

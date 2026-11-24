@@ -4,7 +4,7 @@
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
 > from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
 > from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18); D28–D30 from the user's live testing → 55-13 (§19);
-> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21); D35 from the user during 55-11 (§22).
+> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21); D35–D37 from the user during 55-11 (§22).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -598,6 +598,21 @@ window for new runs), and the release notes say that an escalation of a run star
 answered from the Flow tab's gate panel. 55-11's legacy-gate checks (A12's "Resolve on a run of a workflow still on
 the old gate", A14's legacy escalation) become observations, not pass/fail rows; M1 is recorded as a known
 limitation. Considered: (a) relabel the buttons as the old answers, (b) disable them in Resolve with the reason.
+
+**D36 (user, 2026-11-24): the user runs 55-11's live rows (§3, A1–A14) personally; the reviewer leaves them.** So the
+reviewer's questions on the credit budget, Appian writes and screen time fall away. The reviewer finishes the
+independent review (§1) and the gates (§2), records every §3 row as "to be run by the user", and re-reviews the fix
+pass. The live copy at `/tmp/gr-55-11/` with the frozen candidate on :8790 is the user's to use for the checks (or to
+rebuild from the final head). Release timing against these checks: D37.
+
+**D37 (user, 2026-11-24): option B — release before the user's live checks** (amends D11's "ships after its own
+live acceptance"). Order: genesis-dev fixes 55-11's m1, m3 and m4 (M1 is D35, no change); the reviewer re-reviews the
+fix pass and gives the final 55-11 verdict on the review and gates; then 55-12 releases genesis v0.84.0 →
+genesis-workflows v0.28.0. The user runs 55-11 §3 (A1–A14) afterwards on the released fleet or a copy; findings ship
+as v0.84.x patches. Per L-111 the release notes, README row and `context/state/current.md` say plainly that Phase 55's
+live acceptance is open (as for Phases 51, 53 and 54), and the umbrella status reads `SHIPPED (live acceptance open)`.
+Considered: A (release after the user's checks; the assistant's recommendation, because Phase 55 changes every
+workflow's escalation and every agent prompt).
 
 ## Context manifest
 
