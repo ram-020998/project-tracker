@@ -98,3 +98,113 @@ docs     = ["tracker:specs/phase-55-workflow-execution/55-01-findings.md", "trac
 code     = ["genesis/genesis/runs/**", "genesis/genesis/memory/brief.py", "genesis/web/src/features/run-detail/**"]
 upstream = ["55-02", "55-03", "55-04", "55-05", "55-06", "55-07", "55-08", "55-09", "55-10", "55-13"]
 ```
+
+## As built
+
+The review (§1) and the gates (§2) are in `reviews/55-11-review.md`: round 1 at genesis `76b27a57` was NEEDS_CHANGES
+(M1, m1–m4); the fix pass below was re-reviewed at `e8096f71` and is **SHIP** for §1 + §2. §3 (A1–A14) is the
+user's to run after the release (D36, D37); Phase 55's live acceptance is open (L-111).
+
+### Fix pass (55-11)
+
+**Scope.** m1, m3 and m4 were fixed. M1 is not fixed by decision D35, and m2 was folded into M1, so neither got a code
+change: M1 is a known limitation that 55-12's release notes describe (answer a legacy-gate escalation from the Flow
+tab's gate panel). The report listed no other minors. Nits n1 and n2 were left as they are.
+
+**Commits (genesis master, local, not pushed; base `76b27a57`)**
+- `3f391a61` test(55-11): review m4, regression tests for `419d8363` n2 and n3 (test only).
+- `e8096f71` fix(55-11): review m1 (rebind before cancel) and m3 (gate answer compare-and-set), with tests.
+
+Both commits reach main's workers at once through the editable dev venv (L-099). No web file changed, so there is no
+`web/static` commit. genesis-core was not touched.
+
+**What each finding needed**
+- **m1, a failed rebind left the escalated run cancelled** (`genesis/runs/manager.py`). The binding now moves before the
+  cancel:
+  - In `_relaunch` (`:1274`, the `before` callback passed as `start(before_spawn=)`), the rebind runs first and the
+    waiting run's `cancel` runs after it. Both run after the new record exists and before its worker spawns.
+  - In `_restart_from` (`:1404–1420`), the order is now fork → rebind → cancel → start. A failed rebind also writes
+    the error audit, as a failed relaunch already did.
+  - When the rebind raises, only the new run is failed. The escalated run keeps `awaiting_input:gate`, its stage
+    binding and an answerable gate, with no `run.final` and no `run.relaunched`.
+  - After a successful move, the old run's `run.final{cancelled}` finds the stage bound to the new run, so its
+    finalizer does nothing (L-061).
+  - `cancel` cannot fail on a write: `_claim_status` logs a failed write and goes on (L-108). So nothing needs undoing
+    after the rebind.
+- **m3, `respond` was check-then-write** (`genesis/runs/store.py:158`, `genesis/runs/manager.py:625–664`, `:1200–1220`).
+  - New `RunStore.claim_transition(run_id, expected, status)` runs one `UPDATE … WHERE status = expected` (with
+    `retry_when_busy`).
+  - `respond` validates the answer, then `_claim_gate` moves `awaiting_input:gate` → `running` with that
+    compare-and-set. Only the winner goes on to `_resume_gate`, which logs `gate.resolved`, spawns the resume worker
+    and writes the audit (L-091).
+  - The losing answer gets `RunStateError`. The API answers it with 409 (`run_routes._action_errors`), and Resolve
+    marks the proposal `stale`.
+  - `fix_and_accept` now checks the accept answer (`_check_answer`) and claims the gate before its copy, so a fix that
+    loses writes nothing. A copy that fails gives the gate back with a compare-and-set (`running` →
+    `awaiting_input:gate`), which keeps a stop that arrived in the meantime. Before this change, an accept refused by
+    `allowed` was only detected after the file had been copied.
+- **m4, two `419d8363` fixes had no regression test** (`tests/test_memory_brief.py`). Test only:
+  - n2: a describe step past the deadline reports the deadline error.
+  - n3: a brief write cut off halfway leaves no `brief.md`.
+
+**Tests (7 new)**
+- `tests/test_run_actions.py:696` `test_a_failed_rebind_fails_only_the_new_run_and_the_escalated_run_still_waits_bound`
+  `[relaunch|restart_from]`. The rebind raises `sqlite3.OperationalError("database is locked")`. The test checks that
+  the old run is still waiting at its gate with no terminal `run.final` and no `run.relaunched`, that the stage still
+  points at the old run, that the one new run is `failed` with the "could not prepare the run" / "could not move the
+  Technical Design stage" detail, and that the old run can then be answered and ends `done`.
+- `:767` `test_a_resolve_answer_and_a_manual_answer_at_once_resume_the_run_once`. Two threads answer, and a barrier on
+  `pending_gate` holds both inside the check-then-write window (`_race`, `:725`). Expected: one `RunStateError`, one
+  `gate.resolved`, one resume spawn carrying the winning answer, and one `run.final{done}`.
+- `:780` `test_a_fix_and_accept_that_loses_to_a_stop_writes_nothing`. A fix races a stop. Whichever wins, one
+  `gate.resolved` and one terminal `run.final` are written. If the stop wins, the fix leaves no `file.written` and the
+  file is unchanged.
+- `:807` `test_a_fix_whose_copy_fails_gives_the_gate_back`. The copy raises `ENOSPC`. Expected: `RunActionError`, the
+  run is back at `awaiting_input:gate` with no `gate.resolved`, and a later accept ends `done`.
+- `tests/test_memory_brief.py:324` `test_a_slow_run_description_is_the_deadline_error` and `:342`
+  `test_a_brief_cut_off_while_it_is_written_leaves_no_brief`.
+- **Fail-first** (a fresh `PYTHONPYCACHEPREFIX` for each mutation run, L-110):
+  - With `manager.py` at `76b27a57`, both rebind tests fail (the old run is `cancelled`) and both race tests fail (two
+    answers applied, and a losing fix's `file.written`).
+  - The copy-fails test also passes on the old code. It pins the new give-back path.
+  - With n2 reverted, the event error reads `'TimeoutError: '`. With n3 reverted (a plain `write_text`), a half
+    `brief.md` is left.
+  - The reviewer repeated the manager mutation in a separate worktree and ran the new tests 5 times at HEAD: all green.
+
+**Gates at `e8096f71`.** genesis `pytest -q -p no:warnings` (`PYTHONDONTWRITEBYTECODE=1`): **2406 passed, 4 skipped**
+in 925 s. That is round 1's 2399 plus the 7 new tests; the reviewer's run got the same count in 984 s.
+`ruff check genesis`: clean.
+
+**Review.** genesis-review re-reviewed both commits and gave **SHIP** for §1 + §2 (the "Fix pass re-review" section of
+`reviews/55-11-review.md`). It raised new findings, none blocking, all for the backlog:
+- **m5:** the stage rebind is two writes, `reset_for_reupload` / `reset_for_rerun` then `set_source`
+  (`api/features.py:301-304`, `api/workbench.py:91-93`). If the second write fails, the stage reads "in progress"
+  with no run, and the still-waiting old run is no longer bound. Fix: one transaction, plus a test that fails the
+  second write.
+- **m6:** `resume` on a gate-waiting run writes `running` with no compare-and-set (`manager.py:620-623`). No UI path
+  reaches it, because Resume shows only for paused runs. Fix: refuse it with 409.
+- **n3:** a brief write that is cut off leaves a stray `_memory/brief.md.part`.
+- **n4:** a failure after the claim other than the copy (the stat or the `file.written` / `gate.resolved` append)
+  leaves the run `running` with no worker until the next startup sweep.
+
+**Decisions / deviations.**
+- `restart_from`'s order changed from 55-06's "fork, cancel, rebind, start" to "fork, rebind, cancel, start". This
+  was the review's own fix; it is not an ADR change.
+- The relaunch's cancel moved into `before_spawn`. So a `start` that fails before the record exists (an upload write,
+  for example) now also leaves the escalated run waiting, where before it was already cancelled.
+- No ADR deviation.
+
+**Lesson candidates.**
+- When an operation both replaces a bound object and stops the old one, move the binding first. The bound-run guard
+  (L-061) then makes the old run's terminal event harmless, and a failed move needs no undo.
+- A barrier inside the read step (here `pending_gate`) makes a check-then-write race deterministic in a test. Without
+  it, two threads seldom overlap, and a non-atomic version passes.
+
+**Code-map changes (for genesis-docs).**
+- `genesis/runs/store.py`: `RunStore.claim_transition` (expected → status compare-and-set).
+- `genesis/runs/manager.py`: `RunManager._claim_gate` / `_resume_gate`. `respond` and `fix_and_accept` claim the gate
+  before any write. `relaunch` and `restart_from` rebind before they cancel.
+
+**Next.** 55-12, the release, run by genesis-release. Before it, rebuild the `/tmp/gr-55-11/` candidate from the
+released head: it was built from `76b27a57` and lacks this fix pass. Decide whether m5 and m6 go into 55-12 or the
+Phase 55 backlog.

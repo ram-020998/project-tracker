@@ -1,0 +1,55 @@
+== install (with model)
+install exit=0
+  Created wheel for kiro-agent-sdk: filename=kiro_agent_sdk-0.83.0-py3-none-any.whl size=58206 sha256=10a9aba5c8de873e3054ffedd84b6028a457627cbbe56c66590ad21a6e081592
+  Created wheel for genesis-core: filename=genesis_core-0.83.0-py3-none-any.whl size=67269 sha256=9aab754b73ee64227ba3fd1e9b90a479fddd61377c3e43bb321124d4b2d91d18
+  Created wheel for genesis-appian-parser: filename=genesis_appian_parser-0.83.0-py3-none-any.whl size=117799 sha256=8d919233b7d100d5898d7ed7a090c6036ae7ebcbb5a5391efbcf37aa190486c4
+  Created wheel for genesis: filename=genesis-0.83.0-py3-none-any.whl size=4172928 sha256=b496395d3cebd31dd9e4738f92c00b329ddcec14f0172a295837348f7c044554
+install-packages.sh: fetching the memory embedding model (pinned checksums)
+memory model BAAI/bge-small-en-v1.5 in /work/state/models/bge-small-en-v1.5: fetched 5, already present 0
+embedded 0 memories with BAAI/bge-small-en-v1.5
+fastembed 0.7.4
+total 65624
+drwxr-xr-x 1 502 root      224 Nov 24 08:15 .
+drwxr-xr-x 1 502 root       96 Nov 24 08:15 ..
+-rw-r--r-- 1 502 root      706 Nov 24 08:15 config.json
+-rw-r--r-- 1 502 root 66465124 Nov 24 08:15 model_optimized.onnx
+-rw-r--r-- 1 502 root      695 Nov 24 08:15 special_tokens_map.json
+-rw-r--r-- 1 502 root   711396 Nov 24 08:15 tokenizer.json
+-rw-r--r-- 1 502 root     1242 Nov 24 08:15 tokenizer_config.json
+== validate_library
+exit=0
+OK: internal-pin check correctly rejects 9 known-bad tables and accepts a good one
+LIBRARY VALIDATION PASSED (19 workflow(s) validated)
+== validate_skills
+SKILLS VALIDATION PASSED (5 skill(s) validated)
+== library pytest
+exit=0
+..............................                                           [100%]
+678 passed in 28.83s
+== genesis-core
+exit=0
+173 passed, 2 warnings in 11.06s
+== kiro-agent-sdk
+exit=0
+302 passed in 7.36s
+== genesis full (fastembed + model installed)
+exit=1
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_sail_cli.py::test_extract_sail_binary_for_host - assert (No...
+FAILED tests/test_sail_cli.py::test_install_appian_dev_bundle_installs_both
+2 failed, 2343 passed, 58 skipped, 6006 warnings in 851.03s (0:14:11)
+== test_document_records x5
+46 passed, 14 warnings in 19.85s
+46 passed, 14 warnings in 19.85s
+46 passed, 14 warnings in 23.61s
+46 passed, 14 warnings in 22.51s
+46 passed, 14 warnings in 20.58s
+DOCKER_EXIT=0

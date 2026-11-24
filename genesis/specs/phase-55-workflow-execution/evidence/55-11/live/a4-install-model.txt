@@ -1,0 +1,3 @@
+install-packages.sh: fetching the memory embedding model (pinned checksums)
+memory model BAAI/bge-small-en-v1.5 in /tmp/gr-55-11/state/models/bge-small-en-v1.5: fetched 5, already present 0
+embedded 66 memories with BAAI/bge-small-en-v1.5

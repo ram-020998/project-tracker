@@ -1,0 +1,20 @@
+== negative control: the network is really off
+control ok, no network: gaierror [Errno -3] Temporary failure in name resolution
+== load + embed offline
+embedder: LocalEmbedder BAAI/bge-small-en-v1.5 /work/state/models/bge-small-en-v1.5
+dim: 384 query len: 384 docs: 2 load+embed s: 1.49
+OFFLINE LOAD OK
+exit=0
+== genesis memory status (offline)
+embedder: fastembed BAAI/bge-small-en-v1.5 (384-d) in /work/state/models/bge-small-en-v1.5
+memories by embedding status: (none)
+== memory tests offline
+/work/venv/lib/python3.13/site-packages/pytest_asyncio/plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+...............................................s...........              [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_memory_brief.py:472: needs macOS sandbox-exec to deny the network
+58 passed, 1 skipped in 31.98s
+DOCKER_EXIT=0
