@@ -78,6 +78,14 @@ Only on the operator's explicit go-ahead; back up data first (genesis-live-accep
 - `gsm` is NOT on the agent shell's PATH: call `{{REPOS}}/genesis-fleet/bin/gsm`.
 - First `GET /api/runs?status=running` on each instance (:8760 main, :8761 userb) → `total: 0`; never restart with a run active.
 - Then, one call each: `gsm provision --all --no-mcp --no-env --force` → `gsm restart --all` → `gsm status`.
+- **`gsm provision` installs only the workflow library** (`genesis install --from <genesis-workflows checkout>`); it does
+  NOT run `scripts/install-packages.sh`. The fleet runs from the editable dev venv, so code is live at commit but new
+  dependencies and state-dir assets are not (L-099). When the release adds a Python dependency or a state-dir asset
+  (Phase 55: `fastembed` and the embedding model), with the fleet **stopped** (`gsm stop --all`, ports checked in their
+  own call): run `{{REPOS}}/genesis/scripts/install-packages.sh --editable --dev` once (it fetches the model and
+  re-embeds for the default state dir only), then for every other instance `gsm exec <name> -- memory fetch-model` and
+  `gsm exec <name> -- memory reembed`, one call each; then provision and `gsm start --all`. Check each instance with
+  `gsm exec <name> -- memory status` (and `db status`).
 - Verify the running version from `GET /openapi.json` → `info.version` (the `create_app` version). There is no
   `/api/system/version`; `/api/system/update`'s `current` reads a state file and is stale on the editable dev venv.
 

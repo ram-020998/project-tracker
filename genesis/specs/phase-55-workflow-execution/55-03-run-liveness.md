@@ -1,6 +1,6 @@
 # 55-03 — Run liveness: `node.started`, one versioned snapshot, hint SSE and the run graph
 
-> **Status:** SPEC-DRAFTED 2026-11-22. Repo: genesis (`genesis/runs/`, `genesis/api/run_routes.py`,
+> **Status:** BUILT 2026-11-23 (genesis `793c04b6..29775149`; review SHIP; D16; shipped in v0.84.0). SPEC-DRAFTED 2026-11-22. Repo: genesis (`genesis/runs/`, `genesis/api/run_routes.py`,
 > `web/src/features/run-detail/`). Parent: `specs/phase-55-workflow-execution.md`. Built by **genesis-dev**.
 > Decisions: D10, D12 (items 2, 3), F12, F13 (`55-01-findings.md`). ADR draft: ADR-090 (`adr-drafts.md`). The 55-02
 > mockups are approved (D12), so §5 may start.

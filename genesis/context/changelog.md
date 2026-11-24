@@ -2,6 +2,8 @@
 
 <!-- Appended by genesis-docs at each phase write-back (47-08 §2). History before Phase 47: archive/tracker-status-log.md. -->
 
+- 2026-11-24 — Phase 55 Workflow execution (memory brief, standard escalation gate + Resolve, Documents, run snapshot, per-node models) — genesis v0.84.0 → genesis-workflows v0.28.0 (no migration, DB v30; `fastembed` + pinned bge-small model) — ADR-088/089/090 — every agent run gets a memory brief, every agent workflow escalates to one standard gate resolved in Run Detail's Resolve tab, Documents by step/type, the graph from a versioned snapshot; L-126–L-131; **live acceptance open (55-11 §3 A1–A14, D37; findings → v0.84.x)**
+
 - 2026-11-20 — Phase 54 Schedules, custom agents, fixes and UX revamps — genesis v0.83.0 → genesis-workflows v0.27.0 (m0030, DB v30; `agent-prompt` 0.1.0) — ADR-087 — Schedules page, bell, Catalog → Agents, chat with a custom agent, story/feature revamps, B1–O4 fixes, `program_node` off the loop; L-120–L-125; live-accepted (54-10 round 2) with named not-run rows; known issue m7
 
 - 2026-11-15 — Phase 53 Kiro SDK v3 (kiro-agent-sdk rebuilt for kiro-cli's v3 engine) — playwright-appian v0.3.1 → genesis v0.82.0 → genesis-workflows v0.26.0 (m0029, DB v29; skill `appian` 1.0.0) — ADR-086 — v3 only, Genesis-owned `KIRO_HOME`, projected trust, managed skills, steering, Stop keeps the session, `session/load` resume; verified on kiro-cli 2.37.1; L-113–L-119; **live acceptance partly open (4 of 15 workflows; 53-11 §5 and Phase 51's 51-12 after the release, D24/D26/D20)**

@@ -1,6 +1,6 @@
 # 55-05 — Document records: who wrote each file, its role, and one categorized list
 
-> **Status:** SPEC-DRAFTED 2026-11-22. Repo: genesis (`genesis/runs/`, `genesis/lint/contract.py`,
+> **Status:** BUILT 2026-11-23 (genesis `5bbae6d3`, `7d67c548`, `3c3e38ae`; review SHIP; D20; shipped in v0.84.0). SPEC-DRAFTED 2026-11-22. Repo: genesis (`genesis/runs/`, `genesis/lint/contract.py`,
 > `packages/genesis-core/genesis_core/workspace.py`, `genesis/api/run_routes.py`). Parent:
 > `specs/phase-55-workflow-execution.md`. Built by **genesis-dev**. Decisions: D8, D9, F10–F12 (`55-01-findings.md`).
 > The library's roles and labels are 55-10; the web is 55-09.

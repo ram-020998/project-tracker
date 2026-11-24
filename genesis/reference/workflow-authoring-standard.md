@@ -39,9 +39,37 @@ workflows/<id>/
 `META` / `workflow.yaml` fields:
 `id, name, version, roles[], summary, inputs_schema (JSON Schema), required_mcp[],
 required_cli[], hitl_points[], auto_approve (default true), retry_defaults{max},
-artifacts[], editable[]?`.
+artifacts (map or list), editable[]?`, plus the optional `healing`, `execution`, `schedulable` and the Phase 55 keys
+below.
 
 CI checks `META` ≡ `workflow.yaml` (drift fails the build).
+
+### 2.1 Author-facing keys added in Phase 55 (genesis ≥ 0.84.0; ADR-088, ADR-089, D29)
+
+Each key has one reader in `genesis/runs/` that both the app and the parity lint use (L-109), so declare it in
+`META` and mirror it in `workflow.yaml`.
+
+| Key | Form | Meaning | Reader |
+|---|---|---|---|
+| `artifacts` | map `{<name or glob>: {role, label}}`; `role` ∈ `output`, `input`, `intermediate`, `check`. The older list of names still passes and declares no roles | Run Detail's Documents tab groups a run's files by role and shows the label. An exact name wins over a glob; `*` matches within one folder, `**` across. Declare every deliverable as `output`; a file a step writes that you did not declare reads `intermediate` | `runs/artifact_roles.py` |
+| `relaunchable` | bool, default `false` | May Genesis start a new run from a run of this workflow (Rerun from the start with instructions, Restart from a step). Say `true` only when a fresh run with the same inputs is safe: it writes only its run folder or overwrites idempotently. Whatever the flag, a workflow whose `required_mcp` or a graph node's `mcp` names `appian-dev-write` is never started again from a run (ADR-068); queue-bound workflows are refused by their bindings | `runs/relaunch_policy.py` |
+| `relaunch_hint` | string | Where to start it again instead, shown when Rerun and Restart are refused (for example "Re-run it from the Implementation lane") | same |
+| `memory_brief` | bool, default true | `false` gives the workflow's runs no memory brief (the memory jobs, which read and write memory themselves). A single node opts out with `kiro_node(memory=False)` | `runs/worker.py` |
+| `models` | map `{<agent node>: <model id>}` | A model per agent node. Every key must be an agent node of the compiled graph (`check_node_models`, run by `genesis test-workflow` and `validate_library`) | `runs/node_models.py` |
+| `default_model` | string | The model for agent nodes with no entry in `models` | same |
+
+**Model precedence:** a node's own `kiro_node(model=…)` (per-run included) → `META.models[node]` → `default_model` →
+Kiro's default. Before the turn the node checks each candidate against the models Kiro lists for the account; an
+unlisted id is skipped with a `model.fallback` event, shown on the turn as "used X instead of Y". The list read costs
+one bare kiro-cli session (about 2–4 s, no credits) per worker process, and only when a model is set; an unreadable
+list is trusted.
+
+**The escalation gate.** Every agent node escalates to one shared `escalation_gate("escalate", …)` per workflow,
+passed as the object to every `attach_reliability(on_exhaust_gate=…)` and `attach_healing(gate=…)` (see
+`reliability-standard.md` §5). Give `attach_healing(artifact=<deliverable>)` so Accept is offered only when the
+deliverable exists; use `stop_to=<cleanup node>` when a stop must run cleanup; put workflow-specific answers in
+`extra_options` with a state-built availability (L-106). Test every answer through the compiled graph with
+`genesis.testing.escalation` (`answer_gate`, `topology_gaps`, `cleanup_losses`).
 
 ---
 
@@ -53,7 +81,7 @@ CI checks `META` ≡ `workflow.yaml` (drift fails the build).
 4. Map data flow → blackboard docs (`state.artifacts`), decisions → `state.decisions`.
 5. Implement program nodes (pure, unit-tested).
 6. Implement agent nodes: `kiro_node(prompt_fn, output_doc, mcp=[...])`; agent writes to `output_doc`; keep it narrow.
-7. Add a validator after each agent node; wire retry + escalation via `attach_reliability` (usually already scaffolded). **Compose the validator from `genesis_core.validators`** — most validators are one-liners (`all_of([...])` of toolkit checks); hand-write a `matches_predicate` only for genuinely custom logic.
+7. Add a validator after each agent node; wire retry + escalation via `attach_reliability` (usually already scaffolded), with `on_exhaust_gate=` the workflow's one standard `escalation_gate` (§2.1). **Compose the validator from `genesis_core.validators`** — most validators are one-liners (`all_of([...])` of toolkit checks); hand-write a `matches_predicate` only for genuinely custom logic.
 8. Add HITL approval gates at human decision points and before any mutation.
 9. Add conditional edges for branches (generate/update, dry-run, etc.).
 10. Write tests; run `genesis test-workflow`.

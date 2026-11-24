@@ -18,7 +18,7 @@ run never pauses for per-step confirmation. A run pauses **only** at one of thre
 | Class | When | Node |
 |---|---|---|
 | **(a) Approval gate** | author-designed decision points (declared in `META.hitl_points`) | `hitl_gate(kind="approval")` |
-| **(b) Escalation** | a reliability trio exhausts its retries (ADR-011) | `hitl_gate(kind="escalation")` |
+| **(b) Escalation** | a reliability trio exhausts its retries (ADR-011) | genesis-core's standard `escalation_gate` (since Phase 55, ADR-089; it reports `kind: "escalation"`) |
 | **(c) Pre-mutation** | immediately before any write/deploy/data mutation | `hitl_gate(kind="pre_mutation")` — **required** |
 
 Anything else auto-advances. This makes "keep gates rare" a **default of the
@@ -39,8 +39,10 @@ Rules:
 ## Mode 1 — Designed approval gates
 
 **What:** the *workflow author* marks deliberate pause points (approve a design
-doc, confirm before deploy). Also the target of retry-exhaustion escalation
-(reliability-standard.md).
+doc, confirm before deploy). Retry-exhaustion escalation is also a Mode 1 pause, but since Phase 55 it goes to
+genesis-core's standard `escalation_gate`, not a `hitl_gate` (ADR-089; reliability-standard.md §5): its actions are
+retry with guidance, accept, fix then accept, rerun with instructions, restart from a step and stop, each offered from
+the run's state, and the run's Resolve tab helps the person choose.
 
 **Mechanism:**
 - Node `hitl_gate(kind, prompt_fn, options)` calls LangGraph `interrupt(payload)`.

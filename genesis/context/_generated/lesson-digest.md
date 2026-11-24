@@ -7,7 +7,7 @@ Full text: `genesis-ctx lesson <ID>`. Areas: `genesis-ctx area <name>`.
 - L-002 — `kiro_node` builds the real `KiroAgentOptions`
 - L-003 — Keep the per-run SSE bus open until the run is TERMINAL; the client dedupes replayed history and CLOSES the EventSource on terminal final/error, else it reconnects and replays forever.
 - L-004 — Data plane is SQLite, not JSON
-- L-005 — Use only the canonical event kinds (run.started, node.completed, agent.*, validator.result, retry.scheduled, gate.*, run.final, error) — there is NO node.started/node.failed; running = run.cursor.
+- L-005 — Use only the canonical event kinds, listed once in CANONICAL_KINDS (runs/manager.py; Phase 55 added node.started, file.written, memory.brief, run.relaunched, model.fallback); running = node.started, not run.cursor.
 - L-006 — Workflows SHOULD declare a `graph:` topology whose node ids match LangGraph node names; without one, Run Detail derives a fallback from /steps so the graph is never blank.
 - L-007 — The transcript folds `agent.*` events into turns (`buildTranscript` → `groupTurns`, validator/retry notes on the just-closed turn); Markdown answers reuse the existing renderers — no new deps.
 - L-008 — A generic `worker_exit` must NOT clobber a specific `error` event; empty-message exceptions report their type + a hint.
@@ -128,3 +128,9 @@ Full text: `genesis-ctx lesson <ID>`. Areas: `genesis-ctx area <name>`.
 - L-123 — An opacity modifier on a var() token colour (bg-primary/10) generates no CSS here: use the *-subtle tokens, and probe the old page before moving such a class into a shared component (Phase 54).
 - L-124 — Everything a level-triggered loop decides from must live on the durable row, stamped by the loop's own clock, or a restart changes the decision (Phase 54).
 - L-125 — Copy a live WAL database with SQLite's online backup (.backup), never a plain file copy, and check that a server is up by its port or ps, not by a pid file (Phase 54).
+- L-126 — Spike a stream's real shapes before building on it, never let its consumer swallow an exception, and drain a child's stderr on its own thread so a full pipe cannot block it (Phase 55).
+- L-127 — A fork seeds the state that made the run fail: reset what a restart renews (retry and heal budgets, gate markers), merge dict channels instead of replacing them, and test with a step that fails once (Phase 55).
+- L-128 — A path built from an id is a path: check that an id is one plain segment of an existing record before joining it to a folder, or '..' turns the sandboxes root into the sandbox (Phase 55).
+- L-129 — Evidence of a memory feature carries the user's memories: scan and redact briefs, outputs and fixtures before the first commit, since a later delete leaves the text in git history (Phase 55).
+- L-130 — Size and mtime are no change detector at task granularity: Linux can keep a same-size rewrite's mtime; key small files on content and force the case in a test with os.utime (Phase 55).
+- L-131 — Make a safety claim true by its mechanism, not its name: a read-only server opens its store read-only, and a guard over a declared list reads a string as one item, never its characters (Phase 55).

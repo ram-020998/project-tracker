@@ -6,8 +6,9 @@ enforced by library CI at publish time.
 
 > **Rule:** Every agent node MUST be immediately followed by a program
 > **validator**; on failure the agent **retries** (configurable count) with the
-> validator's feedback; on exhaustion it **escalates to a HITL gate**. No agent
-> output is ever consumed unchecked.
+> validator's feedback; on exhaustion it **escalates to the standard escalation
+> gate** (genesis-core `escalation_gate`, ADR-089). No agent output is ever
+> consumed unchecked.
 
 ---
 
@@ -32,15 +33,15 @@ what makes Genesis reliable where the agent-orchestrator was not.
               │ retry (feedback)    ├── retries < max ──┐
               └─────────────────────┘                   │
                                     │ retries == max     ▼
-                                    └────────────▶ hitl_gate(escalation)
+                                    └────────────▶ escalation_gate (standard)
 ```
 
 - **Agent node** — narrow; writes output to a blackboard doc.
 - **Validator** — deterministic checks on that artifact; returns `ValidationResult(ok, message, normalized?)`; routes `pass`/`fail`.
 - **Retry** — re-runs the agent node with `state["_validation"][validator]["message"]` injected into the prompt so it self-corrects. Count from `META.retry_defaults.max` (or a per-node override).
-- **Escalation** — on exhaustion, route to `hitl_gate(kind="escalation")`: a human sees the failures + last output and can edit state (HITL mode 3) and resume, approve-as-is, or abort.
+- **Escalation** — on exhaustion, route to the workflow's one standard `escalation_gate` (genesis-core `nodes/escalation.py`, since Phase 55): a human sees the failures, the history and the last output, and picks an action the run's state allows (§5).
 
-Wired via `attach_reliability(g, agent=..., validator=..., retry_max=..., on_exhaust_gate=...)` — scaffolded by default.
+Wired via `attach_reliability(g, agent=..., validator=..., retry_max=..., on_exhaust_gate=<the EscalationGate object>)` — scaffolded by default.
 
 ---
 
@@ -88,7 +89,7 @@ allowed set; allowed: …") that is injected into the agent prompt on retry.
 
 Example — a full validator in one line:
 ```python
-attach_reliability(g, agent=assign_domains, retry_max=2, on_exhaust_gate="escalate",
+attach_reliability(g, agent=assign_domains, retry_max=2, on_exhaust_gate=escalate,  # escalate = escalation_gate("escalate")
   validator=validator_node(name="v_enriched", target_artifact="enriched.json",
     check_fn=all_of([
       parses_json("enriched.json"),
@@ -117,12 +118,25 @@ covers all read/generation workflows.
 
 ---
 
-## 5. Escalation semantics
+## 5. Escalation semantics (the standard gate, ADR-089 — since Phase 55)
 
-- Escalation is a **HITL gate** (`hitl-design.md` mode 1, `kind="escalation"`).
-- The gate payload includes: the failing validator messages, the path to the last output artifact, and the retry history.
-- Human options: **edit state/artifact + resume**, **approve as-is** (override), or **abort** the run.
-- Escalation is preferred over silent failure or over producing unchecked output.
+- Escalation is a Mode 1 pause (`hitl-design.md`) at genesis-core's `escalation_gate`, not a `hitl_gate`
+  (`hitl_gate` remains for approval, `pre_mutation` and review gates). One gate per workflow serves every agent node:
+  each `attach_reliability` / `attach_healing` call registers its agent, and the exhausting validator records which
+  one escalated.
+- The gate payload (built from the run's state, L-106): the failed node, the validator messages, the retry, heal and
+  restart history, the last error, the run's files with their roles, the workflow's `extra_options`, and `allowed`
+  (each action available, or the reason why not).
+- Actions: **retry** the failed step with the person's guidance (a fresh retry budget; the guidance is in its prompt
+  until it passes); **accept** as is (only when the step's output exists and is not empty; the output is marked
+  accepted unverified); **fix then accept** (program code copies a corrected file from the run's Resolve sandbox, then
+  accepts); **rerun from the start** with additional instructions and **restart from a step** (run management: new
+  runs, offered only when `META.relaunchable` is true and never for a workflow that writes Dev, ADR-068); **stop** with
+  a reason (the run ends `failed`, through `stop_to` cleanup when declared). Workflow-specific answers are
+  `extra_options`. Old answers map: approve → accept, reject → stop, feedback → retry; an unknown answer stops.
+- The person decides in Run Detail's Resolve tab, where a run-bound agent explains the failure and proposes actions;
+  the person confirms; program code applies (ADR-089). Escalation is preferred over silent failure or over producing
+  unchecked output.
 
 ---
 
@@ -132,7 +146,8 @@ At publish time, the lint walks the compiled graph and asserts, for every node
 with `_genesis_kind == "agent"`:
 1. an immediate successor with `_genesis_kind == "validator"`;
 2. a conditional edge from that validator back to the agent (retry);
-3. a conditional edge from that validator to a `hitl_gate` or `END` (escalation).
+3. a conditional edge from that validator to a node whose kind marker is `escalation_gate` (rule F8, since
+   Phase 55; a `hitl_gate` or a direct `END` no longer passes).
 
 Missing any ⇒ **build fails** — the workflow cannot be tagged/released. A
 deliberately non-compliant fixture is kept in the library to prove the gate fails.
@@ -143,14 +158,15 @@ deliberately non-compliant fixture is kept in the library to prove the gate fail
 
 - **Retry count** is configured per workflow (`META.retry_defaults.max`) and may
   be overridden per node. Chosen at authoring time (Q9).
-- **Escalation target** defaults to a shared `escalation` gate but can be a
-  workflow-specific gate with a tailored prompt.
+- **Escalation target** is the workflow's one standard `escalation_gate("escalate", …)` with a state-built
+  `prompt_fn` and the workflow's `extra_options`; `stop_to=` names a cleanup node a stop must run through.
 
 ---
 
 ## 8. Interaction with other guarantees
 
 - **Durability:** each attempt is checkpointed; a crash mid-retry resumes correctly.
-- **HITL:** escalation *is* HITL mode 1; the human may use mode 3 (state edit) at the gate.
+- **HITL:** escalation *is* HITL mode 1; the human may use mode 3 (state edit) at the gate, and the Resolve tab's
+  actions cover the common fixes.
 - **Blackboard:** validators read the artifact from the blackboard, not from chat.
 - **Observability:** validator results + retries stream to the UI (Phase 5) so the user sees why a node is retrying.

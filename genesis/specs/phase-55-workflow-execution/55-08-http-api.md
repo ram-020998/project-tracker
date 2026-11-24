@@ -1,6 +1,6 @@
 # 55-08 — HTTP API: the contract table, Resolve session storage, web types and fixtures
 
-> **Status:** SPEC-DRAFTED 2026-11-22. Repo: genesis (`genesis/api/`, `genesis/db/`, `web/src/types/`,
+> **Status:** BUILT 2026-11-23 (genesis `bd9873c6`, `be3097b3`, `1f8fd8b5`; review SHIP; D26; no migration; shipped in v0.84.0). SPEC-DRAFTED 2026-11-22. Repo: genesis (`genesis/api/`, `genesis/db/`, `web/src/types/`,
 > `web/src/lib/api/`). Parent: `specs/phase-55-workflow-execution.md`. Built by **genesis-dev**. 55-03..55-07 add their
 > own routes; this sub-spec owns the table, adds what is left, and makes every shape a typed, fixture-tested contract
 > (L-011, L-109). All under `/api`, the client prepends it centrally (ADR-028, L-010).

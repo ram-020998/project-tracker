@@ -429,7 +429,9 @@ store (Keychain/vault) as part of the hosted track.
 
 ## ADR-031 — Chat is a read-only conversational assistant (never orchestrates)
 
-**Status:** Accepted (Phase 10). **Context:** Genesis gains a **Chat** page — a persistent, multi-turn
+**Status:** Accepted (Phase 10). **Amended by ADR-089 (Phase 55, genesis v0.84.0):** a run-bound chat mode,
+`run_resolve`, reads one escalated run and records proposals that the user confirms; writes only in its sandbox.
+**Context:** Genesis gains a **Chat** page — a persistent, multi-turn
 Kiro conversation that (1) answers using the `appian-atlas` read MCP and (2) answers about the
 platform's own state (runs, failures, progress, workflows, health) via a new read-only
 Genesis-introspection MCP server. A free-form chat agent is the same shape that sank the retired
@@ -512,6 +514,8 @@ kiro-agent-sdk v0.4.0, genesis-core v0.8.0, genesis v0.20.0.
 ## ADR-033 — The Chat copilot may operate runs (human-confirmed, run-management layer only), never owns control flow
 
 **Status:** **Accepted** (Phase 13 — SHIPPED, 13-01..13-06; genesis v0.24.0 + kiro-agent-sdk v0.5.0).
+**Amended by ADR-089 (Phase 55, genesis v0.84.0):** new human-confirmed run actions (fix then accept, rerun with
+instructions, restart from a step), confirmed from a Resolve card or the manual menu; no agent answers a gate.
 **Context:** Phase 10 made Chat strictly read-only
 (ADR-031). Users want a **copilot** that starts workflows from chat and supervises them (sensing HITL
 gates, relaying decisions). This appears to collide with **ADR-001** (LangGraph owns control flow;
@@ -1218,13 +1222,16 @@ non-Kiro provider or a chat session-provider plugs into (the chat session-provid
 DocumentProvider** (25-09) remains **Proposed** — not yet built. Spec:
 `specs/phase-25-architectural-foundation-hardening/25-05-agent-provider-interface.md`.
 
-- **ADR-053 (ACCEPTED — Phase 26, SHIPPED genesis v0.52.0 + genesis-workflows v0.10.0)** — the **Genesis Agentic
+- **ADR-053 (ACCEPTED — Phase 26, SHIPPED genesis v0.52.0 + genesis-workflows v0.10.0; amended by ADR-088,
+  Phase 55, genesis v0.84.0: a program prefetch writes a memory brief into every run with an agent node and every
+  workflow agent node gets the read-only memory MCP)** — the **Genesis Agentic
   Memory Layer**: personal (named-user) vs shared (entity-anchored, traversable) memory × semantic/episodic/procedural,
   bi-temporal; a nightly `memory-consolidation` + a periodic `memory-maintenance` ("dreaming") workflow; a read-only
   `genesis-memory` MCP (hybrid retrieval) as the ONLY injection path (steered, no auto-prefetch); a browser-only curation
   API + `/memory` UI where human edits are authoritative + exempt from maintenance. Deferred (seams built): multi-user ACL,
   auto-prefetch, hard-delete, agentic-node MCP injection. Specs: `specs/phase-26-agentic-memory-layer.md` + `26-01..26-08`.
-- **ADR-054 (ACCEPTED — Phase 26, SHIPPED genesis v0.52.0)** — memory **store/infra + local embedder**: a separate
+- **ADR-054 (ACCEPTED — Phase 26, SHIPPED genesis v0.52.0; amended by ADR-088, Phase 55, genesis v0.84.0: the
+  default embedder is the pinned fastembed bge-small, installed by default)** — memory **store/infra + local embedder**: a separate
   `~/.genesis/memory.db` (`mm0001`; bi-temporal graph + FTS5 + `sqlite-vec`) behind DB-agnostic seams (`MemoryStore`/
   `GraphStore`/`VectorIndex`/`Embedder`) for a future Postgres+pgvector re-home; a small LOCAL embedder (model2vec default)
   loaded only in the worker/MCP subprocess, degrading to NullEmbedder when absent. `genesis db upgrade` covers both DBs.
@@ -1831,3 +1838,160 @@ remove-propagation (delete a card when a teammate clears `on_board`). See bible/
   backend-defined in the UI sense; the system jobs stay backend-seeded but are user-editable rows on the Schedules page,
   and users create their own schedules. Amends ADR-049: the primary navigation as built is Home · Workbench · Chat ·
   Runs · Schedules · Catalog · Documents · Memory, with Settings pinned.
+
+## ADR-088 — Memory brief: a program prefetch at run start plus the memory tools on every workflow agent node (Phase 55) — **Accepted**
+
+- **Status:** **Accepted** — 2026-11-24.
+- **Context.** Memory was distilled every night (ADR-053) but only chat read it; no workflow run used it
+  (`specs/phase-55-workflow-execution/55-01-findings.md` §2). ADR-053 had deferred a prefetch and node-level MCP
+  injection. Workflow inputs differ per workflow, so a per-workflow query declaration would put the burden on every
+  author; KiroCrew prefetches by the request text plus a recall tool (55-01 §6.2). No embedder was installed, so
+  retrieval was keyword-only. Source of every clause: 55-01 §9 (D-numbers) and §10 (F-numbers); built in 55-04
+  (genesis `d1ab6d13`, `419d8363`), reviewed SHIP; shipped in genesis v0.84.0.
+- **Decision.**
+  1. **Program prefetch, no agent turn (D2).** Before the graph starts (`op == "run"` only, after `build(ctx)`), the
+     worker renders a generic run description (`META` name, summary and node descriptions plus every input, with
+     application, feature and story ids resolved to names through the KB), runs `HybridRetriever` for shared
+     memories and the run owner's personal memories (D5), and writes `_memory/brief.md` atomically within the F1
+     budget (`genesis/memory/brief.py`: 12 shared + 6 personal, 12,000 characters, a 5 s deadline on daemon
+     threads). The file is marked as data, not instructions. No per-workflow configuration. Keyword and entity hints
+     come from the most specific level that resolves (story or feature, else application), and there is no
+     similarity floor (D17).
+  2. **Pointer line and tools (D2, F4, F5).** When the brief exists, `kiro_node` appends one line to the prompt and
+     adds the read-only `genesis-memory` MCP server (handed in through `ctx.extras["memory_mcp"]`, not the
+     registry; trust exactly `@genesis-memory/<its six read tools>`, owner = the run owner). A node opts out with
+     `kiro_node(memory=False)`. The memory server is read-only by its handle and its vector index
+     (`ReadOnlyDatabase`, `readonly_vector_index`), for chat too.
+  3. **Which runs (D4).** Every run whose compiled graph has an agent node; `META.memory_brief: false` opts a
+     workflow out (the two memory workflows). Resume reuses the brief; a fork copies `_memory/` (ADR-025); a relaunch
+     is a new run and gets a fresh brief.
+  4. **Never fails a run (F3).** Any failure (no `memory.db`, no memories, no match, an embedder error or timeout)
+     gives no brief, a `memory.brief` event with the reason, and no prompt line.
+  5. **Privacy (D5, D25).** The brief stays in the local run folder; a personal memory is never copied into anything
+     Genesis publishes to the Hub. Memory consolidation never reads a run-bound (Resolve) chat, which quotes the
+     brief (`memory/chat_read.py` leaves out `RUN_CHAT_MODES` in its query).
+  6. **Embedder (D3, D17).** fastembed `BAAI/bge-small-en-v1.5` is the default backend: the quantized ONNX
+     `qdrant/bge-small-en-v1.5-onnx-q` at a pinned revision (5 files, about 67 MB, SHA-256 in
+     `genesis/memory/model.py`), a core dependency (`fastembed==0.7.4`), fetched once into `<state>/models/` by
+     `scripts/install-packages.sh` (`genesis memory fetch-model`, then `reembed` back-fills existing memories;
+     `--no-model` skips it; a failure only warns) and loaded only from that folder with `local_files_only`, only in
+     worker and MCP subprocesses. `genesis memory status` and the `memory-embedder` health check show the state.
+- **Alternatives rejected.** An agent turn that queries memory and writes the brief (better relevance, but one turn
+  and 30–90 s per run and an ADR-011 exception; kept as the upgrade path); per-workflow memory query declarations
+  (authoring burden, messy anchors); KiroCrew's Qwen3-Embedding-0.6B (too heavy per worker); the fp32 bge-small model
+  (twice the size, no gain measured); a similarity floor (bge-small similarities sit in 0.57–0.81 with no clean cut).
+- **Consequences.** genesis-core additive (`kiro_node(memory=True)`, `MEMORY_LINE`), `CORE_MAJOR` 1; one new
+  canonical event (`memory.brief`); no `genesis.db` or `memory.db` migration. Personal memories now reach workflow
+  agents of the owner's own runs. Brief quality depends on the embedder and the run description; a run with no
+  application context gets the nearest memories however weak. The install needs huggingface.co once; `gsm provision`
+  does not run the install script, so a fleet instance needs `genesis memory fetch-model` / `reembed` itself.
+  Amends ADR-053: memory is no longer injected through the MCP tool only; the deferred program prefetch and the
+  node-level memory MCP are built for every workflow agent node. Amends ADR-054: the default embedder is fastembed
+  bge-small (pinned, quantized), installed by default; model2vec stays an option.
+
+## ADR-089 — One standard escalation gate with confirm-gated actions, resolved with a run-bound agent in Run Detail (Phase 55) — **Accepted**
+
+- **Status:** **Accepted** — 2026-11-24.
+- **Context.** Most escalation gates routed every answer, Reject included, to END, so the run ended `done` and its
+  finalizer promoted whatever file existed; the payload carried no failure detail; and no run-level relaunch,
+  override or retry-from-a-step existed (`specs/phase-55-workflow-execution/55-01-findings.md` §3). Source of every
+  clause: 55-01 §9 (D6, D7, D12–D15, D21–D26, D31, D35) and §10 (F6–F9); built in 55-06 (gate and run actions),
+  55-07 (Resolve), 55-08 (HTTP contract and the relaunch policy), 55-09 (web), 55-10 (library adoption) and the 55-11
+  fix pass; shipped in genesis v0.84.0 and genesis-workflows v0.28.0.
+- **Decision.**
+  1. **One standard gate (D6, D21, F6, F8).** genesis-core's `escalation_gate` (`nodes/escalation.py`) is the gate
+     every agent node escalates to; one gate per workflow serves every agent node (`attach_reliability` and
+     `attach_healing` register their targets, the exhausting validator records which one escalated), and
+     `escalation_gate(stop_to=)` sends a stop through the workflow's cleanup. The payload is extended additively:
+     failed node, validator messages, retry/heal/restart history, last error, the run's files with their roles, the
+     workflow's `extra_options`, and `allowed` (each action available or the reason why not), built from the run's
+     state (L-106). The reliability lint requires an agent's escalation target to be an `escalation_gate` (F8).
+  2. **Actions (D6 as amended by D13 and D15; keys `retry`, `accept`, `fix_accept`, `relaunch`, `restart_from`,
+     `stop`, D12).** Retry the failed step with guidance (gate answer; fresh budget, guidance in its prompt until it
+     passes); accept as is (gate answer, offered only when the step's output exists and is not empty); fix then
+     accept (program code claims the gate, copies the confirmed file from the run's Resolve sandbox, records a
+     `_resolve` write, then accepts); rerun from the start with additional instructions (`RunManager.relaunch`: every
+     input reused, the instructions in every agent node's prompt and kept across pause, resume and fork, D13);
+     restart from a step (`restart_from(from_step=)`: a fork from the latest checkpoint before that step, the run
+     folder copied, retry and heal budgets and stop markers reset, the original's checkpoints untouched per
+     ADR-025, D15, D21); stop with a reason (gate answer → `failed`). For relaunch and restart the stage or story
+     binding moves to the new run first and only then is the escalated run cancelled and linked (`run.relaunched`),
+     so a failed move fails only the new run (55-11 m1, L-061). A gate answer claims the gate with a compare-and-set
+     before it logs or spawns (55-11 m3, L-091). The old answers map: approve → accept, reject → stop, feedback →
+     retry; an unknown answer stops the run. The plain fork (ADR-009 mode 3) is unchanged.
+  3. **Who may be started again (D21, D23, D26).** Rerun and restart are offered only for a workflow that declares
+     `META.relaunchable: true` (default false; `relaunch_hint` says where to start it instead), read by one reader,
+     `genesis/runs/relaunch_policy.py`, which the parity lint also uses. Whatever its flag, a workflow whose
+     `required_mcp` or a graph node's `mcp` names `appian-dev-write` is never started again from a run: the
+     Implementation lane's confirm stays the single approval for Dev changes. This guard honours ADR-068; it does
+     not amend it. Queue- and record-bound workflows (test-execution, story-verification, setup-composer,
+     action-capture, a test-design top-up) are refused by their bindings (ADR-081, ADR-082). `story-implementation`
+     and `erd-generation` (D32) are `relaunchable: false`.
+  4. **Resolve agent (D7, D14, D24, F7).** A chat in mode `run_resolve`, session id `resolve-<run_id>`, shown only in
+     Run Detail's Resolve tab (`/runs/<id>/resolve`) and started when the user first opens it, with a
+     Genesis-authored first turn. It reads the run through the introspection server and the run-scoped
+     `genesis-resolve` server (escalation, documents, events, iterations) and a sandbox copy of the run's files
+     (System files left out; tool outputs while the run waits, D9); reads stay unscoped and writes stay in the
+     session sandbox (ADR-086). It records **proposals** only (`propose_action`); the user's Confirm on a card calls
+     the API and program code applies it, re-checking `allowed` at apply time. It never answers a gate itself.
+  5. **Audit (D22, D26).** Every action, from Resolve, the manual menu or the chat copilot, is recorded on the run's
+     own events (`gate.resolved`, `run.relaunched`, the `_resolve` `file.written`) with `actor`, `source`
+     (`manual`, `resolve` or `copilot`), `action`, `params` and `proposal_id`; `copilot_actions` holds only the
+     Resolve proposal flow; no audit migration. One error mapping: 400 for a refused or invalid action, 409 for the
+     wrong run state.
+  6. **Notifications (D7).** Every escalation of any run raises one "needs you" bell notice per gate occurrence,
+     linking to the Resolve tab; opening the notice does not start the agent.
+- **Alternatives rejected.** Keep per-workflow gates (the `done`-on-reject bug stays); let the agent call mutating
+  tools behind a permission prompt (weaker: the agent picks the parameters at call time); a Resolve session on the
+  Chat page or a side panel beside the graph (the user chose a Run Detail tab, D14); keep the escalated run alive
+  beside a restart's fork (the stage would stay bound to the old run, D15); call the stage re-run endpoints for a
+  relaunch (they delete the stage folder the unchanged inputs point at, D21); an m0031 audit table (the run log is
+  the audit, D22).
+- **Consequences.** genesis-core additive (`CORE_MAJOR` 1): `escalation_gate`, `kiro_node` guidance and
+  run-instruction lines, the healing `artifact=`. One new canonical event (`run.relaunched`), one chat mode, new run
+  and Resolve routes, no migration. Every library workflow with an agent node adopts the gate (genesis-workflows
+  v0.28.0), which needs genesis ≥ 0.84.0 although the major-only gate (ADR-019) does not enforce it. Known limitation
+  (D35): a run started on a workflow version from before the adoption escalates through its old `hitl_gate`; answer
+  it from the Flow tab's gate panel. ADR-001 holds: the graph routes every gate answer; relaunch and restart are run
+  management. Amends ADR-011: an agent node's escalation must reach the standard `escalation_gate`, not any
+  `hitl_gate` or END. Amends ADR-031: a new run-bound chat mode, `run_resolve`, that reads one run and records
+  proposals, with writes only in its sandbox. Amends ADR-033: new human-confirmed run actions (fix then accept,
+  rerun with instructions, restart from a step) beside the copilot's, confirmed from a Resolve card or the manual
+  menu; the agent still never answers a workflow's gate itself.
+
+## ADR-090 — Run Detail reads one versioned run snapshot; the live stream is only a hint (Phase 55) — **Accepted**
+
+- **Status:** **Accepted** — 2026-11-24.
+- **Context.** The backend never recorded a node start: the cursor was the last completed node, the web lit the edge
+  into it, read that node as "running", and stopped polling between completions, so the live graph lagged, looked
+  stuck during long nodes and lit the edge into a finished node. `/steps` re-read the whole log, and the SSE stream
+  replayed from 0 and never reconnected (`specs/phase-55-workflow-execution/55-01-findings.md` §5). Source: 55-01
+  §9 (D10, D12, D16) and §10 (F12, F13); built in 55-03 (genesis `793c04b6..29775149`) with a spike on LangGraph
+  1.2.8, reviewed SHIP; shipped in genesis v0.84.0.
+- **Decision.**
+  1. **A real node start (D10).** The worker adds LangGraph's `tasks` stream mode and records `node.started`
+     (`{task_id}`, with the node column) for every task; a gate task resumed, and a task resumed after a kill, start
+     again with the same task id. Pseudo-nodes such as `__interrupt__` are dropped.
+  2. **One snapshot (D10, D16).** `GET /runs/{id}/snapshot` is an incremental server fold of the event log
+     (`genesis/runs/snapshot.py`): run status and gate, one row per node (status, executions, attempts, times,
+     tool calls, messages, `entered_from`), edge counts, active nodes and edges. Its `version` is the highest folded
+     event seq; it is rebuilt from the log after a restart and reads only the fold's kinds after the last folded seq
+     (L-066). There is no `?since_version`: a pause writes no event, so an equal seq cannot prove the snapshot
+     unchanged. A run is `legacy` when it has node activity but no `node.started`.
+  3. **Hints, not state (D10, D16).** `GET /runs/{id}/live` sends lifecycle hints with `id:`; it never replays the
+     log, sends one `resync` to a reconnect that missed hints, and puts `status` on `run.final` frames so the client
+     closes only on a terminal one (L-003). The client re-reads the snapshot on each hint, keeps an equal version and
+     drops a lower one, and polls every 3 s while the run is active and on focus, visibility, online and Refresh.
+  4. **Edges from node states (D10, D12, D16).** An edge lights only when its target runs (the warning colour into a
+     waiting gate); on a loop re-entry only the edge just taken; an edge count is the completed hops plus the hop into
+     an unfinished node. The badge reads Live, Reconnecting, Polling or Finished. Old runs fall back without the
+     cursor edge.
+- **Alternatives rejected.** Keep the cursor and poll faster (still no start, still the wrong edge); a worker-emitted
+  start event (the `tasks` spike showed LangGraph's own start is reliable on resume, retries, interrupts and kills);
+  SSE carrying state or replaying history (a missed frame loses state; replay is O(events) per reconnect);
+  `EventSource` (reconnect, backoff and `after` must be ours); "round k of N" (nothing generic in the log gives N).
+- **Consequences.** One new canonical event kind (`node.started`), which updates L-005: "running" is a node's
+  `node.started` without its completion, no longer `run.cursor`. `/steps` and `/transitions` stay for other readers
+  (the introspection MCP server, chat); the event bus and SSE subscribers are bounded (history 500, a subscriber
+  queue 1,000 then one `RESYNC`); the supervisor drains worker stderr on its own thread. No migration, no
+  genesis-core change.

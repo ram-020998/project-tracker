@@ -1,6 +1,6 @@
 # 55-02 — Mockups: Documents tab, Resolve panel and run graph states, approved before the build
 
-> **Status:** SPEC-DRAFTED 2026-11-22. Repo: genesis (`web/src/dev/`). Parent: `specs/phase-55-workflow-execution.md`.
+> **Status:** BUILT 2026-11-22 (genesis `7f32ac0..d0aa1b2`; review SHIP; user review D12–D15; shipped in v0.84.0). SPEC-DRAFTED 2026-11-22. Repo: genesis (`web/src/dev/`). Parent: `specs/phase-55-workflow-execution.md`.
 > Built by **genesis-dev**. **Gate (D8):** the user reviews `/dev/phase-55` in the browser; the web parts of 55-03 and
 > all of 55-09 do not start until the user approves (55-03's backend may start). Each change the user asks for is
 > recorded as a decision in `55-01-findings.md` §9 and folded into 55-03 / 55-09 by the spec agent before they start.

@@ -1,6 +1,8 @@
 # 55-12 — Release and onboarding
 
-> **Status:** §1–§2 DONE 2026-11-24 (As run, genesis-release): genesis v0.84.0 and genesis-workflows v0.28.0 released
+> **Status:** DONE 2026-11-24 — §1–§2 (As run, genesis-release): genesis v0.84.0 and genesis-workflows v0.28.0 released
+> and deployed; §3 write-back done by genesis-docs 2026-11-24 (`progress/phase-55-workflow-execution.md`).
+> **Phase 55's live acceptance (55-11 §3, A1–A14) is open**. Was: §1–§2 DONE 2026-11-24 (As run, genesis-release): genesis v0.84.0 and genesis-workflows v0.28.0 released
 > and deployed; **Phase 55's live acceptance (55-11 §3, A1–A14) is open**. §3 is genesis-docs'. Spec-drafted
 > 2026-11-22. Repos: genesis, genesis-workflows, project-tracker. Parent:
 > `specs/phase-55-workflow-execution.md`. After 55-11 = SHIP on its review and gates (D37: the user's live acceptance
@@ -37,8 +39,11 @@
 
 Never restart while a run is active. Before deploying, note the fleet's state (D34): main (:8760) already runs the
 unreleased Phase 55 build, userb (:8761) the v0.83.0 server with the new web bundle (its Run Detail graph and Documents
-are broken until this deploy); both come to v0.84.0 here. Fleet: `gsm provision --all --no-mcp --no-env --force` (it runs the install
-script, which fetches the embedder model and back-fills memories), `gsm restart --all`; update every workflow from Catalog on each instance (L-033); **turn the `memory-consolidation` and
+are broken until this deploy); both come to v0.84.0 here. Fleet: `gsm stop --all`; then, because `gsm provision`
+installs only the workflow library and does **not** run the install script (corrected at the write-back from the As
+run), `scripts/install-packages.sh --editable --dev` in the dev venv (installs `fastembed`, fetches the embedder model
+and back-fills memories for the default state dir, main) and `gsm exec userb -- memory fetch-model` / `memory reembed`
+for userb; then `gsm provision --all --no-mcp --no-env --force` and `gsm start --all`; update every workflow from Catalog on each instance (L-033); **turn the `memory-consolidation` and
 `memory-maintenance` schedules back on on both instances** once the library release with `memory_brief: false` is
 installed (they were turned off for the build, D18); check `/openapi.json` `info.version`, the DB version and the embedder state. User
 checklist in the release notes:

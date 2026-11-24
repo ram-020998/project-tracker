@@ -164,9 +164,9 @@ status = "accepted"
 areas = ["core-engine", "workflows-library", "release-ci"]
 paths = []
 amends = []
-amended_by = []
+amended_by = ["ADR-089"]
 superseded_by = ""
-rule = "The reliability trio (validator + retry + escalation) is MANDATORY on every agent node; CI-enforced."
+rule = "The reliability trio (validator + retry + escalation to the standard escalation_gate) is MANDATORY on every agent node; CI-enforced."
 reviewed_fp = "642acb9a0f117961"
 b04 = "include"
 
@@ -404,10 +404,10 @@ status = "accepted"
 areas = ["chat", "runs-worker", "config-secrets"]
 paths = []
 amends = []
-amended_by = ["ADR-033", "ADR-034", "ADR-045", "ADR-076", "ADR-086"]
+amended_by = ["ADR-033", "ADR-034", "ADR-045", "ADR-076", "ADR-086", "ADR-089"]
 superseded_by = ""
 rule = "Chat is read-only: it observes/answers, never orchestrates or mutates; trust is fail-closed (read-only `@server/tool` allowlist + `auto_deny`); writes only in the per-session sandbox (ADR-034)."
-reviewed_fp = "feea89c605bd8b26"
+reviewed_fp = "13c6db4fedd19a48"
 b04 = "include"
 
 [ADR-032]
@@ -428,10 +428,10 @@ status = "accepted"
 areas = ["chat", "runs-worker", "api", "config-secrets"]
 paths = []
 amends = ["ADR-031"]
-amended_by = ["ADR-034"]
+amended_by = ["ADR-034", "ADR-089"]
 superseded_by = ""
 rule = "The chat copilot may operate runs only at the run-management layer: every mutation is human-confirmed, it NEVER auto-approves a workflow's HITL gate, and gets NO config/secret/registry/deploy tools."
-reviewed_fp = "0878e4e0f48aebd0"
+reviewed_fp = "1806029eb9c1861b"
 b04 = "include"
 
 [ADR-034]
@@ -668,10 +668,10 @@ status = "accepted"
 areas = ["memory", "chat", "core-engine"]
 paths = []
 amends = []
-amended_by = []
+amended_by = ["ADR-088"]
 superseded_by = ""
 rule = "The Agentic Memory Layer distills persistent memory from stored conversations in two scopes; personal memory is never shared."
-reviewed_fp = "bd67f00182b46c52"
+reviewed_fp = "1f109523123b245a"
 b04 = "include"
 
 [ADR-054]
@@ -680,10 +680,10 @@ status = "accepted"
 areas = ["memory", "runs-worker", "core-engine", "db"]
 paths = []
 amends = []
-amended_by = []
+amended_by = ["ADR-088"]
 superseded_by = ""
 rule = "Memory lives in a separate `~/.genesis/memory.db` with its own migrations (genesis.db untouched) and a local embedder."
-reviewed_fp = "03e203fec11e7601"
+reviewed_fp = "b0f12fc983a58d52"
 b04 = "include"
 
 [ADR-055]
@@ -1070,3 +1070,36 @@ amended_by = []
 superseded_by = ""
 rule = "Every schedule lives in `scheduled_jobs` and is managed on the Schedules page: system jobs editable not deletable; user schedules run a `schedulable` workflow, an agent prompt or a regression suite."
 reviewed_fp = "ffc792cad0f0fc57"
+
+[ADR-088]
+title = "Memory brief: a program prefetch at run start plus the memory tools on every workflow agent node (Phase 55)"
+status = "accepted"
+areas = ["memory", "core-engine", "runs-worker"]
+paths = []
+amends = ["ADR-053", "ADR-054"]
+amended_by = []
+superseded_by = ""
+rule = "At run start program code writes a budgeted memory brief into the run folder; every agent prompt points at it and agent nodes get the read-only genesis-memory MCP; a brief never fails a run."
+reviewed_fp = "85918de5e422361f"
+
+[ADR-089]
+title = "One standard escalation gate with confirm-gated actions, resolved with a run-bound agent in Run Detail (Phase 55)"
+status = "accepted"
+areas = ["core-engine", "runs-worker", "chat", "workflows-library", "web-runs"]
+paths = []
+amends = ["ADR-011", "ADR-031", "ADR-033"]
+amended_by = []
+superseded_by = ""
+rule = "Every agent node escalates to genesis-core's standard escalation_gate (retry, accept, fix then accept, rerun, restart from a step, stop); a Resolve agent only proposes, the human confirms, program code applies."
+reviewed_fp = "2f4619542ab61509"
+
+[ADR-090]
+title = "Run Detail reads one versioned run snapshot; the live stream is only a hint (Phase 55)"
+status = "accepted"
+areas = ["runs-worker", "web-runs", "api"]
+paths = []
+amends = []
+amended_by = []
+superseded_by = ""
+rule = "Run Detail's graph renders only from GET /runs/{id}/snapshot, versioned by event seq; /live sends hints that trigger a re-fetch, with a 3 s poll floor; an edge lights only when its target runs."
+reviewed_fp = "ff48dc7d14c35ea2"

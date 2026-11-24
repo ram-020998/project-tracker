@@ -172,3 +172,6 @@ areas = ["sdk-acp", "chat", "core-engine", "config-secrets", "security", "api", 
 
 ["Phase 54 — Schedules, custom agents, fixes and UX revamps (genesis v0.83.0 · genesis-workflows v0.27.0; m0030)"]
 areas = ["runs-worker", "db", "api", "chat", "config-secrets", "core-engine", "web-shell", "web-runs", "features-stages", "stories-workbench", "browser-testing", "workflows-library"]
+
+["Phase 55 — Workflow execution: memory brief, escalation gate + Resolve, Documents, run snapshot (genesis v0.84.0 · genesis-workflows v0.28.0; no migration)"]
+areas = ["runs-worker", "web-runs", "memory", "chat", "core-engine", "workflows-library", "api", "features-stages", "stories-workbench", "browser-testing", "distribution", "sdk-acp"]

@@ -95,7 +95,14 @@ Probes:
 - `scripts/probes/phase54-ux-pages.mjs` waits for seed-only text ("Design stage") and its init script reads
   `localStorage` in sandboxed frames (54-10 round 2); `phase54-12-probe.mjs` guards this, the older probe does not.
 
-## 5. Flaky on Linux: `test_reap_kills_a_recorded_group_that_is_still_ours` (54-11 As run)
+## 5. Flaky on Linux: `test_reap_kills_a_recorded_group_that_is_still_ours` (54-11 As run) — ✅ CLOSED 2026-11-24
+
+> **Closed by genesis `9cd33d52` (Phase 55, sub-spec 55-14, released in v0.84.0).** The cause was in `procs.reap`,
+> not the test: right after `Popen` returns, Linux can show an empty `/proc/<pid>/cmdline` while the child is still
+> inside `execve`, so a reap in that window read `[]` and signalled nothing. `reap` now re-reads a live group with no
+> marker once after 0.25 s (`_names_a_marker`, `_REREAD_S`). The same cause failed
+> `test_apwt_client.py::test_open_records_the_daemon_and_reap_stops_it` on master #7556336. Both tests unchanged;
+> green in genesis #7559966 and #7560648 (`55-14-release-blockers.md` As built, L-104).
 
 - `tests/test_testexec_procs.py::test_reap_kills_a_recorded_group_that_is_still_ours` failed on genesis `master`
   **#7429033** (2026-11-15, `ea00dfd`) with `assert [] == [6524]`, and passed in #7514744, #7515740 and #7516285.

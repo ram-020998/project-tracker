@@ -1,13 +1,18 @@
 # Phase 55 — ADR drafts
 
-> **Status:** DRAFT 2026-11-22 (genesis-spec). Filed by genesis-docs at the release write-back (55-12 §3) into
+> **Status:** ✅ **FILED 2026-11-24** (genesis-docs, 55-12 §3): ADR-088, ADR-089 and ADR-090 are **Accepted** in
+> `reference/decision-log.md`, brought up to date with the build first (ADR-088: D17, D25; ADR-089: D13, D15,
+> D21–D26, D31, D35 and the 55-11 fix pass; ADR-090: D16). The decision log is now their one home; the text below is
+> the frozen draft, kept for history. DRAFT 2026-11-22 (genesis-spec).
+>
+> Was: filed by genesis-docs at the release write-back (55-12 §3) into
 > `reference/decision-log.md`; until then this file is the one home of the drafts and every sub-spec that relies on them
 > lists it in its manifest `docs`. Each build sub-spec keeps the draft it touches current (its As built names any
 > change). Source of every clause: `55-01-findings.md` §9 (D-numbers) and §10 (F-numbers).
 
 ## ADR-088 (draft) — Memory brief: a program prefetch at run start plus the memory tools on every workflow agent node
 
-- **Status.** PROPOSED — Phase 55. Amends **ADR-053** (injection no longer MCP-only; the deferred prefetch and
+- **Status.** FILED as Accepted 2026-11-24 (was PROPOSED — Phase 55). Amends **ADR-053** (injection no longer MCP-only; the deferred prefetch and
   agentic-node MCP seams are built) and **ADR-054** (default embedder).
 - **Areas.** memory, core-engine, runs-worker.
 - **Rule (one-liner).** At run start program code writes a budgeted memory brief into the blackboard and every agent prompt points at it; agent nodes get the read-only genesis-memory MCP; a brief never fails a run.
@@ -44,7 +49,7 @@
 
 ## ADR-089 (draft) — One standard escalation gate with confirm-gated actions, resolved with a run-bound agent in Run Detail
 
-- **Status.** PROPOSED — Phase 55. Amends **ADR-011** (an agent node's escalation goes to the standard gate),
+- **Status.** FILED as Accepted 2026-11-24 (was PROPOSED — Phase 55). Amends **ADR-011** (an agent node's escalation goes to the standard gate),
   **ADR-031** (a new run-scoped chat mode) and **ADR-033** (new human-confirmed run actions).
 - **Areas.** core-engine, runs-worker, chat, workflows-library, web-runs.
 - **Rule (one-liner).** Every agent node escalates to genesis-core's standard gate (retry with guidance, accept, fix then accept, rerun with instructions, restart from a step, stop); a Resolve agent only proposes, the human confirms, program code applies.
@@ -81,7 +86,7 @@
 
 ## ADR-090 (draft) — Run Detail reads one versioned run snapshot; the live stream is only a hint
 
-- **Status.** PROPOSED — Phase 55. Updates **L-005** (`node.started` becomes canonical).
+- **Status.** FILED as Accepted 2026-11-24 (was PROPOSED — Phase 55). Updates **L-005** (`node.started` becomes canonical).
 - **Areas.** runs-worker, web-runs, api.
 - **Rule (one-liner).** The run graph renders only from GET /runs/{id}/snapshot (versioned by event seq); SSE sends lifecycle hints that trigger a re-fetch, with a 3 s poll floor; edges light only when their target runs.
 - **Context.** The backend never recorded a node start; the cursor is the last completed node; the web lit the edge into

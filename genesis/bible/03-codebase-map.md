@@ -1207,3 +1207,81 @@ genesis-workflows/workflows/agent-prompt/  0.1.0: run_agent (per-run skills/serv
                       → 2 retries → escalate (approve/feedback → retry_agent, reject → give_up); schedulable.
                       schedulable: true + 0.1.1 on sync-documents, generate-business-map, hello-appian.
 ```
+
+**Phase 55 — Workflow execution: memory brief, escalation gate + Resolve, Documents, run snapshot (genesis v0.84.0 · genesis-workflows v0.28.0; no migration):**
+```
+genesis/genesis/
+  runs/snapshot.py    FoldCache (one fold per run, reads only its kinds after the last folded seq; LRU 64, idle 300 s),
+                      RunFold, SnapshotCache, snapshot_of, FOLD_KINDS (ADR-090).
+  runs/writes.py      scan(root, excluded_dirs=, excluded_names=, fingerprint_max=, memo=) → Stat (bytes, mtime_ns,
+                      change key: blake2b ≤ FINGERPRINT_MAX_BYTES 1 MiB, else ctime+inode), Memo (SETTLED_NS 3 s),
+                      WriteTracker, Stamps, FILE_WRITTEN, LAUNCH/MEMORY/PARALLEL/RESOLVE, PSEUDO_NODES, EXCLUDED_DIRS.
+  runs/documents.py   DocFold, categorize, name_category, is_system_path, DOC_KINDS, BRIEF (the view scans with
+                      fingerprint_max=None; _parallel carries nodes).
+  runs/artifact_roles.py  parse_artifacts, roles_of, declares_roles, role_for, ArtifactRole.matches, ROLES (one reader).
+  runs/bindings.py    Binding {workflow_id, find, rebind, label, refusal}, BindingRegistry (register, refuse, get, refusal).
+  runs/relaunch_policy.py  parse_relaunch (the one D23 reader), RelaunchPolicy (write_refusal, flag_refusal, refusal),
+                      WRITE_SERVERS, DEFAULT_REFUSAL, HINT_MAX.
+  runs/node_models.py parse_models, NodeModels.extras(), MODELS_KEY, DEFAULT_KEY.
+  runs/manager.py     CANONICAL_KINDS + node.started, file.written, memory.brief, run.relaunched, model.fallback;
+                      snapshot(), documents(), _log_writes, _stamps; _enrich_gate, gate_allowed, pending_escalation,
+                      respond(source, session_id, proposal_id) → _claim_gate/_resume_gate (CAS), fix_and_accept,
+                      relaunch, restart_from(from_step=), _new_run_refusal, replaced_by, current_run, _replacing,
+                      _audit_fields; start(run_id=, before_spawn=), cancel(detail=), bindings; _copy_memory_brief.
+  runs/store.py       RunStore.claim_transition (expected → status compare-and-set).
+  runs/worker.py      stream_mode + "tasks": _task_start/_task_finish, _internal (drops __* pseudo-nodes); WriteTracker;
+                      _memory_brief, _memory_extras, _internal_launch_spec (genesis-memory), run_instructions and
+                      node-model extras; fork op _restart_point, _rewrite_pointers, merge_dicts.
+  runs/events.py      bounded EventBus (HISTORY_MAX 500), Subscription (SUBSCRIBER_MAX 1,000 → RESYNC), CLOSED.
+  runs/supervisor.py  stderr drain thread (logger genesis.worker, STDERR_TAIL 64 KB); on_event failures logged.
+  memory/brief.py     describe_run, entity_ids, render_brief, prefetch, event, graph_has_agent_node, _off_loop (daemon
+                      thread deadline), SHARED_TOP 12, PERSONAL_TOP 6, BRIEF_MAX_CHARS 12,000, DEADLINE_S 5 (ADR-088).
+  memory/model.py     MODEL_ID, HF_REPO qdrant/bge-small-en-v1.5-onnx-q, HF_REVISION, MODEL_FILES (SHA-256), model_dir,
+                      installed, fetch_model, ModelFetchError.   memory/embedder.py DEFAULT_BACKEND "fastembed".
+  memory/db.py        ReadOnlyDatabase.   memory/vector.py readonly_vector_index, reembed.   memory/store.py
+                      mark_vectors_stale, search_memories(phrases=).   memory/chat_read.py leaves out RUN_CHAT_MODES.
+  mcp/memory_server.py  read-only handle and index.   mcp/resolve_server.py  genesis-resolve (get_escalation,
+                      get_run_documents, get_run_events, get_node_iterations, propose_action; X-Genesis-Resolve-Token).
+  chat/resolve.py     ResolveService (open, refresh, propose, confirm, dismiss, mark_stale), validate_proposal, seed_text.
+  chat/store.py       RUN_CHAT_MODES, HIDDEN_CHAT_MODES, resolve_session_id, resolve_run_of; CopilotActionStore
+                      supersede_and_propose, claim, reopen, mark_open_stale.   chat/mode_profile.py run_resolve.
+                      chat/mcp.py build_resolve_mcp.   chat/manager.py start_genesis_turn, queue_live_note.
+  runtime/notifications.py  EscalationNotifier, escalation_ref, resolve_link, add(once=).   runtime/scheduler.py
+                      _successor (follows a relaunched run).   config/retention.py removes the Resolve run/ copy.
+  config/health.py    check_memory_embedder.   runtime/settings.py models_dir.   cli/main.py genesis memory
+                      fetch-model|reembed|status.
+  lint/reliability.py F8 ESCALATION_GATE, _fn_of.   lint/contract.py check_artifacts, check_relaunch, check_models,
+                      check_required_mcp, check_node_models.   cli/create_workflow.py role map, relaunchable: false,
+                      commented models keys.   cli/test_workflow.py D26 + [models].
+  testing/escalation.py  gate_context, exhausted, ladder_exhausted, raise_gate, answer_gate → GateRun, topology_gaps,
+                      cleanup_losses (route-test harness for the standard gate).
+  api/run_routes.py   GET /runs/{id}/snapshot, /live (hint SSE), /documents; POST /fix-and-accept, /relaunch,
+                      /restart-from; _action_errors (400/409); System paths 403.   api/resolve_routes.py the six
+                      Resolve routes.   api/_shared.py FixAndAccept, Relaunch, RestartFrom, RUN_TRIGGER_SOURCES.
+                      api/features.py _register_stage_bindings.   api/workbench.py STORY_BINDINGS.
+  kb/stages.py, kb/story_stages.py  get_by_run.   testexec/procs.py _names_a_marker, _REREAD_S (reap re-read).
+genesis/packages/genesis-core/genesis_core/
+  nodes/escalation.py escalation_gate(name, failed_node, retry_to, accept_to, prompt_fn, extra_options, stop_to) →
+                      EscalationGate, ExtraOption, normalize_answer, ACTIONS, GATE_ACTIONS, RUN_ACTIONS, FROM_KEY,
+                      STOPPED_KEY, GUIDANCE_LINE, INSTRUCTIONS_LINE (ADR-089).   types.NodeKind + "escalation_gate".
+  nodes/agent.py      MEMORY_LINE, _memory_for, kiro_node(memory=), _user_lines, model choice + model.fallback,
+                      _genesis_output_doc, _genesis_mcp.   nodes/reliability.py EscalationGate path, agent_output.
+                      nodes/healing.py artifact=, verify@healing.   nodes/validator.py target_artifact.
+  agents/models.py    model_candidates, choose_model, ModelChoice, MODEL_FALLBACK, NODE_MODELS, DEFAULT_MODEL.
+                      agents/kiro.py KiroAcpProvider.advertised_models (one locked read per worker, failure cached).
+genesis/web/src/
+  types/{snapshot,runDocuments,escalation,resolve}.ts; lib/api/resolve.ts resolveApi; runs.ts documents, fixAndAccept,
+  relaunch, restartFrom.   features/run-detail/: hooks useRunSnapshot, useRunLive, useRunDocuments; node-states
+  snapshotNodeStates, edgeState; components/LiveStatus.tsx; graph/NodeCard.tsx (84 px, status tint), card-tone.ts;
+  components/docs/run-docs.ts (visibleDocuments), DocumentsTab, DocumentViewer; components/resolve/{actions,hooks,
+  ActionDialog,ResolveTab}; RunDetailPage Resolve tab + /runs/:runId/resolve.   shared/ui icons NODE_STATUS_ICON,
+  format ModelFallbackNote, badge awaiting_input:escalation; features/runs runPillStatus.   Removed: deriveNodeStates,
+  useRunSteps/Transitions/Stream, useRunArtifacts, doc-utils.ts.   dev/mockups/phase55/ (/dev/phase-55).
+  test/fixtures/runs/*, resolve/*, phase55-contract.test.ts.
+genesis/scripts/       install-packages.sh model step + --no-model; probes phase55-mockups.mjs, phase55-run-graph.mjs,
+                      phase55-09-seed.py, phase55-09-pages.mjs, phase55-13-seed.py.
+genesis-workflows/     every agent workflow on one escalation_gate("escalate") (extras, stop_to), META.artifacts role
+                      maps, relaunchable / relaunch_hint, memory_brief: false on the memory jobs; story-verification
+                      accept_as_passed + send_back; story-implementation reverify_gap; schemas/workflow.schema.json;
+                      ci/validate_library.py schema check, check_required_mcp, check_node_models, catalog fields.
+```

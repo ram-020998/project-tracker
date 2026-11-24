@@ -76,6 +76,25 @@ def hitl_gate(*, name, kind, prompt_fn, options=None) -> Node
 - Calls LangGraph `interrupt(payload)`; run pauses (status `awaiting_input`).
 - Resumed via `Command(resume=decision)` (`approve` | `reject` | `{feedback}`) — see `hitl-design.md`.
 - The **only** sanctioned pause classes are `approval` (author gates), `escalation` (retry exhaustion), and `pre_mutation` (before write/deploy) — everything else auto-advances (`META.auto_approve=true` default). `pre_mutation` gates are **required** before any write/deploy/data MCP node.
+- Since Phase 55 (ADR-089) an agent node's retry exhaustion goes to `escalation_gate` (§5a), not to a
+  `hitl_gate(kind="escalation")`; the lint refuses the old wiring (F8). `hitl_gate` serves approval, `pre_mutation`
+  and review gates.
+
+## 5a. `escalation_gate(name)` — the standard escalation gate (genesis-core `nodes/escalation.py`)
+```python
+def escalation_gate(name, *, failed_node=None, retry_to=None, accept_to=None, prompt_fn=None,
+                    extra_options=None, output=None, stop_to=None) -> EscalationGate
+```
+- One per workflow (named `escalate` in the library); pass the object to every `attach_reliability(on_exhaust_gate=…)`
+  and `attach_healing(gate=…)`, which fill `failed_node` / `retry_to` / `accept_to` per agent (retry → the agent,
+  accept → its successor). Give them yourself only for a hand-wired gate. `extra_options`:
+  `[{"id", "to", "label"?, "hint"?, "available"?}]` or `ExtraOption`s. A `prompt_fn` may return `""` for the default
+  wording.
+- Payload: `failed_node`, `validator_messages`, `last_error`, `allowed` (each action, or the reason it is not offered),
+  `extra_options [{id, label, hint}]`; the platform adds `history` and `files`.
+- Answers: `retry` (with guidance), `accept`, `fix_accept`, `stop` (→ `<name>_stop`, `failed`, then `stop_to` or END),
+  an extra option id; run actions `relaunch` / `restart_from` are applied by the run manager. Legacy approve / reject /
+  feedback map to accept / stop / retry; an unknown answer stops the run.
 
 ## 6. `subgraph_node(workflow_id)` — composition
 ```python
@@ -89,7 +108,7 @@ def subgraph_node(*, name, workflow_id, input_map=None, output_map=None) -> Node
 ```python
 def attach_reliability(g, *, agent, validator, retry_max, on_exhaust_gate=None, nxt=END)
 ```
-- Wires `agent → validator`; conditional routing `pass → nxt`, `fail & retries<max → agent (retry)`, `fail & exhausted → on_exhaust_gate` (a `hitl_gate`) or `END`.
+- Wires `agent → validator`; conditional routing `pass → nxt`, `fail & retries<max → agent (retry)`, `fail & exhausted → on_exhaust_gate` (the workflow's `EscalationGate`; a string name or `END` is the pre-Phase-55 wiring the lint refuses).
 - Increments `state["retries"][agent.name]`.
 - **The scaffolder emits this by default** so compliance is the path of least resistance (ADR-014).
 
@@ -106,7 +125,7 @@ or data only reachable via an MCP server?
    kiro_node (inject just the MCP it needs)
         │
         ▼  (MANDATORY)
-   validator_node  ──fail──▶ retry (≤ retry_max) ──exhausted──▶ hitl_gate(escalation)
+   validator_node  ──fail──▶ retry (≤ retry_max) ──exhausted──▶ escalation_gate (standard)
         │ pass
         ▼
    next step
@@ -119,6 +138,6 @@ Is this step itself a whole existing workflow?       ──▶ subgraph_node
 ## 9. Invariants (checked by the reliability lint — Phase 2)
 
 1. Every `agent` node has an immediate `validator` successor.
-2. Every such validator has a retry edge back to its agent and an escalation edge.
+2. Every such validator has a retry edge back to its agent and an escalation edge to an `escalation_gate` (F8).
 3. No node pushes bulk data into state (state-size guard).
 4. Agent nodes declare their `mcp` from the registry (no ad-hoc server defs).

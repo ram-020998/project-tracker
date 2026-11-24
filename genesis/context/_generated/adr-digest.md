@@ -13,7 +13,7 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-008 — One local app bundles engine + UI; LangGraph Studio was the interim harness, the custom workbench is the product UI.
 - ADR-009 — All three HITL modes are REQUIRED: designed approval gates, ad-hoc pause/resume anywhere, and mid-run state injection.
 - ADR-010 — Keep state small/serializable/editable (pointers + decisions); bulk lives in the `RunWorkspace` blackboard under `$GENESIS_ARTIFACTS_DIR`; never inline bulk in state/chat.
-- ADR-011 — The reliability trio (validator + retry + escalation) is MANDATORY on every agent node; CI-enforced.
+- ADR-011 (amended by 089) — The reliability trio (validator + retry + escalation to the standard escalation_gate) is MANDATORY on every agent node; CI-enforced.
 - ADR-012 — Run graph execution in a disposable subprocess worker, not the app (pause=kill, resume=fresh worker from checkpoint); the app never imports workflow Python.
 - ADR-013 — solutions-copilot is retired: Genesis owns its own config UI (GitLab token, MCP secrets, environments), reusing only its concepts as fresh implementations.
 - ADR-014 — Author workflows via the `create-workflow` scaffolder (reliability trio pre-wired), the local test harness and the library steering; contribution is open.
@@ -33,9 +33,9 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-028 (amended by 085) — ALL backend endpoints live under `/api` (+ SPA history fallback; only static Playwright reports sit on their own loopback origin, ADR-085); the client prepends `/api` centrally — never in components.
 - ADR-029 (amends 005,020; amended by 083,086,087) — Two-tier MCP/CLI registry: curated read-only (MR-governed) + custom user-writable; tool trust = `node.tools ∩ server.allowlist`, enforced by the engine's tool list (ADR-086: no tool list = its servers within allowlists).
 - ADR-030 (amended by 037,041) — Persistence stays SQLite; move to Postgres/pgvector only on an explicit trigger (multi-user, transcript RAG, heavy analytics); keep repository signatures DB-agnostic.
-- ADR-031 (amended by 033,034,045,076,086) — Chat is read-only: it observes/answers, never orchestrates or mutates; trust is fail-closed (read-only `@server/tool` allowlist + `auto_deny`); writes only in the per-session sandbox (ADR-034).
+- ADR-031 (amended by 033,034,045,076,086,089) — Chat is read-only: it observes/answers, never orchestrates or mutates; trust is fail-closed (read-only `@server/tool` allowlist + `auto_deny`); writes only in the per-session sandbox (ADR-034).
 - ADR-032 (amended by 086) — Credit usage is REAL metered data from Kiro ACP (per turn), NEVER estimated — no pricing engine; every figure carries `provenance` (metered/partial/unavailable).
-- ADR-033 (amends 031; amended by 034) — The chat copilot may operate runs only at the run-management layer: every mutation is human-confirmed, it NEVER auto-approves a workflow's HITL gate, and gets NO config/secret/registry/deploy tools.
+- ADR-033 (amends 031; amended by 034,089) — The chat copilot may operate runs only at the run-management layer: every mutation is human-confirmed, it NEVER auto-approves a workflow's HITL gate, and gets NO config/secret/registry/deploy tools.
 - ADR-034 (amends 031,033; amended by 086) — Skills are first-class standalone activities beside Workflows, chat-invoked + filesystem-provisioned; chat writes ONLY inside the per-session skill-output sandbox (`fs_write_root`).
 - ADR-035 — Run input files (`format:"file"`) are provisioned into the run blackboard at launch via the multipart upload, never passed inline; bounded and sanitized.
 - ADR-036 (amended by 073) — Genesis owns the Appian KB: a Genesis-native parser + a local KB in `genesis.db`, fed only by the single dev-tagged environment (`is_dev`); Atlas/Jarvis are retired as KB sources.
@@ -55,8 +55,8 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-050 (amended by 076) — Model SDLC lifecycle state as typed domain objects; EVERY status change goes through the single `LifecycleService.transition` authority.
 - ADR-051 — The workflow-agent turn path depends on the `AgentProvider` Protocol (`KiroAcpProvider` default), never binds nodes to the Kiro/ACP loader directly.
 - ADR-052 — Source documents only through the `DocumentProvider` Protocol (provider-neutral `DocRef`/`DocMeta`).
-- ADR-053 — The Agentic Memory Layer distills persistent memory from stored conversations in two scopes; personal memory is never shared.
-- ADR-054 — Memory lives in a separate `~/.genesis/memory.db` with its own migrations (genesis.db untouched) and a local embedder.
+- ADR-053 (amended by 088) — The Agentic Memory Layer distills persistent memory from stored conversations in two scopes; personal memory is never shared.
+- ADR-054 (amended by 088) — Memory lives in a separate `~/.genesis/memory.db` with its own migrations (genesis.db untouched) and a local embedder.
 - ADR-055 — Light-first, MUI-inspired design language by evolving the existing tokens + Tailwind + shadcn-style primitives — NOT adopting `@mui/material`.
 - ADR-056 (amends 044; amended by 057,058,078) — A Feature is a workspace of parallel, independently-advanceable, plug-in stage containers over a shared substrate; each stage has its own lifecycle.
 - ADR-057 (amends 056; amended by 058) — The UX Design stage turns an uploaded PDF mockup into a grounded UX Implementation Analysis via the deterministic `ux-design-analysis` workflow.
@@ -90,3 +90,6 @@ Full text: `genesis-ctx adr <ID>` (loads the amendment chain). Areas: `genesis-c
 - ADR-085 (amends 028,026) — Serve Playwright reports only from a second loopback origin (app port + 100): static report files, no /api, GET/HEAD only, Host-checked, no traversal — never from the app's own origin.
 - ADR-086 (amends 029,031,032,034,045,069,083) — Start Kiro only as kiro-cli acp --agent-engine v3 under a Genesis-owned KIRO_HOME (nothing loaded from ~/.kiro; reads unscoped); trust: a projected agent, activation verified, fail closed; skills only from Genesis.
 - ADR-087 (amends 047,049,029) — Every schedule lives in `scheduled_jobs` and is managed on the Schedules page: system jobs editable not deletable; user schedules run a `schedulable` workflow, an agent prompt or a regression suite.
+- ADR-088 (amends 053,054) — At run start program code writes a budgeted memory brief into the run folder; every agent prompt points at it and agent nodes get the read-only genesis-memory MCP; a brief never fails a run.
+- ADR-089 (amends 011,031,033) — Every agent node escalates to genesis-core's standard escalation_gate (retry, accept, fix then accept, rerun, restart from a step, stop); a Resolve agent only proposes, the human confirms, program code applies.
+- ADR-090 — Run Detail's graph renders only from GET /runs/{id}/snapshot, versioned by event seq; /live sends hints that trigger a re-fetch, with a 3 s poll floor; an edge lights only when its target runs.

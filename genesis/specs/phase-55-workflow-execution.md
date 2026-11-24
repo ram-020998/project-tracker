@@ -1,6 +1,9 @@
 # Phase 55 — Workflow execution: memory brief, agent-assisted escalation, Documents and a reliable run graph
 
-> **Status:** 📝 **SPEC-DRAFTED 2026-11-22** (genesis-spec). Q&A complete: decisions D1–D11, defaults F1–F15; D12–D15
+> **Status:** 🚢 **SHIPPED (live acceptance open) 2026-11-24** — genesis **v0.84.0** (`d6cea8db`) → genesis-workflows
+> **v0.28.0** (`2017afb`); no migration (DB v30); ADR-088, ADR-089, ADR-090 Accepted. Phase 55's live acceptance
+> (55-11 §3, A1–A14) is run by the user after the release, findings as v0.84.x patches (D36, D37); Phase 51/53/54
+> acceptance still open. As built: `progress/phase-55-workflow-execution.md`. Was: 📝 SPEC-DRAFTED 2026-11-22 (genesis-spec). Q&A complete: decisions D1–D11, defaults F1–F15; D12–D15
 > from the 55-02 mockup review (2026-11-23); D16–D20 during the build (`phase-55-workflow-execution/55-01-findings.md` §9–§14).
 > 55-02..55-10 and 55-13 BUILT; 55-11 SHIP on the review and gates (live rows open, D37); 55-12 paused on a red master
 > pipeline → 55-14 (D39).
@@ -134,9 +137,9 @@ Every intermediate commit keeps the gates green. Fold each As built into the lat
 | 55-09 | genesis (`web/`) | Documents tab revamp; Resolve tab (chat, proposal cards, manual action menu, confirm dialogs, results; `/runs/:runId/resolve`) — **BUILT** (genesis `1f8fd8b5..a09c5fbe`, local; review SHIP with m4 deferred; D27) |
 | 55-10 | genesis-workflows | Standard gate in every workflow with an agent node; `META.artifacts` roles + labels; `memory_brief: false` on the memory workflows; versions bumped — **BUILT** (genesis-workflows `60c12f3..3c29e73`, genesis `014ef888..361c99a6`, local; review SHIP; D31) |
 | 55-11 | all | Review + gates (genesis-review) + the fix pass; live acceptance run by the user after the release (D36, D37) — **SHIP on the review and gates** (fix pass genesis `3f391a61`, `e8096f71`; `reviews/55-11-review.md`; M1 not fixed, D35; m5/m6/n3/n4 to the backlog, D38; §3 open, run by the user) |
-| 55-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-088..090, L-005, lessons, areas, state, progress) |
+| 55-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-088..090, L-005, lessons, areas, state, progress) — **DONE** (genesis v0.84.0 `d6cea8db`, genesis-workflows v0.28.0 `2017afb`, CI green; fleet on v0.84.0; write-back 2026-11-24) |
 | 55-13 | genesis (`web/src/features/run-detail/`, `shared/ui/icons.ts`, genesis-core `kiro_node`, `runs/worker.py`, `lint/contract.py`) | Status-coloured 84 px graph cards with standard status icons (D28); `META.models` / `default_model` with fallback and `model.fallback` (D29); Documents hides System and spent Tool outputs (D30); built after 55-10, before 55-11 — **BUILT** (genesis `7cf01475..76b27a57`, local; review SHIP; D33) |
-| 55-14 | genesis (`runs/writes.py`, `testexec/procs.py`, tests) | Release blockers from master pipeline #7556336 (D39): write detection that does not depend on mtime resolution; the apwt reap test on Linux; built while 55-12 is paused |
+| 55-14 | genesis (`runs/writes.py`, `testexec/procs.py`, tests) | Release blockers from master pipeline #7556336 (D39): write detection that does not depend on mtime resolution; the apwt reap test on Linux; built while 55-12 is paused — **BUILT** (genesis `ad8f7eda`, `9cd33d52`, `d6cea8db`; review SHIP) |
 
 API sub-spec: **55-08**.
 
@@ -181,12 +184,12 @@ F1–F15 in `55-01-findings.md` §10 (confirmed 2026-11-22).
 
 ## 12. ADR summaries
 
-- **ADR-088 (draft) — Memory brief.** Program prefetch at run start into `_memory/brief.md`, a pointer line in every
+- **ADR-088 (Accepted 2026-11-24, `reference/decision-log.md`) — Memory brief.** Program prefetch at run start into `_memory/brief.md`, a pointer line in every
   agent prompt, the read-only memory MCP on agent nodes, never fails a run, bge-small default. Amends **ADR-053**,
   **ADR-054**.
-- **ADR-089 (draft) — Standard escalation gate + Resolve agent.** Six confirm-gated actions; the agent proposes, the
+- **ADR-089 (Accepted 2026-11-24, `reference/decision-log.md`) — Standard escalation gate + Resolve agent.** Six confirm-gated actions; the agent proposes, the
   human confirms, program code applies. Amends **ADR-011**, **ADR-031**, **ADR-033**.
-- **ADR-090 (draft) — Versioned run snapshot.** The graph renders from one snapshot; SSE is a hint; `node.started`
+- **ADR-090 (Accepted 2026-11-24, `reference/decision-log.md`) — Versioned run snapshot.** The graph renders from one snapshot; SSE is a hint; `node.started`
   canonical (updates **L-005**).
 
 ## Context manifest

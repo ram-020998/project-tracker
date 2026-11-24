@@ -244,6 +244,12 @@ Detailed, evidence-backed records of what was actually built each phase live in
 
 From Phase 47 on: ≤ 5 lines per phase; detail lives in `progress/`.
 
+- **2026-11-24 — Phase 55 (Workflow execution): 🚢 SHIPPED, live acceptance open — genesis v0.84.0 → genesis-workflows v0.28.0 (no migration, DB v30; ADR-088..090).**
+  Memory brief in every agent run, one standard escalation gate + the Resolve tab (six confirm-gated actions), Documents
+  by step/type, graph from a versioned snapshot, a model per agent node; CI 2346, vitest 1051, core 173, workflows 678.
+  Master #7556336 red (Linux same-size rewrites, reap) → 55-14 before the tag. A1–A14 open (D37). L-126–L-131.
+  Details: `progress/phase-55-workflow-execution.md`.
+
 - **2026-11-20 — Phase 54 (Schedules, custom agents, fixes and UX revamps): 🚢 SHIPPED — genesis v0.83.0 → genesis-workflows v0.27.0 (m0030, DB v30; ADR-087).**
   Schedules page (system + user schedules, agent prompts, regression suites), bell, Catalog → Agents, chat with a custom
   agent, story/feature page revamps, B1–O4 fixes, `program_node` off the loop; pytest 2122 (CI 2054), vitest 906, core

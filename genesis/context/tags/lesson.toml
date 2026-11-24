@@ -48,8 +48,8 @@ reviewed_fp = "9e68eea68783b6db"
 [L-005]
 areas = ["runs-worker", "core-engine", "web-runs"]
 phase = ""
-rule = "Use only the canonical event kinds (run.started, node.completed, agent.*, validator.result, retry.scheduled, gate.*, run.final, error) — there is NO node.started/node.failed; running = run.cursor."
-reviewed_fp = "fa01a3df883ec5b6"
+rule = "Use only the canonical event kinds, listed once in CANONICAL_KINDS (runs/manager.py; Phase 55 added node.started, file.written, memory.brief, run.relaunched, model.fallback); running = node.started, not run.cursor."
+reviewed_fp = "790afb120ca0cb43"
 
 [L-006]
 areas = ["web-runs", "workflows-library", "core-engine"]
@@ -175,7 +175,7 @@ reviewed_fp = "00dbcd9b71f833c6"
 areas = ["core-engine", "runs-worker", "db", "kb-sync", "workflows-library"]
 phase = "16"
 rule = ""
-reviewed_fp = "f4e52b963f685947"
+reviewed_fp = "7e5b423a2759bf5a"
 
 [L-027]
 areas = ["release-ci"]
@@ -385,7 +385,7 @@ reviewed_fp = "d038b6cb2c1c4121"
 areas = ["features-stages", "runs-worker", "chat", "browser-testing"]
 phase = "29"
 rule = ""
-reviewed_fp = "571e661e6fd84857"
+reviewed_fp = "4a8a8c92ce66563f"
 
 [L-062]
 areas = ["features-stages", "runs-worker"]
@@ -517,7 +517,7 @@ reviewed_fp = "c9c3692b0516bf60"
 areas = ["features-stages", "stories-workbench"]
 phase = "46"
 rule = ""
-reviewed_fp = "7dab3b20cc32a0d7"
+reviewed_fp = "dd8281f464869479"
 
 [L-084]
 areas = ["collaboration-hub", "appian-integration", "features-stages"]
@@ -547,7 +547,7 @@ reviewed_fp = "6d681ecfb9a75d7b"
 areas = ["security", "release-ci", "browser-testing"]
 phase = "47"
 rule = ""
-reviewed_fp = "adbd88105b4b7cf6"
+reviewed_fp = "7401bb98e4cc6d2f"
 
 [L-089]
 areas = ["release-ci", "web-shell"]
@@ -559,13 +559,13 @@ reviewed_fp = "6db85ea175ccf44e"
 areas = ["web-shell", "web-runs", "documents", "stories-workbench", "features-stages", "browser-testing"]
 phase = "48"
 rule = ""
-reviewed_fp = "386bf35a139b8125"
+reviewed_fp = "dff6673f3603d108"
 
 [L-091]
 areas = ["db", "kb-sync", "stories-workbench", "browser-testing", "runs-worker"]
 phase = "49"
 rule = ""
-reviewed_fp = "42aec1300fa4a8e5"
+reviewed_fp = "f7bc2354a8708eee"
 
 [L-092]
 areas = ["release-ci", "workflows-library", "db"]
@@ -583,7 +583,7 @@ reviewed_fp = "d717824b00e1f558"
 areas = ["features-stages", "collaboration-hub", "stories-workbench", "web-shell", "runs-worker", "browser-testing"]
 phase = "49"
 rule = ""
-reviewed_fp = "dba3c8c7afff191f"
+reviewed_fp = "96e95765c6edd03c"
 
 [L-095]
 areas = ["stories-workbench", "kb-sync", "features-stages"]
@@ -613,7 +613,7 @@ reviewed_fp = "ac10055c5f86f52e"
 areas = ["kb-sync", "parser", "release-ci"]
 phase = "50"
 rule = ""
-reviewed_fp = "e3027ae3cd7cc0ab"
+reviewed_fp = "d0e66982be906c83"
 
 [L-100]
 areas = ["security", "release-ci"]
@@ -643,7 +643,7 @@ reviewed_fp = "5c1b086033853b1b"
 areas = ["runs-worker", "browser-testing", "release-ci"]
 phase = "51"
 rule = ""
-reviewed_fp = "33b8116e01e4fb4f"
+reviewed_fp = "f05a5db6306d410a"
 
 [L-105]
 areas = ["browser-testing", "security"]
@@ -655,7 +655,7 @@ reviewed_fp = "af3a7a99a75a90ea"
 areas = ["core-engine", "workflows-library", "runs-worker"]
 phase = "51"
 rule = ""
-reviewed_fp = "34580c69491ba17d"
+reviewed_fp = "8ec282e735e97200"
 
 [L-107]
 areas = ["runs-worker", "api", "browser-testing"]
@@ -673,7 +673,7 @@ reviewed_fp = "916737fe297d48cd"
 areas = ["browser-testing", "workflows-library", "api"]
 phase = "51"
 rule = ""
-reviewed_fp = "d5b7638d77610919"
+reviewed_fp = "2e1bfe12aac7c093"
 
 [L-110]
 areas = ["browser-testing", "workflows-library"]
@@ -691,7 +691,7 @@ reviewed_fp = "c0f141491aca7192"
 areas = ["release-ci"]
 phase = "51"
 rule = ""
-reviewed_fp = "293903c7d8ce5386"
+reviewed_fp = "96e01ec5a9b7a647"
 
 [L-113]
 areas = ["sdk-acp", "security", "chat", "core-engine"]
@@ -757,16 +757,52 @@ reviewed_fp = "0497f89c5a1cce0a"
 areas = ["web-shell", "web-runs", "stories-workbench", "features-stages"]
 phase = "54"
 rule = ""
-reviewed_fp = "5d74399b3472b013"
+reviewed_fp = "bbe4bc12c577139c"
 
 [L-124]
 areas = ["runs-worker", "db"]
 phase = "54"
 rule = ""
-reviewed_fp = "b838850efef9385c"
+reviewed_fp = "f0742cd896500c2f"
 
 [L-125]
 areas = ["db", "release-ci", "distribution"]
 phase = "54"
 rule = ""
 reviewed_fp = "a04ab521cf4cf4e6"
+
+[L-126]
+areas = ["runs-worker", "core-engine"]
+phase = "55"
+rule = ""
+reviewed_fp = "0240dd2dea48ae7a"
+
+[L-127]
+areas = ["runs-worker", "core-engine"]
+phase = "55"
+rule = ""
+reviewed_fp = "e79d131e1440b8df"
+
+[L-128]
+areas = ["security", "chat", "runs-worker"]
+phase = "55"
+rule = ""
+reviewed_fp = "64b1bc76b7ce126a"
+
+[L-129]
+areas = ["memory", "security"]
+phase = "55"
+rule = ""
+reviewed_fp = "8df1279a029cfe3a"
+
+[L-130]
+areas = ["runs-worker", "release-ci"]
+phase = "55"
+rule = ""
+reviewed_fp = "46614a285aed04b1"
+
+[L-131]
+areas = ["security", "memory", "appian-integration"]
+phase = "55"
+rule = ""
+reviewed_fp = "c2a276f4f981ec05"

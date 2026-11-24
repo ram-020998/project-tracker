@@ -15,8 +15,11 @@ Canonical terms used across the Genesis documentation.
 | **CLI node** | Wraps an external CLI (e.g. `erd-gen`) with typed argv + output parsing. |
 | **Validator (node)** | Deterministic program check of a prior artifact; routes pass/fail. Makes the *program* decide "good enough." |
 | **HITL gate** | A pause node (`interrupt()`) for human approval / feedback / escalation. |
+| **Escalation gate** | genesis-core's standard `escalation_gate` (Phase 55, ADR-089): the one gate every agent node escalates to after its retries; offers retry with guidance, accept, fix then accept, rerun, restart from a step and stop, each from the run's state; resolved in Run Detail's Resolve tab. |
+| **Memory brief** | `_memory/brief.md` in a run folder: shared and the owner's personal memories, written by program code before the graph starts; every agent prompt points at it (ADR-088). |
+| **Run snapshot** | `GET /runs/{id}/snapshot`: the server's fold of a run's events, versioned by event seq; Run Detail's graph reads only it (ADR-090). |
 | **Subgraph node** | Embeds another workflow's compiled graph (composition). |
-| **Reliability trio** | The mandatory pattern: agent node → validator → retry/escalation. Hard requirement, CI-enforced. |
+| **Reliability trio** | The mandatory pattern: agent node → validator → retry/escalation to the standard escalation gate. Hard requirement, CI-enforced. |
 | **ACP** | Agent Client Protocol — JSON-RPC over stdio that `kiro-cli acp` speaks; how Genesis drives Kiro. |
 | **MCP** | Model Context Protocol — external tool servers (Atlas, Jarvis, LCP, data-generator, Jira) injected per node. |
 | **MCP registry** | `mcp-registry.json` — shared launch configs + secret keys for MCP servers. |

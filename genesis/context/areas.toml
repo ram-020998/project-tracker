@@ -45,7 +45,9 @@ paths    = ["genesis/packages/kiro-agent-sdk/src/**",
             # (preflight, sign-in) and resolves the skills and Kiro home a workflow turn gets
             "genesis/packages/kiro-agent-sdk/tests/fixtures/**",
             "genesis/genesis/runtime/preflight.py", "genesis/genesis/runtime/kiro_auth.py",
-            "genesis/genesis/runtime/context.py"]
+            "genesis/genesis/runtime/context.py",
+            # Phase 55 (D29, D33): the per-node model choice reads Kiro's advertised model list
+            "genesis/packages/genesis-core/genesis_core/agents/models.py"]
 keywords = ["acp", "sdk", "session", "agent client", "tool bridge", "mcp env"]
 skills   = ["genesis-backend-dev"]
 gates    = ["cd genesis/packages/kiro-agent-sdk && ../../.venv/bin/python -m pytest -q",
@@ -67,7 +69,13 @@ paths    = ["genesis-workflows/workflows/**", "genesis-workflows/skills/**",
             "genesis-workflows/skills-registry.json", "genesis-workflows/mcp-registry.json",
             "genesis-workflows/cli-registry.json",
             # Phase 50 (D16): the workflow scaffolder and test harness in the app (ADR-014, ADR-011)
-            "genesis/genesis/cli/create_workflow.py", "genesis/genesis/cli/test_workflow.py"]
+            "genesis/genesis/cli/create_workflow.py", "genesis/genesis/cli/test_workflow.py",
+            # Phase 55: the lints, the gate route-test harness, the standard gate and the one readers of the
+            # author-facing META keys (artifacts roles, relaunchable / relaunch_hint, models / default_model)
+            "genesis/genesis/lint/**", "genesis/genesis/testing/escalation.py",
+            "genesis/genesis/runs/artifact_roles.py", "genesis/genesis/runs/relaunch_policy.py",
+            "genesis/genesis/runs/node_models.py",
+            "genesis/packages/genesis-core/genesis_core/nodes/escalation.py"]
 keywords = ["workflow", "registry", "bundle", "publish gate", "skill package", "langgraph.json"]
 skills   = ["genesis-workflow-authoring"]
 gates    = ["cd genesis-workflows && ../genesis/.venv/bin/python ci/validate_library.py",
@@ -129,9 +137,15 @@ paths    = ["genesis/genesis/runs/**", "genesis/genesis/runtime/engine.py",
             "genesis/genesis/runtime/memory_jobs.py", "genesis/genesis/runtime/notifications.py",
             "genesis/genesis/api/schedule_routes.py", "genesis/genesis/api/notifications.py",
             "genesis/genesis/agents/**", "genesis/genesis/api/custom_agents.py",
-            "genesis-workflows/workflows/agent-prompt/**"]
+            "genesis-workflows/workflows/agent-prompt/**",
+            # Phase 55 (ADR-088..090): the run-start memory brief, the standard escalation gate and its Resolve
+            # agent (genesis/runs/** already holds snapshot, documents, writes, bindings, relaunch_policy, node_models)
+            "genesis/genesis/memory/brief.py", "genesis/genesis/chat/resolve.py",
+            "genesis/genesis/mcp/resolve_server.py", "genesis/genesis/api/resolve_routes.py",
+            "genesis/packages/genesis-core/genesis_core/nodes/escalation.py"]
 keywords = ["run", "worker", "subprocess", "hitl", "gate", "event", "sse", "checkpoint", "resume", "schedule",
-            "notification", "custom agent", "agent prompt", "missed slot"]
+            "notification", "custom agent", "agent prompt", "missed slot", "escalation", "relaunch", "restart",
+            "snapshot", "documents", "memory brief"]
 skills   = ["genesis-backend-dev"]
 gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
             "cd genesis && .venv/bin/ruff check genesis"]
@@ -158,7 +172,11 @@ paths    = ["genesis/genesis/chat/**", "genesis/genesis/skills/**",
             "genesis/web/src/features/chat/**", "genesis/packages/kiro-agent-sdk/src/**",
             # Phase 54 (D4–D6): custom agents, used by the read-only chat
             "genesis/genesis/agents/**", "genesis/genesis/api/custom_agents.py",
-            "genesis/web/src/features/catalog/agents/**"]
+            "genesis/web/src/features/catalog/agents/**",
+            # Phase 55 (ADR-089): the run-bound Resolve chat, its MCP server, routes and web tab
+            "genesis/genesis/mcp/resolve_server.py", "genesis/genesis/api/resolve_routes.py",
+            "genesis/web/src/features/run-detail/components/resolve/**", "genesis/web/src/types/resolve.ts",
+            "genesis/web/src/lib/api/resolve.ts"]
 keywords = ["chat", "copilot", "chat mode", "skill", "steering", "session"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
 gates    = ["cd genesis/packages/kiro-agent-sdk && ../../.venv/bin/python -m pytest -q",
@@ -209,7 +227,9 @@ paths    = ["genesis/genesis/kb/features.py", "genesis/genesis/kb/stages.py",
             "genesis/genesis/services/testimpact.py", "genesis/genesis/api/testdesign.py",
             "genesis/genesis/domain/**", "genesis/web/src/features/test-design/**",
             # Phase 54 (D18, D45): the feature Activity merge
-            "genesis/genesis/services/feature_activity.py"]
+            "genesis/genesis/services/feature_activity.py",
+            # Phase 55 (ADR-089): a relaunch or restart moves the bound stage to the new run
+            "genesis/genesis/runs/bindings.py"]
 keywords = ["feature", "spec", "ux", "technical design", "breakdown", "stage", "finalizer", "change request", "cr",
             "test design", "test case", "test scenario", "test suite"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
@@ -231,7 +251,9 @@ paths    = ["genesis/genesis/kb/stories.py", "genesis/genesis/kb/story_stages.py
             "genesis/genesis/domain/**",
             # Phase 51 (the Verification lane, ADR-084)
             "genesis/genesis/chat/story_verification_finalizer.py", "genesis/genesis/testexec/verification*.py",
-            "genesis-workflows/workflows/story-verification/**"]
+            "genesis-workflows/workflows/story-verification/**",
+            # Phase 55 (ADR-089): a relaunch or restart moves the bound story stage to the new run
+            "genesis/genesis/runs/bindings.py"]
 keywords = ["story", "board", "lane", "workbench", "object wiki", "design lane", "implementation lane",
             "test case", "test impact", "traceability", "verification lane"]
 skills   = ["genesis-backend-dev", "genesis-web-dev"]
@@ -285,7 +307,9 @@ title    = "Install, lockfile, shipping, launcher, update"
 paths    = ["genesis/genesis/dist/**", "genesis/genesis/runtime/launcher.py",
             "genesis/genesis/runtime/updater.py", "genesis/genesis/cli/install.py",
             # Phase 50 (D16): the CLI entry point (launcher commands, the D15 missing-library check)
-            "genesis/genesis/cli/main.py"]
+            "genesis/genesis/cli/main.py",
+            # Phase 55 (ADR-088): the one install command now fetches the pinned embedding model
+            "genesis/scripts/install-packages.sh", "genesis/genesis/memory/model.py"]
 keywords = ["install", "lockfile", "ship", "launcher", "update", "distribution", "catalog"]
 skills   = ["genesis-backend-dev"]
 gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
@@ -296,7 +320,9 @@ title    = "Appian integration: Dev MCP, SAIL CLI, DevOps, write tools"
 paths    = ["genesis/genesis/integrations/sail/**", "genesis/genesis/kb/dev_mcp.py",
             "genesis/genesis/kb/dev_packages.py", "genesis/genesis/mcp/native/**",
             "genesis/genesis/cli_tools/native/**", "genesis/genesis/api/native_mcp.py",
-            "genesis/genesis/api/native_cli.py"]
+            "genesis/genesis/api/native_cli.py",
+            # Phase 55 (D23, ADR-068): never start a workflow that writes Dev again from a run
+            "genesis/genesis/runs/relaunch_policy.py"]
 keywords = ["appian", "dev mcp", "sail", "sail cli", "devops", "write tool", "native"]
 skills   = ["genesis-backend-dev"]
 gates    = ["cd genesis && .venv/bin/python -m pytest -q -p no:warnings",
@@ -328,7 +354,12 @@ gates    = ["cd genesis/web && npm run lint && npm run typecheck && npm test",
 title    = "Runs list, run detail graph, run inspection (web)"
 paths    = ["genesis/web/src/features/runs/**", "genesis/web/src/features/run-detail/**",
             # Phase 54: the schedule history and Run now link to runs (F9, F10)
-            "genesis/web/src/features/schedules/**"]
+            "genesis/web/src/features/schedules/**",
+            # Phase 55 (ADR-090): the run snapshot and documents views and their web contracts
+            "genesis/genesis/runs/snapshot.py", "genesis/genesis/runs/documents.py",
+            "genesis/web/src/types/snapshot.ts", "genesis/web/src/types/runDocuments.ts",
+            "genesis/web/src/types/escalation.ts", "genesis/web/src/types/resolve.ts",
+            "genesis/web/src/lib/api/resolve.ts"]
 keywords = ["runs page", "run detail", "graph", "inspection", "timeline"]
 skills   = ["genesis-web-dev"]
 
