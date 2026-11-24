@@ -1,0 +1,214 @@
+{
+ "s1": {
+  "case": "s1",
+  "start_s": 6.57,
+  "kiro_version": "2.37.1",
+  "models": {
+   "currentModelId": "claude-sonnet-5.5",
+   "availableModels": [
+    {
+     "modelId": "auto",
+     "name": "Auto",
+     "description": "Models chosen by task for optimal usage and consistent quality"
+    },
+    {
+     "modelId": "claude-opus-5.5",
+     "name": "Claude Opus 5.5",
+     "description": "Claude Opus 5.5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-sonnet-5.5",
+     "name": "Claude Sonnet 5.5",
+     "description": "Claude Sonnet 5.5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-haiku-5.5",
+     "name": "Claude Haiku 5.5",
+     "description": "Claude Haiku 5.5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-5",
+     "name": "Claude Opus 5",
+     "description": "Claude Opus 5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-sonnet-5",
+     "name": "Claude Sonnet 5",
+     "description": "Claude Sonnet 5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-4.8",
+     "name": "Claude Opus 4.8",
+     "description": "Claude Opus 4.8 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-4.7",
+     "name": "Claude Opus 4.7",
+     "description": "Claude Opus 4.7 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-4.6",
+     "name": "Claude Opus 4.6",
+     "description": "Claude Opus 4.6 model with 1M context window"
+    },
+    {
+     "modelId": "claude-sonnet-4.6",
+     "name": "Claude Sonnet 4.6",
+     "description": "Claude Sonnet 4.6 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-4.5",
+     "name": "Claude Opus 4.5",
+     "description": "Claude Opus 4.5 model"
+    },
+    {
+     "modelId": "claude-sonnet-4.5",
+     "name": "Claude Sonnet 4.5",
+     "description": "Claude Sonnet 4.5 model"
+    },
+    {
+     "modelId": "claude-haiku-4.5",
+     "name": "Claude Haiku 4.5",
+     "description": "The latest Claude Haiku model"
+    }
+   ]
+  },
+  "current_after_start": "claude-sonnet-5.5"
+ },
+ "s2": {
+  "case": "s2",
+  "start_s": 4.46,
+  "kiro_version": "2.37.1",
+  "models": {
+   "currentModelId": "auto",
+   "availableModels": [
+    {
+     "modelId": "auto",
+     "name": "Auto",
+     "description": "Models chosen by task for optimal usage and consistent quality"
+    },
+    {
+     "modelId": "claude-opus-5.5",
+     "name": "Claude Opus 5.5",
+     "description": "Claude Opus 5.5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-sonnet-5.5",
+     "name": "Claude Sonnet 5.5",
+     "description": "Claude Sonnet 5.5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-haiku-5.5",
+     "name": "Claude Haiku 5.5",
+     "description": "Claude Haiku 5.5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-5",
+     "name": "Claude Opus 5",
+     "description": "Claude Opus 5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-sonnet-5",
+     "name": "Claude Sonnet 5",
+     "description": "Claude Sonnet 5 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-4.8",
+     "name": "Claude Opus 4.8",
+     "description": "Claude Opus 4.8 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-4.7",
+     "name": "Claude Opus 4.7",
+     "description": "Claude Opus 4.7 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-4.6",
+     "name": "Claude Opus 4.6",
+     "description": "Claude Opus 4.6 model with 1M context window"
+    },
+    {
+     "modelId": "claude-sonnet-4.6",
+     "name": "Claude Sonnet 4.6",
+     "description": "Claude Sonnet 4.6 model with 1M context window"
+    },
+    {
+     "modelId": "claude-opus-4.5",
+     "name": "Claude Opus 4.5",
+     "description": "Claude Opus 4.5 model"
+    },
+    {
+     "modelId": "claude-sonnet-4.5",
+     "name": "Claude Sonnet 4.5",
+     "description": "Claude Sonnet 4.5 model"
+    },
+    {
+     "modelId": "claude-haiku-4.5",
+     "name": "Claude Haiku 4.5",
+     "description": "The latest Claude Haiku model"
+    }
+   ]
+  },
+  "current_after_start": "auto",
+  "requested": "auto"
+ },
+ "s3": {
+  "case": "s3",
+  "start_s": 4.31,
+  "error": {
+   "type": "KiroError",
+   "code": "model_unavailable",
+   "message": "The model 'genesis-no-such-model-55-13' is not available here. Choose one of the listed models.",
+   "detail": "auto, claude-opus-5.5, claude-sonnet-5.5, claude-haiku-5.5, claude-opus-5, claude-sonnet-5, claude-opus-4.8, claude-opus-4.7, claude-opus-4.6, claude-sonnet-4.6, claude-opus-4.5, claude-sonnet-4.5, claude-haiku-4.5"
+  }
+ },
+ "s3b": {
+  "case": "s3b",
+  "raised": {
+   "code": "model_unavailable",
+   "message": "The model 'genesis-no-such-model-55-13' is not available here. Choose one of the listed models.",
+   "detail": "auto, claude-opus-5.5, claude-sonnet-5.5, claude-haiku-5.5, claude-opus-5, claude-sonnet-5, claude-opus-4.8, claude-opus-4.7, claude-opus-4.6, claude-sonnet-4.6, claude-opus-4.5, claude-sonnet-4.5, claude-haiku-4.5"
+  },
+  "messages_before_raise": []
+ },
+ "s4": {
+  "case": "s4",
+  "set_answer_current": [
+   "genesis-no-such-model-55-13"
+  ],
+  "messages": [
+   "ResultMessage"
+  ],
+  "result": {
+   "stop_reason": "error",
+   "error": "The selected model is not available. Choose another model and try again. (-32000 The model 'genesis-no-such-model-55-13' is not available. Please select a different model and try again. (Request ID: c4960c47-6c42-4184-a7e1-33703d85c002))",
+   "error_code": "model_unavailable",
+   "usage": {
+    "credits": null,
+    "context_pct": null,
+    "turn_duration_ms": 3827,
+    "provenance": "unavailable"
+   }
+  }
+ },
+ "s5": [
+  {
+   "case": "s5-0",
+   "start_s": 3.64,
+   "kiro_version": "2.37.1",
+   "current_after_start": "claude-sonnet-5.5"
+  },
+  {
+   "case": "s5-1",
+   "start_s": 2.59,
+   "kiro_version": "2.37.1",
+   "current_after_start": "claude-sonnet-5.5"
+  },
+  {
+   "case": "s5-2",
+   "start_s": 2.53,
+   "kiro_version": "2.37.1",
+   "current_after_start": "claude-sonnet-5.5"
+  }
+ ]
+}

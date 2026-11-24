@@ -17,6 +17,9 @@
    `genesis_core_version` move to `genesis.git@v0.84.0` together (`#subdirectory=packages/<name>`, L-057); a CI-image
    run before the release commit (L-112); CI green. Release note: the adopted workflows need genesis ≥ 0.84.0 (the
    major-only gate, ADR-019, does not stop an older app from loading them, where the escalation gate fails).
+   **From 55-13 (review m1/m3):** in the same library commit as the pin move, `ci/validate_library.py` step 3 calls
+   `genesis.lint.check_node_models(compiled, meta)` beside `check_required_mcp` (every `META.models` key is an agent
+   node of the compiled graph); it exists only from the 55-13 genesis commits, so not before the pins name v0.84.0.
 3. Never read CI variables through the API (L-100).
 3b. **Known CI risks at the tag (55-10 CI-image run):** the two arm64-only `test_sail_cli` failures (as at 54-11);
    `test_document_records` failed once in the full genesis suite in the python:3.13 image and passed alone, with no

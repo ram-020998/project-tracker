@@ -1,0 +1,2126 @@
+{
+  "program-running-1280-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [
+      "prepare to work: lit"
+    ],
+    "executed": 0,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running",
+      "Check: Pending",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running",
+        "text": 6.46,
+        "icon": 5.09,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Check: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "program-running-1440-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [
+      "prepare to work: lit"
+    ],
+    "executed": 0,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running",
+      "Check: Pending",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running",
+        "text": 6.46,
+        "icon": 5.09,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Check: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "program-running-1920-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [
+      "prepare to work: lit"
+    ],
+    "executed": 0,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running",
+      "Check: Pending",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running",
+        "text": 6.46,
+        "icon": 5.09,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Check: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "program-running-1280-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [
+      "prepare to work: lit"
+    ],
+    "executed": 0,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running",
+      "Check: Pending",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running",
+        "text": 5.64,
+        "icon": 4.45,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Check: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "program-running-1440-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [
+      "prepare to work: lit"
+    ],
+    "executed": 0,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running",
+      "Check: Pending",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running",
+        "text": 5.64,
+        "icon": 4.45,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Check: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "program-running-1920-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [
+      "prepare to work: lit"
+    ],
+    "executed": 0,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running",
+      "Check: Pending",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running",
+        "text": 5.64,
+        "icon": 4.45,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Check: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "loop-reentry-1280-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [
+      "check to work: lit"
+    ],
+    "executed": 2,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running, round 2",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running, round 2",
+        "text": 6.46,
+        "icon": 5.09,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "loop-reentry-1440-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [
+      "check to work: lit"
+    ],
+    "executed": 2,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running, round 2",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running, round 2",
+        "text": 6.46,
+        "icon": 5.09,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "loop-reentry-1920-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [
+      "check to work: lit"
+    ],
+    "executed": 2,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running, round 2",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running, round 2",
+        "text": 6.46,
+        "icon": 5.09,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "loop-reentry-1280-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [
+      "check to work: lit"
+    ],
+    "executed": 2,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running, round 2",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running, round 2",
+        "text": 5.64,
+        "icon": 4.45,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "loop-reentry-1440-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [
+      "check to work: lit"
+    ],
+    "executed": 2,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running, round 2",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running, round 2",
+        "text": 5.64,
+        "icon": 4.45,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "loop-reentry-1920-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [
+      "check to work: lit"
+    ],
+    "executed": 2,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Running, round 2",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "running",
+        "label": "Work: Running, round 2",
+        "text": 5.64,
+        "icon": 4.45,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "paused-1280-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Paused",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "paused",
+        "label": "Work: Paused",
+        "text": 6.73,
+        "icon": 4.15,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "paused-1440-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Paused",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "paused",
+        "label": "Work: Paused",
+        "text": 6.73,
+        "icon": 4.15,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "paused-1920-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Paused",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "paused",
+        "label": "Work: Paused",
+        "text": 6.73,
+        "icon": 4.15,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "paused-1280-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Paused",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "paused",
+        "label": "Work: Paused",
+        "text": 6.2,
+        "icon": 5.62,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "paused-1440-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Paused",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "paused",
+        "label": "Work: Paused",
+        "text": 6.2,
+        "icon": 5.62,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "paused-1920-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Paused",
+      "Check: OK",
+      "Approve: Pending",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "paused",
+        "label": "Work: Paused",
+        "text": 6.2,
+        "icon": 5.62,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Approve: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "gate-waiting-1280-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [
+      "check to approve: waiting"
+    ],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: Needs you",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "awaiting",
+        "label": "Approve: Needs you",
+        "text": 15.07,
+        "icon": 4.15,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "gate-waiting-1440-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [
+      "check to approve: waiting"
+    ],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: Needs you",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "awaiting",
+        "label": "Approve: Needs you",
+        "text": 15.07,
+        "icon": 4.15,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "gate-waiting-1920-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "live",
+    "lit": [
+      "check to approve: waiting"
+    ],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: Needs you",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "awaiting",
+        "label": "Approve: Needs you",
+        "text": 15.07,
+        "icon": 4.15,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 6.83,
+        "icon": 3.78,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "gate-waiting-1280-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [
+      "check to approve: waiting"
+    ],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: Needs you",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "awaiting",
+        "label": "Approve: Needs you",
+        "text": 12.54,
+        "icon": 5.62,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "gate-waiting-1440-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [
+      "check to approve: waiting"
+    ],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: Needs you",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "awaiting",
+        "label": "Approve: Needs you",
+        "text": 12.54,
+        "icon": 5.62,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "gate-waiting-1920-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "live",
+    "lit": [
+      "check to approve: waiting"
+    ],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: Needs you",
+      "Finish: Pending"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "awaiting",
+        "label": "Approve: Needs you",
+        "text": 12.54,
+        "icon": 5.62,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "pending",
+        "label": "Finish: Pending",
+        "text": 8.35,
+        "icon": 4.56,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "done-1280-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "finished",
+    "lit": [],
+    "executed": 5,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: OK",
+      "Finish: OK"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Approve: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Finish: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "done-1440-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "finished",
+    "lit": [],
+    "executed": 5,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: OK",
+      "Finish: OK"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Approve: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Finish: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "done-1920-light": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "finished",
+    "lit": [],
+    "executed": 5,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: OK",
+      "Finish: OK"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Approve: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Finish: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "done-1280-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 5,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: OK",
+      "Finish: OK"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Approve: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Finish: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "done-1440-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 5,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: OK",
+      "Finish: OK"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Approve: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Finish: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "done-1920-dark": {
+    "run": "r-82b655c4bb5e",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 5,
+    "nodes": [
+      "Prepare: OK",
+      "Work: OK",
+      "Check: OK",
+      "Approve: OK",
+      "Finish: OK"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Work: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Approve: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Finish: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "failed-1280-light": {
+    "run": "r-32336bea7890",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "finished",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Failed",
+      "Check: OK",
+      "Approve: Skipped",
+      "Finish: Skipped"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "failed",
+        "label": "Work: Failed",
+        "text": 6.74,
+        "icon": 5.46,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Approve: Skipped",
+        "text": 17.88,
+        "icon": 7.98,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Finish: Skipped",
+        "text": 17.88,
+        "icon": 7.98,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "failed-1440-light": {
+    "run": "r-32336bea7890",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "finished",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Failed",
+      "Check: OK",
+      "Approve: Skipped",
+      "Finish: Skipped"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "failed",
+        "label": "Work: Failed",
+        "text": 6.74,
+        "icon": 5.46,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Approve: Skipped",
+        "text": 17.88,
+        "icon": 7.98,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Finish: Skipped",
+        "text": 17.88,
+        "icon": 7.98,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "failed-1920-light": {
+    "run": "r-32336bea7890",
+    "page_hscroll": false,
+    "theme_class": "theme-light",
+    "live": "finished",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Failed",
+      "Check: OK",
+      "Approve: Skipped",
+      "Finish: Skipped"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "failed",
+        "label": "Work: Failed",
+        "text": 6.74,
+        "icon": 5.46,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.79,
+        "icon": 4.27,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Approve: Skipped",
+        "text": 17.88,
+        "icon": 7.98,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Finish: Skipped",
+        "text": 17.88,
+        "icon": 7.98,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "failed-1280-dark": {
+    "run": "r-32336bea7890",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Failed",
+      "Check: OK",
+      "Approve: Skipped",
+      "Finish: Skipped"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "failed",
+        "label": "Work: Failed",
+        "text": 6.66,
+        "icon": 4.55,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Approve: Skipped",
+        "text": 16.14,
+        "icon": 7.99,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Finish: Skipped",
+        "text": 16.14,
+        "icon": 7.99,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "failed-1440-dark": {
+    "run": "r-32336bea7890",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Failed",
+      "Check: OK",
+      "Approve: Skipped",
+      "Finish: Skipped"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "failed",
+        "label": "Work: Failed",
+        "text": 6.66,
+        "icon": 4.55,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Approve: Skipped",
+        "text": 16.14,
+        "icon": 7.99,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Finish: Skipped",
+        "text": 16.14,
+        "icon": 7.99,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  },
+  "failed-1920-dark": {
+    "run": "r-32336bea7890",
+    "page_hscroll": false,
+    "theme_class": "theme-dark",
+    "live": "finished",
+    "lit": [],
+    "executed": 3,
+    "nodes": [
+      "Prepare: OK",
+      "Work: Failed",
+      "Check: OK",
+      "Approve: Skipped",
+      "Finish: Skipped"
+    ],
+    "wraps": [],
+    "cards": [
+      {
+        "status": "ok",
+        "label": "Prepare: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "failed",
+        "label": "Work: Failed",
+        "text": 6.66,
+        "icon": 4.55,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "ok",
+        "label": "Check: OK",
+        "text": 6.21,
+        "icon": 5.59,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Approve: Skipped",
+        "text": 16.14,
+        "icon": 7.99,
+        "ok": true,
+        "height": 84
+      },
+      {
+        "status": "skipped",
+        "label": "Finish: Skipped",
+        "text": 16.14,
+        "icon": 7.99,
+        "ok": true,
+        "height": 84
+      }
+    ]
+  }
+}
