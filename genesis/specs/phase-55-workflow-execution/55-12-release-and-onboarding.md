@@ -32,7 +32,9 @@
 
 ## 2. Deploy
 
-Never restart while a run is active. Fleet: `gsm provision --all --no-mcp --no-env --force` (it runs the install
+Never restart while a run is active. Before deploying, note the fleet's state (D34): main (:8760) already runs the
+unreleased Phase 55 build, userb (:8761) the v0.83.0 server with the new web bundle (its Run Detail graph and Documents
+are broken until this deploy); both come to v0.84.0 here. Fleet: `gsm provision --all --no-mcp --no-env --force` (it runs the install
 script, which fetches the embedder model and back-fills memories), `gsm restart --all`; update every workflow from Catalog on each instance (L-033); **turn the `memory-consolidation` and
 `memory-maintenance` schedules back on on both instances** once the library release with `memory_brief: false` is
 installed (they were turned off for the build, D18); check `/openapi.json` `info.version`, the DB version and the embedder state. User

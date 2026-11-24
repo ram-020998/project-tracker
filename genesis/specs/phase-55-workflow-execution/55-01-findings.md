@@ -4,7 +4,7 @@
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
 > from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
 > from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18); D28–D30 from the user's live testing → 55-13 (§19);
-> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 open with the user (§21).
+> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -574,6 +574,11 @@ library v0.27.0 workflows (legacy escalations in Resolve, Rerun / Restart refuse
 userb (:8761) still runs the v0.83.0 server from 2026-11-20 but serves the **new** web bundle from the editable
 checkout (the same `assets/index-EIvn-efW.js`), and `/api/runs/{id}/snapshot` answers 404 there — so userb's Run
 Detail graph and Documents tab call routes its server lacks (the user's call: D34).
+
+**D34 (user, 2026-11-24):** option B — **leave userb as it is until the release.** userb's Run Detail graph and
+Documents tab stay broken (the new bundle on the v0.83.0 server) until 55-12 deploys v0.84.0 and restarts the fleet;
+main keeps running the unreleased build. 55-12's deploy step brings both instances to v0.84.0 together. Considered: A
+(restart userb now onto main's build; no migration).
 
 ## Context manifest
 

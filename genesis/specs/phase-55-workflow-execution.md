@@ -70,6 +70,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D31 | 55-10 build rulings as built (story-implementation reject now stops with no writes; story-verification's gates merged, stop through cleanup; code-review `set_verdict`; memory jobs' `skip`; route-test harness). |
 | D32 | erd-generation stays `relaunchable: false` (a rerun would publish a second Lucidchart diagram). |
 | D33 | 55-13 build rulings as built: the model fallback decided before the turn from one read of Kiro's model list (a promptless session, only when a model is set); one reader `runs/node_models.py`. |
+| D34 | userb stays on its v0.83.0 server (with the new web bundle, so its Run Detail graph and Documents are broken) until 55-12 deploys v0.84.0 to both instances. |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
