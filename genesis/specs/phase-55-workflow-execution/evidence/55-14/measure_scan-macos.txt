@@ -1,0 +1,52 @@
+587 run folders under /Users/ramaswamy.u/Genesis/runs (spike-* and probe-* left out: not workflow runs)
+largest file over all runs: 28.4 MiB; runs with a file over 4 MiB: 32
+
+library-replays/_a-0000e5bc-4a9a-8000-9bbc-011c48011c48_930416: 304 files, 14.60 MiB, 14.60 MiB <= 4 MiB, largest 2.89 MiB, 0 over 4 MiB
+  stat only (55-05)        median    9.02 ms   max    9.68 ms
+  stat key, no read        median    9.07 ms   max    9.82 ms
+  fingerprint <= 256 KiB   median   23.10 ms   max   27.30 ms
+  fingerprint <= 1 MiB     median   35.39 ms   max   47.36 ms
+  fingerprint <= 4 MiB     median   53.31 ms   max   61.48 ms
+  fingerprint <= 16 MiB    median   52.56 ms   max   61.74 ms
+  tracker, first scan      median   38.12 ms   max  123.50 ms
+  tracker, memo warm       median   10.96 ms   max   24.91 ms
+
+test-execution/r-93aab6c223e2: 300 files, 15.85 MiB, 10.80 MiB <= 4 MiB, largest 5.04 MiB, 1 over 4 MiB
+  stat only (55-05)        median    2.07 ms   max    3.21 ms
+  stat key, no read        median    1.88 ms   max    2.68 ms
+  fingerprint <= 256 KiB   median   26.01 ms   max   38.53 ms
+  fingerprint <= 1 MiB     median   27.64 ms   max   36.28 ms
+  fingerprint <= 4 MiB     median   27.40 ms   max   40.32 ms
+  fingerprint <= 16 MiB    median   32.63 ms   max   40.31 ms
+  tracker, first scan      median   26.95 ms   max   29.85 ms
+  tracker, memo warm       median    1.91 ms   max    2.85 ms
+
+action-capture/r-0ac738fb746d: 141 files, 9.48 MiB, 2.52 MiB <= 4 MiB, largest 6.96 MiB, 1 over 4 MiB
+  stat only (55-05)        median    2.71 ms   max    3.63 ms
+  stat key, no read        median    2.72 ms   max    2.98 ms
+  fingerprint <= 256 KiB   median    8.88 ms   max   10.76 ms
+  fingerprint <= 1 MiB     median   11.36 ms   max   12.72 ms
+  fingerprint <= 4 MiB     median   11.43 ms   max   12.13 ms
+  fingerprint <= 16 MiB    median   22.71 ms   max   25.04 ms
+  tracker, first scan      median   11.75 ms   max   17.16 ms
+  tracker, memo warm       median    2.96 ms   max    5.25 ms
+
+test-execution/r-6a8202248ef9: 64 files, 16.32 MiB, 16.32 MiB <= 4 MiB, largest 3.34 MiB, 0 over 4 MiB
+  stat only (55-05)        median    1.34 ms   max    1.68 ms
+  stat key, no read        median    1.31 ms   max    1.70 ms
+  fingerprint <= 256 KiB   median    4.63 ms   max    6.53 ms
+  fingerprint <= 1 MiB     median    7.11 ms   max    9.06 ms
+  fingerprint <= 4 MiB     median   24.34 ms   max   26.12 ms
+  fingerprint <= 16 MiB    median   25.46 ms   max   26.11 ms
+  tracker, first scan      median    7.29 ms   max   10.26 ms
+  tracker, memo warm       median    1.40 ms   max    2.82 ms
+
+ux-design-analysis/r-569e05145bad: 22 files, 10.92 MiB, 10.92 MiB <= 4 MiB, largest 2.86 MiB, 0 over 4 MiB
+  stat only (55-05)        median    0.18 ms   max    0.25 ms
+  stat key, no read        median    0.18 ms   max    0.27 ms
+  fingerprint <= 256 KiB   median    0.68 ms   max    0.82 ms
+  fingerprint <= 1 MiB     median   10.02 ms   max   10.42 ms
+  fingerprint <= 4 MiB     median   13.38 ms   max   14.29 ms
+  fingerprint <= 16 MiB    median   13.34 ms   max   13.76 ms
+  tracker, first scan      median   10.04 ms   max   10.33 ms
+  tracker, memo warm       median    0.28 ms   max    0.43 ms

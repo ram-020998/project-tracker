@@ -1,0 +1,15 @@
+55-14: measure_scan.py in the python:3.13 image (colima, aarch64, 3 CPUs), on a copy of the 300-file run on the
+container's own filesystem (`docker exec gr5514 python /w/measure_scan.py /root/runs 50`), genesis at ad8f7eda:
+
+1 run folders under /root/runs (spike-* and probe-* left out: not workflow runs)
+largest file over all runs: 5.0 MiB; runs with a file over 4 MiB: 1
+
+test-execution/r-93aab6c223e2: 300 files, 15.85 MiB, 10.80 MiB <= 4 MiB, largest 5.04 MiB, 1 over 4 MiB
+  stat only (55-05)        median    0.78 ms   max    0.83 ms
+  stat key, no read        median    0.79 ms   max    0.85 ms
+  fingerprint <= 256 KiB   median   11.77 ms   max   12.72 ms
+  fingerprint <= 1 MiB     median   13.68 ms   max   14.84 ms
+  fingerprint <= 4 MiB     median   13.48 ms   max   14.49 ms
+  fingerprint <= 16 MiB    median   18.68 ms   max   19.62 ms
+  tracker, first scan      median   13.87 ms   max   14.56 ms
+  tracker, memo warm       median    0.93 ms   max    1.05 ms

@@ -1,0 +1,41 @@
+55-14 §2/§3 — the exec-window probes and the CI-image gates (python:3.13 image, digest as pulled 2026-11-24, colima
+aarch64, 3 CPUs). Scripts beside this file; /w = /tmp/colima/gr-55-14, /w/genesis = `git archive` of the genesis head.
+
+== probe_exec.py (Popen(start_new_session=True), then read /proc/<pid>/cmdline at once; n=300 per line)
+container without init (PID 1 `sleep infinity`), genesis 3e1effaf:
+  load=0  ok=298 empty=2 other=0
+  load=6  ok=300 empty=0 other=0
+genesis-review, same container:            load=0  ok=293 empty=7 ;  load=0  ok=296 empty=4
+container with --init, genesis d6cea8db:    load=0  ok=300 empty=0 ;  load=6  ok=299 empty=1
+
+== probe_reap.py (the real procs.start_long_lived + procs.reap straight after the start; and how long the cmdline
+   stays empty after Popen returns; n=300/400 per line; "reap_missed" counts reaps that returned [] for the child)
+without init, OLD reap (3e1effaf):
+  n=400 load=0  reap_missed=0 empty_reads=0   longest_empty=0.00ms
+  n=400 load=6  reap_missed=0 empty_reads=352 longest_empty=6.18ms
+  n=400 load=6 gap=2ms reap_missed=0 empty_reads=0 longest_empty=0.00ms
+  n=300 load=30 reap_missed=0 empty_reads=0   longest_empty=0.00ms
+  n=300 load=60 reap_missed=0 empty_reads=369 longest_empty=41.89ms
+with --init, NEW reap (d6cea8db): load 0/6/60: reap_missed=0, no empty read seen in that pass
+Reading: the window exists (an empty cmdline for a live child whose Popen has returned, up to 41.89 ms under load);
+the reap's own walk of /proc usually outlasts it, so the test-level miss did not reproduce here.
+
+== test-level reproduction, OLD reap (3e1effaf), without init, scratch plugin REPEAT=n (repeat_plugin.py):
+  REPEAT=200, 6 burners:  test_open_records_the_daemon_and_reap_stops_it[open, open_host_not_allowed] +
+                          test_reap_kills_a_recorded_group_that_is_still_ours  -> 600 passed (1810.91 s)
+  REPEAT=60, 60 burners:  same three                                           -> 180 passed (555.65 s)
+  repro.sh 20 runs, 6 burners, the reap tests + test_reap_matches_a_marker_past_column_80 -> 20/20 (4 passed each)
+
+== §3 gates at d6cea8db (repro.sh: a fresh pytest per run, -x -p no:randomly, 6 CPU burners)
+without init:  test_document_records.py 20/20 (52 passed each) · test_apwt_client.py 20/20 (20) · test_testexec_procs.py 20/20 (14)
+   (at ad8f7eda+9cd33d52, before d6cea8db: test_document_records.py 0/20 — the over-the-bound in-place test,
+    1 failed + 7 passed with -x each run; fixed by d6cea8db)
+with --init:   test_document_records.py 20/20 (52 passed each) · test_apwt_client.py 20/20 (20) · test_testexec_procs.py 20/20 (14)
+
+== full genesis suite once (full.sh: ruff check genesis; pytest -q -p no:warnings -ra --tb=long)
+without init (first try, invalid): 5 failed, 2341 passed, 72 skipped — 2 test_sail_cli (aarch64 host) + 3 testexec
+   tests whose killed grandchildren stayed zombies under a non-reaping PID 1; the same 3 failed with 3e1effaf's
+   procs.py staged in that container (3 failed in 20.00 s); `ps` showed hundreds of zombies.
+with --init:  ruff clean; 2 failed, 2344 passed, 72 skipped in 599.30 s — the 2 failures are
+   tests/test_sail_cli.py::test_extract_sail_binary_for_host and ::test_install_appian_dev_bundle_installs_both
+   (aarch64 host; they also failed in 55-12's colima run and passed on CI's runner in #7556336).
