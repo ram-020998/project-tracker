@@ -78,6 +78,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D37 | Release before the user's live checks (amends D11): fix m1, m3, m4 → re-review → 55-12 releases; live acceptance open, findings as v0.84.x patches, stated everywhere (L-111). |
 | D38 | The 55-11 re-review's m5, m6, n3, n4 go to the backlog (§4); the release goes ahead on the fix pass's SHIP. |
 | D39 | Master pipeline #7556336 red (same-size rewrites lost on Linux; an apwt reap test): fix before tagging in sub-spec 55-14, then a green master pipeline, then the tag. |
+| D40 | A second memory leak (55-04's live `output.md`) redacted and the unpushed project-tracker history rewritten again before its push. |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 

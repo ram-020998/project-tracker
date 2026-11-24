@@ -5,7 +5,7 @@
 > from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
 > from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18); D28–D30 from the user's live testing → 55-13 (§19);
 > D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21); D35–D38 from the user during 55-11 (§22);
-> D39 during 55-12 → sub-spec 55-14 (§23).
+> D39 during 55-12 → sub-spec 55-14 (§23); D40 after the release (§23).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -645,6 +645,24 @@ same mtime so it fails on macOS too; the reap test reproduced in the CI image an
 review, push master, a green master pipeline, and only then the tag (no re-tag needed: `v0.84.0` was never created).
 The library's release commit waits in its working tree until then. Considered: B (ship with a known limitation; needs
 the test changed or marked), C (re-run the pipeline; does nothing for failure 1).
+
+**After 55-12 (2026-11-24):** released — genesis v0.84.0 (tag on `d6cea8db`: the release commit plus 55-14's fixes;
+master #7559966 and tag #7560648 green) and genesis-workflows v0.28.0 (`2017afb`; #7561555, #7561788 green); both fleet
+instances on v0.84.0 / DB v30 with the embedder ready, 19 workflows at v0.28.0, memory schedules back on (D18 closed).
+Deploy deviation (55-12 As run): `gsm provision` does not run the install script, so the dev venv had no fastembed and
+main's briefs were keyword + entity only since 55-04; with the user's go-ahead the release agent ran
+`scripts/install-packages.sh --editable --dev` and, for userb, `genesis memory fetch-model` + `reembed`, with the fleet
+stopped (for genesis-docs: correct the skill and 55-12 §2). Phase 55's live acceptance (55-11 §3) stays open (D37).
+
+**D40 (user, 2026-11-24): redact a second memory leak and rewrite the unpushed history again before the push.**
+Before project-tracker's first push of the phase, the spec agent scanned all 39 unpushed commits against all 68
+memories: `evidence/55-04/live-r-ea61596cd428/output.md` (55-04's live run) held the agent's summary of shared memories
+M28, M35, M49 under "What memory says about the templates", missed by D19. Its section was replaced with a redaction
+note (the brief's first id, the search ids and the tool list kept) and the unpushed commits from 55-04's As built on
+were rewritten (`git filter-branch --tree-filter`, range `77a41ec..main`, 32 commits; nothing pushed touched; the D19
+backup kept as `refs/original-d19/refs/heads/main`, this one's as `refs/original/refs/heads/main`). The rescan finds no
+memory text (the only remaining matches are the AS GSS app id `_a-0000e5bc-…_930416`, which a memory also contains;
+it is not memory text). Then project-tracker may be pushed.
 
 ## Context manifest
 
