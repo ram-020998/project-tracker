@@ -1,7 +1,7 @@
 # Backlog — Phase 55 follow-ups (memory brief, agent-assisted escalation, Documents, run liveness)
 
 > **Status:** 📝 BACKLOG (not scheduled). · Created 2026-11-23 by the spec agent with the two items deferred from
-> 55-09's review (D27); §3 from 55-10's As built. The Phase 55 write-back (55-12 §3, genesis-docs) appends the umbrella §9 deferred scope and the
+> 55-09's review (D27); §3 from 55-10's As built; §4 from 55-11's fix-pass re-review (D38). The Phase 55 write-back (55-12 §3, genesis-docs) appends the umbrella §9 deferred scope and the
 > build findings.
 
 ## 1. m4 — the validator step's "OK · check failed N times" label (D12 n3, deferred by D27)
@@ -32,3 +32,20 @@
 - **Fix direction:** move the removal into a `finally` (or a cleanup node every route reaches, as story-verification's
   stop now does), and test it with a capture that raises; L-107 (every error path reaches its terminal step).
 - **Why deferred:** it predates Phase 55 and is outside 55-10's scope.
+
+## 4. 55-11 fix-pass re-review findings (deferred by D38)
+
+All four are reached only after an earlier failure; none is reachable through normal use (`reviews/55-11-review.md`,
+the fix-pass re-review; genesis `e8096f71`).
+
+- **m5 — the stage rebind is two separate writes.** In a relaunch or restart_from, moving a stage / story binding to
+  the new run is two writes; if the second fails, the stage reads "in progress" with no run behind it. Recovery today:
+  re-run the stage. Fix direction: one transaction (take the write lock first, L-091), or record the rebind as one
+  compare-and-set row; test with the second write forced to fail.
+- **m6 — Resume on a run waiting at a gate has no compare-and-set.** No UI path reaches it today (gates are answered,
+  not resumed). Fix direction: reuse 55-11's `RunStore.claim_transition` in `RunManager.resume` for the gate state.
+- **n3 — a brief cut off mid-write leaves `_memory/brief.md.part`.** Harmless (Documents never lists `*.part`, no
+  `brief.md` is written). Fix direction: remove the `.part` file in the prefetch's `finally`.
+- **n4 — a write failing after a gate claim leaves the run "running" with no worker** until the next startup, whose
+  sweep fails it (L-097). Fix direction: give the claim back (as fix-and-accept does) when a later step before the spawn
+  fails; test with that step forced to fail (L-107).

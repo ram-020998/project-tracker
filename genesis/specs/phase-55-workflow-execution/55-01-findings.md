@@ -4,7 +4,7 @@
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
 > from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
 > from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18); D28–D30 from the user's live testing → 55-13 (§19);
-> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21); D35–D37 from the user during 55-11 (§22).
+> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21); D35–D38 from the user during 55-11 (§22).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -613,6 +613,20 @@ as v0.84.x patches. Per L-111 the release notes, README row and `context/state/c
 live acceptance is open (as for Phases 51, 53 and 54), and the umbrella status reads `SHIPPED (live acceptance open)`.
 Considered: A (release after the user's checks; the assistant's recommendation, because Phase 55 changes every
 workflow's escalation and every agent prompt).
+
+**55-11 fix pass (2026-11-24):** genesis `3f391a61` (m4: regression tests for 419d8363's n2 and n3) and `e8096f71`
+(m1: relaunch / restart_from move the binding before cancelling the old run, so a failed move fails only the new run;
+m3: a gate answer claims "waiting at gate → running" with a compare-and-set, `RunStore.claim_transition`, before it logs
+or spawns; fix-and-accept claims the gate before copying and gives it back if the copy fails); 7 new tests; genesis
+2406 passed / 4 skipped. The re-review gave **SHIP on 55-11's review and gates** — the release gate under D37. M1 (with
+m2 folded in) has no code change (D35). The live copy's candidate on :8790 was built from `76b27a57`, before the fix
+pass; the user rebuilds it from the released head before running A1–A14.
+
+**D38 (user, 2026-11-24): option A — the re-review's four new findings go to the backlog** (`specs/backlog/phase-55-follow-ups.md`
+§4): m5 (the stage rebind is two writes), m6 (Resume at a gate has no compare-and-set; no UI path), n3 (a stray
+`brief.md.part`), n4 (a write failing after a gate claim leaves the run "running" until the next startup). All need an
+earlier failure; they can ship as v0.84.x patches. Next: 55-12. Considered: B (fix m5 and m6 first, one more review
+round).
 
 ## Context manifest
 
