@@ -71,6 +71,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D32 | erd-generation stays `relaunchable: false` (a rerun would publish a second Lucidchart diagram). |
 | D33 | 55-13 build rulings as built: the model fallback decided before the turn from one read of Kiro's model list (a promptless session, only when a model is set); one reader `runs/node_models.py`. |
 | D34 | userb stays on its v0.83.0 server (with the new web bundle, so its Run Detail graph and Documents are broken) until 55-12 deploys v0.84.0 to both instances. |
+| D35 | 55-11 M1 not fixed: runs of workflows still on the old gate are the user's to handle; the release notes say to answer them from the gate panel; legacy-gate checks are observations. |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 

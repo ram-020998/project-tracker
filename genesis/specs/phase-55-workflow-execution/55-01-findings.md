@@ -4,7 +4,7 @@
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
 > from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
 > from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18); D28–D30 from the user's live testing → 55-13 (§19);
-> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21).
+> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21); D35 from the user during 55-11 (§22).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -579,6 +579,25 @@ Detail graph and Documents tab call routes its server lacks (the user's call: D3
 Documents tab stay broken (the new bundle on the v0.83.0 server) until 55-12 deploys v0.84.0 and restarts the fleet;
 main keeps running the unreleased build. 55-12's deploy step brings both instances to v0.84.0 together. Considered: A
 (restart userb now onto main's build; no migration).
+
+## 22. During 55-11 (2026-11-24): the reviewer's questions
+
+The interim 55-11 report (`reviews/55-11-review.md`) is NEEDS_CHANGES on one major finding (M1) with minors m1–m4;
+all gates green (genesis 2399 / 4 skipped, genesis-core 173, kiro-agent-sdk 302, web 1051, library 678,
+`validate_library` 0); the CI-image run with fastembed passed except the two known arm64 `test_sail_cli` tests,
+`test_document_records` passed 5 times, and the model loaded on Linux with `--network none` (384-d, 1.5 s). The live
+copy is set up at `/tmp/gr-55-11/` (online backups, integrity ok, v30; a frozen non-editable candidate on :8790; 66
+memories embedded; collaboration and schedules off). The reviewer's questions, answered one at a time:
+
+**D35 (user, 2026-11-24): M1 is not fixed — runs of workflows still on the old gate are the user's to handle.**
+M1: on a run of a v0.27.0 workflow (the old `hitl_gate`), Resolve maps Retry / Stop onto the old Feedback / Reject,
+but many old graphs send every answer to the end of the run, which finishes `done`, so the buttons misdescribe the
+outcome. The user: "we dont have to worry about existing runs. Ill handle any existing runs." So no code change for
+legacy-gate runs; 55-12's deploy updates every workflow from Catalog right after the library release (closing the
+window for new runs), and the release notes say that an escalation of a run started on an older workflow should be
+answered from the Flow tab's gate panel. 55-11's legacy-gate checks (A12's "Resolve on a run of a workflow still on
+the old gate", A14's legacy escalation) become observations, not pass/fail rows; M1 is recorded as a known
+limitation. Considered: (a) relabel the buttons as the old answers, (b) disable them in Resolve with the reason.
 
 ## Context manifest
 

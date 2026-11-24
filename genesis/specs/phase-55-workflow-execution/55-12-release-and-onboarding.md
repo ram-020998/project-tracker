@@ -48,7 +48,9 @@ checklist in the release notes:
 - Escalations: open the **Resolve** tab on the run; the agent explains and proposes, you confirm. Rerun and Restart
   from a step move the feature stage (or story) to the new run and end the old run Cancelled; they are offered only
   for workflows marked relaunchable (story-implementation is not: re-run it from the Implementation lane). Reject at an old
-  gate now ends the run **failed**, not done.
+  gate now ends the run **failed**, not done. **Known limitation (D35):** a run started on a workflow version from
+  before this release escalates through its old gate; answer it from the Flow tab's gate panel, not Resolve's buttons,
+  and update your workflows from Catalog.
 - The Documents tab is reorganized by step and type; tool-output files are still removed at the end of a run, and
   their group then disappears; System files are no longer listed.
 - Workflow authors can set a model per agent step (`META.models`, `META.default_model` in `workflow.yaml`); a model
