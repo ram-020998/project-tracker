@@ -4,7 +4,8 @@
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
 > from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
 > from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18); D28–D30 from the user's live testing → 55-13 (§19);
-> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21); D35–D38 from the user during 55-11 (§22).
+> D31 after 55-10, D32 from the user (§20); D33 after 55-13, D34 from the user (§21); D35–D38 from the user during 55-11 (§22);
+> D39 during 55-12 → sub-spec 55-14 (§23).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -627,6 +628,23 @@ pass; the user rebuilds it from the released head before running A1–A14.
 `brief.md.part`), n4 (a write failing after a gate claim leaves the run "running" until the next startup). All need an
 earlier failure; they can ship as v0.84.x patches. Next: 55-12. Considered: B (fix m5 and m6 first, one more review
 round).
+
+## 23. During 55-12 (2026-11-24): the master pipeline is red
+
+genesis-release pushed master at `3e1effaf` (no tag) and pipeline **#7556336** went red: the genesis job 2336 passed,
+72 skipped, 2 failed (every other job green; the parser's bundle count correct on amd64). (1)
+`test_document_records.py:325` — `[('tick', 1)] == [('tick', 1), ('tick', 2)]`: a real gap in 55-05's write detection,
+which compares only size and mtime, so two same-size writes within one Linux mtime tick record once (APFS's
+nanosecond mtimes hid it on macOS and in colima; 55-10's image failure was this). (2) an apwt reap test
+(`[] == [410]`), the shape of Phase 54's Linux reap flake, not proven a flake. Log:
+`/tmp/colima/gr-55-12/ci-7556336-genesis.txt`.
+
+**D39 (user, 2026-11-24): option A — fix before tagging.** "I want this to be fixed." Sub-spec **55-14** (release
+blockers): content fingerprints beside size and mtime in the worker's diff, with a test that forces same size and
+same mtime so it fails on macOS too; the reap test reproduced in the CI image and fixed (no skip, no mark). Then
+review, push master, a green master pipeline, and only then the tag (no re-tag needed: `v0.84.0` was never created).
+The library's release commit waits in its working tree until then. Considered: B (ship with a known limitation; needs
+the test changed or marked), C (re-run the pipeline; does nothing for failure 1).
 
 ## Context manifest
 

@@ -86,5 +86,5 @@ adrs     = ["ADR-019", "ADR-046", "ADR-080"]
 lessons  = ["L-030", "L-033", "L-056", "L-057", "L-089", "L-100", "L-111", "L-112"]
 docs     = ["tracker:specs/phase-55-workflow-execution/adr-drafts.md", "tracker:specs/phase-54-schedules-and-fixes/54-11-release-and-onboarding.md"]
 code     = ["genesis/pyproject.toml", "genesis/scripts/install-packages.sh", "genesis-workflows/registry.json"]
-upstream = ["55-11", "55-13"]
+upstream = ["55-11", "55-13", "55-14"]
 ```
