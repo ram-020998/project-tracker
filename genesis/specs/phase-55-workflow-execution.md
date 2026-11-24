@@ -2,7 +2,7 @@
 
 > **Status:** 📝 **SPEC-DRAFTED 2026-11-22** (genesis-spec). Q&A complete: decisions D1–D11, defaults F1–F15; D12–D15
 > from the 55-02 mockup review (2026-11-23); D16–D20 during the build (`phase-55-workflow-execution/55-01-findings.md` §9–§14).
-> 55-02..55-10 BUILT; 55-13 in build.
+> 55-02..55-10 and 55-13 BUILT; next is 55-11.
 > Sub-specs: `phase-55-workflow-execution/55-01..55-12`. ADR drafts: `phase-55-workflow-execution/adr-drafts.md`
 > (ADR-088, ADR-089, ADR-090).
 > Repos: **genesis** (worker, runs, memory, chat, API, web, `packages/genesis-core` nodes and lint),
@@ -69,6 +69,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D30 | Documents hides System, and hides Tool outputs once their files are purged and on old runs (amends D8, D9; 55-13). |
 | D31 | 55-10 build rulings as built (story-implementation reject now stops with no writes; story-verification's gates merged, stop through cleanup; code-review `set_verdict`; memory jobs' `skip`; route-test harness). |
 | D32 | erd-generation stays `relaunchable: false` (a rerun would publish a second Lucidchart diagram). |
+| D33 | 55-13 build rulings as built: the model fallback decided before the turn from one read of Kiro's model list (a promptless session, only when a model is set); one reader `runs/node_models.py`. |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
@@ -125,7 +126,7 @@ Every intermediate commit keeps the gates green. Fold each As built into the lat
 | 55-10 | genesis-workflows | Standard gate in every workflow with an agent node; `META.artifacts` roles + labels; `memory_brief: false` on the memory workflows; versions bumped — **BUILT** (genesis-workflows `60c12f3..3c29e73`, genesis `014ef888..361c99a6`, local; review SHIP; D31) |
 | 55-11 | all | Review + gates + live acceptance (Phase 55 only, D11) |
 | 55-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-088..090, L-005, lessons, areas, state, progress) |
-| 55-13 | genesis (`web/src/features/run-detail/`, `shared/ui/icons.ts`, genesis-core `kiro_node`, `runs/worker.py`, `lint/contract.py`) | Status-coloured 84 px graph cards with standard status icons (D28); `META.models` / `default_model` with fallback and `model.fallback` (D29); Documents hides System and spent Tool outputs (D30); built after 55-10, before 55-11 |
+| 55-13 | genesis (`web/src/features/run-detail/`, `shared/ui/icons.ts`, genesis-core `kiro_node`, `runs/worker.py`, `lint/contract.py`) | Status-coloured 84 px graph cards with standard status icons (D28); `META.models` / `default_model` with fallback and `model.fallback` (D29); Documents hides System and spent Tool outputs (D30); built after 55-10, before 55-11 — **BUILT** (genesis `7cf01475..76b27a57`, local; review SHIP; D33) |
 
 API sub-spec: **55-08**.
 
