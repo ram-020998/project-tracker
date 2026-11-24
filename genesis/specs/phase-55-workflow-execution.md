@@ -68,6 +68,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D29 | A model per agent node from the workflow files: `META.models` + `META.default_model`; per-run → node → default → Kiro's default; an unavailable model falls back with a `model.fallback` warning (55-13). |
 | D30 | Documents hides System, and hides Tool outputs once their files are purged and on old runs (amends D8, D9; 55-13). |
 | D31 | 55-10 build rulings as built (story-implementation reject now stops with no writes; story-verification's gates merged, stop through cleanup; code-review `set_verdict`; memory jobs' `skip`; route-test harness). |
+| D32 | erd-generation stays `relaunchable: false` (a rerun would publish a second Lucidchart diagram). |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 

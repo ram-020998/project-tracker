@@ -56,7 +56,8 @@ must be a list). **Add the D26 lint:** every agent node's `mcp` ⊆ the workflow
 (which reads `required_mcp` and the nodes' `mcp`) can never miss a server a node uses. Starting list (confirm each against the workflow's
 bindings and side effects, record it in As built): `true` — ux-design-analysis, technical-design-analysis,
 feature-breakdown-analysis, test-design-analysis (a top-up run stays refused per run), story-design-analysis,
-generate-business-map, code-review, erd-generation, agent-prompt, hello-appian; `false` with a `relaunch_hint` —
+generate-business-map, code-review, agent-prompt, hello-appian; `false` with a `relaunch_hint` — erd-generation (a
+rerun publishes a second Lucidchart diagram; D32),
 story-implementation ("Re-run it from the Implementation lane"; the platform also refuses it for `appian-dev-write`),
 story-verification ("Drag the story into Verification again"), test-execution ("Run it again from Testing"),
 setup-composer and action-capture ("Start it again from Testing → Library"), memory-consolidation and

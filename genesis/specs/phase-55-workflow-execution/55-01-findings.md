@@ -3,7 +3,8 @@
 > **Status:** SPEC-DRAFTED 2026-11-22 — Q&A complete: decisions D1–D11 (§9), defaults F1–F15 (§10, confirmed); D12–D15
 > from the 55-02 mockup review (§9, folded per §11); D16 after 55-03 (§9, folded per §12); D17 after 55-04, D18 and D19
 > from the user (§13); D20 after 55-05 (§14); D21 after 55-06, D22 and D23 from the user (§15); D24 after 55-07, D25
-> from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18); D28–D30 from the user's live testing → 55-13 (§19).
+> from the user (§16); D26 after 55-08 (§17); D27 after 55-09 (§18); D28–D30 from the user's live testing → 55-13 (§19);
+> D31 after 55-10, D32 from the user (§20).
 > Parent: `specs/phase-55-workflow-execution.md` (written after the Q&A).
 >
 > What was researched and decided before the spec set is written: the request as the user stated it, the four areas as
@@ -548,6 +549,12 @@ already use the new behaviour. Folded: **55-11** (review `3c29e73`; one adopted 
 per-workflow behaviour changes in D31 as acceptance checks); **55-12** (move the pins to v0.84.0; the full genesis suite
 again in the CI image; capture `test_document_records`'s assertion before the tag); backlog §3 (action-capture's saved
 logins not removed in a `finally`).
+
+**D32 (user, 2026-11-23):** option A — **erd-generation stays `relaunchable: false`** (the dev's choice, against §3's
+starting list): a rerun without a document id publishes a second Lucidchart diagram instead of updating the first;
+its `relaunch_hint` says how to update the existing one. Retry, Accept, Fix and Stop stay offered inside its escalated
+run. The user did not ask to change story-implementation's send-back rule (D31: offered only after a reverify with
+gaps), so it stands. Considered: B (true; a rerun publishes another diagram).
 
 ## Context manifest
 
