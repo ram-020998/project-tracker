@@ -1,7 +1,7 @@
 # Backlog — Phase 55 follow-ups (memory brief, agent-assisted escalation, Documents, run liveness)
 
 > **Status:** 📝 BACKLOG (not scheduled). · Created 2026-11-23 by the spec agent with the two items deferred from
-> 55-09's review (D27). The Phase 55 write-back (55-12 §3, genesis-docs) appends the umbrella §9 deferred scope and the
+> 55-09's review (D27); §3 from 55-10's As built. The Phase 55 write-back (55-12 §3, genesis-docs) appends the umbrella §9 deferred scope and the
 > build findings.
 
 ## 1. m4 — the validator step's "OK · check failed N times" label (D12 n3, deferred by D27)
@@ -24,3 +24,11 @@
   full-suite run and passes alone.
 - **Fix direction:** replace the wall-clock wait with an event the test can await (the subscriber's registration or
   the resync frame), or widen only that bound with a comment; run the file 50× under load to prove it.
+
+## 3. action-capture: removing saved logins is not in a `finally` (55-10, pre-existing)
+
+- **Symptom:** in `genesis-workflows/workflows/action-capture/graph.py`, the step that removes the saved QA logins after
+  a capture runs only on the success path; an exception before it leaves them in the capture's folder (55-10 As built).
+- **Fix direction:** move the removal into a `finally` (or a cleanup node every route reaches, as story-verification's
+  stop now does), and test it with a capture that raises; L-107 (every error path reaches its terminal step).
+- **Why deferred:** it predates Phase 55 and is outside 55-10's scope.

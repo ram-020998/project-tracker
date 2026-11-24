@@ -45,6 +45,7 @@
    migration 55-08 recorded is forward-only
    (L-102).
 7. **genesis-core (ADR-019):** additive; `CORE_MAJOR` 1; an old library version still runs (legacy escalation payload).
+   **Review genesis-workflows `3c29e73`** (55-10's test-only m6 fix, seen by no review).
 8. **Web:** tokens only, no `Button asChild`, jest-axe on new views. **Review 55-09's last fix** (for the re-review's
    new finding; committed after the SHIP, not re-reviewed).
 9. **ADR drafts** match what was built (`adr-drafts.md`).
@@ -81,6 +82,7 @@ user locally and committed to `evidence/` only redacted (ids, types, scores, len
 | A11 | **From 55-08 (D26):** each action also run from the **manual** menu (not only a Resolve Confirm), each audit event carrying actor / source / action / params / proposal id (D22); a **scheduled** run relaunched from its gate keeps its schedule row, which closes with the new run's result; a Resolve chat present at a consolidation run is skipped and does not hold the cursor (D25); the System 403 seen from the real page; the Genesis-turn stream on a live turn (55-08's fixture came from the fake engine) | as stated |
 | A12 | **From 55-09 (D27):** type and press Stop during a real first turn (unit-tested only); a reload during the first turn (does the stream replay in-flight events?); Resolve on a run of a workflow still on the old gate (computed action map, old panel in the inspector); Rerun and Restart on a run bound to a real feature stage or story (the stage / story moves, the dialogs' text is true) | as stated |
 | A13 | **From 55-13 (D28–D30):** the graph cards at 84 px, tinted per status with the standard status icon, readable and aligned in light and dark (user confirms); a workflow with `default_model` (or `models[node]`) set uses that model (the turn's model), and an id not on the account falls back with the `model.fallback` note; Documents shows no System group, and Tool outputs only while its files exist | user confirms the cards; the rest as stated |
+| A14 | **From 55-10 (D31, D32):** one adopted and one legacy (v0.27.0-style) escalation in Resolve; **story-verification** stop goes through cleanup (QA sessions closed, no password left in the run folder, the card stays in Verification, run `failed`) and `send_back` moves the card back; **story-implementation** stop / bare reject ends `failed` with no Dev write, and `PROCEED_ANYWAY` / `SEND_BACK` appear only after a reverify with gaps; **code-review** `set_verdict` reaches the verdict gate, `skip` / `abort` only for a failing object; a **memory job** escalation offers `skip` only when its failed step wrote nothing usable (on the copy with memory schedules on for the row); erd-generation shows Rerun / Restart disabled with its hint (D32) | as stated |
 
 Rows that cannot run (e.g. Dev down for a stage run) are recorded "not run" with the reason and named in the release
 notes (L-111).

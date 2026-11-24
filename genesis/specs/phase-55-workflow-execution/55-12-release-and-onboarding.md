@@ -18,6 +18,12 @@
    run before the release commit (L-112); CI green. Release note: the adopted workflows need genesis ≥ 0.84.0 (the
    major-only gate, ADR-019, does not stop an older app from loading them, where the escalation gate fails).
 3. Never read CI variables through the API (L-100).
+3b. **Known CI risks at the tag (55-10 CI-image run):** the two arm64-only `test_sail_cli` failures (as at 54-11);
+   `test_document_records` failed once in the full genesis suite in the python:3.13 image and passed alone, with no
+   failure message captured — **run the full genesis suite in the CI image at the release commit and capture its
+   assertion**; if it fails, stop and ask the user (do not re-tag or skip it). The library's last commit after
+   `1d3b9ea` ran only locally, so the library also gets an image run at its release commit against the v0.84.0 pins
+   (L-112).
 4. Name every 55-11 row recorded "not run" in the release notes, README row and state; also state that the Phase
    51 / 53 / 54 live acceptance is still open (D11, L-111).
 

@@ -2,7 +2,7 @@
 
 > **Status:** 📝 **SPEC-DRAFTED 2026-11-22** (genesis-spec). Q&A complete: decisions D1–D11, defaults F1–F15; D12–D15
 > from the 55-02 mockup review (2026-11-23); D16–D20 during the build (`phase-55-workflow-execution/55-01-findings.md` §9–§14).
-> 55-02..55-09 BUILT.
+> 55-02..55-10 BUILT; 55-13 in build.
 > Sub-specs: `phase-55-workflow-execution/55-01..55-12`. ADR drafts: `phase-55-workflow-execution/adr-drafts.md`
 > (ADR-088, ADR-089, ADR-090).
 > Repos: **genesis** (worker, runs, memory, chat, API, web, `packages/genesis-core` nodes and lint),
@@ -67,6 +67,7 @@ Four weaknesses in how every workflow runs (55-01 §2–§5):
 | D28 | Graph cards show status as a tinted card plus a small standard lucide status icon (no tag), back to 84 px (sub-spec 55-13). |
 | D29 | A model per agent node from the workflow files: `META.models` + `META.default_model`; per-run → node → default → Kiro's default; an unavailable model falls back with a `model.fallback` warning (55-13). |
 | D30 | Documents hides System, and hides Tool outputs once their files are purged and on old runs (amends D8, D9; 55-13). |
+| D31 | 55-10 build rulings as built (story-implementation reject now stops with no writes; story-verification's gates merged, stop through cleanup; code-review `set_verdict`; memory jobs' `skip`; route-test harness). |
 
 ## 4. Current state (code-grounded — full detail in `55-01-findings.md` §2–§5)
 
@@ -120,7 +121,7 @@ Every intermediate commit keeps the gates green. Fold each As built into the lat
 | 55-07 | genesis (`chat/`, `mcp/`, `runtime/notifications.py`) | `run_resolve` chat mode, run-scoped read tools + `propose_action`, sandbox copy, first-turn seed, notifications on every escalation — **BUILT** (genesis `70f7c383`, `0a4acd0c`, local; review SHIP; D24) |
 | 55-08 | genesis (`api/`, `runs/`, `lint/`, `web/src/types`, `web/src/lib/api`) | Contract table for every new route; the D23 relaunchable reader and guard; the D22 audit fields; the 55-05 `legacy`/`writing` fixes; System paths refused; fixtures from real responses; no migration expected (D24) — **BUILT** (genesis `bd9873c6`, `be3097b3`, `1f8fd8b5`, local; review SHIP; D26; no migration) |
 | 55-09 | genesis (`web/`) | Documents tab revamp; Resolve tab (chat, proposal cards, manual action menu, confirm dialogs, results; `/runs/:runId/resolve`) — **BUILT** (genesis `1f8fd8b5..a09c5fbe`, local; review SHIP with m4 deferred; D27) |
-| 55-10 | genesis-workflows | Standard gate in every workflow with an agent node; `META.artifacts` roles + labels; `memory_brief: false` on the memory workflows; versions bumped |
+| 55-10 | genesis-workflows | Standard gate in every workflow with an agent node; `META.artifacts` roles + labels; `memory_brief: false` on the memory workflows; versions bumped — **BUILT** (genesis-workflows `60c12f3..3c29e73`, genesis `014ef888..361c99a6`, local; review SHIP; D31) |
 | 55-11 | all | Review + gates + live acceptance (Phase 55 only, D11) |
 | 55-12 | genesis, genesis-workflows, project-tracker | Releases + docs write-back (ADR-088..090, L-005, lessons, areas, state, progress) |
 | 55-13 | genesis (`web/src/features/run-detail/`, `shared/ui/icons.ts`, genesis-core `kiro_node`, `runs/worker.py`, `lint/contract.py`) | Status-coloured 84 px graph cards with standard status icons (D28); `META.models` / `default_model` with fallback and `model.fallback` (D29); Documents hides System and spent Tool outputs (D30); built after 55-10, before 55-11 |
